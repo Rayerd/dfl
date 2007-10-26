@@ -1,0 +1,13 @@
+LIBRARY 'SHELL32.DLL'
+
+EXPORTS
+_Shell_NotifyIconA@8 = Shell_NotifyIconA
+_ShellExecuteA@24 = ShellExecuteA
+_SHAppBarMessage@8 = SHAppBarMessage
+_SHBrowseForFolderW@4 = SHBrowseForFolderW
+_SHGetPathFromIDListW@8 = SHGetPathFromIDListW
+_SHGetMalloc@4 = SHGetMalloc
+_SHBrowseForFolderA@4 = SHBrowseForFolderA
+_SHGetPathFromIDListA@8 = SHGetPathFromIDListA
+_DragQueryFileA@16 = DragQueryFileA
+

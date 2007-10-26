@@ -1,0 +1,6 @@
+LIBRARY 'USER32.DLL'
+
+EXPORTS
+_SetLayeredWindowAttributes@16 = SetLayeredWindowAttributes
+_AnimateWindow@12 = AnimateWindow
+
