@@ -188,10 +188,21 @@ class AsyncSocket: Socket // docmain
 	}
 	
 	
-	override void close()
+	static if(is(typeof(&this.detach)))
 	{
-		unregisterEvent(this);
-		super.close();
+		override void detach()
+		{
+			unregisterEvent(this);
+			super.detach();
+		}
+	}
+	else
+	{
+		override void close()
+		{
+			unregisterEvent(this);
+			super.close();
+		}
 	}
 	
 	

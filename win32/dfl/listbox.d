@@ -202,7 +202,7 @@ class ListBox: ListControl // docmain
 		mixin OpApplyAddIndex!(opApply, int);
 		
 		
-		this(ListBox lb)
+		protected this(ListBox lb)
 		{
 			lbox = lb;
 		}
@@ -360,7 +360,7 @@ class ListBox: ListControl // docmain
 		alias _applychar.opApply opApply;
 		
 		
-		this(ListBox lb)
+		protected this(ListBox lb)
 		{
 			lbox = lb;
 		}
@@ -998,20 +998,20 @@ class ListBox: ListControl // docmain
 	///
 	static class ObjectCollection
 	{
-		this(ListBox lbox)
+		protected this(ListBox lbox)
 		{
 			this.lbox = lbox;
 		}
 		
 		
-		this(ListBox lbox, Object[] range)
+		protected this(ListBox lbox, Object[] range)
 		{
 			this.lbox = lbox;
 			addRange(range);
 		}
 		
 		
-		this(ListBox lbox, char[][] range)
+		protected this(ListBox lbox, char[][] range)
 		{
 			this.lbox = lbox;
 			addRange(range);
@@ -1019,7 +1019,7 @@ class ListBox: ListControl // docmain
 		
 		
 		/+
-		this(ListBox lbox, ObjectCollection range)
+		protected this(ListBox lbox, ObjectCollection range)
 		{
 			this.lbox = lbox;
 			addRange(range);

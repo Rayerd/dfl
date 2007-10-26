@@ -253,6 +253,13 @@ version(Tango)
 	}
 	
 	
+	private import tango.io.model.IConduit;
+	
+	alias tango.io.model.IConduit.IConduit DStream;
+	
+	alias tango.core.Exception.IOException DStreamException; // Note: from tango.core.Exception.
+	
+	
 	class DObject
 	{
 		//alias toUtf8 toString; // Doesn't let you override.
@@ -348,6 +355,22 @@ else // Phobos
 	
 	alias std.ctype.isxdigit charIsHexDigit;
 	
+	
+	private import std.stream;
+	
+	alias std.stream.Stream DStream;
+	
+	alias std.stream.StreamException DStreamException;
+	
+	
 	alias Object DObject;
+}
+
+
+char* unsafeToStringz(char[] s)
+{
+	if(!s.ptr[s.length])
+		return s.ptr;
+	return stringToStringz(s);
 }
 

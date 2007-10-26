@@ -179,7 +179,7 @@ class ListViewItem: DObject
 	///
 	static class ListViewSubItemCollection
 	{
-		this(ListViewItem owner)
+		protected this(ListViewItem owner)
 		in
 		{
 			assert(!owner.isubs);
@@ -535,12 +535,123 @@ class ColumnHeader: DObject
 
 
 ///
+class LabelEditEventArgs: EventArgs
+{
+	///
+	this(ListViewItem item, char[] label)
+	{
+		_item = item;
+		_label = label;
+	}
+	
+	/// ditto
+	this(ListViewItem node)
+	{
+		_item = item;
+	}
+	
+	
+	///
+	final ListViewItem item() // getter
+	{
+		return _item;
+	}
+	
+	
+	///
+	final char[] label() // getter
+	{
+		return _label;
+	}
+	
+	
+	///
+	final void cancelEdit(bool byes) // setter
+	{
+		_cancel = byes;
+	}
+	
+	/// ditto
+	final bool cancelEdit() // getter
+	{
+		return _cancel;
+	}
+	
+	
+	private:
+	ListViewItem _item;
+	char[] _label;
+	bool _cancel = false;
+}
+
+
+alias Event!(LabelEditEventArgs) LabelEditEventHandler; // deprecated
+
+
+/+
+class ItemCheckEventArgs: EventArgs
+{
+	this(int index, CheckState newCheckState, CheckState oldCheckState)
+	{
+		this._idx = index;
+		this._ncs = newCheckState;
+		this._ocs = oldCheckState;
+	}
+	
+	
+	final CheckState currentValue() // getter
+	{
+		return _ocs;
+	}
+	
+	
+	/+
+	final void newValue(CheckState cs) // setter
+	{
+		_ncs = cs;
+	}
+	+/
+	
+	
+	final CheckState newValue() // getter
+	{
+		return _ncs;
+	}
+	
+	
+	private:
+	int _idx;
+	CheckState _ncs, _ocs;
+}
++/
+
+
+class ItemCheckedEventArgs: EventArgs
+{
+	this(ListViewItem item)
+	{
+		this._item = item;
+	}
+	
+	
+	final ListViewItem item() // getter
+	{
+		return this._item;
+	}
+	
+	
+	private:
+	ListViewItem _item;
+}
+
+
+///
 class ListView: ControlSuperClass // docmain
 {
 	///
 	static class ListViewItemCollection
 	{
-		this(ListView lv)
+		protected this(ListView lv)
 		in
 		{
 			assert(lv.litems is null);
@@ -714,7 +825,7 @@ class ListView: ControlSuperClass // docmain
 	///
 	static class ColumnHeaderCollection
 	{
-		this(ListView owner)
+		protected this(ListView owner)
 		in
 		{
 			assert(!owner.cols);
@@ -876,7 +987,7 @@ class ListView: ControlSuperClass // docmain
 		mixin OpApplyAddIndex!(opApply, int);
 		
 		
-		this(ListView lv)
+		protected this(ListView lv)
 		{
 			lview = lv;
 		}
@@ -965,7 +1076,7 @@ class ListView: ControlSuperClass // docmain
 		mixin OpApplyAddIndex!(opApply, ListViewItem);
 		
 		
-		this(ListView lv)
+		protected this(ListView lv)
 		{
 			lview = lv;
 		}
@@ -1051,7 +1162,7 @@ class ListView: ControlSuperClass // docmain
 		mixin OpApplyAddIndex!(opApply, int);
 		
 		
-		this(ListView lv)
+		protected this(ListView lv)
 		{
 			lview = lv;
 		}
@@ -1391,7 +1502,8 @@ class ListView: ControlSuperClass // docmain
 	///
 	// Simple as addRow("item", "sub item1", "sub item2", "etc");
 	// rowstrings[0] is the item and rowstrings[1 .. rowstrings.length] are its sub items.
-	final void addRow(char[][] rowstrings ...)
+	//final void addRow(char[][] rowstrings ...)
+	final ListViewItem addRow(char[][] rowstrings ...)
 	{
 		if(rowstrings.length)
 		{
@@ -1400,7 +1512,10 @@ class ListView: ControlSuperClass // docmain
 			if(rowstrings.length > 1)
 				item.subItems.addRange(rowstrings[1 .. rowstrings.length]);
 			items.add(item);
+			return item;
 		}
+		assert(0);
+		return null;
 	}
 	
 	
@@ -1793,7 +1908,16 @@ class ListView: ControlSuperClass // docmain
 	}
 	
 	
-	Event!(ListView, ColumnClickEventArgs) columnClick;
+	// TODO:
+	//  itemActivate, itemDrag
+	//EventHandler selectedIndexChanged;
+	//CancelEventHandler selectedIndexChanging; // ?
+	
+	Event!(ListView, ColumnClickEventArgs) columnClick; ///
+	Event!(ListView, LabelEditEventArgs) afterLabelEdit; ///
+	Event!(ListView, LabelEditEventArgs) beforeLabelEdit; ///
+	//Event!(ListView, ItemCheckEventArgs) itemCheck; ///
+	Event!(ListView, ItemCheckedEventArgs) itemChecked; ///
 	
 	
 	protected void onColumnClick(ColumnClickEventArgs ea)
@@ -1802,12 +1926,32 @@ class ListView: ControlSuperClass // docmain
 	}
 	
 	
-	// TODO:
-	//LabelEditEventHandler afterLabelEdit;
-	//LabelEditEventHandler beforeLabelEdit;
-	//  itemActivate, itemCheck, itemDrag
-	//EventHandler selectedIndexChanged;
-	//CancelEventHandler selectedIndexChanging; // ?
+	///
+	protected void onAfterLabelEdit(LabelEditEventArgs ea)
+	{
+		afterLabelEdit(this, ea);
+	}
+	
+	
+	///
+	protected void onBeforeLabelEdit(LabelEditEventArgs ea)
+	{
+		beforeLabelEdit(this, ea);
+	}
+	
+	
+	/+
+	protected void onItemCheck(ItemCheckEventArgs ea)
+	{
+		itemCheck(this, ea);
+	}
+	+/
+	
+	
+	protected void onItemChecked(ItemCheckedEventArgs ea)
+	{
+		itemChecked(this, ea);
+	}
 	
 	
 	protected override Size defaultSize() // getter
@@ -1985,6 +2129,8 @@ class ListView: ControlSuperClass // docmain
 					switch(nmh.code)
 					{
 						case LVN_GETDISPINFOA:
+							if(dfl.internal.utf.useUnicode)
+								break;
 							{
 								LV_DISPINFOA* lvdi;
 								lvdi = cast(LV_DISPINFOA*)nmh;
@@ -2029,11 +2175,138 @@ class ListView: ControlSuperClass // docmain
 							}
 							break;
 						
+						/+
+						case LVN_ITEMCHANGING:
+							{
+								auto nmlv = cast(NM_LISTVIEW*)nmh;
+								if(-1 != nmlv.iItem)
+								{
+									UINT stchg = nmlv.uNewState ^ nmlv.uOldState;
+									if(stchg & (3 << 12))
+									{
+										// Note: not tested.
+										scope ItemCheckEventArgs ea = new ItemCheckEventArgs(nmlv.iItem,
+											(((nmlv.uNewState >> 12) & 3) - 1) ? CheckState.CHECKED : CheckState.UNCHECKED,
+											(((nmlv.uOldState >> 12) & 3) - 1) ? CheckState.CHECKED : CheckState.UNCHECKED);
+										onItemCheck(ea);
+									}
+								}
+							}
+							break;
+						+/
+						
+						case LVN_ITEMCHANGED:
+							{
+								auto nmlv = cast(NM_LISTVIEW*)nmh;
+								if(-1 != nmlv.iItem)
+								{
+									UINT stchg = nmlv.uNewState ^ nmlv.uOldState;
+									if(stchg & (3 << 12))
+									{
+										scope ItemCheckedEventArgs ea = new ItemCheckedEventArgs(items[nmlv.iItem]);
+										onItemChecked(ea);
+									}
+								}
+							}
+							break;
+						
 						case LVN_COLUMNCLICK:
 							{
 								auto nmlv = cast(NM_LISTVIEW*)nmh;
 								scope ccea = new ColumnClickEventArgs(nmlv.iSubItem);
 								onColumnClick(ccea);
+							}
+							break;
+						
+						case LVN_BEGINLABELEDITW:
+							goto begin_label_edit;
+						
+						case LVN_BEGINLABELEDITA:
+							if(dfl.internal.utf.useUnicode)
+								break;
+							begin_label_edit:
+							
+							{
+								LV_DISPINFOA* nmdi;
+								nmdi = cast(LV_DISPINFOA*)nmh;
+								if(nmdi.item.iSubItem)
+								{
+									m.result = TRUE;
+									break;
+								}
+								ListViewItem lvitem;
+								lvitem = cast(ListViewItem)cast(void*)nmdi.item.lParam;
+								scope LabelEditEventArgs leea = new LabelEditEventArgs(lvitem);
+								onBeforeLabelEdit(leea);
+								m.result = leea.cancelEdit;
+							}
+							break;
+						
+						case LVN_ENDLABELEDITW:
+							{
+								char[] label;
+								LV_DISPINFOW* nmdi;
+								nmdi = cast(LV_DISPINFOW*)nmh;
+								if(nmdi.item.pszText)
+								{
+									ListViewItem lvitem;
+									lvitem = cast(ListViewItem)cast(void*)nmdi.item.lParam;
+									if(nmdi.item.iSubItem)
+									{
+										m.result = FALSE;
+										break;
+									}
+									label = fromUnicodez(nmdi.item.pszText);
+									scope LabelEditEventArgs nleea = new LabelEditEventArgs(lvitem, label);
+									onAfterLabelEdit(nleea);
+									if(nleea.cancelEdit)
+									{
+										m.result = FALSE;
+									}
+									else
+									{
+										// TODO: check if correct implementation.
+										// Update the lvitem's cached text..
+										lvitem.settextin(label);
+										
+										m.result = TRUE;
+									}
+								}
+							}
+							break;
+						
+						case LVN_ENDLABELEDITA:
+							if(dfl.internal.utf.useUnicode)
+								break;
+							{
+								char[] label;
+								LV_DISPINFOA* nmdi;
+								nmdi = cast(LV_DISPINFOA*)nmh;
+								if(nmdi.item.pszText)
+								{
+									ListViewItem lvitem;
+									lvitem = cast(ListViewItem)cast(void*)nmdi.item.lParam;
+									if(nmdi.item.iSubItem)
+									{
+										m.result = FALSE;
+										break;
+									}
+									label = fromAnsiz(nmdi.item.pszText);
+									scope LabelEditEventArgs nleea = new LabelEditEventArgs(lvitem, label);
+									onAfterLabelEdit(nleea);
+									if(nleea.cancelEdit)
+									{
+										m.result = FALSE;
+									}
+									else
+									{
+										// TODO: check if correct implementation.
+										// Update the lvitem's cached text..
+										lvitem.settextin(label);
+										
+										m.result = TRUE;
+									}
+								}
 							}
 							break;
 						

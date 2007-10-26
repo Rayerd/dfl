@@ -264,8 +264,8 @@ template ListWrapArray(TValue, alias Array,
 				}
 				else
 				{
-					if(getObjectString(onval) == value) // ?
-						return true;
+					if(getObjectString(onval) == value)
+						return idx;
 				}
 			}
 			return -1;

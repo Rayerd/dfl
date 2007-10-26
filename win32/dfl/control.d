@@ -669,7 +669,7 @@ class Control: DObject, IWindow // docmain
 	///
 	static class ControlCollection
 	{
-		this(Control owner)
+		protected this(Control owner)
 		{
 			_owner = owner;
 		}
@@ -978,6 +978,14 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
+	private void _ctrlremoved(ControlEventArgs cea)
+	{
+		alayout(cea.control);
+		
+		onControlRemoved(cea);
+	}
+	
+	
 	///
 	protected void onControlAdded(ControlEventArgs cea)
 	{
@@ -1069,7 +1077,8 @@ class Control: DObject, IWindow // docmain
 			anch |= AnchorStyles.TOP;
 		+/
 		
-		sdock = cast(DockStyle)sdock.init; // Can't be set at the same time.
+		//sdock = cast(DockStyle)sdock.init; // Can't be set at the same time.
+		sdock = DockStyle.NONE; // Can't be set at the same time.
 	}
 	
 	
@@ -2054,6 +2063,15 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
+	/+
+	///
+	// ea is the new parent.
+	protected void onParentChanging(ControlEventArgs ea)
+	{
+	}
+	+/
+	
+	
 	///
 	final Form findForm()
 	{
@@ -2082,6 +2100,9 @@ class Control: DObject, IWindow // docmain
 		
 		if(!(_style() & WS_CHILD) || (_exStyle() & WS_EX_MDICHILD))
 			throw new DflException("Cannot add a top level control to a control");
+		
+		//scope ControlEventArgs pcea = new ControlEventArgs(c);
+		//onParentChanging(pcea);
 		
 		Control oldparent;
 		_FixAmbientOld oldinfo;
@@ -2131,7 +2152,7 @@ class Control: DObject, IWindow // docmain
 				
 				onParentChanged(EventArgs.empty);
 				if(oldparent)
-					oldparent.onControlRemoved(cea);
+					oldparent._ctrlremoved(cea);
 				c._ctrladded(cea);
 				_fixAmbient(&oldinfo);
 				
@@ -2145,7 +2166,7 @@ class Control: DObject, IWindow // docmain
 				
 				onParentChanged(EventArgs.empty);
 				if(oldparent)
-					oldparent.onControlRemoved(cea);
+					oldparent._ctrlremoved(cea);
 				c._ctrladded(cea);
 				_fixAmbient(&oldinfo);
 				
@@ -2163,7 +2184,7 @@ class Control: DObject, IWindow // docmain
 			
 			onParentChanged(EventArgs.empty);
 			assert(oldparent !is null);
-			oldparent.onControlRemoved(cea);
+			oldparent._ctrlremoved(cea);
 			_fixAmbient(&oldinfo);
 		}
 	}
@@ -3186,6 +3207,23 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
+	override int opCmp(Object o)
+	{
+		Control ctrl = cast(Control)o;
+		if(!ctrl)
+			return -1;
+		return opCmp(ctrl);
+	}
+	
+	
+	int opCmp(Control ctrl)
+	{
+		if(!isHandleCreated || hwnd != ctrl.hwnd)
+			return super.opCmp(ctrl);
+		return 0;
+	}
+	
+	
 	///
 	final bool focus()
 	{
@@ -3329,6 +3367,17 @@ class Control: DObject, IWindow // docmain
 			return;
 		
 		RedrawWindow(hwnd, null, rgn.handle, RDW_ERASE | RDW_INVALIDATE | (andChildren ? RDW_ALLCHILDREN : RDW_NOCHILDREN));
+	}
+	
+	
+	///
+	// Redraws the entire control, including nonclient area.
+	final void redraw()
+	{
+		if(!hwnd)
+			return;
+		
+		RedrawWindow(hwnd, null, HRGN.init, RDW_ERASE | RDW_INVALIDATE | RDW_FRAME);
 	}
 	
 	
@@ -4444,6 +4493,7 @@ class Control: DObject, IWindow // docmain
 			case WM_SYSKEYUP:
 			case WM_SYSCHAR:
 			//case WM_IMECHAR:
+				/+
 				if(processKeyEventArgs(msg))
 				{
 					// The key was processed.
@@ -4452,6 +4502,9 @@ class Control: DObject, IWindow // docmain
 				}
 				msg.result = 1; // The key was not processed.
 				break;
+				+/
+				msg.result = !processKeyEventArgs(msg);
+				return;
 			
 			case WM_MOUSEWHEEL: // Requires Windows 98 or NT4.
 				{
@@ -4913,7 +4966,7 @@ class Control: DObject, IWindow // docmain
 						Control ctrl = fromChildHandle(cast(HWND)msg.lParam);
 						if(ctrl)
 						{
-							onControlRemoved(new ControlEventArgs(ctrl));
+							_ctrlremoved(new ControlEventArgs(ctrl));
 							
 							// ?
 							vchanged();
@@ -4992,13 +5045,14 @@ class Control: DObject, IWindow // docmain
 							}
 						}
 					}
+					
+					defWndProc(msg);
+					// Only want chars if ALT isn't down, because it would break mnemonics.
+					if(!(GetAsyncKeyState(VK_MENU) & 0x8000))
+						msg.result |= DLGC_WANTCHARS;
+					return;
 				}
 				
-				/+ // This prevents mnemonics from working.
-				defWndProc(msg);
-				msg.result |= DLGC_WANTCHARS; // For keyPress.
-				return;
-				+/
 				break;
 			
 			case WM_CLOSE:
@@ -5428,18 +5482,9 @@ class Control: DObject, IWindow // docmain
 	
 	package final void doShow()
 	{
-		//ShowWindow(hwnd, SW_SHOW);
-		//SetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_SHOWWINDOW);
-		//SetWindowPos(hwnd, GetParent(hwnd) ? HWND_BOTTOM : HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_SHOWWINDOW); // ?
-		//if(GetParent(hwnd))
 		if(wparent) // Exclude owner.
 		{
-			HWND hw;
-			hw = GetWindow(hwnd, GW_HWNDPREV);
-			if(!hw)
-				hw = HWND_BOTTOM; // ?
-			SetWindowPos(hwnd, hw, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_SHOWWINDOW);
-			//SetWindowPos(hwnd, HWND.init, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_SHOWWINDOW);
+			SetWindowPos(hwnd, HWND.init, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_SHOWWINDOW | SWP_NOACTIVATE | SWP_NOZORDER);
 		}
 		else
 		{
@@ -5450,8 +5495,7 @@ class Control: DObject, IWindow // docmain
 	
 	package final void doHide()
 	{
-		//ShowWindow(hwnd, SW_HIDE);
-		SetWindowPos(hwnd, HWND.init, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE | SWP_HIDEWINDOW);
+		SetWindowPos(hwnd, HWND.init, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE | SWP_HIDEWINDOW | SWP_NOZORDER);
 	}
 	
 	
@@ -5729,9 +5773,10 @@ class Control: DObject, IWindow // docmain
 	
 	
 	/+
-	///
+	// ///
 	final bool hasVisualStyle() // getter
 	{
+		bool result = false;
 		HWND hw = handle; // Always reference handle.
 		HMODULE huxtheme = GetModuleHandleA("uxtheme.dll");
 		//HMODULE huxtheme = LoadLibraryA("uxtheme.dll");
@@ -5740,11 +5785,11 @@ class Control: DObject, IWindow // docmain
 			auto getwintheme = cast(typeof(&GetWindowTheme))GetProcAddress(huxtheme, "GetWindowTheme");
 			if(getwintheme)
 			{
-				return getwintheme(hw) != null;
+				result = getwintheme(hw) != null;
 			}
-			FreeLibrary(huxtheme);
+			//FreeLibrary(huxtheme);
 		}
-		return false;
+		return result;
 	}
 	+/
 	
@@ -6364,7 +6409,8 @@ class Control: DObject, IWindow // docmain
 						onKeyDown(kea);
 					}
 					
-					return kea.handled;
+					if(kea.handled)
+						return true;
 				}
 				break;
 			
@@ -6373,7 +6419,8 @@ class Control: DObject, IWindow // docmain
 					// Repeat count is always 1 for key up.
 					scope KeyEventArgs kea = new KeyEventArgs(cast(Keys)(msg.wParam | modifierKeys));
 					onKeyUp(kea);
-					return kea.handled;
+					if(kea.handled)
+						return true;
 				}
 				break;
 			
@@ -6386,7 +6433,8 @@ class Control: DObject, IWindow // docmain
 						vk = 0xFF & VkKeyScanA(cast(char)msg.wParam);
 					scope KeyEventArgs kea = new KeyEventArgs(cast(Keys)(vk | modifierKeys));
 					onKeyPress(kea);
-					return kea.handled;
+					if(kea.handled)
+						return true;
 				}
 				break;
 			
@@ -6405,6 +6453,27 @@ class Control: DObject, IWindow // docmain
 			+/
 			
 			default: ;
+		}
+		
+		if(Application._compat & DflCompat.CONTROL_KEYEVENT_096)
+			goto def_action;
+		
+		// ?
+		if(!parent
+			|| (IsWindowVisible(hwnd)
+				&& ((ctrlStyle & ControlStyles.SELECTABLE)
+					|| (SendMessageA(hwnd, WM_GETDLGCODE, 0, 0) & DLGC_WANTALLKEYS))))
+		{
+			def_action:
+			defWndProc(msg);
+			//return true;
+			return !msg.result;
+		}
+		else
+		{
+			//if(parent)
+			assert(parent !is null);
+				return parent.processKeyEventArgs(msg);
 		}
 		
 		return false;
@@ -6452,7 +6521,8 @@ class Control: DObject, IWindow // docmain
 		}
 		else
 		{
-			_compat = CCompat.DFL095;
+			//_compat = CCompat.DFL095;
+			Application.setCompat(DflCompat.CONTROL_RECREATE_095);
 		}
 	}
 	
@@ -6463,9 +6533,12 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	version(SET_DFL_095)
-		private const ubyte _compat = CCompat.DFL095;
+		package const ubyte _compat = CCompat.DFL095;
+	else version(DFL_NO_COMPAT)
+		package const ubyte _compat = CCompat.NONE;
 	else
-		private ubyte _compat = CCompat.NONE;
+		package CCompat _compat() // getter
+			{ if(Application._compat & DflCompat.CONTROL_RECREATE_095) return CCompat.DFL095; return CCompat.NONE; }
 	
 	
 	package final void _crecreate()
@@ -6814,7 +6887,7 @@ package abstract class ControlSuperClass: Control // dapi.d
 			case WM_SYSKEYDOWN:
 			case WM_SYSKEYUP:
 			case WM_SYSCHAR:
-			//case WM_IMECHAR:
+			//case WM_IMECHAR: // ?
 				prevWndProc(m);
 				break;
 			
@@ -7058,10 +7131,14 @@ class ScrollableControl: Control // docmain
 		result.y = result.y + dpad.top;
 		result.height = result.height - dpad.bottom - dpad.top;
 		
+		// Add scroll width.
 		if(scrollSize.width > clientSize.width)
 			result.width = result.width + (scrollSize.width - clientSize.width);
 		if(scrollSize.height > clientSize.height)
 			result.height = result.height + (scrollSize.height - clientSize.height);
+		
+		// Adjust scroll position.
+		result.location = Point(result.location.x - scrollPosition.x, result.location.y - scrollPosition.y);
 		
 		return result;
 	}
@@ -7196,9 +7273,6 @@ class ScrollableControl: Control // docmain
 	
 	const Size DEFAULT_SCALE = { 5, 13 };
 	
-	
-	protected:
-	
 	///
 	final void hScroll(bool byes) // setter
 	{
@@ -7240,6 +7314,9 @@ class ScrollableControl: Control // docmain
 	{
 		return (_style() & WS_VSCROLL) != 0;
 	}
+	
+	
+	protected:
 	
 	
 	/+
@@ -7308,7 +7385,8 @@ class ScrollableControl: Control // docmain
 								break;
 							case SB_THUMBTRACK:
 							case SB_THUMBPOSITION:
-								delta = cast(int)HIWORD(m.wParam) - yspos;
+								//delta = cast(int)HIWORD(m.wParam) - yspos; // Limited to 16-bits.
+								delta = si.nTrackPos - yspos;
 								break;
 							case SB_BOTTOM:
 								delta = maxp - yspos;
@@ -7370,7 +7448,8 @@ class ScrollableControl: Control // docmain
 								break;
 							case SB_THUMBTRACK:
 							case SB_THUMBPOSITION:
-								delta = cast(int)HIWORD(m.wParam) - xspos;
+								//delta = cast(int)HIWORD(m.wParam) - xspos; // Limited to 16-bits.
+								delta = si.nTrackPos - xspos;
 								break;
 							case SB_RIGHT:
 								delta = maxp - xspos;
@@ -7574,10 +7653,9 @@ interface IContainerControl // docmain
 {
 	///
 	Control activeControl(); // getter
-	/// ditto
+	
 	deprecated void activeControl(Control); // setter
 	
-	///
 	deprecated bool activateControl(Control);
 }
 

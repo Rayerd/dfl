@@ -349,9 +349,9 @@ class Label: Control // docmain
 		switch(m.msg)
 		{
 			case WM_GETDLGCODE:
-				//m.result = 0;
+				super.wndProc(m);
 				//if(useMnemonic)
-					m.result = DLGC_STATIC;
+					m.result |= DLGC_STATIC;
 				break;
 			
 			default:

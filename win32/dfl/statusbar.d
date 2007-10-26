@@ -145,7 +145,7 @@ class StatusBarPanel: DObject
 				assert(0);
 		}
 		
-		if(_parent && _parent.created)
+		if(_parent && _parent.isHandleCreated)
 		{
 			_parent.panels._fixtexts(); // Also fixes styles.
 		}
@@ -198,7 +198,7 @@ class StatusBarPanel: DObject
 	///
 	final void text(char[] txt) // setter
 	{
-		if(_parent && _parent.created)
+		if(_parent && _parent.isHandleCreated)
 		{
 			int idx = _parent.panels.indexOf(this);
 			assert(-1 != idx);
@@ -235,7 +235,7 @@ class StatusBarPanel: DObject
 	{
 		_width = w;
 		
-		if(_parent && _parent.created)
+		if(_parent && _parent.isHandleCreated)
 		{
 			_parent.panels._fixwidths();
 		}
@@ -284,7 +284,7 @@ class StatusBar: ControlSuperClass // docmain
 	///
 	class StatusBarPanelCollection
 	{
-		this(StatusBar sb)
+		protected this(StatusBar sb)
 		in
 		{
 			assert(sb.lpanels is null);
@@ -301,9 +301,9 @@ class StatusBar: ControlSuperClass // docmain
 		package StatusBarPanel[] _panels;
 		
 		
-		void _fixwidths()
+		package void _fixwidths()
 		{
-			assert(created);
+			assert(isHandleCreated);
 			
 			UINT[20] _pws = void;
 			UINT[] pws = _pws;
@@ -319,7 +319,7 @@ class StatusBar: ControlSuperClass // docmain
 		
 		void _fixtexts()
 		{
-			assert(created);
+			assert(isHandleCreated);
 			
 			if(dfl.internal.utf.useUnicode)
 			{
@@ -340,7 +340,7 @@ class StatusBar: ControlSuperClass // docmain
 		
 		void _setcurparts()
 		{
-			assert(created);
+			assert(isHandleCreated);
 			
 			_fixwidths();
 			
@@ -352,14 +352,14 @@ class StatusBar: ControlSuperClass // docmain
 		{
 			if(size_t.max == idx) // Clear all.
 			{
-				if(sb.created)
+				if(sb.isHandleCreated)
 				{
 					sb.prevwproc(SB_SETPARTS, 0, 0); // 0 parts.
 				}
 			}
 			else
 			{
-				if(sb.created)
+				if(sb.isHandleCreated)
 				{
 					_setcurparts();
 				}
@@ -372,7 +372,9 @@ class StatusBar: ControlSuperClass // docmain
 			if(val._parent)
 				throw new DflException("StatusBarPanel already belongs to a StatusBar");
 			
-			if(sb.created)
+			val._parent = sb;
+			
+			if(sb.isHandleCreated)
 			{
 				_setcurparts();
 			}
@@ -445,7 +447,7 @@ class StatusBar: ControlSuperClass // docmain
 		if(!byes == _issimple)
 			return;
 		
-		if(created)
+		if(isHandleCreated)
 		{
 			prevwproc(SB_SIMPLE, cast(WPARAM)!byes, 0);
 			
@@ -495,7 +497,7 @@ class StatusBar: ControlSuperClass // docmain
 	
 	override void text(char[] txt) // setter
 	{
-		if(created && !showPanels)
+		if(isHandleCreated && !showPanels)
 		{
 			_sendidxtext(255, 0, txt);
 		}
@@ -516,13 +518,18 @@ class StatusBar: ControlSuperClass // docmain
 	{
 		super.onHandleCreated(ea);
 		
-		panels._setcurparts();
-		
-		if(_issimple && _simpletext.length)
-			_sendidxtext(255, 0, _simpletext);
-		prevwproc(SB_SIMPLE, cast(WPARAM)_issimple, 0);
-		
-		panels._setcurparts();
+		if(_issimple)
+		{
+			prevwproc(SB_SIMPLE, cast(WPARAM)true, 0);
+			panels._setcurparts();
+			if(_simpletext.length)
+				_sendidxtext(255, 0, _simpletext);
+		}
+		else
+		{
+			panels._setcurparts();
+			prevwproc(SB_SIMPLE, cast(WPARAM)false, 0);
+		}
 	}
 	
 	
@@ -586,7 +593,7 @@ class StatusBar: ControlSuperClass // docmain
 	
 	void _sendidxtext(int idx, WPARAM utype, char[] txt)
 	{
-		assert(created);
+		assert(isHandleCreated);
 		
 		if(dfl.internal.utf.useUnicode)
 			prevwproc(SB_SETTEXTW, cast(WPARAM)idx | utype, cast(LPARAM)dfl.internal.utf.toUnicodez(txt));

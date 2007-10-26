@@ -296,6 +296,15 @@ enum MouseButtons: uint // docmain
 
 
 ///
+enum CheckState: ubyte
+{
+	UNCHECKED = BST_UNCHECKED, ///
+	CHECKED = BST_CHECKED, /// ditto
+	INDETERMINATE = BST_INDETERMINATE, /// ditto
+}
+
+
+///
 struct Message // docmain
 {
 	union
@@ -511,6 +520,15 @@ enum DialogResult: ubyte // docmain
 }
 
 
+interface IDialogResult
+{
+	// ///
+	DialogResult dialogResult(); // getter
+	// /// ditto
+	void dialogResult(DialogResult); // setter
+}
+
+
 ///
 enum SortOrder: ubyte
 {
@@ -664,6 +682,17 @@ enum RightToLeft: ubyte
 	INHERIT = 2, ///
 	YES = 1, /// ditto
 	NO = 0, /// ditto
+}
+
+
+///
+enum ColorDepth: ubyte
+{
+	DEPTH_4BIT = 1, ///
+	DEPTH_8BIT , /// ditto
+	DEPTH_16BIT, /// ditto
+	DEPTH_24BIT, /// ditto
+	DEPTH_32BIT, /// ditto
 }
 
 
@@ -882,6 +911,7 @@ class MouseEventArgs: EventArgs
 alias Event!(MouseEventArgs) MouseEventHandler; // deprecated
 
 
+/+
 ///
 class LabelEditEventArgs: EventArgs
 {
@@ -936,6 +966,7 @@ class LabelEditEventArgs: EventArgs
 
 
 alias Event!(LabelEditEventArgs) LabelEditEventHandler; // deprecated
++/
 
 
 ///

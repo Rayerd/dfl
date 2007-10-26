@@ -501,6 +501,8 @@ class RichTextBox: TextBoxBase // docmain
 	{
 		if(created)
 		{
+			// To-do: support Unicode font names.
+			
 			CHARFORMAT2A cf;
 			LOGFONTA lf;
 			
@@ -565,7 +567,10 @@ class RichTextBox: TextBoxBase // docmain
 					lf.lfQuality = DEFAULT_QUALITY;
 					lf.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE;
 				}
-				return new Font(Font._create(&lf));
+				//return new Font(Font._create(&lf));
+				LogFont _lf;
+				Font.LOGFONTAtoLogFont(_lf, &lf);
+				return new Font(Font._create(_lf));
 			}
 		}
 		

@@ -67,13 +67,59 @@ else
 	alias std.windows.charset.useWfuncs useUnicode;
 }
 
-package HMODULE user32, kernel32, _advapi32, gdi32;
+package:
+
+version(DFL_LOAD_INTERNAL_LIBS)
+{
+	alias LoadLibraryA initInternalLib;
+}
+else
+{
+	version = DFL_GET_INTERNAL_LIBS;
+	
+	alias GetModuleHandleA initInternalLib;
+}
+
+
+HMODULE _user32, _kernel32, _advapi32, _gdi32;
 
 package HMODULE advapi32() // getter
 {
+	// advapi32 generally always delay loads.
 	if(!_advapi32)
 		_advapi32 = LoadLibraryA("advapi32.dll");
 	return _advapi32;
+}
+
+package HMODULE gdi32() // getter
+{
+	// gdi32 sometimes delay loads.
+	version(DFL_GET_INTERNAL_LIBS)
+	{
+		if(!_gdi32)
+			_gdi32 = LoadLibraryA("gdi32.dll");
+	}
+	return _gdi32;
+}
+
+package HMODULE user32() // getter
+{
+	version(DFL_GET_INTERNAL_LIBS)
+	{
+		if(!_user32)
+			_user32 = LoadLibraryA("user32.dll");
+	}
+	return _user32;
+}
+
+package HMODULE kernel32() // getter
+{
+	version(DFL_GET_INTERNAL_LIBS)
+	{
+		if(!_kernel32)
+			_kernel32 = LoadLibraryA("kernel32.dll");
+	}
+	return _kernel32;
 }
 
 
@@ -100,10 +146,10 @@ public void _utfinit() // package
 			useUnicode = osv.dwPlatformId == VER_PLATFORM_WIN32_NT;
 		+/
 		
-		user32 = GetModuleHandleA("user32.dll");
-		kernel32 = GetModuleHandleA("kernel32.dll");
+		_user32 = initInternalLib("user32.dll");
+		_kernel32 = initInternalLib("kernel32.dll");
 		_advapi32 = GetModuleHandleA("advapi32.dll"); // Not guaranteed to be loaded.
-		gdi32 = GetModuleHandleA("gdi32.dll");
+		_gdi32 = initInternalLib("gdi32.dll");
 	}
 }
 
@@ -368,12 +414,24 @@ private extern(Windows)
 	alias typeof(&LoadLibraryExW) LoadLibraryExWProc;
 	alias typeof(&SetMenuItemInfoW) SetMenuItemInfoWProc;
 	alias typeof(&InsertMenuItemW) InsertMenuItemWProc;
+	alias typeof(&CreateFontIndirectW) CreateFontIndirectWProc;
+	alias typeof(&GetObjectW) GetObjectWProc;
 }
 
 
 private void getProcErr(char[] procName)
 {
-	throw new Exception("Unable to load procedure " ~ procName ~ ".");
+	char[] errdesc;
+	version(DFL_NO_PROC_ERROR_INFO)
+	{
+	}
+	else
+	{
+		auto le = cast(int)GetLastError();
+		if(le)
+			errdesc = " (error " ~ intToString(le) ~ ")";
+	}
+	throw new Exception("Unable to load procedure " ~ procName ~ errdesc);
 }
 
 
@@ -1977,6 +2035,104 @@ char[] regQueryValueString(HKEY hkey, char[] valueName, LPDWORD lpType = null)
 			return null;
 		//return fromAnsi(s.ptr, s.length - 1);
 		return fromAnsiz(s.ptr);
+	}
+}
+
+
+struct LogFont
+{
+	union
+	{
+		LOGFONTW lfw;
+		LOGFONTA lfa;
+	}
+	alias lfw lf;
+	
+	char[] faceName;
+}
+
+
+HFONT createFontIndirect(inout LogFont lf)
+{
+	if(useUnicode)
+	{
+		version(STATIC_UNICODE)
+		{
+			alias CreateFontIndirectW proc;
+		}
+		else
+		{
+			const char[] NAME = "CreateFontIndirectW";
+			static CreateFontIndirectWProc proc = null;
+			
+			if(!proc)
+			{
+				proc = cast(CreateFontIndirectWProc)GetProcAddress(gdi32, NAME.ptr);
+				if(!proc)
+					getProcErr(NAME);
+			}
+		}
+		
+		wchar[] ws = toUnicode(lf.faceName);
+		if(ws.length >= LF_FACESIZE)
+			ws = ws[0 .. LF_FACESIZE - 1]; // ?
+		foreach(idx, wch; ws)
+		{
+			lf.lfw.lfFaceName[idx] = wch;
+		}
+		lf.lfw.lfFaceName[ws.length] = 0;
+		
+		return proc(&lf.lfw);
+	}
+	else
+	{
+		char[] as = toAnsi(lf.faceName);
+		if(as.length >= LF_FACESIZE)
+			as = as[0 .. LF_FACESIZE - 1]; // ?
+		foreach(idx, ach; as)
+		{
+			lf.lfa.lfFaceName[idx] = ach;
+		}
+		lf.lfa.lfFaceName[as.length] = 0;
+		
+		return CreateFontIndirectA(&lf.lfa);
+	}
+}
+
+
+// GetObject for a LogFont.
+int getLogFont(HFONT hf, inout LogFont lf)
+{
+	if(useUnicode)
+	{
+		version(STATIC_UNICODE)
+		{
+			alias GetObjectW proc;
+		}
+		else
+		{
+			const char[] NAME = "GetObjectW";
+			static GetObjectWProc proc = null;
+			
+			if(!proc)
+			{
+				proc = cast(GetObjectWProc)GetProcAddress(gdi32, NAME.ptr);
+				if(!proc)
+					getProcErr(NAME);
+			}
+		}
+		
+		if(LOGFONTW.sizeof != proc(hf, LOGFONTW.sizeof, &lf.lfw))
+			return 0;
+		lf.faceName = fromUnicodez(lf.lfw.lfFaceName.ptr);
+		return LOGFONTW.sizeof;
+	}
+	else
+	{
+		if(LOGFONTA.sizeof != GetObjectA(hf, LOGFONTA.sizeof, &lf.lfa))
+			return 0;
+		lf.faceName = fromAnsiz(lf.lfa.lfFaceName.ptr);
+		return LOGFONTA.sizeof;
 	}
 }
 

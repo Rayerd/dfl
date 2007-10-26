@@ -1087,364 +1087,354 @@ class Bitmap: Image // docmain
 }
 
 
-version(Tango)
+///
+class Picture: Image // docmain
 {
-	// TO-DO: not implemented yet.
-}
-else
-{
-	private import std.stream; // TO-DO: remove this import; use dfl.internal.dlib.
+	// Note: requires OleInitialize(null).
 	
 	
 	///
-	class Picture: Image // docmain
+	// Throws exception on failure.
+	this(DStream stm)
 	{
-		// Note: requires OleInitialize(null).
-		
-		
-		///
-		// Throws exception on failure.
-		this(Stream stm)
+		this.ipic = _fromDStream(stm);
+		if(!this.ipic)
+			throw new DflException("Unable to load picture from stream");
+	}
+	
+	/// ditto
+	// Throws exception on failure.
+	this(char[] fileName)
+	{
+		this.ipic = _fromFileName(fileName);
+		if(!this.ipic)
+			throw new DflException("Unable to load picture from file '" ~ fileName ~ "'");
+	}
+	
+	
+	private this(dfl.internal.wincom.IPicture ipic)
+	{
+		this.ipic = ipic;
+	}
+	
+	
+	///
+	// Returns null on failure instead of throwing exception.
+	static Picture fromStream(DStream stm)
+	{
+		dfl.internal.wincom.IPicture ipic;
+		ipic = _fromDStream(stm);
+		if(!ipic)
+			return null;
+		return new Picture(ipic);
+	}
+	
+	
+	///
+	// Returns null on failure instead of throwing exception.
+	static Picture fromFile(char[] fileName)
+	{
+		dfl.internal.wincom.IPicture ipic;
+		ipic = _fromFileName(fileName);
+		if(!ipic)
+			return null;
+		return new Picture(ipic);
+	}
+	
+	
+	///
+	final void draw(HDC hdc, Point pt) // package
+	{
+		int lhx, lhy;
+		int width, height;
+		lhx = loghimX;
+		lhy = loghimY;
+		width = MAP_LOGHIM_TO_PIX(lhx, GetDeviceCaps(hdc, LOGPIXELSX));
+		height = MAP_LOGHIM_TO_PIX(lhy, GetDeviceCaps(hdc, LOGPIXELSY));
+		ipic.Render(hdc, pt.x, pt.y + height, width, -height, 0, 0, lhx, lhy, null);
+	}
+	
+	/// ditto
+	final override void draw(Graphics g, Point pt)
+	{
+		return draw(g.handle, pt);
+	}
+	
+	
+	///
+	final void drawStretched(HDC hdc, Rect r) // package
+	{
+		int lhx, lhy;
+		lhx = loghimX;
+		lhy = loghimY;
+		ipic.Render(hdc, r.x, r.y + r.height, r.width, -r.height, 0, 0, lhx, lhy, null);
+	}
+	
+	/// ditto
+	final override void drawStretched(Graphics g, Rect r)
+	{
+		return drawStretched(g.handle, r);
+	}
+	
+	
+	///
+	final OLE_XSIZE_HIMETRIC loghimX() // getter
+	{
+		OLE_XSIZE_HIMETRIC xsz;
+		if(S_OK != ipic.get_Width(&xsz))
+			return 0; // ?
+		return xsz;
+	}
+	
+	/// ditto
+	final OLE_YSIZE_HIMETRIC loghimY() // getter
+	{
+		OLE_YSIZE_HIMETRIC ysz;
+		if(S_OK != ipic.get_Height(&ysz))
+			return 0; // ?
+		return ysz;
+	}
+	
+	
+	///
+	final override int width() // getter
+	{
+		Graphics g;
+		int result;
+		g = Graphics.getScreen();
+		result = getWidth(g);
+		g.dispose();
+		return result;
+	}
+	
+	
+	///
+	final override int height() // getter
+	{
+		Graphics g;
+		int result;
+		g = Graphics.getScreen();
+		result = getHeight(g);
+		g.dispose();
+		return result;
+	}
+	
+	
+	///
+	final override Size size() // getter
+	{
+		Graphics g;
+		Size result;
+		g = Graphics.getScreen();
+		result = getSize(g);
+		g.dispose();
+		return result;
+	}
+	
+	
+	///
+	final int getWidth(HDC hdc) // package
+	{
+		return MAP_LOGHIM_TO_PIX(loghimX, GetDeviceCaps(hdc, LOGPIXELSX));
+	}
+	
+	/// ditto
+	final int getWidth(Graphics g)
+	{
+		return getWidth(g.handle);
+	}
+	
+	
+	///
+	final int getHeight(HDC hdc) // package
+	{
+		return MAP_LOGHIM_TO_PIX(loghimY, GetDeviceCaps(hdc, LOGPIXELSX));
+	}
+	
+	/// ditto
+	final int getHeight(Graphics g)
+	{
+		return getHeight(g.handle);
+	}
+	
+	
+	final Size getSize(HDC hdc) // package
+	{
+		return Size(getWidth(hdc), getHeight(hdc));
+	}
+	
+	///
+	final Size getSize(Graphics g)
+	{
+		return Size(getWidth(g), getHeight(g));
+	}
+	
+	
+	///
+	void dispose()
+	{
+		if(ipic)
 		{
-			this.ipic = _fromStdStream(stm);
-			if(!this.ipic)
-				throw new DflException("Unable to load picture from stream");
+			ipic.Release();
+			ipic = null;
 		}
-		
-		/// ditto
-		// Throws exception on failure.
-		this(char[] fileName)
+	}
+	
+	
+	~this()
+	{
+		dispose();
+	}
+	
+	
+	final HBITMAP toHBitmap(HDC hdc) // package
+	{
+		HDC memdc;
+		HBITMAP result;
+		HGDIOBJ oldbm;
+		memdc = CreateCompatibleDC(hdc);
+		if(!memdc)
+			throw new DflException("Device error");
+		try
 		{
-			this.ipic = _fromFileName(fileName);
-			if(!this.ipic)
-				throw new DflException("Unable to load picture from file '" ~ fileName ~ "'");
-		}
-		
-		
-		private this(dfl.internal.wincom.IPicture ipic)
-		{
-			this.ipic = ipic;
-		}
-		
-		
-		///
-		// Returns null on failure instead of throwing exception.
-		static Picture fromStream(Stream stm)
-		{
-			dfl.internal.wincom.IPicture ipic;
-			ipic = _fromStdStream(stm);
-			if(!ipic)
-				return null;
-			return new Picture(ipic);
-		}
-		
-		
-		///
-		// Returns null on failure instead of throwing exception.
-		static Picture fromFile(char[] fileName)
-		{
-			dfl.internal.wincom.IPicture ipic;
-			ipic = _fromFileName(fileName);
-			if(!ipic)
-				return null;
-			return new Picture(ipic);
-		}
-		
-		
-		///
-		final void draw(HDC hdc, Point pt) // package
-		{
-			int lhx, lhy;
-			int width, height;
-			lhx = loghimX;
-			lhy = loghimY;
-			width = MAP_LOGHIM_TO_PIX(lhx, GetDeviceCaps(hdc, LOGPIXELSX));
-			height = MAP_LOGHIM_TO_PIX(lhy, GetDeviceCaps(hdc, LOGPIXELSY));
-			ipic.Render(hdc, pt.x, pt.y + height, width, -height, 0, 0, lhx, lhy, null);
-		}
-		
-		/// ditto
-		final override void draw(Graphics g, Point pt)
-		{
-			return draw(g.handle, pt);
-		}
-		
-		
-		///
-		final void drawStretched(HDC hdc, Rect r) // package
-		{
-			int lhx, lhy;
-			lhx = loghimX;
-			lhy = loghimY;
-			ipic.Render(hdc, r.x, r.y + r.height, r.width, -r.height, 0, 0, lhx, lhy, null);
-		}
-		
-		/// ditto
-		final override void drawStretched(Graphics g, Rect r)
-		{
-			return drawStretched(g.handle, r);
-		}
-		
-		
-		///
-		final OLE_XSIZE_HIMETRIC loghimX() // getter
-		{
-			OLE_XSIZE_HIMETRIC xsz;
-			if(S_OK != ipic.get_Width(&xsz))
-				return 0; // ?
-			return xsz;
-		}
-		
-		/// ditto
-		final OLE_YSIZE_HIMETRIC loghimY() // getter
-		{
-			OLE_YSIZE_HIMETRIC ysz;
-			if(S_OK != ipic.get_Height(&ysz))
-				return 0; // ?
-			return ysz;
-		}
-		
-		
-		///
-		final override int width() // getter
-		{
-			Graphics g;
-			int result;
-			g = Graphics.getScreen();
-			result = getWidth(g);
-			g.dispose();
-			return result;
-		}
-		
-		
-		///
-		final override int height() // getter
-		{
-			Graphics g;
-			int result;
-			g = Graphics.getScreen();
-			result = getHeight(g);
-			g.dispose();
-			return result;
-		}
-		
-		
-		///
-		final override Size size() // getter
-		{
-			Graphics g;
-			Size result;
-			g = Graphics.getScreen();
-			result = getSize(g);
-			g.dispose();
-			return result;
-		}
-		
-		
-		///
-		final int getWidth(HDC hdc) // package
-		{
-			return MAP_LOGHIM_TO_PIX(loghimX, GetDeviceCaps(hdc, LOGPIXELSX));
-		}
-		
-		/// ditto
-		final int getWidth(Graphics g)
-		{
-			return getWidth(g.handle);
-		}
-		
-		
-		///
-		final int getHeight(HDC hdc) // package
-		{
-			return MAP_LOGHIM_TO_PIX(loghimY, GetDeviceCaps(hdc, LOGPIXELSX));
-		}
-		
-		/// ditto
-		final int getHeight(Graphics g)
-		{
-			return getHeight(g.handle);
-		}
-		
-		
-		final Size getSize(HDC hdc) // package
-		{
-			return Size(getWidth(hdc), getHeight(hdc));
-		}
-		
-		///
-		final Size getSize(Graphics g)
-		{
-			return Size(getWidth(g), getHeight(g));
-		}
-		
-		
-		///
-		void dispose()
-		{
-			if(ipic)
+			Size sz;
+			sz = getSize(hdc);
+			result = CreateCompatibleBitmap(hdc, sz.width, sz.height);
+			if(!result)
 			{
-				ipic.Release();
-				ipic = null;
+				bad_bm:
+				throw new DflException("Unable to allocate image");
 			}
+			oldbm = SelectObject(memdc, result);
+			draw(memdc, Point(0, 0));
+		}
+		finally
+		{
+			if(oldbm)
+				SelectObject(memdc, oldbm);
+			DeleteDC(memdc);
+		}
+		return result;
+	}
+	
+	
+	final Bitmap toBitmap(HDC hdc) // package
+	{
+		HBITMAP hbm;
+		hbm = toHBitmap(hdc);
+		if(!hbm)
+			throw new DflException("Unable to create bitmap");
+		return new Bitmap(hbm, true); // Owned.
+	}
+	
+	
+	final Bitmap toBitmap()
+	{
+		Graphics g;
+		Bitmap result;
+		g = Graphics.getScreen();
+		result = toBitmap(g);
+		g.dispose();
+		return result;
+	}
+	
+	/// ditto
+	final Bitmap toBitmap(Graphics g)
+	{
+		return toBitmap(g.handle);
+	}
+	
+	
+	private:
+	dfl.internal.wincom.IPicture ipic = null;
+	
+	
+	static dfl.internal.wincom.IPicture _fromIStream(dfl.internal.wincom.IStream istm)
+	{
+		dfl.internal.wincom.IPicture ipic;
+		if(S_OK != OleLoadPicture(istm, 0, FALSE, &_IID_IPicture, cast(void**)&ipic))
+			return null;
+		return ipic;
+	}
+	
+	
+	static dfl.internal.wincom.IPicture _fromDStream(DStream stm)
+	in
+	{
+		assert(stm !is null);
+	}
+	body
+	{
+		scope DStreamToIStream istm = new DStreamToIStream(stm);
+		return _fromIStream(istm);
+	}
+	
+	
+	static dfl.internal.wincom.IPicture _fromFileName(char[] fileName)
+	{
+		alias dfl.internal.winapi.HANDLE HANDLE; // Otherwise, odd conflict with wine.
+		
+		HANDLE hf;
+		HANDLE hg;
+		void* pg;
+		DWORD dwsz, dw;
+		
+		hf = dfl.internal.utf.createFile(fileName, GENERIC_READ, FILE_SHARE_READ, null,
+			OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, null);
+		if(!hf)
+			return null;
+		
+		dwsz = GetFileSize(hf, null);
+		if(0xFFFFFFFF == dwsz)
+		{
+			failclose:
+			CloseHandle(hf);
+			return null;
 		}
 		
+		hg = GlobalAlloc(GMEM_MOVEABLE, dwsz);
+		if(!hg)
+			goto failclose;
 		
-		~this()
+		pg = GlobalLock(hg);
+		if(!pg)
 		{
-			dispose();
+			CloseHandle(hf);
+			CloseHandle(hg);
+			return null;
 		}
 		
-		
-		final HBITMAP toHBitmap(HDC hdc) // package
+		if(!ReadFile(hf, pg, dwsz, &dw, null) || dwsz != dw)
 		{
-			HDC memdc;
-			HBITMAP result;
-			HGDIOBJ oldbm;
-			memdc = CreateCompatibleDC(hdc);
-			if(!memdc)
-				throw new DflException("Device error");
-			try
-			{
-				Size sz;
-				sz = getSize(hdc);
-				result = CreateCompatibleBitmap(hdc, sz.width, sz.height);
-				if(!result)
-				{
-					bad_bm:
-					throw new DflException("Unable to allocate image");
-				}
-				oldbm = SelectObject(memdc, result);
-				draw(memdc, Point(0, 0));
-			}
-			finally
-			{
-				if(oldbm)
-					SelectObject(memdc, oldbm);
-				DeleteDC(memdc);
-			}
-			return result;
-		}
-		
-		
-		final Bitmap toBitmap(HDC hdc) // package
-		{
-			HBITMAP hbm;
-			hbm = toHBitmap(hdc);
-			if(!hbm)
-				throw new DflException("Unable to create bitmap");
-			return new Bitmap(hbm, true); // Owned.
-		}
-		
-		
-		final Bitmap toBitmap()
-		{
-			Graphics g;
-			Bitmap result;
-			g = Graphics.getScreen();
-			result = toBitmap(g);
-			g.dispose();
-			return result;
-		}
-		
-		/// ditto
-		final Bitmap toBitmap(Graphics g)
-		{
-			return toBitmap(g.handle);
-		}
-		
-		
-		private:
-		dfl.internal.wincom.IPicture ipic = null;
-		
-		
-		static dfl.internal.wincom.IPicture _fromIStream(dfl.internal.wincom.IStream istm)
-		{
-			dfl.internal.wincom.IPicture ipic;
-			if(S_OK != OleLoadPicture(istm, 0, FALSE, &_IID_IPicture, cast(void**)&ipic))
-				return null;
-			return ipic;
-		}
-		
-		
-		static dfl.internal.wincom.IPicture _fromStdStream(Stream stm)
-		in
-		{
-			assert(stm !is null);
-		}
-		body
-		{
-			scope StdStreamToIStream istm = new StdStreamToIStream(stm);
-			return _fromIStream(istm);
-		}
-		
-		
-		static dfl.internal.wincom.IPicture _fromFileName(char[] fileName)
-		{
-			alias dfl.internal.winapi.HANDLE HANDLE; // Otherwise, odd conflict with wine.
-			
-			HANDLE hf;
-			HANDLE hg;
-			void* pg;
-			DWORD dwsz, dw;
-			
-			hf = dfl.internal.utf.createFile(fileName, GENERIC_READ, FILE_SHARE_READ, null,
-				OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, null);
-			if(!hf)
-				return null;
-			
-			dwsz = GetFileSize(hf, null);
-			if(0xFFFFFFFF == dwsz)
-			{
-				failclose:
-				CloseHandle(hf);
-				return null;
-			}
-			
-			hg = GlobalAlloc(GMEM_MOVEABLE, dwsz);
-			if(!hg)
-				goto failclose;
-			
-			pg = GlobalLock(hg);
-			if(!pg)
-			{
-				CloseHandle(hf);
-				CloseHandle(hg);
-				return null;
-			}
-			
-			if(!ReadFile(hf, pg, dwsz, &dw, null) || dwsz != dw)
-			{
-				CloseHandle(hf);
-				GlobalUnlock(hg);
-				CloseHandle(hg);
-				return null;
-			}
-			
 			CloseHandle(hf);
 			GlobalUnlock(hg);
-			
-			IStream istm;
-			dfl.internal.wincom.IPicture ipic;
-			
-			if(S_OK != CreateStreamOnHGlobal(hg, TRUE, &istm))
-			{
-				CloseHandle(hg);
-				return null;
-			}
-			// Don't need to CloseHandle(hg) due to 2nd param being TRUE.
-			
-			ipic = _fromIStream(istm);
-			if(!ipic)
-			{
-				istm.Release();
-				return null;
-			}
-			
-			istm.Release();
-			
-			return ipic;
+			CloseHandle(hg);
+			return null;
 		}
+		
+		CloseHandle(hf);
+		GlobalUnlock(hg);
+		
+		IStream istm;
+		dfl.internal.wincom.IPicture ipic;
+		
+		if(S_OK != CreateStreamOnHGlobal(hg, TRUE, &istm))
+		{
+			CloseHandle(hg);
+			return null;
+		}
+		// Don't need to CloseHandle(hg) due to 2nd param being TRUE.
+		
+		ipic = _fromIStream(istm);
+		if(!ipic)
+		{
+			istm.Release();
+			return null;
+		}
+		
+		istm.Release();
+		
+		return ipic;
 	}
 }
 
@@ -1772,9 +1762,9 @@ class Graphics // docmain
 		
 		if(vSplit)
 		{
-			x = movableArea.width / 2 - MWIDTH / 2;
+			x = movableArea.x + (movableArea.width / 2 - MWIDTH / 2);
 			//y = movableArea.height / 2 - ((MWIDTH * count) + (MSPACE * (count - 1))) / 2;
-			y = movableArea.height / 2 - ((MWIDTH * count) + (MSPACE * count)) / 2;
+			y = movableArea.y + (movableArea.height / 2 - ((MWIDTH * count) + (MSPACE * count)) / 2);
 			
 			for(iw = 0; iw != count; iw++)
 			{
@@ -1785,8 +1775,8 @@ class Graphics // docmain
 		else // hSplit
 		{
 			//x = movableArea.width / 2 - ((MHEIGHT * count) + (MSPACE * (count - 1))) / 2;
-			x = movableArea.width / 2 - ((MHEIGHT * count) + (MSPACE * count)) / 2;
-			y = movableArea.height / 2 - MHEIGHT / 2;
+			x = movableArea.x + (movableArea.width / 2 - ((MHEIGHT * count) + (MSPACE * count)) / 2);
+			y = movableArea.y + (movableArea.height / 2 - MHEIGHT / 2);
 			
 			for(iw = 0; iw != count; iw++)
 			{
@@ -2355,34 +2345,22 @@ class Graphics // docmain
 	}
 	
 	
-	///
-	final bool copyTo(HDC dest, int destX, int destY, int width, int height, int srcX, int srcY, DWORD rop) // package
+	final bool copyTo(HDC dest, int destX, int destY, int width, int height, int srcX = 0, int srcY = 0, DWORD rop = SRCCOPY) // package
 	{
 		return cast(bool)dfl.internal.winapi.BitBlt(dest, destX, destY, width, height, this.handle, srcX, srcY, rop);
 	}
 	
-	/// ditto
-	final bool copyTo(Graphics destGraphics, int destX, int destY, int width, int height, int srcX, int srcY, DWORD rop)
+	
+	///
+	final bool copyTo(Graphics destGraphics, int destX, int destY, int width, int height, int srcX = 0, int srcY = 0, DWORD rop = SRCCOPY)
 	{
 		return copyTo(destGraphics.handle, destX, destY, width, height, srcX, srcY, rop);
 	}
 	
 	/// ditto
-	final bool copyTo(Graphics destGraphics, int destX, int destY, int width, int height, int srcX, int srcY)
-	{
-		return copyTo(destGraphics.handle, destX, destY, width, height, srcX, srcY, SRCCOPY);
-	}
-	
-	/// ditto
-	final bool copyTo(Graphics destGraphics, int destX, int destY, int width, int height)
-	{
-		return copyTo(destGraphics.handle, destX, destY, width, height, 0, 0, SRCCOPY);
-	}
-	
-	/// ditto
 	final bool copyTo(Graphics destGraphics, Rect bounds)
 	{
-		return copyTo(destGraphics.handle, bounds.x, bounds.y, bounds.width, bounds.height, 0, 0, SRCCOPY);
+		return copyTo(destGraphics.handle, bounds.x, bounds.y, bounds.width, bounds.height);
 	}
 	
 	
@@ -2479,18 +2457,74 @@ class MemoryGraphics: Graphics // docmain
 	}
 	
 	
-	/+
-	// Requires creating yet another DC; compatible with screen? Picture.toBitmap() is.
-	final Bitmap toBitmap()
+	final Size size() // getter
 	{
+		return Size(_w, _h);
 	}
-	+/
 	
 	
 	///
 	final HBITMAP hbitmap() // getter // package
 	{
 		return hbm;
+	}
+	
+	
+	// Needs to copy so it can be selected into other DC`s.
+	final HBITMAP toHBitmap(HDC hdc) // package
+	{
+		HDC memdc;
+		HBITMAP result;
+		HGDIOBJ oldbm;
+		memdc = CreateCompatibleDC(hdc);
+		if(!memdc)
+			throw new DflException("Device error");
+		try
+		{
+			result = CreateCompatibleBitmap(hdc, width, height);
+			if(!result)
+			{
+				bad_bm:
+				throw new DflException("Unable to allocate image");
+			}
+			oldbm = SelectObject(memdc, result);
+			copyTo(memdc, 0, 0, width, height);
+		}
+		finally
+		{
+			if(oldbm)
+				SelectObject(memdc, oldbm);
+			DeleteDC(memdc);
+		}
+		return result;
+	}
+	
+	
+	final Bitmap toBitmap(HDC hdc) // package
+	{
+		HBITMAP hbm;
+		hbm = toHBitmap(hdc);
+		if(!hbm)
+			throw new DflException("Unable to create bitmap");
+		return new Bitmap(hbm, true); // Owned.
+	}
+	
+	
+	///
+	final Bitmap toBitmap()
+	{
+		Graphics g;
+		Bitmap result;
+		g = Graphics.getScreen();
+		result = toBitmap(g);
+		g.dispose();
+		return result;
+	}
+	
+	/// ditto
+	final Bitmap toBitmap(Graphics g)
+	{
+		return toBitmap(g.handle);
 	}
 	
 	
@@ -2797,7 +2831,37 @@ enum FontSmoothing
 class Font // docmain
 {
 	// Used internally.
-	this(HFONT hf, LOGFONTA* lf, bool owned = true) // package
+	static void LOGFONTAtoLogFont(inout LogFont lf, LOGFONTA* plfa) // package // deprecated
+	{
+		lf.lfa = *plfa;
+		lf.faceName = dfl.internal.utf.fromAnsiz(plfa.lfFaceName.ptr);
+	}
+	
+	// Used internally.
+	static void LOGFONTWtoLogFont(inout LogFont lf, LOGFONTW* plfw) // package // deprecated
+	{
+		lf.lfw = *plfw;
+		lf.faceName = dfl.internal.utf.fromUnicodez(plfw.lfFaceName.ptr);
+	}
+	
+	
+	// Used internally.
+	this(HFONT hf, LOGFONTA* plfa, bool owned = true) // package // deprecated
+	{
+		LogFont lf;
+		LOGFONTAtoLogFont(lf, plfa);
+		
+		this.hf = hf;
+		this.owned = owned;
+		this._unit = GraphicsUnit.POINT;
+		
+		_fstyle = _style(lf);
+		_initLf(lf);
+	}
+	
+	
+	// Used internally.
+	this(HFONT hf, inout LogFont lf, bool owned = true) // package
 	{
 		this.hf = hf;
 		this.owned = owned;
@@ -2815,60 +2879,85 @@ class Font // docmain
 		this.owned = owned;
 		this._unit = GraphicsUnit.POINT;
 		
-		LOGFONTA lf;
-		_info(&lf);
+		LogFont lf;
+		_info(lf);
 		
-		_fstyle = _style(&lf);
-		_initLf(&lf);
+		_fstyle = _style(lf);
+		_initLf(lf);
 	}
 	
 	
 	// Used internally.
-	this(LOGFONTA* lf, bool owned = true) // package
+	this(LOGFONTA* plfa, bool owned = true) // package // deprecated
+	{
+		LogFont lf;
+		LOGFONTAtoLogFont(lf, plfa);
+		
+		this(_create(lf), lf, owned);
+	}
+	
+	
+	// Used internally.
+	this(inout LogFont lf, bool owned = true) // package
 	{
 		this(_create(lf), lf, owned);
 	}
 	
 	
-	package static HFONT _create(LOGFONTA* lf)
+	package static HFONT _create(inout LogFont lf)
 	{
 		HFONT result;
-		result = CreateFontIndirectA(lf);
+		result = dfl.internal.utf.createFontIndirect(lf);
 		if(!result)
 			throw new DflException("Unable to create font");
 		return result;
 	}
 	
 	
-	private static void _style(LOGFONTA* lf, FontStyle style)
+	private static void _style(inout LogFont lf, FontStyle style)
 	{
-		lf.lfWeight = (style & FontStyle.BOLD) ? FW_BOLD : FW_NORMAL;
-		lf.lfItalic = (style & FontStyle.ITALIC) ? TRUE : FALSE;
-		lf.lfUnderline = (style & FontStyle.UNDERLINE) ? TRUE : FALSE;
-		lf.lfStrikeOut = (style & FontStyle.STRIKEOUT) ? TRUE : FALSE;
+		lf.lf.lfWeight = (style & FontStyle.BOLD) ? FW_BOLD : FW_NORMAL;
+		lf.lf.lfItalic = (style & FontStyle.ITALIC) ? TRUE : FALSE;
+		lf.lf.lfUnderline = (style & FontStyle.UNDERLINE) ? TRUE : FALSE;
+		lf.lf.lfStrikeOut = (style & FontStyle.STRIKEOUT) ? TRUE : FALSE;
 	}
 	
 	
-	private static FontStyle _style(LOGFONTA* lf)
+	private static FontStyle _style(inout LogFont lf)
 	{
 		FontStyle style = FontStyle.REGULAR;
 		
-		if(lf.lfWeight >= FW_BOLD)
+		if(lf.lf.lfWeight >= FW_BOLD)
 			style |= FontStyle.BOLD;
-		if(lf.lfItalic)
+		if(lf.lf.lfItalic)
 			style |= FontStyle.ITALIC;
-		if(lf.lfUnderline)
+		if(lf.lf.lfUnderline)
 			style |= FontStyle.UNDERLINE;
-		if(lf.lfStrikeOut)
+		if(lf.lf.lfStrikeOut)
 			style |= FontStyle.STRIKEOUT;
 		
 		return style;
 	}
 	
 	
-	package void _info(LOGFONTA* lf)
+	package void _info(LOGFONTA* lf) // deprecated
 	{
 		if(GetObjectA(hf, LOGFONTA.sizeof, lf) != LOGFONTA.sizeof)
+			throw new DflException("Unable to get font information");
+	}
+	
+	package void _info(LOGFONTW* lf) // deprecated
+	{
+		auto proc = cast(GetObjectWProc)GetProcAddress(GetModuleHandleA("gdi32.dll"), "GetObjectW");
+		
+		if(!proc || proc(hf, LOGFONTW.sizeof, lf) != LOGFONTW.sizeof)
+			throw new DflException("Unable to get font information");
+	}
+	
+	
+	package void _info(inout LogFont lf)
+	{
+		if(!dfl.internal.utf.getLogFont(hf, lf))
 			throw new DflException("Unable to get font information");
 	}
 	
@@ -2982,14 +3071,14 @@ class Font // docmain
 	///
 	this(Font font, FontStyle style)
 	{
-		LOGFONTA lf;
+		LogFont lf;
 		_unit = font._unit;
-		font._info(&lf);
-		_style(&lf, style);
-		this(_create(&lf));
+		font._info(lf);
+		_style(lf, style);
+		this(_create(lf));
 		
 		_fstyle = style;
-		_initLf(font, &lf);
+		_initLf(font, lf);
 	}
 	
 	/// ditto
@@ -3021,29 +3110,26 @@ class Font // docmain
 		GraphicsUnit unit, ubyte gdiCharSet,
 		FontSmoothing smoothing = FontSmoothing.DEFAULT)
 	{
-		LOGFONTA lf;
+		LogFont lf;
 		
 		_unit = unit;
 		
-		if(name.length >= lf.lfFaceName.length)
-			throw new DflException("Invalid font name");
-		lf.lfFaceName[0 .. name.length] = name;
-		lf.lfFaceName[name.length] = 0;
+		lf.faceName = name;
 		
-		lf.lfHeight = -getLfHeight(emSize, unit);
-		_style(&lf, style);
+		lf.lf.lfHeight = -getLfHeight(emSize, unit);
+		_style(lf, style);
 		
-		lf.lfCharSet = gdiCharSet;
-		lf.lfOutPrecision = OUT_DEFAULT_PRECIS;
-		lf.lfClipPrecision = CLIP_DEFAULT_PRECIS;
-		//lf.lfQuality = DEFAULT_QUALITY;
-		lf.lfQuality = smoothing;
-		lf.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE;
+		lf.lf.lfCharSet = gdiCharSet;
+		lf.lf.lfOutPrecision = OUT_DEFAULT_PRECIS;
+		lf.lf.lfClipPrecision = CLIP_DEFAULT_PRECIS;
+		//lf.lf.lfQuality = DEFAULT_QUALITY;
+		lf.lf.lfQuality = smoothing;
+		lf.lf.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE;
 		
-		this(_create(&lf));
+		this(_create(lf));
 		
 		_fstyle = style;
-		_initLf(&lf);
+		_initLf(lf);
 	}
 	
 	
@@ -3074,7 +3160,7 @@ class Font // docmain
 		/+
 		LOGFONTA lf;
 		_info(&lf);
-		return getEmSize(lf.lfHeight, _unit);
+		return getEmSize(lf.lf.lfHeight, _unit);
 		+/
 		return getEmSize(this.lfHeight, _unit);
 	}
@@ -3086,7 +3172,7 @@ class Font // docmain
 		/+
 		LOGFONTA lf;
 		_info(&lf);
-		return getEmSize(lf.lfHeight, unit);
+		return getEmSize(lf.lf.lfHeight, unit);
 		+/
 		return getEmSize(this.lfHeight, unit);
 	}
@@ -3118,15 +3204,33 @@ class Font // docmain
 	}
 	
 	
+	/+
 	private void _initLf(LOGFONTA* lf)
 	{
 		this.lfHeight = lf.lfHeight;
 		this.lfName = stringFromStringz(lf.lfFaceName.ptr).dup;
 		this.lfCharSet = lf.lfCharSet;
 	}
+	+/
+	
+	private void _initLf(inout LogFont lf)
+	{
+		this.lfHeight = lf.lf.lfHeight;
+		this.lfName = lf.faceName;
+		this.lfCharSet = lf.lf.lfCharSet;
+	}
 	
 	
+	/+
 	private void _initLf(Font otherfont, LOGFONTA* lf)
+	{
+		this.lfHeight = otherfont.lfHeight;
+		this.lfName = otherfont.lfName;
+		this.lfCharSet = otherfont.lfCharSet;
+	}
+	+/
+	
+	private void _initLf(Font otherfont, inout LogFont lf)
 	{
 		this.lfHeight = otherfont.lfHeight;
 		this.lfName = otherfont.lfName;

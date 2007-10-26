@@ -1796,13 +1796,21 @@ class TreeView: ControlSuperClass // docmain
 							switch(nmtv.action)
 							{
 								case TVE_COLLAPSE:
-									onAfterCollapse(new TreeViewEventArgs(cast(TreeNode)cast(void*)nmtv.itemNew.lParam,
-										TreeViewAction.COLLAPSE));
+									{
+										scope TreeViewEventArgs tvea = new TreeViewEventArgs(
+											cast(TreeNode)cast(void*)nmtv.itemNew.lParam,
+											TreeViewAction.COLLAPSE);
+										onAfterCollapse(tvea);
+									}
 									break;
 								
 								case TVE_EXPAND:
-									onAfterExpand(new TreeViewEventArgs(cast(TreeNode)cast(void*)nmtv.itemNew.lParam,
-										TreeViewAction.EXPAND));
+									{
+										scope TreeViewEventArgs tvea = new TreeViewEventArgs(
+											cast(TreeNode)cast(void*)nmtv.itemNew.lParam,
+											TreeViewAction.EXPAND);
+										onAfterExpand(tvea);
+									}
 									break;
 								
 								default: ;
@@ -1820,51 +1828,68 @@ class TreeView: ControlSuperClass // docmain
 							{
 								TV_DISPINFOA* nmdi;
 								nmdi = cast(TV_DISPINFOA*)nmh;
-								NodeLabelEditEventArgs nleea;
 								TreeNode node;
 								node = cast(TreeNode)cast(void*)nmdi.item.lParam;
-								// The nleea.label should contain the NEW text, which
-								// there is no new text before it's edited... ?
-								// TODO: check if correct implementation.
-								nleea = new NodeLabelEditEventArgs(node /+ , node.text +/);
+								scope NodeLabelEditEventArgs nleea = new NodeLabelEditEventArgs(node);
 								onBeforeLabelEdit(nleea);
 								m.result = nleea.cancelEdit;
 							}
 							break;
 						
 						case TVN_ENDLABELEDITW:
-							goto end_label_edit;
+							{
+								char[] label;
+								TV_DISPINFOW* nmdi;
+								nmdi = cast(TV_DISPINFOW*)nmh;
+								if(nmdi.item.pszText)
+								{
+									TreeNode node;
+									node = cast(TreeNode)cast(void*)nmdi.item.lParam;
+									label = fromUnicodez(nmdi.item.pszText);
+									scope NodeLabelEditEventArgs nleea = new NodeLabelEditEventArgs(node, label);
+									onAfterLabelEdit(nleea);
+									if(nleea.cancelEdit)
+									{
+										m.result = FALSE;
+									}
+									else
+									{
+										// TODO: check if correct implementation.
+										// Update the node's cached text..
+										node.ttext = label;
+										
+										m.result = TRUE;
+									}
+								}
+							}
+							break;
 						
 						case TVN_ENDLABELEDITA:
 							if(dfl.internal.utf.useUnicode)
 								break;
-							end_label_edit:
-							
 							{
 								char[] label;
 								TV_DISPINFOA* nmdi;
 								nmdi = cast(TV_DISPINFOA*)nmh;
-								NodeLabelEditEventArgs nleea;
-								TreeNode node;
-								// TODO: check if correct implementation.
-								node = cast(TreeNode)cast(void*)nmdi.item.lParam;
 								if(nmdi.item.pszText)
-									label = stringFromStringz(nmdi.item.pszText).dup;
-								nleea = new NodeLabelEditEventArgs(node, label);
-								if(!nmdi.item.pszText)
-									nleea.cancelEdit = true;
-								onAfterLabelEdit(nleea);
-								if(nleea.cancelEdit)
 								{
-									m.result = FALSE;
-								}
-								else
-								{
-									// TODO: check if correct implementation.
-									// Update the node's cached text..
-									node.ttext = label;
-									
-									m.result = TRUE;
+									TreeNode node;
+									node = cast(TreeNode)cast(void*)nmdi.item.lParam;
+									label = fromAnsiz(nmdi.item.pszText);
+									scope NodeLabelEditEventArgs nleea = new NodeLabelEditEventArgs(node, label);
+									onAfterLabelEdit(nleea);
+									if(nleea.cancelEdit)
+									{
+										m.result = FALSE;
+									}
+									else
+									{
+										// TODO: check if correct implementation.
+										// Update the node's cached text..
+										node.ttext = label;
+										
+										m.result = TRUE;
+									}
 								}
 							}
 							break;

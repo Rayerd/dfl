@@ -1168,6 +1168,15 @@ else
 	{
 		LVN_FIRST = cast(UINT)-100,
 		
+		LVN_ITEMCHANGING = (LVN_FIRST - 0),
+		LVN_ITEMCHANGED = (LVN_FIRST - 1),
+		
+		LVN_BEGINLABELEDITA = LVN_FIRST - 5,
+		LVN_BEGINLABELEDITW = LVN_FIRST - 75,
+		
+		LVN_ENDLABELEDITA = LVN_FIRST - 6,
+		LVN_ENDLABELEDITW = LVN_FIRST - 76,
+		
 		LVN_COLUMNCLICK = LVN_FIRST - 8,
 		
 		LVN_GETDISPINFOA = LVN_FIRST - 50,
@@ -1424,6 +1433,8 @@ else
 		
 		SM_CXSMICON = 49,
 		SM_CYSMICON = 50,
+		
+		SM_CYSMCAPTION = 51,
 		
 		SM_CXSIZEFRAME = SM_CXFRAME,
 		SM_CYSIZEFRAME = SM_CYFRAME,
@@ -1915,6 +1926,26 @@ else
 	alias TVITEMA* PTV_ITEMA;
 	
 	
+	struct TVITEMW
+	{
+		UINT mask;
+		HTREEITEM hItem;
+		UINT state;
+		UINT stateMask;
+		LPWSTR pszText;
+		int cchTextMax;
+		int iImage;
+		int iSelectedImage;
+		int cChildren;
+		LPARAM lParam;
+	}
+	alias TVITEMW* LPTVITEMW;
+	alias TVITEMW* PTVITEMW;
+	alias TVITEMW TV_ITEMW;
+	alias TVITEMW* LPTV_ITEMW;
+	alias TVITEMW* PTV_ITEMW;
+	
+	
 	struct TVHITTESTINFO
 	{
 		POINT pt;
@@ -1956,6 +1987,16 @@ else
 	alias NMTVDISPINFOA* LPNMTVDISPINFOA;
 	alias NMTVDISPINFOA TV_DISPINFOA;
 	alias NMTVDISPINFOA* LPTV_DISPINFOA;
+	
+	
+	struct NMTVDISPINFOW
+	{
+		NMHDR hdr;
+		TVITEMW item;
+	}
+	alias NMTVDISPINFOW* LPNMTVDISPINFOW;
+	alias NMTVDISPINFOW TV_DISPINFOW;
+	alias NMTVDISPINFOW* LPTV_DISPINFOW;
 	
 	
 	struct TCITEMA
@@ -2705,6 +2746,10 @@ else
 	HTHEME GetWindowTheme(HWND hWnd);
 	int SetScrollInfo(HWND hwnd, int fnBar, LPSCROLLINFO lpsi, BOOL fRedraw);
 	BOOL GetScrollInfo(HWND hwnd, int fnBar, LPSCROLLINFO lpsi);
+	BOOL DragDetect(HWND hwnd, POINT pt);
+	HFONT CreateFontIndirectW(LOGFONTW *lplf);
+	DWORD GetThemeAppProperties();
+	BOOL IsAppThemed();
 
 //} // Temporary.
 

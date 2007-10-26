@@ -507,20 +507,20 @@ class ComboBox: ListControl // docmain
 	///
 	static class ObjectCollection
 	{
-		this(ComboBox lbox)
+		protected this(ComboBox lbox)
 		{
 			this.lbox = lbox;
 		}
 		
 		
-		this(ComboBox lbox, Object[] range)
+		protected this(ComboBox lbox, Object[] range)
 		{
 			this.lbox = lbox;
 			addRange(range);
 		}
 		
 		
-		this(ComboBox lbox, char[][] range)
+		protected this(ComboBox lbox, char[][] range)
 		{
 			this.lbox = lbox;
 			addRange(range);
@@ -528,7 +528,7 @@ class ComboBox: ListControl // docmain
 		
 		
 		/+
-		this(ComboBox lbox, ObjectCollection range)
+		protected this(ComboBox lbox, ObjectCollection range)
 		{
 			this.lbox = lbox;
 			addRange(range);

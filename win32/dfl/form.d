@@ -12,6 +12,15 @@ private import dfl.application, dfl.base, dfl.menu, dfl.internal.utf;
 private import dfl.collections;
 
 
+version(NO_DFL_PARK_WINDOW)
+{
+}
+else
+{
+	version = DFL_PARK_WINDOW;
+}
+
+
 version = DFL_NO_ZOMBIE_FORM;
 
 
@@ -104,7 +113,7 @@ version = OLD_MODAL_CLOSE; // New version destroys control info.
 
 
 ///
-class Form: ContainerControl // docmain
+class Form: ContainerControl, IDialogResult // docmain
 {
 	///
 	final void acceptButton(IButtonControl btn) // setter
@@ -129,6 +138,14 @@ class Form: ContainerControl // docmain
 	final void cancelButton(IButtonControl btn) // setter
 	{
 		cancelBtn = btn;
+		
+		if(btn)
+		{
+			if(!(Application._compat & DflCompat.FORM_DIALOGRESULT_096))
+			{
+				btn.dialogResult = DialogResult.CANCEL;
+			}
+		}
 	}
 	
 	/// ditto
@@ -251,7 +268,7 @@ class Form: ContainerControl // docmain
 			cp.parent = sowner;
 		version(DFL_PARK_WINDOW)
 		{
-			if(!cp.parent && !showInTaskbar())
+			if(!cp.parent && !showInTaskbar)
 				cp.parent = getParkHwnd();
 		}
 		
@@ -427,6 +444,9 @@ class Form: ContainerControl // docmain
 			}
 		}
 		
+		if(!nofilter)
+			Application.addMessageFilter(mfilter); // To process IsDialogMessage().
+		
 		//createChildren();
 		try
 		{
@@ -459,6 +479,10 @@ class Form: ContainerControl // docmain
 					default: ;
 				}
 			}
+			
+			// Load before shown.
+			// Not calling if recreating handle!
+			onLoad(EventArgs.empty);
 		}
 		
 		//assert(!visible);
@@ -487,14 +511,6 @@ class Form: ContainerControl // docmain
 			}
 		}
 		//cbits &= ~CBits.FVISIBLE;
-		
-		//Application.addMessageFilter(mfilter = new FormMessageFilter(this)); // To process IsDialogMessage().
-		if(!nofilter)
-			Application.addMessageFilter(mfilter); // To process IsDialogMessage().
-		
-		//onHandleCreated(EventArgs.empty); // Called in Control's WM_CREATE now.
-		
-		onLoad(EventArgs.empty);
 	}
 	
 	
@@ -598,6 +614,12 @@ class Form: ContainerControl // docmain
 	final void dialogResult(DialogResult dr) // setter
 	{
 		fresult = dr;
+		
+		if(!(Application._compat & DflCompat.FORM_DIALOGRESULT_096))
+		{
+			if(modal && DialogResult.NONE != dr)
+				close();
+		}
 	}
 	
 	/// ditto
@@ -732,6 +754,8 @@ class Form: ContainerControl // docmain
 				SetWindowPos(hwnd, HWND.init, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE
 					| SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE); // Recalculate the frame.
 			}
+			
+			invalidate(true);
 			
 			_resetSystemMenu();
 		}
@@ -1392,12 +1416,22 @@ class Form: ContainerControl // docmain
 			
 			wowner = frm;
 			if(isHandleCreated)
-				SetParent(hwnd, frm.hwnd);
+			{
+				if(CCompat.DFL095 == _compat)
+					SetParent(hwnd, frm.hwnd);
+				else
+					_crecreate();
+			}
 		}
 		else
 		{
 			if(isHandleCreated)
-				SetParent(hwnd, HWND.init);
+			{
+				if(showInTaskbar || CCompat.DFL095 == _compat)
+					SetParent(hwnd, HWND.init);
+				else
+					_crecreate();
+			}
 		}
 		
 		//wowner = frm;
@@ -1445,8 +1479,15 @@ class Form: ContainerControl // docmain
 				
 				version(DFL_PARK_WINDOW)
 				{
+					/+ // Not working, the form disappears (probably stuck as a child).
 					if(!GetParent(handle))
+					{
+						//_style((_style() | WS_POPUP) & ~WS_CHILD);
+						
 						SetParent(handle, getParkHwnd());
+					}
+					+/
+					_crecreate();
 				}
 			}
 			
@@ -2436,6 +2477,28 @@ class Form: ContainerControl // docmain
 				break;
 			+/
 			
+			case WM_SETFOCUS:
+				{
+					// Prevent DefDlgProc from getting this message because it'll focus controls it shouldn't.
+					bool didf = false;
+					enumChildWindows(msg.hWnd,
+						(HWND hw)
+						{
+							auto wl = GetWindowLongA(hw, GWL_STYLE);
+							if(((WS_VISIBLE | WS_TABSTOP) == ((WS_VISIBLE | WS_TABSTOP) & wl))
+								&& !(WS_DISABLED & wl))
+							{
+								DefDlgProcA(msg.hWnd, WM_NEXTDLGCTL, cast(WPARAM)hw, MAKELPARAM(true, 0));
+								didf = true;
+								return FALSE;
+							}
+							return TRUE;
+						});
+					if(!didf)
+						SetFocus(msg.hWnd);
+				}
+				return;
+			
 			default:
 				version(NO_MDI)
 				{
@@ -2520,17 +2583,6 @@ class Form: ContainerControl // docmain
 			_recalcClientSize();
 		}
 	}
-	
-	
-	/+
-	// DMD 0.129: Internal error: ..\ztc\cod3.c 736
-	protected override bool processTabKey(bool forward)
-	{
-		if(selectNextControl(activeControl, forward, true, true))
-			return true;
-		return false;
-	}
-	+/
 	
 	
 	// Must be called before handle creation.
@@ -2689,6 +2741,13 @@ class Form: ContainerControl // docmain
 						break;
 					
 					default: ;
+				}
+				
+				// isDialogMessage seems to be eating WM_CHAR in some cases, so see for myself if it should get it.
+				if(WM_CHAR == m.msg)
+				{
+					// ? ...
+					return false; // Continue.
 				}
 				
 				//if(!form.isMdiChild && !form.isMdiContainer)
@@ -2863,13 +2922,16 @@ private:
 
 version(DFL_PARK_WINDOW)
 {
-	static assert(0);
-	
-	
 	HWND getParkHwnd()
 	{
 		if(!_hwPark)
-			_makePark();
+		{
+			synchronized
+			{
+				if(!_hwPark)
+					_makePark();
+			}
+		}
 		return _hwPark;
 	}
 	
@@ -2877,10 +2939,9 @@ version(DFL_PARK_WINDOW)
 	void _makePark()
 	{
 		WNDCLASSEXA wce;
-		(cast(ubyte*)&wce)[0 .. wce.sizeof] = 0;
 		wce.cbSize = wce.sizeof;
 		wce.style = CS_DBLCLKS;
-		wce.lpszClassName = PARK_CLASSNAME;
+		wce.lpszClassName = PARK_CLASSNAME.ptr;
 		wce.lpfnWndProc = &DefWindowProcA;
 		wce.hInstance = Application.getInstance();
 		
@@ -2894,8 +2955,8 @@ version(DFL_PARK_WINDOW)
 			throw new DflException("Unable to create park window");
 		}
 		
-		_hwPark = CreateWindowExA(WS_EX_WINDOWEDGE | WS_EX_CONTROLPARENT, PARK_CLASSNAME, "",
-			WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN, 0, 0, 0, 0,
+		_hwPark = CreateWindowExA(WS_EX_TOOLWINDOW, PARK_CLASSNAME.ptr, "",
+			WS_OVERLAPPEDWINDOW, 0, 0, 0, 0,
 			HWND.init, HMENU.init, wce.hInstance, null);
 		if(!_hwPark)
 		{

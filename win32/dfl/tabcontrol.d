@@ -167,7 +167,7 @@ package union TcItem
 ///
 class TabPageCollection
 {
-	this(TabControl owner)
+	protected this(TabControl owner)
 	in
 	{
 		assert(owner.tchildren is null);

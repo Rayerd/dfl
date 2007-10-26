@@ -6,7 +6,7 @@
 module dfl.fontdialog;
 
 private import dfl.base, dfl.commondialog, dfl.internal.winapi, dfl.application,
-	dfl.control, dfl.drawing, dfl.event;
+	dfl.control, dfl.drawing, dfl.event, dfl.internal.utf;
 
 
 private extern(Windows)
@@ -24,7 +24,7 @@ class FontDialog: CommonDialog
 		
 		cf.lStructSize = cf.sizeof;
 		cf.Flags = INIT_FLAGS;
-		cf.lpLogFont = cast(typeof(cf.lpLogFont))&lf;
+		cf.lpLogFont = cast(typeof(cf.lpLogFont))&lfw;
 		cf.lCustData = cast(typeof(cf.lCustData))cast(void*)this;
 		cf.lpfnHook = &fondHookProc;
 		cf.rgbColors = 0;
@@ -34,7 +34,6 @@ class FontDialog: CommonDialog
 	override void reset()
 	{
 		_fon = null;
-		//lf = lf.init; // It's completely updated when needed.
 		cf.Flags = INIT_FLAGS;
 		cf.rgbColors = 0;
 		cf.nSizeMin = 0;
@@ -333,26 +332,28 @@ class FontDialog: CommonDialog
 	{
 		BOOL result = FALSE;
 		
-		font._info(&lf); // -font- gets default font if not set.
 		cf.hwndOwner = owner;
 		
-		// TODO: fix this when LOGFONTW is implemented.
-		/+if(dfl.internal.utf.useUnicode)
+		if(dfl.internal.utf.useUnicode)
 		{
+			font._info(&lfw); // -font- gets default font if not set.
+			
 			const char[] NAME = "ChooseFontW";
 			static ChooseFontWProc proc = null;
 			
 			if(!proc)
 			{
-				proc = cast(ChooseFontWProc)GetProcAddress(GetModuleHandleA("comdlg32.dll"), NAME);
+				proc = cast(ChooseFontWProc)GetProcAddress(GetModuleHandleA("comdlg32.dll"), NAME.ptr);
 				if(!proc)
 					throw new Exception("Unable to load procedure " ~ NAME ~ ".");
 			}
 			
 			result = proc(&cfw);
 		}
-		else+/
+		else
 		{
+			font._info(&lfa); // -font- gets default font if not set.
+			
 			result = ChooseFontA(&cfa);
 		}
 		
@@ -367,7 +368,14 @@ class FontDialog: CommonDialog
 	
 	private void _update()
 	{
-		_fon = new Font(Font._create(&lf), true);
+		LogFont lf;
+		
+		if(dfl.internal.utf.useUnicode)
+			Font.LOGFONTWtoLogFont(lf, &lfw);
+		else
+			Font.LOGFONTAtoLogFont(lf, &lfa);
+		
+		_fon = new Font(Font._create(lf), true);
 	}
 	
 	
@@ -379,6 +387,7 @@ class FontDialog: CommonDialog
 	
 	
 	private:
+	
 	union
 	{
 		CHOOSEFONTW cfw;
@@ -390,7 +399,14 @@ class FontDialog: CommonDialog
 		static assert(CHOOSEFONTW.nSizeMax.offsetof == CHOOSEFONTA.nSizeMax.offsetof);
 	}
 	
-	LOGFONTA lf;
+	union
+	{
+		LOGFONTW lfw;
+		LOGFONTA lfa;
+		
+		static assert(LOGFONTW.lfFaceName.offsetof == LOGFONTA.lfFaceName.offsetof);
+	}
+	
 	Font _fon;
 	
 	

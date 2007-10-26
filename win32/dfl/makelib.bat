@@ -19,10 +19,20 @@ if not "%dmc_path%" == "" goto dmc_set
 set dmc_path=c:\dm
 :dmc_set
 
+if exist "%dmc_path%" goto got_dmc
+@echo DMC not found; using DMD path (if you get errors, install DMC)
+set dmc_path=%dmd_path%
+:got_dmc
 
-set dfl_files=base.d application.d internal/dlib.d internal/clib.d internal/utf.d internal/com.d control.d form.d registry.d drawing.d menu.d notifyicon.d commondialog.d filedialog.d folderdialog.d panel.d textbox.d richtextbox.d picturebox.d listbox.d groupbox.d splitter.d usercontrol.d button.d label.d collections.d internal/winapi.d internal/wincom.d event.d socket.d timer.d environment.d messagebox.d tooltip.d combobox.d treeview.d tabcontrol.d colordialog.d listview.d data.d clipboard.d fontdialog.d progressbar.d resources.d statusbar.d
 
-set dfl_objs=base.obj application.obj dlib.obj clib.obj utf.obj com.obj control.obj form.obj registry.obj drawing.obj menu.obj notifyicon.obj commondialog.obj filedialog.obj folderdialog.obj panel.obj textbox.obj richtextbox.obj picturebox.obj listbox.obj groupbox.obj splitter.obj usercontrol.obj button.obj label.obj collections.obj winapi.obj wincom.obj event.obj socket.obj timer.obj environment.obj messagebox.obj tooltip.obj combobox.obj treeview.obj tabcontrol.obj colordialog.obj listview.obj data.obj clipboard.obj fontdialog.obj progressbar.obj resources.obj statusbar.obj
+if not "%dlib%" == "Tango" goto dfl_not_tango_files
+set _stdcwindowsd=internal/_stdcwindows.d
+set _stdcwindowsobj=_stdcwindows.obj
+:dfl_not_tango_files
+
+set dfl_files=base.d application.d internal/dlib.d internal/clib.d internal/utf.d internal/com.d control.d form.d registry.d drawing.d menu.d notifyicon.d commondialog.d filedialog.d folderdialog.d panel.d textbox.d richtextbox.d picturebox.d listbox.d groupbox.d splitter.d usercontrol.d button.d label.d collections.d internal/winapi.d internal/wincom.d event.d socket.d timer.d environment.d messagebox.d tooltip.d combobox.d treeview.d tabcontrol.d colordialog.d listview.d data.d clipboard.d fontdialog.d progressbar.d resources.d statusbar.d %_stdcwindowsd%
+
+set dfl_objs=base.obj application.obj dlib.obj clib.obj utf.obj com.obj control.obj form.obj registry.obj drawing.obj menu.obj notifyicon.obj commondialog.obj filedialog.obj folderdialog.obj panel.obj textbox.obj richtextbox.obj picturebox.obj listbox.obj groupbox.obj splitter.obj usercontrol.obj button.obj label.obj collections.obj winapi.obj wincom.obj event.obj socket.obj timer.obj environment.obj messagebox.obj tooltip.obj combobox.obj treeview.obj tabcontrol.obj colordialog.obj listview.obj data.obj clipboard.obj fontdialog.obj progressbar.obj resources.obj statusbar.obj %_stdcwindowsobj%
 
 @rem   Also update link pragmas for build.
 set dfl_libs_dfl=user32_dfl.lib shell32_dfl.lib olepro32_dfl.lib
@@ -32,6 +42,18 @@ set dfl_libs=%dmc_path%\lib\gdi32.lib %dmc_path%\lib\comctl32.lib %dmc_path%\lib
 @rem   -debug=SHOW_MESSAGE_INFO -debug=MESSAGE_PAUSE
 @rem set dfl_flags=%dfl_flags% -debug=SHOW_MESSAGENFO
 set _dfl_flags=%dfl_flags% -v1 
+
+if not "%dfl_debug_flags%" == "" goto dfl_debug_flags_set
+set dfl_debug_flags=-debug -g
+:dfl_debug_flags_set
+if not "%dfl_release_flags%" == "" goto dfl_release_flags_set
+	if not "%dlib%" == "Tango" goto dfl_not_release_tango
+	echo Due to a bug in DMD, release mode dfl lib will not include -inline; set environment variable dfl_release_flags to override.
+	set dfl_release_flags=-O -release
+	goto dfl_release_flags_set
+	:dfl_not_release_tango
+set dfl_release_flags=-O -inline -release
+:dfl_release_flags_set
 
 
 @echo on
@@ -68,7 +90,7 @@ set _dfl_flags=%dfl_flags% -v1
 @echo.
 @echo Compiling debug DFL...
 
-%dmd_path%\bin\dmd -c -debug -g -I.. %_dfl_flags% %dfl_files%
+%dmd_path%\bin\dmd -c %dfl_debug_flags% %_dfl_flags% -I.. %dfl_files%
 @if errorlevel 1 goto oops
 
 @echo.
@@ -81,7 +103,7 @@ set _dfl_flags=%dfl_flags% -v1
 @echo.
 @echo Compiling release DFL...
 
-%dmd_path%\bin\dmd -c -O -inline -release -I.. %_dfl_flags% %dfl_files%
+%dmd_path%\bin\dmd -c %dfl_release_flags% %_dfl_flags% -I.. %dfl_files%
 @if errorlevel 1 goto oops
 
 @echo.
@@ -98,7 +120,8 @@ set _dfl_flags=%dfl_flags% -v1
 
 
 @rem   This file is used by dfl.exe
-@%dmd_path%\bin\dmd > dflcompile.info
+@echo dlib=%dlib%>dflcompile.info
+@%dmd_path%\bin\dmd>>dflcompile.info
 
 
 @set dfl_failed=

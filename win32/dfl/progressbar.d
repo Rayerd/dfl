@@ -167,17 +167,17 @@ class ProgressBar: ControlSuperClass // docmain
 	{
 		super.onHandleCreated(ea);
 		
-		if(_min != _min.init || _max != _max.init)
+		if(_min != MIN_INIT || _max != MAX_INIT)
 		{
 			prevwproc(PBM_SETRANGE, 0, MAKELPARAM(_min, _max));
 		}
 		
-		if(_step != _step.init)
+		if(_step != STEP_INIT)
 		{
 			prevwproc(PBM_SETSTEP, _step, 0);
 		}
 		
-		if(_val != _val.init)
+		if(_val != VAL_INIT)
 		{
 			prevwproc(PBM_SETPOS, _val, 0);
 		}
@@ -213,7 +213,12 @@ class ProgressBar: ControlSuperClass // docmain
 	
 	private:
 	
-	int _min = 0, _max = 100, _step = 10, _val = 0;
+	const int MIN_INIT = 0;
+	const int MAX_INIT = 100;
+	const int STEP_INIT = 10;
+	const int VAL_INIT = 0;
+	
+	int _min = MIN_INIT, _max = MAX_INIT, _step = STEP_INIT, _val = VAL_INIT;
 	
 	
 	package:

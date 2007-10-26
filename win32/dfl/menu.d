@@ -98,8 +98,9 @@ class MenuItem: Menu // docmain
 				if(fType & MFT_SEPARATOR)
 					fType = ~MFT_SEPARATOR;
 				mii.cbSize = mii.sizeof;
-				mii.fMask = MIIM_TYPE;
+				mii.fMask = MIIM_TYPE | MIIM_STATE; // Not setting the state can cause implicit disabled/gray if the text was empty.
 				mii.fType = fType;
+				mii.fState = fState;
 				//mii.dwTypeData = stringToStringz(txt);
 				
 				mparent._setInfo(mid, false, &mii, txt);
@@ -676,7 +677,7 @@ class MenuItem: Menu // docmain
 	
 	UINT _state() // getter
 	{
-		// if(mparent) fetch value ?
+		// if(mparent) fetch value ? No: Windows seems to add disabled/gray when the text is empty.
 		return fState;
 	}
 }
@@ -694,24 +695,24 @@ abstract class Menu: DObject // docmain
 		}
 		else
 		{
-			_compat092 = true;
+			//_compat092 = true;
+			Application.setCompat(DflCompat.MENU_092);
 		}
 	}
 	
 	version(SET_DFL_092)
-	{
 		private const bool _compat092 = true;
-	}
+	else version(DFL_NO_COMPAT)
+		private const bool _compat092 = false;
 	else
-	{
-		private static bool _compat092 = false;
-	}
+		private static bool _compat092() // getter
+			{ return 0 != (Application._compat & DflCompat.MENU_092); }
 	
 	
 	///
 	static class MenuItemCollection
 	{
-		this(Menu owner)
+		protected this(Menu owner)
 		{
 			_owner = owner;
 		}
@@ -856,7 +857,7 @@ abstract class Menu: DObject // docmain
 	
 	
 	// Menu item that isn't popup (yet).
-	private this()
+	protected this()
 	{
 		_init();
 	}

@@ -117,6 +117,49 @@ class Splitter: Control // docmain
 	alias Control.dock dock; // Overload.
 	
 	
+	package void initsplit(int sx, int sy)
+	{
+		capture = true;
+		
+		downing = true;
+		//downpos = Point(mea.x, mea.y);
+		
+		switch(dock)
+		{
+			case DockStyle.TOP:
+			case DockStyle.BOTTOM:
+				downpos = sy;
+				lastpos = 0;
+				drawxorClient(0, lastpos);
+				break;
+			
+			default: // LEFT / RIGHT.
+				downpos = sx;
+				lastpos = 0;
+				drawxorClient(lastpos, 0);
+		}
+	}
+	
+	
+	final void resumeSplit(int sx, int sy) // package
+	{
+		if(Control.mouseButtons & MouseButtons.LEFT)
+		{
+			initsplit(sx, sy);
+			
+			if(cursor)
+				Cursor.current = cursor;
+		}
+	}
+	
+	// /// ditto
+	final void resumeSplit() // package
+	{
+		Point pt = pointToClient(Cursor.position);
+		return resumeSplit(pt.x, pt.y);
+	}
+	
+	
 	///
 	void movingGrip(bool byes) // setter
 	{
@@ -148,19 +191,19 @@ class Splitter: Control // docmain
 		
 		if(mgrip)
 		{
-			ea.graphics.drawMoveGrip(bounds, DockStyle.LEFT == dock || DockStyle.RIGHT == dock);
+			ea.graphics.drawMoveGrip(displayRectangle, DockStyle.LEFT == dock || DockStyle.RIGHT == dock);
 		}
 	}
 	
 	
 	protected override void onResize(EventArgs ea)
 	{
-		super.onResize(ea);
-		
 		if(mgrip)
 		{
 			invalidate();
 		}
+		
+		resize(this, ea);
 	}
 	
 	
@@ -170,25 +213,7 @@ class Splitter: Control // docmain
 		
 		if(mea.button == MouseButtons.LEFT)
 		{
-			capture = true;
-			
-			downing = true;
-			//downpos = Point(mea.x, mea.y);
-			
-			switch(dock)
-			{
-				case DockStyle.TOP:
-				case DockStyle.BOTTOM:
-					downpos = mea.y;
-					lastpos = 0;
-					drawxorClient(0, lastpos);
-					break;
-				
-				default: // LEFT / RIGHT.
-					downpos = mea.x;
-					lastpos = 0;
-					drawxorClient(lastpos, 0);
-			}
+			initsplit(mea.x, mea.y);
 		}
 	}
 	
@@ -436,24 +461,30 @@ class Splitter: Control // docmain
 	
 	
 	//SplitterEventHandler splitterMoved;
-	Event!(Splitter, EventArgs) splitterMoved; ///
+	Event!(Splitter, SplitterEventArgs) splitterMoved; ///
 	//SplitterEventHandler splitterMoving;
-	Event!(Splitter, EventArgs) splitterMoving; ///
+	Event!(Splitter, SplitterEventArgs) splitterMoving; ///
 	
 	
 	protected:
 	
 	override Size defaultSize() // getter
 	{
-		return Size(GetSystemMetrics(SM_CXSIZEFRAME), GetSystemMetrics(SM_CYSIZEFRAME));
+		//return Size(GetSystemMetrics(SM_CXSIZEFRAME), GetSystemMetrics(SM_CYSIZEFRAME));
+		int sx = GetSystemMetrics(SM_CXSIZEFRAME);
+		int sy = GetSystemMetrics(SM_CYSIZEFRAME);
+		// Need a bit extra room for the move-grips.
+		if(sx < 5)
+			sx = 5;
+		if(sy < 5)
+			sy = 5;
+		return Size(sx, sy);
 	}
 	
 	
 	///
 	void onSplitterMoving(SplitterEventArgs sea)
 	{
-		
-		
 		splitterMoving(this, sea);
 	}
 	

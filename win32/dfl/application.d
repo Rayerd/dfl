@@ -122,6 +122,16 @@ else
 }
 
 
+deprecated enum DflCompat
+{
+	NONE = 0,
+	MENU_092 = 0x1, // Adding to menus is the old way.
+	CONTROL_RECREATE_095 = 0x2, // Controls don't recreate automatically when necessary.
+	CONTROL_KEYEVENT_096 = 0x4, // Key events don't propagate up the control hierarchy when they are not handled.
+	FORM_DIALOGRESULT_096 = 0x8, // When a Form is in showDialog, changing the dialogResult from NONE doesn't close the form.
+}
+
+
 ///
 final class Application // docmain
 {
@@ -233,6 +243,17 @@ final class Application // docmain
 			}
 		}
 	}
+	
+	
+	/+
+	// ///
+	bool visualStyles() // getter
+	{
+		// IsAppThemed:
+		// "Do not call this function during DllMain or global objects contructors.
+		// This may cause invalid return values in Microsoft Windows Vista and may cause Windows XP to become unstable."
+	}
+	+/
 	
 	
 	/// Path of the executable including its file name.
@@ -1137,6 +1158,31 @@ final class Application // docmain
 	}
 	
 	
+	version(DFL_NO_COMPAT)
+		package const DflCompat _compat = DflCompat.NONE;
+	else
+		package DflCompat _compat = DflCompat.NONE;
+	
+	
+	deprecated void setCompat(DflCompat dflcompat)
+	{
+		version(DFL_NO_COMPAT)
+		{
+			assert(0, "Compatibility disabled"); // version=DFL_NO_COMPAT
+		}
+		else
+		{
+			if(messageLoop)
+			{
+				assert(0, "setCompat"); // Called too late, must enable compatibility sooner.
+				return;
+			}
+			
+			_compat |= dflcompat;
+		}
+	}
+	
+	
 	private static size_t _doref(void* p, int by)
 	{
 		assert(1 == by || -1 == by);
@@ -1379,7 +1425,6 @@ extern(Windows) void _gcTimeout(HWND hwnd, UINT uMsg, UINT idEvent, DWORD dwTime
 }
 
 
-/+
 // Note: phobos-only.
 debug(SHOW_MESSAGE_INFO)
 {
@@ -1555,7 +1600,6 @@ debug(SHOW_MESSAGE_INFO)
 		}
 	}
 }
-+/
 
 
 extern(Windows) LRESULT dflWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)

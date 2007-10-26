@@ -12,6 +12,24 @@ private import dfl.internal.dlib;
 private import dfl.internal.winapi, dfl.base, dfl.internal.utf;
 
 
+class DflRegistryException: DflException // package
+{
+	this(char[] msg, int errorCode = 0)
+	{
+		this.errorCode = errorCode;
+		debug
+		{
+			if(errorCode)
+				msg = msg ~ " (error " ~ intToString(errorCode) ~ ")"; // Dup.
+		}
+		super(msg);
+	}
+	
+	
+	int errorCode;
+}
+
+
 ///
 class Registry // docmain
 {
@@ -255,7 +273,7 @@ class RegistryValueMultiSz: RegistryValue
 		foreach(char[] s; value)
 		{
 			if(!s.length)
-				throw new DflException("Empty strings are not allowed in multi_sz registry values");
+				throw new DflRegistryException("Empty strings are not allowed in multi_sz registry values");
 			
 			multi[i .. i + s.length] = s;
 			i += s.length;
@@ -637,9 +655,10 @@ class RegistryKey // docmain
 	{
 		DWORD count;
 		
-		if(ERROR_SUCCESS != RegQueryInfoKeyA(hkey, null, null, null, &count,
-			null, null, null, null, null, null, null))
-			infoErr();
+		LONG rr = RegQueryInfoKeyA(hkey, null, null, null, &count,
+			null, null, null, null, null, null, null);
+		if(ERROR_SUCCESS != rr)
+			infoErr(rr);
 		
 		return count;
 	}
@@ -650,9 +669,10 @@ class RegistryKey // docmain
 	{
 		DWORD count;
 		
-		if(ERROR_SUCCESS != RegQueryInfoKeyA(hkey, null, null, null, null,
-			null, null, &count, null, null, null, null))
-			infoErr();
+		LONG rr = RegQueryInfoKeyA(hkey, null, null, null, null,
+			null, null, &count, null, null, null, null);
+		if(ERROR_SUCCESS != rr)
+			infoErr(rr);
 		
 		return count;
 	}
@@ -672,8 +692,9 @@ class RegistryKey // docmain
 		HKEY newHkey;
 		DWORD cdisp;
 		
-		if(ERROR_SUCCESS != RegCreateKeyExA(hkey, unsafeStringz(name), 0, null, 0, KEY_ALL_ACCESS, null, &newHkey, &cdisp))
-			throw new DflException("Unable to create registry key");
+		LONG rr = RegCreateKeyExA(hkey, unsafeStringz(name), 0, null, 0, KEY_ALL_ACCESS, null, &newHkey, &cdisp);
+		if(ERROR_SUCCESS != rr)
+			throw new DflRegistryException("Unable to create registry key", rr);
 		
 		return new RegistryKey(newHkey);
 	}
@@ -682,40 +703,41 @@ class RegistryKey // docmain
 	///
 	final void deleteSubKey(char[] name, bool throwIfMissing)
 	{
-		LONG opencode;
 		HKEY openHkey;
 		char* namez;
 		
 		if(!name.length || !name[0])
-		{
-			unable:
-			throw new DflException("Unable to delete subkey");
-		}
+			throw new DflRegistryException("Unable to delete subkey");
 		
 		namez = unsafeStringz(name);
 		
-		opencode = RegOpenKeyExA(hkey, namez, 0, KEY_ALL_ACCESS, &openHkey);
+		LONG opencode = RegOpenKeyExA(hkey, namez, 0, KEY_ALL_ACCESS, &openHkey);
 		if(ERROR_SUCCESS == opencode)
 		{
 			DWORD count;
 			
-			if(ERROR_SUCCESS == RegQueryInfoKeyA(openHkey, null, null, null, &count,
-				null, null, null, null, null, null, null))
+			LONG querycode = RegQueryInfoKeyA(openHkey, null, null, null, &count,
+				null, null, null, null, null, null, null);
+			if(ERROR_SUCCESS == querycode)
 			{
 				RegCloseKey(openHkey);
 				
+				LONG delcode;
 				if(!count)
 				{
-					if(ERROR_SUCCESS == RegDeleteKeyA(hkey, namez))
+					delcode = RegDeleteKeyA(hkey, namez);
+					if(ERROR_SUCCESS == delcode)
 						return; // OK.
 					
-					goto unable;
+					throw new DflRegistryException("Unable to delete subkey", delcode);
 				}
 				
-				throw new DflException("Cannot delete registry key with subkeys");
+				throw new DflRegistryException("Cannot delete registry key with subkeys");
 			}
 			
 			RegCloseKey(openHkey);
+			
+			throw new DflRegistryException("Unable to delete registry key", querycode);
 		}
 		else
 		{
@@ -729,9 +751,9 @@ class RegistryKey // docmain
 					default: ;
 				}
 			}
+			
+			throw new DflRegistryException("Unable to delete registry key", opencode);
 		}
-		
-		throw new DflException("Unable to delete registry key");
 	}
 	
 	/// ditto
@@ -757,26 +779,27 @@ class RegistryKey // docmain
 		
 		if(ERROR_SUCCESS == RegOpenKeyExA(shkey, namez, 0, KEY_ALL_ACCESS, &openHkey))
 		{
-			void ouch()
+			void ouch(LONG why = 0)
 			{
-				throw new DflException("Unable to delete entire subkey tree");
+				throw new DflRegistryException("Unable to delete entire subkey tree", why);
 			}
 			
 			
 			DWORD count;
 			
-			if(ERROR_SUCCESS == RegQueryInfoKeyA(openHkey, null, null, null, &count,
-				null, null, null, null, null, null, null))
+			LONG querycode = RegQueryInfoKeyA(openHkey, null, null, null, &count,
+				null, null, null, null, null, null, null);
+			if(ERROR_SUCCESS == querycode)
 			{
 				if(!count)
 				{
 					del_me:
 					RegCloseKey(openHkey);
-					if(ERROR_SUCCESS == RegDeleteKeyA(shkey, namez))
+					LONG delcode = RegDeleteKeyA(shkey, namez);
+					if(ERROR_SUCCESS == delcode)
 						return; // OK.
 					
-					//throw new DflException("Unable to delete subkey");
-					ouch();
+					ouch(delcode);
 				}
 				else
 				{
@@ -789,7 +812,8 @@ class RegistryKey // docmain
 						
 						next_subkey:
 						len = skn.length;
-						switch(RegEnumKeyExA(openHkey, 0, skn.ptr, &len, null, null, null, null))
+						LONG enumcode = RegEnumKeyExA(openHkey, 0, skn.ptr, &len, null, null, null, null);
+						switch(enumcode)
 						{
 							case ERROR_SUCCESS:
 								_deleteSubKeyTree(openHkey, skn[0 .. len]);
@@ -800,7 +824,7 @@ class RegistryKey // docmain
 								break;
 							
 							default:
-								ouch();
+								ouch(enumcode);
 						}
 						
 						// Now go back to delete the origional key.
@@ -814,7 +838,7 @@ class RegistryKey // docmain
 			}
 			else
 			{
-				ouch();
+				ouch(querycode);
 			}
 		}
 	}
@@ -823,7 +847,8 @@ class RegistryKey // docmain
 	///
 	final void deleteValue(char[] name, bool throwIfMissing)
 	{
-		switch(RegDeleteValueA(hkey, unsafeStringz(name)))
+		LONG rr = RegDeleteValueA(hkey, unsafeStringz(name));
+		switch(rr)
 		{
 			case ERROR_SUCCESS:
 				break;
@@ -832,7 +857,7 @@ class RegistryKey // docmain
 				if(!throwIfMissing)
 					break;
 			default:
-				throw new DflException("Unable to delete registry value");
+				throw new DflRegistryException("Unable to delete registry value", rr);
 		}
 	}
 	
@@ -879,7 +904,8 @@ class RegistryKey // docmain
 		for(idx = 0;; idx++)
 		{
 			len = buf.length;
-			switch(RegEnumKeyExA(hkey, idx, buf.ptr, &len, null, null, null, null))
+			LONG rr = RegEnumKeyExA(hkey, idx, buf.ptr, &len, null, null, null, null);
+			switch(rr)
 			{
 				case ERROR_SUCCESS:
 					result ~= buf[0 .. len].dup;
@@ -890,7 +916,7 @@ class RegistryKey // docmain
 					break key_names;
 				
 				default:
-					throw new DflException("Unable to obtain subkey names");
+					throw new DflRegistryException("Unable to obtain subkey names", rr);
 			}
 		}
 		
@@ -906,7 +932,8 @@ class RegistryKey // docmain
 		ubyte[] data;
 		
 		len = 0;
-		switch(RegQueryValueExA(hkey, unsafeStringz(name), null, &type, null, &len))
+		LONG querycode = RegQueryValueExA(hkey, unsafeStringz(name), null, &type, null, &len);
+		switch(querycode)
 		{
 			case ERROR_SUCCESS:
 				// Good.
@@ -916,13 +943,15 @@ class RegistryKey // docmain
 				// Value doesn't exist.
 				return defaultValue;
 			
-			default: err:
-				throw new DflException("Unable to get registry value");
+			default: errquerycode:
+				throw new DflRegistryException("Unable to get registry value", querycode);
 		}
 		
 		data = new ubyte[len];
-		if(ERROR_SUCCESS != RegQueryValueExA(hkey, unsafeStringz(name), null, &type, data.ptr, &len))
-			goto err;
+		// Note: reusing querycode here and above.
+		querycode = RegQueryValueExA(hkey, unsafeStringz(name), null, &type, data.ptr, &len);
+		if(ERROR_SUCCESS != querycode)
+			goto errquerycode;
 		
 		switch(type)
 		{
@@ -1013,7 +1042,7 @@ class RegistryKey // docmain
 				break;
 			
 			default:
-				throw new DflException("Unknown type for registry value");
+				throw new DflRegistryException("Unknown type for registry value");
 		}
 		
 		return defaultValue;
@@ -1038,7 +1067,8 @@ class RegistryKey // docmain
 		for(idx = 0;; idx++)
 		{
 			len = buf.length;
-			switch(RegEnumValueA(hkey, idx, buf.ptr, &len, null, null, null, null))
+			LONG rr = RegEnumValueA(hkey, idx, buf.ptr, &len, null, null, null, null);
+			switch(rr)
 			{
 				case ERROR_SUCCESS:
 					result ~= buf[0 .. len].dup;
@@ -1049,7 +1079,7 @@ class RegistryKey // docmain
 					break value_names;
 				
 				default:
-					throw new DflException("Unable to obtain value names");
+					throw new DflRegistryException("Unable to obtain value names", rr);
 			}
 		}
 		
@@ -1062,8 +1092,9 @@ class RegistryKey // docmain
 	{
 		HKEY openHkey;
 		
-		if(ERROR_SUCCESS != RegConnectRegistryA(unsafeStringz(machineName), cast(HKEY)hhive, &openHkey))
-			throw new DflException("Unable to open remote base key");
+		LONG rr = RegConnectRegistryA(unsafeStringz(machineName), cast(HKEY)hhive, &openHkey);
+		if(ERROR_SUCCESS != rr)
+			throw new DflRegistryException("Unable to open remote base key", rr);
 		
 		return new RegistryKey(openHkey);
 	}
@@ -1092,8 +1123,9 @@ class RegistryKey // docmain
 	///
 	final void setValue(char[] name, RegistryValue value)
 	{
-		if(ERROR_SUCCESS != value.save(hkey, name))
-			throw new DflException("Unable to set registry value");
+		LONG rr = value.save(hkey, name);
+		if(ERROR_SUCCESS != rr)
+			throw new DflRegistryException("Unable to set registry value", rr);
 	}
 	
 	/// ditto
@@ -1144,9 +1176,9 @@ class RegistryKey // docmain
 	}
 	
 	
-	void infoErr()
+	private void infoErr(LONG why)
 	{
-		throw new DflException("Unable to obtain registry information");
+		throw new DflRegistryException("Unable to obtain registry information", why);
 	}
 }
 

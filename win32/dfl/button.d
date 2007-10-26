@@ -13,15 +13,6 @@ private extern(Windows) void _initButton();
 
 
 ///
-enum CheckState: ubyte
-{
-	UNCHECKED = BST_UNCHECKED, ///
-	CHECKED = BST_CHECKED, /// ditto
-	INDETERMINATE = BST_INDETERMINATE, /// ditto
-}
-
-
-///
 abstract class ButtonBase: ControlSuperClass // docmain
 {
 	///
@@ -324,6 +315,22 @@ class Button: ButtonBase, IButtonControl // docmain
 		//SendMessageA(handle, BM_CLICK, 0, 0); // So that wndProc() gets it.
 		
 		onClick(EventArgs.empty);
+	}
+	
+	
+	protected override void onClick(EventArgs ea)
+	{
+		super.onClick(ea);
+		
+		if(!(Application._compat & DflCompat.FORM_DIALOGRESULT_096))
+		{
+			if(DialogResult.NONE != this.dialogResult)
+			{
+				auto xx = cast(IDialogResult)topLevelControl;
+				if(xx)
+					xx.dialogResult = this.dialogResult;
+			}
+		}
 	}
 	
 	

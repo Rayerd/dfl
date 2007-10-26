@@ -49,7 +49,7 @@ class GroupBox: ControlSuperClass // docmain
 	{
 		_initButton();
 		
-		if(_defTextHeight.init == _defTextHeight)
+		if(DEFTEXTHEIGHT_INIT == _defTextHeight)
 		{
 			_recalcTextHeight(defaultFont);
 			_defTextHeight = _textHeight;
@@ -121,7 +121,8 @@ class GroupBox: ControlSuperClass // docmain
 	
 	private:
 	
-	static int _defTextHeight = -1;
+	const int DEFTEXTHEIGHT_INIT = -1;
+	static int _defTextHeight = DEFTEXTHEIGHT_INIT;
 	int _textHeight = -1;
 	
 	
