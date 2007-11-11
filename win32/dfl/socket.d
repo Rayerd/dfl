@@ -188,7 +188,12 @@ class AsyncSocket: Socket // docmain
 	}
 	
 	
-	static if(is(typeof(&this.detach)))
+	version(Tango)
+		private const bool _IS_TANGO = true;
+	else
+		private const bool _IS_TANGO = false;
+	
+	static if(_IS_TANGO && is(typeof(&this.detach)))
 	{
 		override void detach()
 		{

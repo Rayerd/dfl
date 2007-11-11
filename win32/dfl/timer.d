@@ -85,6 +85,41 @@ class Timer // docmain
 	}
 	
 	
+	///
+	this()
+	{
+	}
+	
+	/// ditto
+	this(void delegate(Timer) dg)
+	{
+		this();
+		if(dg)
+		{
+			this._dg = dg;
+			tick ~= &_dgcall;
+		}
+	}
+	
+	/// ditto
+	this(void delegate(Object, EventArgs) dg)
+	{
+		assert(dg !is null);
+		
+		this();
+		tick ~= dg;
+	}
+	
+	/// ditto
+	this(void delegate(Timer, EventArgs) dg)
+	{
+		assert(dg !is null);
+		
+		this();
+		tick ~= dg;
+	}
+	
+	
 	~this()
 	{
 		dispose();
@@ -109,6 +144,14 @@ class Timer // docmain
 	private:
 	DWORD _timeout = 100;
 	UINT timerId = 0;
+	void delegate(Timer) _dg;
+	
+	
+	void _dgcall(Object sender, EventArgs ea)
+	{
+		assert(_dg !is null);
+		_dg(this);
+	}
 }
 
 

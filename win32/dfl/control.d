@@ -1077,7 +1077,6 @@ class Control: DObject, IWindow // docmain
 			anch |= AnchorStyles.TOP;
 		+/
 		
-		//sdock = cast(DockStyle)sdock.init; // Can't be set at the same time.
 		sdock = DockStyle.NONE; // Can't be set at the same time.
 	}
 	
@@ -1701,7 +1700,7 @@ class Control: DObject, IWindow // docmain
 		DockStyle _olddock = sdock;
 		sdock = ds;
 		/+
-		anch = cast(AnchorStyles)anch.init; // Can't be set at the same time.
+		anch = AnchorStyles.NONE; // Can't be set at the same time.
 		+/
 		
 		if(DockStyle.NONE == ds)

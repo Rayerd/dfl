@@ -41,14 +41,14 @@ set dfl_libs=%dmc_path%\lib\gdi32.lib %dmc_path%\lib\comctl32.lib %dmc_path%\lib
 @rem   -version=NO_DRAG_DROP -version=NO_MDI
 @rem   -debug=SHOW_MESSAGE_INFO -debug=MESSAGE_PAUSE
 @rem set dfl_flags=%dfl_flags% -debug=SHOW_MESSAGENFO
-set _dfl_flags=%dfl_flags% -v1 
+set _dfl_flags=%dfl_flags% 
 
 if not "%dfl_debug_flags%" == "" goto dfl_debug_flags_set
 set dfl_debug_flags=-debug -g
 :dfl_debug_flags_set
 if not "%dfl_release_flags%" == "" goto dfl_release_flags_set
 	if not "%dlib%" == "Tango" goto dfl_not_release_tango
-	echo Due to a bug in DMD, release mode dfl lib will not include -inline; set environment variable dfl_release_flags to override.
+	echo Due to a bug in DMD, release mode dfl lib will not include -inline; use environment variable dfl_release_flags to override.
 	set dfl_release_flags=-O -release
 	goto dfl_release_flags_set
 	:dfl_not_release_tango

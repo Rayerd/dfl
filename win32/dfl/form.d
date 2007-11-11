@@ -2633,7 +2633,10 @@ class Form: ContainerControl, IDialogResult // docmain
 	{
 		protected bool preFilterMessage(inout Message m)
 		{
-			if(m.hWnd == form.handle || IsChild(form.handle, m.hWnd))
+			if(form.mdiClient && form.mdiClient.isHandleCreated && IsChild(form.mdiClient.handle, m.hWnd))
+			{
+			}
+			else if(m.hWnd == form.handle || IsChild(form.handle, m.hWnd))
 			{
 				switch(m.msg)
 				{
