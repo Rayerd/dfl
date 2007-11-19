@@ -161,6 +161,7 @@ enum ControlStyles: uint
 	//DOUBLE_BUFFER =                    0x10000, // TODO: implement.
 	
 	WANT_TAB_KEY = 0x01000000,
+	WANT_ALL_KEYS = 0x02000000,
 }
 
 
@@ -4537,6 +4538,9 @@ class Control: DObject, IWindow // docmain
 					
 					scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.LEFT, 1, cast(short)LOWORD(msg.lParam), cast(short)HIWORD(msg.lParam), 0);
 					onMouseDown(mea);
+					
+					if(ctrlStyle & ControlStyles.SELECTABLE)
+						SetFocus(hwnd);
 				}
 				break;
 			
@@ -5045,13 +5049,27 @@ class Control: DObject, IWindow // docmain
 						}
 					}
 					
+					/+
+					if(msg.lParam)
+					{
+						Message m;
+						m._winMsg = *cast(MSG*)msg.lParam;
+						if(processKeyEventArgs(m))
+							return;
+					}
+					+/
+					
 					defWndProc(msg);
+					
+					if(ctrlStyle & ControlStyles.WANT_ALL_KEYS)
+						msg.result |= DLGC_WANTALLKEYS;
+					
 					// Only want chars if ALT isn't down, because it would break mnemonics.
 					if(!(GetAsyncKeyState(VK_MENU) & 0x8000))
 						msg.result |= DLGC_WANTCHARS;
+					
 					return;
 				}
-				
 				break;
 			
 			case WM_CLOSE:
@@ -5137,8 +5155,7 @@ class Control: DObject, IWindow // docmain
 			
 			debug
 			{
-				// If overriding onHandleCreated(), be sure to call super.onHandleCreated()!
-				assert(_handlecreated);
+				assert(_handlecreated, "If overriding onHandleCreated(), be sure to call super.onHandleCreated()!");
 			}
 			handleCreated(this, ea);
 			debug
@@ -6393,7 +6410,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	protected bool processKeyEventArgs(inout Message msg) // package
+	protected bool processKeyEventArgs(inout Message msg)
 	{
 		switch(msg.msg)
 		{
@@ -6454,6 +6471,7 @@ class Control: DObject, IWindow // docmain
 			default: ;
 		}
 		
+		/+
 		if(Application._compat & DflCompat.CONTROL_KEYEVENT_096)
 			goto def_action;
 		
@@ -6476,6 +6494,10 @@ class Control: DObject, IWindow // docmain
 		}
 		
 		return false;
+		+/
+		defWndProc(msg);
+		//return true;
+		return !msg.result;
 	}
 	
 	

@@ -688,11 +688,11 @@ enum RightToLeft: ubyte
 ///
 enum ColorDepth: ubyte
 {
-	DEPTH_4BIT = 1, ///
-	DEPTH_8BIT , /// ditto
-	DEPTH_16BIT, /// ditto
-	DEPTH_24BIT, /// ditto
-	DEPTH_32BIT, /// ditto
+	DEPTH_4BIT = 0x04, ///
+	DEPTH_8BIT = 0x08, /// ditto
+	DEPTH_16BIT = 0x10, /// ditto
+	DEPTH_24BIT = 0x18, /// ditto
+	DEPTH_32BIT = 0x20, /// ditto
 }
 
 

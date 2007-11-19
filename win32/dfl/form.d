@@ -172,6 +172,13 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	/// ditto
+	// Delegate parameter contravariance.
+	final void addShortcut(Keys shortcut, void delegate(Object sender, EventArgs ea) pressed)
+	{
+		return addShortcut(shortcut, cast(void delegate(Object sender, FormShortcutEventArgs ea))pressed);
+	}
+	
+	/// ditto
 	final void removeShortcut(Keys shortcut)
 	{
 		//delete _shortcuts[shortcut];
@@ -883,6 +890,21 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	
+	///
+	protected MdiClient createMdiClient()
+	{
+		version(NO_MDI)
+		{
+			assert(0, "MDI disabled");
+			return null;
+		}
+		else
+		{
+			return new MdiClient();
+		}
+	}
+	
+	
 	version(NO_MDI) {} else
 	{
 		///
@@ -894,7 +916,8 @@ class Form: ContainerControl, IDialogResult // docmain
 				{
 					// Remove MDI client.
 					mdiClient.dispose();
-					mdiClient = null;
+					//mdiClient = null;
+					_mdiClient = null;
 				}
 			}
 			else
@@ -902,7 +925,10 @@ class Form: ContainerControl, IDialogResult // docmain
 				if(byes)
 				{
 					// Create MDI client.
-					mdiClient = new MdiClient;
+					//mdiClient = new MdiClient;
+					//_mdiClient = new MdiClient;
+					//mdiClient = createMdiClient();
+					_mdiClient = createMdiClient();
 					mdiClient.parent = this;
 				}
 			}
@@ -911,99 +937,122 @@ class Form: ContainerControl, IDialogResult // docmain
 		/// ditto
 		final bool isMdiContainer() // getter
 		{
-			return !(mdiClient is null);
+			version(NO_MDI)
+			{
+				return false;
+			}
+			else
+			{
+				return !(mdiClient is null);
+			}
 		}
 		
 		
 		///
 		final Form[] mdiChildren() // getter
 		{
-			/+
-			if(!mdiClient)
+			version(NO_MDI)
+			{
 				return null;
-			+/
-			
-			return _mdiChildren;
+			}
+			else
+			{
+				/+
+				if(!mdiClient)
+					return null;
+				+/
+				
+				return _mdiChildren;
+			}
 		}
 		
 		
 		// parent is the MDI client and mdiParent is the MDI frame.
 		
 		
-		///
-		final void mdiParent(Form frm) // setter
-		in
+		version(NO_MDI) {} else
 		{
-			if(frm)
+			///
+			final void mdiParent(Form frm) // setter
+			in
 			{
-				assert(frm.isMdiContainer);
-				assert(!(frm.mdiClient is null));
-			}
-		}
-		/+out
-		{
-			if(frm)
-			{
-				bool found = false;
-				foreach(Form elem; frm._mdiChildren)
+				if(frm)
 				{
-					if(elem is this)
+					assert(frm.isMdiContainer);
+					assert(!(frm.mdiClient is null));
+				}
+			}
+			/+out
+			{
+				if(frm)
+				{
+					bool found = false;
+					foreach(Form elem; frm._mdiChildren)
 					{
-						found = true;
-						break;
+						if(elem is this)
+						{
+							found = true;
+							break;
+						}
 					}
+					assert(found);
 				}
-				assert(found);
-			}
-		}+/
-		body
-		{
-			if(wmdiparent is frm)
-				return;
-			
-			_removeFromOldOwner();
-			wowner = null;
-			wmdiparent = null; // Safety in case of exception.
-			
-			if(frm)
+			}+/
+			body
 			{
-				if(isHandleCreated)
+				if(wmdiparent is frm)
+					return;
+				
+				_removeFromOldOwner();
+				wowner = null;
+				wmdiparent = null; // Safety in case of exception.
+				
+				if(frm)
 				{
-					frm.createControl(); // ?
-					frm.mdiClient.createControl(); // Should already be done from frm.createControl().
+					if(isHandleCreated)
+					{
+						frm.createControl(); // ?
+						frm.mdiClient.createControl(); // Should already be done from frm.createControl().
+					}
+					
+					// Copy so that old mdiChildren arrays won't get overwritten.
+					Form[] _thisa = new Form[1]; // DMD 0.123: this can't be a static array or the append screws up.
+					_thisa[0] = this;
+					frm._mdiChildren = frm._mdiChildren ~ _thisa;
+					
+					_style((_style() | WS_CHILD) & ~WS_POPUP);
+					_exStyle(_exStyle() | WS_EX_MDICHILD);
+					
+					wparent = frm.mdiClient;
+					wmdiparent = frm;
+					if(isHandleCreated)
+						SetParent(hwnd, frm.mdiClient.hwnd);
 				}
-				
-				// Copy so that old mdiChildren arrays won't get overwritten.
-				Form[] _thisa = new Form[1]; // DMD 0.123: this can't be a static array or the append screws up.
-				_thisa[0] = this;
-				frm._mdiChildren = frm._mdiChildren ~ _thisa;
-				
-				_style((_style() | WS_CHILD) & ~WS_POPUP);
-				_exStyle(_exStyle() | WS_EX_MDICHILD);
-				
-				wparent = frm.mdiClient;
-				wmdiparent = frm;
-				if(isHandleCreated)
-					SetParent(hwnd, frm.mdiClient.hwnd);
-			}
-			else
-			{
-				_exStyle(_exStyle() & ~WS_EX_MDICHILD);
-				_style((_style() | WS_POPUP) & ~WS_CHILD);
-				
-				if(isHandleCreated)
-					SetParent(hwnd, HWND.init);
-				wparent = null;
-				
-				//wmdiparent = null;
+				else
+				{
+					_exStyle(_exStyle() & ~WS_EX_MDICHILD);
+					_style((_style() | WS_POPUP) & ~WS_CHILD);
+					
+					if(isHandleCreated)
+						SetParent(hwnd, HWND.init);
+					wparent = null;
+					
+					//wmdiparent = null;
+				}
 			}
 		}
 		
 		/// ditto
 		final Form mdiParent() // getter
 		{
-			//if(isMdiChild)
-				return wmdiparent;
+			version(NO_MDI)
+			{
+			}
+			else
+			{
+				//if(isMdiChild)
+					return wmdiparent;
+			}
 			return null;
 		}
 	}
@@ -2592,6 +2641,13 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	
+	version(NO_MDI) {} else
+	{
+		protected final MdiClient mdiClient() // getter
+		{ return _mdiClient; }
+	}
+	
+	
 	private:
 	IButtonControl acceptBtn, cancelBtn;
 	bool autoscale = true;
@@ -2618,7 +2674,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	
 	version(NO_MDI) {} else
 	{
-		MdiClient mdiClient = null; // null == not MDI container.
+		MdiClient _mdiClient = null; // null == not MDI container.
 	}
 	
 	
@@ -2826,7 +2882,7 @@ class Form: ContainerControl, IDialogResult // docmain
 
 version(NO_MDI) {} else
 {
-	// ///
+	///
 	class MdiClient: ControlSuperClass
 	{
 		private this()
@@ -2838,6 +2894,81 @@ version(NO_MDI) {} else
 			wexstyle |= WS_EX_CLIENTEDGE /+ | WS_EX_CONTROLPARENT +/;
 			
 			dock = DockStyle.FILL;
+		}
+		
+		
+		///
+		void borderStyle(BorderStyle bs) // setter
+		{
+			switch(bs)
+			{
+				case BorderStyle.FIXED_3D:
+					_style(_style() & ~WS_BORDER);
+					_exStyle(_exStyle() | WS_EX_CLIENTEDGE);
+					break;
+					
+				case BorderStyle.FIXED_SINGLE:
+					_exStyle(_exStyle() & ~WS_EX_CLIENTEDGE);
+					_style(_style() | WS_BORDER);
+					break;
+					
+				case BorderStyle.NONE:
+					_style(_style() & ~WS_BORDER);
+					_exStyle(_exStyle() & ~WS_EX_CLIENTEDGE);
+					break;
+			}
+
+			if(isHandleCreated)
+			{
+				redrawEntire();
+			}
+		}
+
+		/// ditto
+		BorderStyle borderStyle() // getter
+		{
+			if(_exStyle() & WS_EX_CLIENTEDGE)
+				return BorderStyle.FIXED_3D;
+			else if(_style() & WS_BORDER)
+				return BorderStyle.FIXED_SINGLE;
+			return BorderStyle.NONE;
+		}
+		
+		
+		///
+		final void hScroll(bool byes) // setter
+		{
+			LONG wl = _style();
+			if(byes)
+				wl |= WS_HSCROLL;
+			else
+				wl &= ~WS_HSCROLL;
+			_style(wl);
+			
+			if(isHandleCreated)
+				redrawEntire();
+		}
+
+
+		/// ditto
+		final bool hScroll() // getter
+		{
+			return (_style() & WS_HSCROLL) != 0;
+		}
+
+
+		///
+		final void vScroll(bool byes) // setter
+		{
+			LONG wl = _style();
+			if(byes)
+				wl |= WS_VSCROLL;
+			else
+				wl &= ~WS_VSCROLL;
+			_style(wl);
+			
+			if(isHandleCreated)
+				redrawEntire();
 		}
 		
 		

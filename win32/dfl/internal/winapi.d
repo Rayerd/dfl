@@ -1628,8 +1628,30 @@ else
 	const DWORD LF_FACESIZE = 32;
 	
 	
+	typedef HANDLE HIMAGELIST;
+	
+	
+	enum: UINT
+	{
+		ILD_NORMAL = 0,
+	}
+	
+	
+	enum: UINT
+	{
+		//ILC_COLOR = ,
+		ILC_COLOR4 = 0x0004,
+		ILC_COLOR8 = 0x0008,
+		ILC_COLOR16 = 0x0010,
+		ILC_COLOR24 = 0x0018,
+		ILC_COLOR32 = 0x0020,
+		
+		ILC_MASK = 0x0001,
+	}
+	
+	
 	// Rich edit.
-	typedef DWORD function(/+ DWORD_PTR +/ DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG* pcb) EDITSTREAMCALLBACK;
+	alias DWORD function(/+ DWORD_PTR +/ DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG* pcb) EDITSTREAMCALLBACK;
 	
 	
 	alias DWORD LCID;
@@ -2750,6 +2772,10 @@ else
 	HFONT CreateFontIndirectW(LOGFONTW *lplf);
 	DWORD GetThemeAppProperties();
 	BOOL IsAppThemed();
+	HIMAGELIST ImageList_Create(int cx, int cy, UINT flags, int cInitial, int cGrow);
+	BOOL ImageList_Destroy(HIMAGELIST himl);	
+	BOOL ImageList_Draw(HIMAGELIST himl, int i, HDC hdcDst, int x, int y, UINT fStyle);
+	BOOL ImageList_DrawEx(HIMAGELIST himl, int i, HDC hdcDst, int x, int y, int dx, int dy, COLORREF rgbBk, COLORREF rgbFg, UINT fStyle);
 
 //} // Temporary.
 

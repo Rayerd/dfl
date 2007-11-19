@@ -60,6 +60,22 @@ class ImageList // docmain
 	
 	
 	///
+	final void imageSize(Size sz) // setter
+	{
+		assert(!isHandleCreated);
+		
+		_w = sz.width;
+		_h = sz.height;
+	}
+	
+	/// ditto
+	final Size imageSize() // getter
+	{
+		return Size(_w, _h);
+	}
+	
+	
+	///
 	final ImageCollection images() // getter
 	{
 		return _cimages;
@@ -80,17 +96,38 @@ class ImageList // docmain
 	
 	
 	///
+	final void draw(Graphics g, Point pt, int index)
+	{
+		return draw(g, pt.x, pt.y, index);
+	}
+	
+	/// ditto
+	final void draw(Graphics g, int x, int y, int index)
+	{
+		ImageList_Draw(handle, index, g.handle, x, y, ILD_NORMAL);
+	}
+	
+	/+
+	/// ditto
+	// stretch
+	final void draw(Graphics g, int x, int y, int width, int height, int index)
+	{
+	}
+	+/
+	
+	
+	///
 	final bool isHandleCreated() // getter
 	{
 		return HIMAGELIST.init != _hil;
 	}
 	
-	deprecated isHandleCreated handleCreated;
+	deprecated alias isHandleCreated handleCreated;
 	
 	
 	final HIMAGELIST handle() // getter
 	{
-		if(isHandleCreated)
+		if(!isHandleCreated)
 			_createimagelist();
 		return _hil;
 	}
@@ -122,17 +159,20 @@ class ImageList // docmain
 		}
 		
 		UINT flags = 0;
+		/+
 		switch(_depth)
 		{
-			case DEPTH_4BIT: flags = ILC_COLOR4; break;
+			case ColorDepth.DEPTH_4BIT: flags = ILC_COLOR4; break;
 			default: case DEPTH_8BIT: flags = ILC_COLOR8; break;
-			case DEPTH_16BIT: flags = ILC_COLOR16; break;
-			case DEPTH_24BIT: flags = ILC_COLOR24; break;
-			case DEPTH_32BIT: flags = ILC_COLOR32; break;
+			case ColorDepth.DEPTH_16BIT: flags = ILC_COLOR16; break;
+			case ColorDepth.DEPTH_24BIT: flags = ILC_COLOR24; break;
+			case ColorDepth.DEPTH_32BIT: flags = ILC_COLOR32; break;
 		}
+		+/
+		flags |= _depth;
 		flags |= ILC_MASK; // ?
 		
-		_hil = ImageList_Create(_w, _h, flags, _cimages._images.length);
+		_hil = ImageList_Create(_w, _h, flags, _cimages._images.length, 65535); // ?
 	}
 }
 

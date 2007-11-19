@@ -1633,10 +1633,8 @@ class ListView: ControlSuperClass // docmain
 				assert(0);
 		}
 		
-		/+
 		if(created)
-			invalidate(false);
-		+/
+			redrawEntire();
 	}
 	
 	/// ditto
@@ -2003,10 +2001,12 @@ class ListView: ControlSuperClass // docmain
 		
 		switch(m.msg)
 		{
+			/+
 			case WM_PAINT:
 				// This seems to be the only way to display columns correctly.
 				prevWndProc(m);
 				return;
+			+/
 			
 			case LVM_ARRANGE:
 				m.result = FALSE;
@@ -2094,7 +2094,6 @@ class ListView: ControlSuperClass // docmain
 		
 		//SendMessageA(hwnd, LVM_SETEXTENDEDLISTVIEWSTYLE, wlvexstyle, wlvexstyle);
 		prevwproc(LVM_SETEXTENDEDLISTVIEWSTYLE, 0, wlvexstyle); // wparam=0 sets all.
-		//redrawEntire(); // Need to recalc the frame ?
 		
 		Color color;
 		COLORREF cref;
@@ -2113,6 +2112,8 @@ class ListView: ControlSuperClass // docmain
 		
 		cols.doListHeaders();
 		litems.doListItems();
+		
+		recalcEntire(); // Fix frame.
 	}
 	
 	
