@@ -187,7 +187,7 @@ class MenuItem: Menu // docmain
 			MenuItem miparent;
 			
 			miparent = cast(MenuItem)mparent;
-			if(miparent.parent() && miparent.parent.hmenu)
+			if(miparent && miparent.hmenu)
 			{
 				MENUITEMINFOA miiPopup;
 				
@@ -389,10 +389,20 @@ class MenuItem: Menu // docmain
 	///
 	final void radioCheck(bool byes) // setter
 	{
+		auto par = parent;
+		auto pidx = index;
+		if(par)
+			par.menuItems._removing(pidx, this);
+		
 		if(byes)
-			_type(_type() | MFT_RADIOCHECK);
+			//_type(_type() | MFT_RADIOCHECK);
+			fType |= MFT_RADIOCHECK;
 		else
-			_type(_type() & ~MFT_RADIOCHECK);
+			//_type(_type() & ~MFT_RADIOCHECK);
+			fType &= ~MFT_RADIOCHECK;
+		
+		if(par)
+			par.menuItems._added(pidx, this);
 	}
 	
 	/// ditto
@@ -803,7 +813,7 @@ abstract class Menu: DObject // docmain
 		// TODO: finish.
 		
 		
-		private:
+		package:
 		
 		Menu _owner;
 		MenuItem[] items; // Kept populated so the menu can be moved around.

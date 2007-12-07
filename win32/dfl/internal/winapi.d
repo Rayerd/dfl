@@ -63,6 +63,9 @@ else
 	alias ulong DWORDLONG;
 	
 	
+	alias HRESULT THEMEAPI;
+	
+	
 	union LARGE_INTEGER
 	{
 		struct
@@ -2766,6 +2769,7 @@ else
 	BOOL SetBrushOrgEx(HDC hdc, int nXOrg, int nYOrg, LPPOINT lppt);
 	BOOL PatBlt(HDC hdc, int nXLeft, int nYLeft, int nWidth, int nHeight, DWORD dwRop);
 	HTHEME GetWindowTheme(HWND hWnd);
+	THEMEAPI SetWindowTheme(HWND hwnd, LPCWSTR pszSubAppName, LPCWSTR pszSubIdList);
 	int SetScrollInfo(HWND hwnd, int fnBar, LPSCROLLINFO lpsi, BOOL fRedraw);
 	BOOL GetScrollInfo(HWND hwnd, int fnBar, LPSCROLLINFO lpsi);
 	BOOL DragDetect(HWND hwnd, POINT pt);

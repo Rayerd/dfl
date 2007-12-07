@@ -2832,26 +2832,6 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	
-	/+
-	protected override void onKeyPress(KeyEventArgs ea)
-	{
-		super.onKeyPress(ea);
-		
-		if(!ea.handled)
-		{
-			if(ea.keyCode == Keys.ESCAPE)
-			{
-				if(cancelBtn)
-				{
-					cancelBtn.performClick();
-					ea.handled = true;
-				}
-			}
-		}
-	}
-	+/
-	
-	
 	package final bool _dlgescape()
 	{
 		if(cancelBtn)

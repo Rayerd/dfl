@@ -851,30 +851,6 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	}
 	
 	
-	/+
-	protected override void onKeyPress(KeyEventArgs ea)
-	{
-		//super.onKeyPress(ea);
-		//if(!ea.handled)
-		{
-			if(ea.keyCode == Keys.ESCAPE)
-			{
-				/+
-				Form cp;
-				cp = cast(Form)topLevelControl();
-				if(cp)
-					cp._keypressed(ea);
-				+/
-				ea.handled = true;
-				// Note: can't let this go unhandled or Windows will close the parent.
-				return;
-			}
-		}
-		super.onKeyPress(ea);
-	}
-	+/
-	
-	
 	protected override bool processKeyEventArgs(inout Message msg) // package
 	{
 		switch(msg.msg)

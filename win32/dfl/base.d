@@ -851,6 +851,47 @@ alias Event!(KeyEventArgs) KeyEventHandler; // deprecated
 
 
 ///
+class KeyPressEventArgs: KeyEventArgs
+{
+	///
+	this(dchar ch)
+	{
+		this(ch, (ch >= 'A' && ch <= 'Z') ? Keys.SHIFT : Keys.NONE);
+	}
+	
+	/// ditto
+	this(dchar ch, Keys modifiers)
+	in
+	{
+		assert((modifiers & Keys.MODIFIERS) == modifiers, "modifiers parameter can only contain modifiers");
+	}
+	body
+	{
+		_keych = ch;
+		
+		int vk;
+		if(dfl.internal.utf.useUnicode)
+			vk = 0xFF & VkKeyScanW(ch);
+		else
+			vk = 0xFF & VkKeyScanA(cast(char)ch);
+		
+		super(cast(Keys)(vk | modifiers));
+	}
+	
+	
+	///
+	final dchar keyChar() // getter
+	{
+		return _keych;
+	}
+	
+	
+	private:
+	dchar _keych;
+}
+
+
+///
 class MouseEventArgs: EventArgs
 {
 	///

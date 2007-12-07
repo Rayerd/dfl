@@ -3878,7 +3878,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	protected void onKeyPress(KeyEventArgs kea)
+	protected void onKeyPress(KeyPressEventArgs kea)
 	{
 		keyPress(this, kea);
 	}
@@ -4101,6 +4101,9 @@ class Control: DObject, IWindow // docmain
 	///
 	protected void onHandleCreated(EventArgs ea)
 	{
+		if(!(cbits & CBits.VSTYLE))
+			_disableVisualStyle();
+		
 		Font fon;
 		fon = font;
 		if(fon)
@@ -5562,7 +5565,7 @@ class Control: DObject, IWindow // docmain
 	//KeyEventHandler keyDown;
 	Event!(Control, KeyEventArgs) keyDown; ///
 	//KeyEventHandler keyPress;
-	Event!(Control, KeyEventArgs) keyPress; ///
+	Event!(Control, KeyPressEventArgs) keyPress; ///
 	//KeyEventHandler keyUp;
 	Event!(Control, KeyEventArgs) keyUp; ///
 	//LayoutEventHandler layout;
@@ -5790,6 +5793,7 @@ class Control: DObject, IWindow // docmain
 	
 	/+
 	// ///
+	// I don't think this is reliable.
 	final bool hasVisualStyle() // getter
 	{
 		bool result = false;
@@ -5808,6 +5812,49 @@ class Control: DObject, IWindow // docmain
 		return result;
 	}
 	+/
+	
+	
+	package final void _disableVisualStyle()
+	{
+		assert(isHandleCreated);
+		
+		HMODULE hmuxt;
+		hmuxt = GetModuleHandleA("uxtheme.dll");
+		if(hmuxt)
+		{
+			auto setWinTheme = cast(typeof(&SetWindowTheme))GetProcAddress(hmuxt, "SetWindowTheme");
+			if(setWinTheme)
+			{
+				setWinTheme(hwnd, " "w.ptr, " "w.ptr); // Clear the theme.
+			}
+		}
+	}
+	
+	
+	///
+	public final void enableVisualStyle(bool byes = true)
+	{
+		if(byes)
+		{
+			if(cbits & CBits.VSTYLE)
+				return;
+			cbits |= CBits.VSTYLE;
+			
+			if(isHandleCreated)
+			{
+				_crecreate();
+			}
+		}
+		else
+		{
+			if(!(cbits & CBits.VSTYLE))
+				return;
+			cbits &= ~CBits.VSTYLE;
+			
+			if(isHandleCreated)
+				_disableVisualStyle();
+		}
+	}
 	
 	
 	///
@@ -6442,14 +6489,9 @@ class Control: DObject, IWindow // docmain
 			
 			case WM_CHAR:
 				{
-					int vk;
-					if(dfl.internal.utf.useUnicode)
-						vk = 0xFF & VkKeyScanW(cast(wchar)msg.wParam);
-					else
-						vk = 0xFF & VkKeyScanA(cast(char)msg.wParam);
-					scope KeyEventArgs kea = new KeyEventArgs(cast(Keys)(vk | modifierKeys));
-					onKeyPress(kea);
-					if(kea.handled)
+					scope KeyPressEventArgs kpea = new KeyPressEventArgs(cast(dchar)msg.wParam, modifierKeys);
+					onKeyPress(kpea);
+					if(kpea.handled)
 						return true;
 				}
 				break;
@@ -6631,11 +6673,12 @@ class Control: DObject, IWindow // docmain
 		FORM = 0x80000,
 		RECREATING = 0x100000,
 		HAS_LAYOUT = 0x200000,
+		VSTYLE = 0x400000, // If not forced off.
 	}
 	
 	//CBits cbits = CBits.ALLOW_LAYOUT;
 	//CBits cbits = CBits.NONE;
-	CBits cbits = CBits.VISIBLE;
+	CBits cbits = CBits.VISIBLE | CBits.VSTYLE;
 	
 	
 	final:
