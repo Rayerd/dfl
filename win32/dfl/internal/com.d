@@ -82,7 +82,7 @@ class DStreamToIStream: DflComObject, dfl.internal.wincom.IStream
 		{
 			version(Tango)
 			{
-				read = stm.input.read(pv[0 .. cb]);
+				read = stm.read(pv[0 .. cb]);
 			}
 			else
 			{
@@ -111,7 +111,7 @@ class DStreamToIStream: DflComObject, dfl.internal.wincom.IStream
 		{
 			version(Tango)
 			{
-				written = stm.output.write(pv[0 .. cb]);
+				written = stm.write(pv[0 .. cb]);
 			}
 			else
 			{
@@ -229,14 +229,7 @@ class DStreamToIStream: DflComObject, dfl.internal.wincom.IStream
 	HRESULT Commit(DWORD grfCommitFlags)
 	{
 		// Ignore -grfCommitFlags- and just flush the stream..
-		version(Tango)
-		{
-			stm.output.flush();
-		}
-		else
-		{
-			stm.flush();
-		}
+		stm.flush();
 		return S_OK; // ?
 	}
 	

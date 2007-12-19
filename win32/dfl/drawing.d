@@ -848,6 +848,13 @@ class SystemIcons // docmain
 		return new Icon(LoadImageA(null, IDI_EXCLAMATION,
 			 IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_SHARED), false);
 	}
+	
+	/// ditto
+	Icon information() // getter
+	{
+		return new Icon(LoadImageA(null, IDI_INFORMATION,
+			 IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_SHARED), false);
+	}
 }
 
 
@@ -1352,9 +1359,33 @@ class Picture: Image // docmain
 	static dfl.internal.wincom.IPicture _fromIStream(dfl.internal.wincom.IStream istm)
 	{
 		dfl.internal.wincom.IPicture ipic;
-		if(S_OK != OleLoadPicture(istm, 0, FALSE, &_IID_IPicture, cast(void**)&ipic))
-			return null;
-		return ipic;
+		switch(OleLoadPicture(istm, 0, FALSE, &_IID_IPicture, cast(void**)&ipic))
+		{
+			case S_OK:
+				return ipic;
+			
+			debug(DFL_X)
+			{
+				case E_OUTOFMEMORY:
+					debug assert(0, "Picture: Out of memory");
+					break;
+				case E_NOINTERFACE:
+					debug assert(0, "Picture: The object does not support the interface");
+					break;
+				case E_UNEXPECTED:
+					debug assert(0, "Picture: Unexpected error");
+					break;
+				case E_POINTER:
+					debug assert(0, "Picture: Invalid pointer");
+					break;
+				case E_FAIL:
+					debug assert(0, "Picture: Fail");
+					break;
+			}
+			
+			default: ;
+		}
+		return null;
 	}
 	
 	
