@@ -4542,8 +4542,8 @@ class Control: DObject, IWindow // docmain
 					scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.LEFT, 1, cast(short)LOWORD(msg.lParam), cast(short)HIWORD(msg.lParam), 0);
 					onMouseDown(mea);
 					
-					if(ctrlStyle & ControlStyles.SELECTABLE)
-						SetFocus(hwnd);
+					//if(ctrlStyle & ControlStyles.SELECTABLE)
+					//	SetFocus(hwnd); // No, this goofs up stuff, including the ComboBox dropdown.
 				}
 				break;
 			
