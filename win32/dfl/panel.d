@@ -53,7 +53,7 @@ class Panel: ContainerControl // docmain
 	{
 		ctrlStyle |= ControlStyles.SELECTABLE | ControlStyles.CONTAINER_CONTROL;
 		/+ wstyle |= WS_TABSTOP; +/ // Should WS_TABSTOP be set?
-		wexstyle |= WS_EX_CONTROLPARENT; // Allow tabbing through children.
+		//wexstyle |= WS_EX_CONTROLPARENT; // Allow tabbing through children. ?
 	}
 }
 

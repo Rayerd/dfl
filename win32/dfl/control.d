@@ -4667,7 +4667,7 @@ class Control: DObject, IWindow // docmain
 							{
 								//msg.result = m.customMsg(*(cast(CustomMsg*)&msg));
 								m._reflectMenu(msg);
-								return;
+								//return; // ?
 							}
 						}
 					}
@@ -4718,7 +4718,7 @@ class Control: DObject, IWindow // docmain
 						{
 							//msg.result = m.customMsg(*(cast(CustomMsg*)&msg));
 							m._reflectMenu(msg);
-							return;
+							//return;
 						}
 					}
 					break;
@@ -4738,7 +4738,7 @@ class Control: DObject, IWindow // docmain
 						{
 							//msg.result = m.customMsg(*(cast(CustomMsg*)&msg));
 							m._reflectMenu(msg);
-							return;
+							//return;
 						}
 					}
 					break;
@@ -4752,7 +4752,7 @@ class Control: DObject, IWindow // docmain
 						{
 							//msg.result = m.customMsg(*(cast(CustomMsg*)&msg));
 							m._reflectMenu(msg);
-							return;
+							//return;
 						}
 					}
 					break;
@@ -5068,7 +5068,7 @@ class Control: DObject, IWindow // docmain
 						msg.result |= DLGC_WANTALLKEYS;
 					
 					// Only want chars if ALT isn't down, because it would break mnemonics.
-					if(!(GetAsyncKeyState(VK_MENU) & 0x8000))
+					if(!(GetKeyState(VK_MENU) & 0x8000))
 						msg.result |= DLGC_WANTCHARS;
 					
 					return;
@@ -6457,6 +6457,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
+	// Return true if processed.
 	protected bool processKeyEventArgs(inout Message msg)
 	{
 		switch(msg.msg)
@@ -6496,49 +6497,10 @@ class Control: DObject, IWindow // docmain
 				}
 				break;
 			
-			/+
-			case WM_SYSKEYDOWN:
-			case WM_SYSKEYUP:
-			case WM_SYSCHAR:
-				// Note: move to processMnemonic if/when used.
-				//if(msg.hWnd == hwnd)
-				{
-					//defwproc(msg.msg, msg.wParam, msg.lParam); // ?
-					defWndProc(msg); // ?
-					//return true; // ?
-				}
-				break;
-			+/
-			
 			default: ;
 		}
 		
-		/+
-		if(Application._compat & DflCompat.CONTROL_KEYEVENT_096)
-			goto def_action;
-		
-		// ?
-		if(!parent
-			|| (IsWindowVisible(hwnd)
-				&& ((ctrlStyle & ControlStyles.SELECTABLE)
-					|| (SendMessageA(hwnd, WM_GETDLGCODE, 0, 0) & DLGC_WANTALLKEYS))))
-		{
-			def_action:
-			defWndProc(msg);
-			//return true;
-			return !msg.result;
-		}
-		else
-		{
-			//if(parent)
-			assert(parent !is null);
-				return parent.processKeyEventArgs(msg);
-		}
-		
-		return false;
-		+/
 		defWndProc(msg);
-		//return true;
 		return !msg.result;
 	}
 	

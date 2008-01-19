@@ -58,7 +58,7 @@ class GroupBox: ControlSuperClass // docmain
 		
 		wstyle |= BS_GROUPBOX /+ | WS_TABSTOP +/; // Should WS_TABSTOP be set?
 		//wstyle |= BS_GROUPBOX | WS_TABSTOP;
-		wexstyle |= WS_EX_CONTROLPARENT;
+		//wexstyle |= WS_EX_CONTROLPARENT; // ?
 		wclassStyle = buttonClassStyle;
 		ctrlStyle |= ControlStyles.CONTAINER_CONTROL;
 	}

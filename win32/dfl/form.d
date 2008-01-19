@@ -890,7 +890,13 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	
+	version(NO_MDI)
+	{
+		private alias Control MdiClient; // ?
+	}
+	
 	///
+	// Note: keeping this here for NO_MDI to keep the vtable.
 	protected MdiClient createMdiClient()
 	{
 		version(NO_MDI)
@@ -2397,29 +2403,6 @@ class Form: ContainerControl, IDialogResult // docmain
 				}
 				return;
 			
-			/+
-			// This isn't working correctly. Execution is entering the right spots, but the menu isn't right.
-			case WM_INITMENUPOPUP:
-				if(HIWORD(msg.lParam))
-				{
-					// System menu.
-					if(msg.wParam)
-					{
-						HMENU hwm;
-						hwm = cast(HMENU)msg.wParam;
-						assert(IsMenu(hwm));
-						_fixSystemMenu(hwm);
-					}
-				}
-				break;
-			+/
-			
-			/+ // Not working either.
-			case WM_INITMENU:
-				_fixSystemMenu(GetSystemMenu(msg.hWnd, FALSE)); // Might leak a copy?
-				break;
-			+/
-			
 			case WM_DESTROY:
 				/+
 				if(_closingvisible)
@@ -2689,7 +2672,12 @@ class Form: ContainerControl, IDialogResult // docmain
 	{
 		protected bool preFilterMessage(inout Message m)
 		{
-			if(form.mdiClient && form.mdiClient.isHandleCreated && IsChild(form.mdiClient.handle, m.hWnd))
+			version(NO_MDI)
+				const bool mdistuff = false;
+			else
+				bool mdistuff = form.mdiClient && form.mdiClient.isHandleCreated && IsChild(form.mdiClient.handle, m.hWnd);
+			
+			if(mdistuff)
 			{
 			}
 			else if(m.hWnd == form.handle || IsChild(form.handle, m.hWnd))
@@ -2802,11 +2790,22 @@ class Form: ContainerControl, IDialogResult // docmain
 					default: ;
 				}
 				
-				// isDialogMessage seems to be eating WM_CHAR in some cases, so see for myself if it should get it.
-				if(WM_CHAR == m.msg)
+				switch(m.msg)
 				{
-					// ? ...
-					return false; // Continue.
+					case WM_CHAR:
+						// isDialogMessage seems to be eating WM_CHAR in some cases, so see for myself if it should get it.
+						// ? ...
+						return false; // Continue.
+					
+					/+
+					case WM_SYSKEYDOWN:
+					case WM_SYSKEYUP:
+					case WM_SYSCHAR:
+						// isDialogMessage returning true seems to be breaking menu mnemonics.
+						return false; // Continue.
+					+/
+					
+					default: ;
 				}
 				
 				//if(!form.isMdiChild && !form.isMdiContainer)
