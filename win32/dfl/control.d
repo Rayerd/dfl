@@ -5824,9 +5824,9 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	public final void enableVisualStyle(bool byes = true)
+	public final void disableVisualStyle(bool byes = true)
 	{
-		if(byes)
+		if(!byes)
 		{
 			if(cbits & CBits.VSTYLE)
 				return;
@@ -5846,6 +5846,11 @@ class Control: DObject, IWindow // docmain
 			if(isHandleCreated)
 				_disableVisualStyle();
 		}
+	}
+	
+	deprecated public final void enableVisualStyle(bool byes = true)
+	{
+		return disableVisualStyle(!byes);
 	}
 	
 	
