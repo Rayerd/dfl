@@ -3709,33 +3709,25 @@ class Control: DObject, IWindow // docmain
 		if(!created)
 			return;
 		
+		// To-do: check if correct implementation.
 		Control ctrl;
-		
-		if(directed)
+		ctrl = findForm();
+		if(ctrl && ctrl !is this)
 		{
-			SendMessageA(hwnd, WM_NEXTDLGCTL, !forward, MAKELPARAM(false, 0)); // TODO: fix...
-			/+
-			ctrl = Control.fromChildHandle(GetFocus());
-			if(ctrl)
+			// Even if directed, ensure THIS one is selected first.
+			if(!directed || hwnd != GetFocus())
 			{
-				ctrl = getNextControl(ctrl, forward, true);
-				if(ctrl)
-					ctrl.select();
+				DefDlgProcA(ctrl.handle, WM_NEXTDLGCTL, cast(WPARAM)hwnd, MAKELPARAM(true, 0));
 			}
-			+/
+			
+			if(directed)
+			{
+				DefDlgProcA(ctrl.handle, WM_NEXTDLGCTL, !forward, MAKELPARAM(false, 0));
+			}
 		}
 		else
 		{
-			ctrl = findForm();
-			if(ctrl && ctrl !is this)
-			{
-				//SendMessageA(ctrl.handle, WM_NEXTDLGCTL, cast(WPARAM)hwnd, MAKELPARAM(true, 0));
-				DefDlgProcA(ctrl.handle, WM_NEXTDLGCTL, cast(WPARAM)hwnd, MAKELPARAM(true, 0));
-			}
-			else
-			{
-				focus(); // This must be a form so just focus it ?
-			}
+			focus(); // This must be a form so just focus it ?
 		}
 	}
 	
@@ -6529,12 +6521,17 @@ class Control: DObject, IWindow // docmain
 	+/
 	
 	
-	/+
-	deprecated protected bool processMnemonic(dchar charCode)
+	///
+	protected bool processMnemonic(dchar charCode)
 	{
 		return false;
 	}
-	+/
+	
+	
+	package bool _processMnemonic(dchar charCode)
+	{
+		return processMnemonic(charCode);
+	}
 	
 	
 	// Retain DFL 0.9.5 compatibility.

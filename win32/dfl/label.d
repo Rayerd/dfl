@@ -360,6 +360,20 @@ class Label: Control // docmain
 	}
 	
 	
+	protected override bool processMnemonic(dchar charCode)
+	{
+		if(visible && enabled)
+		{
+			if(isMnemonic(charCode, text))
+			{
+				select(true, true);
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	
 	private:
 	TextFormat _tfmt;
 	bool autosz = false;

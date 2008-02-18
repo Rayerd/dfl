@@ -233,6 +233,22 @@ abstract class ButtonBase: ControlSuperClass // docmain
 	}
 	
 	
+	protected override bool processMnemonic(dchar charCode)
+	{
+		if(canSelect)
+		{
+			if(isMnemonic(charCode, text))
+			{
+				select();
+				//performClick();
+				onClick(EventArgs.empty);
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	
 	///
 	Size defaultSize() // getter
 	{

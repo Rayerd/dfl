@@ -2742,6 +2742,12 @@ class Form: ContainerControl, IDialogResult // docmain
 								}
 								return false;
 							
+							case Keys.UP, Keys.DOWN:
+							case Keys.RIGHT, Keys.LEFT:
+								if(dfl.internal.utf.isDialogMessage(form.handle, &m._winMsg))
+									return true; // Prevent.
+								return false; // Continue.
+							
 							case Keys.TAB:
 								{
 									LRESULT dlgc;
@@ -2790,6 +2796,7 @@ class Form: ContainerControl, IDialogResult // docmain
 					default: ;
 				}
 				
+				/+
 				switch(m.msg)
 				{
 					case WM_CHAR:
@@ -2813,6 +2820,128 @@ class Form: ContainerControl, IDialogResult // docmain
 					//if(IsDialogMessageA(form.handle, &m._winMsg))
 					if(dfl.internal.utf.isDialogMessage(form.handle, &m._winMsg))
 						return true; // Prevent.
+				}
+				+/
+				switch(m.msg)
+				{
+					case WM_SYSCHAR:
+						{
+							LRESULT dlgc;
+							dlgc = SendMessageA(m.hWnd, WM_GETDLGCODE, 0, 0);
+							if(dlgc & DLGC_WANTALLKEYS)
+								return false; // Continue.
+							
+							size_t xiter;
+							bool _eachild(HWND hw, bool delegate(HWND hw) callback)
+							{
+								for(; hw; hw = GetWindow(hw, GW_HWNDNEXT))
+								{
+									if(!xiter)
+										return false;
+									xiter--;
+									
+									LONG st = GetWindowLongA(hw, GWL_STYLE);
+									if(!(st & WS_VISIBLE))
+										continue;
+									if(st & WS_DISABLED)
+										continue;
+									
+									if(!callback(hw))
+										return false;
+									
+									LONG exst = GetWindowLongA(hw, GWL_EXSTYLE);
+									if(exst & WS_EX_CONTROLPARENT)
+									{
+										HWND hwc = GetWindow(hw, GW_CHILD);
+										if(hwc)
+										{
+											if(!_eachild(hwc, callback))
+												return false;
+										}
+									}
+								}
+								return true;
+							}
+							
+							void eachGoodChild(bool delegate(HWND hw) callback)
+							{
+								HWND hw = GetWindow(form.handle, GW_CHILD);
+								xiter = 2000;
+								_eachild(hw, callback);
+							}
+							
+							bool pmnemonic(HWND hw)
+							{
+								Control cc = Control.fromHandle(hw);
+								//printf("mnemonic for ");
+								if(!cc)
+								{
+									// To-do: check dlgcode for static/button and process.
+									return false;
+								}
+								//printf("'%.*s' ", cc.name);
+								return cc._processMnemonic(cast(dchar)m.wParam);
+							}
+							
+							bool foundmhw = false;
+							bool foundmn = false;
+							eachGoodChild(
+								(HWND hw)
+								{
+									if(foundmhw)
+									{
+										if(pmnemonic(hw))
+										{
+											foundmn = true;
+											return false; // Break.
+										}
+									}
+									else
+									{
+										if(hw == m.hWnd)
+											foundmhw = true;
+									}
+									return true; // Continue.
+								});
+							if(foundmn)
+								return true; // Prevent.
+							
+							if(!foundmhw)
+							{
+								// Didn't find current control, so go from top-to-bottom.
+								eachGoodChild(
+									(HWND hw)
+									{
+										if(pmnemonic(hw))
+										{
+											foundmn = true;
+											return false; // Break.
+										}
+										return true; // Continue.
+									});
+							}
+							else
+							{
+								// Didn't find mnemonic after current control, so go from top-to-this.
+								eachGoodChild(
+									(HWND hw)
+									{
+										if(pmnemonic(hw))
+										{
+											foundmn = true;
+											return false; // Break.
+										}
+										if(hw == m.hWnd)
+											return false; // Break.
+										return true; // Continue.
+									});
+							}
+							if(foundmn)
+								return true; // Prevent.
+						}
+						break;
+					
+					default: ;
 				}
 			}
 			
