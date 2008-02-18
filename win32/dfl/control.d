@@ -799,7 +799,7 @@ class Control: DObject, IWindow // docmain
 		{
 			if(!i)
 				children = children[1 .. children.length];
-			if(i == children.length - 1)
+			else if(i == children.length - 1)
 				children = children[0 .. i];
 			else
 				children = children[0 .. i] ~ children[i + 1 .. children.length];

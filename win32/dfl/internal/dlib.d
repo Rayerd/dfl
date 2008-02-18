@@ -47,6 +47,10 @@ version(Tango)
 	{
 		version = DFL_TANGObefore0994;
 	}
+	else version(DFL_TANGO0993)
+	{
+		version = DFL_TANGObefore0994;
+	}
 	else version(DFL_TANGO_0994)
 	{
 	}
@@ -338,7 +342,18 @@ version(Tango)
 	
 	private import tango.io.model.IConduit;
 	
-	alias tango.io.model.IConduit.IConduit DStream;
+	version(DFL_DSTREAM_ICONDUIT) // Disabled by default.
+	{
+		alias tango.io.model.IConduit.IConduit DStream; // Requires writability.
+	}
+	else
+	{
+		alias tango.io.model.IConduit.InputStream DStream;
+	}
+	
+	alias tango.io.model.IConduit.OutputStream DOutputStream;
+	
+	alias tango.io.model.IConduit.IConduit.Seek DSeekStream;
 	
 	alias tango.core.Exception.IOException DStreamException; // Note: from tango.core.Exception.
 	
@@ -449,6 +464,8 @@ else // Phobos
 	private import std.stream;
 	
 	alias std.stream.Stream DStream;
+	
+	alias std.stream.OutputStream DOutputStream;
 	
 	alias std.stream.StreamException DStreamException;
 	

@@ -7,6 +7,15 @@ module dfl.internal.com;
 private import dfl.internal.winapi, dfl.internal.wincom, dfl.internal.dlib;
 
 
+version(DFL_TANGO_SEEK_COMPAT)
+{
+}
+else
+{
+	version = DFL_TANGO_NO_SEEK_COMPAT;
+}
+
+
 // Importing dfl.application here causes the compiler to crash.
 //import dfl.application;
 private extern(C)
@@ -19,7 +28,7 @@ private extern(C)
 // Won't be killed by GC if not referenced in D and the refcount is > 0.
 package class DflComObject: ComObject
 {
-	extern (Windows):
+	extern(Windows):
 	
 	override ULONG AddRef()
 	{
@@ -111,10 +120,15 @@ class DStreamToIStream: DflComObject, dfl.internal.wincom.IStream
 		{
 			version(Tango)
 			{
-				written = stm.write(pv[0 .. cb]);
+				auto outstm = cast(DOutputStream)stm;
+				if(!outstm)
+					return E_NOTIMPL;
+				written = outstm.write(pv[0 .. cb]);
 			}
 			else
 			{
+				if(!stm.writeable)
+					return E_NOTIMPL;
 				written = stm.writeBlock(pv, cb);
 			}
 		}
@@ -131,53 +145,104 @@ class DStreamToIStream: DflComObject, dfl.internal.wincom.IStream
 	}
 	
 	
+	version(DFL_TANGO_NO_SEEK_COMPAT)
+	{
+	}
+	else
+	{
+		long _fakepos = 0;
+	}
+	
+	
 	HRESULT Seek(LARGE_INTEGER dlibMove, DWORD dwOrigin, ULARGE_INTEGER* plibNewPosition)
 	{
-		version(Tango)
-		{
-			auto stmseek = cast(DStream.Seek)stm;
-			if(!stmseek)
-				return S_FALSE; // ?
-		}
-		else
-		{
-			if(!stm.seekable)
-				return S_FALSE; // ?
-		}
-		
 		HRESULT result = S_OK;
+		
+		//printf("seek move=%u, origin=0x%x\n", cast(uint)dlibMove.QuadPart, dwOrigin);
 		
 		try
 		{
 			version(Tango)
 			{
 				long pos;
-				switch(dwOrigin)
+				auto stmseek = cast(DSeekStream)stm;
+				if(!stmseek)
 				{
-					case STREAM_SEEK_SET:
-						pos = stmseek.seek(dlibMove.QuadPart, DStream.Seek.Anchor.Begin);
-						if(plibNewPosition)
-							plibNewPosition.QuadPart = pos;
-						break;
-					
-					case STREAM_SEEK_CUR:
-						pos = stmseek.seek(dlibMove.QuadPart, DStream.Seek.Anchor.Current);
-						if(plibNewPosition)
-							plibNewPosition.QuadPart = pos;
-						break;
-					
-					case STREAM_SEEK_END:
-						pos = stmseek.seek(dlibMove.QuadPart, DStream.Seek.Anchor.End);
-						if(plibNewPosition)
-							plibNewPosition.QuadPart = pos;
-						break;
-					
-					default:
-						result = STG_E_INVALIDFUNCTION;
+					//return S_FALSE; // ?
+					//return E_NOTIMPL; // ?
+					version(DFL_TANGO_NO_SEEK_COMPAT)
+					{
+						//return S_FALSE; // ?
+						return E_NOTIMPL; // ?
+					}
+					else
+					{
+						switch(dwOrigin)
+						{
+							case STREAM_SEEK_SET:
+								//return S_FALSE; // ?
+								return E_NOTIMPL; // ?
+							
+							case STREAM_SEEK_CUR:
+								pos = cast(long)dlibMove.QuadPart;
+								if(pos < 0)
+									return E_NOTIMPL; // ?
+								if(pos)
+								{
+									byte[1] b1;
+									for(; pos; pos--)
+									{
+										if(1 != stm.read(b1))
+											break;
+										_fakepos++;
+									}
+								}
+								if(plibNewPosition)
+									plibNewPosition.QuadPart = _fakepos;
+								break;
+							
+							case STREAM_SEEK_END:
+								//return S_FALSE; // ?
+								return E_NOTIMPL; // ?
+							
+							default:
+								result = STG_E_INVALIDFUNCTION;
+						}
+					}
+				}
+				else
+				{
+					switch(dwOrigin)
+					{
+						case STREAM_SEEK_SET:
+							pos = stmseek.seek(dlibMove.QuadPart, DSeekStream.Anchor.Begin);
+							if(plibNewPosition)
+								plibNewPosition.QuadPart = pos;
+							break;
+						
+						case STREAM_SEEK_CUR:
+							pos = stmseek.seek(dlibMove.QuadPart, DSeekStream.Anchor.Current);
+							if(plibNewPosition)
+								plibNewPosition.QuadPart = pos;
+							break;
+						
+						case STREAM_SEEK_END:
+							pos = stmseek.seek(dlibMove.QuadPart, DSeekStream.Anchor.End);
+							if(plibNewPosition)
+								plibNewPosition.QuadPart = pos;
+							break;
+						
+						default:
+							result = STG_E_INVALIDFUNCTION;
+					}
 				}
 			}
 			else
 			{
+				if(!stm.seekable)
+					//return S_FALSE; // ?
+					return E_NOTIMPL; // ?
+				
 				ulong pos;
 				switch(dwOrigin)
 				{
@@ -229,7 +294,18 @@ class DStreamToIStream: DflComObject, dfl.internal.wincom.IStream
 	HRESULT Commit(DWORD grfCommitFlags)
 	{
 		// Ignore -grfCommitFlags- and just flush the stream..
-		stm.flush();
+		//stm.flush();
+		version(Tango)
+		{
+			auto outstm = cast(DOutputStream)stm;
+			if(!outstm)
+				return E_NOTIMPL;
+			outstm.flush();
+		}
+		else
+		{
+			stm.flush();
+		}
 		return S_OK; // ?
 	}
 	
