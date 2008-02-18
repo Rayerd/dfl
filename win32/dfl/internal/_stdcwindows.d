@@ -137,10 +137,13 @@ else
 	 alias FARPROC DRAWSTATEPROC;
 }
 
-WORD HIWORD(int l) { return cast(WORD)((l >> 16) & 0xFFFF); }
-WORD LOWORD(int l) { return cast(WORD)l; }
-int FAILED(int status) { return status < 0; }
-int SUCCEEDED(int Status) { return Status >= 0; }
+extern(D) // These are macros anyway.
+{
+	WORD HIWORD(int l) { return cast(WORD)((l >> 16) & 0xFFFF); }
+	WORD LOWORD(int l) { return cast(WORD)l; }
+	int FAILED(int status) { return status < 0; }
+	int SUCCEEDED(int Status) { return Status >= 0; }
+}
 
 enum : int
 {
@@ -241,8 +244,11 @@ enum
 	 FILE_VOLUME_IS_COMPRESSED       = 0x00008000,  
 }
 
-const DWORD MAILSLOT_NO_MESSAGE = cast(DWORD)-1;
-const DWORD MAILSLOT_WAIT_FOREVER = cast(DWORD)-1; 
+extern(D)
+{
+	const DWORD MAILSLOT_NO_MESSAGE = cast(DWORD)-1;
+	const DWORD MAILSLOT_WAIT_FOREVER = cast(DWORD)-1; 
+}
 
 enum : uint
 {
@@ -265,9 +271,12 @@ enum
 	 TRUNCATE_EXISTING   = 5,
 }
 
-const HANDLE INVALID_HANDLE_VALUE = cast(HANDLE)-1;
-const DWORD INVALID_SET_FILE_POINTER = cast(DWORD)-1;
-const DWORD INVALID_FILE_SIZE = cast(DWORD)0xFFFFFFFF;
+extern(D)
+{
+	const HANDLE INVALID_HANDLE_VALUE = cast(HANDLE)-1;
+	const DWORD INVALID_SET_FILE_POINTER = cast(DWORD)-1;
+	const DWORD INVALID_FILE_SIZE = cast(DWORD)0xFFFFFFFF;
+}
 
 struct OVERLAPPED {
 	 DWORD   Internal;
@@ -419,8 +428,11 @@ enum
 // Key creation/open disposition
 //
 
-const int REG_CREATED_NEW_KEY =         0x00000001;   // New Registry Key created
-const int REG_OPENED_EXISTING_KEY =     0x00000002;   // Existing Key opened
+extern(D)
+{
+	const int REG_CREATED_NEW_KEY =         0x00000001;   // New Registry Key created
+	const int REG_OPENED_EXISTING_KEY =     0x00000002;   // Existing Key opened
+}
 
 
 //
@@ -508,14 +520,17 @@ enum
 int MessageBoxA(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType);
 int MessageBoxExA(HWND hWnd, LPCSTR lpText, LPCSTR lpCaption, UINT uType, WORD wLanguageId);
 
-const HKEY HKEY_CLASSES_ROOT =           cast(HKEY)(0x80000000);
-const HKEY HKEY_CURRENT_USER =           cast(HKEY)(0x80000001);
-const HKEY HKEY_LOCAL_MACHINE =          cast(HKEY)(0x80000002);
-const HKEY HKEY_USERS =                  cast(HKEY)(0x80000003);
-const HKEY HKEY_PERFORMANCE_DATA =       cast(HKEY)(0x80000004);
+extern(D)
+{
+	const HKEY HKEY_CLASSES_ROOT =           cast(HKEY)(0x80000000);
+	const HKEY HKEY_CURRENT_USER =           cast(HKEY)(0x80000001);
+	const HKEY HKEY_LOCAL_MACHINE =          cast(HKEY)(0x80000002);
+	const HKEY HKEY_USERS =                  cast(HKEY)(0x80000003);
+	const HKEY HKEY_PERFORMANCE_DATA =       cast(HKEY)(0x80000004);
 
-const HKEY HKEY_CURRENT_CONFIG =         cast(HKEY)(0x80000005);
-const HKEY HKEY_DYN_DATA =               cast(HKEY)(0x80000006);
+	const HKEY HKEY_CURRENT_CONFIG =         cast(HKEY)(0x80000005);
+	const HKEY HKEY_DYN_DATA =               cast(HKEY)(0x80000006);
+}
 
 enum
 {
@@ -2021,10 +2036,13 @@ export
  HCURSOR LoadCursorW(HINSTANCE hInstance, LPCWSTR lpCursorName);
 }
 
-const LPSTR IDI_APPLICATION =     cast(LPSTR)(32512);
+extern(D)
+{
+	const LPSTR IDI_APPLICATION =     cast(LPSTR)(32512);
 
-const LPSTR IDC_ARROW =           cast(LPSTR)(32512);
-const LPSTR IDC_CROSS =           cast(LPSTR)(32515);
+	const LPSTR IDC_ARROW =           cast(LPSTR)(32512);
+	const LPSTR IDC_CROSS =           cast(LPSTR)(32515);
+}
 
 /*
  * Color Types
@@ -2076,11 +2094,14 @@ enum
 	COLOR_BTNHILIGHT =        COLOR_BTNHIGHLIGHT,
 }
 
-const int CW_USEDEFAULT = cast(int)0x80000000;
-/*
- * Special value for CreateWindow, et al.
- */
-const HWND HWND_DESKTOP = (cast(HWND)0);
+extern(D)
+{
+	const int CW_USEDEFAULT = cast(int)0x80000000;
+	/*
+	 * Special value for CreateWindow, et al.
+	 */
+	const HWND HWND_DESKTOP = (cast(HWND)0);
+}
 
 
 export ATOM RegisterClassA(WNDCLASSA *lpWndClass);
@@ -2100,6 +2121,7 @@ export HWND CreateWindowExA(
 	 LPVOID lpParam);
 
 
+/+
 HWND CreateWindowA(
 	 LPCSTR lpClassName,
 	 LPCSTR lpWindowName,
@@ -2115,6 +2137,20 @@ HWND CreateWindowA(
 {
 	 return CreateWindowExA(0, lpClassName, lpWindowName, dwStyle, X, Y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
 }
++/
+HWND CreateWindowA(
+	 LPCSTR lpClassName,
+	 LPCSTR lpWindowName,
+	 DWORD dwStyle,
+	 int X,
+	 int Y,
+	 int nWidth,
+	 int nHeight,
+	 HWND hWndParent ,
+	 HMENU hMenu,
+	 HINSTANCE hInstance,
+	 LPVOID lpParam);
+
 
 /*
  * Message structure
@@ -2515,7 +2551,8 @@ export HMENU GetSubMenu(HMENU hMenu, int nPos);
 export HBITMAP LoadBitmapA(HINSTANCE hInstance, LPCSTR lpBitmapName);
 export HBITMAP LoadBitmapW(HINSTANCE hInstance, LPCWSTR lpBitmapName);
 
-LPSTR MAKEINTRESOURCEA(int i) { return cast(LPSTR)(cast(DWORD)(cast(WORD)(i))); }
+extern(D) // This is a macro anyway
+	LPSTR MAKEINTRESOURCEA(int i) { return cast(LPSTR)(cast(DWORD)(cast(WORD)(i))); }
 
 export  HFONT     CreateFontIndirectA(LOGFONTA *);
 
@@ -2671,6 +2708,7 @@ export  HRGN      CreateRoundRectRgn(int, int, int, int, int, int);
 export  BOOL      CreateScalableFontResourceA(DWORD, LPCSTR, LPCSTR, LPCSTR);
 export  BOOL      CreateScalableFontResourceW(DWORD, LPCWSTR, LPCWSTR, LPCWSTR);
 
+extern(D) // This is a macro anyway.
 COLORREF RGB(int r, int g, int b)
 {
 	 return cast(COLORREF)
@@ -2706,8 +2744,11 @@ export HWND SetFocus(HWND hWnd);
 export int wsprintfA(LPSTR, LPCSTR, ...);
 export int wsprintfW(LPWSTR, LPCWSTR, ...);
 
-const uint INFINITE = uint.max;
-const uint WAIT_OBJECT_0 = 0;
+extern(D)
+{
+	const uint INFINITE = uint.max;
+	const uint WAIT_OBJECT_0 = 0;
+}
 
 export HANDLE CreateSemaphoreA(LPSECURITY_ATTRIBUTES lpSemaphoreAttributes, LONG lInitialCount, LONG lMaximumCount, LPCTSTR lpName);
 export HANDLE OpenSemaphoreA(DWORD dwDesiredAccess, BOOL bInheritHandle, LPCTSTR lpName);

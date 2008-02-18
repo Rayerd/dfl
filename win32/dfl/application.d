@@ -127,7 +127,7 @@ deprecated enum DflCompat
 	NONE = 0,
 	MENU_092 = 0x1, // Adding to menus is the old way.
 	CONTROL_RECREATE_095 = 0x2, // Controls don't recreate automatically when necessary.
-	CONTROL_KEYEVENT_096 = 0x4, // Key events don't propagate up the control hierarchy when they are not handled.
+	CONTROL_KEYEVENT_096 = 0x4, // Nothing.
 	FORM_DIALOGRESULT_096 = 0x8, // When a Form is in showDialog, changing the dialogResult from NONE doesn't close the form.
 }
 
