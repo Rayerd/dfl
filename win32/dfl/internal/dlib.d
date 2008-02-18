@@ -24,12 +24,7 @@ module dfl.internal.dlib;
 
 version(Tango)
 {
-	version(DFL_TANGO0951beta1)
-	{
-		version = DFL_TANGObefore099rc3;
-		version = DFL_TANGObefore0994;
-	}
-	else version(DFL_TANGO097rc1)
+	version(DFL_TANGO097rc1)
 	{
 		version = DFL_TANGObefore099rc3;
 		version = DFL_TANGObefore0994;
@@ -58,14 +53,7 @@ version(Tango)
 	
 	public import tango.core.Thread;
 	
-	version(DFL_TANGO0951beta1)
-	{
-		public import tango.util.meta.Traits;
-	}
-	else
-	{
-		public import tango.core.Traits;
-	}
+	public import tango.core.Traits;
 		
 	
 	template PhobosTraits()
@@ -166,21 +154,12 @@ version(Tango)
 	char[] pathGetDirName(char[] s)
 	{
 		scope mypath = new FilePath(s);
-		version(DFL_TANGO0951beta1)
-		{
-			return mypath.getPath();
-		}
-		else
-		{
-			return mypath.path();
-		}
+		return mypath.path();
 	}
 	
 	char[] pathJoin(char[] p1, char[] p2)
 	{
-		scope mypath = new FilePath(p2);
-		mypath.join(p1);
-		return getObjectString(mypath);
+		return FilePath.join(p1, p2);
 	}
 	
 	
@@ -287,14 +266,7 @@ version(Tango)
 		return cast(int)loc;
 	}
 	
-	version(DFL_TANGO0951beta1)
-	{
-		alias tango.text.Util.delineate!(char) stringSplitLines;
-	}
-	else
-	{
-		alias tango.text.Util.splitLines!(char) stringSplitLines;
-	}
+	alias tango.text.Util.splitLines!(char) stringSplitLines;
 	
 	
 	private import tango.text.convert.Integer;
@@ -313,16 +285,8 @@ version(Tango)
 	char[] uintToHexString(uint num)
 	{
 		char[16] buf;
-		version(DFL_TANGO0951beta1)
-		{
-			return tango.text.convert.Integer.format!(char, uint)(buf, num,
-				tango.text.convert.Integer.Format.HexUpper).dup;
-		}
-		else
-		{
-			return tango.text.convert.Integer.format!(char, uint)(buf, num,
-				tango.text.convert.Integer.Style.HexUpper).dup;
-		}
+		return tango.text.convert.Integer.format!(char, uint)(buf, num,
+			tango.text.convert.Integer.Style.HexUpper).dup;
 	}
 	
 	char[] intToString(int num)
