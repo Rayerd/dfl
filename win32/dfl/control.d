@@ -1477,6 +1477,22 @@ class Control: DObject, IWindow // docmain
 		}
 		+/
 		
+		if(isHandleCreated)
+		{
+			if(visible && enabled)
+			{
+				Point curpt = Cursor.position;
+				if(hwnd == WindowFromPoint(curpt.point))
+				{
+					SendMessageA(hwnd, WM_SETCURSOR, cast(WPARAM)hwnd,
+						MAKELPARAM(
+							SendMessageA(hwnd, WM_NCHITTEST, 0, MAKELPARAM(curpt.x, curpt.y)),
+							WM_MOUSEMOVE)
+							);
+				}
+			}
+		}
+		
 		cursorChanged(this, ea);
 	}
 	
