@@ -4,9 +4,18 @@
 module dfl.internal.winapi;
 
 
-extern(Windows):
+version(Tango)
+{
+	version(Tangobos)
+		version = HASstdcwindowswindows;
+}
+else
+{
+	version = HASstdcwindowswindows;
+}
 
 
+/+
 version(Tango)
 {
 	/+
@@ -15,23 +24,22 @@ version(Tango)
 	public import tango.sys.win32.Types;
 	public import tango.sys.win32.UserGdi;
 	+/
-	
-	public import dfl.internal._stdcwindows;
-	private import dfl.internal.wincom;
+}
++/
+
+
+version(HASstdcwindowswindows)
+{
+	public import std.c.windows.windows;
 }
 else
 {
-	/+version(WINE)
-	{
-		public import dfl.internal._stdcwindows;
-	}
-	else
-	{+/
-		public import std.c.windows.windows;
-	//}
-	private import dfl.internal.wincom;
-} // Temporary.
-	
+	public import dfl.internal._stdcwindows;
+}
+private import dfl.internal.wincom;
+
+
+extern(Windows):
 	
 	struct SIZE
 	{
