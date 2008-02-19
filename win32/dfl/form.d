@@ -2826,10 +2826,14 @@ class Form: ContainerControl, IDialogResult // docmain
 				{
 					case WM_SYSCHAR:
 						{
+							/+
 							LRESULT dlgc;
 							dlgc = SendMessageA(m.hWnd, WM_GETDLGCODE, 0, 0);
+							/+ // Mnemonics bypass want-all-keys!
 							if(dlgc & DLGC_WANTALLKEYS)
 								return false; // Continue.
+							+/
+							+/
 							
 							size_t xiter;
 							bool _eachild(HWND hw, bool delegate(HWND hw) callback)
