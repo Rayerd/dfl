@@ -2534,8 +2534,11 @@ class Form: ContainerControl, IDialogResult // docmain
 			case WM_ENABLE:
 				if(msg.wParam)
 				{
-					if(!GetFocus())
-						SetFocus(msg.hWnd);
+					if(GetActiveWindow() == msg.hWnd)
+					{
+						if(!GetFocus())
+							SetFocus(msg.hWnd);
+					}
 				}
 				break;
 			

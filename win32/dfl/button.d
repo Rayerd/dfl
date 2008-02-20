@@ -240,6 +240,7 @@ abstract class ButtonBase: ControlSuperClass // docmain
 			if(isMnemonic(charCode, text))
 			{
 				select();
+				//Application.doEvents(); // ?
 				//performClick();
 				onClick(EventArgs.empty);
 				return true;
