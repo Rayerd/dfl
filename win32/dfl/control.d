@@ -3485,7 +3485,9 @@ class Control: DObject, IWindow // docmain
 		static assert((DflInvokeParam*).sizeof <= LPARAM.sizeof);
 		
 		DflInvokeParam* p;
-		p = cast(DflInvokeParam*)dfl.internal.clib.malloc(DflInvokeParam.sizeof + params.length * size_t.sizeof);
+		p = cast(DflInvokeParam*)dfl.internal.clib.malloc(
+			(DflInvokeParam.sizeof - size_t.sizeof)
+				+ params.length * size_t.sizeof);
 		if(!p)
 			throw new OomException();
 		
@@ -3752,7 +3754,15 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	package static void _dlgselnext(HWND hwdlg, HWND hwcursel, bool forward)
+	private static bool _isHwndControlSel(HWND hw)
+	{
+		Control c = Control.fromHandle(hw);
+		return c && c.getStyle(ControlStyles.SELECTABLE);
+	}
+	
+	
+	package static void _dlgselnext(HWND hwdlg, HWND hwcursel, bool forward,
+		bool tabStopOnly = true, bool selectableOnly = false)
 	{
 		if(forward)
 		{
@@ -3761,25 +3771,28 @@ class Control: DObject, IWindow // docmain
 			eachGoodChildHandle(hwdlg,
 				(HWND hw)
 				{
+					assert(!tdone);
 					if(hw == hwcursel)
 					{
 						foundthis = true;
 					}
 					else
 					{
-						LONG st = GetWindowLongA(hw, GWL_STYLE);
-						if(st & WS_TABSTOP)
+						if(!tabStopOnly || (GetWindowLongA(hw, GWL_STYLE) & WS_TABSTOP))
 						{
-							if(foundthis)
+							if(!selectableOnly || _isHwndControlSel(hw))
 							{
-								DefDlgProcA(hwdlg, WM_NEXTDLGCTL, cast(WPARAM)hw, MAKELPARAM(true, 0));
-								tdone = true;
-								return false; // Break.
-							}
-							else
-							{
-								if(HWND.init == hwfirst)
-									hwfirst = hw;
+								if(foundthis)
+								{
+									DefDlgProcA(hwdlg, WM_NEXTDLGCTL, cast(WPARAM)hw, MAKELPARAM(true, 0));
+									tdone = true;
+									return false; // Break.
+								}
+								else
+								{
+									if(HWND.init == hwfirst)
+										hwfirst = hw;
+								}
 							}
 						}
 					}
@@ -3799,9 +3812,13 @@ class Control: DObject, IWindow // docmain
 						if(HWND.init != hwprev) // Otherwise, keep looping and get last one.
 							return false; // Break.
 					}
-					LONG st = GetWindowLongA(hw, GWL_STYLE);
-					if(st & WS_TABSTOP)
-						hwprev = hw;
+					if(!tabStopOnly || (GetWindowLongA(hw, GWL_STYLE) & WS_TABSTOP))
+					{
+						if(!selectableOnly || _isHwndControlSel(hw))
+						{
+							hwprev = hw;
+						}
+					}
 					return true; // Continue.
 				});
 			if(HWND.init != hwprev)
@@ -3821,7 +3838,7 @@ class Control: DObject, IWindow // docmain
 	// If -forward- is true, the next control in the tab order is selected,
 	// otherwise the previous control in the tab order is selected.
 	// Controls without style ControlStyles.SELECTABLE are skipped.
-	/+protected+/ void select(bool directed, bool forward)
+	void select(bool directed, bool forward)
 	{
 		if(!created)
 			return;
@@ -3849,7 +3866,8 @@ class Control: DObject, IWindow // docmain
 			}
 			else
 			{
-				DefDlgProcA(ctrltoplevel.handle, WM_NEXTDLGCTL, cast(WPARAM)this.handle, MAKELPARAM(true, 0));
+				if(canSelect)
+					DefDlgProcA(ctrltoplevel.handle, WM_NEXTDLGCTL, cast(WPARAM)this.handle, MAKELPARAM(true, 0));
 			}
 		}
 		else

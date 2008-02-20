@@ -2744,8 +2744,32 @@ class Form: ContainerControl, IDialogResult // docmain
 							
 							case Keys.UP, Keys.DOWN:
 							case Keys.RIGHT, Keys.LEFT:
-								if(dfl.internal.utf.isDialogMessage(form.handle, &m._winMsg))
-									return true; // Prevent.
+								//if(dfl.internal.utf.isDialogMessage(form.handle, &m._winMsg)) // Stopped working after removing controlparent.
+								//	return true; // Prevent.
+								{
+									LRESULT dlgc;
+									dlgc = SendMessageA(m.hWnd, WM_GETDLGCODE, 0, 0);
+									if(!(dlgc & (DLGC_WANTALLKEYS | DLGC_WANTARROWS)))
+									{
+										if(WM_KEYDOWN == m.msg)
+										{
+											switch(cast(Keys)m.wParam)
+											{
+												case Keys.UP, Keys.LEFT:
+													// Backwards...
+													Control._dlgselnext(form.handle, m.hWnd, false, false, true);
+													break;
+												case Keys.DOWN, Keys.RIGHT:
+													// Forwards...
+													Control._dlgselnext(form.handle, m.hWnd, true, false, true);
+													break;
+												default:
+													assert(0);
+											}
+										}
+										return true; // Prevent.
+									}
+								}
 								return false; // Continue.
 							
 							case Keys.TAB:

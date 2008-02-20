@@ -1820,7 +1820,7 @@ struct DflInvokeParam
 {
 	void function(Control, size_t[]) fp;
 	size_t nparams;
-	size_t[0] params;
+	size_t[1] params;
 }
 
 
