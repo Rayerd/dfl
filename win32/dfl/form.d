@@ -659,9 +659,10 @@ class Form: ContainerControl, IDialogResult // docmain
 		if(isHandleCreated && visible)
 		{
 			vis = true;
-			// Do it directly so that DFL code can't prevent it.
 			cbits |= CBits.RECREATING;
-			doHide();
+			// Do it directly so that DFL code can't prevent it.
+			//doHide();
+			ShowWindow(hwnd, SW_HIDE);
 		}
 		scope(exit)
 			cbits &= ~CBits.RECREATING;
@@ -752,19 +753,18 @@ class Form: ContainerControl, IDialogResult // docmain
 				//hide();
 				//show();
 				SetWindowPos(hwnd, HWND.init, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE
-					| SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE); // Recalculate the frame while hidden.
+					| SWP_NOSIZE | SWP_NOZORDER); // Recalculate the frame while hidden.
+				_resetSystemMenu();
 				// Do it directly so that DFL code can't prevent it.
 				doShow();
+				invalidate(true);
 			}
 			else
 			{
 				SetWindowPos(hwnd, HWND.init, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE
 					| SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE); // Recalculate the frame.
+				_resetSystemMenu();
 			}
-			
-			invalidate(true);
-			
-			_resetSystemMenu();
 		}
 	}
 	
@@ -2530,6 +2530,14 @@ class Form: ContainerControl, IDialogResult // docmain
 						SetFocus(msg.hWnd);
 				}
 				return;
+			
+			case WM_ENABLE:
+				if(msg.wParam)
+				{
+					if(!GetFocus())
+						SetFocus(msg.hWnd);
+				}
+				break;
 			
 			default:
 				version(NO_MDI)

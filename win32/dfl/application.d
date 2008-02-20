@@ -122,13 +122,23 @@ else
 }
 
 
+// Compatibility with previous DFL versions.
+// Set version=DFL_NO_COMPAT to disable.
 deprecated enum DflCompat
 {
 	NONE = 0,
-	MENU_092 = 0x1, // Adding to menus is the old way.
-	CONTROL_RECREATE_095 = 0x2, // Controls don't recreate automatically when necessary.
-	CONTROL_KEYEVENT_096 = 0x4, // Nothing.
-	FORM_DIALOGRESULT_096 = 0x8, // When a Form is in showDialog, changing the dialogResult from NONE doesn't close the form.
+	
+	// Adding to menus is the old way.
+	MENU_092 = 0x1,
+	
+	// Controls don't recreate automatically when necessary.
+	CONTROL_RECREATE_095 = 0x2,
+	
+	// Nothing.
+	CONTROL_KEYEVENT_096 = 0x4,
+	
+	// When a Form is in showDialog, changing the dialogResult from NONE doesn't close the form.
+	FORM_DIALOGRESULT_096 = 0x8,
 }
 
 
