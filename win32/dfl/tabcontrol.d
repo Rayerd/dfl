@@ -38,6 +38,8 @@ class TabPage: Panel
 	{
 		Application.ppin(cast(void*)this);
 		
+		ctrlStyle |= ControlStyles.CONTAINER_CONTROL;
+		
 		wstyle &= ~WS_VISIBLE;
 		cbits &= ~CBits.VISIBLE;
 	}

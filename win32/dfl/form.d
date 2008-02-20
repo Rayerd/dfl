@@ -2510,8 +2510,8 @@ class Form: ContainerControl, IDialogResult // docmain
 			+/
 			
 			case WM_SETFOCUS:
+				/+
 				{
-					// Prevent DefDlgProc from getting this message because it'll focus controls it shouldn't.
 					bool didf = false;
 					enumChildWindows(msg.hWnd,
 						(HWND hw)
@@ -2529,6 +2529,11 @@ class Form: ContainerControl, IDialogResult // docmain
 					if(!didf)
 						SetFocus(msg.hWnd);
 				}
+				+/
+				_selectNextControl(this, null, true, true, true, false);
+				if(!GetFocus())
+					focus();
+				// Prevent DefDlgProc from getting this message because it'll focus controls it shouldn't.
 				return;
 			
 			case WM_ENABLE:
@@ -2825,37 +2830,6 @@ class Form: ContainerControl, IDialogResult // docmain
 						}
 						break;
 					
-					default: ;
-				}
-				
-				/+
-				switch(m.msg)
-				{
-					case WM_CHAR:
-						// isDialogMessage seems to be eating WM_CHAR in some cases, so see for myself if it should get it.
-						// ? ...
-						return false; // Continue.
-					
-					/+
-					case WM_SYSKEYDOWN:
-					case WM_SYSKEYUP:
-					case WM_SYSCHAR:
-						// isDialogMessage returning true seems to be breaking menu mnemonics.
-						return false; // Continue.
-					+/
-					
-					default: ;
-				}
-				
-				//if(!form.isMdiChild && !form.isMdiContainer)
-				{
-					//if(IsDialogMessageA(form.handle, &m._winMsg))
-					if(dfl.internal.utf.isDialogMessage(form.handle, &m._winMsg))
-						return true; // Prevent.
-				}
-				+/
-				switch(m.msg)
-				{
 					case WM_SYSCHAR:
 						{
 							/+

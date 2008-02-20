@@ -3715,7 +3715,7 @@ class Control: DObject, IWindow // docmain
 	+/
 	
 	
-	private static bool _eachild(HWND hw, bool delegate(HWND hw) callback, inout size_t xiter)
+	private static bool _eachild(HWND hw, bool delegate(HWND hw) callback, inout size_t xiter, bool nested)
 	{
 		for(; hw; hw = GetWindow(hw, GW_HWNDNEXT))
 		{
@@ -3732,25 +3732,29 @@ class Control: DObject, IWindow // docmain
 			if(!callback(hw))
 				return false;
 			
-			//LONG exst = GetWindowLongA(hw, GWL_EXSTYLE);
-			//if(exst & WS_EX_CONTROLPARENT) // It's no longer added.
+			if(nested)
 			{
-				HWND hwc = GetWindow(hw, GW_CHILD);
-				if(hwc)
+				//LONG exst = GetWindowLongA(hw, GWL_EXSTYLE);
+				//if(exst & WS_EX_CONTROLPARENT) // It's no longer added.
 				{
-					if(!_eachild(hwc, callback, xiter))
-						return false;
+					HWND hwc = GetWindow(hw, GW_CHILD);
+					if(hwc)
+					{
+						//if(!_eachild(hwc, callback, xiter, nested))
+						if(!_eachild(hwc, callback, xiter, true))
+							return false;
+					}
 				}
 			}
 		}
 		return true;
 	}
 	
-	package static void eachGoodChildHandle(HWND hwtoplevel, bool delegate(HWND hw) callback)
+	package static void eachGoodChildHandle(HWND hwparent, bool delegate(HWND hw) callback, bool nested = true)
 	{
-		HWND hw = GetWindow(hwtoplevel, GW_CHILD);
+		HWND hw = GetWindow(hwparent, GW_CHILD);
 		size_t xiter = 2000;
-		_eachild(hw, callback, xiter);
+		_eachild(hw, callback, xiter, nested);
 	}
 	
 	
@@ -3762,13 +3766,17 @@ class Control: DObject, IWindow // docmain
 	
 	
 	package static void _dlgselnext(HWND hwdlg, HWND hwcursel, bool forward,
-		bool tabStopOnly = true, bool selectableOnly = false)
+		bool tabStopOnly = true, bool selectableOnly = false,
+		bool nested = true, bool wrap = true,
+		HWND hwchildrenof = null)
 	{
+		if(!hwchildrenof)
+			hwchildrenof = hwdlg;
 		if(forward)
 		{
 			bool foundthis = false, tdone = false;
 			HWND hwfirst;
-			eachGoodChildHandle(hwdlg,
+			eachGoodChildHandle(hwchildrenof,
 				(HWND hw)
 				{
 					assert(!tdone);
@@ -3797,20 +3805,31 @@ class Control: DObject, IWindow // docmain
 						}
 					}
 					return true; // Continue.
-				});
+				}, nested);
 			if(!tdone && HWND.init != hwfirst)
-				DefDlgProcA(hwdlg, WM_NEXTDLGCTL, cast(WPARAM)hwfirst, MAKELPARAM(true, 0));
+			{
+				// If it falls through without finding hwcursel, let it select the first one, even if not wrapping.
+				if(wrap || !foundthis)
+				{
+					DefDlgProcA(hwdlg, WM_NEXTDLGCTL, cast(WPARAM)hwfirst, MAKELPARAM(true, 0));
+				}
+			}
 		}
 		else
 		{
 			HWND hwprev;
-			eachGoodChildHandle(hwdlg,
+			eachGoodChildHandle(hwchildrenof,
 				(HWND hw)
 				{
 					if(hw == hwcursel)
 					{
 						if(HWND.init != hwprev) // Otherwise, keep looping and get last one.
 							return false; // Break.
+						if(!wrap) // No wrapping, so don't get last one.
+						{
+							assert(HWND.init == hwprev);
+							return false; // Break.
+						}
 					}
 					if(!tabStopOnly || (GetWindowLongA(hw, GWL_STYLE) & WS_TABSTOP))
 					{
@@ -3820,10 +3839,39 @@ class Control: DObject, IWindow // docmain
 						}
 					}
 					return true; // Continue.
-				});
+				}, nested);
+			// If it falls through without finding hwcursel, let it select the last one, even if not wrapping.
 			if(HWND.init != hwprev)
 				DefDlgProcA(hwdlg, WM_NEXTDLGCTL, cast(WPARAM)hwprev, MAKELPARAM(true, 0));
 		}
+	}
+	
+	
+	package final void _selectNextControl(Control ctrltoplevel,
+		Control ctrl, bool forward, bool tabStopOnly, bool nested, bool wrap)
+	{
+		if(!created)
+			return;
+		
+		assert(ctrltoplevel !is null);
+		assert(ctrltoplevel.isHandleCreated);
+		
+		_dlgselnext(ctrltoplevel.handle,
+			(ctrl && ctrl.isHandleCreated) ? ctrl.handle : null,
+			forward, tabStopOnly, !tabStopOnly, nested, wrap,
+			this.handle);
+	}
+	
+	
+	final void selectNextControl(Control ctrl, bool forward, bool tabStopOnly, bool nested, bool wrap)
+	{
+		if(!created)
+			return;
+		
+		Control ctrltoplevel;
+		ctrltoplevel = findForm();
+		if(ctrltoplevel)
+			return _selectNextControl(ctrltoplevel, ctrl, forward, tabStopOnly, nested, wrap);
 	}
 	
 	
@@ -6129,14 +6177,11 @@ class Control: DObject, IWindow // docmain
 			wexstyle = exStyle;
 			wstyle = style;
 			
-			/+
+			//if((ctrlStyle & ControlStyles.CONTAINER_CONTROL) && (style & WS_CHILD))
 			if(style & WS_CHILD)
 			{
-				if(exStyle & WS_EX_CONTROLPARENT)
-					//wstyle = style |= WS_TABSTOP; // Otherwise, Windows could get stuck in an infinite loop ?
-					wstyle = style |= WS_TABSTOP | WS_GROUP; // ?
+				exStyle |= WS_EX_CONTROLPARENT;
 			}
-			+/
 			
 			Application.creatingControl(this);
 			hwnd = dfl.internal.utf.createWindowEx(exStyle, className, caption, style, x, y,
@@ -7928,7 +7973,7 @@ class ContainerControl: ScrollableControl, IContainerControl // docmain
 	
 	private void _init()
 	{
-		wexstyle |= WS_EX_CONTROLPARENT;
+		//wexstyle |= WS_EX_CONTROLPARENT;
 		ctrlStyle |= ControlStyles.CONTAINER_CONTROL;
 	}
 	
