@@ -968,12 +968,16 @@ class Control: DObject, IWindow // docmain
 	
 	private void _ctrladded(ControlEventArgs cea)
 	{
+		/+
 		if(!(_exStyle() & WS_EX_CONTROLPARENT))
 		{
-			//if(_style() & WS_CHILD)
 			if(!(cbits & CBits.FORM))
-				_exStyle(_exStyle() | WS_EX_CONTROLPARENT);
+			{
+				//if((cea.control._style() & WS_TABSTOP) || (cea.control._exStyle() & WS_EX_CONTROLPARENT))
+					_exStyle(_exStyle() | WS_EX_CONTROLPARENT);
+			}
 		}
+		+/
 		
 		onControlAdded(cea);
 	}
@@ -3709,6 +3713,103 @@ class Control: DObject, IWindow // docmain
 	+/
 	
 	
+	private static bool _eachild(HWND hw, bool delegate(HWND hw) callback, inout size_t xiter)
+	{
+		for(; hw; hw = GetWindow(hw, GW_HWNDNEXT))
+		{
+			if(!xiter)
+				return false;
+			xiter--;
+			
+			LONG st = GetWindowLongA(hw, GWL_STYLE);
+			if(!(st & WS_VISIBLE))
+				continue;
+			if(st & WS_DISABLED)
+				continue;
+			
+			if(!callback(hw))
+				return false;
+			
+			//LONG exst = GetWindowLongA(hw, GWL_EXSTYLE);
+			//if(exst & WS_EX_CONTROLPARENT) // It's no longer added.
+			{
+				HWND hwc = GetWindow(hw, GW_CHILD);
+				if(hwc)
+				{
+					if(!_eachild(hwc, callback, xiter))
+						return false;
+				}
+			}
+		}
+		return true;
+	}
+	
+	package static void eachGoodChildHandle(HWND hwtoplevel, bool delegate(HWND hw) callback)
+	{
+		HWND hw = GetWindow(hwtoplevel, GW_CHILD);
+		size_t xiter = 2000;
+		_eachild(hw, callback, xiter);
+	}
+	
+	
+	package static void _dlgselnext(HWND hwdlg, HWND hwcursel, bool forward)
+	{
+		if(forward)
+		{
+			bool foundthis = false, tdone = false;
+			HWND hwfirst;
+			eachGoodChildHandle(hwdlg,
+				(HWND hw)
+				{
+					if(hw == hwcursel)
+					{
+						foundthis = true;
+					}
+					else
+					{
+						LONG st = GetWindowLongA(hw, GWL_STYLE);
+						if(st & WS_TABSTOP)
+						{
+							if(foundthis)
+							{
+								DefDlgProcA(hwdlg, WM_NEXTDLGCTL, cast(WPARAM)hw, MAKELPARAM(true, 0));
+								tdone = true;
+								return false; // Break.
+							}
+							else
+							{
+								if(HWND.init == hwfirst)
+									hwfirst = hw;
+							}
+						}
+					}
+					return true; // Continue.
+				});
+			if(!tdone && HWND.init != hwfirst)
+				DefDlgProcA(hwdlg, WM_NEXTDLGCTL, cast(WPARAM)hwfirst, MAKELPARAM(true, 0));
+		}
+		else
+		{
+			HWND hwprev;
+			eachGoodChildHandle(hwdlg,
+				(HWND hw)
+				{
+					if(hw == hwcursel)
+					{
+						if(HWND.init != hwprev) // Otherwise, keep looping and get last one.
+							return false; // Break.
+					}
+					LONG st = GetWindowLongA(hw, GWL_STYLE);
+					if(st & WS_TABSTOP)
+						hwprev = hw;
+					return true; // Continue.
+				});
+			if(HWND.init != hwprev)
+				DefDlgProcA(hwdlg, WM_NEXTDLGCTL, cast(WPARAM)hwprev, MAKELPARAM(true, 0));
+		}
+	}
+	
+	
 	///
 	final void select()
 	{
@@ -3725,20 +3826,30 @@ class Control: DObject, IWindow // docmain
 		if(!created)
 			return;
 		
-		// To-do: check if correct implementation.
-		Control ctrl;
-		ctrl = findForm();
-		if(ctrl && ctrl !is this)
+		Control ctrltoplevel;
+		ctrltoplevel = findForm();
+		if(ctrltoplevel && ctrltoplevel !is this)
 		{
+			/+ // Old...
 			// Even if directed, ensure THIS one is selected first.
 			if(!directed || hwnd != GetFocus())
 			{
-				DefDlgProcA(ctrl.handle, WM_NEXTDLGCTL, cast(WPARAM)hwnd, MAKELPARAM(true, 0));
+				DefDlgProcA(ctrltoplevel.handle, WM_NEXTDLGCTL, cast(WPARAM)hwnd, MAKELPARAM(true, 0));
 			}
 			
 			if(directed)
 			{
-				DefDlgProcA(ctrl.handle, WM_NEXTDLGCTL, !forward, MAKELPARAM(false, 0));
+				DefDlgProcA(ctrltoplevel.handle, WM_NEXTDLGCTL, !forward, MAKELPARAM(false, 0));
+			}
+			+/
+			
+			if(directed)
+			{
+				_dlgselnext(ctrltoplevel.handle, this.handle, forward);
+			}
+			else
+			{
+				DefDlgProcA(ctrltoplevel.handle, WM_NEXTDLGCTL, cast(WPARAM)this.handle, MAKELPARAM(true, 0));
 			}
 		}
 		else

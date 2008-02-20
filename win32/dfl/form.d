@@ -2769,21 +2769,18 @@ class Form: ContainerControl, IDialogResult // docmain
 										return false; // Continue.
 									if(WM_KEYDOWN == m.msg)
 									{
-										/+
-										Message mm;
-										mm.hWnd = form.handle;
-										mm.msg = WM_NEXTDLGCTL;
-										mm.lParam = MAKEWPARAM(FALSE, 0); // wParam is direction.
 										if(GetKeyState(VK_SHIFT) & 0x8000)
-											mm.wParam = 1;
+										{
+											// Backwards...
+											//DefDlgProcA(form.handle, WM_NEXTDLGCTL, 1, MAKELPARAM(FALSE, 0));
+											_dlgselnext(form.handle, m.hWnd, false);
+										}
 										else
-											mm.wParam = 0;
-										form.wndProc(mm);
-										+/
-										if(GetKeyState(VK_SHIFT) & 0x8000)
-											DefDlgProcA(form.handle, WM_NEXTDLGCTL, 1, MAKELPARAM(FALSE, 0));
-										else
-											DefDlgProcA(form.handle, WM_NEXTDLGCTL, 0, MAKELPARAM(FALSE, 0));
+										{
+											// Forwards...
+											//DefDlgProcA(form.handle, WM_NEXTDLGCTL, 0, MAKELPARAM(FALSE, 0));
+											_dlgselnext(form.handle, m.hWnd, true);
+										}
 									}
 									return true; // Prevent.
 								}
@@ -2835,45 +2832,6 @@ class Form: ContainerControl, IDialogResult // docmain
 							+/
 							+/
 							
-							size_t xiter;
-							bool _eachild(HWND hw, bool delegate(HWND hw) callback)
-							{
-								for(; hw; hw = GetWindow(hw, GW_HWNDNEXT))
-								{
-									if(!xiter)
-										return false;
-									xiter--;
-									
-									LONG st = GetWindowLongA(hw, GWL_STYLE);
-									if(!(st & WS_VISIBLE))
-										continue;
-									if(st & WS_DISABLED)
-										continue;
-									
-									if(!callback(hw))
-										return false;
-									
-									LONG exst = GetWindowLongA(hw, GWL_EXSTYLE);
-									if(exst & WS_EX_CONTROLPARENT)
-									{
-										HWND hwc = GetWindow(hw, GW_CHILD);
-										if(hwc)
-										{
-											if(!_eachild(hwc, callback))
-												return false;
-										}
-									}
-								}
-								return true;
-							}
-							
-							void eachGoodChild(bool delegate(HWND hw) callback)
-							{
-								HWND hw = GetWindow(form.handle, GW_CHILD);
-								xiter = 2000;
-								_eachild(hw, callback);
-							}
-							
 							bool pmnemonic(HWND hw)
 							{
 								Control cc = Control.fromHandle(hw);
@@ -2889,7 +2847,7 @@ class Form: ContainerControl, IDialogResult // docmain
 							
 							bool foundmhw = false;
 							bool foundmn = false;
-							eachGoodChild(
+							eachGoodChildHandle(form.handle,
 								(HWND hw)
 								{
 									if(foundmhw)
@@ -2913,7 +2871,7 @@ class Form: ContainerControl, IDialogResult // docmain
 							if(!foundmhw)
 							{
 								// Didn't find current control, so go from top-to-bottom.
-								eachGoodChild(
+								eachGoodChildHandle(form.handle,
 									(HWND hw)
 									{
 										if(pmnemonic(hw))
@@ -2927,7 +2885,7 @@ class Form: ContainerControl, IDialogResult // docmain
 							else
 							{
 								// Didn't find mnemonic after current control, so go from top-to-this.
-								eachGoodChild(
+								eachGoodChildHandle(form.handle,
 									(HWND hw)
 									{
 										if(pmnemonic(hw))
