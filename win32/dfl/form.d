@@ -487,9 +487,12 @@ class Form: ContainerControl, IDialogResult // docmain
 				}
 			}
 			
-			// Load before shown.
-			// Not calling if recreating handle!
-			onLoad(EventArgs.empty);
+			if(Application._compat & DflCompat.FORM_LOAD_096)
+			{
+				// Load before shown.
+				// Not calling if recreating handle!
+				onLoad(EventArgs.empty);
+			}
 		}
 		
 		//assert(!visible);
@@ -1800,6 +1803,18 @@ class Form: ContainerControl, IDialogResult // docmain
 			}
 		}
 		
+		if(!(Application._compat & DflCompat.FORM_LOAD_096))
+		{
+			if(visible)
+			{
+				if(!(cbits & CBits.FORMLOADED))
+				{
+					cbits |= CBits.FORMLOADED;
+					onLoad(EventArgs.empty);
+				}
+			}
+		}
+		
 		super.onVisibleChanged(ea);
 	}
 	
@@ -2137,6 +2152,11 @@ class Form: ContainerControl, IDialogResult // docmain
 	protected void onLoad(EventArgs ea)
 	{
 		load(this, ea);
+		
+		if(!(Application._compat & DflCompat.FORM_LOAD_096))
+		{
+			_selonecontrol();
+		}
 	}
 	
 	
@@ -2490,6 +2510,18 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	
+	private void _selonecontrol()
+	{
+		HWND hwfocus = GetFocus();
+		if(!hwfocus || hwfocus == hwnd)
+		{
+			_selectNextControl(this, null, true, true, true, false);
+			if(!GetFocus())
+				select();
+		}
+	}
+	
+	
 	package alias dfl.internal.utf.defDlgProc _defFormProc;
 	
 	protected override void defWndProc(inout Message msg)
@@ -2530,9 +2562,7 @@ class Form: ContainerControl, IDialogResult // docmain
 						SetFocus(msg.hWnd);
 				}
 				+/
-				_selectNextControl(this, null, true, true, true, false);
-				if(!GetFocus())
-					focus();
+				_selonecontrol();
 				// Prevent DefDlgProc from getting this message because it'll focus controls it shouldn't.
 				return;
 			
@@ -2541,8 +2571,7 @@ class Form: ContainerControl, IDialogResult // docmain
 				{
 					if(GetActiveWindow() == msg.hWnd)
 					{
-						if(!GetFocus())
-							SetFocus(msg.hWnd);
+						_selonecontrol();
 					}
 				}
 				break;

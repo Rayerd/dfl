@@ -139,6 +139,9 @@ deprecated enum DflCompat
 	
 	// When a Form is in showDialog, changing the dialogResult from NONE doesn't close the form.
 	FORM_DIALOGRESULT_096 = 0x8,
+	
+	// Call onLoad/load and focus a control at old time.
+	FORM_LOAD_096 = 0x10,
 }
 
 

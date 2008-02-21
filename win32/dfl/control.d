@@ -5632,6 +5632,8 @@ class Control: DObject, IWindow // docmain
 			
 			case WM_DESTROY:
 				cbits &= ~CBits.CREATED;
+				if(!recreatingHandle)
+					cbits &= ~CBits.FORMLOADED;
 				_destroying();
 				//if(!killing)
 				if(recreatingHandle)
@@ -6828,6 +6830,7 @@ class Control: DObject, IWindow // docmain
 		RECREATING = 0x100000,
 		HAS_LAYOUT = 0x200000,
 		VSTYLE = 0x400000, // If not forced off.
+		FORMLOADED = 0x800000, // If not forced off.
 	}
 	
 	//CBits cbits = CBits.ALLOW_LAYOUT;
