@@ -1393,7 +1393,8 @@ class Control: DObject, IWindow // docmain
 		if(!isHandleCreated)
 			return false;
 		
-		return IsChild(hwnd, GetFocus()) != FALSE;
+		HWND hwfocus = GetFocus();
+		return hwfocus == hwnd || IsChild(hwnd, hwfocus);
 	}
 	
 	
@@ -3863,6 +3864,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
+	// Only considers child controls of this control.
 	final void selectNextControl(Control ctrl, bool forward, bool tabStopOnly, bool nested, bool wrap)
 	{
 		if(!created)
