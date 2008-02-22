@@ -776,16 +776,20 @@ final class Application // docmain
 			show();
 			
 			Message msg;
-			while(GetMessageA(&msg._winMsg, handle, 0, 0))
+			for(;;)
 			{
-				/+
-				//if(!IsDialogMessageA(handle, &msg._winMsg)) // Back to the old problems.
+				WaitMessage();
+				if(PeekMessageA(&msg._winMsg, handle, 0, 0, PM_REMOVE | PM_NOYIELD))
 				{
-					TranslateMessage(&msg._winMsg);
-					DispatchMessageA(&msg._winMsg);
+					/+
+					//if(!IsDialogMessageA(handle, &msg._winMsg)) // Back to the old problems.
+					{
+						TranslateMessage(&msg._winMsg);
+						DispatchMessageA(&msg._winMsg);
+					}
+					+/
+					gotMessage(msg);
 				}
-				+/
-				gotMessage(msg);
 				
 				if(!isHandleCreated)
 					break;
