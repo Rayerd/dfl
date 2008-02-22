@@ -631,7 +631,8 @@ final class Application // docmain
 		{
 			errdone = true;
 			ctnu = true;
-			close();
+			//close();
+			dispose();
 		}
 		
 		
@@ -639,7 +640,8 @@ final class Application // docmain
 		{
 			errdone = true;
 			ctnu = false;
-			close();
+			//close();
+			dispose();
 		}
 		
 		
@@ -697,6 +699,7 @@ final class Application // docmain
 		}
 		
 		
+		/+
 		private int inThread2()
 		{
 			try
@@ -761,6 +764,32 @@ final class Application // docmain
 				Sleep(200);
 			}
 			while(thread1);
+			
+			return ctnu;
+		}
+		+/
+		
+		bool doContinue()
+		{
+			assert(!isHandleCreated);
+			
+			show();
+			
+			Message msg;
+			while(GetMessageA(&msg._winMsg, handle, 0, 0))
+			{
+				/+
+				//if(!IsDialogMessageA(handle, &msg._winMsg)) // Back to the old problems.
+				{
+					TranslateMessage(&msg._winMsg);
+					DispatchMessageA(&msg._winMsg);
+				}
+				+/
+				gotMessage(msg);
+				
+				if(!isHandleCreated)
+					break;
+			}
 			
 			return ctnu;
 		}

@@ -504,6 +504,7 @@ class Form: ContainerControl, IDialogResult // docmain
 			wstyle |= WS_VISIBLE;
 			if(recreatingHandle)
 				goto show_normal;
+			// These fire onVisibleChanged as needed...
 			switch(windowState)
 			{
 				case FormWindowState.NORMAL: show_normal:
@@ -1815,6 +1816,7 @@ class Form: ContainerControl, IDialogResult // docmain
 			}
 		}
 		
+		// Ensure Control.onVisibleChanged is called AFTER onLoad, so onLoad can set the selection first.
 		super.onVisibleChanged(ea);
 	}
 	
@@ -2153,10 +2155,12 @@ class Form: ContainerControl, IDialogResult // docmain
 	{
 		load(this, ea);
 		
+		/+ // Moved to Control.onVisibleChanged
 		if(!(Application._compat & DflCompat.FORM_LOAD_096))
 		{
 			_selonecontrol();
 		}
+		+/
 	}
 	
 	
@@ -2562,7 +2566,7 @@ class Form: ContainerControl, IDialogResult // docmain
 						SetFocus(msg.hWnd);
 				}
 				+/
-				_selonecontrol();
+				//_selonecontrol();
 				// Prevent DefDlgProc from getting this message because it'll focus controls it shouldn't.
 				return;
 			

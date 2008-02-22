@@ -4258,6 +4258,18 @@ class Control: DObject, IWindow // docmain
 			alayout(this);
 		
 		visibleChanged(this, ea);
+		
+		if(visible)
+		{
+			// If no focus or the focused control is hidden, try to select something...
+			HWND hwfocus = GetFocus();
+			if(!hwfocus
+				|| (hwfocus == hwnd && !getStyle(ControlStyles.SELECTABLE))
+				|| !IsWindowVisible(hwfocus))
+			{
+				selectNextControl(null, true, true, true, false);
+			}
+		}
 	}
 	
 	
@@ -6187,8 +6199,10 @@ class Control: DObject, IWindow // docmain
 				exStyle |= WS_EX_CONTROLPARENT;
 			}
 			
+			bool vis = (style & WS_VISIBLE) != 0;
+			
 			Application.creatingControl(this);
-			hwnd = dfl.internal.utf.createWindowEx(exStyle, className, caption, style, x, y,
+			hwnd = dfl.internal.utf.createWindowEx(exStyle, className, caption, (style & ~WS_VISIBLE), x, y,
 				width, height, parent, menu, inst, param);
 			if(!hwnd)
 			{
@@ -6216,6 +6230,9 @@ class Control: DObject, IWindow // docmain
 				
 				goto create_err;
 			}
+			
+			if(vis)
+				doShow(); // Properly fires onVisibleChanged.
 		}
 		
 		//onHandleCreated(EventArgs.empty); // Called in WM_CREATE now.
