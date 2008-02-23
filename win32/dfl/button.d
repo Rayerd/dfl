@@ -210,17 +210,6 @@ abstract class ButtonBase: ControlSuperClass // docmain
 	///
 	final void isDefault(bool byes) // setter
 	{
-		if(byes)
-		{
-			if(isHandleCreated)
-				SetWindowLongA(handle, GWL_ID, IDOK);
-		}
-		else
-		{
-			if(isHandleCreated)
-				SetWindowLongA(handle, GWL_ID, 0);
-		}
-		
 		isdef = byes;
 	}
 	

@@ -1289,6 +1289,12 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
+	package final bool _hasSelStyle()
+	{
+		return getStyle(ControlStyles.SELECTABLE);
+	}
+	
+	
 	///
 	// Returns true if this control has the mouse capture.
 	final bool capture() // getter
@@ -3766,13 +3772,15 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	package static void _dlgselnext(HWND hwdlg, HWND hwcursel, bool forward,
+	package static void _dlgselnext(Form dlg, HWND hwcursel, bool forward,
 		bool tabStopOnly = true, bool selectableOnly = false,
 		bool nested = true, bool wrap = true,
 		HWND hwchildrenof = null)
 	{
+		//assert(cast(Form)Control.fromHandle(hwdlg) !is null);
+		
 		if(!hwchildrenof)
-			hwchildrenof = hwdlg;
+			hwchildrenof = dlg.handle;
 		if(forward)
 		{
 			bool foundthis = false, tdone = false;
@@ -3793,7 +3801,8 @@ class Control: DObject, IWindow // docmain
 							{
 								if(foundthis)
 								{
-									DefDlgProcA(hwdlg, WM_NEXTDLGCTL, cast(WPARAM)hw, MAKELPARAM(true, 0));
+									//DefDlgProcA(dlg.handle, WM_NEXTDLGCTL, cast(WPARAM)hw, MAKELPARAM(true, 0));
+									dlg._selectChild(hw);
 									tdone = true;
 									return false; // Break.
 								}
@@ -3812,7 +3821,8 @@ class Control: DObject, IWindow // docmain
 				// If it falls through without finding hwcursel, let it select the first one, even if not wrapping.
 				if(wrap || !foundthis)
 				{
-					DefDlgProcA(hwdlg, WM_NEXTDLGCTL, cast(WPARAM)hwfirst, MAKELPARAM(true, 0));
+					//DefDlgProcA(dlg.handle, WM_NEXTDLGCTL, cast(WPARAM)hwfirst, MAKELPARAM(true, 0));
+					dlg._selectChild(hwfirst);
 				}
 			}
 		}
@@ -3843,12 +3853,13 @@ class Control: DObject, IWindow // docmain
 				}, nested);
 			// If it falls through without finding hwcursel, let it select the last one, even if not wrapping.
 			if(HWND.init != hwprev)
-				DefDlgProcA(hwdlg, WM_NEXTDLGCTL, cast(WPARAM)hwprev, MAKELPARAM(true, 0));
+				//DefDlgProcA(dlg.handle, WM_NEXTDLGCTL, cast(WPARAM)hwprev, MAKELPARAM(true, 0));
+				dlg._selectChild(hwprev);
 		}
 	}
 	
 	
-	package final void _selectNextControl(Control ctrltoplevel,
+	package final void _selectNextControl(Form ctrltoplevel,
 		Control ctrl, bool forward, bool tabStopOnly, bool nested, bool wrap)
 	{
 		if(!created)
@@ -3857,10 +3868,16 @@ class Control: DObject, IWindow // docmain
 		assert(ctrltoplevel !is null);
 		assert(ctrltoplevel.isHandleCreated);
 		
-		_dlgselnext(ctrltoplevel.handle,
+		_dlgselnext(ctrltoplevel,
 			(ctrl && ctrl.isHandleCreated) ? ctrl.handle : null,
 			forward, tabStopOnly, !tabStopOnly, nested, wrap,
 			this.handle);
+	}
+	
+	
+	package final void _selectThisControl()
+	{
+		
 	}
 	
 	
@@ -3870,8 +3887,7 @@ class Control: DObject, IWindow // docmain
 		if(!created)
 			return;
 		
-		Control ctrltoplevel;
-		ctrltoplevel = findForm();
+		auto ctrltoplevel = findForm();
 		if(ctrltoplevel)
 			return _selectNextControl(ctrltoplevel, ctrl, forward, tabStopOnly, nested, wrap);
 	}
@@ -3893,8 +3909,7 @@ class Control: DObject, IWindow // docmain
 		if(!created)
 			return;
 		
-		Control ctrltoplevel;
-		ctrltoplevel = findForm();
+		auto ctrltoplevel = findForm();
 		if(ctrltoplevel && ctrltoplevel !is this)
 		{
 			/+ // Old...
@@ -3912,12 +3927,11 @@ class Control: DObject, IWindow // docmain
 			
 			if(directed)
 			{
-				_dlgselnext(ctrltoplevel.handle, this.handle, forward);
+				_dlgselnext(ctrltoplevel, this.handle, forward);
 			}
 			else
 			{
-				if(canSelect)
-					DefDlgProcA(ctrltoplevel.handle, WM_NEXTDLGCTL, cast(WPARAM)this.handle, MAKELPARAM(true, 0));
+				ctrltoplevel._selectChild(this);
 			}
 		}
 		else

@@ -1837,6 +1837,7 @@ class Form: ContainerControl, IDialogResult // docmain
 		{
 			if(isMdiChild)
 			{
+				// Good, make sure client window proc handles it too.
 				SendMessageA(mdiParent.mdiClient.handle, WM_MDIACTIVATE, cast(WPARAM)handle, 0);
 				return;
 			}
@@ -1873,7 +1874,8 @@ class Form: ContainerControl, IDialogResult // docmain
 			version(OLD_MODAL_CLOSE)
 			{
 				cbits |= CBits.NOCLOSING;
-				doHide();
+				//doHide();
+				setVisibleCore(false);
 				//if(!visible)
 				if(!wmodal)
 					onClosed(EventArgs.empty);
@@ -2212,7 +2214,8 @@ class Form: ContainerControl, IDialogResult // docmain
 					case IDOK:
 						if(acceptBtn)
 						{
-							acceptBtn.performClick();
+							if(HIWORD(msg.wParam) == BN_CLICKED)
+								acceptBtn.performClick();
 							return;
 						}
 						break;
@@ -2221,7 +2224,8 @@ class Form: ContainerControl, IDialogResult // docmain
 					case IDCANCEL:
 						if(cancelBtn)
 						{
-							cancelBtn.performClick();
+							if(HIWORD(msg.wParam) == BN_CLICKED)
+								cancelBtn.performClick();
 							return;
 						}
 						break;
@@ -2514,6 +2518,121 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	
+	package HWND _lastSel; // Last selected, excluding accept button!
+	package HWND _hadfocus; // Before being deactivated.
+	
+	
+	// Returns if there was a selection.
+	package final bool _selbefore()
+	{
+		bool wasselbtn = false;
+		if(_lastSel)
+		{
+			wasselbtn = true;
+			if(IsChild(this.hwnd, _lastSel))
+			{
+				auto lastctrl = Control.fromHandle(_lastSel);
+				if(lastctrl)
+				{
+					auto lastibc = cast(IButtonControl)lastctrl;
+					if(lastibc)
+						lastibc.notifyDefault(false);
+				}
+			}
+		}
+		return wasselbtn;
+	}
+	
+	package final void _seldeactivate()
+	{
+		if(!_selbefore())
+		{
+			if(acceptButton)
+				acceptButton.notifyDefault(false);
+		}
+	}
+	
+	package final void _selafter(Control ctrl, bool wasselbtn)
+	{
+		_lastSel = _lastSel.init;
+		auto ibc = cast(IButtonControl)ctrl;
+		if(ibc)
+		{
+			if(acceptButton)
+			{
+				if(ibc !is acceptButton)
+				{
+					acceptButton.notifyDefault(false);
+					_lastSel = ctrl.hwnd;
+				}
+				//else don't set _lastSel to accept button.
+			}
+			else
+			{
+				_lastSel = ctrl.hwnd;
+			}
+			
+			ibc.notifyDefault(true);
+		}
+		else
+		{
+			if(wasselbtn) // Only do it if there was a different button; don't keep doing this.
+			{
+				if(acceptButton)
+					acceptButton.notifyDefault(true);
+			}
+		}
+	}
+	
+	package final void _selactivate()
+	{
+		if(_lastSel)
+		{
+			Control ctrl = Control.fromChildHandle(_lastSel);
+			if(ctrl && ctrl._hasSelStyle())
+			{
+				auto ibc = cast(IButtonControl)ctrl;
+				if(ibc)
+				{
+					//ibc.notifyDefault(true);
+					ctrl.select();
+					return;
+				}
+				ctrl.select();
+			}
+			else
+			{
+				SetFocus(ctrl.hwnd);
+			}
+		}
+		if(acceptButton)
+		{
+			acceptButton.notifyDefault(true);
+		}
+	}
+	
+	// Child can be nested at any level.
+	package final void _selectChild(Control ctrl)
+	{
+		if(ctrl.canSelect)
+		{
+			bool wasselbtn = _selbefore();
+			
+			// Need to do some things, like select-all for edit.
+			DefDlgProcA(this.hwnd, WM_NEXTDLGCTL, cast(WPARAM)ctrl.hwnd, MAKELPARAM(true, 0));
+			
+			_selafter(ctrl, wasselbtn);
+		}
+	}
+	
+	package final void _selectChild(HWND hw)
+	{
+		Control ctrl = Control.fromHandle(hw);
+		if(ctrl)
+			_selectChild(ctrl);
+	}
+	
+	
 	private void _selonecontrol()
 	{
 		HWND hwfocus = GetFocus();
@@ -2570,6 +2689,17 @@ class Form: ContainerControl, IDialogResult // docmain
 				// Prevent DefDlgProc from getting this message because it'll focus controls it shouldn't.
 				return;
 			
+			case WM_NEXTDLGCTL:
+				if(LOWORD(msg.lParam))
+				{
+					_selectChild(cast(HWND)msg.wParam);
+				}
+				else
+				{
+					_dlgselnext(this, GetFocus(), msg.wParam != 0);
+				}
+				return;
+			
 			case WM_ENABLE:
 				if(msg.wParam)
 				{
@@ -2579,6 +2709,23 @@ class Form: ContainerControl, IDialogResult // docmain
 					}
 				}
 				break;
+			
+			case WM_ACTIVATE:
+				switch(LOWORD(msg.wParam))
+				{
+					case WA_ACTIVE:
+					case WA_CLICKACTIVE:
+						_selactivate();
+						break;
+					
+					case WA_INACTIVE:
+						_seldeactivate();
+						_lastSel = GetFocus();
+						break;
+					
+					default: ;
+				}
+				return;
 			
 			default:
 				version(NO_MDI)
@@ -2806,11 +2953,11 @@ class Form: ContainerControl, IDialogResult // docmain
 											{
 												case Keys.UP, Keys.LEFT:
 													// Backwards...
-													Control._dlgselnext(form.handle, m.hWnd, false, false, true);
+													Control._dlgselnext(form, m.hWnd, false, false, true);
 													break;
 												case Keys.DOWN, Keys.RIGHT:
 													// Forwards...
-													Control._dlgselnext(form.handle, m.hWnd, true, false, true);
+													Control._dlgselnext(form, m.hWnd, true, false, true);
 													break;
 												default:
 													assert(0);
@@ -2846,13 +2993,13 @@ class Form: ContainerControl, IDialogResult // docmain
 										{
 											// Backwards...
 											//DefDlgProcA(form.handle, WM_NEXTDLGCTL, 1, MAKELPARAM(FALSE, 0));
-											_dlgselnext(form.handle, m.hWnd, false);
+											_dlgselnext(form, m.hWnd, false);
 										}
 										else
 										{
 											// Forwards...
 											//DefDlgProcA(form.handle, WM_NEXTDLGCTL, 0, MAKELPARAM(FALSE, 0));
-											_dlgselnext(form.handle, m.hWnd, true);
+											_dlgselnext(form, m.hWnd, true);
 										}
 									}
 									return true; // Prevent.
@@ -2945,6 +3092,20 @@ class Form: ContainerControl, IDialogResult // docmain
 						}
 						break;
 					
+					case WM_LBUTTONUP:
+					case WM_MBUTTONUP:
+					case WM_RBUTTONUP:
+						if(m.hWnd != form.hwnd)
+						{
+							Control ctrl = Control.fromChildHandle(m.hWnd);
+							if(ctrl.focused && ctrl.canSelect)
+							{
+								bool wasselbtn = form._selbefore();
+								form._selafter(ctrl, wasselbtn);
+							}
+						}
+						break;
+					
 					default: ;
 				}
 			}
@@ -2964,6 +3125,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	
+	/+
 	package final bool _dlgescape()
 	{
 		if(cancelBtn)
@@ -2973,6 +3135,7 @@ class Form: ContainerControl, IDialogResult // docmain
 		}
 		return false;
 	}
+	+/
 	
 	
 	final void _recalcClientSize()
