@@ -2157,12 +2157,13 @@ class Form: ContainerControl, IDialogResult // docmain
 	{
 		load(this, ea);
 		
-		/+ // Moved to Control.onVisibleChanged
 		if(!(Application._compat & DflCompat.FORM_LOAD_096))
 		{
-			_selonecontrol();
+			// Needed anyway because MDI client form needs it.
+			HWND hwfocus = GetFocus();
+			if(!hwfocus || !IsChild(hwnd, hwfocus))
+				_selectNextControl(this, null, true, true, true, false);
 		}
-		+/
 	}
 	
 	
@@ -2550,6 +2551,7 @@ class Form: ContainerControl, IDialogResult // docmain
 			if(acceptButton)
 				acceptButton.notifyDefault(false);
 		}
+		_lastSel = GetFocus();
 	}
 	
 	package final void _selafter(Control ctrl, bool wasselbtn)
@@ -2720,14 +2722,25 @@ class Form: ContainerControl, IDialogResult // docmain
 					
 					case WA_INACTIVE:
 						_seldeactivate();
-						_lastSel = GetFocus();
 						break;
 					
 					default: ;
 				}
 				return;
 			
-			default:
+			// Note: WM_MDIACTIVATE here is to the MDI child forms.
+			case WM_MDIACTIVATE:
+				if(cast(HWND)msg.lParam == hwnd)
+				{
+					_selactivate();
+				}
+				else if(cast(HWND)msg.wParam == hwnd)
+				{
+					_seldeactivate();
+				}
+				goto def_def;
+			
+			default: def_def:
 				version(NO_MDI)
 				{
 					//msg.result = DefDlgProcA(msg.hWnd, msg.msg, msg.wParam, msg.lParam);
@@ -2871,7 +2884,8 @@ class Form: ContainerControl, IDialogResult // docmain
 			version(NO_MDI)
 				const bool mdistuff = false;
 			else
-				bool mdistuff = form.mdiClient && form.mdiClient.isHandleCreated && IsChild(form.mdiClient.handle, m.hWnd);
+				bool mdistuff = form.mdiClient && form.mdiClient.isHandleCreated
+					&& (form.mdiClient.handle == m.hWnd || IsChild(form.mdiClient.handle, m.hWnd));
 			
 			if(mdistuff)
 			{
