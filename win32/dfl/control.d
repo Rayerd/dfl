@@ -968,17 +968,21 @@ class Control: DObject, IWindow // docmain
 	
 	private void _ctrladded(ControlEventArgs cea)
 	{
-		/+
-		if(!(_exStyle() & WS_EX_CONTROLPARENT))
+		if(Application._compat & DflCompat.CONTROL_PARENT_096)
 		{
-			if(!(cbits & CBits.FORM))
+			if(!(_exStyle() & WS_EX_CONTROLPARENT))
 			{
-				//if((cea.control._style() & WS_TABSTOP) || (cea.control._exStyle() & WS_EX_CONTROLPARENT))
-					_exStyle(_exStyle() | WS_EX_CONTROLPARENT);
+				if(!(cbits & CBits.FORM))
+				{
+					//if((cea.control._style() & WS_TABSTOP) || (cea.control._exStyle() & WS_EX_CONTROLPARENT))
+						_exStyle(_exStyle() | WS_EX_CONTROLPARENT);
+				}
 			}
 		}
-		+/
-		assert(getStyle(ControlStyles.CONTAINER_CONTROL), "Control added to non-container parent");
+		else
+		{
+			assert(getStyle(ControlStyles.CONTAINER_CONTROL), "Control added to non-container parent");
+		}
 		
 		onControlAdded(cea);
 	}

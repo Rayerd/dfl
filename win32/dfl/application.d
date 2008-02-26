@@ -142,6 +142,9 @@ deprecated enum DflCompat
 	
 	// Call onLoad/load and focus a control at old time.
 	FORM_LOAD_096 = 0x10,
+	
+	// Parent controls now need to be container-controls; this removes that limit.
+	CONTROL_PARENT_096 = 0x20,
 }
 
 

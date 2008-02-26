@@ -2895,6 +2895,12 @@ class Form: ContainerControl, IDialogResult // docmain
 			}
 			else if(m.hWnd == form.handle || IsChild(form.handle, m.hWnd))
 			{
+				{
+					HWND hwfocus = GetFocus();
+					if(IsChild(form.handle, hwfocus))
+						form._lastSel = hwfocus; // ?
+				}
+				
 				switch(m.msg)
 				{
 					// Process shortcut keys.
