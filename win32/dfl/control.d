@@ -978,6 +978,7 @@ class Control: DObject, IWindow // docmain
 			}
 		}
 		+/
+		assert(getStyle(ControlStyles.CONTAINER_CONTROL), "Control added to non-container parent");
 		
 		onControlAdded(cea);
 	}
@@ -6207,8 +6208,8 @@ class Control: DObject, IWindow // docmain
 			wexstyle = exStyle;
 			wstyle = style;
 			
-			//if((ctrlStyle & ControlStyles.CONTAINER_CONTROL) && (style & WS_CHILD))
-			if(style & WS_CHILD)
+			//if(style & WS_CHILD) // Breaks context-help.
+			if((ctrlStyle & ControlStyles.CONTAINER_CONTROL) && (style & WS_CHILD))
 			{
 				exStyle |= WS_EX_CONTROLPARENT;
 			}

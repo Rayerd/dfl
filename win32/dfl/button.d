@@ -348,6 +348,8 @@ class Button: ButtonBase, IButtonControl // docmain
 				{
 					// Fixing the thick border of a default button when enabling and disabling it.
 					
+					// To-do: check if correct implementation.
+					
 					DWORD bst;
 					bst = _bstyle();
 					if(bst & BS_DEFPUSHBUTTON)

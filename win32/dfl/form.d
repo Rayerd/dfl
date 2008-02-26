@@ -2519,7 +2519,8 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	
-	package HWND _lastSel; // Last selected, excluding accept button!
+	package HWND _lastSelBtn; // Last selected button (not necessarily focused), excluding accept button!
+	package HWND _lastSel; // Last senected and focused control.
 	package HWND _hadfocus; // Before being deactivated.
 	
 	
@@ -2527,12 +2528,12 @@ class Form: ContainerControl, IDialogResult // docmain
 	package final bool _selbefore()
 	{
 		bool wasselbtn = false;
-		if(_lastSel)
+		if(_lastSelBtn)
 		{
 			wasselbtn = true;
-			if(IsChild(this.hwnd, _lastSel))
+			if(IsChild(this.hwnd, _lastSelBtn))
 			{
-				auto lastctrl = Control.fromHandle(_lastSel);
+				auto lastctrl = Control.fromHandle(_lastSelBtn);
 				if(lastctrl)
 				{
 					auto lastibc = cast(IButtonControl)lastctrl;
@@ -2544,19 +2545,9 @@ class Form: ContainerControl, IDialogResult // docmain
 		return wasselbtn;
 	}
 	
-	package final void _seldeactivate()
-	{
-		if(!_selbefore())
-		{
-			if(acceptButton)
-				acceptButton.notifyDefault(false);
-		}
-		_lastSel = GetFocus();
-	}
-	
 	package final void _selafter(Control ctrl, bool wasselbtn)
 	{
-		_lastSel = _lastSel.init;
+		_lastSelBtn = _lastSelBtn.init;
 		auto ibc = cast(IButtonControl)ctrl;
 		if(ibc)
 		{
@@ -2565,13 +2556,13 @@ class Form: ContainerControl, IDialogResult // docmain
 				if(ibc !is acceptButton)
 				{
 					acceptButton.notifyDefault(false);
-					_lastSel = ctrl.hwnd;
+					_lastSelBtn = ctrl.hwnd;
 				}
-				//else don't set _lastSel to accept button.
+				//else don't set _lastSelBtn to accept button.
 			}
 			else
 			{
-				_lastSel = ctrl.hwnd;
+				_lastSelBtn = ctrl.hwnd;
 			}
 			
 			ibc.notifyDefault(true);
@@ -2584,6 +2575,16 @@ class Form: ContainerControl, IDialogResult // docmain
 					acceptButton.notifyDefault(true);
 			}
 		}
+	}
+	
+	package final void _seldeactivate()
+	{
+		if(!_selbefore())
+		{
+			if(acceptButton)
+				acceptButton.notifyDefault(false);
+		}
+		//_lastSel = GetFocus(); // Not reliable, especially when minimizing.
 	}
 	
 	package final void _selactivate()
@@ -2624,6 +2625,8 @@ class Form: ContainerControl, IDialogResult // docmain
 			DefDlgProcA(this.hwnd, WM_NEXTDLGCTL, cast(WPARAM)ctrl.hwnd, MAKELPARAM(true, 0));
 			
 			_selafter(ctrl, wasselbtn);
+			
+			_lastSel = ctrl.hwnd;
 		}
 	}
 	
