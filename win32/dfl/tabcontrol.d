@@ -371,8 +371,7 @@ class TabControlBase: ControlSuperClass
 		_initTabcontrol();
 		
 		wstyle |= WS_TABSTOP;
-		//wexstyle |= WS_EX_CONTROLPARENT; // ?
-		ctrlStyle |= ControlStyles.SELECTABLE; // Not considered a container control even though it contains TabPage`s or whatever.
+		ctrlStyle |= ControlStyles.SELECTABLE | ControlStyles.CONTAINER_CONTROL;
 		wclassStyle = tabcontrolClassStyle;
 	}
 	
