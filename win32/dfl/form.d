@@ -2519,6 +2519,32 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	
+	package BOOL _isNonMdiChild(HWND hw)
+	{
+		assert(isHandleCreated);
+		
+		if(!hw || hw == this.hwnd)
+			return false;
+		
+		if(IsChild(this.hwnd, hw))
+		{
+			version(NO_MDI)
+			{
+			}
+			else
+			{
+				if(mdiClient && mdiClient.isHandleCreated)
+				{
+					if(IsChild(mdiClient.hwnd, hw))
+						return false; // !
+				}
+			}
+			return true;
+		}
+		return false;
+	}
+	
+	
 	package HWND _lastSelBtn; // Last selected button (not necessarily focused), excluding accept button!
 	package HWND _lastSel; // Last senected and focused control.
 	package HWND _hadfocus; // Before being deactivated.
@@ -2531,7 +2557,8 @@ class Form: ContainerControl, IDialogResult // docmain
 		if(_lastSelBtn)
 		{
 			wasselbtn = true;
-			if(IsChild(this.hwnd, _lastSelBtn))
+			//if(IsChild(this.hwnd, _lastSelBtn))
+			if(_isNonMdiChild(_lastSelBtn))
 			{
 				auto lastctrl = Control.fromHandle(_lastSelBtn);
 				if(lastctrl)
@@ -2589,7 +2616,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	
 	package final void _selactivate()
 	{
-		if(_lastSel)
+		if(_lastSel && _isNonMdiChild(_lastSel))
 		{
 			Control ctrl = Control.fromChildHandle(_lastSel);
 			if(ctrl && ctrl._hasSelStyle())
@@ -2691,6 +2718,21 @@ class Form: ContainerControl, IDialogResult // docmain
 				}
 				+/
 				//_selonecontrol();
+				
+				version(NO_MDI)
+				{
+				}
+				else
+				{
+					if(isMdiChild)
+					{
+						// ?
+						//msg.result = DefMDIChildProcA(msg.hWnd, msg.msg, msg.wParam, msg.lParam);
+						msg.result = dfl.internal.utf.defMDIChildProc(msg.hWnd, msg.msg, msg.wParam, msg.lParam);
+						return;
+					}
+				}
+				
 				// Prevent DefDlgProc from getting this message because it'll focus controls it shouldn't.
 				return;
 			
@@ -2721,9 +2763,39 @@ class Form: ContainerControl, IDialogResult // docmain
 					case WA_ACTIVE:
 					case WA_CLICKACTIVE:
 						_selactivate();
+						
+						/+
+						version(NO_MDI)
+						{
+						}
+						else
+						{
+							if(isMdiContainer)
+							{
+								auto amc = getActiveMdiChild();
+								if(amc)
+									amc._selactivate();
+							}
+						}
+						+/
 						break;
 					
 					case WA_INACTIVE:
+						/+
+						version(NO_MDI)
+						{
+						}
+						else
+						{
+							if(isMdiContainer)
+							{
+								auto amc = getActiveMdiChild();
+								if(amc)
+									amc._seldeactivate();
+							}
+						}
+						+/
+						
 						_seldeactivate();
 						break;
 					
@@ -2897,7 +2969,8 @@ class Form: ContainerControl, IDialogResult // docmain
 			{
 				{
 					HWND hwfocus = GetFocus();
-					if(IsChild(form.handle, hwfocus))
+					// Don't need _isNonMdiChild here; mdistuff excludes MDI stuff.
+					if(hwfocus != form._lastSel && IsChild(form.handle, hwfocus))
 						form._lastSel = hwfocus; // ?
 				}
 				
