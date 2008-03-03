@@ -6,11 +6,13 @@
 module dfl.imagelist;
 
 import dfl.base, dfl.drawing, dfl.internal.winapi;
+import dfl.collections;
 
 
 ///
 class ImageList // docmain
 {
+	///
 	class ImageCollection
 	{
 		protected this()
@@ -18,7 +20,90 @@ class ImageList // docmain
 		}
 		
 		
-		package Image[] _images;
+		void insert(int index, Image img)
+		{
+			if(index >= _images.length)
+			{
+				add(img);
+			}
+			else
+			{
+				assert(0, "Must add images to the end of the image list");
+			}
+		}
+		
+		
+		package:
+		
+		Image[] _images;
+		
+		
+		void _adding(size_t idx, Image val)
+		{
+			assert(val !is null);
+			
+			switch(val._imgtype(null))
+			{
+				case 1:
+				case 2:
+					break;
+				default:
+					debug
+					{
+						assert(0, "Image list: invalid image type");
+					}
+					_unableimg();
+			}
+			
+			if(val.size != imageSize)
+			{
+				debug
+				{
+					assert(0, "Image list: invalid image size");
+				}
+				_unableimg();
+			}
+		}
+		
+		
+		void _added(size_t idx, Image val)
+		{
+			if(isHandleCreated)
+			{
+				if(idx >= _images.length)
+				{
+					_addimg(val);
+				}
+				else
+				{
+					assert(0);
+				}
+			}
+		}
+		
+		
+		void _removed(size_t idx, Image val)
+		{
+			if(isHandleCreated)
+			{
+				if(size_t.max == idx) // Clear all.
+				{
+					ImageList_Remove(handle, -1);
+				}
+				else
+				{
+					ImageList_Remove(handle, idx);
+				}
+			}
+		}
+		
+		
+		public:
+		
+		mixin ListWrapArray!(Image, _images,
+			_adding, _added,
+			_blankListCallback!(Image), _removed,
+			false, false, false);
 	}
 	
 	
@@ -107,13 +192,20 @@ class ImageList // docmain
 		ImageList_Draw(handle, index, g.handle, x, y, ILD_NORMAL);
 	}
 	
-	/+
 	/// ditto
 	// stretch
 	final void draw(Graphics g, int x, int y, int width, int height, int index)
 	{
+		// ImageList_DrawEx operates differently if the width or height is zero
+		// so bail out if zero and pretend the zero size image was drawn.
+		if(!width)
+			return;
+		if(!height)
+			return;
+		
+		ImageList_DrawEx(handle, index, g.handle, x, y, width, height,
+			CLR_NONE, CLR_NONE, ILD_NORMAL); // ?
 	}
-	+/
 	
 	
 	///
@@ -125,6 +217,7 @@ class ImageList // docmain
 	deprecated alias isHandleCreated handleCreated;
 	
 	
+	///
 	final HIMAGELIST handle() // getter
 	{
 		if(!isHandleCreated)
@@ -133,10 +226,30 @@ class ImageList // docmain
 	}
 	
 	
-	~this()
+	///
+	void dispose()
+	{
+		return dispose(true);
+	}
+	
+	/// ditto
+	void dispose(bool disposing)
 	{
 		if(isHandleCreated)
 			ImageList_Destroy(_hil);
+		_hil = HIMAGELIST.init;
+		
+		if(disposing)
+		{
+			//_cimages._images = null; // Not GC-safe in dtor.
+			//_cimages = null; // Could cause bad things.
+		}
+	}
+	
+	
+	~this()
+	{
+		dispose();
 	}
 	
 	
@@ -159,20 +272,69 @@ class ImageList // docmain
 		}
 		
 		UINT flags = 0;
-		/+
 		switch(_depth)
 		{
 			case ColorDepth.DEPTH_4BIT: flags = ILC_COLOR4; break;
-			default: case DEPTH_8BIT: flags = ILC_COLOR8; break;
+			default: case ColorDepth.DEPTH_8BIT: flags = ILC_COLOR8; break;
 			case ColorDepth.DEPTH_16BIT: flags = ILC_COLOR16; break;
 			case ColorDepth.DEPTH_24BIT: flags = ILC_COLOR24; break;
 			case ColorDepth.DEPTH_32BIT: flags = ILC_COLOR32; break;
 		}
-		+/
 		flags |= _depth;
 		flags |= ILC_MASK; // ?
 		
-		_hil = ImageList_Create(_w, _h, flags, _cimages._images.length, 65535); // ?
+		// Note: cGrow is not a limit, but how many images to preallocate each grow.
+		_hil = ImageList_Create(_w, _h, flags, _cimages._images.length, 8 + _cimages._images.length / 4);
+		if(!_hil)
+			throw new Exception("Unable to create image list");
+		
+		foreach(img; _cimages._images)
+		{
+			_addimg(img);
+		}
+	}
+	
+	
+	void _unableimg()
+	{
+		throw new DflException("Unable to add image to image list");
+	}
+	
+	
+	void _addimg(Image img)
+	{
+		assert(isHandleCreated);
+		
+		HGDIOBJ hgo;
+		int result;
+		switch(img._imgtype(&hgo))
+		{
+			case 1:
+				{
+					COLORREF cr;
+					if(_transcolor == Color.empty
+						|| _transcolor == Color.transparent)
+					{
+						cr = CLR_NONE; // ?
+					}
+					else
+					{
+						cr = _transcolor.toRgb();
+					}
+					result = ImageList_AddMasked(_hil, cast(HBITMAP)hgo, cr);
+				}
+				break;
+			
+			case 2:
+				result = ImageList_AddIcon(_hil, cast(HICON)hgo);
+				break;
+			
+			default:
+				result = -1;
+		}
+		
+		//if(-1 == result)
+		//	_unableimg();
 	}
 }
 

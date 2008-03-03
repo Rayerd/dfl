@@ -237,7 +237,17 @@ final class Application // docmain
 											ULONG_PTR ul;
 											activateActCtx(hac, &ul);
 											
-											_initCommonControls(ICC_STANDARD_CLASSES); // ?
+											_initCommonControls(ICC_STANDARD_CLASSES);
+											
+											/+ // Not helping.
+											// Fix issue with image lists now showing...
+											PostMessageA(null, wmDfl, 0, 0); // Posts to this thread.
+											//Application.doEvents();
+											{
+												MSG msg;
+												GetMessageA(&msg, null, wmDfl, wmDfl);
+											}
+											+/
 										}
 										else
 										{

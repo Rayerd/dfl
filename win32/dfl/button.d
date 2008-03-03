@@ -407,16 +407,19 @@ class Button: ButtonBase, IButtonControl // docmain
 	}
 	body
 	{
+		/+
 		if(_picbm)
 		{
 			_picbm.dispose();
 			_picbm = null;
 		}
+		+/
 		
 		_img = null; // In case of exception.
 		LONG imgst = 0;
 		if(img)
 		{
+			/+
 			if(cast(Bitmap)img)
 			{
 				imgst = BS_BITMAP;
@@ -427,21 +430,30 @@ class Button: ButtonBase, IButtonControl // docmain
 			}
 			else
 			{
-				version(Tango)
+				if(cast(Picture)img)
 				{
-				}
-				else
-				{
-					if(cast(Picture)img)
-					{
-						_picbm = (cast(Picture)img).toBitmap();
-						imgst = BS_BITMAP;
-						goto not_unsupported;
-					}
+					_picbm = (cast(Picture)img).toBitmap();
+					imgst = BS_BITMAP;
+					goto not_unsupported;
 				}
 				
-				throw new DflException("Unsupported image format.");
+				throw new DflException("Unsupported image format");
 				not_unsupported: ;
+			}
+			+/
+			switch(img._imgtype(null))
+			{
+				case 1:
+					imgst = BS_BITMAP;
+					break;
+				
+				case 2:
+					imgst = BS_ICON;
+					break;
+				
+				default:
+					throw new DflException("Unsupported image format");
+					not_unsupported: ;
 			}
 		}
 		
@@ -466,6 +478,7 @@ class Button: ButtonBase, IButtonControl // docmain
 		WPARAM wparam = 0;
 		LPARAM lparam = 0;
 		
+		/+
 		if(bsImageStyle & BS_BITMAP)
 		{
 			wparam = IMAGE_BITMAP;
@@ -480,6 +493,22 @@ class Button: ButtonBase, IButtonControl // docmain
 		{
 			return;
 		}
+		+/
+		HGDIOBJ hgo;
+		switch(_img._imgtype(&hgo))
+		{
+			case 1:
+				wparam = BS_BITMAP;
+				break;
+			
+			case 2:
+				wparam = BS_ICON;
+				break;
+			
+			default:
+				return;
+		}
+		lparam = cast(LPARAM)hgo;
 		
 		//assert(lparam);
 		SendMessageA(handle, BM_SETIMAGE, wparam, lparam);
@@ -499,18 +528,20 @@ class Button: ButtonBase, IButtonControl // docmain
 	{
 		super.onHandleDestroyed(ea);
 		
+		/+
 		if(_picbm)
 		{
 			_picbm.dispose();
 			_picbm = null;
 		}
+		+/
 	}
 	
 	
 	private:
 	DialogResult dresult = DialogResult.NONE;
 	Image _img = null;
-	Bitmap _picbm = null; // If -_img- is a Picture, need to keep a separate Bitmap.
+	//Bitmap _picbm = null; // If -_img- is a Picture, need to keep a separate Bitmap.
 }
 
 

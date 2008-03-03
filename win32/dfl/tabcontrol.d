@@ -366,8 +366,6 @@ class TabControlBase: ControlSuperClass
 {
 	this()
 	{
-		_initCommonControls(ICC_TAB_CLASSES);
-		
 		_initTabcontrol();
 		
 		wstyle |= WS_TABSTOP;

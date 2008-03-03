@@ -400,8 +400,6 @@ class StatusBar: ControlSuperClass // docmain
 	///
 	this()
 	{
-		_initCommonControls(ICC_BAR_CLASSES);
-		
 		_initStatusbar();
 		
 		_issimple = true;

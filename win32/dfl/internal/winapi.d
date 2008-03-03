@@ -1292,6 +1292,20 @@ extern(Windows):
 	}
 	
 	
+	enum
+	{
+		LVSIL_NORMAL = 0,
+		LVSIL_SMALL = 1,
+		LVSIL_STATE = 2,
+	}
+	
+	
+	enum
+	{
+		I_IMAGECALLBACK = -1,
+	}
+	
+	
 	enum: UINT
 	{
 		TCM_FIRST = 0x1300,
@@ -2790,6 +2804,10 @@ extern(Windows):
 	BOOL ImageList_Destroy(HIMAGELIST himl);	
 	BOOL ImageList_Draw(HIMAGELIST himl, int i, HDC hdcDst, int x, int y, UINT fStyle);
 	BOOL ImageList_DrawEx(HIMAGELIST himl, int i, HDC hdcDst, int x, int y, int dx, int dy, COLORREF rgbBk, COLORREF rgbFg, UINT fStyle);
+	int ImageList_Add(HIMAGELIST himl, HBITMAP hbmImage, HBITMAP hbmMask);
+	int ImageList_AddIcon(HIMAGELIST himl, HICON hicon);
+	int ImageList_AddMasked(HIMAGELIST himl, HBITMAP hbmImage, COLORREF crMask);
+	BOOL ImageList_Remove(HIMAGELIST himl, int i);
 
 //} // Temporary.
 

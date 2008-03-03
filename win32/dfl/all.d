@@ -62,5 +62,6 @@ public import dfl.base, dfl.menu, dfl.control, dfl.usercontrol,
 	dfl.registry, dfl.notifyicon, dfl.collections, dfl.data,
 	dfl.clipboard, dfl.commondialog, dfl.richtextbox, dfl.tooltip,
 	dfl.combobox, dfl.treeview, dfl.picturebox, dfl.tabcontrol,
-	dfl.listview, dfl.statusbar, dfl.progressbar, dfl.resources;
+	dfl.listview, dfl.statusbar, dfl.progressbar, dfl.resources,
+	dfl.imagelist;
 

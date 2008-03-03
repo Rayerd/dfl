@@ -938,6 +938,14 @@ abstract class Image // docmain
 	{
 		return size.height;
 	}
+	
+	
+	int _imgtype(HGDIOBJ* ph) // internal
+	{
+		if(ph)
+			*ph = HGDIOBJ.init;
+		return 0; // 1 = bitmap; 2 = icon.
+	}
 }
 
 
@@ -1085,6 +1093,14 @@ class Bitmap: Image // docmain
 	{
 		if(owned)
 			dispose();
+	}
+	
+	
+	override int _imgtype(HGDIOBJ* ph) // internal
+	{
+		if(ph)
+			*ph = cast(HGDIOBJ)hbm;
+		return 1;
 	}
 	
 	
@@ -1280,6 +1296,12 @@ class Picture: Image // docmain
 	///
 	void dispose()
 	{
+		if(HBITMAP.init != _hbmimgtype)
+		{
+			DeleteObject(_hbmimgtype);
+			_hbmimgtype = HBITMAP.init;
+		}
+		
 		if(ipic)
 		{
 			ipic.Release();
@@ -1337,11 +1359,10 @@ class Picture: Image // docmain
 	
 	final Bitmap toBitmap()
 	{
-		Graphics g;
 		Bitmap result;
-		g = Graphics.getScreen();
+		scope Graphics g = Graphics.getScreen();
 		result = toBitmap(g);
-		g.dispose();
+		//g.dispose(); // scope'd
 		return result;
 	}
 	
@@ -1349,6 +1370,25 @@ class Picture: Image // docmain
 	final Bitmap toBitmap(Graphics g)
 	{
 		return toBitmap(g.handle);
+	}
+	
+	
+	HBITMAP _hbmimgtype;
+	
+	override int _imgtype(HGDIOBJ* ph) // internal
+	{
+		if(ph)
+		{
+			if(HBITMAP.init == _hbmimgtype)
+			{
+				scope Graphics g = Graphics.getScreen();
+				_hbmimgtype = toHBitmap(g.handle);
+				//g.dispose(); // scope'd
+			}
+			
+			*ph = _hbmimgtype;
+		}
+		return 1;
 	}
 	
 	
@@ -2717,6 +2757,14 @@ class Icon: Image // docmain
 	{
 		if(owned)
 			dispose();
+	}
+	
+	
+	int _imgtype(HGDIOBJ* ph) // internal
+	{
+		if(ph)
+			*ph = cast(HGDIOBJ)hi;
+		return 2;
 	}
 	
 	

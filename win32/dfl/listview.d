@@ -9,6 +9,7 @@ private import dfl.internal.dlib, dfl.internal.clib;
 
 private import dfl.base, dfl.control, dfl.internal.winapi, dfl.application;
 private import dfl.event, dfl.drawing, dfl.collections, dfl.internal.utf;
+private import dfl.imagelist;
 
 
 private extern(Windows) void _initListview();
@@ -392,12 +393,29 @@ class ListViewItem: DObject
 	}
 	
 	
+	///
+	final void imageIndex(int index) // setter
+	{
+		this._imgidx = index;
+		
+		if(lview && lview.created)
+			lview.updateItem(this);
+	}
+	
+	/// ditto
+	final int imageIndex() // getter
+	{
+		return _imgidx;
+	}
+	
+	
 	private:
 	package ListView lview = null;
-	char[] _txt;
-	package CallText calltxt;
 	Object _tag = null;
 	package ListViewSubItemCollection isubs = null;
+	int _imgidx = -1;
+	char[] _txt;
+	package CallText calltxt;
 }
 
 
@@ -1175,8 +1193,6 @@ class ListView: ControlSuperClass // docmain
 	
 	this()
 	{
-		_initCommonControls(ICC_LISTVIEW_CLASSES);
-		
 		_initListview();
 		
 		litems = new ListViewItemCollection(this);
@@ -1185,7 +1201,7 @@ class ListView: ControlSuperClass // docmain
 		selobjcollection = new SelectedItemCollection(this);
 		checkedis = new CheckedIndexCollection(this);
 		
-		wstyle |= WS_TABSTOP | LVS_ALIGNTOP | LVS_AUTOARRANGE; // LVS_SHAREIMAGELISTS
+		wstyle |= WS_TABSTOP | LVS_ALIGNTOP | LVS_AUTOARRANGE | LVS_SHAREIMAGELISTS;
 		wexstyle |= WS_EX_CLIENTEDGE;
 		ctrlStyle |= ControlStyles.SELECTABLE;
 		wclassStyle = listviewClassStyle;
@@ -1906,6 +1922,63 @@ class ListView: ControlSuperClass // docmain
 	}
 	
 	
+	///
+	void largeImageList(ImageList imglist) // setter
+	{
+		if(isHandleCreated)
+		{
+			prevwproc(LVM_SETIMAGELIST, LVSIL_NORMAL,
+				cast(LPARAM)(imglist ? imglist.handle : cast(HIMAGELIST)null));
+		}
+		
+		_lgimglist = imglist;
+	}
+	
+	/// ditto
+	ImageList largeImageList() // getter
+	{
+		return _lgimglist;
+	}
+	
+	
+	///
+	void smallImageList(ImageList imglist) // setter
+	{
+		if(isHandleCreated)
+		{
+			prevwproc(LVM_SETIMAGELIST, LVSIL_SMALL,
+				cast(LPARAM)(imglist ? imglist.handle : cast(HIMAGELIST)null));
+		}
+		
+		_smimglist = imglist;
+	}
+	
+	/// ditto
+	ImageList smallImageList() // getter
+	{
+		return _smimglist;
+	}
+	
+	
+	///
+	void stateImageList(ImageList imglist) // setter
+	{
+		if(isHandleCreated)
+		{
+			prevwproc(LVM_SETIMAGELIST, LVSIL_STATE,
+				cast(LPARAM)(imglist ? imglist.handle : cast(HIMAGELIST)null));
+		}
+		
+		_stimglist = imglist;
+	}
+	
+	/// ditto
+	ImageList stateImageList() // getter
+	{
+		return _stimglist;
+	}
+	
+	
 	// TODO:
 	//  itemActivate, itemDrag
 	//CancelEventHandler selectedIndexChanging; // ?
@@ -2119,6 +2192,13 @@ class ListView: ControlSuperClass // docmain
 		color = foreColor;
 		prevwproc(LVM_SETTEXTCOLOR, 0, cast(LPARAM)color.toRgb());
 		
+		if(_lgimglist)
+			prevwproc(LVM_SETIMAGELIST, LVSIL_NORMAL, cast(LPARAM)_lgimglist.handle);
+		if(_smimglist)
+			prevwproc(LVM_SETIMAGELIST, LVSIL_SMALL, cast(LPARAM)_smimglist.handle);
+		if(_stimglist)
+			prevwproc(LVM_SETIMAGELIST, LVSIL_STATE, cast(LPARAM)_stimglist.handle);
+		
 		cols.doListHeaders();
 		litems.doListItems();
 		
@@ -2152,12 +2232,19 @@ class ListView: ControlSuperClass // docmain
 								
 								if(!lvdi.item.iSubItem) // Item.
 								{
-									lvdi.item.pszText = item.calltxt.ansi;
+									if(lvdi.item.mask & LVIF_IMAGE)
+										lvdi.item.iImage = item._imgidx;
+									
+									if(lvdi.item.mask & LVIF_TEXT)
+										lvdi.item.pszText = item.calltxt.ansi;
 								}
 								else // Sub item.
 								{
-									if(lvdi.item.iSubItem <= item.subItems.length)
-										lvdi.item.pszText = item.subItems[lvdi.item.iSubItem - 1].calltxt.ansi;
+									if(lvdi.item.mask & LVIF_TEXT)
+									{
+										if(lvdi.item.iSubItem <= item.subItems.length)
+											lvdi.item.pszText = item.subItems[lvdi.item.iSubItem - 1].calltxt.ansi;
+									}
 								}
 							}
 							break;
@@ -2175,12 +2262,19 @@ class ListView: ControlSuperClass // docmain
 								
 								if(!lvdi.item.iSubItem) // Item.
 								{
-									lvdi.item.pszText = item.calltxt.unicode;
+									if(lvdi.item.mask & LVIF_IMAGE)
+										lvdi.item.iImage = item._imgidx;
+									
+									if(lvdi.item.mask & LVIF_TEXT)
+										lvdi.item.pszText = item.calltxt.unicode;
 								}
 								else // Sub item.
 								{
-									if(lvdi.item.iSubItem <= item.subItems.length)
-										lvdi.item.pszText = item.subItems[lvdi.item.iSubItem - 1].calltxt.unicode;
+									if(lvdi.item.mask & LVIF_TEXT)
+									{
+										if(lvdi.item.iSubItem <= item.subItems.length)
+											lvdi.item.pszText = item.subItems[lvdi.item.iSubItem - 1].calltxt.unicode;
+									}
 								}
 							}
 							break;
@@ -2352,6 +2446,7 @@ class ListView: ControlSuperClass // docmain
 	SortOrder _sortorder = SortOrder.NONE;
 	CheckedIndexCollection checkedis;
 	int delegate(ListViewItem, ListViewItem) _sortproc;
+	ImageList _lgimglist, _smimglist, _stimglist;
 	
 	
 	int _defsortproc(ListViewItem a, ListViewItem b)
@@ -2405,7 +2500,7 @@ class ListView: ControlSuperClass // docmain
 	
 	// If -subItemIndex- is 0 it's an item not a sub item.
 	// Returns the insertion index or -1 on failure.
-	package final LRESULT _ins(int index, LPARAM lparam, char[] itemText, int subItemIndex)
+	package final LRESULT _ins(int index, LPARAM lparam, char[] itemText, int subItemIndex, int imageIndex = -1)
 	in
 	{
 		assert(created);
@@ -2419,18 +2514,24 @@ class ListView: ControlSuperClass // docmain
 		
 		LV_ITEMA lvi;
 		lvi.mask = LVIF_TEXT | LVIF_PARAM;
+		//if(-1 != imageIndex)
+		if(!subItemIndex)
+			lvi.mask |= LVIF_IMAGE;
 		lvi.iItem = index;
 		lvi.iSubItem = subItemIndex;
 		//lvi.pszText = toStringz(itemText);
 		lvi.pszText = LPSTR_TEXTCALLBACKA;
 		lvi.lParam = lparam;
+		//lvi.iImage = imageIndex;
+		lvi.iImage = I_IMAGECALLBACK;
 		return prevwproc(LVM_INSERTITEMA, 0, cast(LPARAM)&lvi);
 	}
 	
 	
 	package final LRESULT _ins(int index, ListViewItem item)
 	{
-		return _ins(index, cast(LPARAM)cast(void*)item, item.text, 0);
+		//return _ins(index, cast(LPARAM)cast(void*)item, item.text, 0);
+		return _ins(index, cast(LPARAM)cast(void*)item, item.text, 0, item._imgidx);
 	}
 	
 	
@@ -2483,7 +2584,7 @@ class ListView: ControlSuperClass // docmain
 	
 	// If -subItemIndex- is 0 it's an item not a sub item.
 	// Returns FALSE on failure.
-	LRESULT updateItemText(int index, char[] newText, int subItemIndex = 0)
+	LRESULT updateItem(int index)
 	in
 	{
 		assert(created);
@@ -2493,13 +2594,23 @@ class ListView: ControlSuperClass // docmain
 		return prevwproc(LVM_REDRAWITEMS, cast(WPARAM)index, cast(LPARAM)index);
 	}
 	
-	
-	LRESULT updateItemText(ListViewItem item, char[] newText, int subItemIndex = 0)
+	LRESULT updateItem(ListViewItem item)
 	{
 		int index;
 		index = item.index;
 		assert(-1 != index);
-		return updateItemText(index, newText, subItemIndex);
+		return updateItem(index);
+	}
+	
+	
+	LRESULT updateItemText(int index, char[] newText, int subItemIndex = 0)
+	{
+		return updateItem(index);
+	}
+	
+	LRESULT updateItemText(ListViewItem item, char[] newText, int subItemIndex = 0)
+	{
+		return updateItem(item);
 	}
 	
 	

@@ -3976,13 +3976,6 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	void dispose()
-	{
-		dispose(true);
-	}
-	
-	
-	///
 	// If mouseEnter, mouseHover and mouseLeave events are supported.
 	// Returns true on Windows 95 with IE 5.5, Windows 98+ or Windows NT 4.0+.
 	static bool supportsMouseTracking() // getter
@@ -6165,12 +6158,12 @@ class Control: DObject, IWindow // docmain
 		{
 			debug
 			{
-				er = "the control is being killed";
+				er = "the control is being disposed";
 			}
 			
 			debug(APP_PRINT)
 			{
-				printf("Creating Control handle while killing.\n");
+				printf("Creating Control handle while disposing.\n");
 			}
 			
 			create_err:
@@ -6357,13 +6350,16 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	// TODO: check if correct implementation.
-	final void dispose(bool managedToo)
+	void dispose()
 	{
-		if(!isHandleCreated)
-			return;
-		
-		if(managedToo)
+		dispose(true);
+	}
+	
+	
+	///
+	void dispose(bool disposing)
+	{
+		if(disposing)
 		{
 			killing = true;
 			
@@ -6376,8 +6372,12 @@ class Control: DObject, IWindow // docmain
 			wregion = wregion.init;
 			wtext = wtext.init;
 			deleteThisBackgroundBrush();
+			//ccollection.children = null; // Not GC-safe in dtor.
 			//ccollection = null; // ? Causes bad things. Leaving it will do just fine.
 		}
+		
+		if(!isHandleCreated)
+			return;
 		
 		destroyHandle();
 		/+
@@ -6884,7 +6884,8 @@ class Control: DObject, IWindow // docmain
 		{ return (cbits & CBits.MENTER) != 0; }
 	
 	void killing(bool byes) // setter
-		{ if(byes) cbits |= CBits.KILLING; else cbits &= ~CBits.KILLING; }
+		//{ if(byes) cbits |= CBits.KILLING; else cbits &= ~CBits.KILLING; }
+		{ assert(byes); if(byes) cbits |= CBits.KILLING; }
 	bool killing() // getter
 		{ return (cbits & CBits.KILLING) != 0; }
 	

@@ -958,8 +958,6 @@ class TreeView: ControlSuperClass // docmain
 {
 	this()
 	{
-		_initCommonControls(ICC_TREEVIEW_CLASSES);
-		
 		_initTreeview();
 		
 		wstyle |= WS_TABSTOP | TVS_HASBUTTONS | TVS_LINESATROOT | TVS_HASLINES;

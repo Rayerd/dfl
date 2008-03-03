@@ -18,8 +18,6 @@ class ProgressBar: ControlSuperClass // docmain
 {
 	this()
 	{
-		_initCommonControls(ICC_PROGRESS_CLASS);
-		
 		_initProgressbar();
 		
 		wexstyle |= WS_EX_CLIENTEDGE;
