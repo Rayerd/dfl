@@ -1908,7 +1908,6 @@ class ListView: ControlSuperClass // docmain
 	
 	// TODO:
 	//  itemActivate, itemDrag
-	//EventHandler selectedIndexChanged;
 	//CancelEventHandler selectedIndexChanging; // ?
 	
 	Event!(ListView, ColumnClickEventArgs) columnClick; ///
@@ -1916,8 +1915,10 @@ class ListView: ControlSuperClass // docmain
 	Event!(ListView, LabelEditEventArgs) beforeLabelEdit; ///
 	//Event!(ListView, ItemCheckEventArgs) itemCheck; ///
 	Event!(ListView, ItemCheckedEventArgs) itemChecked; ///
+	Event!(ListView, EventArgs) selectedIndexChanged; ///
 	
 	
+	///
 	protected void onColumnClick(ColumnClickEventArgs ea)
 	{
 		columnClick(this, ea);
@@ -1946,9 +1947,17 @@ class ListView: ControlSuperClass // docmain
 	+/
 	
 	
+	///
 	protected void onItemChecked(ItemCheckedEventArgs ea)
 	{
 		itemChecked(this, ea);
+	}
+	
+	
+	///
+	protected void onSelectedIndexChanged(EventArgs ea)
+	{
+		selectedIndexChanged(this, ea);
 	}
 	
 	
@@ -2201,11 +2210,24 @@ class ListView: ControlSuperClass // docmain
 								auto nmlv = cast(NM_LISTVIEW*)nmh;
 								if(-1 != nmlv.iItem)
 								{
-									UINT stchg = nmlv.uNewState ^ nmlv.uOldState;
-									if(stchg & (3 << 12))
+									if(nmlv.uChanged & LVIF_STATE)
 									{
-										scope ItemCheckedEventArgs ea = new ItemCheckedEventArgs(items[nmlv.iItem]);
-										onItemChecked(ea);
+										UINT stchg = nmlv.uNewState ^ nmlv.uOldState;
+										
+										//if(stchg & LVIS_SELECTED)
+										{
+											// Only fire for the selected one; don't fire twice for old/new.
+											if(nmlv.uNewState & LVIS_SELECTED)
+											{
+												onSelectedIndexChanged(EventArgs.empty);
+											}
+										}
+										
+										if(stchg & (3 << 12))
+										{
+											scope ItemCheckedEventArgs ea = new ItemCheckedEventArgs(items[nmlv.iItem]);
+											onItemChecked(ea);
+										}
 									}
 								}
 							}
