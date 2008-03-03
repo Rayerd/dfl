@@ -494,15 +494,17 @@ class Button: ButtonBase, IButtonControl // docmain
 			return;
 		}
 		+/
+		if(!_img)
+			return;
 		HGDIOBJ hgo;
 		switch(_img._imgtype(&hgo))
 		{
 			case 1:
-				wparam = BS_BITMAP;
+				wparam = IMAGE_BITMAP;
 				break;
 			
 			case 2:
-				wparam = BS_ICON;
+				wparam = IMAGE_ICON;
 				break;
 			
 			default:
