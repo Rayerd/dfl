@@ -271,20 +271,18 @@ class ImageList // docmain
 			_hil = HIMAGELIST.init;
 		}
 		
-		UINT flags = 0;
+		UINT flags = ILC_MASK;
 		switch(_depth)
 		{
-			case ColorDepth.DEPTH_4BIT: flags = ILC_COLOR4; break;
-			default: case ColorDepth.DEPTH_8BIT: flags = ILC_COLOR8; break;
-			case ColorDepth.DEPTH_16BIT: flags = ILC_COLOR16; break;
-			case ColorDepth.DEPTH_24BIT: flags = ILC_COLOR24; break;
-			case ColorDepth.DEPTH_32BIT: flags = ILC_COLOR32; break;
+			case ColorDepth.DEPTH_4BIT:          flags |= ILC_COLOR4;  break;
+			default: case ColorDepth.DEPTH_8BIT: flags |= ILC_COLOR8;  break;
+			case ColorDepth.DEPTH_16BIT:         flags |= ILC_COLOR16; break;
+			case ColorDepth.DEPTH_24BIT:         flags |= ILC_COLOR24; break;
+			case ColorDepth.DEPTH_32BIT:         flags |= ILC_COLOR32; break;
 		}
-		flags |= _depth;
-		flags |= ILC_MASK; // ?
 		
 		// Note: cGrow is not a limit, but how many images to preallocate each grow.
-		_hil = ImageList_Create(_w, _h, flags, _cimages._images.length, 8 + _cimages._images.length / 4);
+		_hil = ImageList_Create(_w, _h, flags, _cimages._images.length, 4 + _cimages._images.length / 4);
 		if(!_hil)
 			throw new Exception("Unable to create image list");
 		
