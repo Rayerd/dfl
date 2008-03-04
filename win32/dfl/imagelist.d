@@ -66,18 +66,14 @@ class ImageList // docmain
 		}
 		
 		
+		import std.string: format;
+		import dfl.messagebox : msgBox;
 		void _added(size_t idx, Image val)
 		{
 			if(isHandleCreated)
 			{
-				if(idx >= _images.length)
-				{
-					_addimg(val);
-				}
-				else
-				{
-					assert(0);
-				}
+				//if(idx >= _images.length) // Can't test for this here because -val- is already added to the array.
+				_addimg(val);
 			}
 		}
 		
@@ -88,11 +84,11 @@ class ImageList // docmain
 			{
 				if(size_t.max == idx) // Clear all.
 				{
-					ImageList_Remove(handle, -1);
+					imageListRemove(handle, -1);
 				}
 				else
 				{
-					ImageList_Remove(handle, idx);
+					imageListRemove(handle, idx);
 				}
 			}
 		}
@@ -109,6 +105,8 @@ class ImageList // docmain
 	
 	this()
 	{
+		InitCommonControls();
+		
 		_cimages = new ImageCollection();
 		_transcolor = Color.transparent;
 	}
@@ -180,6 +178,7 @@ class ImageList // docmain
 	}
 	
 	
+	/+ // Actually, forget about these; just draw with the actual images.
 	///
 	final void draw(Graphics g, Point pt, int index)
 	{
@@ -189,7 +188,7 @@ class ImageList // docmain
 	/// ditto
 	final void draw(Graphics g, int x, int y, int index)
 	{
-		ImageList_Draw(handle, index, g.handle, x, y, ILD_NORMAL);
+		imageListDraw(handle, index, g.handle, x, y, ILD_NORMAL);
 	}
 	
 	/// ditto
@@ -203,9 +202,10 @@ class ImageList // docmain
 		if(!height)
 			return;
 		
-		ImageList_DrawEx(handle, index, g.handle, x, y, width, height,
+		imageListDrawEx(handle, index, g.handle, x, y, width, height,
 			CLR_NONE, CLR_NONE, ILD_NORMAL); // ?
 	}
+	+/
 	
 	
 	///
@@ -236,7 +236,7 @@ class ImageList // docmain
 	void dispose(bool disposing)
 	{
 		if(isHandleCreated)
-			ImageList_Destroy(_hil);
+			imageListDestroy(_hil);
 		_hil = HIMAGELIST.init;
 		
 		if(disposing)
@@ -267,7 +267,7 @@ class ImageList // docmain
 	{
 		if(isHandleCreated)
 		{
-			ImageList_Destroy(_hil);
+			imageListDestroy(_hil);
 			_hil = HIMAGELIST.init;
 		}
 		
@@ -282,7 +282,7 @@ class ImageList // docmain
 		}
 		
 		// Note: cGrow is not a limit, but how many images to preallocate each grow.
-		_hil = ImageList_Create(_w, _h, flags, _cimages._images.length, 4 + _cimages._images.length / 4);
+		_hil = imageListCreate(_w, _h, flags, _cimages._images.length, 4 + _cimages._images.length / 4);
 		if(!_hil)
 			throw new Exception("Unable to create image list");
 		
@@ -319,12 +319,12 @@ class ImageList // docmain
 					{
 						cr = _transcolor.toRgb();
 					}
-					result = ImageList_AddMasked(_hil, cast(HBITMAP)hgo, cr);
+					result = imageListAddMasked(_hil, cast(HBITMAP)hgo, cr);
 				}
 				break;
 			
 			case 2:
-				result = ImageList_AddIcon(_hil, cast(HICON)hgo);
+				result = imageListAddIcon(_hil, cast(HICON)hgo);
 				break;
 			
 			default:
@@ -333,6 +333,62 @@ class ImageList // docmain
 		
 		//if(-1 == result)
 		//	_unableimg();
+	}
+}
+
+
+private extern(Windows)
+{
+	// This was the only way I could figure out how to use the current actctx (Windows issue).
+	
+	HIMAGELIST imageListCreate(
+		int cx, int cy, UINT flags, int cInitial, int cGrow)
+	{
+		alias typeof(&ImageList_Create) TProc;
+		static TProc proc = null;
+		if(!proc)
+			proc = cast(typeof(proc))GetProcAddress(GetModuleHandleA("comctl32.dll"), "ImageList_Create");
+		return proc(cx, cy, flags, cInitial, cGrow);
+	}
+	
+	int imageListAddIcon(
+		HIMAGELIST himl, HICON hicon)
+	{
+		alias typeof(&ImageList_AddIcon) TProc;
+		static TProc proc = null;
+		if(!proc)
+			proc = cast(typeof(proc))GetProcAddress(GetModuleHandleA("comctl32.dll"), "ImageList_AddIcon");
+		return proc(himl, hicon);
+	}
+	
+	int imageListAddMasked(
+		HIMAGELIST himl, HBITMAP hbmImage, COLORREF crMask)
+	{
+		alias typeof(&ImageList_AddMasked) TProc;
+		static TProc proc = null;
+		if(!proc)
+			proc = cast(typeof(proc))GetProcAddress(GetModuleHandleA("comctl32.dll"), "ImageList_AddMasked");
+		return proc(himl, hbmImage, crMask);
+	}
+	
+	BOOL imageListRemove(
+		HIMAGELIST himl, int i)
+	{
+		alias typeof(&ImageList_Remove) TProc;
+		static TProc proc = null;
+		if(!proc)
+			proc = cast(typeof(proc))GetProcAddress(GetModuleHandleA("comctl32.dll"), "ImageList_Remove");
+		return proc(himl, i);
+	}
+	
+	BOOL imageListDestroy(
+		HIMAGELIST himl)
+	{
+		alias typeof(&ImageList_Destroy) TProc;
+		static TProc proc = null;
+		if(!proc)
+			proc = cast(typeof(proc))GetProcAddress(GetModuleHandleA("comctl32.dll"), "ImageList_Destroy");
+		return proc(himl);
 	}
 }
 
