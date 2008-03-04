@@ -282,7 +282,7 @@ class ImageList // docmain
 		// Note: cGrow is not a limit, but how many images to preallocate each grow.
 		_hil = imageListCreate(_w, _h, flags, _cimages._images.length, 4 + _cimages._images.length / 4);
 		if(!_hil)
-			throw new Exception("Unable to create image list");
+			throw new DflException("Unable to create image list");
 		
 		foreach(img; _cimages._images)
 		{
