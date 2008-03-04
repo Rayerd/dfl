@@ -66,8 +66,6 @@ class ImageList // docmain
 		}
 		
 		
-		import std.string: format;
-		import dfl.messagebox : msgBox;
 		void _added(size_t idx, Image val)
 		{
 			if(isHandleCreated)
