@@ -5945,6 +5945,50 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
+	///
+	void dispose()
+	{
+		dispose(true);
+	}
+	
+	/// ditto
+	protected void dispose(bool disposing)
+	{
+		if(disposing)
+		{
+			killing = true;
+			
+			cmenu = cmenu.init;
+			_ctrlname = _ctrlname.init;
+			otag = otag.init;
+			wcurs = wcurs.init;
+			wfont = wfont.init;
+			wparent = wparent.init;
+			wregion = wregion.init;
+			wtext = wtext.init;
+			deleteThisBackgroundBrush();
+			//ccollection.children = null; // Not GC-safe in dtor.
+			//ccollection = null; // ? Causes bad things. Leaving it will do just fine.
+		}
+		
+		if(!isHandleCreated)
+			return;
+		
+		destroyHandle();
+		/+
+		//assert(hwnd == HWND.init); // Zombie trips this. (Not anymore with the hwnd-prop)
+		if(hwnd)
+		{
+			assert(!IsWindow(hwnd));
+			hwnd = HWND.init;
+		}
+		+/
+		assert(hwnd == HWND.init);
+		
+		onDisposed(EventArgs.empty);
+	}
+	
+	
 	protected:
 	
 	///
@@ -6346,51 +6390,6 @@ class Control: DObject, IWindow // docmain
 	protected void onDisposed(EventArgs ea)
 	{
 		disposed(this, ea);
-	}
-	
-	
-	///
-	void dispose()
-	{
-		dispose(true);
-	}
-	
-	
-	///
-	void dispose(bool disposing)
-	{
-		if(disposing)
-		{
-			killing = true;
-			
-			cmenu = cmenu.init;
-			_ctrlname = _ctrlname.init;
-			otag = otag.init;
-			wcurs = wcurs.init;
-			wfont = wfont.init;
-			wparent = wparent.init;
-			wregion = wregion.init;
-			wtext = wtext.init;
-			deleteThisBackgroundBrush();
-			//ccollection.children = null; // Not GC-safe in dtor.
-			//ccollection = null; // ? Causes bad things. Leaving it will do just fine.
-		}
-		
-		if(!isHandleCreated)
-			return;
-		
-		destroyHandle();
-		/+
-		//assert(hwnd == HWND.init); // Zombie trips this. (Not anymore with the hwnd-prop)
-		if(hwnd)
-		{
-			assert(!IsWindow(hwnd));
-			hwnd = HWND.init;
-		}
-		+/
-		assert(hwnd == HWND.init);
-		
-		onDisposed(EventArgs.empty);
 	}
 	
 	
