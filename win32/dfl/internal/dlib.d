@@ -28,25 +28,34 @@ version(Tango)
 	{
 		version = DFL_TANGObefore099rc3;
 		version = DFL_TANGObefore0994;
+		version = DFL_TANGObefore0995;
 	}
 	else version(DFL_TANGO098rc2)
 	{
 		version = DFL_TANGObefore099rc3;
 		version = DFL_TANGObefore0994;
+		version = DFL_TANGObefore0995;
 	}
 	else version(DFL_TANGObefore099rc3)
 	{
 		version = DFL_TANGObefore0994;
+		version = DFL_TANGObefore0995;
 	}
 	else version(DFL_TANGO0992)
 	{
 		version = DFL_TANGObefore0994;
+		version = DFL_TANGObefore0995;
 	}
 	else version(DFL_TANGO0993)
 	{
 		version = DFL_TANGObefore0994;
+		version = DFL_TANGObefore0995;
 	}
 	else version(DFL_TANGO_0994)
+	{
+		version = DFL_TANGObefore0995;
+	}
+	else version(DFL_TANGO_0995)
 	{
 	}
 	
@@ -137,7 +146,14 @@ version(Tango)
 	
 	private import tango.stdc.stringz;
 	
-	alias tango.stdc.stringz.fromUtf8z stringFromStringz;
+	version(DFL_TANGObefore0995)
+	{
+		alias tango.stdc.stringz.fromUtf8z stringFromStringz;
+	}
+	else
+	{
+		alias tango.stdc.stringz.fromStringz stringFromStringz;
+	}
 	
 	version(DFL_TANGObefore0994)
 	{

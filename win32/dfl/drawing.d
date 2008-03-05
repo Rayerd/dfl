@@ -824,36 +824,31 @@ class SystemIcons // docmain
 	///
 	Icon application() // getter
 	{
-		return new Icon(LoadImageA(null, IDI_APPLICATION,
-			 IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_SHARED), false);
+		return new Icon(LoadIconA(null, IDI_APPLICATION), false);
 	}
 	
 	/// ditto
 	Icon error() // getter
 	{
-		return new Icon(LoadImageA(null, IDI_HAND,
-			 IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_SHARED), false);
+		return new Icon(LoadIconA(null, IDI_HAND), false);
 	}
 	
 	/// ditto
 	Icon question() // getter
 	{
-		return new Icon(LoadImageA(null, IDI_QUESTION,
-			 IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_SHARED), false);
+		return new Icon(LoadIconA(null, IDI_QUESTION), false);
 	}
 	
 	/// ditto
 	Icon warning() // getter
 	{
-		return new Icon(LoadImageA(null, IDI_EXCLAMATION,
-			 IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_SHARED), false);
+		return new Icon(LoadIconA(null, IDI_EXCLAMATION), false);
 	}
 	
 	/// ditto
 	Icon information() // getter
 	{
-		return new Icon(LoadImageA(null, IDI_INFORMATION,
-			 IMAGE_ICON, 0, 0, LR_DEFAULTSIZE | LR_SHARED), false);
+		return new Icon(LoadIconA(null, IDI_INFORMATION), false);
 	}
 }
 
