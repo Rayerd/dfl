@@ -10,6 +10,14 @@ private import dfl.internal.dlib;
 private import dfl.control, dfl.application, dfl.base, dfl.internal.winapi;
 private import dfl.event, dfl.drawing, dfl.collections, dfl.internal.utf;
 
+version(DFL_NO_IMAGELIST)
+{
+}
+else
+{
+	private import dfl.imagelist;
+}
+
 
 private extern(Windows) void _initTreeview();
 
@@ -58,9 +66,6 @@ class TreeViewCancelEventArgs: CancelEventArgs
 }
 
 
-alias Event!(TreeViewCancelEventArgs) TreeViewCancelEventHandler; // deprecated
-
-
 ///
 class TreeViewEventArgs: EventArgs
 {
@@ -97,9 +102,6 @@ class TreeViewEventArgs: EventArgs
 	TreeNode _node;
 	TreeViewAction _action = TreeViewAction.UNKNOWN;
 }
-
-
-alias Event!(TreeViewEventArgs) TreeViewEventHandler; // deprecated
 
 
 ///
@@ -151,9 +153,6 @@ class NodeLabelEditEventArgs: EventArgs
 	char[] _label;
 	bool _cancel = false;
 }
-
-
-alias Event!(NodeLabelEditEventArgs) NodeLabelEditEventHandler; // deprecated
 
 
 ///
@@ -561,6 +560,41 @@ class TreeNode: DObject
 	}
 	
 	
+	version(DFL_NO_IMAGELIST)
+	{
+	}
+	else
+	{
+		///
+		final void imageIndex(int index) // setter
+		{
+			this._imgidx = index;
+			
+			if(created)
+			{
+				TV_ITEMA item;
+				Message m;
+				
+				item.mask = TVIF_HANDLE | TVIF_IMAGE;
+				item.hItem = hnode;
+				item.iImage = _imgidx;
+				if(tview._selimgidx < 0)
+				{
+					item.mask |= TVIF_SELECTEDIMAGE;
+					item.iSelectedImage = _imgidx;
+				}
+				tview.prevWndProc(m);
+			}
+		}
+		
+		/// ditto
+		final int imageIndex() // getter
+		{
+			return _imgidx;
+		}
+	}
+	
+	
 	override char[] toString()
 	{
 		return ttext;
@@ -610,6 +644,13 @@ class TreeNode: DObject
 	Object ttag;
 	HTREEITEM hnode;
 	TreeView tview;
+	version(DFL_NO_IMAGELIST)
+	{
+	}
+	else
+	{
+		int _imgidx = -1;
+	}
 	/+
 	Color bcolor, fcolor;
 	Font tfont;
@@ -783,6 +824,18 @@ class TreeNodeCollection
 		with(dest)
 		{
 			mask = /+ TVIF_CHILDREN | +/ TVIF_PARAM | TVIF_TEXT;
+			version(DFL_NO_IMAGELIST)
+			{
+			}
+			else
+			{
+				mask |= TVIF_IMAGE | TVIF_SELECTEDIMAGE;
+				iImage = node._imgidx;
+				if(tview._selimgidx < 0)
+					iSelectedImage = node._imgidx;
+				else
+					iSelectedImage = tview._selimgidx;
+			}
 			/+ cChildren = I_CHILDRENCALLBACK; +/
 			lParam = cast(LPARAM)cast(void*)node;
 			/+
@@ -1478,6 +1531,70 @@ class TreeView: ControlSuperClass // docmain
 	+/
 	
 	
+	version(DFL_NO_IMAGELIST)
+	{
+	}
+	else
+	{
+		///
+		final void imageList(ImageList imglist) // setter
+		{
+			if(isHandleCreated)
+			{
+				prevwproc(TVM_SETIMAGELIST, TVSIL_NORMAL,
+					cast(LPARAM)(imglist ? imglist.handle : cast(HIMAGELIST)null));
+			}
+			
+			_imglist = imglist;
+		}
+		
+		/// ditto
+		final ImageList imageList() // getter
+		{
+			return _imglist;
+		}
+		
+		
+		/+
+		///
+		// Default image index (if -1 use this).
+		final void imageIndex(int index)
+		{
+			_defimgidx = index;
+		}
+		
+		/// ditto
+		final int imageIndex() // getter
+		{
+			return _defimgidx;
+		}
+		+/
+		
+		
+		///
+		final void selectedImageIndex(int index)
+		{
+			//assert(index >= 0);
+			assert(index >= -1);
+			_selimgidx = index;
+			
+			if(isHandleCreated)
+			{
+				TreeNode curnode = selectedNode;
+				_crecreate();
+				if(curnode)
+					curnode.ensureVisible();
+			}
+		}
+		
+		/// ditto
+		final int selectedImageIndex() // getter
+		{
+			return _selimgidx;
+		}
+	}
+	
+	
 	protected override Size defaultSize() // getter
 	{
 		return Size(120, 100);
@@ -1515,6 +1632,15 @@ class TreeView: ControlSuperClass // docmain
 		
 		prevwproc(TVM_SETITEMHEIGHT, iheight, 0);
 		
+		version(DFL_NO_IMAGELIST)
+		{
+		}
+		else
+		{
+			if(_imglist)
+				prevwproc(TVM_SETIMAGELIST, TVSIL_NORMAL, cast(LPARAM)_imglist.handle);
+		}
+		
 		tchildren.doNodes();
 	}
 	
@@ -1544,6 +1670,10 @@ class TreeView: ControlSuperClass // docmain
 			
 			case TVM_DELETEITEM:
 				m.result = FALSE;
+				return;
+			
+			case TVM_SETIMAGELIST:
+				m.result = cast(LRESULT)null;
 				return;
 			
 			default: ;
@@ -1908,6 +2038,14 @@ class TreeView: ControlSuperClass // docmain
 	dchar pathsep = '\\';
 	bool _sort = false;
 	int iheight = 16;
+	version(DFL_NO_IMAGELIST)
+	{
+	}
+	else
+	{
+		ImageList _imglist;
+		int _selimgidx = -1; //0;
+	}
 	
 	
 	TreeNode treeNodeFromHandle(HTREEITEM hnode)

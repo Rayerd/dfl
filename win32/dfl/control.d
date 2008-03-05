@@ -229,10 +229,6 @@ struct CreateParams
 }
 
 
-// Usually fired on alt, tab or F10 keys.
-deprecated alias Event!(UICuesEventArgs) UICuesEventHandler; // deprecated
-
-
 ///
 class ControlEventArgs: EventArgs
 {
@@ -253,9 +249,6 @@ class ControlEventArgs: EventArgs
 	private:
 	Control ctrl;
 }
-
-
-alias Event!(ControlEventArgs) ControlEventHandler; // deprecated
 
 
 ///
@@ -294,9 +287,6 @@ class HelpEventArgs: EventArgs
 }
 
 
-alias Event!(HelpEventArgs) HelpEventHandler; // deprecated
-
-
 ///
 class InvalidateEventArgs: EventArgs
 {
@@ -317,9 +307,6 @@ class InvalidateEventArgs: EventArgs
 	private:
 	Rect ir;
 }
-
-
-alias Event!(InvalidateEventArgs) InvalidateEventHandler; // deprecated
 
 
 // ///
@@ -387,9 +374,6 @@ class LayoutEventArgs: EventArgs
 	private:
 	Control ac;
 }
-
-
-alias Event!(LayoutEventArgs) LayoutEventHandler; // deprecated
 
 
 version(NO_DRAG_DROP) {} else
@@ -468,9 +452,6 @@ version(NO_DRAG_DROP) {} else
 	}
 	
 	
-	alias Event!(DragEventArgs) DragEventHandler; // deprecated
-	
-	
 	///
 	class GiveFeedbackEventArgs: EventArgs
 	{
@@ -506,9 +487,6 @@ version(NO_DRAG_DROP) {} else
 		DragDropEffects _effect;
 		bool udefcurs;
 	}
-	
-	
-	alias Event!(GiveFeedbackEventArgs) GiveFeedbackEventHandler; // deprecated
 	
 	
 	///
@@ -556,10 +534,6 @@ version(NO_DRAG_DROP) {} else
 		bool escp;
 		DragAction _action;
 	}
-	
-	
-	alias Event!(QueryContinueDragEventArgs) QueryContinueDragEventHandler; // deprecated
-	;
 }
 
 

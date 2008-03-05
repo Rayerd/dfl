@@ -8,7 +8,7 @@ module dfl.filedialog;
 private import dfl.internal.dlib;
 
 private import dfl.control, dfl.internal.winapi, dfl.base, dfl.drawing;
-private import dfl.application, dfl.commondialog, dfl.internal.utf;
+private import dfl.application, dfl.commondialog, dfl.event, dfl.internal.utf;
 
 
 ///
@@ -437,7 +437,7 @@ abstract class FileDialog: CommonDialog // docmain
 	
 	
 	///
-	CancelEventHandler fileOk;
+	Event!(FileDialog, CancelEventArgs) fileOk;
 	
 	
 	protected:

@@ -8,7 +8,7 @@ import dfl.internal.dlib;
 
 
 // Create an event handler; old style.
-template Event(TArgs : EventArgs = EventArgs) // docmain
+deprecated template Event(TArgs : EventArgs = EventArgs)
 {
 	alias Event!(Object, TArgs) Event;
 }
@@ -297,7 +297,7 @@ class EventArgs // docmain
 
 
 // Simple event handler.
-alias Event!() EventHandler; // deprecated
+alias Event!(Object, EventArgs) EventHandler; // deprecated
 
 
 ///
@@ -321,7 +321,4 @@ class ThreadExceptionEventArgs: EventArgs
 	private:
 	Object except;
 }
-
-
-alias Event!(ThreadExceptionEventArgs) ThreadExceptionEventHandler; // deprecated
 

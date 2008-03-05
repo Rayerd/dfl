@@ -70,8 +70,7 @@ class ApplicationContext // docmain
 	
 	
 	///
-	//EventHandler threadExit;
-	Event!() threadExit;
+	Event!(Object, EventArgs) threadExit;
 	
 	
 	///
@@ -910,11 +909,11 @@ final class Application // docmain
 	
 	
 	///
-	Event!() idle; // Finished processing and is now idle.
+	Event!(Object, EventArgs) idle; // Finished processing and is now idle.
 	///
-	Event!(ThreadExceptionEventArgs) threadException;
+	Event!(Object, ThreadExceptionEventArgs) threadException;
 	///
-	Event!() threadExit;
+	Event!(Object, EventArgs) threadExit;
 	
 	
 	// Returns null if not found.

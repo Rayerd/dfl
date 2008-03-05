@@ -67,9 +67,6 @@ class SplitterEventArgs: EventArgs
 }
 
 
-alias Event!(SplitterEventArgs) SplitterEventHandler; // deprecated
-
-
 ///
 class Splitter: Control // docmain
 {

@@ -38,9 +38,6 @@ class LinkClickedEventArgs: EventArgs
 }
 
 
-alias Event!(LinkClickedEventArgs) LinkClickedEventHandler; // deprecated
-
-
 ///
 enum RichTextBoxScrollBars: ubyte
 {

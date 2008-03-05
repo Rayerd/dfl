@@ -727,9 +727,6 @@ class PaintEventArgs: EventArgs
 }
 
 
-alias Event!(PaintEventArgs) PaintEventHandler; // deprecated
-
-
 ///
 class CancelEventArgs: EventArgs
 {
@@ -763,9 +760,6 @@ class CancelEventArgs: EventArgs
 	private:
 	bool cncl;
 }
-
-
-alias Event!(CancelEventArgs) CancelEventHandler; // deprecated
 
 
 ///
@@ -845,9 +839,6 @@ class KeyEventArgs: EventArgs
 	Keys ks;
 	bool hand = false;
 }
-
-
-alias Event!(KeyEventArgs) KeyEventHandler; // deprecated
 
 
 ///
@@ -949,9 +940,6 @@ class MouseEventArgs: EventArgs
 }
 
 
-alias Event!(MouseEventArgs) MouseEventHandler; // deprecated
-
-
 /+
 ///
 class LabelEditEventArgs: EventArgs
@@ -1004,9 +992,6 @@ class LabelEditEventArgs: EventArgs
 	char[] ltxt;
 	bool cancl = false;
 }
-
-
-alias Event!(LabelEditEventArgs) LabelEditEventHandler; // deprecated
 +/
 
 
@@ -1030,9 +1015,6 @@ class ColumnClickEventArgs: EventArgs
 	private:
 	int col;
 }
-
-
-alias Event!(ColumnClickEventArgs) ColumnClickEventHandler; // deprecated
 
 
 ///
@@ -1151,9 +1133,6 @@ class DrawItemEventArgs: EventArgs
 }
 
 
-alias Event!(DrawItemEventArgs) DrawItemEventHandler; // deprecated
-
-
 ///
 class MeasureItemEventArgs: EventArgs
 {
@@ -1216,8 +1195,6 @@ class MeasureItemEventArgs: EventArgs
 	Graphics gpx;
 	int idx, iheight, iwidth = 0;
 }
-
-alias Event!(MeasureItemEventArgs) MeasureItemEventHandler; // deprecated
 
 
 ///

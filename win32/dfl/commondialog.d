@@ -27,8 +27,7 @@ abstract class CommonDialog // docmain
 	
 	
 	///
-	//HelpEventHandler helpRequest;
-	Event!(HelpEventArgs) helpRequest;
+	Event!(CommonDialog, HelpEventArgs) helpRequest;
 	
 	
 	protected:

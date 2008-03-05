@@ -208,9 +208,6 @@ class PowerModeChangedEventArgs: EventArgs
 	private:
 	PowerModes _pm;
 }
-
-
-alias Event!(PowerModeChangedEventArgs) PowerModeChangedEventHandler; // deprecated
 +/
 
 
@@ -243,9 +240,6 @@ class SystemEndedEventArgs: EventArgs
 	private:
 	SessionEndReasons _reason;
 }
-
-
-alias Event!(SystemEndedEventArgs) SystemEndedEventHandler; // deprecated
 
 
 ///
@@ -282,9 +276,6 @@ class SessionEndingEventArgs: EventArgs
 	SessionEndReasons _reason;
 	bool _cancel = false;
 }
-
-
-alias Event!(SessionEndingEventArgs) SessionEndingEventHandler; // deprecated
 +/
 
 

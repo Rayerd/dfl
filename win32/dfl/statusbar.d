@@ -275,9 +275,6 @@ class StatusBarPanelClickEventArgs: MouseEventArgs
 +/
 
 
-//alias Event!(StatusBarPanelClickEventArgs) StatusBarPanelClickEventHandler; // deprecated
-
-
 ///
 class StatusBar: ControlSuperClass // docmain
 {
