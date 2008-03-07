@@ -1046,7 +1046,7 @@ class Control: DObject, IWindow // docmain
 			return (_exStyle() & WS_EX_ACCEPTFILES) != 0;
 			+/
 			
-			return droptarget != null;
+			return droptarget !is null;
 		}
 	}
 	

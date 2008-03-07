@@ -576,6 +576,40 @@ class RichTextBox: TextBoxBase // docmain
 	
 	
 	///
+	final void selectionBold(bool byes) // setter
+	{
+		if(!created)
+			return;
+		
+		CHARFORMAT2A cf;
+		
+		cf.cbSize = cf.sizeof;
+		cf.dwMask = CFM_BOLD;
+		if(byes)
+			cf.dwEffects |= CFE_BOLD;
+		else
+			cf.dwEffects &= ~CFE_BOLD;
+		_setFormat(&cf);
+	}
+	
+	/// ditto
+	final bool selectionBold() // getter
+	{
+		if(created)
+		{
+			CHARFORMAT2A cf;
+			
+			cf.cbSize = cf.sizeof;
+			cf.dwMask = CFM_BOLD;
+			_getFormat(&cf);
+			
+			return (cf.dwEffects & CFE_BOLD) == CFE_BOLD;
+		}
+		return false;
+	}
+	
+	
+	///
 	final void selectionUnderline(bool byes) // setter
 	{
 		if(!created)
