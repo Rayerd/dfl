@@ -1221,6 +1221,7 @@ class Cursor // docmain
 	///
 	void dispose()
 	{
+		assert(owned);
 		DestroyCursor(hcur);
 		hcur = HCURSOR.init;
 	}

@@ -2586,7 +2586,14 @@ class ListView: ControlSuperClass // docmain
 	package final LRESULT _ins(int index, ListViewItem item)
 	{
 		//return _ins(index, cast(LPARAM)cast(void*)item, item.text, 0);
-		return _ins(index, cast(LPARAM)cast(void*)item, item.text, 0, item._imgidx);
+		version(DFL_NO_IMAGELIST)
+		{
+			return _ins(index, cast(LPARAM)cast(void*)item, item.text, 0, -1);
+		}
+		else
+		{
+			return _ins(index, cast(LPARAM)cast(void*)item, item.text, 0, item._imgidx);
+		}
 	}
 	
 	

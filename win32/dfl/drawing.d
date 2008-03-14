@@ -1079,6 +1079,7 @@ class Bitmap: Image // docmain
 	///
 	void dispose()
 	{
+		assert(owned);
 		DeleteObject(hbm);
 		hbm = null;
 	}
@@ -2440,6 +2441,7 @@ class Graphics // docmain
 	///
 	void dispose()
 	{
+		assert(owned);
 		DeleteDC(hdc);
 		hdc = null;
 	}
@@ -2766,6 +2768,7 @@ class Icon: Image // docmain
 	///
 	void dispose()
 	{
+		assert(owned);
 		DestroyIcon(hi);
 		hi = null;
 	}

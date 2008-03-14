@@ -2792,7 +2792,9 @@ extern(Windows):
 	SHORT VkKeyScanA(char ch);
 	SHORT VkKeyScanW(wchar ch);
 	HRSRC FindResourceExA(HMODULE hModule, LPCSTR lpType, LPCSTR lpName, WORD wLanguage);
+	HRSRC FindResourceExW(HMODULE hModule, LPCWSTR lpType, LPCWSTR lpName, WORD wLanguage);
 	HGLOBAL LoadResource(HMODULE hModule, HRSRC hResInfo);
+	DWORD SizeofResource(HMODULE hModule, HRSRC hResInfo);
 	BOOL EnableMenuItem(HMENU hMenu, UINT uIDEnableItem, UINT uEnable);
 	BOOL IsMenu(HMENU hMenu);
 	HMENU GetSystemMenu(HWND hWnd, BOOL bRevert);

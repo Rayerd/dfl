@@ -44,6 +44,7 @@ class Resources // docmain
 	///
 	void dispose()
 	{
+		assert(_owned);
 		//if(hinst != Application.getInstance()) // ?
 			FreeLibrary(hinst);
 		hinst = null;
@@ -98,7 +99,6 @@ class Resources // docmain
 		return new Icon(hi, true); // Owned.
 	}
 	
-	/+
 	/// ditto
 	final Icon getIcon(int id, int width, int height)
 	in
@@ -131,7 +131,6 @@ class Resources // docmain
 			return null;
 		return new Icon(hi, true); // Owned.
 	}
-	+/
 	
 	deprecated alias getIcon loadIcon;
 	
@@ -204,17 +203,9 @@ class Resources // docmain
 	}
 	body
 	{
-		HRSRC hrc;
-		hrc = FindResourceExA(hinst, RT_STRING, cast(LPCSTR)cast(WORD)(id / 16 + 1), lang);
-		if(!hrc)
-			return null;
-		HGLOBAL hg;
-		LPCWSTR ws;
-		char[] result = null;
-		hg = LoadResource(hinst, hrc);
-		if(!hg)
-			return null;
-		ws = cast(LPCWSTR)LockResource(hg);
+		// Not casting to wchar[] because a resource isn't guaranteed to be the same size.
+		wchar* ws = cast(wchar*)_getData(cast(LPCWSTR)RT_STRING, cast(LPCWSTR)cast(WORD)(id / 16 + 1)).ptr;
+		char[] result;
 		if(ws)
 		{
 			int i;
@@ -223,13 +214,68 @@ class Resources // docmain
 				ws += 1 + cast(size_t)*ws;
 			}
 			result = utf16stringtoUtf8string((ws + 1)[0 .. cast(size_t)*ws]);
-			//UnlockResource(ws); // Obsolete / stub.
 		}
-		FreeResource(hg); // Obsolete / stub.
 		return result;
 	}
 	
 	deprecated alias getString loadString;
+	
+	
+	// Used internally
+	final void[] _getData(LPCWSTR type, LPCWSTR name) // internal
+	{
+		HRSRC hrc;
+		hrc = FindResourceExW(hinst, type, name, lang);
+		if(!hrc)
+			return null;
+		HGLOBAL hg = LoadResource(hinst, hrc);
+		if(!hg)
+			return null;
+		LPVOID pv = LockResource(hg);
+		if(!pv)
+			return null;
+		return pv[0 .. SizeofResource(hinst, hrc)];
+	}
+	
+	///
+	final void[] getData(int type, int id)
+	in
+	{
+		assert(type >= WORD.min && type <= WORD.max);
+		assert(id >= WORD.min && id <= WORD.max);
+	}
+	body
+	{
+		return _getData(cast(LPCWSTR)type, cast(LPCWSTR)id);
+	}
+	
+	/// ditto
+	final void[] getData(char[] type, int id)
+	in
+	{
+		assert(id >= WORD.min && id <= WORD.max);
+	}
+	body
+	{
+		return _getData(utf8stringToUtf16stringz(type), cast(LPCWSTR)id);
+	}
+	
+	/// ditto
+	final void[] getData(int type, char[] name)
+	in
+	{
+		assert(type >= WORD.min && type <= WORD.max);
+	}
+	body
+	{
+		return _getData(cast(LPCWSTR)type, utf8stringToUtf16stringz(name));
+	}
+	
+	/// ditto
+	final void[] getData(char[] type, char[] name)
+	{
+		return _getData(utf8stringToUtf16stringz(type), utf8stringToUtf16stringz(name));
+	}
 	
 	
 	~this()
@@ -246,11 +292,9 @@ class Resources // docmain
 	bool _owned = false;
 	
 	
-	/+
 	void _noload(char[] type)
 	{
 		throw new DflException("Unable to load " ~ type ~ " resource");
 	}
-	+/
 }
 

@@ -1051,6 +1051,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
+	/+
 	deprecated void anchor(AnchorStyles a) // setter
 	{
 		/+
@@ -1070,6 +1071,7 @@ class Control: DObject, IWindow // docmain
 		//return anch;
 		return cast(AnchorStyles)(AnchorStyles.LEFT | AnchorStyles.TOP);
 	}
+	+/
 	
 	
 	private void _propagateBackColorAmbience()

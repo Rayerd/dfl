@@ -80,12 +80,14 @@ class Splitter: Control // docmain
 	}
 	
 	
+	/+
 	override void anchor(AnchorStyles a) // setter
 	{
 		throw new DflException("Splitter cannot be anchored");
 	}
 	
 	alias Control.anchor anchor; // Overload.
+	+/
 	
 	
 	override void dock(DockStyle ds) // setter
