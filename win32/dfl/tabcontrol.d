@@ -18,7 +18,7 @@ private extern(Windows) void _initTabcontrol();
 class TabPage: Panel
 {
 	///
-	this(char[] tabText)
+	this(Dstring tabText)
 	{
 		this();
 		
@@ -45,7 +45,7 @@ class TabPage: Panel
 	}
 	
 	
-	override char[] toString()
+	override Dstring toString()
 	{
 		return text;
 	}
@@ -57,7 +57,7 @@ class TabPage: Panel
 	}
 	
 	
-	int opEquals(char[] val)
+	int opEquals(Dstring val)
 	{
 		return text == val;
 	}
@@ -69,7 +69,7 @@ class TabPage: Panel
 	}
 	
 	
-	int opCmp(char[] val)
+	int opCmp(Dstring val)
 	{
 		return stringICmp(text, val);
 	}
@@ -78,7 +78,7 @@ class TabPage: Panel
 	// imageIndex
 	
 	
-	override void text(char[] newText) // setter
+	override void text(Dstring newText) // setter
 	{
 		// Note: this probably causes toStringz() to be called twice,
 		// allocating 2 of the same string.
@@ -98,13 +98,13 @@ class TabPage: Panel
 	
 	
 	/+
-	final void toolTipText(char[] ttt) // setter
+	final void toolTipText(Dstring ttt) // setter
 	{
 		// TODO: ...
 	}
 	
 	
-	final char[] toolTipText() // getter
+	final Dstring toolTipText() // getter
 	{
 		// TODO: ...
 		return null;
@@ -209,7 +209,7 @@ class TabPageCollection
 			{
 				// TODO: TCIF_RTLREADING flag based on rightToLeft property.
 				tci.mask = TCIF_TEXT | TCIF_PARAM;
-				tci.tciw.pszText = dfl.internal.utf.toUnicodez(page.text); // <--
+				tci.tciw.pszText = cast(typeof(tci.tciw.pszText))dfl.internal.utf.toUnicodez(page.text); // <--
 				static assert(tci.lParam.sizeof >= (void*).sizeof);
 				tci.lParam = cast(LPARAM)cast(void*)page;
 				
@@ -226,7 +226,7 @@ class TabPageCollection
 			{
 				// TODO: TCIF_RTLREADING flag based on rightToLeft property.
 				tci.mask = TCIF_TEXT | TCIF_PARAM;
-				tci.tcia.pszText = dfl.internal.utf.toAnsiz(page.text); // <--
+				tci.tcia.pszText = cast(typeof(tci.tcia.pszText))dfl.internal.utf.toAnsiz(page.text); // <--
 				static assert(tci.lParam.sizeof >= (void*).sizeof);
 				tci.lParam = cast(LPARAM)cast(void*)page;
 				
@@ -271,12 +271,12 @@ class TabPageCollection
 			tci.lParam = cast(LPARAM)cast(void*)val;
 			if(dfl.internal.utf.useUnicode)
 			{
-				tci.tciw.pszText = dfl.internal.utf.toUnicodez(val.text);
+				tci.tciw.pszText = cast(typeof(tci.tciw.pszText))dfl.internal.utf.toUnicodez(val.text);
 				m = Message(tc.handle, TCM_INSERTITEMW, idx, cast(LPARAM)&tci.tciw);
 			}
 			else
 			{
-				tci.tcia.pszText = dfl.internal.utf.toAnsiz(val.text);
+				tci.tcia.pszText = cast(typeof(tci.tcia.pszText))dfl.internal.utf.toAnsiz(val.text);
 				m = Message(tc.handle, TCM_INSERTITEMA, idx, cast(LPARAM)&tci.tcia);
 			}
 			tc.prevWndProc(m);
@@ -974,7 +974,7 @@ class TabControl: TabControlBase // docmain
 	}
 	
 	
-	void updateTabText(TabPage page, char[] newText)
+	void updateTabText(TabPage page, Dstring newText)
 	in
 	{
 		assert(created);
@@ -991,12 +991,12 @@ class TabControl: TabControlBase // docmain
 		Message m;
 		if(dfl.internal.utf.useUnicode)
 		{
-			tci.tciw.pszText = dfl.internal.utf.toUnicodez(newText);
+			tci.tciw.pszText = cast(typeof(tci.tciw.pszText))dfl.internal.utf.toUnicodez(newText);
 			m = Message(hwnd, TCM_SETITEMW, cast(WPARAM)i, cast(LPARAM)&tci.tciw);
 		}
 		else
 		{
-			tci.tcia.pszText = dfl.internal.utf.toAnsiz(newText);
+			tci.tcia.pszText = cast(typeof(tci.tcia.pszText))dfl.internal.utf.toAnsiz(newText);
 			m = Message(hwnd, TCM_SETITEMA, cast(WPARAM)i, cast(LPARAM)&tci.tcia);
 		}
 		prevWndProc(m);

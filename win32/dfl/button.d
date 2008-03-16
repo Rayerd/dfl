@@ -6,7 +6,7 @@
 module dfl.button;
 
 private import dfl.base, dfl.control, dfl.application, dfl.internal.winapi;
-private import dfl.event, dfl.drawing;
+private import dfl.event, dfl.drawing, dfl.internal.dlib;
 
 
 private extern(Windows) void _initButton();
@@ -378,7 +378,7 @@ class Button: ButtonBase, IButtonControl // docmain
 	}
 	
 	
-	override void text(char[] txt) // setter
+	override void text(Dstring txt) // setter
 	in
 	{
 		if(txt.length)

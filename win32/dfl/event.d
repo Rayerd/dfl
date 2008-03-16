@@ -278,8 +278,8 @@ class EventArgs // docmain
 	+/
 	
 	
-	//private static EventArgs _e;
-	private static const EventArgs _e;
+	//private static const EventArgs _e;
+	private static EventArgs _e;
 	
 	
 	static this()

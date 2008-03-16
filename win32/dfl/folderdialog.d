@@ -65,7 +65,7 @@ class FolderBrowserDialog: CommonDialog // docmain
 	
 	
 	///
-	final void description(char[] desc) // setter
+	final void description(Dstring desc) // setter
 	{
 		// lpszTitle
 		
@@ -73,14 +73,14 @@ class FolderBrowserDialog: CommonDialog // docmain
 	}
 	
 	/// ditto
-	final char[] description() // getter
+	final Dstring description() // getter
 	{
 		return _desc;
 	}
 	
 	
 	///
-	final void selectedPath(char[] selpath) // setter
+	final void selectedPath(Dstring selpath) // setter
 	{
 		// pszDisplayName
 		
@@ -88,7 +88,7 @@ class FolderBrowserDialog: CommonDialog // docmain
 	}
 	
 	/// ditto
-	final char[] selectedPath() // getter
+	final Dstring selectedPath() // getter
 	{
 		return _selpath;
 	}
@@ -148,8 +148,8 @@ class FolderBrowserDialog: CommonDialog // docmain
 		
 		if(dfl.internal.utf.useUnicode)
 		{
-			const char[] BROWSE_NAME = "SHBrowseForFolderW";
-			const char[] PATH_NAME = "SHGetPathFromIDListW";
+			const Dstring BROWSE_NAME = "SHBrowseForFolderW";
+			const Dstring PATH_NAME = "SHGetPathFromIDListW";
 			static SHBrowseForFolderWProc browseproc = null;
 			static SHGetPathFromIDListWProc pathproc = null;
 			
@@ -172,7 +172,7 @@ class FolderBrowserDialog: CommonDialog // docmain
 			biw.pszDisplayName = cast(wchar*)pdescz;
 			if(_desc.length)
 			{
-				wchar[] tmp;
+				Dwstring tmp;
 				tmp = dfl.internal.utf.toUnicode(_desc);
 				if(tmp.length >= MAX_PATH)
 					_errPathTooLong();
@@ -221,7 +221,7 @@ class FolderBrowserDialog: CommonDialog // docmain
 			bia.pszDisplayName = cast(char*)pdescz;
 			if(_desc.length)
 			{
-				char[] tmp; // ansi.
+				Dstring tmp; // ansi.
 				tmp = dfl.internal.utf.toAnsi(_desc);
 				if(tmp.length >= MAX_PATH)
 					_errPathTooLong();
@@ -311,8 +311,8 @@ class FolderBrowserDialog: CommonDialog // docmain
 		static assert(BROWSEINFOW.ulFlags.offsetof == BROWSEINFOA.ulFlags.offsetof);
 	}
 	
-	char[] _desc;
-	char[] _selpath;
+	Dstring _desc;
+	Dstring _selpath;
 	
 	
 	const UINT INIT_FLAGS = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE;
@@ -331,7 +331,7 @@ private extern(Windows) int fbdHookProc(HWND hwnd, UINT msg, LPARAM lparam, LPAR
 		fd = cast(FolderBrowserDialog)cast(void*)lpData;
 		if(fd)
 		{
-			char[] s;
+			Dstring s;
 			switch(msg)
 			{
 				case BFFM_INITIALIZED:

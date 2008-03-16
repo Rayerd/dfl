@@ -1041,10 +1041,29 @@ extern(Windows):
 	}
 	
 	
-	const HTREEITEM TVI_ROOT = cast(HTREEITEM)-0x10000;
-	const HTREEITEM TVI_FIRST = cast(HTREEITEM)-0x0FFFF;
-	const HTREEITEM TVI_LAST = cast(HTREEITEM)-0x0FFFE;
-	const HTREEITEM TVI_SORT = cast(HTREEITEM)-0x0FFFD;
+	version(D_Version2)
+	{
+		/+ // DMD 2.012: Error: cannot implicitly convert expression (cast(HANDLE)cast(void*)-65536u) of type const(HANDLE) to int
+		const HTREEITEM TVI_ROOT = cast(HTREEITEM)-0x10000;
+		const HTREEITEM TVI_FIRST = cast(HTREEITEM)-0x0FFFF;
+		const HTREEITEM TVI_LAST = cast(HTREEITEM)-0x0FFFE;
+		const HTREEITEM TVI_SORT = cast(HTREEITEM)-0x0FFFD;
+		+/
+		enum: HTREEITEM
+		{
+			TVI_ROOT = cast(HTREEITEM)-0x10000,
+			TVI_FIRST = cast(HTREEITEM)-0x0FFFF,
+			TVI_LAST = cast(HTREEITEM)-0x0FFFE,
+			TVI_SORT = cast(HTREEITEM)-0x0FFFD,
+		}
+	}
+	else
+	{
+		const HTREEITEM TVI_ROOT = cast(HTREEITEM)-0x10000;
+		const HTREEITEM TVI_FIRST = cast(HTREEITEM)-0x0FFFF;
+		const HTREEITEM TVI_LAST = cast(HTREEITEM)-0x0FFFE;
+		const HTREEITEM TVI_SORT = cast(HTREEITEM)-0x0FFFD;
+	}
 	
 	
 	enum: UINT
@@ -2693,9 +2712,9 @@ extern(Windows):
 	HMENU CreatePopupMenu();
 	HMENU CreateMenu();
 	BOOL Shell_NotifyIconA(DWORD dwMessage, NOTIFYICONDATA* pnid);
-	LONG RegQueryValueExA(HKEY hKey, LPSTR lpValueName, LPDWORD lpReserved, LPDWORD lpType, LPBYTE lpData, LPDWORD lpcbData);
-	LONG RegQueryValueExW(HKEY hKey, LPWSTR lpValueName, LPDWORD lpReserved, LPDWORD lpType, LPBYTE lpData, LPDWORD lpcbData);
-	LONG RegConnectRegistryA(LPSTR lpMachineName, HKEY hKey, PHKEY phkResult);
+	LONG RegQueryValueExA(HKEY hKey, LPCSTR lpValueName, LPDWORD lpReserved, LPDWORD lpType, LPBYTE lpData, LPDWORD lpcbData);
+	LONG RegQueryValueExW(HKEY hKey, LPCWSTR lpValueName, LPDWORD lpReserved, LPDWORD lpType, LPBYTE lpData, LPDWORD lpcbData);
+	LONG RegConnectRegistryA(LPCSTR lpMachineName, HKEY hKey, PHKEY phkResult);
 	UINT RegisterClipboardFormatA(LPCSTR lpszFormat);
 	UINT RegisterClipboardFormatW(LPCWSTR lpszFormat);
 	int GetClipboardFormatNameA(UINT format, LPSTR lpszFormatName, int cchMaxCount);
@@ -2725,8 +2744,8 @@ extern(Windows):
 	HANDLE LoadImageW(HINSTANCE hinst, LPCWSTR lpszName, UINT uType, int cxDesired, int cyDesired, UINT fuLoad);
 	HANDLE CopyImage(HANDLE hImage, UINT uType, int cxDesired, int cyDesired, UINT fuFlags);
 	int WSACancelAsyncRequest(HANDLE hAsyncTaskHandle);
-	HANDLE WSAAsyncGetHostByName(HWND hWnd, uint wMsg, char* name, char* buf, int buflen);
-	HANDLE WSAAsyncGetHostByAddr(HWND hWnd, uint wMsg, char* addr, int len, int type, char* buf, int buflen);
+	HANDLE WSAAsyncGetHostByName(HWND hWnd, uint wMsg, PCSTR name, char* buf, int buflen);
+	HANDLE WSAAsyncGetHostByAddr(HWND hWnd, uint wMsg, PCSTR addr, int len, int type, char* buf, int buflen);
 	BOOL ExtTextOutA(HDC hdc, int X, int Y, UINT fuOptions, RECT* lprc, LPCSTR lpString, UINT cbCount, INT* lpDx);
 	BOOL Arc(HDC hdc, int nLeftRect, int nTopRect, int nRightRect, int nBottomRect, int nXStartArc, int nYStartArc, int nXEndArc, int nYEndArc);
 	BOOL PolyBezier(HDC hdc, POINT* lppt,DWORD cPoints);

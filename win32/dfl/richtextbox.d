@@ -7,7 +7,7 @@ module dfl.richtextbox;
 
 private import dfl.textbox, dfl.internal.winapi, dfl.event, dfl.application;
 private import dfl.base, dfl.drawing, dfl.menu, dfl.data;
-private import dfl.control, dfl.internal.utf;
+private import dfl.control, dfl.internal.utf, dfl.internal.dlib;
 
 
 private extern(C) char* strcpy(char*, char*);
@@ -20,21 +20,21 @@ private extern(Windows) void _initRichtextbox();
 class LinkClickedEventArgs: EventArgs
 {
 	///
-	this(char[] linkText)
+	this(Dstring linkText)
 	{
 		_linktxt = linkText;
 	}
 	
 	
 	///
-	final char[] linkText() // getter
+	final Dstring linkText() // getter
 	{
 		return _linktxt;
 	}
 	
 	
 	private:
-	char[] _linktxt;
+	Dstring _linktxt;
 }
 
 
@@ -101,13 +101,13 @@ class RichTextBox: TextBoxBase // docmain
 	alias TextBoxBase.cursor cursor; // Overload.
 	
 	
-	override char[] selectedText() // getter
+	override Dstring selectedText() // getter
 	{
 		if(created)
 		{
 			/+
 			uint len = selectionLength + 1;
-			char[] result = new char[len];
+			Dstring result = new char[len];
 			len = SendMessageA(handle, EM_GETSELTEXT, 0, cast(LPARAM)cast(char*)result);
 			assert(!result[len]);
 			return result[0 .. len];
@@ -741,14 +741,14 @@ class RichTextBox: TextBoxBase // docmain
 	
 	private struct _StreamStr
 	{
-		char[] str;
+		Dstring str;
 	}
 	
 	
 	// Note: RTF should only be ASCII so no conversions are necessary.
 	// TODO: verify this; I'm not certain.
 	
-	private void _streamIn(UINT fmt, char[] str)
+	private void _streamIn(UINT fmt, Dstring str)
 	in
 	{
 		assert(created);
@@ -769,7 +769,7 @@ class RichTextBox: TextBoxBase // docmain
 	}
 	
 	
-	private char[] _streamOut(UINT fmt)
+	private Dstring _streamOut(UINT fmt)
 	in
 	{
 		assert(created);
@@ -789,26 +789,26 @@ class RichTextBox: TextBoxBase // docmain
 	
 	
 	///
-	final void selectedRtf(char[] rtf) // setter
+	final void selectedRtf(Dstring rtf) // setter
 	{
 		_streamIn(SF_RTF | SFF_SELECTION, rtf);
 	}
 	
 	/// ditto
-	final char[] selectedRtf() // getter
+	final Dstring selectedRtf() // getter
 	{
 		return _streamOut(SF_RTF | SFF_SELECTION);
 	}
 	
 	
 	///
-	final void rtf(char[] newRtf) // setter
+	final void rtf(Dstring newRtf) // setter
 	{
 		_streamIn(SF_RTF, rtf);
 	}
 	
 	/// ditto
-	final char[] rtf() // getter
+	final Dstring rtf() // getter
 	{
 		return _streamOut(SF_RTF);
 	}
@@ -851,7 +851,7 @@ class RichTextBox: TextBoxBase // docmain
 		/+ // TextBoxBase.createHandle() does this.
 		if(!isHandleCreated)
 		{
-			char[] txt;
+			Dstring txt;
 			txt = wtext;
 			
 			super.createHandle();
@@ -886,7 +886,7 @@ class RichTextBox: TextBoxBase // docmain
 	}
 	
 	
-	private char[] _getRange(LONG min, LONG max)
+	private Dstring _getRange(LONG min, LONG max)
 	in
 	{
 		assert(created);
@@ -911,11 +911,12 @@ class RichTextBox: TextBoxBase // docmain
 		
 		//max = SendMessageA(handle, EM_GETTEXTRANGE, 0, cast(LPARAM)&tr);
 		max = dfl.internal.utf.sendMessage(handle, EM_GETTEXTRANGE, 0, cast(LPARAM)&tr);
+		Dstring result;
 		if(dfl.internal.utf.useUnicode)
-			s = fromUnicode(cast(wchar*)s.ptr, max);
+			result = fromUnicode(cast(wchar*)s.ptr, max);
 		else
-			s = fromAnsi(s.ptr, max);
-		return s;
+			result = fromAnsi(s.ptr, max);
+		return result;
 	}
 	
 	
@@ -1016,7 +1017,7 @@ private extern(Windows) DWORD _streamingOutStr(DWORD dwCookie, LPBYTE pbBuff, LO
 	RichTextBox._StreamStr* so;
 	so = cast(typeof(so))dwCookie;
 	
-	so.str ~= cast(char[])pbBuff[0 .. cb];
+	so.str ~= cast(Dstring)pbBuff[0 .. cb];
 	*pcb = cb;
 	
 	return 0;

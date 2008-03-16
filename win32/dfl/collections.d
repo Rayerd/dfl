@@ -46,7 +46,7 @@ template ListWrapArray(TValue, alias Array,
 	
 	static if(OVERLOAD_STRING)
 	{
-		static assert(!is(TValue == char[]));
+		static assert(!is(TValue == Dstring));
 		
 		static if(is(TValue == Object))
 			alias StringObject TValueString;
@@ -92,7 +92,7 @@ template ListWrapArray(TValue, alias Array,
 	static if(OVERLOAD_STRING)
 	{
 		/// ditto
-		void opIndexAssign(char[] value, int index) // setter
+		void opIndexAssign(Dstring value, int index) // setter
 		{
 			return opIndexAssign(new TValueString(value), index);
 		}
@@ -124,7 +124,7 @@ template ListWrapArray(TValue, alias Array,
 	static if(OVERLOAD_STRING)
 	{
 		/// ditto
-		void add(char[] value)
+		void add(Dstring value)
 		{
 			insert(cast(int)Array.length, new TValueString(value));
 		}
@@ -214,7 +214,7 @@ template ListWrapArray(TValue, alias Array,
 	static if(OVERLOAD_STRING)
 	{
 		/// ditto
-		bool contains(char[] value)
+		bool contains(Dstring value)
 		{
 			return -1 != indexOf(value);
 		}
@@ -253,7 +253,7 @@ template ListWrapArray(TValue, alias Array,
 	static if(OVERLOAD_STRING)
 	{
 		/// ditto
-		int indexOf(char[] value)
+		int indexOf(Dstring value)
 		{
 			foreach(size_t idx, TValue onval; Array)
 			{
@@ -324,7 +324,7 @@ template ListWrapArray(TValue, alias Array,
 	static if(OVERLOAD_STRING)
 	{
 		/// ditto
-		void insert(int index, char[] value)
+		void insert(int index, Dstring value)
 		{
 			return insert(index, new TValueString(value));
 		}
@@ -364,7 +364,7 @@ template ListWrapArray(TValue, alias Array,
 	static if(OVERLOAD_STRING)
 	{
 		/// ditto
-		void remove(char[] value)
+		void remove(Dstring value)
 		{
 			int i;
 			i = indexOf(value);
@@ -438,9 +438,9 @@ template ListWrapArray(TValue, alias Array,
 	static if(OVERLOAD_STRING)
 	{
 		/// ditto
-		void addRange(char[][] values)
+		void addRange(Dstring[] values)
 		{
-			foreach(char[] value; values)
+			foreach(Dstring value; values)
 			{
 				add(value);
 			}

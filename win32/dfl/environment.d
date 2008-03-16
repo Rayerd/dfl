@@ -21,30 +21,30 @@ final class Environment // docmain
 	static:
 	
 	///
-	char[] commandLine() // getter
+	Dstring commandLine() // getter
 	{
 		return dfl.internal.utf.getCommandLine();
 	}
 	
 	
 	///
-	void currentDirectory(char[] cd) // setter
+	void currentDirectory(Dstring cd) // setter
 	{
 		if(!dfl.internal.utf.setCurrentDirectory(cd))
 			throw new DflException("Unable to set current directory");
 	}
 	
 	/// ditto
-	char[] currentDirectory() // getter
+	Dstring currentDirectory() // getter
 	{
 		return dfl.internal.utf.getCurrentDirectory();
 	}
 	
 	
 	///
-	char[] machineName() // getter
+	Dstring machineName() // getter
 	{
-		char[] result;
+		Dstring result;
 		result = dfl.internal.utf.getComputerName();
 		if(!result.length)
 			throw new DflException("Unable to obtain machine name");
@@ -53,7 +53,7 @@ final class Environment // docmain
 	
 	
 	///
-	char[] newLine() // getter
+	Dstring newLine() // getter
 	{
 		return nativeLineSeparatorString;
 	}
@@ -90,9 +90,9 @@ final class Environment // docmain
 	
 	
 	///
-	char[] systemDirectory() // getter
+	Dstring systemDirectory() // getter
 	{
-		char[] result;
+		Dstring result;
 		result = dfl.internal.utf.getSystemDirectory();
 		if(!result.length)
 			throw new DflException("Unable to obtain system directory");
@@ -108,9 +108,9 @@ final class Environment // docmain
 	
 	
 	///
-	char[] userName() // getter
+	Dstring userName() // getter
 	{
-		char[] result;
+		Dstring result;
 		result = dfl.internal.utf.getUserName();
 		if(!result.length)
 			throw new DflException("Unable to obtain user name");
@@ -127,9 +127,9 @@ final class Environment // docmain
 	
 	
 	///
-	char[] expandEnvironmentVariables(char[] str)
+	Dstring expandEnvironmentVariables(Dstring str)
 	{
-		char[] result;
+		Dstring result;
 		if(!dfl.internal.utf.expandEnvironmentStrings(str, result))
 			throw new DflException("Unable to expand environment variables");
 		return result;
@@ -137,16 +137,16 @@ final class Environment // docmain
 	
 	
 	///
-	char[][] getCommandLineArgs()
+	Dstring[] getCommandLineArgs()
 	{
 		return parseArgs(commandLine);
 	}
 	
 	
 	///
-	char[] getEnvironmentVariable(char[] name)
+	Dstring getEnvironmentVariable(Dstring name)
 	{
-		char[] result;
+		Dstring result;
 		result = dfl.internal.utf.getEnvironmentVariable(name);
 		if(!result.length)
 			throw new DflException("Unable to obtain environment variable");
@@ -154,15 +154,15 @@ final class Environment // docmain
 	}
 	
 	
-	//char[][char[]] getEnvironmentVariables()
-	//char[][] getEnvironmentVariables()
+	//Dstring[Dstring] getEnvironmentVariables()
+	//Dstring[] getEnvironmentVariables()
 	
 	
 	///
-	char[][] getLogicalDrives()
+	Dstring[] getLogicalDrives()
 	{
 		DWORD dr = GetLogicalDrives();
-		char[][] result;
+		Dstring[] result;
 		int i;
 		char[4] tmp = " :\\\0";
 		
@@ -172,7 +172,8 @@ final class Environment // docmain
 			{
 				char[] s = tmp.dup[0 .. 3];
 				s[0] = 'A' + i;
-				result ~= s;
+				//result ~= s;
+				result ~= cast(Dstring)s; // Needed in D2.
 			}
 			dr >>= 1;
 		}
@@ -392,9 +393,9 @@ final class SystemEvents // docmain
 +/
 
 
-package char[][] parseArgs(char[] args)
+package Dstring[] parseArgs(Dstring args)
 {
-	char[][] result;
+	Dstring[] result;
 	uint i;
 	bool inQuote = false;
 	bool findStart = true;
@@ -463,7 +464,7 @@ package char[][] parseArgs(char[] args)
 
 unittest
 {
-	char[][] args;
+	Dstring[] args;
 	
 	args = parseArgs(`"foo" bar`);
 	assert(args.length == 2);
@@ -476,7 +477,7 @@ unittest
 	
 	/+
 	writefln("commandLine = '%s'", Environment.commandLine);
-	foreach(char[] arg; Environment.getCommandLineArgs())
+	foreach(Dstring arg; Environment.getCommandLineArgs())
 	{
 		writefln("\t'%s'", arg);
 	}
@@ -506,9 +507,9 @@ class Version // docmain ?
 	/// ditto
 	// A string containing "major.minor.build.revision".
 	// 2 to 4 parts expected.
-	this(char[] str)
+	this(Dstring str)
 	{
-		char[][] stuff = stringSplit(str, ".");
+		Dstring[] stuff = stringSplit(str, ".");
 		
 		// Note: fallthrough.
 		switch(stuff.length)
@@ -550,6 +551,7 @@ class Version // docmain ?
 	}
 	
 	
+	/+ // D2 doesn't like this without () but this invariant doesn't really even matter.
 	invariant
 	{
 		assert(_major >= 0);
@@ -557,12 +559,13 @@ class Version // docmain ?
 		assert(_build >= -1);
 		assert(_revision >= -1);
 	}
+	+/
 	
 	
 	///
-	override char[] toString()
+	override Dstring toString()
 	{
-		char[] result;
+		Dstring result;
 		
 		result = intToString(_major) ~ "." ~ intToString(_minor);
 		if(_build != -1)
@@ -615,61 +618,62 @@ enum PlatformId: DWORD
 ///
 final class OperatingSystem // docmain
 {
-	final:
-	
-	///
-	this(PlatformId platId, Version ver)
+	final
 	{
-		this.platId = platId;
-		this.vers = ver;
-	}
-	
-	
-	///
-	override char[] toString()
-	{
-		char[] result;
-		
-		// DMD 0.92 says error: cannot implicitly convert uint to PlatformId
-		switch(cast(DWORD)platId)
+		///
+		this(PlatformId platId, Version ver)
 		{
-			case PlatformId.WIN32_NT:
-				result = "Microsoft Windows NT ";
-				break;
-			
-			case PlatformId.WIN32_WINDOWS:
-				result = "Microsoft Windows 95 ";
-				break;
-			
-			case PlatformId.WIN32s:
-				result = "Microsoft Win32s ";
-				break;
-			
-			case PlatformId.WIN_CE:
-				result = "Microsoft Windows CE ";
-				break;
-			
-			default:
-				throw new DflException("Unknown platform ID");
+			this.platId = platId;
+			this.vers = ver;
 		}
 		
-		result ~= vers.toString();
-		return result;
-	}
-	
-	
-	///
-	PlatformId platform() // getter
-	{
-		return platId;
-	}
-	
-	
-	///
-	// Should be version() :p
-	Version ver() // getter
-	{
-		return vers;
+		
+		///
+		override Dstring toString()
+		{
+			Dstring result;
+			
+			// DMD 0.92 says error: cannot implicitly convert uint to PlatformId
+			switch(cast(DWORD)platId)
+			{
+				case PlatformId.WIN32_NT:
+					result = "Microsoft Windows NT ";
+					break;
+				
+				case PlatformId.WIN32_WINDOWS:
+					result = "Microsoft Windows 95 ";
+					break;
+				
+				case PlatformId.WIN32s:
+					result = "Microsoft Win32s ";
+					break;
+				
+				case PlatformId.WIN_CE:
+					result = "Microsoft Windows CE ";
+					break;
+				
+				default:
+					throw new DflException("Unknown platform ID");
+			}
+			
+			result ~= vers.toString();
+			return result;
+		}
+		
+		
+		///
+		PlatformId platform() // getter
+		{
+			return platId;
+		}
+		
+		
+		///
+		// Should be version() :p
+		Version ver() // getter
+		{
+			return vers;
+		}
 	}
 	
 	

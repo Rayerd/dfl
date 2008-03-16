@@ -27,7 +27,7 @@ alias IWindow IWin32Window; // deprecated
 class DflException: Exception // docmain
 {
 	///
-	this(char[] msg)
+	this(Dstring msg)
 	{
 		super(msg);
 	}
@@ -38,17 +38,17 @@ class DflException: Exception // docmain
 class StringObject: DObject
 {
 	///
-	char[] value;
+	Dstring value;
 	
 	
 	///
-	this(char[] str)
+	this(Dstring str)
 	{
 		this.value = str;
 	}
 	
 	
-	override char[] toString()
+	override Dstring toString()
 	{
 		return value;
 	}
@@ -951,7 +951,7 @@ class LabelEditEventArgs: EventArgs
 	}
 	
 	/// ditto
-	this(int index, char[] labelText)
+	this(int index, Dstring labelText)
 	{
 		this.idx = index;
 		this.ltxt = labelText;
@@ -973,7 +973,7 @@ class LabelEditEventArgs: EventArgs
 	
 	///
 	// The text of the label's edit.
-	final char[] label() // getter
+	final Dstring label() // getter
 	{
 		return ltxt;
 	}
@@ -989,7 +989,7 @@ class LabelEditEventArgs: EventArgs
 	
 	private:
 	int idx;
-	char[] ltxt;
+	Dstring ltxt;
 	bool cancl = false;
 }
 +/

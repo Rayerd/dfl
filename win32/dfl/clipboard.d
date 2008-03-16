@@ -5,7 +5,8 @@
 /// Interfacing with the system clipboard for copy and paste operations.
 module dfl.clipboard;
 
-private import dfl.base, dfl.internal.winapi, dfl.data, dfl.internal.wincom;
+private import dfl.base, dfl.internal.winapi, dfl.data, dfl.internal.wincom,
+	dfl.internal.dlib;
 
 
 ///
@@ -115,13 +116,13 @@ class Clipboard // docmain
 	
 	
 	///
-	void setString(char[] str, bool persist = false)
+	void setString(Dstring str, bool persist = false)
 	{
 		setDataObject(Data(str), persist);
 	}
 	
 	/// ditto
-	char[] getString()
+	Dstring getString()
 	{
 		dfl.data.IDataObject ido;
 		ido = getDataObject();

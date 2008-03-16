@@ -83,7 +83,7 @@ class ContextMenu: Menu // docmain
 class MenuItem: Menu // docmain
 {
 	///
-	final void text(char[] txt) // setter
+	final void text(Dstring txt) // setter
 	{
 		if(!menuItems.length && txt == SEPARATOR_TEXT)
 		{
@@ -111,7 +111,7 @@ class MenuItem: Menu // docmain
 	}
 	
 	/// ditto
-	final char[] text() // getter
+	final Dstring text() // getter
 	{
 		// if(mparent) fetch text ?
 		return mtext;
@@ -471,7 +471,7 @@ class MenuItem: Menu // docmain
 	}
 	
 	/// ditto
-	this(char[] text)
+	this(Dstring text)
 	{
 		_init();
 		
@@ -479,7 +479,7 @@ class MenuItem: Menu // docmain
 	}
 	
 	/// ditto
-	this(char[] text, MenuItem[] items)
+	this(Dstring text, MenuItem[] items)
 	{
 		if(items.length)
 		{
@@ -513,7 +513,7 @@ class MenuItem: Menu // docmain
 	}
 	
 	
-	override char[] toString()
+	override Dstring toString()
 	{
 		return text;
 	}
@@ -525,7 +525,7 @@ class MenuItem: Menu // docmain
 	}
 	
 	
-	int opEquals(char[] val)
+	int opEquals(Dstring val)
 	{
 		return text == val;
 	}
@@ -537,7 +537,7 @@ class MenuItem: Menu // docmain
 	}
 	
 	
-	int opCmp(char[] val)
+	int opCmp(Dstring val)
 	{
 		return stringICmp(text, val);
 	}
@@ -620,14 +620,14 @@ class MenuItem: Menu // docmain
 	private:
 	
 	int mid; // Menu ID.
-	char[] mtext;
+	Dstring mtext;
 	Menu mparent;
 	UINT fType = 0; // MFT_*
 	UINT fState = 0;
 	int mindex = -1; //0;
 	//int mergeord = 0;
 	
-	const char[] SEPARATOR_TEXT = "-";
+	const Dstring SEPARATOR_TEXT = "-";
 	
 	static assert(!MFS_UNCHECKED);
 	static assert(!MFT_STRING);
@@ -781,7 +781,7 @@ abstract class Menu: DObject // docmain
 			insert(mi.mindex, mi);
 		}
 		
-		void add(char[] value)
+		void add(Dstring value)
 		{
 			return add(new MenuItem(value));
 		}
@@ -798,12 +798,12 @@ abstract class Menu: DObject // docmain
 			}
 		}
 		
-		void addRange(char[][] items)
+		void addRange(Dstring[] items)
 		{
 			if(!Menu._compat092)
 				return _wraparray.addRange(items);
 			
-			foreach(char[] it; items)
+			foreach(Dstring it; items)
 			{
 				insert(length, it);
 			}
@@ -963,7 +963,7 @@ abstract class Menu: DObject // docmain
 	}
 	
 	
-	/+ package +/ protected void _setInfo(UINT uItem, BOOL fByPosition, LPMENUITEMINFOA lpmii, char[] typeData = null) // package
+	/+ package +/ protected void _setInfo(UINT uItem, BOOL fByPosition, LPMENUITEMINFOA lpmii, Dstring typeData = null) // package
 	{
 		if(typeData.length)
 		{
@@ -975,7 +975,7 @@ abstract class Menu: DObject // docmain
 			}
 			else
 			{
-				lpmii.dwTypeData = dfl.internal.utf.unsafeAnsiz(typeData);
+				lpmii.dwTypeData = cast(typeof(lpmii.dwTypeData))dfl.internal.utf.unsafeAnsiz(typeData);
 				SetMenuItemInfoA(hmenu, uItem, fByPosition, lpmii);
 			}
 		}
@@ -986,7 +986,7 @@ abstract class Menu: DObject // docmain
 	}
 	
 	
-	/+ package +/ protected void _insert(UINT uItem, BOOL fByPosition, LPMENUITEMINFOA lpmii, char[] typeData = null) // package
+	/+ package +/ protected void _insert(UINT uItem, BOOL fByPosition, LPMENUITEMINFOA lpmii, Dstring typeData = null) // package
 	{
 		if(typeData.length)
 		{
@@ -998,7 +998,7 @@ abstract class Menu: DObject // docmain
 			}
 			else
 			{
-				lpmii.dwTypeData = dfl.internal.utf.unsafeAnsiz(typeData);
+				lpmii.dwTypeData = cast(typeof(lpmii.dwTypeData))dfl.internal.utf.unsafeAnsiz(typeData);
 				InsertMenuItemA(hmenu, uItem, fByPosition, lpmii);
 			}
 		}
@@ -1047,7 +1047,7 @@ class MainMenu: Menu // docmain
 	}
 	
 	
-	/+ package +/ protected override void _setInfo(UINT uItem, BOOL fByPosition, LPMENUITEMINFOA lpmii, char[] typeData = null) // package
+	/+ package +/ protected override void _setInfo(UINT uItem, BOOL fByPosition, LPMENUITEMINFOA lpmii, Dstring typeData = null) // package
 	{
 		Menu._setInfo(uItem, fByPosition, lpmii, typeData);
 		
@@ -1056,7 +1056,7 @@ class MainMenu: Menu // docmain
 	}
 	
 	
-	/+ package +/ protected override void _insert(UINT uItem, BOOL fByPosition, LPMENUITEMINFOA lpmii, char[] typeData = null) // package
+	/+ package +/ protected override void _insert(UINT uItem, BOOL fByPosition, LPMENUITEMINFOA lpmii, Dstring typeData = null) // package
 	{
 		Menu._insert(uItem, fByPosition, lpmii, typeData);
 		

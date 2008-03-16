@@ -25,7 +25,7 @@ class DataFormats // docmain
 		
 		
 		/// Data format name.
-		final char[] name() // getter
+		final Dstring name() // getter
 		{
 			return _name;
 		}
@@ -33,7 +33,7 @@ class DataFormats // docmain
 		
 		package:
 		int _id;
-		char[] _name;
+		Dstring _name;
 		
 		
 		this()
@@ -45,87 +45,87 @@ class DataFormats // docmain
 	static:
 	
 	/// Predefined data formats.
-	char[] bitmap() // getter
+	Dstring bitmap() // getter
 	{
 		return getFormat(CF_BITMAP).name;
 	}
 	
 	/+
 	/// ditto
-	char[] commaSeparatedValue() // getter
+	Dstring commaSeparatedValue() // getter
 	{
 		return getFormat(?).name;
 	}
 	+/
 	
 	/// ditto
-	char[] dib() // getter
+	Dstring dib() // getter
 	{
 		return getFormat(CF_DIB).name;
 	}
 	
 	/// ditto
-	char[] dif() // getter
+	Dstring dif() // getter
 	{
 		return getFormat(CF_DIF).name;
 	}
 	
 	/// ditto
-	char[] enhandedMetaFile() // getter
+	Dstring enhandedMetaFile() // getter
 	{
 		return getFormat(CF_ENHMETAFILE).name;
 	}
 	
 	/// ditto
-	char[] fileDrop() // getter
+	Dstring fileDrop() // getter
 	{
 		return getFormat(CF_HDROP).name;
 	}
 	
 	/// ditto
-	char[] html() // getter
+	Dstring html() // getter
 	{
 		return getFormat("HTML Format").name;
 	}
 	
 	/// ditto
-	char[] locale() // getter
+	Dstring locale() // getter
 	{
 		return getFormat(CF_LOCALE).name;
 	}
 	
 	/// ditto
-	char[] metafilePict() // getter
+	Dstring metafilePict() // getter
 	{
 		return getFormat(CF_METAFILEPICT).name;
 	}
 	
 	/// ditto
-	char[] oemText() // getter
+	Dstring oemText() // getter
 	{
 		return getFormat(CF_OEMTEXT).name;
 	}
 	
 	/// ditto
-	char[] palette() // getter
+	Dstring palette() // getter
 	{
 		return getFormat(CF_PALETTE).name;
 	}
 	
 	/// ditto
-	char[] penData() // getter
+	Dstring penData() // getter
 	{
 		return getFormat(CF_PENDATA).name;
 	}
 	
 	/// ditto
-	char[] riff() // getter
+	Dstring riff() // getter
 	{
 		return getFormat(CF_RIFF).name;
 	}
 	
 	/// ditto
-	char[] rtf() // getter
+	Dstring rtf() // getter
 	{
 		return getFormat("Rich Text Format").name;
 	}
@@ -133,50 +133,50 @@ class DataFormats // docmain
 	
 	/+
 	/// ditto
-	char[] serializable() // getter
+	Dstring serializable() // getter
 	{
 		return getFormat(?).name;
 	}
 	+/
 	
 	/// ditto
-	char[] stringFormat() // getter
+	Dstring stringFormat() // getter
 	{
 		return utf8; // ?
 	}
 	
 	/// ditto
-	char[] utf8() // getter
+	Dstring utf8() // getter
 	{
 		return getFormat("UTF-8").name;
 	}
 	
 	/// ditto
-	char[] symbolicLink() // getter
+	Dstring symbolicLink() // getter
 	{
 		return getFormat(CF_SYLK).name;
 	}
 	
 	/// ditto
-	char[] text() // getter
+	Dstring text() // getter
 	{
 		return getFormat(CF_TEXT).name;
 	}
 	
 	/// ditto
-	char[] tiff() // getter
+	Dstring tiff() // getter
 	{
 		return getFormat(CF_TIFF).name;
 	}
 	
 	/// ditto
-	char[] unicodeText() // getter
+	Dstring unicodeText() // getter
 	{
 		return getFormat(CF_UNICODETEXT).name;
 	}
 	
 	/// ditto
-	char[] waveAudio() // getter
+	Dstring waveAudio() // getter
 	{
 		return getFormat(CF_WAVE).name;
 	}
@@ -211,7 +211,7 @@ class DataFormats // docmain
 	
 	/// ditto
 	// Creates the format name if it doesn't exist.
-	Format getFormat(char[] name)
+	Format getFormat(Dstring name)
 	{
 		_init();
 		foreach(Format onfmt; fmts)
@@ -241,7 +241,7 @@ class DataFormats // docmain
 			return;
 		
 		
-		void initfmt(int id, char[] name)
+		void initfmt(int id, Dstring name)
 		in
 		{
 			assert(!(id in fmts));
@@ -278,9 +278,9 @@ class DataFormats // docmain
 	
 	
 	// Does not get the name of one of the predefined constant ones.
-	char[] getName(int id)
+	Dstring getName(int id)
 	{
-		char[] result;
+		Dstring result;
 		result = dfl.internal.utf.getClipboardFormatName(id);
 		if(!result.length)
 			throw new DflException("Unable to get format");
@@ -292,9 +292,9 @@ class DataFormats // docmain
 	{
 		if(type == typeid(ubyte[]))
 			return getFormat(text);
-		if(type == typeid(char[]))
+		if(type == typeid(Dstring))
 			return getFormat(stringFormat);
-		if(type == typeid(wchar[]))
+		if(type == typeid(Dwstring))
 			return getFormat(unicodeText);
 		//if(type == typeid(Bitmap))
 		//	return getFormat(bitmap);
@@ -306,7 +306,7 @@ class DataFormats // docmain
 	}
 	
 	
-	private char[][] getHDropStrings(void[] value)
+	private Dstring[] getHDropStrings(void[] value)
 	{
 		/+
 		if(value.length != HDROP.sizeof)
@@ -314,14 +314,14 @@ class DataFormats // docmain
 		
 		HDROP hd;
 		UINT num;
-		char[][] result;
+		Dstring[] result;
 		size_t iw;
 		
 		hd = *cast(HDROP*)value.ptr;
 		num = dragQueryFile(hd);
 		if(!num)
 			return null;
-		result = new char[][num];
+		result = new Dstring[num];
 		for(iw = 0; iw != num; iw++)
 		{
 			result[iw] = dragQueryFile(hd, iw);
@@ -332,7 +332,7 @@ class DataFormats // docmain
 		if(value.length <= DROPFILES.sizeof)
 			return null;
 		
-		char[][] result;
+		Dstring[] result;
 		DROPFILES* df;
 		size_t iw, startiw;
 		
@@ -342,7 +342,7 @@ class DataFormats // docmain
 		
 		if(df.fWide) // Unicode.
 		{
-			wchar[] uni = cast(wchar[])((value.ptr + df.pFiles)[0 .. value.length]);
+			Dwstring uni = cast(Dwstring)((value.ptr + df.pFiles)[0 .. value.length]);
 			for(iw = startiw = 0;; iw++)
 			{
 				if(!uni[iw])
@@ -357,7 +357,7 @@ class DataFormats // docmain
 		}
 		else // ANSI.
 		{
-			char[] ansi = cast(char[])((value.ptr + df.pFiles)[0 .. value.length]);
+			Dstring ansi = cast(Dstring)((value.ptr + df.pFiles)[0 .. value.length]);
 			for(iw = startiw = 0;; iw++)
 			{
 				if(!ansi[iw])
@@ -384,14 +384,14 @@ class DataFormats // docmain
 				return Data(stopAtNull!(ubyte)(cast(ubyte[])value));
 			
 			case CF_UNICODETEXT:
-				return Data(stopAtNull!(wchar)(cast(wchar[])value));
+				return Data(stopAtNull!(Dwchar)(cast(Dwstring)value));
 			
 			case CF_HDROP:
 				return Data(getHDropStrings(value));
 			
 			default:
 				if(id == getFormat(stringFormat).id)
-					return Data(stopAtNull!(char)(cast(char[])value));
+					return Data(stopAtNull!(Dchar)(cast(Dstring)value));
 		}
 		
 		//throw new DflException("Unknown data format");
@@ -399,7 +399,7 @@ class DataFormats // docmain
 	}
 	
 	
-	void[] getCbFileDrop(char[][] fileNames)
+	void[] getCbFileDrop(Dstring[] fileNames)
 	{
 		size_t sz = DROPFILES.sizeof;
 		void* p;
@@ -442,32 +442,37 @@ class DataFormats // docmain
 			const ubyte[] UBYTE_ZERO = [0];
 			return data.getText() ~ UBYTE_ZERO;
 		}
-		//else if(data.info == typeid(char[]))
+		//else if(data.info == typeid(Dstring))
 		//else if(getFormat(stringFormat).id == id)
-		else if((getFormat(stringFormat).id == id) || (data.info == typeid(char[])))
+		else if((getFormat(stringFormat).id == id) || (data.info == typeid(Dstring)))
 		{
 			// UTF-8 string.
-			char[] str;
+			Dstring str;
 			str = data.getString();
 			//return toStringz(str)[0 .. str.length + 1];
-			return unsafeStringz(str)[0 .. str.length + 1]; // ?
+			//return unsafeStringz(str)[0 .. str.length + 1]; // ?
+			return cast(void[])unsafeStringz(str)[0 .. str.length + 1]; // ? Needed in D2.
 		}
-		//else if(data.info == typeid(wchar[]))
+		//else if(data.info == typeid(Dwstring))
 		//else if(CF_UNICODETEXT == id)
-		else if((CF_UNICODETEXT == id) || (data.info == typeid(wchar[])))
+		else if((CF_UNICODETEXT == id) || (data.info == typeid(Dwstring)))
 		{
 			// Unicode string.
-			return data.getUnicodeText() ~ cast(wchar[])\0;
+			//return data.getUnicodeText() ~ cast(Dwstring)\0;
+			//return cast(void[])(data.getUnicodeText() ~ cast(Dwstring)\0); // Needed in D2. Not guaranteed safe.
+			return (data.getUnicodeText() ~ cast(Dwstring)\0).dup; // Needed in D2.
 		}
-		else if(data.info == typeid(dchar[]))
+		else if(data.info == typeid(Ddstring))
 		{
-			return (*cast(dchar[]*)data.value) ~ \0;
+			//return (*cast(Ddstring*)data.value) ~ \0;
+			//return cast(void[])((*cast(Ddstring*)data.value) ~ \0); // Needed in D2. Not guaranteed safe.
+			return ((*cast(Ddstring*)data.value) ~ \0).dup; // Needed in D2.
 		}
 		else if(CF_HDROP == id)
 		{
 			return getCbFileDrop(data.getStrings());
 		}
-		else if(data.info == typeid(void[]) || data.info == typeid(char[])
+		else if(data.info == typeid(void[]) || data.info == typeid(Dstring)
 			|| data.info == typeid(ubyte[]) || data.info == typeid(byte[])) // Hack ?
 		{
 			return *cast(void[]*)data.value; // Save the array elements, not the reference.
@@ -542,10 +547,10 @@ struct Data // docmain
 	
 	/// ditto
 	// UTF-8.
-	char[] getString()
+	Dstring getString()
 	{
-		assert(_info == typeid(char[]) || _info == typeid(void[]));
-		return *cast(char[]*)_value;
+		assert(_info == typeid(Dstring) || _info == typeid(void[]));
+		return *cast(Dstring*)_value;
 	}
 	
 	/// ditto
@@ -562,10 +567,10 @@ struct Data // docmain
 	}
 	
 	/// ditto
-	wchar[] getUnicodeText()
+	Dwstring getUnicodeText()
 	{
-		assert(_info == typeid(wchar[]) || _info == typeid(void[]));
-		return *cast(wchar[]*)_value;
+		assert(_info == typeid(Dwstring) || _info == typeid(void[]));
+		return *cast(Dwstring*)_value;
 	}
 	
 	/// ditto
@@ -581,10 +586,10 @@ struct Data // docmain
 	}
 	
 	/// ditto
-	char[][] getStrings()
+	Dstring[] getStrings()
 	{
-		assert(_info == typeid(char[][]));
-		return *cast(char[][]*)_value;
+		assert(_info == typeid(Dstring[]));
+		return *cast(Dstring[]*)_value;
 	}
 	
 	/// ditto
@@ -613,31 +618,31 @@ interface IDataFormat
 interface IDataObject // docmain
 {
 	///
-	Data getData(char[] fmt);
+	Data getData(Dstring fmt);
 	/// ditto
 	Data getData(TypeInfo type);
 	/// ditto
-	Data getData(char[] fmt, bool doConvert);
+	Data getData(Dstring fmt, bool doConvert);
 	
 	///
-	bool getDataPresent(char[] fmt); // Check.
+	bool getDataPresent(Dstring fmt); // Check.
 	/// ditto
 	bool getDataPresent(TypeInfo type); // Check.
 	/// ditto
-	bool getDataPresent(char[] fmt, bool canConvert); // Check.
+	bool getDataPresent(Dstring fmt, bool canConvert); // Check.
 	
 	///
-	char[][] getFormats();
-	//char[][] getFormats(bool onlyNative);
+	Dstring[] getFormats();
+	//Dstring[] getFormats(bool onlyNative);
 	
 	///
 	void setData(Data obj);
 	/// ditto
-	void setData(char[] fmt, Data obj);
+	void setData(Dstring fmt, Data obj);
 	/// ditto
 	void setData(TypeInfo type, Data obj);
 	/// ditto
-	void setData(char[] fmt, bool canConvert, Data obj);
+	void setData(Dstring fmt, bool canConvert, Data obj);
 }
 
 
@@ -645,7 +650,7 @@ interface IDataObject // docmain
 class DataObject: dfl.data.IDataObject // docmain
 {
 	///
-	Data getData(char[] fmt)
+	Data getData(Dstring fmt)
 	{
 		return getData(fmt, true);
 	}
@@ -657,7 +662,7 @@ class DataObject: dfl.data.IDataObject // docmain
 	}
 	
 	/// ditto
-	Data getData(char[] fmt, bool doConvert)
+	Data getData(Dstring fmt, bool doConvert)
 	{
 		// doConvert ...
 		
@@ -671,7 +676,7 @@ class DataObject: dfl.data.IDataObject // docmain
 	
 	
 	///
-	bool getDataPresent(char[] fmt)
+	bool getDataPresent(Dstring fmt)
 	{
 		return getDataPresent(fmt, true);
 	}
@@ -683,7 +688,7 @@ class DataObject: dfl.data.IDataObject // docmain
 	}
 	
 	/// ditto
-	bool getDataPresent(char[] fmt, bool canConvert)
+	bool getDataPresent(Dstring fmt, bool canConvert)
 	{
 		// canConvert ...
 		return find(fmt) != -1;
@@ -691,11 +696,11 @@ class DataObject: dfl.data.IDataObject // docmain
 	
 	
 	///
-	char[][] getFormats()
+	Dstring[] getFormats()
 	{
-		char[][] result;
-		result = new char[][all.length];
-		foreach(int i, inout char[] fmt; result)
+		Dstring[] result;
+		result = new Dstring[all.length];
+		foreach(int i, inout Dstring fmt; result)
 		{
 			fmt = all[i].fmt;
 		}
@@ -704,13 +709,13 @@ class DataObject: dfl.data.IDataObject // docmain
 	
 	
 	// TO-DO: remove...
-	deprecated final char[][] getFormats(bool onlyNative)
+	deprecated final Dstring[] getFormats(bool onlyNative)
 	{
 		return getFormats();
 	}
 	
 	
-	package final void _setData(char[] fmt, Data obj, bool replace = true)
+	package final void _setData(Dstring fmt, Data obj, bool replace = true)
 	{
 		int i;
 		i = find(fmt, false);
@@ -737,7 +742,7 @@ class DataObject: dfl.data.IDataObject // docmain
 	
 	
 	/// ditto
-	void setData(char[] fmt, Data obj)
+	void setData(Dstring fmt, Data obj)
 	{
 		setData(fmt, true, obj);
 	}
@@ -751,7 +756,7 @@ class DataObject: dfl.data.IDataObject // docmain
 	
 	
 	/// ditto
-	void setData(char[] fmt, bool canConvert, Data obj)
+	void setData(Dstring fmt, bool canConvert, Data obj)
 	{
 		/+
 		if(obj.info == typeid(Data))
@@ -769,7 +774,7 @@ class DataObject: dfl.data.IDataObject // docmain
 			Data cdat;
 			cdat = Data(*(cast(_DataConvert*)&obj));
 			_canConvertFormats(fmt,
-				(char[] cfmt)
+				(Dstring cfmt)
 				{
 					_setData(cfmt, cdat, false);
 				});
@@ -780,7 +785,7 @@ class DataObject: dfl.data.IDataObject // docmain
 	private:
 	struct Pair
 	{
-		char[] fmt;
+		Dstring fmt;
 		Data obj;
 	}
 	
@@ -800,7 +805,7 @@ class DataObject: dfl.data.IDataObject // docmain
 	}
 	
 	
-	int find(char[] fmt, bool fix = true)
+	int find(Dstring fmt, bool fix = true)
 	{
 		int i;
 		for(i = 0; i != all.length; i++)
@@ -823,7 +828,7 @@ private struct _DataConvert
 }
 
 
-package void _canConvertFormats(char[] fmt, void delegate(char[] cfmt) callback)
+package void _canConvertFormats(Dstring fmt, void delegate(Dstring cfmt) callback)
 {
 	//if(!stringICmp(fmt, DataFormats.utf8))
 	if(!stringICmp(fmt, "UTF-8"))
@@ -846,13 +851,13 @@ package void _canConvertFormats(char[] fmt, void delegate(char[] cfmt) callback)
 }
 
 
-package Data _doConvertFormat(Data dat, char[] toFmt)
+package Data _doConvertFormat(Data dat, Dstring toFmt)
 {
 	Data result;
 	//if(!stringICmp(toFmt, DataFormats.utf8))
 	if(!stringICmp(toFmt, "UTF-8"))
 	{
-		if(typeid(wchar[]) == dat.info)
+		if(typeid(Dwstring) == dat.info)
 		{
 			result = Data(utf16stringtoUtf8string(dat.getUnicodeText()));
 		}
@@ -860,12 +865,12 @@ package Data _doConvertFormat(Data dat, char[] toFmt)
 		{
 			ubyte[] ubs;
 			ubs = dat.getText();
-			result = Data(dfl.internal.utf.fromAnsi(cast(char*)ubs.ptr, ubs.length));
+			result = Data(dfl.internal.utf.fromAnsi(cast(Dstringz)ubs.ptr, ubs.length));
 		}
 	}
 	else if(!stringICmp(toFmt, DataFormats.unicodeText))
 	{
-		if(typeid(char[]) == dat.info)
+		if(typeid(Dstring) == dat.info)
 		{
 			result = Data(utf8stringtoUtf16string(dat.getString()));
 		}
@@ -873,18 +878,18 @@ package Data _doConvertFormat(Data dat, char[] toFmt)
 		{
 			ubyte[] ubs;
 			ubs = dat.getText();
-			result = Data(dfl.internal.utf.ansiToUnicode(cast(char*)ubs.ptr, ubs.length));
+			result = Data(dfl.internal.utf.ansiToUnicode(cast(Dstringz)ubs.ptr, ubs.length));
 		}
 	}
 	else if(!stringICmp(toFmt, DataFormats.text))
 	{
-		if(typeid(char[]) == dat.info)
+		if(typeid(Dstring) == dat.info)
 		{
 			result = Data(cast(ubyte[])dfl.internal.utf.toAnsi(dat.getString()));
 		}
-		else if(typeid(wchar[]) == dat.info)
+		else if(typeid(Dwstring) == dat.info)
 		{
-			wchar[] wcs;
+			Dwstring wcs;
 			wcs = dat.getUnicodeText();
 			result = Data(cast(ubyte[])unicodeToAnsi(wcs.ptr, wcs.length));
 		}
@@ -951,7 +956,7 @@ class ComToDdataObject: dfl.data.IDataObject // package
 	}
 	
 	
-	Data getData(char[] fmt)
+	Data getData(Dstring fmt)
 	{
 		return _getData(DataFormats.getFormat(fmt).id);
 	}
@@ -963,7 +968,7 @@ class ComToDdataObject: dfl.data.IDataObject // package
 	}
 	
 	
-	Data getData(char[] fmt, bool doConvert)
+	Data getData(Dstring fmt, bool doConvert)
 	{
 		return getData(fmt); // ?
 	}
@@ -983,7 +988,7 @@ class ComToDdataObject: dfl.data.IDataObject // package
 	}
 	
 	
-	bool getDataPresent(char[] fmt)
+	bool getDataPresent(Dstring fmt)
 	{
 		return _getDataPresent(DataFormats.getFormat(fmt).id);
 	}
@@ -995,17 +1000,17 @@ class ComToDdataObject: dfl.data.IDataObject // package
 	}
 	
 	
-	bool getDataPresent(char[] fmt, bool canConvert)
+	bool getDataPresent(Dstring fmt, bool canConvert)
 	{
 		return getDataPresent(fmt); // ?
 	}
 	
 	
-	char[][] getFormats()
+	Dstring[] getFormats()
 	{
 		IEnumFORMATETC fenum;
 		FORMATETC fmte;
-		char[][] result;
+		Dstring[] result;
 		ULONG nfetched = 1; // ?
 		
 		if(S_OK != dataObj.EnumFormatEtc(1, &fenum))
@@ -1028,7 +1033,7 @@ class ComToDdataObject: dfl.data.IDataObject // package
 	
 	
 	// TO-DO: remove...
-	deprecated final char[][] getFormats(bool onlyNative)
+	deprecated final Dstring[] getFormats(bool onlyNative)
 	{
 		return getFormats();
 	}
@@ -1092,7 +1097,7 @@ class ComToDdataObject: dfl.data.IDataObject // package
 	}
 	
 	
-	void setData(char[] fmt, Data obj)
+	void setData(Dstring fmt, Data obj)
 	{
 		_setData(DataFormats.getFormat(fmt).id, obj);
 	}
@@ -1104,7 +1109,7 @@ class ComToDdataObject: dfl.data.IDataObject // package
 	}
 	
 	
-	void setData(char[] fmt, bool canConvert, Data obj)
+	void setData(Dstring fmt, bool canConvert, Data obj)
 	{
 		setData(fmt, obj); // ?
 	}
@@ -1123,7 +1128,7 @@ class ComToDdataObject: dfl.data.IDataObject // package
 
 package class EnumDataObjectFORMATETC: DflComObject, IEnumFORMATETC
 {
-	this(dfl.data.IDataObject dataObj, char[][] fmts, ULONG start)
+	this(dfl.data.IDataObject dataObj, Dstring[] fmts, ULONG start)
 	{
 		this.dataObj = dataObj;
 		this.fmts = fmts;
@@ -1269,7 +1274,7 @@ package class EnumDataObjectFORMATETC: DflComObject, IEnumFORMATETC
 	
 	private:
 	dfl.data.IDataObject dataObj;
-	char[][] fmts;
+	Dstring[] fmts;
 	ULONG idx;
 }
 
@@ -1308,7 +1313,7 @@ class DtoComDataObject: DflComObject, dfl.internal.wincom.IDataObject // package
 	
 	HRESULT GetData(FORMATETC* pFormatetc, STGMEDIUM* pmedium)
 	{
-		char[] fmt;
+		Dstring fmt;
 		HRESULT result = S_OK;
 		Data data;
 		
@@ -1397,7 +1402,7 @@ class DtoComDataObject: DflComObject, dfl.internal.wincom.IDataObject // package
 	
 	HRESULT QueryGetData(FORMATETC* pFormatetc)
 	{
-		char[] fmt;
+		Dstring fmt;
 		HRESULT result = S_OK;
 		
 		try

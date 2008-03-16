@@ -160,9 +160,9 @@ class ToolTip // docmain
 	
 	///
 	// WARNING: possible buffer overflow.
-	final char[] getToolTip(Control ctrl)
+	final Dstring getToolTip(Control ctrl)
 	{
-		char[] result;
+		Dstring result;
 		TOOLINFOA tool;
 		tool.cbSize = TOOLINFOA.sizeof;
 		tool.uFlags = TTF_IDISHWND;
@@ -201,7 +201,7 @@ class ToolTip // docmain
 	}
 	
 	/// ditto
-	final void setToolTip(Control ctrl, char[] text)
+	final void setToolTip(Control ctrl, Dstring text)
 	in
 	{
 		try
@@ -250,7 +250,7 @@ class ToolTip // docmain
 			}
 			else
 			{
-				tool.lpszText = unsafeAnsiz(text);
+				tool.lpszText = cast(typeof(tool.lpszText))unsafeAnsiz(text);
 				SendMessageA(hwtt, TTM_UPDATETIPTEXTA, 0, cast(LPARAM)&tool);
 			}
 		}
@@ -274,7 +274,7 @@ class ToolTip // docmain
 			}
 			else
 			{
-				tool.lpszText = unsafeAnsiz(text);
+				tool.lpszText = cast(typeof(tool.lpszText))unsafeAnsiz(text);
 				lr = SendMessageA(hwtt, TTM_ADDTOOLA, 0, cast(LPARAM)&tool);
 			}
 			
@@ -285,7 +285,7 @@ class ToolTip // docmain
 	
 	
 	private:
-	const char[] _TOOLTIPS_CLASSA = "tooltips_class32";
+	const Dstring _TOOLTIPS_CLASSA = "tooltips_class32";
 	const size_t MAX_TIP_TEXT_LENGTH = 2045;
 	
 	HWND hwtt; // Tooltip control handle.

@@ -38,13 +38,13 @@ enum StatusBarPanelBorderStyle: ubyte
 class StatusBarPanel: DObject
 {
 	///
-	this(char[] text)
+	this(Dstring text)
 	{
 		this._txt = text;
 	}
 	
 	/// ditto
-	this(char[] text, int width)
+	this(Dstring text, int width)
 	{
 		this._txt = text;
 		this._width = width;
@@ -56,7 +56,7 @@ class StatusBarPanel: DObject
 	}
 	
 	
-	override char[] toString()
+	override Dstring toString()
 	{
 		return _txt;
 	}
@@ -72,7 +72,7 @@ class StatusBarPanel: DObject
 		return _txt == pnl._txt;
 	}
 	
-	int opEquals(char[] val)
+	int opEquals(Dstring val)
 	{
 		return _txt == val;
 	}
@@ -88,7 +88,7 @@ class StatusBarPanel: DObject
 		return stringICmp(_txt, pnl._txt);
 	}
 	
-	int opCmp(char[] val)
+	int opCmp(Dstring val)
 	{
 		return stringICmp(_txt, val);
 	}
@@ -196,7 +196,7 @@ class StatusBarPanel: DObject
 	
 	
 	///
-	final void text(char[] txt) // setter
+	final void text(Dstring txt) // setter
 	{
 		if(_parent && _parent.isHandleCreated)
 		{
@@ -209,7 +209,7 @@ class StatusBarPanel: DObject
 	}
 	
 	/// ditto
-	final char[] text() // getter
+	final Dstring text() // getter
 	{
 		return _txt;
 	}
@@ -217,13 +217,13 @@ class StatusBarPanel: DObject
 	
 	/+
 	///
-	final void toolTipText(char[] txt) // setter
+	final void toolTipText(Dstring txt) // setter
 	{
 		
 	}
 	
 	/// ditto
-	final char[] toolTipText() // getter
+	final Dstring toolTipText() // getter
 	{
 		//null
 	}
@@ -250,7 +250,7 @@ class StatusBarPanel: DObject
 	
 	private:
 	
-	char[] _txt = null;
+	Dstring _txt = null;
 	int _width = 100;
 	StatusBar _parent = null;
 	WPARAM _utype = 0; // StatusBarPanelBorderStyle.SUNKEN.
@@ -490,7 +490,7 @@ class StatusBar: ControlSuperClass // docmain
 	}
 	
 	
-	override void text(char[] txt) // setter
+	override void text(Dstring txt) // setter
 	{
 		if(isHandleCreated && !showPanels)
 		{
@@ -503,7 +503,7 @@ class StatusBar: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	override char[] text() // getter
+	override Dstring text() // getter
 	{
 		return this._simpletext;
 	}
@@ -572,7 +572,7 @@ class StatusBar: ControlSuperClass // docmain
 	private:
 	
 	StatusBarPanelCollection lpanels;
-	char[] _simpletext = null;
+	Dstring _simpletext = null;
 	bool _issimple = true;
 	
 	
@@ -586,7 +586,7 @@ class StatusBar: ControlSuperClass // docmain
 	}
 	
 	
-	void _sendidxtext(int idx, WPARAM utype, char[] txt)
+	void _sendidxtext(int idx, WPARAM utype, Dstring txt)
 	{
 		assert(isHandleCreated);
 		

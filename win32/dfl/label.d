@@ -6,7 +6,7 @@
 module dfl.label;
 
 private import dfl.base, dfl.control, dfl.internal.winapi, dfl.application,
-	dfl.event, dfl.drawing;
+	dfl.event, dfl.drawing, dfl.internal.dlib;
 
 
 ///
@@ -95,7 +95,7 @@ class Label: Control // docmain
 	}
 	
 	
-	private void doAutoSize(char[] text)
+	private void doAutoSize(Dstring text)
 	{
 		//if(isHandleCreated)
 		{
@@ -104,7 +104,7 @@ class Label: Control // docmain
 	}
 	
 	
-	override void text(char[] newText) // setter
+	override void text(Dstring newText) // setter
 	{
 		super.text = newText;
 		
@@ -246,7 +246,7 @@ class Label: Control // docmain
 	protected override void onPaint(PaintEventArgs ea)
 	{
 		int x, y, w, h;
-		char[] text;
+		Dstring text;
 		
 		text = this.text;
 		

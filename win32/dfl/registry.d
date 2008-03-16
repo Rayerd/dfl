@@ -14,7 +14,7 @@ private import dfl.internal.winapi, dfl.base, dfl.internal.utf;
 
 class DflRegistryException: DflException // package
 {
-	this(char[] msg, int errorCode = 0)
+	this(Dstring msg, int errorCode = 0)
 	{
 		this.errorCode = errorCode;
 		debug
@@ -127,8 +127,8 @@ private const uint MAX_REG_BUFFER = 256;
 abstract class RegistryValue
 {
 	DWORD valueType(); // getter
-	char[] toString();
-	/+ package +/ protected LONG save(HKEY hkey, char[] name); // package
+	Dstring toString();
+	/+ package +/ protected LONG save(HKEY hkey, Dstring name); // package
 	package final RegistryValue _reg() { return this; }
 }
 
@@ -137,11 +137,11 @@ abstract class RegistryValue
 class RegistryValueSz: RegistryValue
 {
 	///
-	char[] value;
+	Dstring value;
 	
 	
 	///
-	this(char[] str)
+	this(Dstring str)
 	{
 		this.value = str;
 	}
@@ -158,15 +158,15 @@ class RegistryValueSz: RegistryValue
 	}
 	
 	
-	override char[] toString()
+	override Dstring toString()
 	{
 		return value;
 	}
 	
 	
-	/+ package +/ protected override LONG save(HKEY hkey, char[] name) // package
+	/+ package +/ protected override LONG save(HKEY hkey, Dstring name) // package
 	{
-		char* valuez = unsafeStringz(value);
+		auto valuez = unsafeStringz(value);
 		return RegSetValueExA(hkey, unsafeStringz(name), 0, REG_SZ, cast(BYTE*)valuez, value.length + 1);
 	}
 }
@@ -178,11 +178,11 @@ class RegistryValueSz: RegistryValue
 class RegistryValueSzW: RegistryValue
 {
 	///
-	wchar[] value;
+	wDstring value;
 	
 	
 	///
-	this(wchar[] str)
+	this(wDstring str)
 	{
 		this.value = str;
 	}
@@ -199,13 +199,13 @@ class RegistryValueSzW: RegistryValue
 	}
 	
 	
-	override char[] toString()
+	override Dstring toString()
 	{
 		return utf16stringtoUtf8string(value);
 	}
 	
 	
-	/+ package +/ protected override LONG save(HKEY hkey, char[] name) // package
+	/+ package +/ protected override LONG save(HKEY hkey, Dstring name) // package
 	{
 		if(dfl.internal.utf.useUnicode)
 		{
@@ -224,11 +224,11 @@ class RegistryValueSzW: RegistryValue
 class RegistryValueMultiSz: RegistryValue
 {
 	///
-	char[][] value;
+	Dstring[] value;
 	
 	
 	///
-	this(char[][] strs)
+	this(Dstring[] strs)
 	{
 		this.value = strs;
 	}
@@ -245,10 +245,10 @@ class RegistryValueMultiSz: RegistryValue
 	}
 	
 	
-	override char[] toString()
+	override Dstring toString()
 	{
-		char[] result;
-		foreach(char[] str; value)
+		Dstring result;
+		foreach(Dstring str; value)
 		{
 			result ~= str ~ \r\n;
 		}
@@ -258,19 +258,19 @@ class RegistryValueMultiSz: RegistryValue
 	}
 	
 	
-	/+ package +/ protected override LONG save(HKEY hkey, char[] name) // package
+	/+ package +/ protected override LONG save(HKEY hkey, Dstring name) // package
 	{
 		char[] multi;
 		uint i;
 		
 		i = value.length + 1; // Each NUL and the extra terminating NUL.
-		foreach(char[] s; value)
+		foreach(Dstring s; value)
 		{
 			i += s.length;
 		}
 		
 		multi = new char[i];
-		foreach(char[] s; value)
+		foreach(Dstring s; value)
 		{
 			if(!s.length)
 				throw new DflRegistryException("Empty strings are not allowed in multi_sz registry values");
@@ -291,11 +291,11 @@ class RegistryValueMultiSz: RegistryValue
 class RegistryValueExpandSz: RegistryValue
 {
 	///
-	char[] value;
+	Dstring value;
 	
 	
 	///
-	this(char[] str)
+	this(Dstring str)
 	{
 		this.value = str;
 	}
@@ -312,21 +312,21 @@ class RegistryValueExpandSz: RegistryValue
 	}
 	
 	
-	override char[] toString()
+	override Dstring toString()
 	{
 		return value;
 	}
 	
 	
-	/+ package +/ protected override LONG save(HKEY hkey, char[] name) // package
+	/+ package +/ protected override LONG save(HKEY hkey, Dstring name) // package
 	{
-		char* valuez = unsafeStringz(value);
+		auto valuez = unsafeStringz(value);
 		return RegSetValueExA(hkey, unsafeStringz(name), 0, REG_EXPAND_SZ, cast(BYTE*)valuez, value.length + 1);
 	}
 }
 
 
-private char[] dwordToString(DWORD dw)
+private Dstring dwordToString(DWORD dw)
 out(result)
 {
 	assert(result.length == 10);
@@ -339,7 +339,7 @@ out(result)
 body
 {
 	char[] result;
-	char[] stmp;
+	Dstring stmp;
 	uint ntmp;
 	
 	stmp = uintToHexString(dw);
@@ -350,7 +350,8 @@ body
 	result[2 .. ntmp] = '0';
 	result[ntmp .. result.length] = stmp;
 	
-	return result;
+	//return result;
+	return cast(Dstring)result; // Needed in D2.
 }
 
 
@@ -390,13 +391,13 @@ class RegistryValueDword: RegistryValue
 	}
 	
 	
-	override char[] toString()
+	override Dstring toString()
 	{
 		return dwordToString(value);
 	}
 	
 	
-	/+ package +/ protected override LONG save(HKEY hkey, char[] name) // package
+	/+ package +/ protected override LONG save(HKEY hkey, Dstring name) // package
 	{
 		return RegSetValueExA(hkey, unsafeStringz(name), 0, REG_DWORD, cast(BYTE*)&value, DWORD.sizeof);
 	}
@@ -430,13 +431,13 @@ class RegistryValueDwordBigEndian: RegistryValue
 	}
 	
 	
-	override char[] toString()
+	override Dstring toString()
 	{
 		return dwordToString(value);
 	}
 	
 	
-	/+ package +/ protected override LONG save(HKEY hkey, char[] name) // package
+	/+ package +/ protected override LONG save(HKEY hkey, Dstring name) // package
 	{
 		return RegSetValueExA(hkey, unsafeStringz(name), 0, REG_DWORD_BIG_ENDIAN, cast(BYTE*)&value, DWORD.sizeof);
 	}
@@ -468,13 +469,13 @@ class RegistryValueBinary: RegistryValue
 	}
 	
 	
-	override char[] toString()
+	override Dstring toString()
 	{
 		return "Binary";
 	}
 	
 	
-	/+ package +/ protected override LONG save(HKEY hkey, char[] name) // package
+	/+ package +/ protected override LONG save(HKEY hkey, Dstring name) // package
 	{
 		return RegSetValueExA(hkey, unsafeStringz(name), 0, REG_BINARY, cast(BYTE*)value, value.length);
 	}
@@ -506,13 +507,13 @@ class RegistryValueLink: RegistryValue
 	}
 	
 	
-	override char[] toString()
+	override Dstring toString()
 	{
 		return "Symbolic Link";
 	}
 	
 	
-	/+ package +/ protected override LONG save(HKEY hkey, char[] name) // package
+	/+ package +/ protected override LONG save(HKEY hkey, Dstring name) // package
 	{
 		return RegSetValueExA(hkey, unsafeStringz(name), 0, REG_LINK, cast(BYTE*)value, value.length);
 	}
@@ -544,13 +545,13 @@ class RegistryValueResourceList: RegistryValue
 	}
 	
 	
-	override char[] toString()
+	override Dstring toString()
 	{
 		return "Resource List";
 	}
 	
 	
-	/+ package +/ protected override LONG save(HKEY hkey, char[] name) // package
+	/+ package +/ protected override LONG save(HKEY hkey, Dstring name) // package
 	{
 		return RegSetValueExA(hkey, unsafeStringz(name), 0, REG_RESOURCE_LIST, cast(BYTE*)value, value.length);
 	}
@@ -582,13 +583,13 @@ class RegistryValueNone: RegistryValue
 	}
 	
 	
-	override char[] toString()
+	override Dstring toString()
 	{
 		return "None";
 	}
 	
 	
-	/+ package +/ protected override LONG save(HKEY hkey, char[] name) // package
+	/+ package +/ protected override LONG save(HKEY hkey, Dstring name) // package
 	{
 		return RegSetValueExA(hkey, unsafeStringz(name), 0, REG_NONE, cast(BYTE*)value, value.length);
 	}
@@ -634,9 +635,9 @@ class RegistryKey // docmain
 	/+
 	// An absolute key path.
 	// This doesn't work.
-	final char[] name() // getter
+	final Dstring name() // getter
 	{
-		char[] buf;
+		Dstring buf;
 		DWORD buflen;
 		
 		buf = new char[MAX_REG_BUFFER];
@@ -687,7 +688,7 @@ class RegistryKey // docmain
 	
 	
 	///
-	final RegistryKey createSubKey(char[] name)
+	final RegistryKey createSubKey(Dstring name)
 	{
 		HKEY newHkey;
 		DWORD cdisp;
@@ -701,15 +702,14 @@ class RegistryKey // docmain
 	
 	
 	///
-	final void deleteSubKey(char[] name, bool throwIfMissing)
+	final void deleteSubKey(Dstring name, bool throwIfMissing)
 	{
 		HKEY openHkey;
-		char* namez;
 		
 		if(!name.length || !name[0])
 			throw new DflRegistryException("Unable to delete subkey");
 		
-		namez = unsafeStringz(name);
+		auto namez = unsafeStringz(name);
 		
 		LONG opencode = RegOpenKeyExA(hkey, namez, 0, KEY_ALL_ACCESS, &openHkey);
 		if(ERROR_SUCCESS == opencode)
@@ -757,25 +757,25 @@ class RegistryKey // docmain
 	}
 	
 	/// ditto
-	final void deleteSubKey(char[] name)
+	final void deleteSubKey(Dstring name)
 	{
 		deleteSubKey(name, true);
 	}
 	
 	
 	///
-	final void deleteSubKeyTree(char[] name)
+	final void deleteSubKeyTree(Dstring name)
 	{
 		_deleteSubKeyTree(hkey, name);
 	}
 	
 	
-	private static void _deleteSubKeyTree(HKEY shkey, char[] name)
+	// Note: name is not written to! it's just not "invariant".
+	private static void _deleteSubKeyTree(HKEY shkey, Dstring name)
 	{
 		HKEY openHkey;
-		char* namez;
 		
-		namez = unsafeStringz(name);
+		auto namez = unsafeStringz(name);
 		
 		if(ERROR_SUCCESS == RegOpenKeyExA(shkey, namez, 0, KEY_ALL_ACCESS, &openHkey))
 		{
@@ -816,7 +816,8 @@ class RegistryKey // docmain
 						switch(enumcode)
 						{
 							case ERROR_SUCCESS:
-								_deleteSubKeyTree(openHkey, skn[0 .. len]);
+								//_deleteSubKeyTree(openHkey, skn[0 .. len]);
+								_deleteSubKeyTree(openHkey, cast(Dstring)skn[0 .. len]); // Needed in D2. WARNING: NOT REALLY INVARIANT.
 								goto next_subkey;
 							
 							case ERROR_NO_MORE_ITEMS:
@@ -845,7 +846,7 @@ class RegistryKey // docmain
 	
 	
 	///
-	final void deleteValue(char[] name, bool throwIfMissing)
+	final void deleteValue(Dstring name, bool throwIfMissing)
 	{
 		LONG rr = RegDeleteValueA(hkey, unsafeStringz(name));
 		switch(rr)
@@ -862,7 +863,7 @@ class RegistryKey // docmain
 	}
 	
 	/// ditto
-	final void deleteValue(char[] name)
+	final void deleteValue(Dstring name)
 	{
 		deleteValue(name, true);
 	}
@@ -893,12 +894,12 @@ class RegistryKey // docmain
 	
 	
 	///
-	final char[][] getSubKeyNames()
+	final Dstring[] getSubKeyNames()
 	{
 		char[MAX_REG_BUFFER] buf;
 		DWORD len;
 		DWORD idx;
-		char[][] result;
+		Dstring[] result;
 		
 		key_names:
 		for(idx = 0;; idx++)
@@ -908,7 +909,9 @@ class RegistryKey // docmain
 			switch(rr)
 			{
 				case ERROR_SUCCESS:
-					result ~= buf[0 .. len].dup;
+					//result ~= buf[0 .. len].dup;
+					//result ~= buf[0 .. len].idup; // Needed in D2. Doesn't work in D1.
+					result ~= cast(Dstring)buf[0 .. len].dup; // Needed in D2.
 					break;
 				
 				case ERROR_NO_MORE_ITEMS:
@@ -925,7 +928,7 @@ class RegistryKey // docmain
 	
 	
 	///
-	final RegistryValue getValue(char[] name, RegistryValue defaultValue)
+	final RegistryValue getValue(Dstring name, RegistryValue defaultValue)
 	{
 		DWORD type;
 		DWORD len;
@@ -959,7 +962,7 @@ class RegistryKey // docmain
 				with(new RegistryValueSz)
 				{
 					assert(!data[data.length - 1]);
-					value = cast(char[])data[0 .. data.length - 1];
+					value = cast(Dstring)data[0 .. data.length - 1];
 					defaultValue = _reg;
 				}
 				break;
@@ -977,7 +980,7 @@ class RegistryKey // docmain
 				with(new RegistryValueExpandSz)
 				{
 					assert(!data[data.length - 1]);
-					value = cast(char[])data[0 .. data.length - 1];
+					value = cast(Dstring)data[0 .. data.length - 1];
 					defaultValue = _reg;
 				}
 				break;
@@ -985,7 +988,7 @@ class RegistryKey // docmain
 			case REG_MULTI_SZ:
 				with(new RegistryValueMultiSz)
 				{
-					char[] s;
+					Dstring s;
 					
 					next_sz:
 					s = stringFromStringz(cast(char*)data);
@@ -1049,19 +1052,19 @@ class RegistryKey // docmain
 	}
 	
 	/// ditto
-	final RegistryValue getValue(char[] name)
+	final RegistryValue getValue(Dstring name)
 	{
 		return getValue(name, null);
 	}
 	
 	
 	///
-	final char[][] getValueNames()
+	final Dstring[] getValueNames()
 	{
 		char[MAX_REG_BUFFER] buf;
 		DWORD len;
 		DWORD idx;
-		char[][] result;
+		Dstring[] result;
 		
 		value_names:
 		for(idx = 0;; idx++)
@@ -1071,7 +1074,9 @@ class RegistryKey // docmain
 			switch(rr)
 			{
 				case ERROR_SUCCESS:
-					result ~= buf[0 .. len].dup;
+					//result ~= buf[0 .. len].dup;
+					//result ~= buf[0 .. len].idup; // Needed in D2. Doesn't work in D1.
+					result ~= cast(Dstring)buf[0 .. len].dup; // Needed in D2.
 					break;
 				
 				case ERROR_NO_MORE_ITEMS:
@@ -1088,7 +1093,7 @@ class RegistryKey // docmain
 	
 	
 	///
-	static RegistryKey openRemoteBaseKey(RegistryHive hhive, char[] machineName)
+	static RegistryKey openRemoteBaseKey(RegistryHive hhive, Dstring machineName)
 	{
 		HKEY openHkey;
 		
@@ -1102,7 +1107,7 @@ class RegistryKey // docmain
 	
 	///
 	// Returns null on error.
-	final RegistryKey openSubKey(char[] name, bool writeAccess)
+	final RegistryKey openSubKey(Dstring name, bool writeAccess)
 	{
 		HKEY openHkey;
 		
@@ -1114,14 +1119,14 @@ class RegistryKey // docmain
 	}
 	
 	/// ditto
-	final RegistryKey openSubKey(char[] name)
+	final RegistryKey openSubKey(Dstring name)
 	{
 		return openSubKey(name, false);
 	}
 	
 	
 	///
-	final void setValue(char[] name, RegistryValue value)
+	final void setValue(Dstring name, RegistryValue value)
 	{
 		LONG rr = value.save(hkey, name);
 		if(ERROR_SUCCESS != rr)
@@ -1130,7 +1135,7 @@ class RegistryKey // docmain
 	
 	/// ditto
 	// Shortcut.
-	final void setValue(char[] name, char[] value)
+	final void setValue(Dstring name, Dstring value)
 	{
 		scope rv = new RegistryValueSz(value);
 		setValue(name, rv);
@@ -1138,7 +1143,7 @@ class RegistryKey // docmain
 	
 	/// ditto
 	// Shortcut.
-	final void setValue(char[] name, char[][] value)
+	final void setValue(Dstring name, Dstring[] value)
 	{
 		scope rv = new RegistryValueMultiSz(value);
 		setValue(name, rv);
@@ -1146,7 +1151,7 @@ class RegistryKey // docmain
 	
 	/// ditto
 	// Shortcut.
-	final void setValue(char[] name, DWORD value)
+	final void setValue(Dstring name, DWORD value)
 	{
 		scope rv = new RegistryValueDword(value);
 		setValue(name, rv);

@@ -22,6 +22,17 @@
 module dfl.internal.dlib;
 
 
+alias typeof(""c[]) Dstring;
+alias typeof(""c.ptr) Dstringz;
+alias typeof(" "c[0]) Dchar;
+alias typeof(""w[]) Dwstring;
+alias typeof(""w.ptr) Dwstringz;
+alias typeof(" "w[0]) Dwchar;
+alias typeof(""d[]) Ddstring;
+alias typeof(""d.ptr) Ddstringz;
+alias typeof(" "d[0]) Ddchar;
+
+
 version(Tango)
 {
 	version(DFL_TANGO097rc1)
@@ -94,7 +105,7 @@ version(Tango)
 	mixin PhobosTraits;
 	
 	
-	char[] getObjectString(Object o)
+	Dstring getObjectString(Object o)
 	{
 		version(DFL_TANGObefore0994)
 		{
@@ -167,13 +178,13 @@ version(Tango)
 	
 	private import tango.io.FilePath;
 	
-	char[] pathGetDirName(char[] s)
+	Dstring pathGetDirName(Dstring s)
 	{
 		scope mypath = new FilePath(s);
 		return mypath.path();
 	}
 	
-	char[] pathJoin(char[] p1, char[] p2)
+	Dstring pathJoin(Dstring p1, Dstring p2)
 	{
 		return FilePath.join(p1, p2);
 	}
@@ -192,7 +203,7 @@ version(Tango)
 	
 	private import tango.text.convert.Utf;
 	
-	dchar utf8stringGetUtf32char(char[] input, inout uint idx)
+	dchar utf8stringGetUtf32char(Dstring input, inout uint idx)
 	{
 		// Since the 'ate' (x) param is specified, the output (result) doesn't grow and returns when full.
 		dchar[1] result;
@@ -227,9 +238,9 @@ version(Tango)
 		alias tango.text.convert.Utf.toString16 utf8stringtoUtf16string;
 	}
 	
-	wchar* utf8stringToUtf16stringz(char[] s)
+	Dwstringz utf8stringToUtf16stringz(Dstring s)
 	{
-		wchar[] ws;
+		Dwstring ws;
 		version(DFL_TANGObefore0994)
 		{
 			ws = tango.text.convert.Utf.toUtf16(s);
@@ -272,7 +283,7 @@ version(Tango)
 	
 	alias tango.text.Util.delimit!(char) stringSplit;
 	
-	int charFindInString(char[] str, dchar dch)
+	int charFindInString(Dstring str, dchar dch)
 	{
 		//uint locate(T, U=uint) (T[] source, T match, U start=0)
 		uint loc;
@@ -298,14 +309,14 @@ version(Tango)
 		alias tango.text.convert.Integer.toString stringToInt;
 	}
 	
-	char[] uintToHexString(uint num)
+	Dstring uintToHexString(uint num)
 	{
 		char[16] buf;
 		return tango.text.convert.Integer.format!(char, uint)(buf, num,
 			tango.text.convert.Integer.Style.HexUpper).dup;
 	}
 	
-	char[] intToString(int num)
+	Dstring intToString(int num)
 	{
 		char[16] buf;
 		return tango.text.convert.Integer.format!(char, uint)(buf, num).dup;
@@ -343,8 +354,8 @@ version(Tango)
 		version(DFL_TANGObefore0994)
 		{
 			//alias toUtf8 toString; // Doesn't let you override.
-			char[] toString() { return super.toUtf8(); }
-			override char[] toUtf8() { return toString(); }
+			Dstring toString() { return super.toUtf8(); }
+			override Dstring toUtf8() { return toString(); }
 		}
 		else
 		{
@@ -357,7 +368,7 @@ else // Phobos
 	public import std.thread, std.traits;
 	
 	
-	char[] getObjectString(Object o)
+	Dstring getObjectString(Object o)
 	{
 		return o.toString();
 	}
@@ -387,7 +398,7 @@ else // Phobos
 	
 	alias std.string.toStringz stringToStringz;
 	
-	char[] uintToHexString(uint num)
+	Dstring uintToHexString(uint num)
 	{
 		return std.string.format("%X", num);
 	}
@@ -454,10 +465,12 @@ else // Phobos
 }
 
 
-char* unsafeToStringz(char[] s)
+char* unsafeToStringz(Dstring s)
 {
+	// This is intentionally unsafe, hence the name.
 	if(!s.ptr[s.length])
-		return s.ptr;
+		//return s.ptr;
+		return cast(char*)s.ptr; // Needed in D2.
 	return stringToStringz(s);
 }
 

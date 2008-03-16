@@ -6,7 +6,8 @@
 module dfl.fontdialog;
 
 private import dfl.base, dfl.commondialog, dfl.internal.winapi, dfl.application,
-	dfl.control, dfl.drawing, dfl.event, dfl.internal.utf;
+	dfl.control, dfl.drawing, dfl.event, dfl.internal.utf,
+	dfl.internal.dlib;
 
 
 private extern(Windows)
@@ -338,7 +339,7 @@ class FontDialog: CommonDialog
 		{
 			font._info(&lfw); // -font- gets default font if not set.
 			
-			const char[] NAME = "ChooseFontW";
+			const Dstring NAME = "ChooseFontW";
 			static ChooseFontWProc proc = null;
 			
 			if(!proc)
@@ -419,7 +420,7 @@ class FontDialog: CommonDialog
 
 private extern(Windows) UINT fondHookProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
-	const char[] PROP_STR = "DFL_FontDialog";
+	const Dstring PROP_STR = "DFL_FontDialog";
 	FontDialog fd;
 	LRESULT result = 0;
 	

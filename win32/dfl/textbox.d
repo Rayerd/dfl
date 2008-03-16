@@ -98,10 +98,10 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	
 	
 	///
-	final void lines(char[][] lns) // setter
+	final void lines(Dstring[] lns) // setter
 	{
-		char[] result;
-		foreach(char[] s; lns)
+		Dstring result;
+		foreach(Dstring s; lns)
 		{
 			result ~= s ~ \r\n;
 		}
@@ -111,7 +111,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final char[][] lines() // getter
+	final Dstring[] lines() // getter
 	{
 		return stringSplitLines(text);
 	}
@@ -160,7 +160,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 			return cast(uint)SendMessageA(handle, EM_GETLINECOUNT, 0, 0);
 		}
 		
-		char[] s;
+		Dstring s;
 		size_t iw = 0;
 		uint count = 1;
 		s = text;
@@ -265,7 +265,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	
 	
 	///
-	void selectedText(char[] sel) // setter
+	void selectedText(Dstring sel) // setter
 	{
 		/+
 		if(created)
@@ -280,7 +280,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	char[] selectedText() // getter
+	Dstring selectedText() // getter
 	{
 		/+
 		if(created)
@@ -290,7 +290,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 			if(v1 == v2)
 				return null;
 			assert(v2 > v1);
-			char[] result = new char[v2 - v1 + 1];
+			Dstring result = new char[v2 - v1 + 1];
 			result[result.length - 1] = 0;
 			result = result[0 .. result.length - 1];
 			result[] = text[v1 .. v2];
@@ -429,7 +429,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	
 	
 	///
-	final void appendText(char[] txt)
+	final void appendText(Dstring txt)
 	{
 		if(created)
 		{
@@ -554,7 +554,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	}
 	
 	
-	override char[] toString()
+	override Dstring toString()
 	{
 		return text; // ?
 	}
@@ -585,7 +585,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	{
 		if(!isHandleCreated)
 		{
-			char[] txt;
+			Dstring txt;
 			txt = wtext;
 			
 			super.createHandle();
@@ -871,7 +871,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 							{
 								//selectedText = "\t";
 								//SendMessageA(handle, EM_REPLACESEL, TRUE, cast(LPARAM)"\t".ptr); // Allow undo. // Crashes DMD 0.161.
-								char* str = "\t";
+								auto str = "\t".ptr;
 								SendMessageA(handle, EM_REPLACESEL, TRUE, cast(LPARAM)str); // Allow undo.
 							}
 						}

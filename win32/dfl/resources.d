@@ -23,7 +23,7 @@ class Resources // docmain
 	
 	/// ditto
 	// Note: libName gets unloaded and may take down all its resources with it.
-	this(char[] libName, WORD language = 0)
+	this(Dstring libName, WORD language = 0)
 	{
 		HINSTANCE inst;
 		inst = loadLibraryEx(libName, LOAD_LIBRARY_AS_DATAFILE);
@@ -82,7 +82,7 @@ class Resources // docmain
 	}
 	
 	/// ditto
-	final Icon getIcon(char[] name, bool defaultSize = true)
+	final Icon getIcon(Dstring name, bool defaultSize = true)
 	{
 		/+
 		HICON hi;
@@ -119,7 +119,7 @@ class Resources // docmain
 	}
 	
 	/// ditto
-	final Icon getIcon(char[] name, int width, int height)
+	final Icon getIcon(Dstring name, int width, int height)
 	{
 		// Can't have size 0 (plus causes Windows to use the actual size).
 		//if(width <= 0 || height <= 0)
@@ -152,7 +152,7 @@ class Resources // docmain
 	}
 	
 	/// ditto
-	final Bitmap getBitmap(char[] name)
+	final Bitmap getBitmap(Dstring name)
 	{
 		HBITMAP h;
 		h = cast(HBITMAP)loadImage(hinst, name, IMAGE_BITMAP,
@@ -182,7 +182,7 @@ class Resources // docmain
 	}
 	
 	/// ditto
-	final Cursor getCursor(char[] name)
+	final Cursor getCursor(Dstring name)
 	{
 		HCURSOR h;
 		h = cast(HCURSOR)loadImage(hinst, name, IMAGE_CURSOR,
@@ -196,16 +196,16 @@ class Resources // docmain
 	
 	
 	///
-	final char[] getString(int id)
+	final Dstring getString(int id)
 	in
 	{
 		assert(id >= WORD.min && id <= WORD.max);
 	}
 	body
 	{
-		// Not casting to wchar[] because a resource isn't guaranteed to be the same size.
+		// Not casting to wDstring because a resource isn't guaranteed to be the same size.
 		wchar* ws = cast(wchar*)_getData(cast(LPCWSTR)RT_STRING, cast(LPCWSTR)cast(WORD)(id / 16 + 1)).ptr;
-		char[] result;
+		Dstring result;
 		if(ws)
 		{
 			int i;
@@ -222,6 +222,7 @@ class Resources // docmain
 	
 	
 	// Used internally
+	// NOTE: win9x doesn't like these strings to be on the heap!
 	final void[] _getData(LPCWSTR type, LPCWSTR name) // internal
 	{
 		HRSRC hrc;
@@ -250,7 +251,7 @@ class Resources // docmain
 	}
 	
 	/// ditto
-	final void[] getData(char[] type, int id)
+	final void[] getData(Dstring type, int id)
 	in
 	{
 		assert(id >= WORD.min && id <= WORD.max);
@@ -261,7 +262,7 @@ class Resources // docmain
 	}
 	
 	/// ditto
-	final void[] getData(int type, char[] name)
+	final void[] getData(int type, Dstring name)
 	in
 	{
 		assert(type >= WORD.min && type <= WORD.max);
@@ -272,7 +273,7 @@ class Resources // docmain
 	}
 	
 	/// ditto
-	final void[] getData(char[] type, char[] name)
+	final void[] getData(Dstring type, Dstring name)
 	{
 		return _getData(utf8stringToUtf16stringz(type), utf8stringToUtf16stringz(name));
 	}
@@ -292,7 +293,7 @@ class Resources // docmain
 	bool _owned = false;
 	
 	
-	void _noload(char[] type)
+	void _noload(Dstring type)
 	{
 		throw new DflException("Unable to load " ~ type ~ " resource");
 	}

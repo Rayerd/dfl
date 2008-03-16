@@ -108,7 +108,7 @@ class TreeViewEventArgs: EventArgs
 class NodeLabelEditEventArgs: EventArgs
 {
 	///
-	this(TreeNode node, char[] label)
+	this(TreeNode node, Dstring label)
 	{
 		_node = node;
 		_label = label;
@@ -129,7 +129,7 @@ class NodeLabelEditEventArgs: EventArgs
 	
 	
 	///
-	final char[] label() // getter
+	final Dstring label() // getter
 	{
 		return _label;
 	}
@@ -150,7 +150,7 @@ class NodeLabelEditEventArgs: EventArgs
 	
 	private:
 	TreeNode _node;
-	char[] _label;
+	Dstring _label;
 	bool _cancel = false;
 }
 
@@ -159,7 +159,7 @@ class NodeLabelEditEventArgs: EventArgs
 class TreeNode: DObject
 {
 	///
-	this(char[] labelText)
+	this(Dstring labelText)
 	{
 		this();
 		
@@ -167,7 +167,7 @@ class TreeNode: DObject
 	}
 	
 	/// ditto
-	this(char[] labelText, TreeNode[] children)
+	this(Dstring labelText, TreeNode[] children)
 	{
 		this();
 		
@@ -254,7 +254,7 @@ class TreeNode: DObject
 	
 	///
 	// Path from the root to this node.
-	final char[] fullPath() // getter
+	final Dstring fullPath() // getter
 	{
 		if(!tparent)
 			return ttext;
@@ -270,7 +270,8 @@ class TreeNode: DObject
 		{
 			ssep[sseplen++] = ch;
 		}
-		return tparent.fullPath ~ ssep[0 .. sseplen] ~ ttext;
+		//return tparent.fullPath ~ ssep[0 .. sseplen] ~ ttext;
+		return tparent.fullPath ~ cast(Dstring)ssep[0 .. sseplen] ~ ttext; // Needed in D2.
 	}
 	
 	
@@ -415,7 +416,7 @@ class TreeNode: DObject
 	
 	
 	///
-	final void text(char[] newText) // setter
+	final void text(Dstring newText) // setter
 	{
 		ttext = newText;
 		
@@ -438,7 +439,7 @@ class TreeNode: DObject
 			}
 			else
 			{
-				item.pszText = dfl.internal.utf.unsafeAnsiz(ttext);
+				item.pszText = cast(typeof(item.pszText))dfl.internal.utf.unsafeAnsiz(ttext);
 				m = Message(tview.handle, TVM_SETITEMA, 0, cast(LPARAM)&item);
 			}
 			tview.prevWndProc(m);
@@ -446,7 +447,7 @@ class TreeNode: DObject
 	}
 	
 	/// ditto
-	final char[] text() // getter
+	final Dstring text() // getter
 	{
 		return ttext;
 	}
@@ -595,7 +596,7 @@ class TreeNode: DObject
 	}
 	
 	
-	override char[] toString()
+	override Dstring toString()
 	{
 		return ttext;
 	}
@@ -613,7 +614,7 @@ class TreeNode: DObject
 	}
 	
 	
-	int opEquals(char[] val)
+	int opEquals(Dstring val)
 	{
 		return text == val;
 	}
@@ -631,14 +632,14 @@ class TreeNode: DObject
 	}
 	
 	
-	int opCmp(char[] val)
+	int opCmp(Dstring val)
 	{
 		return stringICmp(text, val);
 	}
 	
 	
 	private:
-	char[] ttext;
+	Dstring ttext;
 	TreeNode tparent;
 	TreeNodeCollection tchildren;
 	Object ttag;
@@ -722,7 +723,7 @@ class TreeNodeCollection
 		insert(i, node);
 	}
 	
-	void add(char[] text)
+	void add(Dstring text)
 	{
 		return add(new TreeNode(text));
 	}
@@ -749,9 +750,9 @@ class TreeNodeCollection
 		}
 	}
 	
-	void addRange(char[][] range)
+	void addRange(Dstring[] range)
 	{
-		foreach(char[] s; range)
+		foreach(Dstring s; range)
 		{
 			add(s);
 		}
@@ -850,7 +851,7 @@ class TreeNodeCollection
 			}
 			else
 			{
-				pszText = dfl.internal.utf.unsafeAnsiz(node.text);
+				pszText = cast(typeof(pszText))dfl.internal.utf.unsafeAnsiz(node.text);
 				m.hWnd = tview.handle;
 				m.msg = TVM_INSERTITEMA;
 			}
@@ -1966,7 +1967,7 @@ class TreeView: ControlSuperClass // docmain
 						
 						case TVN_ENDLABELEDITW:
 							{
-								char[] label;
+								Dstring label;
 								TV_DISPINFOW* nmdi;
 								nmdi = cast(TV_DISPINFOW*)nmh;
 								if(nmdi.item.pszText)
@@ -1996,7 +1997,7 @@ class TreeView: ControlSuperClass // docmain
 							if(dfl.internal.utf.useUnicode)
 								break;
 							{
-								char[] label;
+								Dstring label;
 								TV_DISPINFOA* nmdi;
 								nmdi = cast(TV_DISPINFOA*)nmh;
 								if(nmdi.item.pszText)

@@ -510,7 +510,7 @@ class Splitter: Control // docmain
 	
 	static void inithbrxor()
 	{
-		const ubyte[] bmbits = [0xAA, 0, 0x55, 0, 0xAA, 0, 0x55, 0,
+		static ubyte[] bmbits = [0xAA, 0, 0x55, 0, 0xAA, 0, 0x55, 0,
 			0xAA, 0, 0x55, 0, 0xAA, 0, 0x55, 0, ];
 		
 		HBITMAP hbm;

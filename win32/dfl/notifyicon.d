@@ -7,7 +7,7 @@ module dfl.notifyicon;
 
 private import dfl.internal.winapi, dfl.base, dfl.drawing, dfl.menu;
 private import dfl.control, dfl.form, dfl.application;
-private import dfl.event, dfl.internal.utf;
+private import dfl.event, dfl.internal.utf, dfl.internal.dlib;
 
 
 ///
@@ -48,7 +48,8 @@ class NotifyIcon // docmain
 	
 	///
 	// Must be less than 64 chars.
-	final void text(char[] txt) // setter
+	// To-do: hold reference to setter's string, use that for getter.. ?
+	final void text(Dstring txt) // setter
 	{
 		if(txt.length >= nid.szTip.length)
 			throw new DflException("Notify icon text too long");
@@ -68,9 +69,12 @@ class NotifyIcon // docmain
 	}
 	
 	/// ditto
-	final char[] text() // getter
+	final Dstring text() // getter
 	{
-		return nid.szTip[0 .. tipLen];
+		//return nid.szTip[0 .. tipLen]; // Returning possibly mutated text!
+		//return nid.szTip[0 .. tipLen].dup;
+		//return nid.szTip[0 .. tipLen].idup; // Needed in D2. Doesn't work in D1.
+		return cast(Dstring)nid.szTip[0 .. tipLen].dup; // Needed in D2. Doesn't work in D1.
 	}
 	
 	
