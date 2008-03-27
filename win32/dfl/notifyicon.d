@@ -109,6 +109,19 @@ class NotifyIcon // docmain
 	}
 	
 	
+	///
+	final void show()
+	{
+		visible = true;
+	}
+	
+	/// ditto
+	final void hide()
+	{
+		visible = false;
+	}
+	
+	
 	//EventHandler click;
 	Event!(NotifyIcon, EventArgs) click; ///
 	//EventHandler doubleClick;

@@ -184,7 +184,7 @@ struct CreateParams
 }
 
 
-/+deprecated+/ class UICuesEventArgs: EventArgs // deprecated
+deprecated class UICuesEventArgs: EventArgs
 {
 	deprecated:
 	
