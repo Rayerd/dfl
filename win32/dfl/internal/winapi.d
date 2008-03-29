@@ -246,8 +246,20 @@ extern(Windows):
 	enum: UINT
 	{
 		NM_FIRST = 0,
+		NM_CLICK = NM_FIRST - 2,
 		NM_CUSTOMDRAW = NM_FIRST - 12,
 	}
+	
+	
+	struct NMMOUSE
+	{
+		NMHDR hdr;
+		DWORD dwItemSpec;
+		DWORD dwItemData;
+		POINT pt;
+		LPARAM dwHitInfo;
+	}
+	alias NMMOUSE* LPNMMOUSE;
 	
 	
 	enum: UINT
@@ -1980,6 +1992,50 @@ extern(Windows):
 	alias LVCOLUMNW LV_COLUMNW;
 	alias LVCOLUMNW* LPLV_COLUMNW;
 	alias LVCOLUMNW* PLV_COLUMNW;
+	
+	
+	struct TBBUTTON
+	{
+		int iBitmap;
+		int idCommand;
+		BYTE fsState;
+		BYTE fsStyle;
+		BYTE[2] bReserved;
+		DWORD dwData;
+		int iString;
+	}
+	alias TBBUTTON* PTBBUTTON, LPTBBUTTON, LPCTBBUTTON;
+	
+	
+	/+enum
+	{
+		TBSTYLE_AUTOSIZE
+	}+/
+	
+	
+	enum: BYTE
+	{
+		TBSTATE_ENABLED = 0x04,
+	}
+	
+	
+	enum: BYTE
+	{
+		//BTNS_AUTOSIZE = TBSTYLE_AUTOSIZE,
+		BTNS_AUTOSIZE = 0x0010,
+	}
+	
+	
+	enum: UINT
+	{
+		TB_ADDBUTTONSA = WM_USER + 20,
+		TB_INSERTBUTTONA = WM_USER + 21,
+		TB_DELETEBUTTON = WM_USER + 22,
+		TB_BUTTONSTRUCTSIZE = WM_USER + 30,
+		TB_SETIMAGELIST = WM_USER + 48,
+		TB_INSERTBUTTONW = WM_USER + 67,
+		TB_ADDBUTTONSW = WM_USER + 68,
+	}
 	
 	
 	struct TVITEMA

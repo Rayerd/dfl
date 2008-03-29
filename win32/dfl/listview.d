@@ -204,7 +204,7 @@ class ListViewItem: DObject
 		package ListViewSubItem[] _subs;
 		
 		
-		void _added(size_t idx, ListViewSubItem val)
+		void _adding(size_t idx, ListViewSubItem val)
 		{
 			if(val._item)
 				throw new DflException("ListViewSubItem already belongs to a ListViewItem");
@@ -214,7 +214,7 @@ class ListViewItem: DObject
 		public:
 		
 		mixin ListWrapArray!(ListViewSubItem, _subs,
-			_blankListCallback!(ListViewSubItem), _added,
+			_adding, _blankListCallback!(ListViewSubItem),
 			_blankListCallback!(ListViewSubItem), _blankListCallback!(ListViewSubItem),
 			true, false, false);
 	}
@@ -813,10 +813,14 @@ class ListView: ControlSuperClass // docmain
 		}
 		
 		
-		void _added(size_t idx, ListViewItem val)
+		void _adding(size_t idx, ListViewItem val)
 		{
 			verifyNoParent(val);
-			
+		}
+		
+		
+		void _added(size_t idx, ListViewItem val)
+		{
 			val.lview = lv;
 			
 			int i;
@@ -850,7 +854,7 @@ class ListView: ControlSuperClass // docmain
 		public:
 		
 		mixin ListWrapArray!(ListViewItem, _items,
-			_blankListCallback!(ListViewItem), _added,
+			_adding, _added,
 			_blankListCallback!(ListViewItem), _removed,
 			true, false, false);
 	}
@@ -905,10 +909,14 @@ class ListView: ControlSuperClass // docmain
 		}
 		
 		
-		void _added(size_t idx, ColumnHeader val)
+		void _adding(size_t idx, ColumnHeader val)
 		{
 			verifyNoParent(val);
-			
+		}
+		
+		
+		void _added(size_t idx, ColumnHeader val)
+		{
 			val.lview = lv;
 			
 			int i;
@@ -938,7 +946,7 @@ class ListView: ControlSuperClass // docmain
 		public:
 		
 		mixin ListWrapArray!(ColumnHeader, _headers,
-			_blankListCallback!(ColumnHeader), _added,
+			_adding, _added,
 			_blankListCallback!(ColumnHeader), _removed,
 			true, false, false,
 			true); // CLEAR_EACH

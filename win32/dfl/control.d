@@ -311,7 +311,7 @@ class InvalidateEventArgs: EventArgs
 
 // ///
 // New dimensions before resizing.
-class BeforeResizeEventArgs: EventArgs // deprecated
+deprecated class BeforeResizeEventArgs: EventArgs
 {
 	deprecated:
 	
@@ -4024,11 +4024,13 @@ class Control: DObject, IWindow // docmain
 	alias onResize onSizeChanged;
 	
 	
+	/+
 	// ///
 	// Allows comparing before and after dimensions, and also allows modifying the new dimensions.
 	deprecated protected void onBeforeResize(BeforeResizeEventArgs ea)
 	{
 	}
+	+/
 	
 	
 	///
