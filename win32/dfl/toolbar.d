@@ -13,6 +13,25 @@ else
 	private import dfl.imagelist;
 }
 
+version(DFL_TOOLBAR_NO_MENU)
+{
+}
+else
+{
+	private import dfl.menu;
+}
+
+
+///
+enum ToolBarButtonStyle: ubyte
+{
+	PUSH_BUTTON = TBSTYLE_BUTTON, ///
+	TOGGLE_BUTTON = TBSTYLE_CHECK, /// ditto
+	SEPARATOR = TBSTYLE_SEP, /// ditto
+	//DROP_DOWN_BUTTON = TBSTYLE_DROPDOWN, /// ditto
+	DROP_DOWN_BUTTON = TBSTYLE_DROPDOWN | BTNS_WHOLEDROPDOWN, /// ditto
+}
+
 
 ///
 class ToolBarButton
@@ -70,6 +89,22 @@ class ToolBarButton
 	}
 	
 	
+	///
+	final void style(ToolBarButtonStyle st) // setter
+	{
+		this._st = st;
+		
+		//if(tbar && tbar.created)
+		//	
+	}
+	
+	/// ditto
+	final ToolBarButtonStyle style() // getter
+	{
+		return _st;
+	}
+	
+	
 	override Dstring toString()
 	{
 		return text;
@@ -100,9 +135,81 @@ class ToolBarButton
 	}
 	
 	
+	///
+	final void tag(Object o) // setter
+	{
+		_tag = o;
+	}
+	
+	/// ditto
+	final Object tag() // getter
+	{
+		return _tag;
+	}
+	
+	
+	version(DFL_TOOLBAR_NO_MENU)
+	{
+	}
+	else
+	{
+		///
+		final void dropDownMenu(ContextMenu cmenu) // setter
+		{
+			_cmenu = cmenu;
+		}
+		
+		/// ditto
+		final ContextMenu dropDownMenu() // getter
+		{
+			return _cmenu;
+		}
+	}
+	
+	
+	///
+	final ToolBar parent() // getter
+	{
+		return tbar;
+	}
+	
+	
+	///
+	final Rect rectangle() // getter
+	{
+		//if(!tbar || !tbar.created)
+		if(!visible)
+			return Rect(0, 0, 0, 0); // ?
+		assert(tbar !is null);
+		RECT rect;
+		//assert(-1 != tbar.buttons.indexOf(this));
+		tbar.prevwproc(TB_GETITEMRECT, tbar.buttons.indexOf(this), cast(LPARAM)&rect); // Fails if item is hidden.
+		return Rect(&rect); // Should return all 0`s if TB_GETITEMRECT failed.
+	}
+	
+	
+	///
+	final bool visible() // getter
+	{
+		if(!tbar || !tbar.created)
+			return false;
+		return true; // To-do: get actual hidden state.
+	}
+	
+	
 	private:
 	ToolBar tbar;
+	int _id = 0;
 	Dstring _text;
+	Object _tag;
+	ToolBarButtonStyle _st = ToolBarButtonStyle.PUSH_BUTTON;
+	version(DFL_TOOLBAR_NO_MENU)
+	{
+	}
+	else
+	{
+		ContextMenu _cmenu;
+	}
 	version(DFL_NO_IMAGELIST)
 	{
 	}
@@ -160,6 +267,7 @@ class ToolBar: ControlSuperClass // docmain
 		void _added(size_t idx, ToolBarButton val)
 		{
 			val.tbar = tbar;
+			val._id = tbar._allocTbbID();
 			
 			if(created)
 			{
@@ -179,6 +287,7 @@ class ToolBar: ControlSuperClass // docmain
 				{
 					prevwproc(TB_DELETEBUTTON, idx, 0);
 				}
+				val.tbar = null;
 			}
 		}
 		
@@ -293,6 +402,32 @@ class ToolBar: ControlSuperClass // docmain
 							}
 							break;
 						
+						case TBN_DROPDOWN:
+							version(DFL_TOOLBAR_NO_MENU) // This condition might be removed later.
+							{
+							}
+							else // Ditto.
+							{
+								auto nmtb = cast(LPNMTOOLBARA)nmh; // NMTOOLBARA/NMTOOLBARW doesn't matter here; string fields not used.
+								auto tbb = buttomFromID(nmtb.iItem);
+								if(tbb)
+								{
+									version(DFL_TOOLBAR_NO_MENU) // Keep this here in case the other condition is removed.
+									{
+									}
+									else // Ditto.
+									{
+										if(tbb._cmenu)
+										{
+											auto brect = tbb.rectangle;
+											tbb._cmenu.show(this, pointToScreen(Point(brect.x, brect.bottom)));
+											// Note: showing a menu also triggers a click!
+										}
+									}
+								}
+							}
+							return TBDDRET_DEFAULT;
+						
 						default: ;
 					}
 				}
@@ -316,6 +451,37 @@ class ToolBar: ControlSuperClass // docmain
 		
 		cp.className = TOOLBAR_CLASSNAME;
 	}
+	
+	
+	
+	// Used internally
+	/+package+/ final ToolBarButton buttomFromID(int id) // package
+	{
+		foreach(tbb; _tbuttons._buttons)
+		{
+			if(id == tbb._id)
+				return tbb;
+		}
+		return null;
+	}
+	
+	
+	package int _lastTbbID = 0;
+	
+	package final int _allocTbbID()
+	{
+		for(int j = 0; j != 250; j++)
+		{
+			_lastTbbID++;
+			if(_lastTbbID >= short.max)
+				_lastTbbID = 1;
+			
+			if(!buttomFromID(_lastTbbID))
+				return _lastTbbID;
+		}
+		return 0;
+	}
+	
 	
 	
 	protected override void onHandleCreated(EventArgs ea)
@@ -368,10 +534,10 @@ class ToolBar: ControlSuperClass // docmain
 		{
 			xtb.iBitmap = tbb._imgidx;
 		}
-		//xtb.idCommand = 42;
+		xtb.idCommand = tbb._id;
 		xtb.dwData = cast(DWORD)cast(void*)tbb;
 		xtb.fsState = TBSTATE_ENABLED;
-		xtb.fsStyle = BTNS_AUTOSIZE;
+		xtb.fsStyle = TBSTYLE_AUTOSIZE | tbb._st; // TBSTYLE_AUTOSIZE factors in the text's width instead of default button size.
 		LRESULT lresult;
 		// MSDN says iString can be either an int offset or pointer to a string buffer.
 		if(dfl.internal.utf.useUnicode)

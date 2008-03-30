@@ -2007,10 +2007,54 @@ extern(Windows):
 	alias TBBUTTON* PTBBUTTON, LPTBBUTTON, LPCTBBUTTON;
 	
 	
-	/+enum
+	struct NMTOOLBARA
 	{
-		TBSTYLE_AUTOSIZE
-	}+/
+		NMHDR hdr;
+		int iItem;
+		TBBUTTON tbButton;
+		int cchText;
+		LPSTR pszText;
+		RECT rcButton;
+	}
+	alias NMTOOLBARA* LPNMTOOLBARA;
+	
+	
+	struct NMTOOLBARW
+	{
+		NMHDR hdr;
+		int iItem;
+		TBBUTTON tbButton;
+		int cchText;
+		LPWSTR pszText;
+		RECT rcButton;
+	}
+	alias NMTOOLBARW* LPNMTOOLBARW;
+	
+	
+	enum: BYTE
+	{
+		TBSTYLE_BUTTON = 0x00,
+		TBSTYLE_SEP = 0x01,
+		TBSTYLE_CHECK = 0x02,
+		TBSTYLE_GROUP = 0x04,
+		TBSTYLE_DROPDOWN = 0x08,
+		TBSTYLE_AUTOSIZE = 0x10,
+		
+		/+
+		// The following are too big for TBBUTTON.fsStyle
+		TBSTYLE_TOOLTIPS = 0x0100,
+		TBSTYLE_WRAPABLE = 0x0200,
+		TBSTYLE_ALTDRAG = 0x0400,
+		+/
+	}
+	
+	
+	enum: BYTE
+	{
+		//BTNS_AUTOSIZE = TBSTYLE_AUTOSIZE,
+		
+		BTNS_WHOLEDROPDOWN = 0x80,
+	}
 	
 	
 	enum: BYTE
@@ -2019,10 +2063,11 @@ extern(Windows):
 	}
 	
 	
-	enum: BYTE
+	enum: LRESULT
 	{
-		//BTNS_AUTOSIZE = TBSTYLE_AUTOSIZE,
-		BTNS_AUTOSIZE = 0x0010,
+		TBDDRET_DEFAULT = 0,
+		TBDDRET_NODEFAULT = 1,
+		TBDDRET_TREATPRESSED = 2,
 	}
 	
 	
@@ -2031,10 +2076,18 @@ extern(Windows):
 		TB_ADDBUTTONSA = WM_USER + 20,
 		TB_INSERTBUTTONA = WM_USER + 21,
 		TB_DELETEBUTTON = WM_USER + 22,
+		TB_GETITEMRECT = WM_USER + 29,
 		TB_BUTTONSTRUCTSIZE = WM_USER + 30,
 		TB_SETIMAGELIST = WM_USER + 48,
 		TB_INSERTBUTTONW = WM_USER + 67,
 		TB_ADDBUTTONSW = WM_USER + 68,
+	}
+	
+	
+	enum: UINT
+	{
+		TBN_FIRST = cast(UINT)-700,
+		TBN_DROPDOWN = TBN_FIRST - 10,
 	}
 	
 	
