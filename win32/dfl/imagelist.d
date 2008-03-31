@@ -33,9 +33,113 @@ class ImageList // docmain
 		}
 		
 		
+		final void addStrip(Image img)
+		{
+			HGDIOBJ hgo;
+			if(1 != img._imgtype(&hgo))
+			{
+				debug
+				{
+					assert(0, "Image list: addStrip needs bitmap");
+				}
+				_unableimg();
+			}
+			
+			auto sz = imageSize;
+			if(img.height != sz.height
+				|| img.width % sz.width)
+			{
+				debug
+				{
+					assert(0, "Image list: invalid image size");
+				}
+				_unableimg();
+			}
+			int num = img.width / sz.width;
+			
+			/+
+			if(1 == num)
+			{
+				add(img);
+				return;
+			}
+			+/
+			
+			auto _hdl = handle; // _addhbitmap needs the handle! Could avoid this in the future.
+			_addhbitmap(hgo);
+			
+			int x = 0;
+			for(; num; num--)
+			{
+				auto sp = new StripPart();
+				sp.origImg = img;
+				sp.hbm = hgo;
+				sp.partBounds = Rect(x, 0, sz.width, sz.height);
+				
+				_images ~= sp;
+				
+				x += sz.width;
+			}
+		}
+		
+		
 		package:
 		
 		Image[] _images;
+		
+		
+		static class StripPart: Image
+		{
+			override Size size() // getter
+			{
+				return partBounds.size;
+			}
+			
+			
+			override void draw(Graphics g, Point pt)
+			{
+				HDC memdc;
+				memdc = CreateCompatibleDC(g.handle);
+				try
+				{
+					HGDIOBJ hgo;
+					hgo = SelectObject(memdc, hbm);
+					BitBlt(g.handle, pt.x, pt.y, partBounds.width, partBounds.height, memdc, partBounds.x, partBounds.y, SRCCOPY);
+					SelectObject(memdc, hgo); // Old bitmap.
+				}
+				finally
+				{
+					DeleteDC(memdc);
+				}
+			}
+			
+			
+			override void drawStretched(Graphics g, Rect r)
+			{
+				HDC memdc;
+				memdc = CreateCompatibleDC(g.handle);
+				try
+				{
+					HGDIOBJ hgo;
+					int lstretch;
+					hgo = SelectObject(memdc, hbm);
+					lstretch = SetStretchBltMode(g.handle, COLORONCOLOR);
+					StretchBlt(g.handle, r.x, r.y, r.width, r.height,
+						memdc, partBounds.x, partBounds.y, partBounds.width, partBounds.height, SRCCOPY);
+					SetStretchBltMode(g.handle, lstretch);
+					SelectObject(memdc, hgo); // Old bitmap.
+				}
+				finally
+				{
+					DeleteDC(memdc);
+				}
+			}
+			
+			
+			Image origImg; // Hold this so the HBITMAP doesn't get collected.
+			HBITMAP hbm;
+			Rect partBounds;
+		}
 		
 		
 		void _adding(size_t idx, Image val)
@@ -144,6 +248,8 @@ class ImageList // docmain
 	final void imageSize(Size sz) // setter
 	{
 		assert(!isHandleCreated);
+		
+		assert(sz.width && sz.height);
 		
 		_w = sz.width;
 		_h = sz.height;
@@ -297,7 +403,7 @@ class ImageList // docmain
 	}
 	
 	
-	void _addimg(Image img)
+	int _addimg(Image img)
 	{
 		assert(isHandleCreated);
 		
@@ -306,19 +412,7 @@ class ImageList // docmain
 		switch(img._imgtype(&hgo))
 		{
 			case 1:
-				{
-					COLORREF cr;
-					if(_transcolor == Color.empty
-						|| _transcolor == Color.transparent)
-					{
-						cr = CLR_NONE; // ?
-					}
-					else
-					{
-						cr = _transcolor.toRgb();
-					}
-					result = imageListAddMasked(_hil, cast(HBITMAP)hgo, cr);
-				}
+				result = _addhbitmap(hgo);
 				break;
 			
 			case 2:
@@ -331,6 +425,24 @@ class ImageList // docmain
 		
 		//if(-1 == result)
 		//	_unableimg();
+		return result;
+	}
+	
+	int _addhbitmap(HBITMAP hbm)
+	{
+		assert(isHandleCreated);
+		
+		COLORREF cr;
+		if(_transcolor == Color.empty
+			|| _transcolor == Color.transparent)
+		{
+			cr = CLR_NONE; // ?
+		}
+		else
+		{
+			cr = _transcolor.toRgb();
+		}
+		return imageListAddMasked(_hil, cast(HBITMAP)hbm, cr);
 	}
 }
 

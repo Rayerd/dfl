@@ -567,6 +567,8 @@ class ToolBar: ControlSuperClass // docmain
 		static assert(TBBUTTON.sizeof == 20);
 		prevwproc(TB_BUTTONSTRUCTSIZE, TBBUTTON.sizeof, 0);
 		
+		//prevwproc(TB_SETPADDING, 0, MAKELPARAM(0, 0));
+		
 		if(_imglist)
 			prevwproc(TB_SETIMAGELIST, 0, cast(WPARAM)_imglist.handle);
 		
@@ -574,6 +576,8 @@ class ToolBar: ControlSuperClass // docmain
 		{
 			_ins(idx, tbb);
 		}
+		
+		//prevwproc(TB_AUTOSIZE, 0, 0);
 	}
 	
 	
@@ -618,13 +622,15 @@ class ToolBar: ControlSuperClass // docmain
 		// MSDN says iString can be either an int offset or pointer to a string buffer.
 		if(dfl.internal.utf.useUnicode)
 		{
-			xtb.iString = cast(typeof(xtb.iString))dfl.internal.utf.toUnicodez(tbb._text);
+			if(tbb._text.length)
+				xtb.iString = cast(typeof(xtb.iString))dfl.internal.utf.toUnicodez(tbb._text);
 			//prevwproc(TB_ADDBUTTONSW, 1, cast(LPARAM)&xtb);
 			lresult = prevwproc(TB_INSERTBUTTONW, idx, cast(LPARAM)&xtb);
 		}
 		else
 		{
-			xtb.iString = cast(typeof(xtb.iString))dfl.internal.utf.toAnsiz(tbb._text);
+			if(tbb._text.length)
+				xtb.iString = cast(typeof(xtb.iString))dfl.internal.utf.toAnsiz(tbb._text);
 			//prevwproc(TB_ADDBUTTONSA, 1, cast(LPARAM)&xtb);
 			lresult = prevwproc(TB_INSERTBUTTONA, idx, cast(LPARAM)&xtb);
 		}
