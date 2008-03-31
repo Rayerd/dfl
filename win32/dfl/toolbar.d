@@ -92,7 +92,7 @@ class ToolBarButton
 	///
 	final void style(ToolBarButtonStyle st) // setter
 	{
-		this._st = st;
+		this._style = st;
 		
 		//if(tbar && tbar.created)
 		//	
@@ -101,7 +101,7 @@ class ToolBarButton
 	/// ditto
 	final ToolBarButtonStyle style() // getter
 	{
-		return _st;
+		return _style;
 	}
 	
 	
@@ -189,6 +189,18 @@ class ToolBarButton
 	
 	
 	///
+	final void visible(bool byes) // setter
+	{
+		if(byes)
+			_state &= ~TBSTATE_HIDDEN;
+		else
+			_state |= TBSTATE_HIDDEN;
+		
+		if(tbar && tbar.created)
+			tbar.prevwproc(TB_SETSTATE, _id, MAKELPARAM(_state, 0));
+	}
+	
+	/// ditto
 	final bool visible() // getter
 	{
 		if(!tbar || !tbar.created)
@@ -197,12 +209,76 @@ class ToolBarButton
 	}
 	
 	
+	///
+	final void enabled(bool byes) // setter
+	{
+		if(byes)
+			_state |= TBSTATE_ENABLED;
+		else
+			_state &= ~TBSTATE_ENABLED;
+		
+		if(tbar && tbar.created)
+			tbar.prevwproc(TB_SETSTATE, _id, MAKELPARAM(_state, 0));
+	}
+	
+	/// ditto
+	final bool enabled() // getter
+	{
+		if(_state & TBSTATE_ENABLED)
+			return true;
+		return false;
+	}
+	
+	
+	///
+	final void pushed(bool byes) // setter
+	{
+		if(byes)
+			_state = (_state & ~TBSTATE_INDETERMINATE) | TBSTATE_CHECKED;
+		else
+			_state &= ~TBSTATE_CHECKED;
+		
+		if(tbar && tbar.created)
+			tbar.prevwproc(TB_SETSTATE, _id, MAKELPARAM(_state, 0));
+	}
+	
+	/// ditto
+	final bool pushed() // getter
+	{
+		if(TBSTATE_CHECKED == (_state & TBSTATE_CHECKED))
+			return true;
+		return false;
+	}
+	
+	
+	///
+	final void partialPush(bool byes) // setter
+	{
+		if(byes)
+			_state = (_state & ~TBSTATE_CHECKED) | TBSTATE_INDETERMINATE;
+		else
+			_state &= ~TBSTATE_INDETERMINATE;
+		
+		if(tbar && tbar.created)
+			tbar.prevwproc(TB_SETSTATE, _id, MAKELPARAM(_state, 0));
+	}
+	
+	/// ditto
+	final bool partialPush() // getter
+	{
+		if(TBSTATE_INDETERMINATE == (_state & TBSTATE_INDETERMINATE))
+			return true;
+		return false;
+	}
+	
+	
 	private:
 	ToolBar tbar;
 	int _id = 0;
 	Dstring _text;
 	Object _tag;
-	ToolBarButtonStyle _st = ToolBarButtonStyle.PUSH_BUTTON;
+	ToolBarButtonStyle _style = ToolBarButtonStyle.PUSH_BUTTON;
+	BYTE _state = TBSTATE_ENABLED;
 	version(DFL_TOOLBAR_NO_MENU)
 	{
 	}
@@ -536,8 +612,8 @@ class ToolBar: ControlSuperClass // docmain
 		}
 		xtb.idCommand = tbb._id;
 		xtb.dwData = cast(DWORD)cast(void*)tbb;
-		xtb.fsState = TBSTATE_ENABLED;
-		xtb.fsStyle = TBSTYLE_AUTOSIZE | tbb._st; // TBSTYLE_AUTOSIZE factors in the text's width instead of default button size.
+		xtb.fsState = tbb._state;
+		xtb.fsStyle = TBSTYLE_AUTOSIZE | tbb._style; // TBSTYLE_AUTOSIZE factors in the text's width instead of default button size.
 		LRESULT lresult;
 		// MSDN says iString can be either an int offset or pointer to a string buffer.
 		if(dfl.internal.utf.useUnicode)
