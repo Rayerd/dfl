@@ -793,6 +793,62 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	alias Control.cursor cursor; // Overload.
 	
 	
+	///
+	int getFirstCharIndexFromLine(int line)
+	{
+		if(!isHandleCreated)
+			return -1; // ...
+		if(line < 0)
+			return -1;
+		return SendMessageA(hwnd, EM_LINEINDEX, line, 0);
+	}
+	
+	/// ditto
+	int getFirstCharIndexOfCurrentLine()
+	{
+		if(!isHandleCreated)
+			return -1; // ...
+		return SendMessageA(hwnd, EM_LINEINDEX, -1, 0);
+	}
+	
+	
+	///
+	int getLineFromCharIndex(int charIndex)
+	{
+		if(!isHandleCreated)
+			return -1; // ...
+		if(charIndex < 0)
+			return -1;
+		return SendMessageA(hwnd, EM_LINEFROMCHAR, charIndex, 0);
+	}
+	
+	
+	///
+	Point getPositionFromCharIndex(int charIndex)
+	{
+		if(!isHandleCreated)
+			return Point(0, 0); // ...
+		if(charIndex < 0)
+			return Point(0, 0);
+		POINT point;
+		SendMessageA(hwnd, EM_POSFROMCHAR, cast(WPARAM)&point, charIndex);
+		return Point(point.x, point.y);
+	}
+	
+	/// ditto
+	int getCharIndexFromPosition(Point pt)
+	{
+		if(!isHandleCreated)
+			return -1; // ...
+		if(!multiline)
+			return 0;
+		auto lresult = SendMessageA(hwnd, EM_CHARFROMPOS, 0, MAKELPARAM(pt.x, pt.y));
+		if(-1 == lresult)
+			return -1;
+		return cast(int)cast(short)(lresult & 0xFFFF);
+	}
+	
+	
 	package static Cursor _defaultCursor() // getter
 	{
 		static Cursor def = null;

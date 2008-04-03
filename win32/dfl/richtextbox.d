@@ -709,6 +709,17 @@ class RichTextBox: TextBoxBase // docmain
 	}
 	
 	
+	///
+	override int getLineFromCharIndex(int charIndex)
+	{
+		if(!isHandleCreated)
+			return -1; // ...
+		if(charIndex < 0)
+			return -1;
+		return SendMessageA(hwnd, EM_EXLINEFROMCHAR, 0, charIndex);
+	}
+	
+	
 	private void _getFormat(CHARFORMAT2A* cf, BOOL selection = TRUE)
 	in
 	{
