@@ -153,11 +153,12 @@ class GroupBox: ControlSuperClass // docmain
 								Color c;
 								COLORREF cr;
 								auto getThemeColor = cast(typeof(&GetThemeColor))GetProcAddress(hmuxt, "GetThemeColor");
+								auto gtcState = enabled ? (1 /*PBS_NORMAL*/) : (2 /*GBS_DISABLED*/);
 								if(getThemeColor
-									&& 0 == getThemeColor(htd, 4 /*BP_GROUPBOX*/, 1 /*PBS_NORMAL*/, 3803 /*TMT_TEXTCOLOR*/, &cr))
+									&& 0 == getThemeColor(htd, 4 /*BP_GROUPBOX*/, gtcState, 3803 /*TMT_TEXTCOLOR*/, &cr))
 									c = Color.fromRgb(cr);
 								else
-									c = foreColor;
+									c = enabled ? foreColor : SystemColors.grayText; // ?
 								
 								Size tsz = g.measureText(txt, f, tfmt);
 								

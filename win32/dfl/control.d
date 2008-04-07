@@ -1775,14 +1775,10 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	///
-	final void enabled(bool byes) // setter
+	package final void _venabled(bool byes)
 	{
 		if(isHandleCreated)
 		{
-			if(byes == enabled)
-				return;
-			
 			EnableWindow(hwnd, byes);
 			// Window events will update -wstyle-.
 		}
@@ -1795,6 +1791,32 @@ class Control: DObject, IWindow // docmain
 		}
 	}
 	
+	
+	///
+	final void enabled(bool byes) // setter
+	{
+		if(byes)
+			cbits |= CBits.ENABLED;
+		else
+			cbits &= ~CBits.ENABLED;
+		
+		/+
+		if(!byes)
+		{
+			_venabled(false);
+		}
+		else
+		{
+			if(!parent || parent.enabled)
+				_venabled(true);
+		}
+		
+		_propagateEnabledAmbience();
+		+/
+		
+		_venabled(byes);
+	}
+	
 	///
 	final bool enabled() // getter
 	{
@@ -1803,6 +1825,32 @@ class Control: DObject, IWindow // docmain
 		*/
 		
 		return (wstyle & WS_DISABLED) == 0;
+	}
+	
+	
+	private void _propagateEnabledAmbience()
+	{
+		/+ // Isn't working...
+		if(cbits & CBits.FORM)
+			return;
+		
+		bool en = enabled;
+		
+		void pa(Control pc)
+		{
+			foreach(Control ctrl; pc.ccollection)
+			{
+				if(ctrl.cbits & CBits.ENABLED)
+				{
+					_venabled(en);
+					
+					pa(ctrl);
+				}
+			}
+		}
+		
+		pa(this);
+		+/
 	}
 	
 	
@@ -2374,6 +2422,8 @@ class Control: DObject, IWindow // docmain
 		Color backColor;
 		Color foreColor;
 		RightToLeft rightToLeft;
+		//CBits cbits;
+		bool enabled;
 		
 		
 		void set(Control ctrl)
@@ -2385,6 +2435,8 @@ class Control: DObject, IWindow // docmain
 				backColor = ctrl.backColor;
 				foreColor = ctrl.foreColor;
 				rightToLeft = ctrl.rightToLeft;
+				//cbits = ctrl.cbits;
+				enabled = ctrl.enabled;
 			}
 			/+else
 			{
@@ -2393,6 +2445,8 @@ class Control: DObject, IWindow // docmain
 				backColor = Color.empty;
 				foreColor = Color.empty;
 				rightToLeft = RightToLeft.INHERIT;
+				//cbits = CBits.init;
+				enabled = true;
 			}+/
 		}
 	}
@@ -2453,6 +2507,17 @@ class Control: DObject, IWindow // docmain
 				_propagateCursorAmbience();
 			}
 		}
+		
+		/+
+		if(newinfo.enabled != oldinfo.enabled)
+		{
+			if(cbits & CBits.ENABLED)
+			{
+				_venabled(newinfo.enabled);
+				_propagateEnabledAmbience();
+			}
+		}
+		+/
 	}
 	
 	
@@ -6855,11 +6920,12 @@ class Control: DObject, IWindow // docmain
 		HAS_LAYOUT = 0x200000,
 		VSTYLE = 0x400000, // If not forced off.
 		FORMLOADED = 0x800000, // If not forced off.
+		ENABLED = 0x1000000, // Enabled state, not considering the parent.
 	}
 	
 	//CBits cbits = CBits.ALLOW_LAYOUT;
 	//CBits cbits = CBits.NONE;
-	CBits cbits = CBits.VISIBLE | CBits.VSTYLE;
+	CBits cbits = CBits.VISIBLE | CBits.VSTYLE | CBits.ENABLED;
 	
 	
 	final:
