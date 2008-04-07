@@ -2088,7 +2088,6 @@ class Graphics // docmain
 		fillRectangle(color, r.x, r.y, r.width, r.height);
 	}
 	
-	
 	/// ditto
 	// Extra function.
 	final void fillRectangle(Color color, int x, int y, int width, int height)

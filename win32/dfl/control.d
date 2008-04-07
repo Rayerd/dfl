@@ -1542,15 +1542,24 @@ class Control: DObject, IWindow // docmain
 	private static Font _createCompatibleFont()
 	{
 		Font result;
-		result = _createOldFont();
+		//result = _createOldFont();
 		
-		OSVERSIONINFOA osi;
-		osi.dwOSVersionInfoSize = osi.sizeof;
-		if(GetVersionExA(&osi) && osi.dwMajorVersion >= 5)
+		try
 		{
-			// "MS Shell Dlg" / "MS Shell Dlg 2" not always supported.
-			result = new Font("MS Shell Dlg 2", result.getSize(GraphicsUnit.POINT), GraphicsUnit.POINT);
+			OSVERSIONINFOA osi;
+			osi.dwOSVersionInfoSize = osi.sizeof;
+			if(GetVersionExA(&osi) && osi.dwMajorVersion >= 5)
+			{
+				// "MS Shell Dlg" / "MS Shell Dlg 2" not always supported.
+				result = new Font("MS Shell Dlg 2", result.getSize(GraphicsUnit.POINT), GraphicsUnit.POINT);
+			}
 		}
+		catch
+		{
+		}
+		
+		if(!result)
+			result = _createOldFont();
 		
 		return result;
 	}

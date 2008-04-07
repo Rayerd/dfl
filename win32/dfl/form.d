@@ -1993,11 +1993,17 @@ class Form: ContainerControl, IDialogResult // docmain
 			//if(wl & WS_VISIBLE)
 			if(visible)
 			{
-				debug
+				if(!wmodal && owner && sowner == owner.handle)
 				{
-					throw new DflException("Unable to show dialog because it is already visible");
 				}
-				goto no_show;
+				else
+				{
+					debug
+					{
+						throw new DflException("Unable to show dialog because it is already visible");
+					}
+					goto no_show;
+				}
 			}
 			
 			if(sowner == hwnd)

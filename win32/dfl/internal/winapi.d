@@ -2950,6 +2950,9 @@ extern(Windows):
 	HFONT CreateFontIndirectW(LOGFONTW *lplf);
 	DWORD GetThemeAppProperties();
 	BOOL IsAppThemed();
+	HTHEME OpenThemeData(HWND hwnd, LPCWSTR pszClassList);
+	HRESULT CloseThemeData(HTHEME hTheme);
+	HRESULT GetThemeColor(HTHEME hTheme, int iPartId, int iStateId, int iPropId, COLORREF *pColor);
 	HIMAGELIST ImageList_Create(int cx, int cy, UINT flags, int cInitial, int cGrow);
 	BOOL ImageList_Destroy(HIMAGELIST himl);	
 	BOOL ImageList_Draw(HIMAGELIST himl, int i, HDC hdcDst, int x, int y, UINT fStyle);

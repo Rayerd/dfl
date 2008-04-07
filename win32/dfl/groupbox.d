@@ -51,7 +51,8 @@ class GroupBox: ControlSuperClass // docmain
 		
 		if(DEFTEXTHEIGHT_INIT == _defTextHeight)
 		{
-			_recalcTextHeight(defaultFont);
+			//_recalcTextHeight(defaultFont);
+			_recalcTextHeight(font);
 			_defTextHeight = _textHeight;
 		}
 		_textHeight = _defTextHeight;
@@ -116,6 +117,69 @@ class GroupBox: ControlSuperClass // docmain
 	{
 		//msg.result = CallWindowProcA(buttonPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
 		msg.result = dfl.internal.utf.callWindowProc(buttonPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
+		
+		// Work around a Windows issue...
+		if(WM_PAINT == msg.msg)
+		{
+			auto hmuxt = GetModuleHandleA("uxtheme.dll");
+			if(hmuxt)
+			{
+				auto isAppThemed = cast(typeof(&IsAppThemed))GetProcAddress(hmuxt, "IsAppThemed");
+				if(isAppThemed && isAppThemed())
+				{
+					char[] txt = text;
+					if(txt.length)
+					{
+						auto openThemeData = cast(typeof(&OpenThemeData))GetProcAddress(hmuxt, "OpenThemeData");
+						HTHEME htd;
+						if(openThemeData
+							&& HTHEME.init != (htd = openThemeData(msg.hWnd, "Button")))
+						{
+							HDC hdc = cast(HDC)msg.wParam;
+							//PAINTSTRUCT ps;
+							bool gotdc = false;
+							if(!hdc)
+							{
+								//hdc = BeginPaint(msg.hWnd, &ps);
+								gotdc = true;
+								hdc = GetDC(msg.hWnd);
+							}
+							try
+							{
+								scope g = new Graphics(hdc, false); // Not owned.
+								auto f = font;
+								scope tfmt = new TextFormat(TextFormatFlags.SINGLE_LINE);
+								
+								Color c;
+								COLORREF cr;
+								auto getThemeColor = cast(typeof(&GetThemeColor))GetProcAddress(hmuxt, "GetThemeColor");
+								if(getThemeColor
+									&& 0 == getThemeColor(htd, 4 /*BP_GROUPBOX*/, 1 /*PBS_NORMAL*/, 3803 /*TMT_TEXTCOLOR*/, &cr))
+									c = Color.fromRgb(cr);
+								else
+									c = foreColor;
+								
+								Size tsz = g.measureText(txt, f, tfmt);
+								
+								g.fillRectangle(backColor, 8, 0, 2 + tsz.width + 2, tsz.height + 2);
+								g.drawText(txt, f, c, Rect(8 + 2, 0, tsz.width, tsz.height), tfmt);
+							}
+							finally
+							{
+								//if(ps.hdc)
+								//	EndPaint(msg.hWnd, &ps);
+								if(gotdc)
+									ReleaseDC(msg.hWnd, hdc);
+								
+								auto closeThemeData = cast(typeof(&CloseThemeData))GetProcAddress(hmuxt, "CloseThemeData");
+								assert(closeThemeData !is null);
+								closeThemeData(htd);
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 	
 	
