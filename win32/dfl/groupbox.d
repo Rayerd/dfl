@@ -127,7 +127,7 @@ class GroupBox: ControlSuperClass // docmain
 				auto isAppThemed = cast(typeof(&IsAppThemed))GetProcAddress(hmuxt, "IsAppThemed");
 				if(isAppThemed && isAppThemed())
 				{
-					char[] txt = text;
+					auto txt = text;
 					if(txt.length)
 					{
 						auto openThemeData = cast(typeof(&OpenThemeData))GetProcAddress(hmuxt, "OpenThemeData");

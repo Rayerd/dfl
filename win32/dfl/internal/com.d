@@ -26,7 +26,7 @@ private extern(C)
 
 
 // Won't be killed by GC if not referenced in D and the refcount is > 0.
-package class DflComObject: ComObject
+class DflComObject: ComObject // package
 {
 	extern(Windows):
 	
