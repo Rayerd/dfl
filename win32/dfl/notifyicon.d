@@ -5,24 +5,38 @@
 ///
 module dfl.notifyicon;
 
-private import dfl.internal.winapi, dfl.base, dfl.drawing, dfl.menu;
+private import dfl.internal.winapi, dfl.base, dfl.drawing;
 private import dfl.control, dfl.form, dfl.application;
 private import dfl.event, dfl.internal.utf, dfl.internal.dlib;
+
+version(DFL_NO_MENUS)
+{
+}
+else
+{
+	private import dfl.menu;
+}
 
 
 ///
 class NotifyIcon // docmain
 {
-	///
-	final void contextMenu(ContextMenu menu) // setter
+	version(DFL_NO_MENUS)
 	{
-		this.cmenu = menu;
 	}
-	
-	/// ditto
-	final ContextMenu contextMenu() // getter
+	else
 	{
-		return cmenu;
+		///
+		final void contextMenu(ContextMenu menu) // setter
+		{
+			this.cmenu = menu;
+		}
+		
+		/// ditto
+		final ContextMenu contextMenu() // getter
+		{
+			return cmenu;
+		}
 	}
 	
 	
@@ -244,7 +258,13 @@ class NotifyIcon // docmain
 	
 	NOTIFYICONDATA nid;
 	int tipLen = 0;
-	ContextMenu cmenu;
+	version(DFL_NO_MENUS)
+	{
+	}
+	else
+	{
+		ContextMenu cmenu;
+	}
 	Icon _icon;
 	
 	
@@ -394,8 +414,14 @@ class NotifyIconControl: Control
 						pt = Cursor.position;
 						ni.mouseUp(ni, new MouseEventArgs(MouseButtons.RIGHT, 1, pt.x, pt.y, 0));
 						
-						if(ni.cmenu)
-							ni.cmenu.show(ctrlNotifyIcon, pt);
+						version(DFL_NO_MENUS)
+						{
+						}
+						else
+						{
+							if(ni.cmenu)
+								ni.cmenu.show(ctrlNotifyIcon, pt);
+						}
 						break;
 					
 					case WM_LBUTTONDOWN:

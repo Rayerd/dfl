@@ -8,9 +8,16 @@ module dfl.form;
 private import dfl.internal.dlib;
 
 private import dfl.control, dfl.internal.winapi, dfl.event, dfl.drawing;
-private import dfl.application, dfl.base, dfl.menu, dfl.internal.utf;
+private import dfl.application, dfl.base, dfl.internal.utf;
 private import dfl.collections;
 
+version(DFL_NO_MENUS)
+{
+}
+else
+{
+	private import dfl.menu;
+}
 
 version(NO_DFL_PARK_WINDOW)
 {
@@ -265,7 +272,14 @@ class Form: ContainerControl, IDialogResult // docmain
 			cwparent = wowner;
 		
 		cp.className = FORM_CLASSNAME;
-		cp.menu = wmenu ? wmenu.handle : HMENU.init;
+		version(DFL_NO_MENUS)
+		{
+			cp.menu = HMENU.init;
+		}
+		else
+		{
+			cp.menu = wmenu ? wmenu.handle : HMENU.init;
+		}
 		
 		//cp.parent = wparent ? wparent.handle : HWND.init;
 		//if(!(cp.style & WS_CHILD))
@@ -1124,8 +1138,14 @@ class Form: ContainerControl, IDialogResult // docmain
 	{
 		super.onHandleCreated(ea);
 		
-		if(wmenu)
-			wmenu._setHwnd(handle);
+		version(DFL_NO_MENUS)
+		{
+		}
+		else
+		{
+			if(wmenu)
+				wmenu._setHwnd(handle);
+		}
 		
 		_setIcon();
 		
@@ -1186,51 +1206,57 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	
-	///
-	final void menu(MainMenu menu) // setter
+	version(DFL_NO_MENUS)
 	{
-		if(isHandleCreated)
+	}
+	else
+	{
+		///
+		final void menu(MainMenu menu) // setter
 		{
-			HWND hwnd;
-			hwnd = handle;
-			
-			if(menu)
+			if(isHandleCreated)
 			{
-				SetMenu(hwnd, menu.handle);
-				menu._setHwnd(hwnd);
+				HWND hwnd;
+				hwnd = handle;
+				
+				if(menu)
+				{
+					SetMenu(hwnd, menu.handle);
+					menu._setHwnd(hwnd);
+				}
+				else
+				{
+					SetMenu(hwnd, HMENU.init);
+				}
+				
+				if(wmenu)
+					wmenu._setHwnd(HWND.init);
+				wmenu = menu;
+				
+				DrawMenuBar(hwnd);
 			}
 			else
 			{
-				SetMenu(hwnd, HMENU.init);
+				wmenu = menu;
+				_recalcClientSize();
 			}
-			
-			if(wmenu)
-				wmenu._setHwnd(HWND.init);
-			wmenu = menu;
-			
-			DrawMenuBar(hwnd);
 		}
-		else
+		
+		/// ditto
+		final MainMenu menu() // getter
 		{
-			wmenu = menu;
-			_recalcClientSize();
+			return wmenu;
 		}
+		
+		
+		/+
+		///
+		final MainMenu mergedMenu() // getter
+		{
+			// Return menu belonging to active MDI child if maximized ?
+		}
+		+/
 	}
-	
-	/// ditto
-	final MainMenu menu() // getter
-	{
-		return wmenu;
-	}
-	
-	
-	/+
-	///
-	final MainMenu mergedMenu() // getter
-	{
-		// Return menu belonging to active MDI child if maximized ?
-	}
-	+/
 	
 	
 	///
@@ -2512,8 +2538,14 @@ class Form: ContainerControl, IDialogResult // docmain
 		Application.removeMessageFilter(mfilter);
 		//mfilter = null;
 		
-		if(wmenu)
-			wmenu._setHwnd(HWND.init);
+		version(DFL_NO_MENUS)
+		{
+		}
+		else
+		{
+			if(wmenu)
+				wmenu._setHwnd(HWND.init);
+		}
 		
 		super._destroying();
 	}
@@ -2869,7 +2901,15 @@ class Form: ContainerControl, IDialogResult // docmain
 		r.bottom = height;
 		
 		LONG wl = _style();
-		AdjustWindowRectEx(&r, wl, !(wl & WS_CHILD) && wmenu, _exStyle());
+		version(DFL_NO_MENUS)
+		{
+			const hasmenu = null;
+		}
+		else
+		{
+			auto hasmenu = wmenu;
+		}
+		AdjustWindowRectEx(&r, wl, !(wl & WS_CHILD) && hasmenu, _exStyle());
 		
 		setBoundsCore(0, 0, r.right - r.left, r.bottom - r.top, BoundsSpecified.SIZE);
 	}
@@ -2927,7 +2967,13 @@ class Form: ContainerControl, IDialogResult // docmain
 	Size autoscaleBase;
 	DialogResult fresult = DialogResult.NONE;
 	Icon wicon, wiconSm;
-	MainMenu wmenu;
+	version(DFL_NO_MENUS)
+	{
+	}
+	else
+	{
+		MainMenu wmenu;
+	}
 	Size minsz, maxsz; // {0, 0} means none.
 	bool wmodal = false;
 	bool sownerEnabled;
@@ -3249,7 +3295,15 @@ class Form: ContainerControl, IDialogResult // docmain
 		r.bottom = wrect.height;
 		
 		LONG wl = _style();
-		AdjustWindowRectEx(&r, wl, wmenu && !(wl & WS_CHILD), _exStyle());
+		version(DFL_NO_MENUS)
+		{
+			const hasmenu = null;
+		}
+		else
+		{
+			auto hasmenu = wmenu;
+		}
+		AdjustWindowRectEx(&r, wl, hasmenu && !(wl & WS_CHILD), _exStyle());
 		
 		// Subtract the difference.
 		wclientsz = Size(wrect.width - ((r.right - r.left) - wrect.width), wrect.height - ((r.bottom - r.top) - wrect.height));

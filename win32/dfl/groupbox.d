@@ -12,6 +12,10 @@ private import dfl.internal.winapi, dfl.application, dfl.event;
 private extern(Windows) void _initButton();
 
 
+version(NO_DRAG_DROP)
+	version = DFL_NO_DRAG_DROP;
+
+
 ///
 class GroupBox: ControlSuperClass // docmain
 {
@@ -32,7 +36,7 @@ class GroupBox: ControlSuperClass // docmain
 	}
 	
 	
-	version(NO_DRAG_DROP) {} else
+	version(DFL_NO_DRAG_DROP) {} else
 	{
 		void allowDrop(bool dyes) // setter
 		{

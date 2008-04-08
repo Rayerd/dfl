@@ -8,7 +8,15 @@ module dfl.textbox;
 private import dfl.internal.dlib;
 
 private import dfl.control, dfl.base, dfl.internal.winapi, dfl.application;
-private import dfl.drawing, dfl.menu, dfl.event, dfl.internal.utf;
+private import dfl.drawing, dfl.event, dfl.internal.utf;
+
+version(DFL_NO_MENUS)
+{
+}
+else
+{
+	private import dfl.menu;
+}
 
 
 private extern(Windows) void _initTextBox();
@@ -616,76 +624,82 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	
 	private
 	{
-		void menuUndo(Object sender, EventArgs ea)
+		version(DFL_NO_MENUS)
 		{
-			undo();
 		}
-		
-		
-		void menuCut(Object sender, EventArgs ea)
+		else
 		{
-			cut();
-		}
-		
-		
-		void menuCopy(Object sender, EventArgs ea)
-		{
-			copy();
-		}
-		
-		
-		void menuPaste(Object sender, EventArgs ea)
-		{
-			paste();
-		}
-		
-		
-		void menuDelete(Object sender, EventArgs ea)
-		{
-			// Only clear selection.
-			SendMessageA(handle, WM_CLEAR, 0, 0);
-		}
-		
-		
-		void menuSelectAll(Object sender, EventArgs ea)
-		{
-			selectAll();
-		}
-		
-		
-		bool isClipboardText()
-		{
-			if(!OpenClipboard(handle))
-				return false;
+			void menuUndo(Object sender, EventArgs ea)
+			{
+				undo();
+			}
 			
-			bool result;
-			result = GetClipboardData(CF_TEXT) != null;
 			
-			CloseClipboard();
+			void menuCut(Object sender, EventArgs ea)
+			{
+				cut();
+			}
 			
-			return result;
+			
+			void menuCopy(Object sender, EventArgs ea)
+			{
+				copy();
+			}
+			
+			
+			void menuPaste(Object sender, EventArgs ea)
+			{
+				paste();
+			}
+			
+			
+			void menuDelete(Object sender, EventArgs ea)
+			{
+				// Only clear selection.
+				SendMessageA(handle, WM_CLEAR, 0, 0);
+			}
+			
+			
+			void menuSelectAll(Object sender, EventArgs ea)
+			{
+				selectAll();
+			}
+			
+			
+			bool isClipboardText()
+			{
+				if(!OpenClipboard(handle))
+					return false;
+				
+				bool result;
+				result = GetClipboardData(CF_TEXT) != null;
+				
+				CloseClipboard();
+				
+				return result;
+			}
+			
+			
+			void menuPopup(Object sender, EventArgs ea)
+			{
+				int slen, tlen;
+				bool issel;
+				
+				slen = selectionLength;
+				tlen = textLength;
+				issel = slen != 0;
+				
+				miundo.enabled = canUndo;
+				micut.enabled = !readOnly() && issel;
+				micopy.enabled = issel;
+				mipaste.enabled = !readOnly() && isClipboardText();
+				midel.enabled = !readOnly() && issel;
+				misel.enabled = tlen != 0 && tlen != slen;
+			}
+			
+			
+			MenuItem miundo, micut, micopy, mipaste, midel, misel;
 		}
-		
-		
-		void menuPopup(Object sender, EventArgs ea)
-		{
-			int slen, tlen;
-			bool issel;
-			
-			slen = selectionLength;
-			tlen = textLength;
-			issel = slen != 0;
-			
-			miundo.enabled = canUndo;
-			micut.enabled = !readOnly() && issel;
-			micopy.enabled = issel;
-			mipaste.enabled = !readOnly() && isClipboardText();
-			midel.enabled = !readOnly() && issel;
-			misel.enabled = tlen != 0 && tlen != slen;
-		}
-		
-		
-		MenuItem miundo, micut, micopy, mipaste, midel, misel;
 	}
 	
 	
@@ -698,56 +712,62 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 		ctrlStyle |= ControlStyles.SELECTABLE;
 		wclassStyle = textBoxClassStyle;
 		
-		MenuItem mi;
-		
-		cmenu = new ContextMenu;
-		cmenu.popup ~= &menuPopup;
-		
-		miundo = new MenuItem;
-		miundo.text = "&Undo";
-		miundo.click ~= &menuUndo;
-		miundo.index = 0;
-		cmenu.menuItems.add(miundo);
-		
-		mi = new MenuItem;
-		mi.text = "-";
-		mi.index = 1;
-		cmenu.menuItems.add(mi);
-		
-		micut = new MenuItem;
-		micut.text = "Cu&t";
-		micut.click ~= &menuCut;
-		micut.index = 2;
-		cmenu.menuItems.add(micut);
-		
-		micopy = new MenuItem;
-		micopy.text = "&Copy";
-		micopy.click ~= &menuCopy;
-		micopy.index = 3;
-		cmenu.menuItems.add(micopy);
-		
-		mipaste = new MenuItem;
-		mipaste.text = "&Paste";
-		mipaste.click ~= &menuPaste;
-		mipaste.index = 4;
-		cmenu.menuItems.add(mipaste);
-		
-		midel = new MenuItem;
-		midel.text = "&Delete";
-		midel.click ~= &menuDelete;
-		midel.index = 5;
-		cmenu.menuItems.add(midel);
-		
-		mi = new MenuItem;
-		mi.text = "-";
-		mi.index = 6;
-		cmenu.menuItems.add(mi);
-		
-		misel = new MenuItem;
-		misel.text = "Select &All";
-		misel.click ~= &menuSelectAll;
-		misel.index = 7;
-		cmenu.menuItems.add(misel);
+		version(DFL_NO_MENUS)
+		{
+		}
+		else
+		{
+			MenuItem mi;
+			
+			cmenu = new ContextMenu;
+			cmenu.popup ~= &menuPopup;
+			
+			miundo = new MenuItem;
+			miundo.text = "&Undo";
+			miundo.click ~= &menuUndo;
+			miundo.index = 0;
+			cmenu.menuItems.add(miundo);
+			
+			mi = new MenuItem;
+			mi.text = "-";
+			mi.index = 1;
+			cmenu.menuItems.add(mi);
+			
+			micut = new MenuItem;
+			micut.text = "Cu&t";
+			micut.click ~= &menuCut;
+			micut.index = 2;
+			cmenu.menuItems.add(micut);
+			
+			micopy = new MenuItem;
+			micopy.text = "&Copy";
+			micopy.click ~= &menuCopy;
+			micopy.index = 3;
+			cmenu.menuItems.add(micopy);
+			
+			mipaste = new MenuItem;
+			mipaste.text = "&Paste";
+			mipaste.click ~= &menuPaste;
+			mipaste.index = 4;
+			cmenu.menuItems.add(mipaste);
+			
+			midel = new MenuItem;
+			midel.text = "&Delete";
+			midel.click ~= &menuDelete;
+			midel.index = 5;
+			cmenu.menuItems.add(midel);
+			
+			mi = new MenuItem;
+			mi.text = "-";
+			mi.index = 6;
+			cmenu.menuItems.add(mi);
+			
+			misel = new MenuItem;
+			misel.text = "Select &All";
+			misel.click ~= &menuSelectAll;
+			misel.index = 7;
+			cmenu.menuItems.add(misel);
+		}
 	}
 	
 	
@@ -901,9 +921,18 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	
 	override void prevWndProc(inout Message msg)
 	{
-		if(msg.msg != WM_CONTEXTMENU) // Ignore the default context menu.
-			//msg.result = CallWindowProcA(textBoxPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
-			msg.result = dfl.internal.utf.callWindowProc(textBoxPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
+		version(DFL_NO_MENUS)
+		{
+			// Don't prevent WM_CONTEXTMENU so at least it'll have a default menu.
+		}
+		else
+		{
+			if(msg.msg == WM_CONTEXTMENU) // Ignore the default context menu.
+				return;
+		}
+		
+		//msg.result = CallWindowProcA(textBoxPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
+		msg.result = dfl.internal.utf.callWindowProc(textBoxPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
 	}
 	
 	

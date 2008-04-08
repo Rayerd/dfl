@@ -6,8 +6,16 @@
 module dfl.richtextbox;
 
 private import dfl.textbox, dfl.internal.winapi, dfl.event, dfl.application;
-private import dfl.base, dfl.drawing, dfl.menu, dfl.data;
+private import dfl.base, dfl.drawing, dfl.data;
 private import dfl.control, dfl.internal.utf, dfl.internal.dlib;
+
+version(DFL_NO_MENUS)
+{
+}
+else
+{
+	private import dfl.menu;
+}
 
 
 private extern(C) char* strcpy(char*, char*);
@@ -64,32 +72,44 @@ class RichTextBox: TextBoxBase // docmain
 		wcurs = null; // So that the control can change it accordingly.
 		wclassStyle = richtextboxClassStyle;
 		
-		with(miredo = new MenuItem)
+		version(DFL_NO_MENUS)
 		{
-			text = "&Redo";
-			click ~= &menuRedo;
-			contextMenu.menuItems.insert(1, miredo);
 		}
-		
-		contextMenu.popup ~= &menuPopup2;
+		else
+		{
+			with(miredo = new MenuItem)
+			{
+				text = "&Redo";
+				click ~= &menuRedo;
+				contextMenu.menuItems.insert(1, miredo);
+			}
+			
+			contextMenu.popup ~= &menuPopup2;
+		}
 	}
 	
 	
 	private
 	{
-		void menuRedo(Object sender, EventArgs ea)
+		version(DFL_NO_MENUS)
 		{
-			redo();
 		}
-		
-		
-		void menuPopup2(Object sender, EventArgs ea)
+		else
 		{
-			miredo.enabled = canRedo;
+			void menuRedo(Object sender, EventArgs ea)
+			{
+				redo();
+			}
+			
+			
+			void menuPopup2(Object sender, EventArgs ea)
+			{
+				miredo.enabled = canRedo;
+			}
+			
+			
+			MenuItem miredo;
 		}
-		
-		
-		MenuItem miredo;
 	}
 	
 	

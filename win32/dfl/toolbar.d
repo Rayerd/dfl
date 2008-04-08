@@ -13,6 +13,9 @@ else
 	private import dfl.imagelist;
 }
 
+version(DFL_NO_MENUS)
+	version = DFL_TOOLBAR_NO_MENU;
+
 version(DFL_TOOLBAR_NO_MENU)
 {
 }
@@ -569,8 +572,14 @@ class ToolBar: ControlSuperClass // docmain
 		
 		//prevwproc(TB_SETPADDING, 0, MAKELPARAM(0, 0));
 		
-		if(_imglist)
-			prevwproc(TB_SETIMAGELIST, 0, cast(WPARAM)_imglist.handle);
+		version(DFL_NO_IMAGELIST)
+		{
+		}
+		else
+		{
+			if(_imglist)
+				prevwproc(TB_SETIMAGELIST, 0, cast(WPARAM)_imglist.handle);
+		}
 		
 		foreach(idx, tbb; _tbuttons._buttons)
 		{

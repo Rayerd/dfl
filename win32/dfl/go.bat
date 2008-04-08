@@ -16,11 +16,14 @@ call makelib
 
 :do_move
 
-@move /Y dfl_debug.lib %dmd_path%\lib
-@if errorlevel 1 goto fail
-@move /Y dfl.lib %dmd_path%\lib
-@if errorlevel 1 goto fail
-@move /Y dfl_build.lib %dmd_path%\lib
+@rem   @move /Y dfl_debug.lib %dmd_path%\lib
+@rem   @if errorlevel 1 goto fail
+@rem   @move /Y dfl.lib %dmd_path%\lib
+@rem   @if errorlevel 1 goto fail
+@rem   @move /Y dfl_build.lib %dmd_path%\lib
+@rem   @if errorlevel 1 goto fail
+
+@move /Y dfl*.lib %dmd_path%\lib
 @if errorlevel 1 goto fail
 
 
