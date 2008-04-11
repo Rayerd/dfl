@@ -153,13 +153,13 @@ template ListWrapArray(TValue, alias Array,
 						{
 							ItemRemovingCallback(iw, oldval); // Removing.
 						}
-						static if(COW)
+						/+static if(COW)
 						{
 						}
 						else
 						{
 							//Array[iw] = TValue.init;
-						}
+						}+/
 						debug
 						{
 							Array = Array[0 .. iw]; // 'Temporarily' removes it for ItemRemovedCallback.

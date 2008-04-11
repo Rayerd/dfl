@@ -604,19 +604,17 @@ class TreeNode: DObject
 	
 	override int opEquals(Object o)
 	{
-		return ttext == getObjectString(o); // ?
+		return 0 == stringICmp(ttext, getObjectString(o)); // ?
 	}
-	
 	
 	int opEquals(TreeNode node)
 	{
-		return ttext == node.ttext;
+		return 0 == stringICmp(ttext, node.ttext);
 	}
-	
 	
 	int opEquals(Dstring val)
 	{
-		return text == val;
+		return 0 == stringICmp(ttext, val);
 	}
 	
 	
@@ -625,12 +623,10 @@ class TreeNode: DObject
 		return stringICmp(ttext, getObjectString(o)); // ?
 	}
 	
-	
 	int opCmp(TreeNode node)
 	{
 		return stringICmp(ttext, node.ttext);
 	}
-	
 	
 	int opCmp(Dstring val)
 	{

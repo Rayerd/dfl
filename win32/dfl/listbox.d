@@ -288,7 +288,7 @@ class ListBox: ListControl // docmain
 		}
 		
 		
-		int opApply(int delegate(inout Object) dg)
+		private int myOpApply(int delegate(inout Object) dg)
 		{
 			int result = 0;
 			
@@ -317,12 +317,8 @@ class ListBox: ListControl // docmain
 			return result;
 		}
 		
-		mixin OpApplyAddIndex!(opApply, Object) _applyobj;
 		
-		alias _applyobj.opApply opApply;
-		
-		
-		int opApply(int delegate(inout Dstring) dg)
+		private int myOpApply(int delegate(inout Dstring) dg)
 		{
 			int result = 0;
 			
@@ -355,9 +351,13 @@ class ListBox: ListControl // docmain
 			return result;
 		}
 		
-		mixin OpApplyAddIndex!(opApply, Dstring) _applychar;
+		mixin OpApplyAddIndex!(myOpApply, Dstring);
 		
-		alias _applychar.opApply opApply;
+		mixin OpApplyAddIndex!(myOpApply, Object);
+		
+		// Had to do it this way because: DMD 1.028: -H is broken for mixin identifiers
+		// Note that this way probably prevents opApply from being overridden.
+		alias myOpApply opApply;
 		
 		
 		protected this(ListBox lb)

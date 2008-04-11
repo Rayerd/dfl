@@ -1,7 +1,7 @@
 The DFL License Agreement
 
 
-DFL is Copyright (C) 2004-2007 Christopher E. Miller
+DFL is Copyright (C) 2004-2008 Christopher E. Miller
 Official DFL website: http://www.dprogramming.com/dfl.php
 
 
