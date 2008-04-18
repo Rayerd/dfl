@@ -210,7 +210,7 @@ class Splitter: Control // docmain
 	{
 		super.onMouseDown(mea);
 		
-		if(mea.button == MouseButtons.LEFT)
+		if(mea.button == MouseButtons.LEFT && 1 == mea.clicks)
 		{
 			initsplit(mea.x, mea.y);
 		}
@@ -256,6 +256,69 @@ class Splitter: Control // docmain
 	}
 	
 	
+	final Control getSplitControl() // package
+	{
+		Control splat; // Splitted.
+		// DMD 0.95: need 'this' to access member dock
+		//switch(dock())
+		switch(this.dock())
+		{
+			case DockStyle.LEFT:
+				foreach(Control ctrl; parent.controls())
+				{
+					if(DockStyle.LEFT != ctrl.dock) //if(this.dock != ctrl.dock)
+						continue;
+					// DMD 0.95: overloads int(Object o) and int(Control ctrl) both match argument list for opEquals
+					//if(ctrl == this)
+					if(ctrl == cast(Control)this)
+						return splat;
+					splat = ctrl;
+				}
+				break;
+			
+			case DockStyle.RIGHT:
+				foreach(Control ctrl; parent.controls())
+				{
+					if(DockStyle.RIGHT != ctrl.dock) //if(this.dock != ctrl.dock)
+						continue;
+					// DMD 0.95: overloads int(Object o) and int(Control ctrl) both match argument list for opEquals
+					//if(ctrl == this)
+					if(ctrl == cast(Control)this)
+						return splat;
+					splat = ctrl;
+				}
+				break;
+			
+			case DockStyle.TOP:
+				foreach(Control ctrl; parent.controls())
+				{
+					if(DockStyle.TOP != ctrl.dock) //if(this.dock != ctrl.dock)
+						continue;
+					// DMD 0.95: overloads int(Object o) and int(Control ctrl) both match argument list for opEquals
+					//if(ctrl == this)
+					if(ctrl == cast(Control)this)
+						return splat;
+					splat = ctrl;
+				}
+				break;
+			
+			case DockStyle.BOTTOM:
+				foreach(Control ctrl; parent.controls())
+				{
+					if(DockStyle.BOTTOM != ctrl.dock) //if(this.dock != ctrl.dock)
+						continue;
+					// DMD 0.95: overloads int(Object o) and int(Control ctrl) both match argument list for opEquals
+					//if(ctrl == this)
+					if(ctrl == cast(Control)this)
+						return splat;
+					splat = ctrl;
+				}
+				break;
+		}
+		return null;
+	}
+	
+	
 	protected override void onMouseUp(MouseEventArgs mea)
 	{
 		if(downing)
@@ -281,118 +344,62 @@ class Splitter: Control // docmain
 				return;
 			}
 			
-			Control splat; // Splitted.
 			int adj, val, vx;
-			
-			// DMD 0.95: need 'this' to access member dock
-			//switch(dock())
-			switch(this.dock())
+			auto splat = getSplitControl(); // Splitted.
+			if(splat)
 			{
-				case DockStyle.LEFT:
-					drawxorClient(lastpos, 0);
-					foreach(Control ctrl; parent.controls())
-					{
-						if(DockStyle.NONE == ctrl.dock)
-							continue;
-						// DMD 0.95: overloads int(Object o) and int(Control ctrl) both match argument list for opEquals
-						//if(ctrl == this)
-						if(ctrl == cast(Control)this)
+				// DMD 0.95: need 'this' to access member dock
+				//switch(dock())
+				switch(this.dock())
+				{
+					case DockStyle.LEFT:
+						drawxorClient(lastpos, 0);
+						//val = left - splat.left + mea.x - downpos.x;
+						val = left - splat.left + mea.x - downpos;
+						if(val < msize)
+							val = msize;
+						splat.width = val;
+						break;
+					
+					case DockStyle.RIGHT:
+						drawxorClient(lastpos, 0);
+						//adj = right - splat.left + mea.x - downpos.x;
+						adj = right - splat.left + mea.x - downpos;
+						val = splat.width - adj;
+						vx = splat.left + adj;
+						if(val < msize)
 						{
-							if(splat)
-							{
-								//val = left - splat.left + mea.x - downpos.x;
-								val = left - splat.left + mea.x - downpos;
-								if(val < msize)
-									val = msize;
-								splat.width = val;
-							}
-							break;
+							vx -= msize - val;
+							val = msize;
 						}
-						splat = ctrl;
-					}
-					break;
-				
-				case DockStyle.RIGHT:
-					drawxorClient(lastpos, 0);
-					foreach(Control ctrl; parent.controls())
-					{
-						if(DockStyle.NONE == ctrl.dock)
-							continue;
-						// DMD 0.95: overloads int(Object o) and int(Control ctrl) both match argument list for opEquals
-						//if(ctrl == this)
-						if(ctrl == cast(Control)this)
+						splat.bounds = Rect(vx, splat.top, val, splat.height);
+						break;
+					
+					case DockStyle.TOP:
+						drawxorClient(0, lastpos);
+						//val = top - splat.top + mea.y - downpos.y;
+						val = top - splat.top + mea.y - downpos;
+						if(val < msize)
+							val = msize;
+						splat.height = val;
+						break;
+					
+					case DockStyle.BOTTOM:
+						drawxorClient(0, lastpos);
+						//adj = bottom - splat.top + mea.y - downpos.y;
+						adj = bottom - splat.top + mea.y - downpos;
+						val = splat.height - adj;
+						vx = splat.top + adj;
+						if(val < msize)
 						{
-							if(splat)
-							{
-								//adj = right - splat.left + mea.x - downpos.x;
-								adj = right - splat.left + mea.x - downpos;
-								val = splat.width - adj;
-								vx = splat.left + adj;
-								if(val < msize)
-								{
-									vx -= msize - val;
-									val = msize;
-								}
-								splat.bounds = Rect(vx, splat.top, val, splat.height);
-							}
-							break;
+							vx -= msize - val;
+							val = msize;
 						}
-						splat = ctrl;
-					}
-					break;
-				
-				case DockStyle.TOP:
-					drawxorClient(0, lastpos);
-					foreach(Control ctrl; parent.controls())
-					{
-						if(DockStyle.NONE == ctrl.dock)
-							continue;
-						// DMD 0.95: overloads int(Object o) and int(Control ctrl) both match argument list for opEquals
-						//if(ctrl == this)
-						if(ctrl == cast(Control)this)
-						{
-							if(splat)
-							{
-								//val = top - splat.top + mea.y - downpos.y;
-								val = top - splat.top + mea.y - downpos;
-								if(val < msize)
-									val = msize;
-								splat.height = val;
-							}
-							break;
-						}
-						splat = ctrl;
-					}
-					break;
-				
-				case DockStyle.BOTTOM:
-					drawxorClient(0, lastpos);
-					foreach(Control ctrl; parent.controls())
-					{
-						if(DockStyle.NONE == ctrl.dock)
-							continue;
-						// DMD 0.95: overloads int(Object o) and int(Control ctrl) both match argument list for opEquals
-						//if(ctrl == this)
-						if(ctrl == cast(Control)this)
-						{
-							if(splat)
-							{
-								//adj = bottom - splat.top + mea.y - downpos.y;
-								adj = bottom - splat.top + mea.y - downpos;
-								val = splat.height - adj;
-								vx = splat.top + adj;
-								if(val < msize)
-								{
-									vx -= msize - val;
-									val = msize;
-								}
-								splat.bounds = Rect(splat.left, vx, splat.width, val);
-							}
-							break;
-						}
-						splat = ctrl;
-					}
-					break;
+						splat.bounds = Rect(splat.left, vx, splat.width, val);
+						break;
+					
+					default: ;
+				}
 			}
 			
 			// This is needed when the moved control first overlaps the splitter and the splitter
@@ -441,22 +448,55 @@ class Splitter: Control // docmain
 	}
 	
 	
-	/+
-	// TODO: implement.
-	
 	///
 	final void splitPosition(int pos) // setter
 	{
-		
+		auto splat = getSplitControl(); // Splitted.
+		if(splat)
+		{
+			// DMD 0.95: need 'this' to access member dock
+			//switch(dock())
+			switch(this.dock())
+			{
+				case DockStyle.LEFT:
+				case DockStyle.RIGHT:
+					splat.width = pos;
+					break;
+				
+				case DockStyle.TOP:
+				case DockStyle.BOTTOM:
+					splat.height = pos;
+					break;
+				
+				default: ;
+			}
+		}
 	}
 	
 	/// ditto
 	// -1 if not docked to a control.
 	final int splitPosition() // getter
 	{
-		
+		auto splat = getSplitControl(); // Splitted.
+		if(splat)
+		{
+			// DMD 0.95: need 'this' to access member dock
+			//switch(dock())
+			switch(this.dock())
+			{
+				case DockStyle.LEFT:
+				case DockStyle.RIGHT:
+					return splat.width;
+				
+				case DockStyle.TOP:
+				case DockStyle.BOTTOM:
+					return splat.height;
+				
+				default: ;
+			}
+		}
+		return -1;
 	}
-	+/
 	
 	
 	//SplitterEventHandler splitterMoved;
