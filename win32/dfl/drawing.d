@@ -1131,6 +1131,15 @@ class Picture: Image // docmain
 	}
 	
 	
+	/// ditto
+	this(void[] mem)
+	{
+		this.ipic = _fromMemory(mem);
+		if(!this.ipic)
+			throw new DflException("Unable to load picture from memory");
+	}
+	
+	
 	private this(dfl.internal.wincom.IPicture ipic)
 	{
 		this.ipic = ipic;
@@ -1141,8 +1150,7 @@ class Picture: Image // docmain
 	// Returns null on failure instead of throwing exception.
 	static Picture fromStream(DStream stm)
 	{
-		dfl.internal.wincom.IPicture ipic;
-		ipic = _fromDStream(stm);
+		auto ipic = _fromDStream(stm);
 		if(!ipic)
 			return null;
 		return new Picture(ipic);
@@ -1153,8 +1161,17 @@ class Picture: Image // docmain
 	// Returns null on failure instead of throwing exception.
 	static Picture fromFile(Dstring fileName)
 	{
-		dfl.internal.wincom.IPicture ipic;
-		ipic = _fromFileName(fileName);
+		auto ipic = _fromFileName(fileName);
+		if(!ipic)
+			return null;
+		return new Picture(ipic);
+	}
+	
+	
+	///
+	static Picture fromMemory(void[] mem)
+	{
+		auto ipic = _fromMemory(mem);
 		if(!ipic)
 			return null;
 		return new Picture(ipic);
@@ -1493,16 +1510,16 @@ class Picture: Image // docmain
 		// Don't need to CloseHandle(hg) due to 2nd param being TRUE.
 		
 		ipic = _fromIStream(istm);
-		if(!ipic)
-		{
-			istm.Release();
-			return null;
-		}
-		
 		istm.Release();
-		
 		return ipic;
 	}
+	
+	
+	static dfl.internal.wincom.IPicture _fromMemory(void[] mem)
+	{
+		return _fromIStream(new MemoryIStream(mem));
+	}
+	
 }
 
 

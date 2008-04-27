@@ -3259,7 +3259,7 @@ class Control: DObject, IWindow // docmain
 		/// Perform a drag/drop operation.
 		final DragDropEffects doDragDrop(dfl.data.IDataObject dataObj, DragDropEffects allowedEffects)
 		{
-			volatile Object foo = cast(Object)dataObj; // Hold a reference to the Object...
+			Object foo = cast(Object)dataObj; // Hold a reference to the Object...
 			
 			DWORD effect;
 			DropSource dropsrc;
