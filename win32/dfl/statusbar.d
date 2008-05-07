@@ -306,9 +306,18 @@ class StatusBar: ControlSuperClass // docmain
 			UINT[] pws = _pws;
 			if(_panels.length > _pws.length)
 				pws = new UINT[_panels.length];
+			UINT right = 0;
 			foreach(idx, pnl; _panels)
 			{
-				pws[idx] = pnl.width;
+				if(-1 == pnl.width)
+				{
+					pws[idx] = -1;
+				}
+				else
+				{
+					right += pnl.width;
+					pws[idx] = right;
+				}
 			}
 			sb.prevwproc(SB_SETPARTS, cast(WPARAM)_panels.length, cast(LPARAM)pws.ptr);
 		}
