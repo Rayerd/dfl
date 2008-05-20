@@ -7087,7 +7087,7 @@ class Control: DObject, IWindow // docmain
 			_hbrBg = parent.hbrBg;
 			return _hbrBg;
 		}
-		_hbrBg = backColor.createBrush();
+		hbrBg = backColor.createBrush(); // Call hbrBg's setter and set ownedbg.
 		return _hbrBg;
 	}
 	
