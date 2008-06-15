@@ -618,7 +618,7 @@ else
 		///
 		void onSelect(EventArgs ea)
 		{
-			popup(this, ea);
+			select(this, ea);
 		}
 		
 		
