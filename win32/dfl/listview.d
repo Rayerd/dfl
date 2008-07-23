@@ -393,6 +393,22 @@ class ListViewItem: DObject
 	}
 	
 	
+	final void beginEdit()
+	{
+		if(lview && lview.created)
+		{
+			if(dfl.internal.utf.useUnicode)
+			{
+				lview.prevwproc(LVM_EDITLABELW, index, 0);
+			}
+			else
+			{
+				lview.prevwproc(LVM_EDITLABELA, index, 0);
+			}
+		}
+	}
+	
+	
 	///
 	final ListViewSubItemCollection subItems() // getter
 	{
