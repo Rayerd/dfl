@@ -950,7 +950,7 @@ class ComboBox: ListControl // docmain
 			
 			case CB_DELETESTRING:
 				icollection.removeAt(msg.wParam);
-				msg.result = icollection.count;
+				msg.result = icollection.length;
 				return;
 			
 			case CB_RESETCONTENT:

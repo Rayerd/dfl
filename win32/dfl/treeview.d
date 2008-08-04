@@ -602,17 +602,17 @@ class TreeNode: DObject
 	}
 	
 	
-	override int opEquals(Object o)
+	override Dequ opEquals(Object o)
 	{
 		return 0 == stringICmp(ttext, getObjectString(o)); // ?
 	}
 	
-	int opEquals(TreeNode node)
+	Dequ opEquals(TreeNode node)
 	{
 		return 0 == stringICmp(ttext, node.ttext);
 	}
 	
-	int opEquals(Dstring val)
+	Dequ opEquals(Dstring val)
 	{
 		return 0 == stringICmp(ttext, val);
 	}

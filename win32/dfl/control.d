@@ -3295,7 +3295,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	override int opEquals(Object o)
+	override Dequ opEquals(Object o)
 	{
 		Control ctrl = cast(Control)o;
 		if(!ctrl)
@@ -3304,7 +3304,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	int opEquals(Control ctrl)
+	Dequ opEquals(Control ctrl)
 	{
 		if(!isHandleCreated)
 			return super.opEquals(ctrl);
@@ -5790,18 +5790,6 @@ class Control: DObject, IWindow // docmain
 	package final void _defWndProc(inout Message msg)
 	{
 		defWndProc(msg);
-	}
-	
-	
-	package final void _ControlWndProc(inout Message msg)
-	{
-		typeof(Control).wndProc(msg);
-	}
-	
-	
-	package final void _Control_wndProc(inout Message msg)
-	{
-		Control.wndProc(msg);
 	}
 	
 	

@@ -869,7 +869,7 @@ class RegistryKey // docmain
 	}
 	
 	
-	override int opEquals(Object o)
+	override Dequ opEquals(Object o)
 	{
 		RegistryKey rk;
 		
@@ -880,7 +880,7 @@ class RegistryKey // docmain
 	}
 	
 	
-	int opEquals(RegistryKey rk)
+	Dequ opEquals(RegistryKey rk)
 	{
 		return hkey == rk.hkey;
 	}

@@ -43,7 +43,7 @@ struct Point // docmain
 	
 	
 	///
-	int opEquals(Point pt)
+	Dequ opEquals(Point pt)
 	{
 		return x == pt.x && y == pt.y;
 	}
@@ -125,7 +125,7 @@ struct Size // docmain
 	
 	
 	///
-	int opEquals(Size sz)
+	Dequ opEquals(Size sz)
 	{
 		return width == sz.width && height == sz.height;
 	}
@@ -280,7 +280,7 @@ struct Rect // docmain
 	
 	
 	///
-	int opEquals(Rect r)
+	Dequ opEquals(Rect r)
 	{
 		return x == r.x && y == r.y &&
 			width == r.width && height == r.height;
@@ -3568,7 +3568,7 @@ class Region // docmain
 	}
 	
 	
-	override int opEquals(Object o)
+	override Dequ opEquals(Object o)
 	{
 		Region rgn = cast(Region)o;
 		if(!rgn)
@@ -3577,7 +3577,7 @@ class Region // docmain
 	}
 	
 	
-	int opEquals(Region rgn)
+	Dequ opEquals(Region rgn)
 	{
 		return hrgn == rgn.hrgn;
 	}

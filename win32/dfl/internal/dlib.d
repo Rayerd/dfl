@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2007 Christopher E. Miller
+	Copyright (C) 2007-2008 Christopher E. Miller
 	
 	This software is provided 'as-is', without any express or implied
 	warranty.  In no event will the authors be held liable for any damages
@@ -40,35 +40,59 @@ version(Tango)
 		version = DFL_TANGObefore099rc3;
 		version = DFL_TANGObefore0994;
 		version = DFL_TANGObefore0995;
+		version = DFL_TANGObefore0996;
+		version = DFL_TANGObefore0997;
 	}
 	else version(DFL_TANGO098rc2)
 	{
 		version = DFL_TANGObefore099rc3;
 		version = DFL_TANGObefore0994;
 		version = DFL_TANGObefore0995;
+		version = DFL_TANGObefore0996;
+		version = DFL_TANGObefore0997;
 	}
 	else version(DFL_TANGObefore099rc3)
 	{
 		version = DFL_TANGObefore0994;
 		version = DFL_TANGObefore0995;
+		version = DFL_TANGObefore0996;
+		version = DFL_TANGObefore0997;
 	}
 	else version(DFL_TANGO0992)
 	{
 		version = DFL_TANGObefore0994;
 		version = DFL_TANGObefore0995;
+		version = DFL_TANGObefore0996;
+		version = DFL_TANGObefore0997;
 	}
 	else version(DFL_TANGO0993)
 	{
 		version = DFL_TANGObefore0994;
 		version = DFL_TANGObefore0995;
+		version = DFL_TANGObefore0996;
+		version = DFL_TANGObefore0997;
 	}
 	else version(DFL_TANGO_0994)
 	{
 		version = DFL_TANGObefore0995;
+		version = DFL_TANGObefore0996;
+		version = DFL_TANGObefore0997;
 	}
 	else version(DFL_TANGO_0995)
 	{
+		version = DFL_TANGObefore0996;
+		version = DFL_TANGObefore0997;
 	}
+	else version(DFL_TANGO_0996)
+	{
+		version = DFL_TANGObefore0997;
+	}
+	else version(DFL_TANGO_0997)
+	{
+	}
+	
+	
+	alias int Dequ;
 	
 	
 	public import tango.core.Thread;
@@ -272,11 +296,22 @@ version(Tango)
 	}
 	
 	
-	private import tango.io.FileConst;
-	
-	alias tango.io.FileConst.FileConst.NewlineString nativeLineSeparatorString;
-	
-	alias tango.io.FileConst.FileConst.PathSeparatorString nativePathSeparatorString;
+	version(DFL_TANGObefore0997)
+	{
+		private import tango.io.FileConst;
+		
+		alias tango.io.FileConst.FileConst.NewlineString nativeLineSeparatorString;
+		
+		alias tango.io.FileConst.FileConst.PathSeparatorString nativePathSeparatorString;
+	}
+	else
+	{
+		private import tango.io.model.IFile;
+		
+		alias tango.io.model.IFile.FileConst.NewlineString nativeLineSeparatorString;
+		
+		alias tango.io.model.IFile.FileConst.PathSeparatorString nativePathSeparatorString;
+	}
 	
 	
 	private import tango.text.Util;
@@ -311,15 +346,32 @@ version(Tango)
 	
 	Dstring uintToHexString(uint num)
 	{
-		char[16] buf;
-		return tango.text.convert.Integer.format!(char, uint)(buf, num,
-			tango.text.convert.Integer.Style.HexUpper).dup;
+		version(DFL_TANGObefore0997)
+		{
+			char[16] buf;
+			return tango.text.convert.Integer.format!(char, uint)(buf, num,
+				tango.text.convert.Integer.Style.HexUpper).dup;
+		}
+		else
+		{
+			char[16] buf;
+			return tango.text.convert.Integer.format(buf, num, "X").dup;
+		}
 	}
 	
 	Dstring intToString(int num)
 	{
-		char[16] buf;
-		return tango.text.convert.Integer.format!(char, uint)(buf, num).dup;
+		
+		version(DFL_TANGObefore0997)
+		{
+			char[16] buf;
+			return tango.text.convert.Integer.format!(char, uint)(buf, num).dup;
+		}
+		else
+		{
+			char[16] buf;
+			return tango.text.convert.Integer.format(buf, num, "d").dup;
+		}
 	}
 	
 	
@@ -366,6 +418,9 @@ version(Tango)
 else // Phobos
 {
 	public import std.thread, std.traits;
+	
+	
+	alias ReturnType!(Object.opEquals) Dequ; // Since D2 changes mid-stream.
 	
 	
 	Dstring getObjectString(Object o)
@@ -471,6 +526,7 @@ char* unsafeToStringz(Dstring s)
 	if(!s.ptr[s.length])
 		//return s.ptr;
 		return cast(char*)s.ptr; // Needed in D2.
-	return stringToStringz(s);
+	//return stringToStringz(s);
+	return cast(char*)stringToStringz(s); // Needed in D2.
 }
 

@@ -62,17 +62,17 @@ class StatusBarPanel: DObject
 	}
 	
 	
-	override int opEquals(Object o)
+	override Dequ opEquals(Object o)
 	{
 		return _txt == getObjectString(o); // ?
 	}
 	
-	int opEquals(StatusBarPanel pnl)
+	Dequ opEquals(StatusBarPanel pnl)
 	{
 		return _txt == pnl._txt;
 	}
 	
-	int opEquals(Dstring val)
+	Dequ opEquals(Dstring val)
 	{
 		return _txt == val;
 	}

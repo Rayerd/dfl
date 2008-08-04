@@ -54,13 +54,13 @@ class StringObject: DObject
 	}
 	
 	
-	override int opEquals(Object o)
+	override Dequ opEquals(Object o)
 	{
 		return value == getObjectString(o); // ?
 	}
 	
 	
-	int opEquals(StringObject s)
+	Dequ opEquals(StringObject s)
 	{
 		return value == s.value;
 	}
@@ -1317,7 +1317,7 @@ class Cursor // docmain
 	}
 	
 	
-	override int opEquals(Object o)
+	override Dequ opEquals(Object o)
 	{
 		Cursor cur = cast(Cursor)o;
 		if(!cur)
@@ -1326,7 +1326,7 @@ class Cursor // docmain
 	}
 	
 	
-	int opEquals(Cursor cur)
+	Dequ opEquals(Cursor cur)
 	{
 		return hcur == cur.hcur;
 	}

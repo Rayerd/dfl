@@ -138,7 +138,7 @@ else
 
 // Compatibility with previous DFL versions.
 // Set version=DFL_NO_COMPAT to disable.
-deprecated enum DflCompat
+enum DflCompat
 {
 	NONE = 0,
 	

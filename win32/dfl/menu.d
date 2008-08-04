@@ -524,13 +524,13 @@ else
 		}
 		
 		
-		override int opEquals(Object o)
+		override Dequ opEquals(Object o)
 		{
 			return text == getObjectString(o);
 		}
 		
 		
-		int opEquals(Dstring val)
+		Dequ opEquals(Dstring val)
 		{
 			return text == val;
 		}
