@@ -538,7 +538,7 @@ final class Application // docmain
 					}
 					
 					// Stopped running.
-					threadExit(Thread.getThis(), EventArgs.empty);
+					threadExit(typeid(Application), EventArgs.empty);
 					threadFlags = threadFlags & ~(TF.RUNNING | TF.STOP_RUNNING);
 					return;
 				}
@@ -776,7 +776,7 @@ final class Application // docmain
 			// Need to use a separate thread so that all the main thread's messages
 			// will be there still when the exception is recovered from.
 			// This is very important for some messages, such as socket events.
-			thread1 = Thread.getThis();
+			thread1 = Thread.getThis(); // Problems with DMD 2.x
 			Thread thd;
 			version(Tango)
 				thd = new Thread(&tinThread2);
@@ -901,7 +901,7 @@ final class Application // docmain
 		//if(threadException.handlers.length)
 		if(threadException.hasHandlers)
 		{
-			threadException(Thread.getThis(), new ThreadExceptionEventArgs(e));
+			threadException(typeid(Application), new ThreadExceptionEventArgs(e));
 			except = false;
 			return;
 		}
@@ -1207,7 +1207,7 @@ final class Application // docmain
 		if(threadFlags & (TF.STOP_RUNNING | TF.QUIT))
 			return;
 		
-		idle(Thread.getThis(), EventArgs.empty);
+		idle(typeid(Application), EventArgs.empty);
 		WaitMessage();
 	}
 	
