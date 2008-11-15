@@ -264,7 +264,7 @@ final class Application // docmain
 										else
 										{
 											debug(APP_PRINT)
-												printf("CreateActCtxW failed.\n");
+												cprintf("CreateActCtxW failed.\n");
 										}
 									}
 									else
@@ -891,7 +891,7 @@ final class Application // docmain
 		
 		if(except)
 		{
-			printf("Error: %.*s\n", cast(int)getObjectString(e).length, getObjectString(e).ptr);
+			cprintf("Error: %.*s\n", cast(int)getObjectString(e).length, getObjectString(e).ptr);
 			
 			abort();
 			return;
@@ -917,7 +917,7 @@ final class Application // docmain
 		//except = false;
 		
 		//throw e;
-		printf("Error: %.*s\n", cast(int)getObjectString(e).length, getObjectString(e).ptr);
+		cprintf("Error: %.*s\n", cast(int)getObjectString(e).length, getObjectString(e).ptr);
 		//exitThread();
 		Environment.exit(EXIT_FAILURE);
 	}
@@ -1507,8 +1507,8 @@ extern(Windows) void _gcTimeout(HWND hwnd, UINT uMsg, UINT idEvent, DWORD dwTime
 	KillTimer(hwnd, Application.gctimer);
 	Application.gctimer = 0;
 	
-	//printf("Auto-collecting\n");
-	dfl.internal.dlib.gcGenCollect();
+	//cprintf("Auto-collecting\n");
+	dfl.internal.dlib.gcFullCollect();
 	
 	Application.gcinfo = GetTickCount() + 4000;
 }
@@ -1693,7 +1693,7 @@ debug(SHOW_MESSAGE_INFO)
 
 extern(Windows) LRESULT dflWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
-	//printf("HWND %p; WM %d(0x%X); WPARAM %d(0x%X); LPARAM %d(0x%X);\n", hwnd, msg, msg, wparam, wparam, lparam, lparam);
+	//cprintf("HWND %p; WM %d(0x%X); WPARAM %d(0x%X); LPARAM %d(0x%X);\n", hwnd, msg, msg, wparam, wparam, lparam, lparam);
 	
 	if(msg == wmDfl)
 	{
@@ -1796,7 +1796,7 @@ extern(Windows) LRESULT dflWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 		if(!ctrl)
 		{
 			debug(APP_PRINT)
-				printf("Unable to add window 0x%X.\n", hwnd);
+				cprintf("Unable to add window 0x%X.\n", hwnd);
 			return dm.result;
 		}
 		Application.creatingControl(null); // Reset.
@@ -1804,7 +1804,7 @@ extern(Windows) LRESULT dflWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 		Application.controls[hwnd] = ctrl;
 		ctrl.hwnd = hwnd;
 		debug(APP_PRINT)
-			printf("Added window 0x%X.\n", hwnd);
+			cprintf("Added window 0x%X.\n", hwnd);
 		
 		//ctrl.finishCreating(hwnd);
 		goto do_msg;
@@ -2061,51 +2061,8 @@ extern(C)
 }
 
 
-/+
-// GC 1.0 by default.
-version(Tango)
-{
-}
-else
-{
-	version(DFL_NO_GC_V1_0)
-	{
-	}
-	else // DFL_GC_V1_0
-	{
-		version = _DFL_STD_GC_V1_0;
-		
-		private import std.gc;
-	}
-}
-+/
-// Not GC 1.0 by default.
-version(Tango)
-{
-}
-else
-{
-	version(DFL_GC_V1_0)
-	{
-		version = _DFL_STD_GC_V1_0;
-	}
-}
-
-
 static this()
 {
-	version(_DFL_STD_GC_V1_0)
-	{
-		static if(is(typeof(&std.gc.setV1_0)))
-		{
-			std.gc.setV1_0();
-		}
-		else
-		{
-			pragma(msg, "DFL: assuming version=DFL_NO_GC_V1_0");
-		}
-	}
-	
 	dfl.internal.utf._utfinit();
 	
 	Application.tlsThreadFlags = TlsAlloc();

@@ -2581,7 +2581,7 @@ class ListView: ControlSuperClass // docmain
 	body
 	{
 		/+
-		printf("^ Insert item:  index=%d, lparam=0x%X, text='%.*s', subItemIndex=%d\n",
+		cprintf("^ Insert item:  index=%d, lparam=0x%X, text='%.*s', subItemIndex=%d\n",
 			index, lparam, itemText.length > 20 ? 20 : itemText.length, cast(char*)itemText, subItemIndex);
 		+/
 		

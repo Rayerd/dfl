@@ -248,7 +248,7 @@ class EventArgs // docmain
 {
 	/+
 	private static byte[] buf;
-	private import std.gc;
+	private import std.gc; // <-- ...
 	
 	
 	new(uint sz)

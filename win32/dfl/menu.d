@@ -54,7 +54,7 @@ else
 			Application.removeMenu(this);
 			
 			debug(APP_PRINT)
-				printf("~ContextMenu\n");
+				cprintf("~ContextMenu\n");
 		}
 		
 		
@@ -514,7 +514,7 @@ else
 			Application.removeMenu(this);
 			
 			debug(APP_PRINT)
-				printf("~MenuItem\n");
+				cprintf("~MenuItem\n");
 		}
 		
 		

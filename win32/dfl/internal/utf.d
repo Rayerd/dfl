@@ -60,6 +60,11 @@ else
 	{
 		version = DFL_D2_AND_ABOVE;
 	}
+	else version(D_Version3)
+	{
+		version = DFL_D3_AND_ABOVE;
+		version = DFL_D2_AND_ABOVE;
+	}
 }
 
 

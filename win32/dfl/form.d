@@ -372,7 +372,7 @@ class Form: ContainerControl, IDialogResult // docmain
 			
 			debug(APP_PRINT)
 			{
-				printf("Creating Form handle while killing.\n");
+				cprintf("Creating Form handle while killing.\n");
 			}
 			
 			create_err:
@@ -3172,13 +3172,13 @@ class Form: ContainerControl, IDialogResult // docmain
 							bool pmnemonic(HWND hw)
 							{
 								Control cc = Control.fromHandle(hw);
-								//printf("mnemonic for ");
+								//cprintf("mnemonic for ");
 								if(!cc)
 								{
 									// To-do: check dlgcode for static/button and process.
 									return false;
 								}
-								//printf("'%.*s' ", cc.name);
+								//cprintf("'%.*s' ", cc.name);
 								return cc._processMnemonic(cast(dchar)m.wParam);
 							}
 							
@@ -3513,7 +3513,7 @@ version(DFL_PARK_WINDOW)
 		if(!RegisterClassExA(&wce))
 		{
 			debug(APP_PRINT)
-				printf("RegisterClassEx() failed for park class.\n");
+				cprintf("RegisterClassEx() failed for park class.\n");
 			
 			init_err:
 			//throw new DflException("Unable to initialize forms library");
@@ -3526,7 +3526,7 @@ version(DFL_PARK_WINDOW)
 		if(!_hwPark)
 		{
 			debug(APP_PRINT)
-				printf("CreateWindowEx() failed for park window.\n");
+				cprintf("CreateWindowEx() failed for park window.\n");
 			
 			goto init_err;
 		}

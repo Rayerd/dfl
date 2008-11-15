@@ -488,7 +488,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 			if(!OpenClipboard(null))
 			{
 				debug(APP_PRINT)
-					printf("Unable to OpenClipboard().\n");
+					cprintf("Unable to OpenClipboard().\n");
 				//throw new DflException("Unable to set clipboard data.");
 				return;
 			}
@@ -512,7 +512,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 			if(!OpenClipboard(null))
 			{
 				debug(APP_PRINT)
-					printf("Unable to OpenClipboard().\n");
+					cprintf("Unable to OpenClipboard().\n");
 				//throw new DflException("Unable to set clipboard data.");
 				return;
 			}

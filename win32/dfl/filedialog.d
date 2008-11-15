@@ -480,7 +480,7 @@ abstract class FileDialog: CommonDialog // docmain
 							break;
 						
 						default: ;
-							//printf("   nmhdr.code = %d/0x%X\n", nmhdr.code, nmhdr.code);
+							//cprintf("   nmhdr.code = %d/0x%X\n", nmhdr.code, nmhdr.code);
 					}
 				}
 				break;
@@ -683,7 +683,7 @@ abstract class FileDialog: CommonDialog // docmain
 					exts = stringSplit(s, ";");
 					foreach(Dstring ext; exts)
 					{
-						printf("sel ext:  %.*s\n", ext);
+						cprintf("sel ext:  %.*s\n", ext);
 					}
 					
 					// ...
@@ -986,7 +986,7 @@ private extern(Windows) LRESULT ofnHookProc(HWND hwnd, UINT msg, WPARAM wparam, 
 			fd = cast(FileDialog)cast(void*)GetPropA(hwnd, PROP_STR.ptr);
 		}
 		
-		//printf("hook msg(%d/0x%X) to obj %p\n", msg, msg, fd);
+		//cprintf("hook msg(%d/0x%X) to obj %p\n", msg, msg, fd);
 		if(fd)
 		{
 			fd.needRebuildFiles = true;

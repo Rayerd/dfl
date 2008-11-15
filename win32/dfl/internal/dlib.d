@@ -33,6 +33,36 @@ alias typeof(""d.ptr) Ddstringz;
 alias typeof(" "d[0]) Ddchar;
 
 
+version(DFL_NO_D2_AND_ABOVE)
+{
+}
+else
+{
+	version(D_Version2)
+	{
+		version = DFL_D2_AND_ABOVE;
+	}
+	else version(D_Version3)
+	{
+		version = DFL_D3_AND_ABOVE;
+		version = DFL_D2_AND_ABOVE;
+	}
+}
+
+
+version(DFL_DMD2020)
+{
+	version = DFL_USE_CORE_MEMORY;
+	version = DFL_USE_CORE_EXCEPTION_OUTOFMEMORY;
+}
+
+
+version(DFL_USE_CORE_MEMORY)
+{
+	version = DFL_USE_CORE_EXCEPTION_OUTOFMEMORY;
+}
+
+
 version(Tango)
 {
 	version(DFL_TANGO097rc1)
@@ -142,25 +172,45 @@ version(Tango)
 	}
 	
 	
-	private import tango.core.Memory;
-	
-	void gcPin(void* p) { }
-	void gcUnpin(void* p) { }
-	
-	void gcGenCollect()
+	version(DFL_USE_CORE_MEMORY)
 	{
-		version(DFL_TANGObefore099rc3)
-			gc.collect();
-		else
-			GC.collect();
+		private import core.memory;
+		
+		void gcPin(void* p) { }
+		void gcUnpin(void* p) { }
+		
+		deprecated void gcGenCollect()
+		{
+			core.memory.GC.collect();
+		}
+		
+		void gcFullCollect()
+		{
+			core.memory.GC.collect();
+		}
 	}
-	
-	void gcFullCollect()
+	else
 	{
-		version(DFL_TANGObefore099rc3)
-			gc.collect();
-		else
-			GC.collect();
+		private import tango.core.Memory;
+		
+		void gcPin(void* p) { }
+		void gcUnpin(void* p) { }
+		
+		deprecated void gcGenCollect()
+		{
+			version(DFL_TANGObefore099rc3)
+				gc.collect();
+			else
+				GC.collect();
+		}
+		
+		void gcFullCollect()
+		{
+			version(DFL_TANGObefore099rc3)
+				gc.collect();
+			else
+				GC.collect();
+		}
 	}
 	
 	
@@ -214,13 +264,28 @@ version(Tango)
 	}
 	
 	
-	private import tango.core.Exception;
-	
-	class OomException: tango.core.Exception.OutOfMemoryException
+	version(DFL_USE_CORE_EXCEPTION_OUTOFMEMORY)
 	{
-		this()
+		private import core.exception;
+		
+		class OomException: core.exception.OutOfMemoryException
 		{
-			super(null, 0);
+			this()
+			{
+				super(null, 0);
+			}
+		}
+	}
+	else
+	{
+		private import tango.core.Exception;
+		
+		class OomException: tango.core.Exception.OutOfMemoryException
+		{
+			this()
+			{
+				super(null, 0);
+			}
 		}
 	}
 	
@@ -417,7 +482,7 @@ version(Tango)
 }
 else // Phobos
 {
-	public import std.thread, std.traits;
+	public import std.traits;
 	
 	
 	alias ReturnType!(Object.opEquals) Dequ; // Since D2 changes mid-stream.
@@ -429,14 +494,34 @@ else // Phobos
 	}
 	
 	
-	private import std.gc;
-	
-	void gcPin(void* p) { }
-	void gcUnpin(void* p) { }
-	
-	alias std.gc.genCollect gcGenCollect;
-	
-	alias std.gc.fullCollect gcFullCollect;
+	version(DFL_USE_CORE_MEMORY)
+	{
+		private import core.memory;
+		
+		void gcPin(void* p) { }
+		void gcUnpin(void* p) { }
+		
+		deprecated void gcGenCollect()
+		{
+			core.memory.GC.collect();
+		}
+		
+		void gcFullCollect()
+		{
+			core.memory.GC.collect();
+		}
+	}
+	else
+	{
+		private import std.gc; // If you get "module gc cannot read file 'std\gc.d'" then use -version=DFL_USE_CORE_MEMORY <http://wiki.dprogramming.com/Dfl/CompileVersions>
+		
+		void gcPin(void* p) { }
+		void gcUnpin(void* p) { }
+		
+		deprecated alias std.gc.genCollect gcGenCollect;
+		
+		alias std.gc.fullCollect gcFullCollect;
+	}
 	
 	
 	private import std.string;
@@ -472,9 +557,24 @@ else // Phobos
 	alias std.path.pathsep nativePathSeparatorString;
 	
 	
-	private import std.outofmemory;
-	
-	alias std.outofmemory.OutOfMemoryException OomException;
+	version(DFL_USE_CORE_EXCEPTION_OUTOFMEMORY)
+	{
+		private import core.exception;
+		
+		class OomException: core.exception.OutOfMemoryException
+		{
+			this()
+			{
+				super(null, 0);
+			}
+		}
+	}
+	else
+	{
+		private import std.outofmemory;
+		
+		alias std.outofmemory.OutOfMemoryException OomException;
+	}
 	
 	
 	private import std.utf;

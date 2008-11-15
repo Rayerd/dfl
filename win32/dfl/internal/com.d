@@ -32,13 +32,13 @@ class DflComObject: ComObject // package
 	
 	override ULONG AddRef()
 	{
-		//printf("AddRef `%.*s`\n", cast(int)toString().length, toString().ptr);
+		//cprintf("AddRef `%.*s`\n", cast(int)toString().length, toString().ptr);
 		return C_refCountInc(cast(void*)this);
 	}
 	
 	override ULONG Release()
 	{
-		//printf("Release `%.*s`\n", cast(int)toString().length, toString().ptr);
+		//cprintf("Release `%.*s`\n", cast(int)toString().length, toString().ptr);
 		return C_refCountDec(cast(void*)this);
 	}
 }
@@ -158,7 +158,7 @@ class DStreamToIStream: DflComObject, dfl.internal.wincom.IStream
 	{
 		HRESULT result = S_OK;
 		
-		//printf("seek move=%u, origin=0x%x\n", cast(uint)dlibMove.QuadPart, dwOrigin);
+		//cprintf("seek move=%u, origin=0x%x\n", cast(uint)dlibMove.QuadPart, dwOrigin);
 		
 		try
 		{
@@ -422,7 +422,7 @@ class MemoryIStream: DflComObject, dfl.internal.wincom.IStream
 	
 	HRESULT Seek(LARGE_INTEGER dlibMove, DWORD dwOrigin, ULARGE_INTEGER* plibNewPosition)
 	{
-		//printf("seek move=%u, origin=0x%x\n", cast(uint)dlibMove.QuadPart, dwOrigin);
+		//cprintf("seek move=%u, origin=0x%x\n", cast(uint)dlibMove.QuadPart, dwOrigin);
 		
 		auto toPos = cast(long)dlibMove.QuadPart;
 		switch(dwOrigin)

@@ -738,7 +738,7 @@ void _init()
 	if(!RegisterClassExA(&wce))
 	{
 		debug(APP_PRINT)
-			printf("RegisterClassEx() failed for network event class.\n");
+			cprintf("RegisterClassEx() failed for network event class.\n");
 		
 		init_err:
 		throw new DflException("Unable to initialize asynchronous socket library");
@@ -753,7 +753,7 @@ void _init()
 		if(!hwNet)
 		{
 			debug(APP_PRINT)
-				printf("CreateWindowEx() failed for network event window.\n");
+				cprintf("CreateWindowEx() failed for network event window.\n");
 			
 			goto init_err;
 		}

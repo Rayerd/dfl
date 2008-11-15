@@ -1007,7 +1007,7 @@ class Control: DObject, IWindow // docmain
 		if(!isHandleCreated)
 		{
 			debug(APP_PRINT)
-				printf("Control created due to handle request.\n");
+				cprintf("Control created due to handle request.\n");
 			
 			createHandle();
 		}
@@ -1124,7 +1124,7 @@ class Control: DObject, IWindow // docmain
 	{
 		debug(EVENT_PRINT)
 		{
-			printf("{ Event: onBackColorChanged - Control %.*s }\n", name);
+			cprintf("{ Event: onBackColorChanged - Control %.*s }\n", name);
 		}
 		
 		backColorChanged(this, ea);
@@ -1488,7 +1488,7 @@ class Control: DObject, IWindow // docmain
 		/+
 		debug(EVENT_PRINT)
 		{
-			printf("{ Event: onCursorChanged - Control %.*s }\n", name);
+			cprintf("{ Event: onCursorChanged - Control %.*s }\n", name);
 		}
 		+/
 		
@@ -1959,7 +1959,7 @@ class Control: DObject, IWindow // docmain
 	{
 		debug(EVENT_PRINT)
 		{
-			printf("{ Event: onForeColorChanged - Control %.*s }\n", name);
+			cprintf("{ Event: onForeColorChanged - Control %.*s }\n", name);
 		}
 		
 		foreColorChanged(this, ea);
@@ -2144,7 +2144,7 @@ class Control: DObject, IWindow // docmain
 	{
 		debug(EVENT_PRINT)
 		{
-			printf("{ Event: onParentChanged - Control %.*s }\n", name);
+			cprintf("{ Event: onParentChanged - Control %.*s }\n", name);
 		}
 		
 		parentChanged(this, ea);
@@ -4312,7 +4312,7 @@ class Control: DObject, IWindow // docmain
 	{
 		debug(EVENT_PRINT)
 		{
-			printf("{ Event: onFontChanged - Control %.*s }\n", name);
+			cprintf("{ Event: onFontChanged - Control %.*s }\n", name);
 		}
 		
 		fontChanged(this, ea);
@@ -4324,7 +4324,7 @@ class Control: DObject, IWindow // docmain
 	{
 		debug(EVENT_PRINT)
 		{
-			printf("{ Event: onRightToLeftChanged - Control %.*s }\n", name);
+			cprintf("{ Event: onRightToLeftChanged - Control %.*s }\n", name);
 		}
 		
 		rightToLeftChanged(this, ea);
@@ -4365,7 +4365,7 @@ class Control: DObject, IWindow // docmain
 	{
 		debug(EVENT_PRINT)
 		{
-			printf("{ Event: onHelpRequested - Control %.*s }\n", name);
+			cprintf("{ Event: onHelpRequested - Control %.*s }\n", name);
 		}
 		
 		helpRequested(this, hea);
@@ -4377,7 +4377,7 @@ class Control: DObject, IWindow // docmain
 	{
 		debug(EVENT_PRINT)
 		{
-			printf("{ Event: onSystemColorsChanged - Control %.*s }\n", name);
+			cprintf("{ Event: onSystemColorsChanged - Control %.*s }\n", name);
 		}
 		
 		systemColorsChanged(this, ea);
@@ -5404,7 +5404,7 @@ class Control: DObject, IWindow // docmain
 				{
 					if(msg.msg == wmGetControlName)
 					{
-						//printf("WM_GETCONTROLNAME: %.*s; wparam: %d\n", cast(uint)name.length, name.ptr, msg.wParam);
+						//cprintf("WM_GETCONTROLNAME: %.*s; wparam: %d\n", cast(uint)name.length, name.ptr, msg.wParam);
 						if(msg.wParam && this.name.length)
 						{
 							OSVERSIONINFOA osver;
@@ -6010,7 +6010,7 @@ class Control: DObject, IWindow // docmain
 	~this()
 	{
 		debug(APP_PRINT)
-			printf("~Control %p\n", cast(void*)this);
+			cprintf("~Control %p\n", cast(void*)this);
 		
 		version(DFL_NO_ZOMBIE_FORM)
 		{
@@ -6300,7 +6300,7 @@ class Control: DObject, IWindow // docmain
 			
 			debug(APP_PRINT)
 			{
-				printf("Creating Control handle while disposing.\n");
+				cprintf("Creating Control handle while disposing.\n");
 			}
 			
 			create_err:
@@ -6357,7 +6357,7 @@ class Control: DObject, IWindow // docmain
 			{
 				debug(APP_PRINT)
 				{
-					printf("CreateWindowEx failed."
+					cprintf("CreateWindowEx failed."
 						" (exStyle=0x%X, className=`%.*s`, caption=`%.*s`, style=0x%X, x=%d, y=%d, width=%d, height=%d,"
 						" parent=0x%X, menu=0x%X, inst=0x%X, param=0x%X)\n",
 						exStyle, className, caption, style, x, y, width, height,
@@ -6462,7 +6462,7 @@ class Control: DObject, IWindow // docmain
 	
 	private final void fillRecreationData()
 	{
-		//printf(" { fillRecreationData %.*s }\n", name);
+		//cprintf(" { fillRecreationData %.*s }\n", name);
 		
 		if(!(ctrlStyle & ControlStyles.CACHE_TEXT))
 			wtext = _fetchText();
@@ -6560,7 +6560,7 @@ class Control: DObject, IWindow // docmain
 		//if(_allowLayout)
 		if(!_disallowLayout)
 		{
-			//printf("alayout\n");
+			//cprintf("alayout\n");
 			scope LayoutEventArgs lea = new LayoutEventArgs(ctrl);
 			onLayout(lea);
 		}
@@ -6576,7 +6576,7 @@ class Control: DObject, IWindow // docmain
 		
 		version(RADIO_GROUP_LAYOUT)
 		{
-			//printf("vchanged\n");
+			//cprintf("vchanged\n");
 			
 			bool foundRadio = false;
 			
@@ -6639,7 +6639,7 @@ class Control: DObject, IWindow // docmain
 		
 		debug(EVENT_PRINT)
 		{
-			printf("{ Event: onLayout - Control %.*s }\n", name);
+			cprintf("{ Event: onLayout - Control %.*s }\n", name);
 		}
 		
 		Rect area;

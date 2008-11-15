@@ -666,7 +666,7 @@ class DataObject: dfl.data.IDataObject // docmain
 	{
 		// doConvert ...
 		
-		//printf("Looking for format '%.*s'.\n", fmt);
+		//cprintf("Looking for format '%.*s'.\n", fmt);
 		int i;
 		i = find(fmt);
 		if(i == -1)
@@ -1023,7 +1023,7 @@ class ComToDdataObject: dfl.data.IDataObject // package
 				break;
 			if(!nfetched)
 				break;
-			//printf("\t\t{getFormats:%d}\n", fmte.cfFormat);
+			//cprintf("\t\t{getFormats:%d}\n", fmte.cfFormat);
 			result ~= DataFormats.getFormat(fmte.cfFormat).name;
 		}
 		fenum.Release(); // ?
@@ -1053,14 +1053,14 @@ class ComToDdataObject: dfl.data.IDataObject // package
 		hmem = GlobalAlloc(GMEM_SHARE, mem.length);
 		if(!hmem)
 		{
-			//printf("Unable to GlobalAlloc().\n");
+			//cprintf("Unable to GlobalAlloc().\n");
 			err_set:
 			throw new DflException("Unable to set data");
 		}
 		pmem = GlobalLock(hmem);
 		if(!pmem)
 		{
-			//printf("Unable to GlobalLock().\n");
+			//cprintf("Unable to GlobalLock().\n");
 			GlobalFree(hmem);
 			goto err_set;
 		}
@@ -1081,7 +1081,7 @@ class ComToDdataObject: dfl.data.IDataObject // package
 		HRESULT hr = dataObj.SetData(&fmte, &stgm, true);
 		if(S_OK != hr)
 		{
-			//printf("Unable to IDataObject::SetData() = %d (0x%X).\n", hr, hr);
+			//cprintf("Unable to IDataObject::SetData() = %d (0x%X).\n", hr, hr);
 			// Failed, need to free it..
 			GlobalFree(hmem);
 			goto err_set;

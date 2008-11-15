@@ -697,7 +697,7 @@ class TreeNodeCollection
 {
 	void add(TreeNode node)
 	{
-		//printf("Adding node %p '%.*s'\n", cast(void*)node, getObjectString(node));
+		//cprintf("Adding node %p '%.*s'\n", cast(void*)node, getObjectString(node));
 		
 		int i;
 		

@@ -10,6 +10,8 @@ version(Tango)
 		tango.stdc.string,
 		tango.stdc.stdint,
 		tango.stdc.stdio;
+	
+	alias tango.stdc.stdio.printf cprintf;
 }
 else // Phobos
 {
@@ -17,5 +19,7 @@ else // Phobos
 		std.c.string,
 		std.stdint, // Mostly the same as the C interface.
 		std.c.stdio;
+	
+	alias std.c.stdio.printf cprintf;
 }
 

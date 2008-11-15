@@ -171,7 +171,7 @@ extern(Windows) void timerProc(HWND hwnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 		else
 		{
 			debug(APP_PRINT)
-				printf("Unknown timer 0x%X.\n", idEvent);
+				cprintf("Unknown timer 0x%X.\n", idEvent);
 		}
 	}
 	catch(Object e)
