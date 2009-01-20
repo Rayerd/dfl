@@ -1565,7 +1565,7 @@ class Control: DObject, IWindow // docmain
 	private static Font _createCompatibleFont()
 	{
 		Font result;
-		//result = _createOldFont();
+		result = _createOldFont();
 		
 		try
 		{
