@@ -1581,8 +1581,9 @@ class Control: DObject, IWindow // docmain
 		{
 		}
 		
-		if(!result)
-			result = _createOldFont();
+		//if(!result)
+		//	result = _createOldFont();
+		assert(result !is null);
 		
 		return result;
 	}

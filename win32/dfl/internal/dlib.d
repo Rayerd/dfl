@@ -254,13 +254,30 @@ version(Tango)
 	
 	Dstring pathGetDirName(Dstring s)
 	{
-		scope mypath = new FilePath(s);
-		return mypath.path();
+		version(DFL_TANGObefore0997)
+		{
+			scope mypath = new FilePath(s);
+			return mypath.path();
+		}
+		else
+		{
+			// Need to dup because standard and native mutate.
+			scope mypath = new FilePath(tango.io.Path.standard(s.dup));
+			return tango.io.Path.native(mypath.path().dup);
+		}
 	}
 	
 	Dstring pathJoin(Dstring p1, Dstring p2)
 	{
-		return FilePath.join(p1, p2);
+		version(DFL_TANGObefore0997)
+		{
+			return FilePath.join(p1, p2);
+		}
+		else
+		{
+			// Need to dup because standard and native mutate.
+			return tango.io.Path.native(FilePath.join(tango.io.Path.standard(p1.dup), tango.io.Path.standard(p2.dup)).dup);
+		}
 	}
 	
 	
