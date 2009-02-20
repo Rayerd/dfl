@@ -2668,6 +2668,15 @@ class Icon: Image // docmain
 		this.owned = owned;
 	}
 	
+	///
+	// Load from an ico file.
+	this(Dstring fileName)
+	{
+		this.hi = cast(HICON)dfl.internal.utf.loadImage(null, fileName, IMAGE_ICON, 0, 0, LR_LOADFROMFILE);
+		if(!this.hi)
+			throw new DflException("Unable to load icon from file '" ~ fileName ~ "'");
+	}
+	
 	
 	///
 	deprecated static Icon fromHandle(HICON hi)
