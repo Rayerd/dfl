@@ -6,24 +6,27 @@ call makelib
 
 @if "%dmd_path%" == "" goto no_dmd
 
+@set dmd_path_windows=%dmd_path%\windows
+@if not exist %dmd_path_windows% set dmd_path_windows=%dmd_path%
+
 
 @echo.
 
 @if not "%dfl_go_move%" == "" goto do_move
 
-@echo About to move DFL lib files to %dmd_path%\lib (Close window or Ctrl+C to stop)
+@echo About to move DFL lib files to %dmd_path_windows%\lib (Close window or Ctrl+C to stop)
 @pause
 
 :do_move
 
-@rem   @move /Y dfl_debug.lib %dmd_path%\lib
+@rem   @move /Y dfl_debug.lib %dmd_path_windows%\lib
 @rem   @if errorlevel 1 goto fail
-@rem   @move /Y dfl.lib %dmd_path%\lib
+@rem   @move /Y dfl.lib %dmd_path_windows%\lib
 @rem   @if errorlevel 1 goto fail
-@rem   @move /Y dfl_build.lib %dmd_path%\lib
+@rem   @move /Y dfl_build.lib %dmd_path_windows%\lib
 @rem   @if errorlevel 1 goto fail
 
-@move /Y dfl*.lib %dmd_path%\lib
+@move /Y dfl*.lib %dmd_path_windows%\lib
 @if errorlevel 1 goto fail
 
 
