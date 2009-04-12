@@ -60,14 +60,14 @@ enum MsgBoxOptions
 ///
 DialogResult msgBox(Dstring txt) // docmain
 {
-	return cast(DialogResult)dfl.internal.utf.messageBox(GetActiveWindow(), txt, \0, MB_OK);
+	return cast(DialogResult)dfl.internal.utf.messageBox(GetActiveWindow(), txt, "\0", MB_OK);
 }
 
 /// ditto
 DialogResult msgBox(IWindow owner, Dstring txt) // docmain
 {
 	return cast(DialogResult)dfl.internal.utf.messageBox(owner ? owner.handle : GetActiveWindow(),
-		txt, \0, MB_OK);
+		txt, "\0", MB_OK);
 }
 
 /// ditto

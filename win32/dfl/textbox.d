@@ -111,7 +111,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 		Dstring result;
 		foreach(Dstring s; lns)
 		{
-			result ~= s ~ \r\n;
+			result ~= s ~ "\r\n";
 		}
 		if(result.length) // Remove last \r\n.
 			result = result[0 .. result.length - 2];

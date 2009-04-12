@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2007-2008 Christopher E. Miller
+	Copyright (C) 2007-2009 Christopher E. Miller
 	
 	This software is provided 'as-is', without any express or implied
 	warranty.  In no event will the authors be held liable for any damages
@@ -33,33 +33,63 @@ alias typeof(""d.ptr) Ddstringz;
 alias typeof(" "d[0]) Ddchar;
 
 
-version(DFL_NO_D2_AND_ABOVE)
+version(D_Version2)
 {
+	version = DFL_D2;
+	version = DFL_D2_AND_ABOVE;
+}
+else version(D_Version3)
+{
+	version = DFL_D3;
+	version = DFL_D3_AND_ABOVE;
+	version = DFL_D2_AND_ABOVE;
+}
+else version(D_Version4)
+{
+	version = DFL_D4;
+	version = DFL_D4_AND_ABOVE;
+	version = DFL_D3_AND_ABOVE;
+	version = DFL_D2_AND_ABOVE;
 }
 else
 {
-	version(D_Version2)
+	version = DFL_D1;
+}
+//version = DFL_D1_AND_ABOVE;
+
+
+version(DFL_D1)
+{
+	version(DFL_USE_CORE_MEMORY)
 	{
-		version = DFL_D2_AND_ABOVE;
 	}
-	else version(D_Version3)
+	else
 	{
-		version = DFL_D3_AND_ABOVE;
-		version = DFL_D2_AND_ABOVE;
+		version = DFL_NO_USE_CORE_MEMORY;
+		version = _DFL_NO_USE_CORE_EXCEPTION_OUTOFMEMORY_EXCEPTION;
 	}
 }
 
 
-version(DFL_DMD2020)
+version(DFL_D2_AND_ABOVE)
 {
-	version = DFL_USE_CORE_MEMORY;
-	version = DFL_USE_CORE_EXCEPTION_OUTOFMEMORY;
+	version(DFL_beforeDMD2020)
+	{
+		version = DFL_NO_USE_CORE_MEMORY;
+		version = _DFL_NO_USE_CORE_EXCEPTION_OUTOFMEMORY_EXCEPTION;
+		version = _DFL_NO_USE_CORE_EXCEPTION_OUTOFMEMORY_ERROR;
+	}
+	
+	version(DFL_beforeDMD2021)
+	{
+		version = _DFL_NO_USE_CORE_EXCEPTION_OUTOFMEMORY_ERROR;
+	}
 }
 
 
-version(DFL_USE_CORE_MEMORY)
+version(DFL_NO_USE_CORE_MEMORY)
 {
-	version = DFL_USE_CORE_EXCEPTION_OUTOFMEMORY;
+	version = _DFL_NO_USE_CORE_EXCEPTION_OUTOFMEMORY_EXCEPTION;
 }
 
 
@@ -281,11 +311,11 @@ version(Tango)
 	}
 	
 	
-	version(DFL_USE_CORE_EXCEPTION_OUTOFMEMORY)
+	version(_DFL_NO_USE_CORE_EXCEPTION_OUTOFMEMORY_EXCEPTION)
 	{
-		private import core.exception;
+		private import tango.core.Exception;
 		
-		class OomException: core.exception.OutOfMemoryException
+		class OomException: tango.core.Exception.OutOfMemoryException
 		{
 			this()
 			{
@@ -295,9 +325,9 @@ version(Tango)
 	}
 	else
 	{
-		private import tango.core.Exception;
+		private import core.exception;
 		
-		class OomException: tango.core.Exception.OutOfMemoryException
+		class OomException: core.exception.OutOfMemoryException
 		{
 			this()
 			{
@@ -511,9 +541,20 @@ else // Phobos
 	}
 	
 	
-	version(DFL_USE_CORE_MEMORY)
+	version(DFL_NO_USE_CORE_MEMORY)
 	{
-		private import core.memory;
+		private import std.gc; // If you get "module gc cannot read file 'core\memory.d'" then use -version=DFL_NO_USE_CORE_MEMORY <http://wiki.dprogramming.com/Dfl/CompileVersions>
+		
+		void gcPin(void* p) { }
+		void gcUnpin(void* p) { }
+		
+		deprecated alias std.gc.genCollect gcGenCollect;
+		
+		alias std.gc.fullCollect gcFullCollect;
+	}
+	else
+	{
+		private import core.memory; // If you get "module gc cannot read file 'std\gc.d'" then use -version=DFL_USE_CORE_MEMORY <http://wiki.dprogramming.com/Dfl/CompileVersions>
 		
 		void gcPin(void* p) { }
 		void gcUnpin(void* p) { }
@@ -527,17 +568,6 @@ else // Phobos
 		{
 			core.memory.GC.collect();
 		}
-	}
-	else
-	{
-		private import std.gc; // If you get "module gc cannot read file 'std\gc.d'" then use -version=DFL_USE_CORE_MEMORY <http://wiki.dprogramming.com/Dfl/CompileVersions>
-		
-		void gcPin(void* p) { }
-		void gcUnpin(void* p) { }
-		
-		deprecated alias std.gc.genCollect gcGenCollect;
-		
-		alias std.gc.fullCollect gcFullCollect;
 	}
 	
 	
@@ -574,23 +604,36 @@ else // Phobos
 	alias std.path.pathsep nativePathSeparatorString;
 	
 	
-	version(DFL_USE_CORE_EXCEPTION_OUTOFMEMORY)
-	{
-		private import core.exception;
-		
-		class OomException: core.exception.OutOfMemoryException
-		{
-			this()
-			{
-				super(null, 0);
-			}
-		}
-	}
-	else
+	version(_DFL_NO_USE_CORE_EXCEPTION_OUTOFMEMORY_EXCEPTION)
 	{
 		private import std.outofmemory;
 		
 		alias std.outofmemory.OutOfMemoryException OomException;
+	}
+	else
+	{
+		private import core.exception;
+		
+		version(_DFL_NO_USE_CORE_EXCEPTION_OUTOFMEMORY_ERROR)
+		{
+			class OomException: core.exception.OutOfMemoryException
+			{
+				this()
+				{
+					super(null, 0);
+				}
+			}
+		}
+		else
+		{
+			class OomException: core.exception.OutOfMemoryError
+			{
+				this()
+				{
+					super(null, 0);
+				}
+			}
+		}
 	}
 	
 	

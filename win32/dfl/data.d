@@ -458,15 +458,15 @@ class DataFormats // docmain
 		else if((CF_UNICODETEXT == id) || (data.info == typeid(Dwstring)))
 		{
 			// Unicode string.
-			//return data.getUnicodeText() ~ cast(Dwstring)\0;
-			//return cast(void[])(data.getUnicodeText() ~ cast(Dwstring)\0); // Needed in D2. Not guaranteed safe.
-			return (data.getUnicodeText() ~ cast(Dwstring)\0).dup; // Needed in D2.
+			//return data.getUnicodeText() ~ cast(Dwstring)"\0";
+			//return cast(void[])(data.getUnicodeText() ~ cast(Dwstring)"\0"); // Needed in D2. Not guaranteed safe.
+			return (data.getUnicodeText() ~ cast(Dwstring)"\0").dup; // Needed in D2.
 		}
 		else if(data.info == typeid(Ddstring))
 		{
-			//return (*cast(Ddstring*)data.value) ~ \0;
-			//return cast(void[])((*cast(Ddstring*)data.value) ~ \0); // Needed in D2. Not guaranteed safe.
-			return ((*cast(Ddstring*)data.value) ~ \0).dup; // Needed in D2.
+			//return (*cast(Ddstring*)data.value) ~ "\0";
+			//return cast(void[])((*cast(Ddstring*)data.value) ~ "\0"); // Needed in D2. Not guaranteed safe.
+			return ((*cast(Ddstring*)data.value) ~ "\0").dup; // Needed in D2.
 		}
 		else if(CF_HDROP == id)
 		{

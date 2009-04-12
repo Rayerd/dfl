@@ -250,7 +250,7 @@ class RegistryValueMultiSz: RegistryValue
 		Dstring result;
 		foreach(Dstring str; value)
 		{
-			result ~= str ~ \r\n;
+			result ~= str ~ "\r\n";
 		}
 		if(result.length)
 			result = result[0 .. result.length - 2]; // Exclude last \r\n.

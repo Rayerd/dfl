@@ -176,11 +176,11 @@ final class Application // docmain
 	// Does nothing if not supported.
 	void enableVisualStyles()
 	{
-		const Dstring MANIFEST = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` \r\n
-			`<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">` \r\n
-				`<description>DFL manifest</description>` \r\n
-				`<dependency>` \r\n
-					`<dependentAssembly>` \r\n
+		const Dstring MANIFEST = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` "\r\n"
+			`<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">` "\r\n"
+				`<description>DFL manifest</description>` "\r\n"
+				`<dependency>` "\r\n"
+					`<dependentAssembly>` "\r\n"
 						`<assemblyIdentity `
 							`type="win32" `
 							`name="Microsoft.Windows.Common-Controls" `
@@ -188,10 +188,10 @@ final class Application // docmain
 							`processorArchitecture="X86" `
 							`publicKeyToken="6595b64144ccf1df" `
 							`language="*" `
-						`/>` \r\n
-					`</dependentAssembly>` \r\n
-				`</dependency>` \r\n
-			`</assembly>` \r\n;
+						`/>` "\r\n"
+					`</dependentAssembly>` "\r\n"
+				`</dependency>` "\r\n"
+			`</assembly>` "\r\n";
 		
 		HMODULE kernel32;
 		kernel32 = GetModuleHandleA("kernel32.dll");

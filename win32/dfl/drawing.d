@@ -456,6 +456,12 @@ struct Color // docmain
 	}
 	
 	
+	Color* Dthisptr(Color* t) { return t; }
+	Color* Dthisptr(ref Color t) { return &t; }
+	Color Dthisval(Color* t) { return *t; }
+	Color Dthisval(Color t) { return t; }
+	
+	
 	deprecated static Color opCall(COLORREF argb)
 	{
 		Color nc;
@@ -546,10 +552,10 @@ struct Color // docmain
 	// The new blended color is returned; -this- Color is not modified.
 	Color blendColor(Color wc)
 	{
-		if(*this == Color.empty)
+		if(Dthisval(this) == Color.empty)
 			return wc;
 		if(wc == Color.empty)
-			return *this;
+			return Dthisval(this);
 		
 		validateColor();
 		wc.validateColor();
@@ -569,14 +575,14 @@ struct Color // docmain
 	{
 		//if(0x7F == this.color.alpha)
 		//	return blendColor(backColor);
-		//if(*this == Color.empty) // Checked if(0 == this.color.alpha)
+		//if(Dthisval(this) == Color.empty) // Checked if(0 == this.color.alpha)
 		//	return backColor;
 		if(0 == this.color.alpha)
 			return backColor;
 		if(backColor == Color.empty)
-			return *this;
+			return Dthisval(this);
 		if(0xFF == this.color.alpha)
-			return *this;
+			return Dthisval(this);
 		
 		validateColor();
 		backColor.validateColor();
