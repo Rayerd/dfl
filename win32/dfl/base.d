@@ -862,7 +862,7 @@ class KeyPressEventArgs: KeyEventArgs
 		
 		int vk;
 		if(dfl.internal.utf.useUnicode)
-			vk = 0xFF & VkKeyScanW(ch);
+			vk = 0xFF & VkKeyScanW(cast(WCHAR)ch);
 		else
 			vk = 0xFF & VkKeyScanA(cast(char)ch);
 		

@@ -920,7 +920,7 @@ class ComToDdataObject: dfl.data.IDataObject // package
 		void[] mem;
 		void* plock;
 		
-		fmte.cfFormat = id;
+		fmte.cfFormat = cast(CLIPFORMAT)id;
 		fmte.ptd = null;
 		fmte.dwAspect = DVASPECT_CONTENT; // ?
 		fmte.lindex = -1;
@@ -978,7 +978,7 @@ class ComToDdataObject: dfl.data.IDataObject // package
 	{
 		FORMATETC fmte;
 		
-		fmte.cfFormat = id;
+		fmte.cfFormat = cast(CLIPFORMAT)id;
 		fmte.ptd = null;
 		fmte.dwAspect = DVASPECT_CONTENT; // ?
 		fmte.lindex = -1;
@@ -1067,7 +1067,7 @@ class ComToDdataObject: dfl.data.IDataObject // package
 		pmem[0 .. mem.length] = mem;
 		GlobalUnlock(hmem);
 		
-		fmte.cfFormat = id;
+		fmte.cfFormat = cast(CLIPFORMAT)id;
 		fmte.ptd = null;
 		fmte.dwAspect = DVASPECT_CONTENT; // ?
 		fmte.lindex = -1;
@@ -1193,7 +1193,7 @@ package class EnumDataObjectFORMATETC: DflComObject, IEnumFORMATETC
 				
 				for(; idx != end; idx++)
 				{
-					rgelt.cfFormat = DataFormats.getFormat(fmts[idx]).id;
+					rgelt.cfFormat = cast(CLIPFORMAT)DataFormats.getFormat(fmts[idx]).id;
 					rgelt.ptd = null;
 					rgelt.dwAspect = DVASPECT_CONTENT; // ?
 					rgelt.lindex = -1;

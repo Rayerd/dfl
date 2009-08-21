@@ -80,6 +80,8 @@ class ComboBox: ListControl // docmain
 			
 			case CBS_SIMPLE:
 				return ComboBoxStyle.SIMPLE;
+			default:
+				assert(0);
 		}
 	}
 	

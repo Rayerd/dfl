@@ -560,9 +560,9 @@ struct Color // docmain
 		validateColor();
 		wc.validateColor();
 		
-		return Color((cast(uint)color.red + cast(uint)wc.color.red) >> 1,
-			(cast(uint)color.green + cast(uint)wc.color.green) >> 1,
-			(cast(uint)color.blue + cast(uint)wc.color.blue) >> 1);
+		return Color(cast(ubyte)((cast(uint)color.red + cast(uint)wc.color.red) >> 1),
+			cast(ubyte)((cast(uint)color.green + cast(uint)wc.color.green) >> 1),
+			cast(ubyte)((cast(uint)color.blue + cast(uint)wc.color.blue) >> 1));
 	}
 	
 	
@@ -603,7 +603,7 @@ struct Color // docmain
 	package static Color systemColor(int colorIndex)
 	{
 		Color c;
-		c.sysIndex = colorIndex;
+		c.sysIndex = cast(ubyte)colorIndex;
 		c.color.alpha = 0xFF;
 		return c;
 	}
@@ -1817,7 +1817,7 @@ class Graphics // docmain
 		norm = SystemColors.control;
 		light = SystemColors.controlLightLight.blendColor(norm); // center
 		//dark = SystemColors.controlDark.blendColor(norm); // top
-		ubyte ubmin(int ub) { if(ub <= 0) return 0; return ub; }
+		ubyte ubmin(int ub) { if(ub <= 0) return 0; return cast(ubyte)ub; }
 		dark = Color(ubmin(cast(int)norm.r - 0x10), ubmin(cast(int)norm.g - 0x10), ubmin(cast(int)norm.b - 0x10));
 		//ddark = SystemColors.controlDarkDark; // bottom
 		ddark = SystemColors.controlDark.blendColor(Color(0x10, 0x10, 0x10)); // bottom
@@ -3235,7 +3235,7 @@ class Font // docmain
 		lf.lf.lfOutPrecision = OUT_DEFAULT_PRECIS;
 		lf.lf.lfClipPrecision = CLIP_DEFAULT_PRECIS;
 		//lf.lf.lfQuality = DEFAULT_QUALITY;
-		lf.lf.lfQuality = smoothing;
+		lf.lf.lfQuality = cast(BYTE)smoothing;
 		lf.lf.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE;
 		
 		this(_create(lf));

@@ -541,7 +541,7 @@ class RichTextBox: TextBoxBase // docmain
 			cf.bCharSet = lf.lfCharSet;
 			strcpy(cf.szFaceName.ptr, lf.lfFaceName.ptr);
 			cf.bUnderlineType = CFU_UNDERLINE;
-			cf.wWeight = lf.lfWeight;
+			cf.wWeight = cast(WORD)lf.lfWeight;
 			
 			_setFormat(&cf);
 		}

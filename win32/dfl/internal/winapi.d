@@ -2604,9 +2604,10 @@ extern(Windows):
 	alias STYLESTRUCT* LPSTYLESTRUCT;
 	
 	
-	extern(C) DWORD MAKELONG(WORD wLow, WORD wHigh)
+	//extern(C) DWORD MAKELONG(WORD wLow, WORD wHigh)
+	extern(C) DWORD MAKELONG(int wLow, int wHigh)
 	{
-		return wLow | (wHigh << 16);
+		return cast(DWORD)cast(WORD)wLow | (cast(DWORD)cast(WORD)wHigh << 16);
 	}
 	
 	alias MAKELONG MAKELPARAM;

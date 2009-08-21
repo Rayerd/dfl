@@ -171,7 +171,7 @@ final class Environment // docmain
 			if(dr & 1)
 			{
 				char[] s = tmp.dup[0 .. 3];
-				s[0] = 'A' + i;
+				s[0] = cast(char)('A' + i);
 				//result ~= s;
 				result ~= cast(Dstring)s; // Needed in D2.
 			}

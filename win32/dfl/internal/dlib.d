@@ -68,6 +68,14 @@ version(DFL_D1)
 		version = DFL_NO_USE_CORE_MEMORY;
 		version = _DFL_NO_USE_CORE_EXCEPTION_OUTOFMEMORY_EXCEPTION;
 	}
+	
+	version(DFL_CONV_TO_TEMPLATE)
+	{
+	}
+	else
+	{
+		version = DFL_NO_CONV_TO_TEMPLATE;
+	}
 }
 
 
@@ -78,11 +86,27 @@ version(DFL_D2_AND_ABOVE)
 		version = DFL_NO_USE_CORE_MEMORY;
 		version = _DFL_NO_USE_CORE_EXCEPTION_OUTOFMEMORY_EXCEPTION;
 		version = _DFL_NO_USE_CORE_EXCEPTION_OUTOFMEMORY_ERROR;
+		
+		version = DFL_beforeDMD2021;
+		version = DFL_beforeDMD2029;
 	}
 	
 	version(DFL_beforeDMD2021)
 	{
 		version = _DFL_NO_USE_CORE_EXCEPTION_OUTOFMEMORY_ERROR;
+		
+		version = DFL_beforeDMD2029;
+	}
+	
+	version(DFL_beforeDMD2029)
+	{
+		version(DFL_CONV_TO_TEMPLATE)
+		{
+		}
+		else
+		{
+			version = DFL_NO_CONV_TO_TEMPLATE;
+		}
 	}
 }
 
@@ -575,11 +599,39 @@ else // Phobos
 	
 	alias std.string.icmp stringICmp;
 	
-	alias std.string.toString stringFromStringz;
+	version(DFL_NO_CONV_TO_TEMPLATE)
+	{
+		alias std.string.toString stringFromStringz;
+	}
+	else
+	{
+		Dstring stringFromStringz(Dstringz sz)
+		{
+			return std.conv.to!(Dstring, Dstringz)(sz); // D 2.029
+		}
+		
+		version(DFL_D2_AND_ABOVE)
+		{
+			Dstring stringFromStringz(char* sz)
+			{
+				return stringFromStringz(cast(Dstringz)sz);
+			}
+		}
+	}
 	
 	alias std.string.split stringSplit;
 	
-	alias std.string.toString intToString;
+	version(DFL_NO_CONV_TO_TEMPLATE)
+	{
+		alias std.string.toString intToString;
+	}
+	else
+	{
+		Dstring intToString(int i) 
+		{ 
+			return to!(Dstring)(i); // D 2.029
+		}
+	}
 	
 	alias std.string.find charFindInString;
 	
@@ -659,7 +711,14 @@ else // Phobos
 	
 	private import std.conv;
 	
-	alias std.conv.toInt stringToInt;
+	version(DFL_NO_CONV_TO_TEMPLATE)
+	{
+		alias std.conv.toInt stringToInt;
+	}
+	else
+	{
+		alias std.conv.to!(int, Dstring) stringToInt; // D 2.029
+	}
 	
 	
 	private import std.ctype;
