@@ -1444,7 +1444,7 @@ struct WndClass
 }
 
 
-ATOM registerClass(inout WndClass wc)
+ATOM registerClass(ref WndClass wc)
 {
 	if(useUnicode)
 	{
@@ -1476,7 +1476,7 @@ ATOM registerClass(inout WndClass wc)
 }
 
 
-BOOL getClassInfo(HINSTANCE hinst, Dstring className, inout WndClass wc)
+BOOL getClassInfo(HINSTANCE hinst, Dstring className, ref WndClass wc)
 {
 	wc.className = className; // ?
 	
@@ -2112,7 +2112,7 @@ struct LogFont
 }
 
 
-HFONT createFontIndirect(inout LogFont lf)
+HFONT createFontIndirect(ref LogFont lf)
 {
 	if(useUnicode)
 	{
@@ -2161,7 +2161,7 @@ HFONT createFontIndirect(inout LogFont lf)
 
 
 // GetObject for a LogFont.
-int getLogFont(HFONT hf, inout LogFont lf)
+int getLogFont(HFONT hf, ref LogFont lf)
 {
 	if(useUnicode)
 	{

@@ -28,6 +28,7 @@ version(Tango)
 +/
 
 
+
 version(HASstdcwindowswindows)
 {
 	public import std.c.windows.windows;
@@ -37,6 +38,31 @@ else
 	public import dfl.internal._stdcwindows;
 }
 private import dfl.internal.wincom;
+
+
+version(D_Version2)
+{
+	version = DFL_D2;
+	version = DFL_D2_AND_ABOVE;
+}
+else version(D_Version3)
+{
+	version = DFL_D3;
+	version = DFL_D3_AND_ABOVE;
+	version = DFL_D2_AND_ABOVE;
+}
+else version(D_Version4)
+{
+	version = DFL_D4;
+	version = DFL_D4_AND_ABOVE;
+	version = DFL_D3_AND_ABOVE;
+	version = DFL_D2_AND_ABOVE;
+}
+else
+{
+	version = DFL_D1;
+}
+//version = DFL_D1_AND_ABOVE;
 
 
 extern(Windows):
@@ -1054,7 +1080,7 @@ extern(Windows):
 	}
 	
 	
-	version(D_Version2)
+	version(DFL_D2_AND_ABOVE)
 	{
 		/+ // DMD 2.012: Error: cannot implicitly convert expression (cast(HANDLE)cast(void*)-65536u) of type const(HANDLE) to int
 		const HTREEITEM TVI_ROOT = cast(HTREEITEM)-0x10000;

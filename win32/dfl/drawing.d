@@ -11,6 +11,31 @@ private import dfl.internal.winapi, dfl.base, dfl.internal.utf, dfl.internal.com
 	dfl.internal.wincom;
 
 
+version(D_Version2)
+{
+	version = DFL_D2;
+	version = DFL_D2_AND_ABOVE;
+}
+else version(D_Version3)
+{
+	version = DFL_D3;
+	version = DFL_D3_AND_ABOVE;
+	version = DFL_D2_AND_ABOVE;
+}
+else version(D_Version4)
+{
+	version = DFL_D4;
+	version = DFL_D4_AND_ABOVE;
+	version = DFL_D3_AND_ABOVE;
+	version = DFL_D2_AND_ABOVE;
+}
+else
+{
+	version = DFL_D1;
+}
+//version = DFL_D1_AND_ABOVE;
+
+
 /// X and Y coordinate.
 struct Point // docmain
 {
@@ -42,10 +67,21 @@ struct Point // docmain
 	}
 	
 	
-	///
-	Dequ opEquals(Point pt)
+	version(DFL_D2_AND_ABOVE)
 	{
-		return x == pt.x && y == pt.y;
+		///
+		const Dequ opEquals(ref ConstType!(Point) pt)
+		{
+			return x == pt.x && y == pt.y;
+		}
+	}
+	else
+	{
+		///
+		Dequ opEquals(Point pt)
+		{
+			return x == pt.x && y == pt.y;
+		}
 	}
 	
 	
@@ -124,10 +160,21 @@ struct Size // docmain
 	}
 	
 	
-	///
-	Dequ opEquals(Size sz)
+	version(DFL_D2_AND_ABOVE)
 	{
-		return width == sz.width && height == sz.height;
+		///
+		const Dequ opEquals(ref ConstType!(Size) sz)
+		{
+			return width == sz.width && height == sz.height;
+		}
+	}
+	else
+	{
+		///
+		Dequ opEquals(Size sz)
+		{
+			return width == sz.width && height == sz.height;
+		}
 	}
 	
 	
@@ -279,11 +326,23 @@ struct Rect // docmain
 	}
 	
 	
-	///
-	Dequ opEquals(Rect r)
+	version(DFL_D2_AND_ABOVE)
 	{
-		return x == r.x && y == r.y &&
-			width == r.width && height == r.height;
+		///
+		const Dequ opEquals(ref ConstType!(Rect) r)
+		{
+			return x == r.x && y == r.y &&
+				width == r.width && height == r.height;
+		}
+	}
+	else
+	{
+		///
+		Dequ opEquals(Rect r)
+		{
+			return x == r.x && y == r.y &&
+				width == r.width && height == r.height;
+		}
 	}
 	
 	
@@ -2384,7 +2443,7 @@ class Graphics // docmain
 		prevPen = SelectObject(hdc, pen.handle);
 		prevBrush = SelectObject(hdc, cast(HBRUSH)GetStockObject(NULL_BRUSH)); // Don't fill it in.
 		
-		foreach(inout Rect r; rs)
+		foreach(ref Rect r; rs)
 		{
 			dfl.internal.winapi.Rectangle(hdc, r.x, r.y, r.x + r.width, r.y + r.height);
 		}
@@ -2943,14 +3002,14 @@ enum FontSmoothing
 class Font // docmain
 {
 	// Used internally.
-	static void LOGFONTAtoLogFont(inout LogFont lf, LOGFONTA* plfa) // package // deprecated
+	static void LOGFONTAtoLogFont(ref LogFont lf, LOGFONTA* plfa) // package // deprecated
 	{
 		lf.lfa = *plfa;
 		lf.faceName = dfl.internal.utf.fromAnsiz(plfa.lfFaceName.ptr);
 	}
 	
 	// Used internally.
-	static void LOGFONTWtoLogFont(inout LogFont lf, LOGFONTW* plfw) // package // deprecated
+	static void LOGFONTWtoLogFont(ref LogFont lf, LOGFONTW* plfw) // package // deprecated
 	{
 		lf.lfw = *plfw;
 		lf.faceName = dfl.internal.utf.fromUnicodez(plfw.lfFaceName.ptr);
@@ -2973,7 +3032,7 @@ class Font // docmain
 	
 	
 	// Used internally.
-	this(HFONT hf, inout LogFont lf, bool owned = true) // package
+	this(HFONT hf, ref LogFont lf, bool owned = true) // package
 	{
 		this.hf = hf;
 		this.owned = owned;
@@ -3010,13 +3069,13 @@ class Font // docmain
 	
 	
 	// Used internally.
-	this(inout LogFont lf, bool owned = true) // package
+	this(ref LogFont lf, bool owned = true) // package
 	{
 		this(_create(lf), lf, owned);
 	}
 	
 	
-	package static HFONT _create(inout LogFont lf)
+	package static HFONT _create(ref LogFont lf)
 	{
 		HFONT result;
 		result = dfl.internal.utf.createFontIndirect(lf);
@@ -3026,7 +3085,7 @@ class Font // docmain
 	}
 	
 	
-	private static void _style(inout LogFont lf, FontStyle style)
+	private static void _style(ref LogFont lf, FontStyle style)
 	{
 		lf.lf.lfWeight = (style & FontStyle.BOLD) ? FW_BOLD : FW_NORMAL;
 		lf.lf.lfItalic = (style & FontStyle.ITALIC) ? TRUE : FALSE;
@@ -3035,7 +3094,7 @@ class Font // docmain
 	}
 	
 	
-	private static FontStyle _style(inout LogFont lf)
+	private static FontStyle _style(ref LogFont lf)
 	{
 		FontStyle style = FontStyle.REGULAR;
 		
@@ -3067,7 +3126,7 @@ class Font // docmain
 	}
 	
 	
-	package void _info(inout LogFont lf)
+	package void _info(ref LogFont lf)
 	{
 		if(!dfl.internal.utf.getLogFont(hf, lf))
 			throw new DflException("Unable to get font information");
@@ -3325,7 +3384,7 @@ class Font // docmain
 	}
 	+/
 	
-	private void _initLf(inout LogFont lf)
+	private void _initLf(ref LogFont lf)
 	{
 		this.lfHeight = lf.lf.lfHeight;
 		this.lfName = lf.faceName;
@@ -3342,7 +3401,7 @@ class Font // docmain
 	}
 	+/
 	
-	private void _initLf(Font otherfont, inout LogFont lf)
+	private void _initLf(Font otherfont, ref LogFont lf)
 	{
 		this.lfHeight = otherfont.lfHeight;
 		this.lfName = otherfont.lfName;

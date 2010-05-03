@@ -770,7 +770,7 @@ class ComboBox: ListControl // docmain
 	}
 	
 	
-	protected override void createParams(inout CreateParams cp)
+	protected override void createParams(ref CreateParams cp)
 	{
 		super.createParams(cp);
 		
@@ -863,14 +863,14 @@ class ComboBox: ListControl // docmain
 	}
 	
 	
-	override void prevWndProc(inout Message msg)
+	override void prevWndProc(ref Message msg)
 	{
 		//msg.result = CallWindowProcA(comboboxPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
 		msg.result = dfl.internal.utf.callWindowProc(comboboxPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
 	}
 	
 	
-	protected override void onReflectedMessage(inout Message m)
+	protected override void onReflectedMessage(ref Message m)
 	{
 		super.onReflectedMessage(m);
 		
@@ -934,7 +934,7 @@ class ComboBox: ListControl // docmain
 	}
 	
 	
-	override void wndProc(inout Message msg)
+	override void wndProc(ref Message msg)
 	{
 		switch(msg.msg)
 		{

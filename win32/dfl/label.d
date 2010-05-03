@@ -344,7 +344,7 @@ class Label: Control // docmain
 	}
 	
 	
-	protected override void wndProc(inout Message m)
+	protected override void wndProc(ref Message m)
 	{
 		switch(m.msg)
 		{

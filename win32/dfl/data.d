@@ -700,7 +700,7 @@ class DataObject: dfl.data.IDataObject // docmain
 	{
 		Dstring[] result;
 		result = new Dstring[all.length];
-		foreach(int i, inout Dstring fmt; result)
+		foreach(int i, ref Dstring fmt; result)
 		{
 			fmt = all[i].fmt;
 		}
@@ -793,7 +793,7 @@ class DataObject: dfl.data.IDataObject // docmain
 	Pair[] all;
 	
 	
-	void fixPairEntry(inout Pair pr)
+	void fixPairEntry(ref Pair pr)
 	{
 		assert(pr.obj.info == typeid(_DataConvert));
 		Data obj;

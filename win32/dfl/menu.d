@@ -58,7 +58,7 @@ else
 		}
 		
 		
-		protected override void onReflectedMessage(inout Message m)
+		protected override void onReflectedMessage(ref Message m)
 		{
 			super.onReflectedMessage(m);
 			
@@ -548,7 +548,7 @@ else
 		}
 		
 		
-		protected override void onReflectedMessage(inout Message m)
+		protected override void onReflectedMessage(ref Message m)
 		{
 			super.onReflectedMessage(m);
 			
@@ -957,12 +957,12 @@ else
 		
 		
 		///
-		protected void onReflectedMessage(inout Message m)
+		protected void onReflectedMessage(ref Message m)
 		{
 		}
 		
 		
-		package final void _reflectMenu(inout Message m)
+		package final void _reflectMenu(ref Message m)
 		{
 			onReflectedMessage(m);
 		}

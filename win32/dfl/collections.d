@@ -453,11 +453,11 @@ template ListWrapArray(TValue, alias Array,
 template OpApplyAddIndex(alias ApplyFunc, TValue, bool ADD_APPLY_FUNC = false) // package
 {
 	///
-	int opApply(int delegate(inout size_t, inout TValue val) dg)
+	int opApply(int delegate(ref size_t, ref TValue val) dg)
 	{
 		size_t idx = 0;
 		return ApplyFunc(
-			(inout TValue val)
+			(ref TValue val)
 			{
 				int result;
 				result = dg(idx, val);
@@ -470,7 +470,7 @@ template OpApplyAddIndex(alias ApplyFunc, TValue, bool ADD_APPLY_FUNC = false) /
 	static if(ADD_APPLY_FUNC)
 	{
 		/// ditto
-		int opApply(int delegate(inout TValue val) dg)
+		int opApply(int delegate(ref TValue val) dg)
 		{
 			return ApplyFunc(dg);
 		}
@@ -482,10 +482,10 @@ template OpApplyAddIndex(alias ApplyFunc, TValue, bool ADD_APPLY_FUNC = false) /
 template OpApplyWrapArray(TValue, alias Array) // package
 {
 	///
-	int opApply(int delegate(inout TValue val) dg)
+	int opApply(int delegate(ref TValue val) dg)
 	{
 		int result = 0;
-		foreach(inout TValue val; Array)
+		foreach(ref TValue val; Array)
 		{
 			result = dg(val);
 			if(result)
@@ -495,10 +495,10 @@ template OpApplyWrapArray(TValue, alias Array) // package
 	}
 	
 	/// ditto
-	int opApply(int delegate(inout size_t, inout TValue val) dg)
+	int opApply(int delegate(ref size_t, ref TValue val) dg)
 	{
 		int result = 0;
-		foreach(size_t idx, inout TValue val; Array)
+		foreach(size_t idx, ref TValue val; Array)
 		{
 			result = dg(idx, val);
 			if(result)

@@ -112,7 +112,7 @@ abstract class ButtonBase: ControlSuperClass // docmain
 	+/
 	
 	
-	protected override void createParams(inout CreateParams cp)
+	protected override void createParams(ref CreateParams cp)
 	{
 		super.createParams(cp);
 		
@@ -130,14 +130,14 @@ abstract class ButtonBase: ControlSuperClass // docmain
 	}
 	
 	
-	protected override void prevWndProc(inout Message msg)
+	protected override void prevWndProc(ref Message msg)
 	{
 		//msg.result = CallWindowProcA(buttonPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
 		msg.result = dfl.internal.utf.callWindowProc(buttonPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
 	}
 	
 	
-	protected override void onReflectedMessage(inout Message m)
+	protected override void onReflectedMessage(ref Message m)
 	{
 		super.onReflectedMessage(m);
 		
@@ -161,7 +161,7 @@ abstract class ButtonBase: ControlSuperClass // docmain
 	}
 	
 	
-	protected override void wndProc(inout Message msg)
+	protected override void wndProc(ref Message msg)
 	{
 		switch(msg.msg)
 		{
@@ -340,7 +340,7 @@ class Button: ButtonBase, IButtonControl // docmain
 	}
 	
 	
-	protected override void wndProc(inout Message m)
+	protected override void wndProc(ref Message m)
 	{
 		switch(m.msg)
 		{
@@ -838,7 +838,7 @@ class RadioButton: ButtonBase // docmain
 	
 	
 	/+
-	protected override void onReflectedMessage(inout Message m)
+	protected override void onReflectedMessage(ref Message m)
 	{
 		super.onReflectedMessage(m);
 		

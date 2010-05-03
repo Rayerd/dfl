@@ -468,7 +468,7 @@ class TabControlBase: ControlSuperClass
 	Event!(TabControlBase, CancelEventArgs) selectedIndexChanging; ///
 	
 	
-	protected override void createParams(inout CreateParams cp)
+	protected override void createParams(ref CreateParams cp)
 	{
 		super.createParams(cp);
 		
@@ -490,14 +490,14 @@ class TabControlBase: ControlSuperClass
 	}
 	
 	
-	protected override void prevWndProc(inout Message msg)
+	protected override void prevWndProc(ref Message msg)
 	{
 		//msg.result = CallWindowProcA(tabcontrolPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
 		msg.result = dfl.internal.utf.callWindowProc(tabcontrolPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
 	}
 	
 	
-	protected override void wndProc(inout Message m)
+	protected override void wndProc(ref Message m)
 	{
 		// TODO: support the tab control messages.
 		
@@ -559,7 +559,7 @@ class TabControlBase: ControlSuperClass
 	}
 	
 	
-	protected override void onReflectedMessage(inout Message m)
+	protected override void onReflectedMessage(ref Message m)
 	{
 		super.onReflectedMessage(m);
 		
@@ -877,7 +877,7 @@ class TabControl: TabControlBase // docmain
 	
 	
 	/+
-	protected override void wndProc(inout Message m)
+	protected override void wndProc(ref Message m)
 	{
 		// TODO: support the tab control messages.
 		
@@ -914,7 +914,7 @@ class TabControl: TabControlBase // docmain
 	+/
 	
 	
-	protected override void onReflectedMessage(inout Message m)
+	protected override void onReflectedMessage(ref Message m)
 	{
 		TabPage page;
 		NMHDR* nmh;

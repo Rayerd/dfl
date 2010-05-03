@@ -837,7 +837,7 @@ class Control: DObject, IWindow // docmain
 		
 		
 		///
-		int opApply(int delegate(inout Control) dg)
+		int opApply(int delegate(ref Control) dg)
 		{
 			int result = 0;
 			
@@ -3648,7 +3648,7 @@ class Control: DObject, IWindow // docmain
 	
 	///
 	// Return true if processed.
-	bool preProcessMessage(inout Message msg)
+	bool preProcessMessage(ref Message msg)
 	{
 		return false;
 	}
@@ -3801,7 +3801,7 @@ class Control: DObject, IWindow // docmain
 	+/
 	
 	
-	private static bool _eachild(HWND hw, bool delegate(HWND hw) callback, inout size_t xiter, bool nested)
+	private static bool _eachild(HWND hw, bool delegate(HWND hw) callback, ref size_t xiter, bool nested)
 	{
 		for(; hw; hw = GetWindow(hw, GW_HWNDNEXT))
 		{
@@ -4466,7 +4466,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	/+
-	/+package+/ LRESULT customMsg(inout CustomMsg msg) // package
+	/+package+/ LRESULT customMsg(ref CustomMsg msg) // package
 	{
 		return 0;
 	}
@@ -4474,7 +4474,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	protected void onReflectedMessage(inout Message m)
+	protected void onReflectedMessage(ref Message m)
 	{
 		switch(m.msg)
 		{
@@ -4528,7 +4528,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	protected void wndProc(inout Message msg)
+	protected void wndProc(ref Message msg)
 	{
 		//if(ctrlStyle & ControlStyles.ENABLE_NOTIFY_MESSAGE)
 		//	onNotifyMessage(msg);
@@ -5498,7 +5498,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	protected void defWndProc(inout Message msg)
+	protected void defWndProc(ref Message msg)
 	{
 		//msg.result = DefWindowProcA(msg.hWnd, msg.msg, msg.wParam, msg.lParam);
 		msg.result = dfl.internal.utf.defWindowProc(msg.hWnd, msg.msg, msg.wParam, msg.lParam);
@@ -5516,7 +5516,7 @@ class Control: DObject, IWindow // docmain
 	// This function must be called FIRST for EVERY message to this
 	// window in order to keep the correct window state.
 	// This function must not throw exceptions.
-	package final void mustWndProc(inout Message msg)
+	package final void mustWndProc(ref Message msg)
 	{
 		if(needCalcSize)
 		{
@@ -5781,14 +5781,14 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	package final void _wndProc(inout Message msg)
+	package final void _wndProc(ref Message msg)
 	{
 		//mustWndProc(msg); // Done in dflWndProc() now.
 		wndProc(msg);
 	}
 	
 	
-	package final void _defWndProc(inout Message msg)
+	package final void _defWndProc(ref Message msg)
 	{
 		defWndProc(msg);
 	}
@@ -6244,7 +6244,7 @@ class Control: DObject, IWindow // docmain
 	///
 	// Override to change the creation parameters.
 	// Be sure to call super.createParams() or all the create params will need to be filled.
-	protected void createParams(inout CreateParams cp)
+	protected void createParams(ref CreateParams cp)
 	{
 		with(cp)
 		{
@@ -6778,7 +6778,7 @@ class Control: DObject, IWindow // docmain
 	
 	///
 	// Return true if processed.
-	protected bool processKeyEventArgs(inout Message msg)
+	protected bool processKeyEventArgs(ref Message msg)
 	{
 		switch(msg.msg)
 		{
@@ -6825,14 +6825,14 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	package final bool _processKeyEventArgs(inout Message msg)
+	package final bool _processKeyEventArgs(ref Message msg)
 	{
 		return processKeyEventArgs(msg);
 	}
 	
 	
 	/+
-	bool processKeyPreview(inout Message m)
+	bool processKeyPreview(ref Message m)
 	{
 		if(wparent)
 			return wparent.processKeyPreview(m);
@@ -7150,10 +7150,10 @@ class Control: DObject, IWindow // docmain
 package abstract class ControlSuperClass: Control // dapi.d
 {
 	// Call previous wndProc().
-	abstract protected void prevWndProc(inout Message msg);
+	abstract protected void prevWndProc(ref Message msg);
 	
 	
-	protected override void wndProc(inout Message msg)
+	protected override void wndProc(ref Message msg)
 	{
 		switch(msg.msg)
 		{
@@ -7237,7 +7237,7 @@ package abstract class ControlSuperClass: Control // dapi.d
 	}
 	
 	
-	override void defWndProc(inout Message m)
+	override void defWndProc(ref Message m)
 	{
 		switch(m.msg)
 		{
@@ -7696,7 +7696,7 @@ class ScrollableControl: Control // docmain
 	+/
 	
 	
-	override void wndProc(inout Message m)
+	override void wndProc(ref Message m)
 	{
 		switch(m.msg)
 		{

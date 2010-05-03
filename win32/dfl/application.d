@@ -1455,7 +1455,7 @@ final class Application // docmain
 	}
 	
 	
-	void gotMessage(inout Message msg)
+	void gotMessage(ref Message msg)
 	{
 		//debug(SHOW_MESSAGE_INFO)
 		//	showMessageInfo(msg);
@@ -1520,7 +1520,7 @@ debug(SHOW_MESSAGE_INFO)
 	private import std.stdio, std.string;
 	
 	
-	void showMessageInfo(inout Message m)
+	void showMessageInfo(ref Message m)
 	{
 		void writeWm(Dstring wmName)
 		{
@@ -2154,25 +2154,6 @@ in
 body
 {
 	Application.hinst = inst;
-	
-	/+
-	WNDCLASSA wc;
-	//(cast(ubyte*)&wc)[0 .. wc.sizeof] = 0;
-	wc.style = WNDCLASS_STYLE;
-	wc.hInstance = inst;
-	wc.lpfnWndProc = &dflWndProc;
-	
-	// Control wndclass.
-	wc.lpszClassName = CONTROL_CLASSNAME;
-	if(!RegisterClassA(&wc))
-		_unableToInit("Control");
-	
-	// Form wndclass.
-	wc.cbWndExtra = DLGWINDOWEXTRA;
-	wc.lpszClassName = FORM_CLASSNAME;
-	if(!RegisterClassA(&wc))
-		_unableToInit("Form");
-	+/
 	
 	dfl.internal.utf.WndClass wc;
 	wc.wc.style = WNDCLASS_STYLE;

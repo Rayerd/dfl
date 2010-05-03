@@ -7,4 +7,4 @@ module dfl.utf;
 
 public import dfl.internal.utf;
 
-pragma(msg, "DFL: dfl.utf is deprecated, please import dfl.internal.utf; dfl.utf is provided for compatibility only");
+pragma(msg, "DFL: *** ERROR: dfl.utf is deprecated, please import dfl.internal.utf");

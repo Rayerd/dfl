@@ -537,7 +537,7 @@ class StatusBar: ControlSuperClass // docmain
 	}
 	
 	
-	protected override void createParams(inout CreateParams cp)
+	protected override void createParams(ref CreateParams cp)
 	{
 		super.createParams(cp);
 		
@@ -545,7 +545,7 @@ class StatusBar: ControlSuperClass // docmain
 	}
 	
 	
-	protected override void prevWndProc(inout Message msg)
+	protected override void prevWndProc(ref Message msg)
 	{
 		//msg.result = CallWindowProcA(statusbarPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
 		msg.result = dfl.internal.utf.callWindowProc(statusbarPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);

@@ -342,7 +342,7 @@ interface IMessageFilter // docmain
 	///
 	// Return false to allow the message to be dispatched.
 	// Filter functions cannot modify messages.
-	bool preFilterMessage(inout Message m);
+	bool preFilterMessage(ref Message m);
 }
 
 

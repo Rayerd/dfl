@@ -895,7 +895,7 @@ class RichTextBox: TextBoxBase // docmain
 	+/
 	
 	
-	protected override void createParams(inout CreateParams cp)
+	protected override void createParams(ref CreateParams cp)
 	{
 		super.createParams(cp);
 		
@@ -951,7 +951,7 @@ class RichTextBox: TextBoxBase // docmain
 	}
 	
 	
-	protected override void onReflectedMessage(inout Message m)
+	protected override void onReflectedMessage(ref Message m)
 	{
 		super.onReflectedMessage(m);
 		
@@ -1004,7 +1004,7 @@ class RichTextBox: TextBoxBase // docmain
 	}
 	
 	
-	override void prevWndProc(inout Message m)
+	override void prevWndProc(ref Message m)
 	{
 		m.result = CallWindowProcA(richtextboxPrevWndProc, m.hWnd, m.msg, m.wParam, m.lParam);
 		//m.result = dfl.internal.utf.callWindowProc(richtextboxPrevWndProc, m.hWnd, m.msg, m.wParam, m.lParam);

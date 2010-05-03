@@ -164,7 +164,8 @@ else
 						_unableimg();
 				}
 				
-				if(val.size != imageSize)
+				Size imgsz = imageSize;
+				if(val.size != imgsz)
 				{
 					debug
 					{

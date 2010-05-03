@@ -261,7 +261,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	
-	protected override void createParams(inout CreateParams cp)
+	protected override void createParams(ref CreateParams cp)
 	{
 		super.createParams(cp);
 		
@@ -2235,7 +2235,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	+/
 	
 	
-	protected override void wndProc(inout Message msg)
+	protected override void wndProc(ref Message msg)
 	{
 		switch(msg.msg)
 		{
@@ -2717,7 +2717,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	
 	package alias dfl.internal.utf.defDlgProc _defFormProc;
 	
-	protected override void defWndProc(inout Message msg)
+	protected override void defWndProc(ref Message msg)
 	{
 		switch(msg.msg)
 		{
@@ -3006,7 +3006,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	
 	private static class FormMessageFilter: IMessageFilter
 	{
-		protected bool preFilterMessage(inout Message m)
+		protected bool preFilterMessage(ref Message m)
 		{
 			version(NO_MDI)
 				const bool mdistuff = false;
@@ -3431,7 +3431,7 @@ version(NO_MDI) {} else
 		+/
 		
 		
-		protected override void createParams(inout CreateParams cp)
+		protected override void createParams(ref CreateParams cp)
 		{
 			if(!wparent)
 				throw new DflException("Invalid MDI child parent");
@@ -3470,7 +3470,7 @@ version(NO_MDI) {} else
 		+/
 		
 		
-		protected override void prevWndProc(inout Message msg)
+		protected override void prevWndProc(ref Message msg)
 		{
 			//msg.result = CallWindowProcA(mdiclientPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
 			msg.result = dfl.internal.utf.callWindowProc(mdiclientPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);

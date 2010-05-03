@@ -60,6 +60,16 @@ else
 
 version(DFL_D1)
 {
+	public import dfl.internal.d1;
+}
+else
+{
+	public import dfl.internal.d2;
+}
+
+
+version(DFL_D1)
+{
 	version(DFL_USE_CORE_MEMORY)
 	{
 	}
@@ -605,9 +615,19 @@ else // Phobos
 	}
 	else
 	{
-		Dstring stringFromStringz(Dstringz sz)
+		version(DFL_DMD2029)
 		{
-			return std.conv.to!(Dstring, Dstringz)(sz); // D 2.029
+			Dstring stringFromStringz(Dstringz sz)
+			{
+				return std.conv.to!(Dstring, Dstringz)(sz); // D 2.029
+			}
+		}
+		else
+		{
+			Dstring stringFromStringz(Dstringz sz)
+			{
+				return std.conv.to!(Dstring)(sz);
+			}
 		}
 		
 		version(DFL_D2_AND_ABOVE)
@@ -717,7 +737,17 @@ else // Phobos
 	}
 	else
 	{
-		alias std.conv.to!(int, Dstring) stringToInt; // D 2.029
+		version(DFL_DMD2029)
+		{
+			alias std.conv.to!(int, Dstring) stringToInt; // D 2.029
+		}
+		else
+		{
+			int stringToInt(Dstring s)
+			{
+				return std.conv.to!(int)(s);
+			}
+		}
 	}
 	
 	

@@ -816,7 +816,7 @@ class TreeNodeCollection
 	}
 	
 	
-	package void populateInsertChildNode(inout Message m, inout TV_ITEMA dest, TreeNode node)
+	package void populateInsertChildNode(ref Message m, ref TV_ITEMA dest, TreeNode node)
 	{
 		with(dest)
 		{
@@ -1611,7 +1611,7 @@ class TreeView: ControlSuperClass // docmain
 	+/
 	
 	
-	protected override void createParams(inout CreateParams cp)
+	protected override void createParams(ref CreateParams cp)
 	{
 		super.createParams(cp);
 		
@@ -1650,7 +1650,7 @@ class TreeView: ControlSuperClass // docmain
 	}
 	
 	
-	protected override void wndProc(inout Message m)
+	protected override void wndProc(ref Message m)
 	{
 		// TODO: support these messages.
 		switch(m.msg)
@@ -1680,7 +1680,7 @@ class TreeView: ControlSuperClass // docmain
 	}
 	
 	
-	protected override void prevWndProc(inout Message msg)
+	protected override void prevWndProc(ref Message msg)
 	{
 		//msg.result = CallWindowProcA(treeviewPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
 		msg.result = dfl.internal.utf.callWindowProc(treeviewPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
@@ -1761,7 +1761,7 @@ class TreeView: ControlSuperClass // docmain
 	}
 	
 	
-	protected override void onReflectedMessage(inout Message m) // package
+	protected override void onReflectedMessage(ref Message m) // package
 	{
 		super.onReflectedMessage(m);
 		

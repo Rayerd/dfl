@@ -85,7 +85,7 @@ class GroupBox: ControlSuperClass // docmain
 	}
 	
 	
-	protected override void createParams(inout CreateParams cp)
+	protected override void createParams(ref CreateParams cp)
 	{
 		super.createParams(cp);
 		
@@ -93,7 +93,7 @@ class GroupBox: ControlSuperClass // docmain
 	}
 	
 	
-	protected override void wndProc(inout Message msg)
+	protected override void wndProc(ref Message msg)
 	{
 		switch(msg.msg)
 		{
@@ -117,7 +117,7 @@ class GroupBox: ControlSuperClass // docmain
 	}
 	
 	
-	protected override void prevWndProc(inout Message msg)
+	protected override void prevWndProc(ref Message msg)
 	{
 		//msg.result = CallWindowProcA(buttonPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
 		msg.result = dfl.internal.utf.callWindowProc(buttonPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);

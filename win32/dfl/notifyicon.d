@@ -385,7 +385,7 @@ class NotifyIconControl: Control
 	}
 	
 	
-	protected override void wndProc(inout Message msg)
+	protected override void wndProc(ref Message msg)
 	{
 		if(msg.msg == WM_NOTIFYICON)
 		{

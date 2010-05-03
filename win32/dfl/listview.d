@@ -1022,7 +1022,7 @@ class ListView: ControlSuperClass // docmain
 		}
 		
 		
-		int opApply(int delegate(inout int) dg)
+		int opApply(int delegate(ref int) dg)
 		{
 			if(!lview.created)
 				return 0;
@@ -1034,7 +1034,7 @@ class ListView: ControlSuperClass // docmain
 				idx = cast(int)lview.prevwproc(LVM_GETNEXTITEM, cast(WPARAM)idx, MAKELPARAM(cast(UINT)LVNI_SELECTED, 0));
 				if(-1 == idx) // Done.
 					break;
-				int dgidx = idx; // Prevent inout.
+				int dgidx = idx; // Prevent ref.
 				result = dg(dgidx);
 				if(result)
 					break;
@@ -1111,7 +1111,7 @@ class ListView: ControlSuperClass // docmain
 		}
 		
 		
-		int opApply(int delegate(inout ListViewItem) dg)
+		int opApply(int delegate(ref ListViewItem) dg)
 		{
 			if(!lview.created)
 				return 0;
@@ -1123,7 +1123,7 @@ class ListView: ControlSuperClass // docmain
 				idx = cast(int)lview.prevwproc(LVM_GETNEXTITEM, cast(WPARAM)idx, MAKELPARAM(cast(UINT)LVNI_SELECTED, 0));
 				if(-1 == idx) // Done.
 					break;
-				ListViewItem litem = lview.litems._items[idx]; // Prevent inout.
+				ListViewItem litem = lview.litems._items[idx]; // Prevent ref.
 				result = dg(litem);
 				if(result)
 					break;
@@ -1198,17 +1198,17 @@ class ListView: ControlSuperClass // docmain
 		}
 		
 		
-		int opApply(int delegate(inout int) dg)
+		int opApply(int delegate(ref int) dg)
 		{
 			if(!lview.created)
 				return 0;
 			
 			int result = 0;
-			foreach(inout size_t i, inout ListViewItem lvitem; lview.items)
+			foreach(ref size_t i, ref ListViewItem lvitem; lview.items)
 			{
 				if(lvitem._getcheckstate(i))
 				{
-					int dgidx = i; // Prevent inout.
+					int dgidx = i; // Prevent ref.
 					result = dg(dgidx);
 					if(result)
 						break;
@@ -2100,7 +2100,7 @@ class ListView: ControlSuperClass // docmain
 	}
 	
 	
-	protected override void createParams(inout CreateParams cp)
+	protected override void createParams(ref CreateParams cp)
 	{
 		super.createParams(cp);
 		
@@ -2108,7 +2108,7 @@ class ListView: ControlSuperClass // docmain
 	}
 	
 	
-	protected override void prevWndProc(inout Message msg)
+	protected override void prevWndProc(ref Message msg)
 	{
 		switch(msg.msg)
 		{
@@ -2125,7 +2125,7 @@ class ListView: ControlSuperClass // docmain
 	}
 	
 	
-	protected override void wndProc(inout Message m)
+	protected override void wndProc(ref Message m)
 	{
 		// TODO: support the listview messages.
 		
@@ -2260,7 +2260,7 @@ class ListView: ControlSuperClass // docmain
 	}
 	
 	
-	protected override void onReflectedMessage(inout Message m)
+	protected override void onReflectedMessage(ref Message m)
 	{
 		super.onReflectedMessage(m);
 		

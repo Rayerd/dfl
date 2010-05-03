@@ -604,7 +604,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	}
 	
 	
-	protected override void createParams(inout CreateParams cp)
+	protected override void createParams(ref CreateParams cp)
 	{
 		super.createParams(cp);
 		
@@ -887,7 +887,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	
 	
 	protected:
-	protected override void onReflectedMessage(inout Message m)
+	protected override void onReflectedMessage(ref Message m)
 	{
 		super.onReflectedMessage(m);
 		
@@ -919,7 +919,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	}
 	
 	
-	override void prevWndProc(inout Message msg)
+	override void prevWndProc(ref Message msg)
 	{
 		version(DFL_NO_MENUS)
 		{
@@ -936,7 +936,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	}
 	
 	
-	protected override bool processKeyEventArgs(inout Message msg) // package
+	protected override bool processKeyEventArgs(ref Message msg) // package
 	{
 		switch(msg.msg)
 		{
@@ -971,7 +971,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	}
 	
 	
-	override void wndProc(inout Message msg)
+	override void wndProc(ref Message msg)
 	{
 		switch(msg.msg)
 		{
@@ -1262,7 +1262,7 @@ class TextBox: TextBoxBase // docmain
 	
 	
 	/+
-	override void wndProc(inout Message msg)
+	override void wndProc(ref Message msg)
 	{
 		switch(msg.msg)
 		{

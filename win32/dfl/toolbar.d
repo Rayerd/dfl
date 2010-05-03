@@ -460,7 +460,7 @@ class ToolBar: ControlSuperClass // docmain
 	}
 	
 	
-	protected override void onReflectedMessage(inout Message m)
+	protected override void onReflectedMessage(ref Message m)
 	{
 		switch(m.msg)
 		{
@@ -505,7 +505,8 @@ class ToolBar: ControlSuperClass // docmain
 									}
 								}
 							}
-							return TBDDRET_DEFAULT;
+							m.result = TBDDRET_DEFAULT;
+							return;
 						
 						default: ;
 					}
@@ -524,7 +525,7 @@ class ToolBar: ControlSuperClass // docmain
 	}
 	
 	
-	protected override void createParams(inout CreateParams cp)
+	protected override void createParams(ref CreateParams cp)
 	{
 		super.createParams(cp);
 		
@@ -590,7 +591,7 @@ class ToolBar: ControlSuperClass // docmain
 	}
 	
 	
-	protected override void prevWndProc(inout Message msg)
+	protected override void prevWndProc(ref Message msg)
 	{
 		//msg.result = CallWindowProcA(toolbarPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
 		msg.result = dfl.internal.utf.callWindowProc(toolbarPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);

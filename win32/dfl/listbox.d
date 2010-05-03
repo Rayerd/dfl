@@ -171,7 +171,7 @@ class ListBox: ListControl // docmain
 		}
 		
 		
-		int opApply(int delegate(inout int) dg)
+		int opApply(int delegate(ref int) dg)
 		{
 			int result = 0;
 			
@@ -183,7 +183,7 @@ class ListBox: ListControl // docmain
 					throw new DflException("Unable to enumerate selected list items");
 				foreach(int _idx; items)
 				{
-					int idx = _idx; // Prevent inout.
+					int idx = _idx; // Prevent ref.
 					result = dg(idx);
 					if(result)
 						break;
@@ -289,7 +289,7 @@ class ListBox: ListControl // docmain
 		
 		
 		// Used internally.
-		int _opApply(int delegate(inout Object) dg) // package
+		int _opApply(int delegate(ref Object) dg) // package
 		{
 			int result = 0;
 			
@@ -320,7 +320,7 @@ class ListBox: ListControl // docmain
 		
 		
 		// Used internally.
-		int _opApply(int delegate(inout Dstring) dg) // package
+		int _opApply(int delegate(ref Dstring) dg) // package
 		{
 			int result = 0;
 			
@@ -1229,7 +1229,7 @@ class ListBox: ListControl // docmain
 	+/
 	
 	
-	protected override void createParams(inout CreateParams cp)
+	protected override void createParams(ref CreateParams cp)
 	{
 		super.createParams(cp);
 		
@@ -1320,14 +1320,14 @@ class ListBox: ListControl // docmain
 	}
 	
 	
-	override void prevWndProc(inout Message msg)
+	override void prevWndProc(ref Message msg)
 	{
 		//msg.result = CallWindowProcA(listboxPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
 		msg.result = dfl.internal.utf.callWindowProc(listboxPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
 	}
 	
 	
-	protected override void onReflectedMessage(inout Message m)
+	protected override void onReflectedMessage(ref Message m)
 	{
 		super.onReflectedMessage(m);
 		
@@ -1364,7 +1364,7 @@ class ListBox: ListControl // docmain
 	}
 	
 	
-	override void wndProc(inout Message msg)
+	override void wndProc(ref Message msg)
 	{
 		switch(msg.msg)
 		{

@@ -7,4 +7,4 @@ module dfl.winapi;
 
 public import dfl.internal.winapi;
 
-pragma(msg, "DFL: dfl.winapi is deprecated, please import dfl.internal.winapi; dfl.winapi is provided for compatibility only");
+pragma(msg, "DFL: *** ERROR: dfl.winapi is deprecated, please import dfl.internal.winapi");
