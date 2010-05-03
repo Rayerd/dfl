@@ -194,7 +194,7 @@ class ColorDialog: CommonDialog // docmain
 	{
 		COLORREF cdef;
 		cdef = Color(0xFF, 0xFF, 0xFF).toRgb();
-		foreach(inout COLORREF cref; _cust)
+		foreach(ref COLORREF cref; _cust)
 		{
 			cref = cdef;
 		}

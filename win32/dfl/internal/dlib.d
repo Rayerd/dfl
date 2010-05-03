@@ -373,7 +373,7 @@ version(Tango)
 	
 	private import tango.text.convert.Utf;
 	
-	dchar utf8stringGetUtf32char(Dstring input, inout uint idx)
+	dchar utf8stringGetUtf32char(Dstring input, ref uint idx)
 	{
 		// Since the 'ate' (x) param is specified, the output (result) doesn't grow and returns when full.
 		dchar[1] result;

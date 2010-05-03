@@ -74,6 +74,12 @@ struct Point // docmain
 		{
 			return x == pt.x && y == pt.y;
 		}
+		
+		/// ditto
+		const Dequ opEquals(Point pt)
+		{
+			return x == pt.x && y == pt.y;
+		}
 	}
 	else
 	{
@@ -164,6 +170,12 @@ struct Size // docmain
 	{
 		///
 		const Dequ opEquals(ref ConstType!(Size) sz)
+		{
+			return width == sz.width && height == sz.height;
+		}
+		
+		/// ditto
+		const Dequ opEquals(Size sz)
 		{
 			return width == sz.width && height == sz.height;
 		}
@@ -330,6 +342,13 @@ struct Rect // docmain
 	{
 		///
 		const Dequ opEquals(ref ConstType!(Rect) r)
+		{
+			return x == r.x && y == r.y &&
+				width == r.width && height == r.height;
+		}
+		
+		/// ditto
+		const Dequ opEquals(Rect r)
 		{
 			return x == r.x && y == r.y &&
 				width == r.width && height == r.height;

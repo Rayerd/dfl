@@ -336,7 +336,7 @@ final class SystemEvents // docmain
 	}
 	
 	
-	void _realCheckMessage(inout Message m)
+	void _realCheckMessage(ref Message m)
 	{
 		switch(m.msg)
 		{
@@ -384,7 +384,7 @@ final class SystemEvents // docmain
 	}
 	
 	
-	package void _checkMessage(inout Message m)
+	package void _checkMessage(ref Message m)
 	{
 		//if(_ownthread)
 			_realCheckMessage(m);
