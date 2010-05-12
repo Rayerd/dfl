@@ -129,63 +129,6 @@ version(DFL_NO_USE_CORE_MEMORY)
 
 version(Tango)
 {
-	version(DFL_TANGO097rc1)
-	{
-		version = DFL_TANGObefore099rc3;
-		version = DFL_TANGObefore0994;
-		version = DFL_TANGObefore0995;
-		version = DFL_TANGObefore0996;
-		version = DFL_TANGObefore0997;
-	}
-	else version(DFL_TANGO098rc2)
-	{
-		version = DFL_TANGObefore099rc3;
-		version = DFL_TANGObefore0994;
-		version = DFL_TANGObefore0995;
-		version = DFL_TANGObefore0996;
-		version = DFL_TANGObefore0997;
-	}
-	else version(DFL_TANGObefore099rc3)
-	{
-		version = DFL_TANGObefore0994;
-		version = DFL_TANGObefore0995;
-		version = DFL_TANGObefore0996;
-		version = DFL_TANGObefore0997;
-	}
-	else version(DFL_TANGO0992)
-	{
-		version = DFL_TANGObefore0994;
-		version = DFL_TANGObefore0995;
-		version = DFL_TANGObefore0996;
-		version = DFL_TANGObefore0997;
-	}
-	else version(DFL_TANGO0993)
-	{
-		version = DFL_TANGObefore0994;
-		version = DFL_TANGObefore0995;
-		version = DFL_TANGObefore0996;
-		version = DFL_TANGObefore0997;
-	}
-	else version(DFL_TANGO_0994)
-	{
-		version = DFL_TANGObefore0995;
-		version = DFL_TANGObefore0996;
-		version = DFL_TANGObefore0997;
-	}
-	else version(DFL_TANGO_0995)
-	{
-		version = DFL_TANGObefore0996;
-		version = DFL_TANGObefore0997;
-	}
-	else version(DFL_TANGO_0996)
-	{
-		version = DFL_TANGObefore0997;
-	}
-	else version(DFL_TANGO_0997)
-	{
-	}
-	
-	
 	alias int Dequ;
 	
 	
@@ -225,14 +168,7 @@ version(Tango)
 	
 	Dstring getObjectString(Object o)
 	{
-		version(DFL_TANGObefore0994)
-		{
-			return o.toUtf8();
-		}
-		else
-		{
-			return o.toString();
-		}
+		return o.toString();
 	}
 	
 	
@@ -262,18 +198,12 @@ version(Tango)
 		
 		deprecated void gcGenCollect()
 		{
-			version(DFL_TANGObefore099rc3)
-				gc.collect();
-			else
-				GC.collect();
+			GC.collect();
 		}
 		
 		void gcFullCollect()
 		{
-			version(DFL_TANGObefore099rc3)
-				gc.collect();
-			else
-				GC.collect();
+			GC.collect();
 		}
 	}
 	
@@ -295,53 +225,27 @@ version(Tango)
 	
 	private import tango.stdc.stringz;
 	
-	version(DFL_TANGObefore0995)
-	{
-		alias tango.stdc.stringz.fromUtf8z stringFromStringz;
-	}
-	else
-	{
-		alias tango.stdc.stringz.fromStringz stringFromStringz;
-	}
+	alias tango.stdc.stringz.fromStringz stringFromStringz;
 	
-	version(DFL_TANGObefore0994)
-	{
-		alias tango.stdc.stringz.toUtf8z stringToStringz;
-	}
-	else
-	{
-		alias tango.stdc.stringz.toStringz stringToStringz;
-	}
+	alias tango.stdc.stringz.toStringz stringToStringz;
 	
 	
 	private import tango.io.FilePath;
 	
 	Dstring pathGetDirName(Dstring s)
 	{
-		version(DFL_TANGObefore0997)
-		{
-			scope mypath = new FilePath(s);
-			return mypath.path();
-		}
-		else
-		{
-			// Need to dup because standard and native mutate.
-			scope mypath = new FilePath(tango.io.Path.standard(s.dup));
-			return tango.io.Path.native(mypath.path().dup);
-		}
+		// Need to dup because standard and native mutate.
+		scope mypath = new FilePath(tango.io.Path.standard(s.dup));
+		return tango.io.Path.native(mypath.path().dup);
 	}
 	
 	Dstring pathJoin(Dstring p1, Dstring p2)
 	{
-		version(DFL_TANGObefore0997)
-		{
-			return FilePath.join(p1, p2);
-		}
-		else
-		{
 			// Need to dup because standard and native mutate.
-			return tango.io.Path.native(FilePath.join(tango.io.Path.standard(p1.dup), tango.io.Path.standard(p2.dup)).dup);
-		}
+			return tango.io.Path.native(
+				FilePath.join(
+					tango.io.Path.standard(p1.dup),
+					tango.io.Path.standard(p2.dup)).dup);
 	}
 	
 	
@@ -378,86 +282,33 @@ version(Tango)
 		// Since the 'ate' (x) param is specified, the output (result) doesn't grow and returns when full.
 		dchar[1] result;
 		uint x;
-		version(DFL_TANGObefore0994)
-		{
-			tango.text.convert.Utf.toUtf32(input[idx .. input.length], result, &x);
-		}
-		else
-		{
-			tango.text.convert.Utf.toString32(input[idx .. input.length], result, &x);
-		}
+		tango.text.convert.Utf.toString32(input[idx .. input.length], result, &x);
 		idx += x;
 		return result[0];
 	}
 	
-	version(DFL_TANGObefore0994)
-	{
-		alias tango.text.convert.Utf.toUtf8 utf16stringtoUtf8string;
-	}
-	else
-	{
-		alias tango.text.convert.Utf.toString utf16stringtoUtf8string;
-	}
+	alias tango.text.convert.Utf.toString utf16stringtoUtf8string;
 	
-	version(DFL_TANGObefore0994)
-	{
-		alias tango.text.convert.Utf.toUtf16 utf8stringtoUtf16string;
-	}
-	else
-	{
-		alias tango.text.convert.Utf.toString16 utf8stringtoUtf16string;
-	}
+	alias tango.text.convert.Utf.toString16 utf8stringtoUtf16string;
 	
 	Dwstringz utf8stringToUtf16stringz(Dstring s)
 	{
 		Dwstring ws;
-		version(DFL_TANGObefore0994)
-		{
-			ws = tango.text.convert.Utf.toUtf16(s);
-		}
-		else
-		{
-			ws = tango.text.convert.Utf.toString16(s);
-		}
+		ws = tango.text.convert.Utf.toString16(s);
 		ws ~= '\0';
 		return ws.ptr;
 	}
 	
-	version(DFL_TANGObefore0994)
-	{
-		alias tango.text.convert.Utf.toUtf8 utf32stringtoUtf8string;
-	}
-	else
-	{
-		alias tango.text.convert.Utf.toString utf32stringtoUtf8string;
-	}
+	alias tango.text.convert.Utf.toString utf32stringtoUtf8string;
 	
-	version(DFL_TANGObefore0994)
-	{
-		alias tango.text.convert.Utf.toUtf32 utf8stringtoUtf32string;
-	}
-	else
-	{
-		alias tango.text.convert.Utf.toString32 utf8stringtoUtf32string;
-	}
+	alias tango.text.convert.Utf.toString32 utf8stringtoUtf32string;
 	
 	
-	version(DFL_TANGObefore0997)
-	{
-		private import tango.io.FileConst;
-		
-		alias tango.io.FileConst.FileConst.NewlineString nativeLineSeparatorString;
-		
-		alias tango.io.FileConst.FileConst.PathSeparatorString nativePathSeparatorString;
-	}
-	else
-	{
-		private import tango.io.model.IFile;
-		
-		alias tango.io.model.IFile.FileConst.NewlineString nativeLineSeparatorString;
-		
-		alias tango.io.model.IFile.FileConst.PathSeparatorString nativePathSeparatorString;
-	}
+	private import tango.io.model.IFile;
+	
+	alias tango.io.model.IFile.FileConst.NewlineString nativeLineSeparatorString;
+	
+	alias tango.io.model.IFile.FileConst.PathSeparatorString nativePathSeparatorString;
 	
 	
 	private import tango.text.Util;
@@ -481,43 +332,18 @@ version(Tango)
 	
 	alias tango.text.convert.Integer.toInt!(char) stringToInt;
 	
-	version(DFL_TANGObefore0994)
-	{
-		alias tango.text.convert.Integer.toUtf8 stringToInt;
-	}
-	else
-	{
-		alias tango.text.convert.Integer.toString stringToInt;
-	}
+	alias tango.text.convert.Integer.toString stringToInt;
 	
 	Dstring uintToHexString(uint num)
 	{
-		version(DFL_TANGObefore0997)
-		{
-			char[16] buf;
-			return tango.text.convert.Integer.format!(char, uint)(buf, num,
-				tango.text.convert.Integer.Style.HexUpper).dup;
-		}
-		else
-		{
-			char[16] buf;
-			return tango.text.convert.Integer.format(buf, num, "X").dup;
-		}
+		char[16] buf;
+		return tango.text.convert.Integer.format(buf, num, "X").dup;
 	}
 	
 	Dstring intToString(int num)
 	{
-		
-		version(DFL_TANGObefore0997)
-		{
-			char[16] buf;
-			return tango.text.convert.Integer.format!(char, uint)(buf, num).dup;
-		}
-		else
-		{
-			char[16] buf;
-			return tango.text.convert.Integer.format(buf, num, "d").dup;
-		}
+		char[16] buf;
+		return tango.text.convert.Integer.format(buf, num, "d").dup;
 	}
 	
 	
@@ -542,24 +368,13 @@ version(Tango)
 	
 	alias tango.io.model.IConduit.OutputStream DOutputStream;
 	
-	alias tango.io.model.IConduit.IConduit.Seek DSeekStream;
+	//alias tango.io.model.IConduit.IConduit.Seek DSeekStream;
+	alias tango.io.model.IConduit.IConduit DSeekStream;
 	
 	alias tango.core.Exception.IOException DStreamException; // Note: from tango.core.Exception.
 	
 	
-	class DObject
-	{
-		version(DFL_TANGObefore0994)
-		{
-			//alias toUtf8 toString; // Doesn't let you override.
-			Dstring toString() { return super.toUtf8(); }
-			override Dstring toUtf8() { return toString(); }
-		}
-		else
-		{
-			// No need to override.
-		}
-	}
+	alias Object DObject;
 }
 else // Phobos
 {

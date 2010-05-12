@@ -6,15 +6,17 @@
 module dfl.socket;
 
 
-version(DFL_TANGO0951beta1)
-	version = DFL_TANGObefore099rc3;
-else version(DFL_TANGO097rc1)
-	version = DFL_TANGObefore099rc3;
-else version(DFL_TANGO098rc2)
-	version = DFL_TANGObefore099rc3;
-
-
 version(WINE)
+{
+	version = DFL_NoSocket;
+}
+version(Tango)
+{
+	version = DFL_NoSocket;
+}
+
+
+version(DFL_NoSocket)
 {
 }
 else
@@ -26,11 +28,9 @@ private
 {
 	version(Tango)
 	{
-		version(DFL_TANGObefore099rc3)
-			private import tango.core.Intrinsic;
-		else
-			private import std.intrinsic;
-		private import tango.net.Socket;
+		private import std.intrinsic;
+		private import tango.net.device.Berkeley;
+		private import tango.net.device.Socket;
 		
 		alias NetHost DInternetHost;
 		alias IPv4Address DInternetAddress;
