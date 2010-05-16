@@ -593,13 +593,24 @@ int main(/+ char[][] args +/)
 	startpath = getshortpath(Application.startupPath);
 	basepath = getParentDir(startpath);
 	{
-		char[] dpw = std.path.join(basepath, "..\\windows");
-		if(std.file.exists(dpw) && std.file.isdir(dpw))
+		while(basepath.length > 0
+			&& ('\\' == basepath[basepath.length - 1]
+				|| '/' == basepath[basepath.length - 1])
+			)
+		{
+			basepath = basepath[0 .. basepath.length - 1];
+		}
+		char[] platformdirname = "windows";
+		if(basepath.length > platformdirname.length
+			&& ('\\' == basepath[basepath.length - 1 - platformdirname.length]
+				|| '/' == basepath[basepath.length - 1 - platformdirname.length])
+			&& (0 == std.string.icmp(platformdirname,
+				basepath[basepath.length - platformdirname.length .. basepath.length]))
+			)
 		{
 			basepath = getParentDir(basepath);
 		}
 	}
-	//writefln("basepath = %s", basepath);
 	rkey = Registry.currentUser.createSubKey("Software\\DFL");
 	
 	bool gotargfn = false;
@@ -608,6 +619,13 @@ int main(/+ char[][] args +/)
 	
 	char[][] args;
 	args = Environment.getCommandLineArgs();
+	
+	if(args.length > 1
+		&& args[1] == "-dfl-bp")
+	{
+		writefln("basepath = %s", basepath);
+		return 0;
+	}
 	
 	if(args.length > 1)
 	{
