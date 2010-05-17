@@ -16,17 +16,15 @@ if not "%dmd_path%" == "" goto dmd_set
 set dmd_path=c:\dmd
 :dmd_set
 set dmd_path_windows=%dmd_path%\windows
-if not exist %dmd_path_windows% set dmd_path_windows=%dmd_path%
+if not exist %dmd_path_windows%\bin\dmd.exe set dmd_path_windows=%dmd_path%
 if not "%dmc_path%" == "" goto dmc_set
 set dmc_path=c:\dm
 :dmc_set
 
 if exist "%dmc_path%" goto got_dmc
 @rem @echo DMC not found; using DMD path (if you get errors, install DMC)
-set dmc_path=%dmd_path%
+set dmc_path=%dmd_path_windows%
 :got_dmc
-set dmc_path_windows=%dmc_path%\windows
-if not exist %dmc_path_windows% set dmc_path_windows=%dmc_path%
 
 
 if not "%dlib%" == "Tango" goto dfl_not_tango_files
@@ -40,7 +38,7 @@ set dfl_objs=all.obj base.obj application.obj dlib.obj clib.obj utf.obj com.obj 
 
 @rem   Also update link pragmas for build.
 set dfl_libs_dfl=user32_dfl.lib shell32_dfl.lib olepro32_dfl.lib
-set dfl_libs=%dmc_path_windows%\lib\gdi32.lib %dmc_path_windows%\lib\comctl32.lib %dmc_path_windows%\lib\advapi32.lib %dmc_path_windows%\lib\comdlg32.lib %dmc_path_windows%\lib\ole32.lib %dmc_path_windows%\lib\uuid.lib %dmd_path_windows%\lib\ws2_32.lib %dfl_libs_dfl%
+set dfl_libs=%dmc_path%\lib\gdi32.lib %dmc_path%\lib\comctl32.lib %dmc_path%\lib\advapi32.lib %dmc_path%\lib\comdlg32.lib %dmc_path%\lib\ole32.lib %dmc_path%\lib\uuid.lib %dmd_path_windows%\lib\ws2_32.lib %dfl_libs_dfl%
 
 @rem   -version=NO_DRAG_DROP -version=NO_MDI
 @rem   -debug=SHOW_MESSAGE_INFO -debug=MESSAGE_PAUSE
@@ -77,11 +75,11 @@ if not "%dfl_release_flags%" == "" goto dfl_release_flags_set
 
 
 @rem   DMC's Basic Utilities required to make these libs.
-@rem   %dmc_path_windows%\bin\implib user32_dfl.lib user32_dfl.def
+@rem   %dmc_path%\bin\implib user32_dfl.lib user32_dfl.def
 @rem   @if errorlevel 1 goto oops
-@rem   %dmc_path_windows%\bin\implib shell32_dfl.lib shell32_dfl.def
+@rem   %dmc_path%\bin\implib shell32_dfl.lib shell32_dfl.def
 @rem   @if errorlevel 1 goto oops
-@rem   %dmc_path_windows%\bin\implib olepro32_dfl.lib olepro32_dfl.def
+@rem   %dmc_path%\bin\implib olepro32_dfl.lib olepro32_dfl.def
 @rem   @if errorlevel 1 goto oops
 
 
@@ -101,7 +99,7 @@ if not "%dfl_release_flags%" == "" goto dfl_release_flags_set
 @echo.
 @echo Making debug lib...
 
-%dmc_path_windows%\bin\lib -c -n -p64 dfl_debug.lib %dfl_libs% %dfl_objs%
+%dmc_path%\bin\lib -c -n -p64 dfl_debug.lib %dfl_libs% %dfl_objs%
 @if errorlevel 1 goto oops
 
 
@@ -114,13 +112,13 @@ if not "%dfl_release_flags%" == "" goto dfl_release_flags_set
 @echo.
 @echo Making release lib...
 
-%dmc_path_windows%\bin\lib -c -n -p64 dfl.lib %dfl_libs% %dfl_objs%
+%dmc_path%\bin\lib -c -n -p64 dfl.lib %dfl_libs% %dfl_objs%
 @if errorlevel 1 goto oops
 
 @echo.
 @echo Making build lib...
 
-%dmc_path_windows%\bin\lib -c -n dfl_build.lib %dfl_libs_dfl%
+%dmc_path%\bin\lib -c -n dfl_build.lib %dfl_libs_dfl%
 @if errorlevel 1 goto oops
 
 

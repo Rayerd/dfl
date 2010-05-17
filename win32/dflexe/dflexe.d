@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2005-2007, 2009 Christopher E. Miller
+	Copyright (C) 2005-2010 Christopher E. Miller
 	
 	This software is provided 'as-is', without any express or implied
 	warranty.  In no event will the authors be held liable for any damages
@@ -239,7 +239,8 @@ void prepare()
 	dmdpath_windows = dmdpath;
 	{
 		char[] dpw = std.path.join(dmdpath, "windows");
-		if(std.file.exists(dpw) && std.file.isdir(dpw))
+		if(std.file.exists(std.path.join(dpw, "bin\\dmd.exe"))
+			&& std.file.isdir(dpw))
 		{
 			dmdpath_windows = dpw;
 		}
@@ -774,7 +775,7 @@ int main(/+ char[][] args +/)
 			if(std.file.exists(std.path.join(dmdpath_windows, "bin\\link.exe"))
 				&& std.file.exists(std.path.join(dmdpath_windows, "bin\\lib.exe")))
 			{
-				dmcpath = dmdpath;
+				dmcpath = dmdpath_windows;
 			}
 			else
 			{

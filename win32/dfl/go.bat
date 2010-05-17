@@ -7,7 +7,7 @@ call makelib
 @if "%dmd_path%" == "" goto no_dmd
 
 @set dmd_path_windows=%dmd_path%\windows
-@if not exist %dmd_path_windows% set dmd_path_windows=%dmd_path%
+@if not exist %dmd_path_windows%\bin\dmd.exe set dmd_path_windows=%dmd_path%
 
 
 @echo.
