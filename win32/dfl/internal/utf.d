@@ -1129,76 +1129,150 @@ Dstring getCommandLine()
 }
 
 
+/* MSDN:
+	The current directory state written by the SetCurrentDirectory function
+	is stored as a global variable in each process, therefore multithreaded
+	applications cannot reliably use this value without possible data
+	corruption from other threads that may also be reading or setting this
+	value. This limitation also applies to the GetCurrentDirectory and
+	GetFullPathName functions.
+*/
+// This doesn't prevent the problem, but it can minimize it.
+// e.g. file dialogs set it.
+//class CurDirLockType { }
+
+
 BOOL setCurrentDirectory(Dstring pathName)
 {
-	if(useUnicode)
+	//synchronized(typeid(CurDirLockType))
 	{
-		version(STATIC_UNICODE)
+		if(useUnicode)
 		{
-			alias SetCurrentDirectoryW proc;
+			version(STATIC_UNICODE)
+			{
+				alias SetCurrentDirectoryW proc;
+			}
+			else
+			{
+				const Dstring NAME = "SetCurrentDirectoryW";
+				static SetCurrentDirectoryWProc proc = null;
+				
+				if(!proc)
+				{
+					proc = cast(SetCurrentDirectoryWProc)GetProcAddress(kernel32, NAME.ptr);
+					if(!proc)
+						getProcErr(NAME);
+				}
+			}
+			
+			return proc(toUnicodez(pathName));
 		}
 		else
 		{
-			const Dstring NAME = "SetCurrentDirectoryW";
-			static SetCurrentDirectoryWProc proc = null;
-			
-			if(!proc)
-			{
-				proc = cast(SetCurrentDirectoryWProc)GetProcAddress(kernel32, NAME.ptr);
-				if(!proc)
-					getProcErr(NAME);
-			}
+			return SetCurrentDirectoryA(unsafeAnsiz(pathName));
 		}
-		
-		return proc(toUnicodez(pathName));
-	}
-	else
-	{
-		return SetCurrentDirectoryA(unsafeAnsiz(pathName));
 	}
 }
 
 
 Dstring getCurrentDirectory()
 {
-	if(useUnicode)
+	//synchronized(typeid(CurDirLockType))
 	{
-		version(STATIC_UNICODE)
+		if(useUnicode)
 		{
-			alias GetCurrentDirectoryW proc;
+			version(STATIC_UNICODE)
+			{
+				alias GetCurrentDirectoryW proc;
+			}
+			else
+			{
+				const Dstring NAME = "GetCurrentDirectoryW";
+				static GetCurrentDirectoryWProc proc = null;
+				
+				if(!proc)
+				{
+					proc = cast(GetCurrentDirectoryWProc)GetProcAddress(kernel32, NAME.ptr);
+					if(!proc)
+						getProcErr(NAME);
+				}
+			}
+			
+			wchar* buf;
+			int len;
+			len = proc(0, null);
+			buf = (new wchar[len]).ptr;
+			len = proc(len, buf);
+			if(!len)
+				return null;
+			return fromUnicode(buf, len);
 		}
 		else
 		{
-			const Dstring NAME = "GetCurrentDirectoryW";
-			static GetCurrentDirectoryWProc proc = null;
-			
-			if(!proc)
-			{
-				proc = cast(GetCurrentDirectoryWProc)GetProcAddress(kernel32, NAME.ptr);
-				if(!proc)
-					getProcErr(NAME);
-			}
+			char* buf;
+			int len;
+			len = GetCurrentDirectoryA(0, null);
+			buf = (new char[len]).ptr;
+			len = GetCurrentDirectoryA(len, buf);
+			if(!len)
+				return null;
+			return fromAnsi(buf, len);
 		}
-		
-		wchar* buf;
-		int len;
-		len = proc(0, null);
-		buf = (new wchar[len]).ptr;
-		len = proc(len, buf);
-		if(!len)
-			return null;
-		return fromUnicode(buf, len);
 	}
-	else
+}
+
+
+Dstring getFullPathName(Dstring fileName)
+{
+	//synchronized(typeid(CurDirLockType))
 	{
-		char* buf;
-		int len;
-		len = GetCurrentDirectoryA(0, null);
-		buf = (new char[len]).ptr;
-		len = GetCurrentDirectoryA(len, buf);
-		if(!len)
-			return null;
-		return fromAnsi(buf, len);
+		DWORD len;
+		
+		if(useUnicode)
+		{
+			version(STATIC_UNICODE)
+			{
+				alias GetFullPathNameW proc;
+			}
+			else
+			{
+				const Dstring NAME = "GetFullPathNameW";
+				static GetFullPathNameWProc proc = null;
+				
+				if(!proc)
+				{
+					proc = cast(GetFullPathNameWProc)GetProcAddress(kernel32, NAME.ptr);
+					if(!proc)
+						getProcErr(NAME);
+				}
+			}
+			
+			auto fnw = toUnicodez(fileName);
+			len = proc(fnw, 0, null, null);
+			if(!len)
+				return null;
+			wchar[260] _wbuf;
+			wchar[] wbuf = _wbuf;
+			if(len > _wbuf.sizeof)
+				wbuf = new wchar[len];
+			len = proc(fnw, wbuf.length, wbuf.ptr, null);
+			assert(len < wbuf.length);
+			return fromUnicode(wbuf.ptr, len);
+		}
+		else
+		{
+			auto fna = unsafeAnsiz(fileName);
+			len = GetFullPathNameA(fna, 0, null, null);
+			if(!len)
+				return null;
+			char[260] _abuf;
+			char[] abuf = _abuf;
+			if(len > _abuf.sizeof)
+				abuf = new char[len];
+			len = GetFullPathNameA(fna, abuf.length, abuf.ptr, null);
+			assert(len < abuf.length);
+			return fromAnsi(abuf.ptr, len);
+		}
 	}
 }
 
@@ -1897,58 +1971,6 @@ HANDLE findFirstChangeNotification(Dstring pathName, BOOL watchSubtree, DWORD no
 	else
 	{
 		return FindFirstChangeNotificationA(unsafeAnsiz(pathName), watchSubtree, notifyFilter);
-	}
-}
-
-
-Dstring getFullPathName(Dstring fileName)
-{
-	DWORD len;
-	
-	if(useUnicode)
-	{
-		version(STATIC_UNICODE)
-		{
-			alias GetFullPathNameW proc;
-		}
-		else
-		{
-			const Dstring NAME = "GetFullPathNameW";
-			static GetFullPathNameWProc proc = null;
-			
-			if(!proc)
-			{
-				proc = cast(GetFullPathNameWProc)GetProcAddress(kernel32, NAME.ptr);
-				if(!proc)
-					getProcErr(NAME);
-			}
-		}
-		
-		auto fnw = toUnicodez(fileName);
-		len = proc(fnw, 0, null, null);
-		if(!len)
-			return null;
-		wchar[260] _wbuf;
-		wchar[] wbuf = _wbuf;
-		if(len > _wbuf.sizeof)
-			wbuf = new wchar[len];
-		len = proc(fnw, wbuf.length, wbuf.ptr, null);
-		assert(len < wbuf.length);
-		return fromUnicode(wbuf.ptr, len);
-	}
-	else
-	{
-		auto fna = unsafeAnsiz(fileName);
-		len = GetFullPathNameA(fna, 0, null, null);
-		if(!len)
-			return null;
-		char[260] _abuf;
-		char[] abuf = _abuf;
-		if(len > _abuf.sizeof)
-			abuf = new char[len];
-		len = GetFullPathNameA(fna, abuf.length, abuf.ptr, null);
-		assert(len < abuf.length);
-		return fromAnsi(abuf.ptr, len);
 	}
 }
 

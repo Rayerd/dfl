@@ -827,23 +827,26 @@ class OpenFileDialog: FileDialog // docmain
 		
 		beginOfn(owner);
 		
-		if(dfl.internal.utf.useUnicode)
+		//synchronized(typeid(dfl.internal.utf.CurDirLockType))
 		{
-			const Dstring NAME = "GetOpenFileNameW";
-			static GetOpenFileNameWProc proc = null;
-			
-			if(!proc)
+			if(dfl.internal.utf.useUnicode)
 			{
-				proc = cast(GetOpenFileNameWProc)GetProcAddress(GetModuleHandleA("comdlg32.dll"), NAME.ptr);
+				const Dstring NAME = "GetOpenFileNameW";
+				static GetOpenFileNameWProc proc = null;
+				
 				if(!proc)
-					throw new Exception("Unable to load procedure " ~ NAME ~ "");
+				{
+					proc = cast(GetOpenFileNameWProc)GetProcAddress(GetModuleHandleA("comdlg32.dll"), NAME.ptr);
+					if(!proc)
+						throw new Exception("Unable to load procedure " ~ NAME ~ "");
+				}
+				
+				result = proc(&ofnw);
 			}
-			
-			result = proc(&ofnw);
-		}
-		else
-		{
-			result = GetOpenFileNameA(&ofna);
+			else
+			{
+				result = GetOpenFileNameA(&ofna);
+			}
 		}
 		
 		if(result)
@@ -931,30 +934,33 @@ class SaveFileDialog: FileDialog // docmain
 	{
 		beginOfn(owner);
 		
-		if(dfl.internal.utf.useUnicode)
+		//synchronized(typeid(dfl.internal.utf.CurDirLockType))
 		{
-			const Dstring NAME = "GetSaveFileNameW";
-			static GetSaveFileNameWProc proc = null;
-			
-			if(!proc)
+			if(dfl.internal.utf.useUnicode)
 			{
-				proc = cast(GetSaveFileNameWProc)GetProcAddress(GetModuleHandleA("comdlg32.dll"), NAME.ptr);
+				const Dstring NAME = "GetSaveFileNameW";
+				static GetSaveFileNameWProc proc = null;
+				
 				if(!proc)
-					throw new Exception("Unable to load procedure " ~ NAME ~ "");
+				{
+					proc = cast(GetSaveFileNameWProc)GetProcAddress(GetModuleHandleA("comdlg32.dll"), NAME.ptr);
+					if(!proc)
+						throw new Exception("Unable to load procedure " ~ NAME ~ "");
+				}
+				
+				if(proc(&ofnw))
+				{
+					finishOfn();
+					return true;
+				}
 			}
-			
-			if(proc(&ofnw))
+			else
 			{
-				finishOfn();
-				return true;
-			}
-		}
-		else
-		{
-			if(GetSaveFileNameA(&ofna))
-			{
-				finishOfn();
-				return true;
+				if(GetSaveFileNameA(&ofna))
+				{
+					finishOfn();
+					return true;
+				}
 			}
 		}
 		

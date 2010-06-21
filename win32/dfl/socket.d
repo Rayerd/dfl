@@ -6,6 +6,24 @@
 module dfl.socket;
 
 
+version(Tango)
+{
+	version(DFL_TangoNetDeviceBerkeley)
+	{
+		version = _DFL_TangoHasBerkeleySocket;
+	}
+	else version(Old)
+	{
+		version = _DFL_TangoHasOldSocket;
+	}
+	else
+	{
+		// Tango's socket conduit not supported yet.
+		version = DFL_NoSocket;
+	}
+}
+
+
 version(WINE)
 {
 	version = DFL_NoSocket;
@@ -24,16 +42,34 @@ private
 {
 	version(Tango)
 	{
-		private import std.intrinsic;
-		private import tango.net.device.Berkeley;
 		
-		alias NetHost DInternetHost;
-		alias IPv4Address DInternetAddress;
-		
-		socket_t getSocketHandle(DflSocket sock)
+		version(_DFL_TangoHasBerkeleySocket)
 		{
-			return sock.fileHandle;
+			private import std.intrinsic;
+			private import tango.net.device.Berkeley;
+			
+			alias NetHost DInternetHost;
+			alias IPv4Address DInternetAddress;
+			
+			socket_t getSocketHandle(DflSocket sock)
+			{
+				return sock.fileHandle;
+			}
 		}
+		else version(_DFL_TangoHasOldSocket)
+		{
+			private import std.intrinsic;
+			private import tango.net.Socket;
+			
+			alias NetHost DInternetHost;
+			alias IPv4Address DInternetAddress;
+			
+			socket_t getSocketHandle(DflSocket sock)
+			{
+				return sock.fileHandle;
+			}
+		}
+		
 	}
 	else
 	{
@@ -52,175 +88,184 @@ private
 
 version(Tango)
 {
-	class DflSocket ///
+	version(_DFL_TangoHasBerkeleySocket)
 	{
-		Berkeley berkeley;
-		
-        package this()
-        {
-        }
-        
-        this(AddressFamily family, SocketType type, ProtocolType protocol, bool create = true)
-        {
-        	berkeley.open(family, type, protocol, create);
-        }
-        
-        socket_t handle()
-        {
-        	return berkeley.handle();
-        }
-        
-        socket_t fileHandle()
-        {
-        	return berkeley.handle();
-        }
-        
-        bool isAlive()
-        {
-        	return berkeley.isAlive();
-        }
-        
-        bool blocking() // getter
-        {
-        	return berkeley.blocking();
-        }
-        
-        void blocking(bool byes) // setter
-        {
-        	berkeley.blocking(byes);
-        }
-        
-        DflSocket bind(Address addr)
-        {
-        	berkeley.bind(addr);
-        	return this;
-        }
-        
-        DflSocket connect(Address to)
-        {
-        	berkeley.connect(to);
-        	return this;
-        }
-        
-        DflSocket listen (int backlog)
-        {
-        	berkeley.listen(backlog);
-        	return this;
-        }
-        
-        DflSocket accept()
-        {
-        	return accept(new DflSocket());
-        }
-        
-        DflSocket accept(DflSocket sock)
-        {
-        	berkeley.accept(sock.berkeley);
-        	return sock;
-        }
-        
-        void initialize(socket_t sock = socket_t.init)
-        {
-        	berkeley.reopen(sock);
-        }
-        
-        void reopen(socket_t sock = socket_t.init)
-        {
-        	initialize(sock);
-        }
-        
-        DflSocket shutdown(SocketShutdown how)
-        {
-        	berkeley.shutdown(how);
-        	return this;
-        }
-        
-        Address remoteAddress()
-        {
-        	return berkeley.remoteAddress();
-        }
-        
-        Address localAddress()
-        {
-        	return berkeley.localAddress();
-        }
-        
-        void detach()
-        {
-        	berkeley.detach();
-        }
-        
-        const int ERROR = Berkeley.ERROR;
-        
-        int send(void[] buf, SocketFlags flags = SocketFlags.NONE)
+		class DflSocket ///
 		{
-			return berkeley.send(buf, flags);
+			Berkeley berkeley;
+			
+			package this()
+			{
+			}
+			
+			this(AddressFamily family, SocketType type, ProtocolType protocol, bool create = true)
+			{
+				berkeley.open(family, type, protocol, create);
+			}
+			
+			socket_t handle()
+			{
+				return berkeley.handle();
+			}
+			
+			socket_t fileHandle()
+			{
+				return berkeley.handle();
+			}
+			
+			bool isAlive()
+			{
+				return berkeley.isAlive();
+			}
+			
+			bool blocking() // getter
+			{
+				return berkeley.blocking();
+			}
+			
+			void blocking(bool byes) // setter
+			{
+				berkeley.blocking(byes);
+			}
+			
+			DflSocket bind(Address addr)
+			{
+				berkeley.bind(addr);
+				return this;
+			}
+			
+			DflSocket connect(Address to)
+			{
+				berkeley.connect(to);
+				return this;
+			}
+			
+			DflSocket listen (int backlog)
+			{
+				berkeley.listen(backlog);
+				return this;
+			}
+			
+			DflSocket accept()
+			{
+				return accept(new DflSocket());
+			}
+			
+			DflSocket accept(DflSocket sock)
+			{
+				berkeley.accept(sock.berkeley);
+				return sock;
+			}
+			
+			void initialize(socket_t sock = socket_t.init)
+			{
+				berkeley.reopen(sock);
+			}
+			
+			void reopen(socket_t sock = socket_t.init)
+			{
+				initialize(sock);
+			}
+			
+			DflSocket shutdown(SocketShutdown how)
+			{
+				berkeley.shutdown(how);
+				return this;
+			}
+			
+			Address remoteAddress()
+			{
+				return berkeley.remoteAddress();
+			}
+			
+			Address localAddress()
+			{
+				return berkeley.localAddress();
+			}
+			
+			void detach()
+			{
+				berkeley.detach();
+			}
+			
+			const int ERROR = Berkeley.ERROR;
+			
+			int send(void[] buf, SocketFlags flags = SocketFlags.NONE)
+			{
+				return berkeley.send(buf, flags);
+			}
+			
+			int sendTo(void[] buf, SocketFlags flags, Address to)
+			{
+				return berkeley.sendTo(buf, flags, to);
+			}
+			
+			int sendTo(void[] buf, Address to)
+			{
+				return berkeley.sendTo(buf, to);
+			}
+			
+			int sendTo(void[] buf, SocketFlags flags = SocketFlags.NONE)
+			{
+				return berkeley.sendTo(buf, flags);
+			}
+			
+			int receive(void[] buf, SocketFlags flags = SocketFlags.NONE)
+			{
+				return berkeley.receive(buf, flags);
+			}
+			
+			int receiveFrom(void[] buf, SocketFlags flags, Address from)
+			{
+				return berkeley.receiveFrom(buf, flags, from);
+			}
+			
+			int receiveFrom(void[] buf, Address from)
+			{
+				return berkeley.receiveFrom(buf, from);
+			}
+			
+			int receiveFrom(void[] buf, SocketFlags flags = SocketFlags.NONE)
+			{
+				return berkeley.receiveFrom(buf, flags);
+			}
+			
+			int getOption(SocketOptionLevel level, SocketOption option, void[] result)
+			{
+				return berkeley.getOption(level, option, result);
+			}
+			
+			DflSocket setOption(SocketOptionLevel level, SocketOption option, void[] value)
+			{
+				berkeley.setOption(level, option, value);
+				return this;
+			}
+			
+			DflSocket linger(int period)
+			{
+				berkeley.linger(period);
+				return this;
+			}
+			
+			DflSocket addressReuse(bool enabled)
+			{
+				berkeley.addressReuse(enabled);
+				return this;
+			}
+			
+			DflSocket noDelay(bool enabled)
+			{
+				berkeley.noDelay(enabled);
+				return this;
+			}
+			
+			
 		}
+	}
+	else version(_DFL_TangoHasOldSocket)
+	{
 		
-		int sendTo(void[] buf, SocketFlags flags, Address to)
-		{
-			return berkeley.sendTo(buf, flags, to);
-		}
-		
-		int sendTo(void[] buf, Address to)
-		{
-			return berkeley.sendTo(buf, to);
-		}
-		
-		int sendTo(void[] buf, SocketFlags flags = SocketFlags.NONE)
-		{
-			return berkeley.sendTo(buf, flags);
-		}
-		
-		int receive(void[] buf, SocketFlags flags = SocketFlags.NONE)
-		{
-			return berkeley.receive(buf, flags);
-		}
-		
-		int receiveFrom(void[] buf, SocketFlags flags, Address from)
-		{
-			return berkeley.receiveFrom(buf, flags, from);
-		}
-		
-		int receiveFrom(void[] buf, Address from)
-		{
-			return berkeley.receiveFrom(buf, from);
-		}
-		
-		int receiveFrom(void[] buf, SocketFlags flags = SocketFlags.NONE)
-		{
-			return berkeley.receiveFrom(buf, flags);
-		}
-		
-		int getOption(SocketOptionLevel level, SocketOption option, void[] result)
-		{
-			return berkeley.getOption(level, option, result);
-		}
-		
-		DflSocket setOption(SocketOptionLevel level, SocketOption option, void[] value)
-		{
-			berkeley.setOption(level, option, value);
-			return this;
-		}
-		
-		DflSocket linger(int period)
-		{
-			berkeley.linger(period);
-			return this;
-		}
-		
-		DflSocket addressReuse(bool enabled)
-		{
-			berkeley.addressReuse(enabled);
-			return this;
-		}
-		
-		DflSocket noDelay(bool enabled)
-		{
-			berkeley.noDelay(enabled);
-			return this;
-		}
-		
+		alias tango.net.Socket.Socket DflSocket; ///
 		
 	}
 }
@@ -355,15 +400,18 @@ class AsyncSocket: DflSocket // docmain
 	
 	version(Tango)
 	{
-        override DflSocket accept()
-        {
-        	return accept(new AsyncSocket());
-        }
-        
-        DflSocket accept(AsyncSocket sock)
-        {
-        	return super.accept(sock);
-        }
+		version(_DFL_TangoHasBerkeleySocket)
+		{
+			override DflSocket accept()
+			{
+				return accept(new AsyncSocket());
+			}
+			
+			DflSocket accept(AsyncSocket sock)
+			{
+				return super.accept(sock);
+			}
+		}
 	}
 	else
 	{
