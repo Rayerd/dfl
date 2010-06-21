@@ -10,7 +10,7 @@ version(Tango)
 {
 	version(DFL_TangoNetDeviceBerkeley)
 	{
-		version = _DFL_TangoHasBerkeleySocket;
+		version = _DFL_TangoBerkeleySocket;
 	}
 	else version(Old)
 	{
@@ -18,8 +18,7 @@ version(Tango)
 	}
 	else
 	{
-		// Tango's socket conduit not supported yet.
-		version = DFL_NoSocket;
+		version = _DFL_TangoSocketConduit;
 	}
 }
 
@@ -43,7 +42,7 @@ private
 	version(Tango)
 	{
 		
-		version(_DFL_TangoHasBerkeleySocket)
+		version(_DFL_TangoBerkeleySocket)
 		{
 			private import std.intrinsic;
 			private import tango.net.device.Berkeley;
@@ -69,6 +68,20 @@ private
 				return sock.fileHandle;
 			}
 		}
+		else version(_DFL_TangoSocketConduit)
+		{
+			private import std.intrinsic;
+			private import tango.net.device.Socket;
+			private import tango.net.device.Berkeley;
+			
+			alias NetHost DInternetHost;
+			alias IPv4Address DInternetAddress;
+			
+			socket_t getSocketHandle(DflSocket sock)
+			{
+				return sock.native.handle;
+			}
+		}
 		
 	}
 	else
@@ -88,7 +101,7 @@ private
 
 version(Tango)
 {
-	version(_DFL_TangoHasBerkeleySocket)
+	version(_DFL_TangoBerkeleySocket)
 	{
 		class DflSocket ///
 		{
@@ -268,6 +281,12 @@ version(Tango)
 		alias tango.net.Socket.Socket DflSocket; ///
 		
 	}
+	else version(_DFL_TangoSocketConduit)
+	{
+		
+		alias tango.net.device.Socket.Socket DflSocket; ///
+		
+	}
 }
 else
 {
@@ -331,7 +350,21 @@ void registerEvent(DflSocket sock, EventType events, RegisterEventCallback callb
 	if(!hwNet)
 		_init();
 	
-	sock.blocking = false; // So the getter will be correct.
+	version(Tango)
+	{
+		version(_DFL_TangoBerkeleySocket)
+		{
+			sock.blocking = false; // So the getter will be correct.
+		}
+		else version(_DFL_TangoHasOldSocket)
+		{
+			sock.blocking = false; // So the getter will be correct.
+		}
+	}
+	else
+	{
+		sock.blocking = false; // So the getter will be correct.
+	}
 	
 	// SOCKET_ERROR
 	if(-1 == WSAAsyncSelect(getSocketHandle(sock), hwNet, WM_DFL_NETEVENT, cast(int)events))
@@ -361,11 +394,28 @@ class AsyncSocket: DflSocket // docmain
 	this(AddressFamily af, SocketType type, ProtocolType protocol)
 	{
 		super(af, type, protocol);
-		super.blocking = false;
+		version(_DFL_TangoSocketConduit)
+		{
+			this.native.blocking = false;
+		}
+		else
+		{
+			super.blocking = false;
+		}
 	}
 	
 	version(Tango)
 	{
+		version(_DFL_TangoSocketConduit)
+		{
+			
+			this()
+			{
+				super();
+				this.native.blocking = false;
+			}
+			
+		}
 	}
 	else
 	{
@@ -384,10 +434,16 @@ class AsyncSocket: DflSocket // docmain
 		}
 	}
 	
-	/// ditto
-	// For use with accept().
-	protected this()
+	version(_DFL_TangoSocketConduit)
 	{
+	}
+	else
+	{
+		/// ditto
+		// For use with accept().
+		protected this()
+		{
+		}
 	}
 	
 	
@@ -400,7 +456,7 @@ class AsyncSocket: DflSocket // docmain
 	
 	version(Tango)
 	{
-		version(_DFL_TangoHasBerkeleySocket)
+		version(_DFL_TangoBerkeleySocket)
 		{
 			override DflSocket accept()
 			{
@@ -440,17 +496,24 @@ class AsyncSocket: DflSocket // docmain
 	}
 	
 	
-	override bool blocking() // getter
+	version(_DFL_TangoSocketConduit)
 	{
-		return false;
+	}
+	else
+	{
+		override bool blocking() // getter
+		{
+			return false;
+		}
+		
+		
+		override void blocking(bool byes) // setter
+		{
+			if(byes)
+				assert(0);
+		}
 	}
 	
-	
-	override void blocking(bool byes) // setter
-	{
-		if(byes)
-			assert(0);
-	}
 }
 
 
@@ -784,7 +847,14 @@ class SocketQueue // docmain
 			else
 				st = buf.length;
 			
-			st = sock.send(buf[0 .. st]);
+			version(_DFL_TangoSocketConduit)
+			{
+				st = sock.write(buf[0 .. st]);
+			}
+			else
+			{
+				st = sock.send(buf[0 .. st]);
+			}
 			if(st > 0)
 			{
 				if(buf.length - st)
@@ -855,7 +925,14 @@ class SocketQueue // docmain
 		if(readbuf.length - rpos < 1024)
 			readbuf.length = readbuf.length + 2048;
 		
-		int rd = sock.receive(readbuf[rpos .. readbuf.length]);
+		version(_DFL_TangoSocketConduit)
+		{
+			int rd = sock.read(readbuf[rpos .. readbuf.length]);
+		}
+		else
+		{
+			int rd = sock.receive(readbuf[rpos .. readbuf.length]);
+		}
 		if(rd > 0)
 			rpos += cast(uint)rd;
 	}
@@ -874,7 +951,14 @@ class SocketQueue // docmain
 			else
 				buf = writebuf;
 			
-			int st = sock.send(buf);
+			version(_DFL_TangoSocketConduit)
+			{
+				int st = sock.write(buf);
+			}
+			else
+			{
+				int st = sock.send(buf);
+			}
 			if(st > 0)
 				writebuf = writebuf[st .. writebuf.length];
 		}
