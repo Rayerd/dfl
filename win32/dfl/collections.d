@@ -109,7 +109,7 @@ template ListWrapArray(TValue, alias Array,
 	///
 	void add(TValue value)
 	{
-		insert(cast(int)Array.length, value);
+		_insert(cast(int)Array.length, value);
 	}
 	
 	static if(OVERLOAD_OBJECT)
@@ -117,7 +117,7 @@ template ListWrapArray(TValue, alias Array,
 		/// ditto
 		void add(Object value)
 		{
-			insert(cast(int)Array.length, value);
+			_insert(cast(int)Array.length, value);
 		}
 	}
 	
@@ -126,7 +126,7 @@ template ListWrapArray(TValue, alias Array,
 		/// ditto
 		void add(Dstring value)
 		{
-			insert(cast(int)Array.length, new TValueString(value));
+			_insert(cast(int)Array.length, new TValueString(value));
 		}
 	}
 	
@@ -273,8 +273,7 @@ template ListWrapArray(TValue, alias Array,
 	}
 	
 	
-	///
-	void insert(int index, TValue value)
+	private final void _insert(int index, TValue value)
 	{
 		if(index > Array.length)
 			index = Array.length;
@@ -309,15 +308,39 @@ template ListWrapArray(TValue, alias Array,
 	
 	static if(OVERLOAD_OBJECT)
 	{
-		/// ditto
-		void insert(int index, Object value)
+		private final void _insert(int index, Object value)
 		{
 			TValue tval;
 			tval = cast(TValue)value;
 			if(tval)
-				return insert(index, tval);
+				return _insert(index, tval);
 			else
-				return insert(index, new TValue(value)); // ?
+				return _insert(index, new TValue(value)); // ?
+		}
+	}
+	
+	static if(OVERLOAD_STRING)
+	{
+		/// ditto
+		private final void _insert(int index, Dstring value)
+		{
+			return _insert(index, new TValueString(value));
+		}
+	}
+	
+	
+	///
+	void insert(int index, TValue value)
+	{
+		_insert(index, value);
+	}
+	
+	static if(OVERLOAD_OBJECT)
+	{
+		/// ditto
+		void insert(int index, Object value)
+		{
+			_insert(index, value);
 		}
 	}
 	
@@ -326,7 +349,7 @@ template ListWrapArray(TValue, alias Array,
 		/// ditto
 		void insert(int index, Dstring value)
 		{
-			return insert(index, new TValueString(value));
+			return _insert(index, value);
 		}
 	}
 	
