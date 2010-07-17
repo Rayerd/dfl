@@ -7,7 +7,7 @@ module dfl.control;
 
 import dfl.base, dfl.drawing;
 
-import dfl.internal.gtk, dfl.internal.gtkcontainer;
+import dfl.internal.gtk;
 
 
 /// Control creation parameters.
@@ -128,11 +128,7 @@ class Control
 		
 		assert(wid);
 		
-		wcontainer = cast(DflGtkContainer*)dflGtkContainer_new();
-		if(!wcontainer)
-			throw new DflException("Unable to create child control container");
-		wcontainer.sizeRequest = &_gtkRequest;
-		wcontainer.sizeAllocate = &_gtkAllocate;
+		wcontainer = cast(GtkContainer*)gtk_fixed_new();
 		gtk_container_add(cast(GtkContainer*)wid, cast(GtkWidget*)wcontainer);
 		
 		gtk_widget_realize(cast(GtkWidget*)wcontainer);
@@ -153,7 +149,7 @@ class Control
 			if(wparent)
 			{
 				wparent._createcontainer();
-				parent = &wparent.wcontainer.parent;
+				parent = wparent.wcontainer;
 			}
 			text = wtext;
 		}
@@ -189,7 +185,8 @@ class Control
 			throw new DflException("Control creation failure");
 		}
 		
-		gtk_widget_set_size_request(wid, defaultSize.width, defaultSize.height); // ...
+		//gtk_widget_set_size_request(wid, defaultSize.width, defaultSize.height); // ...
+		//gtk_fixed_put
 		
 		postcreateinit(cp);
 	}
@@ -317,7 +314,7 @@ class Control
 	package:
 	
 	GtkWidget* wid;
-	DflGtkContainer* wcontainer;
+	GtkContainer* wcontainer;
 	Control wparent;
 	char[] wtext;
 	ControlStyles ctrlStyle = ControlStyles.STANDARD_CLICK | ControlStyles.STANDARD_DOUBLE_CLICK /+ | ControlStyles.RESIZE_REDRAW +/ ;
