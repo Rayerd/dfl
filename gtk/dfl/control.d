@@ -91,48 +91,23 @@ class Control
 	}
 	
 	
-	protected void gtkRequest(GtkWidget* w, GtkRequisition* req)
-	{
-		printf("GTKREQUEST\n");
-		
-		req.width = 100;
-		req.height = 100;
-	}
-	
-	private void _gtkRequest(GtkWidget* w, GtkRequisition* req)
-	{
-		return gtkRequest(w, req);
-	}
-	
-	
-	protected void gtkAllocate(GtkWidget* w, GtkAllocation* a)
-	{
-		// GTK reporting the position...
-		
-		printf("GTKALLOCATE x=%d; y=%d; width=%d; height=%d\n", a.x, a.y, a.width, a.height);
-		
-		//w.allocation.width = 200;
-		//w.allocation.height = 200;
-	}
-	
-	private void _gtkAllocate(GtkWidget* w, GtkAllocation* a)
-	{
-		return gtkAllocate(w, a);
-	}
-	
-	
-	package void _createcontainer()
+	protected GtkContainer* gtkGetContainer(bool autoCreate = true)
 	{
 		if(wcontainer)
-			return;
+			return wcontainer;
+		if(!autoCreate)
+			return null;
 		
-		assert(wid);
+		if(!isHandleCreated)
+			throw new DflException("Handle must be created before getting container (gtkGetContainer)");
 		
 		wcontainer = cast(GtkContainer*)gtk_fixed_new();
 		gtk_container_add(cast(GtkContainer*)wid, cast(GtkWidget*)wcontainer);
 		
 		gtk_widget_realize(cast(GtkWidget*)wcontainer);
 		gtk_widget_show(cast(GtkWidget*)wcontainer);
+		
+		return wcontainer;
 	}
 	
 	
@@ -148,8 +123,7 @@ class Control
 			parent = null;
 			if(wparent)
 			{
-				wparent._createcontainer();
-				parent = wparent.wcontainer;
+				parent = wparent.gtkGetContainer();
 			}
 			text = wtext;
 		}
@@ -185,8 +159,7 @@ class Control
 			throw new DflException("Control creation failure");
 		}
 		
-		//gtk_widget_set_size_request(wid, defaultSize.width, defaultSize.height); // ...
-		//gtk_fixed_put
+		gtk_widget_set_size_request(wid, defaultSize.width, defaultSize.height);
 		
 		postcreateinit(cp);
 	}
@@ -200,12 +173,11 @@ class Control
 		
 		if(cp.parent)
 		{
-			//gtk_container_add(cast(GtkContainer*)cp.parent, wid);
 			gtk_container_add(cp.parent, wid);
 		}
 		
-		gtk_widget_realize(wid); // ...
-		gtk_widget_show(wid); // ...
+		gtk_widget_realize(wid);
+		gtk_widget_show(wid); // if visible...
 	}
 	
 	
@@ -226,14 +198,10 @@ class Control
 	{
 		if(isHandleCreated)
 		{
-			if(ctrlStyle & ControlStyles.CACHE_TEXT)
-			{
-				//if(wtext == txt)
-				//	return;
-				wtext = txt;
-			}
-			
 			gtkSetTextCore(txt);
+			
+			if(ctrlStyle & ControlStyles.CACHE_TEXT)
+				wtext = txt;
 		}
 		else
 		{

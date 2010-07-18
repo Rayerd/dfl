@@ -41,7 +41,7 @@ class Form: Control
 		createParams(cp);
 		assert(!isHandleCreated); // Make sure the handle wasn't created in createParams().
 		
-		wid = gtk_window_new(GtkWindowType.GTK_WINDOW_TOPLEVEL); // ...
+		wid = gtk_window_new(GtkWindowType.GTK_WINDOW_TOPLEVEL);
 		if(!wid)
 		{
 			create_err:
@@ -49,7 +49,7 @@ class Form: Control
 		}
 		auto win = cast(GtkWindow*)wid;
 		
-		gtk_window_set_default_size(win, 300, 300); // ...
+		gtk_window_set_default_size(win, 300, 300);
 		
 		postcreateinit(cp);
 	}
@@ -66,9 +66,9 @@ class Form: Control
 	{
 		char[] result;
 		result = stringFromStringz(gtk_window_get_title(cast(GtkWindow*)wid));
-		if(result.length)
-			result = result.dup;
-		return result;
+		if(!result.length)
+			return "";
+		return result.dup;
 	}
 }
 
