@@ -2744,11 +2744,31 @@ extern(Windows):
 	alias HANDLE HTHEME;
 	alias HANDLE HTREEITEM;
 	alias HANDLE HDROP;
+	alias HANDLE HMONITOR;
 	
 	
 	HCURSOR CopyCursor(HCURSOR pcur)
 	{
 		return cast(HCURSOR)CopyIcon(cast(HICON)pcur);
+	}
+	
+	
+	alias BOOL function(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) MONITORENUMPROC;
+	
+	
+	struct MONITORINFO
+	{
+		DWORD cbSize;
+		RECT rcMonitor;
+		RECT rcWork;
+		DWORD dwFlags;
+	}
+	alias MONITORINFO* LPMONITORINFO;
+	
+	
+	enum: DWORD
+	{
+		MONITORINFOF_PRIMARY = 1,
 	}
 	
 	
@@ -2990,6 +3010,8 @@ extern(Windows):
 	int ImageList_AddIcon(HIMAGELIST himl, HICON hicon);
 	int ImageList_AddMasked(HIMAGELIST himl, HBITMAP hbmImage, COLORREF crMask);
 	BOOL ImageList_Remove(HIMAGELIST himl, int i);
+	BOOL EnumDisplayMonitors(HDC hdc, LPCRECT lprcClip, MONITORENUMPROC lpfnEnum, LPARAM dwData);
+	BOOL GetMonitorInfoA(HMONITOR hMonitor, LPMONITORINFO lpmi);
 
 //} // Temporary.
 

@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2007-2009 Christopher E. Miller
+	Copyright (C) 2007-2010 Christopher E. Miller
 	
 	This software is provided 'as-is', without any express or implied
 	warranty.  In no event will the authors be held liable for any damages

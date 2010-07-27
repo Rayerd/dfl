@@ -1776,20 +1776,32 @@ class TextFormat
 
 
 ///
-// Note: currently only works with the one screen.
 class Screen
 {
 	///
 	static Screen primaryScreen() // getter
 	{
-		static Screen _ps;
+		version(DFL_MULTIPLE_SCREENS)
+		{
+			_getScreens();
+			if(_screens.length > 0)
+			{
+				if(_screens.length == 1)
+				{
+					return _screens[0];
+				}
+				MONITORINFO mi;
+				for(int i = 0; i < _screens.length; i++)
+				{
+					_screens[i]._getInfo(mi);
+					if(mi.dwFlags & MONITORINFOF_PRIMARY)
+						return _screens[i];
+				}
+			}
+		}
 		if(!_ps)
 		{
-			synchronized
-			{
-				if(!_ps)
-					_ps = new Screen();
-			}
+			_setPs();
 		}
 		return _ps;
 	}
@@ -1798,6 +1810,15 @@ class Screen
 	///
 	Rect bounds() // getter
 	{
+		version(DFL_MULTIPLE_SCREENS)
+		{
+			if(HMONITOR.init != hmonitor)
+			{
+				MONITORINFO mi;
+				_getInfo(mi);
+				return Rect(&mi.rcMonitor);
+			}
+		}
 		RECT area;
 		if(!GetWindowRect(GetDesktopWindow(), &area))
 			assert(0);
@@ -1808,6 +1829,15 @@ class Screen
 	///
 	Rect workingArea() // getter
 	{
+		version(DFL_MULTIPLE_SCREENS)
+		{
+			if(HMONITOR.init != hmonitor)
+			{
+				MONITORINFO mi;
+				_getInfo(mi);
+				return Rect(&mi.rcWork);
+			}
+		}
 		RECT area;
 		if(!SystemParametersInfoA(SPI_GETWORKAREA, 0, &area, FALSE))
 			return bounds;
@@ -1815,8 +1845,160 @@ class Screen
 	}
 	
 	
+	version(DFL_MULTIPLE_SCREENS)
+	{
+		///
+		static Screen[] screens() // getter
+		{
+			version(DFL_MULTIPLE_SCREENS)
+			{
+				_getScreens();
+				if(_screens.length > 0)
+					return _screens;
+			}
+			if(_screens.length < 1)
+			{
+				synchronized
+				{
+					_screens = new Screen[1];
+					if(!_ps)
+					{
+						_setPs();
+					}
+					_screens[0] = _ps;
+				}
+			}
+			return _screens;
+		}
+	}
+	
+	
 	private:
-	this() { }
+	
+	static void _setPs()
+	{
+		synchronized
+		{
+			if(!_ps)
+				_ps = new Screen();
+		}
+	}
+	
+	this()
+	{
+	}
+	
+	this(HMONITOR hmonitor)
+	{
+		this.hmonitor = hmonitor;
+	}
+	
+	HMONITOR hmonitor;
+	
+	static Screen _ps; // Primary screen; might not be used.
+	static Screen[] _screens;
+	
+	version(DFL_MULTIPLE_SCREENS)
+	{
+		
+		bool foundThis = true; // Used during _getScreens callback.
+		
+		
+		static void _getScreens()
+		{
+			// Note: monitors can change, so always enum,
+			// but update the array by removing old ones and adding new ones.
+			for(int i = 0; i < _screens.length; i++)
+			{
+				_screens[i].foundThis = false;
+			}
+			version(SUPPORTS_MULTIPLE_SCREENS)
+			{
+				pragma(msg, "DFL: multiple screens supported at compile time");
+				
+				alias EnumDisplayMonitors enumScreens;
+			}
+			else
+			{
+				auto enumScreens = cast(typeof(&EnumDisplayMonitors))GetProcAddress(
+					GetModuleHandleA("user32.dll"), "EnumDisplayMonitors");
+				if(!enumScreens)
+				{
+					//throw new DflException("Multiple screens not supported");
+					return;
+				}
+			}
+			if(!enumScreens(null, null, &_gettingScreens, 0))
+			{
+				//throw new DflException("Failed to enumerate screens");
+				return;
+			}
+			{
+				int numremoved = 0;
+				for(int i = 0; i < _screens.length; i++)
+				{
+					if(!_screens[i].foundThis)
+					{
+						numremoved++;
+					}
+				}
+				if(numremoved > 0)
+				{
+					Screen[] newscreens = new Screen[_screens.length - numremoved];
+					for(int i = 0, nsi = 0; i < _screens.length; i++)
+					{
+						if(_screens[i].foundThis)
+						{
+							newscreens[nsi++] = _screens[i];
+						}
+					}
+					_screens = newscreens;
+				}
+			}
+		}
+		
+		
+		void _getInfo(ref MONITORINFO info)
+		{
+			version(SUPPORTS_MULTIPLE_SCREENS)
+			{
+				alias GetMonitorInfoA getMI;
+			}
+			else
+			{
+				auto getMI = cast(typeof(&GetMonitorInfoA))GetProcAddress(
+					GetModuleHandleA("user32.dll"), "GetMonitorInfoA");
+				if(!getMI)
+					throw new DflException("Error getting screen information (unable to find GetMonitorInfoA)");
+			}
+			info.cbSize = MONITORINFO.sizeof;
+			if(!getMI(hmonitor, &info))
+				throw new DflException("Unable to get screen information");
+		}
+		
+		
+	}
+}
+
+
+version(DFL_MULTIPLE_SCREENS)
+{
+	private extern(Windows) BOOL _gettingScreens(HMONITOR hmonitor,
+		HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData)
+	{
+		for(int i = 0; i < Screen._screens.length; i++)
+		{
+			if(hmonitor == Screen._screens[i].hmonitor)
+			{
+				Screen._screens[i].foundThis = true;
+				return TRUE; // Continue.
+			}
+		}
+		// Didn't find it from old list, so add it.
+		Screen._screens ~= new Screen(hmonitor);
+		return TRUE; // Continue.
+	}
+	
 }
 
 
@@ -3302,19 +3484,24 @@ class Font // docmain
 	{
 		LogFont lf;
 		
-		_unit = unit;
-		
 		lf.faceName = name;
+		lf.lf.lfCharSet = gdiCharSet;
+		lf.lf.lfQuality = cast(BYTE)smoothing;
+		lf.lf.lfOutPrecision = OUT_DEFAULT_PRECIS;
+		lf.lf.lfClipPrecision = CLIP_DEFAULT_PRECIS;
+		lf.lf.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE;
+		
+		this(lf, emSize, style, unit);
+	}
+	
+	// /// ditto
+	// This is a somewhat internal function.
+	this(ref LogFont lf, float emSize, FontStyle style, GraphicsUnit unit)
+	{
+		_unit = unit;
 		
 		lf.lf.lfHeight = -getLfHeight(emSize, unit);
 		_style(lf, style);
-		
-		lf.lf.lfCharSet = gdiCharSet;
-		lf.lf.lfOutPrecision = OUT_DEFAULT_PRECIS;
-		lf.lf.lfClipPrecision = CLIP_DEFAULT_PRECIS;
-		//lf.lf.lfQuality = DEFAULT_QUALITY;
-		lf.lf.lfQuality = cast(BYTE)smoothing;
-		lf.lf.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE;
 		
 		this(_create(lf));
 		
