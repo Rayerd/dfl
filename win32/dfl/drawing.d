@@ -1847,8 +1847,9 @@ class Screen
 	
 	version(DFL_MULTIPLE_SCREENS)
 	{
+		
 		///
-		static Screen[] screens() // getter
+		static Screen[] allScreens() // getter
 		{
 			version(DFL_MULTIPLE_SCREENS)
 			{
@@ -1870,6 +1871,96 @@ class Screen
 			}
 			return _screens;
 		}
+		
+		
+		static Screen fromHandle(HWND hwnd)
+		{
+			version(DFL_MULTIPLE_SCREENS)
+			{
+				version(SUPPORTS_MULTIPLE_SCREENS)
+				{
+					alias MonitorFromWindow fromWindow;
+				}
+				else
+				{
+					auto fromWindow = cast(typeof(&MonitorFromWindow))GetProcAddress(
+						GetModuleHandleA("user32.dll"), "MonitorFromWindow");
+					if(!fromWindow)
+					{
+						//throw new DflException("Multiple screens not supported");
+						goto _def;
+					}
+				}
+				HMONITOR hm = fromWindow(hwnd, MONITOR_DEFAULTTOPRIMARY);
+				return _findScreen(hm);
+			}
+			_def:
+			return primaryScreen;
+		}
+		
+		
+		///
+		static Screen fromControl(IWindow ctrl)
+		{
+			return fromHandle(ctrl.handle);
+		}
+		
+		
+		///
+		static Screen fromPoint(Point pt)
+		{
+			version(DFL_MULTIPLE_SCREENS)
+			{
+				version(SUPPORTS_MULTIPLE_SCREENS)
+				{
+					alias MonitorFromPoint fromPoint;
+				}
+				else
+				{
+					auto fromPoint = cast(typeof(&MonitorFromPoint))GetProcAddress(
+						GetModuleHandleA("user32.dll"), "MonitorFromPoint");
+					if(!fromPoint)
+					{
+						//throw new DflException("Multiple screens not supported");
+						goto _def;
+					}
+				}
+				HMONITOR hm = fromPoint(pt.point, MONITOR_DEFAULTTOPRIMARY);
+				return _findScreen(hm);
+			}
+			_def:
+			return primaryScreen;
+		}
+		
+		
+		///
+		static Screen fromRectangle(Rect r)
+		{
+			version(DFL_MULTIPLE_SCREENS)
+			{
+				version(SUPPORTS_MULTIPLE_SCREENS)
+				{
+					alias MonitorFromRect fromRect;
+				}
+				else
+				{
+					auto fromRect = cast(typeof(&MonitorFromRect))GetProcAddress(
+						GetModuleHandleA("user32.dll"), "MonitorFromRect");
+					if(!fromRect)
+					{
+						//throw new DflException("Multiple screens not supported");
+						goto _def;
+					}
+				}
+				RECT rect;
+				r.getRect(&rect);
+				HMONITOR hm = fromRect(&rect, MONITOR_DEFAULTTOPRIMARY);
+				return _findScreen(hm);
+			}
+			_def:
+			return primaryScreen;
+		}
+		
 	}
 	
 	
@@ -1902,6 +1993,19 @@ class Screen
 	{
 		
 		bool foundThis = true; // Used during _getScreens callback.
+		
+		
+		static Screen _findScreen(HMONITOR hm)
+		{
+			foreach(Screen s; allScreens)
+			{
+				if(s.hmonitor == hm)
+				{
+					return s;
+				}
+			}
+			return primaryScreen;
+		}
 		
 		
 		static void _getScreens()

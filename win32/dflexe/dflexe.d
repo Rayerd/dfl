@@ -1052,6 +1052,7 @@ int main(/+ char[][] args +/)
 			
 			char[] dfllibdmdver;
 			char[] dfllibdlibname = "Phobos";
+			char[] dfllibdfloptions = "";
 			try
 			{
 				x = cast(char[])std.file.read(std.path.join(importdir, r"dfl\dflcompile.info"));
@@ -1063,13 +1064,30 @@ int main(/+ char[][] args +/)
 						writefln("DFL lib files compiled with %s", xver);
 				}
 				
-				int fli = std.string.find(x, '\n');
-				if(-1 != fli)
 				{
-					char[] flx = std.string.strip(x[0 .. fli]);
-					if(flx.length > 5 && flx[0 .. 5] == "dlib=")
+					const char[] finding = "dlib=";
+					int idx = std.string.find(x, finding);
+					if(-1 != idx)
 					{
-						dfllibdlibname = flx[5 .. $];
+						char[] sub = x[idx + finding.length .. $];
+						idx = std.string.find(sub, '\n');
+						if(-1 != idx)
+						{
+							dfllibdlibname = std.string.strip(sub[0 .. idx]);
+						}
+					}
+				}
+				{
+					const char[] finding = "dfl_options=";
+					int idx = std.string.find(x, finding);
+					if(-1 != idx)
+					{
+						char[] sub = x[idx + finding.length .. $];
+						idx = std.string.find(sub, '\n');
+						if(-1 != idx)
+						{
+							dfllibdfloptions = std.string.strip(sub[0 .. idx]);
+						}
 					}
 				}
 			}
@@ -1092,6 +1110,7 @@ int main(/+ char[][] args +/)
 			
 			if(vcPrintIssues)
 			{
+				char[] dfloptions = std.string.strip(Environment.getEnvironmentVariable("dfl_options", false)); // throwIfMissing=false
 				if(!dmdver.length || !dfllibdmdver.length)
 				{
 					writefln("*** Warning: Unable to verify if current DFL and DMD versions are compatible.");
@@ -1102,17 +1121,17 @@ int main(/+ char[][] args +/)
 					if(dfllibdmdver != dmdver
 						|| std.string.icmp(dfllibdlibname, dlibname))
 					{
-						/+
-						writefln("*** Warning: DFL lib files were not compiled with the current DMD compiler."
-							"\nIt is recommended to go to www.dprogramming.com and look for a DFL update"
-							"\nor rebuild the DFL lib files to ensure binary compatibility when linking."
-							/+ "\n (-nover skips this check) " +/);
-						std.process.system("pause");
-						+/
 						writefln("*** Warning: DFL lib files were not compiled with the current DMD compiler."
 							"\nIt is recommended you rebuild the DFL lib files to ensure binary compatibility,"
 							"\nor go to www.dprogramming.com and look for a possible DFL update."
 							/+ "\n (-nover skips this check) " +/);
+						askBuildDflNow();
+					}
+					else if(dfloptions != dfllibdfloptions)
+					{
+						writefln("*** Warning: DFL lib files were not compiled with the current dfl_options."
+							"\nIt is recommended you rebuild the DFL lib files to ensure binary compatibility,"
+							);
 						askBuildDflNow();
 					}
 				}
@@ -1187,6 +1206,13 @@ int main(/+ char[][] args +/)
 			}
 			if(!optTangobos && "Tango" != dlibname) // Tango's std and Tangobos' std conflict; Tango automatically has this -I anyway.
 				dmdargs ~= "-I" ~ getshortpath(importdir);
+			{
+				char[] dfl_options = Environment.getEnvironmentVariable("dfl_options", false); // throwIfMissing=false
+				if(dfl_options.length)
+				{
+					dmdargs ~= dfl_options;
+				}
+			}
 			dmdargs ~= "-L/exet:" ~ optExet ~ "/su:" ~ optSu;
 			dmdargs ~= getshortpath(dfllib);
 			

@@ -129,6 +129,10 @@ final class Environment // docmain
 	///
 	Dstring expandEnvironmentVariables(Dstring str)
 	{
+		if(!str.length)
+		{
+			return str;
+		}
 		Dstring result;
 		if(!dfl.internal.utf.expandEnvironmentStrings(str, result))
 			throw new DflException("Unable to expand environment variables");
@@ -144,13 +148,26 @@ final class Environment // docmain
 	
 	
 	///
-	Dstring getEnvironmentVariable(Dstring name)
+	Dstring getEnvironmentVariable(Dstring name, bool throwIfMissing)
 	{
 		Dstring result;
 		result = dfl.internal.utf.getEnvironmentVariable(name);
 		if(!result.length)
+		{
+			if(!throwIfMissing)
+			{
+				if(GetLastError() == 203) // ERROR_ENVVAR_NOT_FOUND
+					return null;
+			}
 			throw new DflException("Unable to obtain environment variable");
+		}
 		return result;
+	}
+	
+	/// ditto
+	Dstring getEnvironmentVariable(Dstring name)
+	{
+		return getEnvironmentVariable(name, true);
 	}
 	
 	

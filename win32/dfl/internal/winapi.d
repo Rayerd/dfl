@@ -2772,6 +2772,14 @@ extern(Windows):
 	}
 	
 	
+	enum: DWORD
+	{
+		MONITOR_DEFAULTTONULL = 0x00000000,
+		MONITOR_DEFAULTTOPRIMARY = 0x00000001,
+		MONITOR_DEFAULTTONEAREST = 0x00000002,
+	}
+	
+	
 	BOOL DrawIconEx(HDC hdc, int xLeft, int yTop, HICON hIcon, int cxWidth, int cyWidth, UINT istepIfAniCur, HBRUSH hbrFlickerFreeDraw, UINT diFlags);
 	BOOL DrawIcon(HDC hDC, int X, int Y, HICON hIcon);
 	BOOL SetWindowPos(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx, int cy, UINT uFlags);
@@ -3012,6 +3020,9 @@ extern(Windows):
 	BOOL ImageList_Remove(HIMAGELIST himl, int i);
 	BOOL EnumDisplayMonitors(HDC hdc, LPCRECT lprcClip, MONITORENUMPROC lpfnEnum, LPARAM dwData);
 	BOOL GetMonitorInfoA(HMONITOR hMonitor, LPMONITORINFO lpmi);
+	HMONITOR MonitorFromWindow(HWND hwnd, DWORD dwFlags);
+	HMONITOR MonitorFromPoint(POINT pt, DWORD dwFlags);
+	HMONITOR MonitorFromRect(LPCRECT lprc, DWORD dwFlags);
 
 //} // Temporary.
 

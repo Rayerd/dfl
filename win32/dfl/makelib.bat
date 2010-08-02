@@ -66,7 +66,7 @@ if not "%dfl_release_flags%" == "" goto dfl_release_flags_set
 @echo.
 @echo Generating ddoc documentation...
 
-%dmd_path_windows%\bin\dmd %_dfl_flags% -c -o- -Dddoc %dfl_files%
+%dmd_path_windows%\bin\dmd %_dfl_flags% %dfl_options% -c -o- -Dddoc %dfl_files%
 @if errorlevel 1 goto oops
 
 @if "%dfl_ddoc%" == "only" goto done
@@ -86,14 +86,14 @@ if not "%dfl_release_flags%" == "" goto dfl_release_flags_set
 @rem   @echo.
 @rem   @echo Generating headers...
 @rem   @del *.di
-@rem   %dmd_path_windows%\bin\dmd -H -o- -c -I.. %_dfl_flags% %dfl_files%
+@rem   %dmd_path_windows%\bin\dmd -H -o- -c -I.. %_dfl_flags% %dfl_options% %dfl_files%
 @rem   @if errorlevel 1 goto oops
 
 
 @echo.
 @echo Compiling debug DFL...
 
-%dmd_path_windows%\bin\dmd -c %dfl_debug_flags% %_dfl_flags% -I.. %dfl_files%
+%dmd_path_windows%\bin\dmd -c %dfl_debug_flags% %_dfl_flags% %dfl_options% -I.. %dfl_files%
 @if errorlevel 1 goto oops
 
 @echo.
@@ -106,7 +106,7 @@ if not "%dfl_release_flags%" == "" goto dfl_release_flags_set
 @echo.
 @echo Compiling release DFL...
 
-%dmd_path_windows%\bin\dmd -c %dfl_release_flags% %_dfl_flags% -I.. %dfl_files%
+%dmd_path_windows%\bin\dmd -c %dfl_release_flags% %_dfl_flags% %dfl_options% -I.. %dfl_files%
 @if errorlevel 1 goto oops
 
 @echo.
@@ -124,6 +124,7 @@ if not "%dfl_release_flags%" == "" goto dfl_release_flags_set
 
 @rem   This file is used by dfl.exe
 @echo dlib=%dlib%>dflcompile.info
+@echo dfl_options=%dfl_options%>>dflcompile.info
 @%dmd_path_windows%\bin\dmd>>dflcompile.info
 
 
