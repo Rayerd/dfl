@@ -1848,6 +1848,30 @@ class Screen
 	version(DFL_MULTIPLE_SCREENS)
 	{
 		
+		debug
+		{
+			static void fakeMultipleScreens(bool byes) // setter
+			{
+				if(byes)
+				{
+					allScreens(); // Force populating.
+					if(_screens.length < 2)
+					{
+						_screens ~= new Screen(HMFAKE);
+					}
+				}
+			}
+			
+			static bool fakeMultipleScreens() // getter
+			{
+				return _screens.length > 1
+					&& HMFAKE == _screens[1].hmonitor;
+			}
+			
+			private const HMONITOR HMFAKE = cast(HMONITOR)1969253357;
+		}
+		
+		
 		///
 		static Screen[] allScreens() // getter
 		{
@@ -1892,6 +1916,20 @@ class Screen
 					}
 				}
 				HMONITOR hm = fromWindow(hwnd, MONITOR_DEFAULTTOPRIMARY);
+				debug
+				{
+					if(fakeMultipleScreens
+						&& hm == _screens[0].hmonitor)
+					{
+						RECT rect;
+						if(GetWindowRect(hwnd, &rect))
+						{
+							Rect r = Rect(&rect);
+							if(_withinFakeScreen(r))
+								return _screens[1];
+						}
+					}
+				}
 				return _findScreen(hm);
 			}
 			_def:
@@ -1926,6 +1964,16 @@ class Screen
 					}
 				}
 				HMONITOR hm = fromPoint(pt.point, MONITOR_DEFAULTTOPRIMARY);
+				debug
+				{
+					if(fakeMultipleScreens
+						&& hm == _screens[0].hmonitor)
+					{
+						Rect r = Rect(pt, Size(0, 0));
+						if(_withinFakeScreen(r))
+							return _screens[1];
+					}
+				}
 				return _findScreen(hm);
 			}
 			_def:
@@ -1955,6 +2003,15 @@ class Screen
 				RECT rect;
 				r.getRect(&rect);
 				HMONITOR hm = fromRect(&rect, MONITOR_DEFAULTTOPRIMARY);
+				debug
+				{
+					if(fakeMultipleScreens
+						&& hm == _screens[0].hmonitor)
+					{
+						if(_withinFakeScreen(r))
+							return _screens[1];
+					}
+				}
 				return _findScreen(hm);
 			}
 			_def:
@@ -2015,6 +2072,13 @@ class Screen
 			for(int i = 0; i < _screens.length; i++)
 			{
 				_screens[i].foundThis = false;
+				debug
+				{
+					if(HMFAKE == _screens[i].hmonitor)
+					{
+						_screens[i].foundThis = true;
+					}
+				}
 			}
 			version(SUPPORTS_MULTIPLE_SCREENS)
 			{
@@ -2062,6 +2126,32 @@ class Screen
 		}
 		
 		
+		debug
+		{
+			static bool _withinFakeScreen(Rect r)
+			{
+				Rect fr = _screens[1].bounds;
+				//return r.right >= fr.x;
+				if(r.x >= fr.x)
+					return true;
+				if(r.right < fr.x)
+					return false;
+				{
+					// See which side it's in most.
+					RECT rect;
+					r.getRect(&rect);
+					RECT w0 = rect;
+					assert(w0.right >= fr.width);
+					w0.right = fr.width;
+					RECT w1 = rect;
+					assert(w1.left >= fr.width);
+					w1.left = fr.width;
+					return Rect(&w1).width > Rect(&w0).width;
+				}
+			}
+		}
+		
+		
 		void _getInfo(ref MONITORINFO info)
 		{
 			version(SUPPORTS_MULTIPLE_SCREENS)
@@ -2076,8 +2166,61 @@ class Screen
 					throw new DflException("Error getting screen information (unable to find GetMonitorInfoA)");
 			}
 			info.cbSize = MONITORINFO.sizeof;
-			if(!getMI(hmonitor, &info))
+			HMONITOR hm = hmonitor;
+			int fake = -1;
+			debug
+			{
+				if(fakeMultipleScreens)
+				{
+					if(HMFAKE == hm)
+					{
+						fake = 1;
+						hm = _screens[0].hmonitor;
+					}
+					else if(hm == _screens[0].hmonitor)
+					{
+						fake = 0;
+					}
+				}
+			}
+			if(!getMI(hm, &info))
 				throw new DflException("Unable to get screen information");
+			debug
+			{
+				if(1 == fake)
+				{
+					info.dwFlags &= ~MONITORINFOF_PRIMARY;
+					{
+						Rect r = Rect(&info.rcMonitor);
+						int w = r.width >> 1;
+						r.x = r.x + w;
+						r.width = r.width - w;
+						r.getRect(&info.rcMonitor);
+					}
+					{
+						Rect r = Rect(&info.rcWork);
+						int w = r.width >> 1;
+						r.x = r.x + w;
+						r.width = r.width - w;
+						r.getRect(&info.rcWork);
+					}
+				}
+				else if(0 == fake)
+				{
+					{
+						Rect r = Rect(&info.rcMonitor);
+						int w = r.width >> 1;
+						r.width = r.width - w;
+						r.getRect(&info.rcMonitor);
+					}
+					{
+						Rect r = Rect(&info.rcWork);
+						int w = r.width >> 1;
+						r.width = r.width - w;
+						r.getRect(&info.rcWork);
+					}
+				}
+			}
 		}
 		
 		
