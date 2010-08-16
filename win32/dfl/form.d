@@ -219,12 +219,33 @@ class Form: ContainerControl, IDialogResult // docmain
 	
 	final Point screenCenter() // getter
 	{
-		RECT area;
-		SystemParametersInfoA(SPI_GETWORKAREA, 0, &area, FALSE);
+		Rect area;
+		version(DFL_MULTIPLE_SCREENS)
+		{
+			if(wparent && wparent.created)
+			{
+				area = Screen.fromRectangle(wparent).workingArea;
+			}
+			else
+			{
+				if(this.left != 0 && this.top != 0)
+				{
+					area = Screen.fromRectangle(this.bounds).workingArea;
+				}
+				else
+				{
+					area = Screen.fromRectangle(Control.mousePosition).workingArea;
+				}
+			}
+		}
+		else
+		{
+			area = Screen.primaryScreen.workingArea;
+		}
 		
 		Point pt;
-		pt.x = area.left + (((area.right - area.left) - this.width) / 2);
-		pt.y = area.top + (((area.bottom - area.top) - this.height) / 2);
+		pt.x = area.x + ((area.width - this.width) / 2);
+		pt.y = area.y + ((area.height - this.height) / 2);
 		return pt;
 	}
 	

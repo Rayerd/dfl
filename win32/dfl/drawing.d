@@ -2144,7 +2144,7 @@ class Screen
 					assert(w0.right >= fr.width);
 					w0.right = fr.width;
 					RECT w1 = rect;
-					assert(w1.left >= fr.width);
+					assert(w1.left <= fr.width);
 					w1.left = fr.width;
 					return Rect(&w1).width > Rect(&w0).width;
 				}
