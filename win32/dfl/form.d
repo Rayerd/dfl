@@ -224,7 +224,7 @@ class Form: ContainerControl, IDialogResult // docmain
 		{
 			if(wparent && wparent.created)
 			{
-				area = Screen.fromRectangle(wparent).workingArea;
+				area = Screen.fromControl(wparent).workingArea;
 			}
 			else
 			{
@@ -234,7 +234,7 @@ class Form: ContainerControl, IDialogResult // docmain
 				}
 				else
 				{
-					area = Screen.fromRectangle(Control.mousePosition).workingArea;
+					area = Screen.fromPoint(Control.mousePosition).workingArea;
 				}
 			}
 		}
