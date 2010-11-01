@@ -27,6 +27,8 @@ set dmc_path=%dmd_path_windows%
 :got_dmc
 
 
+set _stdcwindowsd=
+set _stdcwindowsobj=
 if not "%dlib%" == "Tango" goto dfl_not_tango_files
 set _stdcwindowsd=internal/_stdcwindows.d
 set _stdcwindowsobj=_stdcwindows.obj
