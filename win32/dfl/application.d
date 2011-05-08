@@ -403,7 +403,7 @@ final class Application // docmain
 			
 			// Execution continues after this so it's not idle.
 		}
-		catch(Object e)
+		catch(DThrowable e)
 		{
 			onThreadException(e);
 		}
@@ -542,7 +542,7 @@ final class Application // docmain
 					threadFlags = threadFlags & ~(TF.RUNNING | TF.STOP_RUNNING);
 					return;
 				}
-				catch(Object e)
+				catch(DThrowable e)
 				{
 					onThreadException(e);
 				}
@@ -873,7 +873,7 @@ final class Application // docmain
 	
 	
 	///
-	void onThreadException(Object e)
+	void onThreadException(DThrowable e)
 	{
 		static bool except = false;
 		
@@ -1482,7 +1482,7 @@ final class Application // docmain
 					}
 				}
 			}
-			catch(Object o)
+			catch(DThrowable o)
 			{
 				Control ctrl;
 				ctrl = lookupHwnd(msg.hWnd);
@@ -1707,17 +1707,14 @@ extern(Windows) LRESULT dflWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 					{
 						pinv.result = pinv.dg(pinv.args);
 					}
-					catch(Object e)
+					catch(DThrowable e)
 					{
 						//Application.onThreadException(e);
 						try
 						{
-							if(e)
-								pinv.exception = e;
-							else
-								pinv.exception = new Object;
+							pinv.exception = e;
 						}
-						catch(Object e2)
+						catch(DThrowable e2)
 						{
 							Application.onThreadException(e2);
 						}
@@ -1734,17 +1731,14 @@ extern(Windows) LRESULT dflWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 					{
 						pinv.dg();
 					}
-					catch(Object e)
+					catch(DThrowable e)
 					{
 						//Application.onThreadException(e);
 						try
 						{
-							if(e)
-								pinv.exception = e;
-							else
-								pinv.exception = new Object;
+							pinv.exception = e;
 						}
-						catch(Object e2)
+						catch(DThrowable e2)
 						{
 							Application.onThreadException(e2);
 						}
@@ -1758,7 +1752,7 @@ extern(Windows) LRESULT dflWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 				{
 					(cast(void function())lparam)();
 				}
-				catch(Object e)
+				catch(DThrowable e)
 				{
 					Application.onThreadException(e);
 				}
@@ -1772,7 +1766,7 @@ extern(Windows) LRESULT dflWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 					{
 						p.fp(Application.lookupHwnd(hwnd), p.params.ptr[0 .. p.nparams]);
 					}
-					catch(Object e)
+					catch(DThrowable e)
 					{
 						Application.onThreadException(e);
 					}
@@ -1884,14 +1878,14 @@ struct InvokeData
 	Object delegate(Object[]) dg;
 	Object[] args;
 	Object result;
-	Object exception = null;
+	DThrowable exception = null;
 }
 
 
 struct InvokeSimpleData
 {
 	void delegate() dg;
-	Object exception = null;
+	DThrowable exception = null;
 }
 
 

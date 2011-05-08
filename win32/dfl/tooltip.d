@@ -208,7 +208,7 @@ class ToolTip // docmain
 		{
 			ctrl.createControl();
 		}
-		catch(Object o)
+		catch(DThrowable o)
 		{
 			assert(0); // If -ctrl- is a child, make sure the parent is set before setting tool tip text.
 			//throw o;

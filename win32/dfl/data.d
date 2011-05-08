@@ -1210,7 +1210,7 @@ package class EnumDataObjectFORMATETC: DflComObject, IEnumFORMATETC
 				result = S_FALSE;
 			}
 		}
-		catch(Object e)
+		catch(DThrowable e)
 		{
 			Application.onThreadException(e);
 			
@@ -1239,7 +1239,7 @@ package class EnumDataObjectFORMATETC: DflComObject, IEnumFORMATETC
 			
 			result = S_OK;
 		}
-		catch(Object e)
+		catch(DThrowable e)
 		{
 			Application.onThreadException(e);
 			
@@ -1259,7 +1259,7 @@ package class EnumDataObjectFORMATETC: DflComObject, IEnumFORMATETC
 			*ppenum = new EnumDataObjectFORMATETC(dataObj, fmts, idx);
 			result = S_OK;
 		}
-		catch(Object e)
+		catch(DThrowable e)
 		{
 			Application.onThreadException(e);
 			
@@ -1383,7 +1383,7 @@ class DtoComDataObject: DflComObject, dfl.internal.wincom.IDataObject // package
 			
 			result = E_OUTOFMEMORY;
 		}
-		catch(Object e)
+		catch(DThrowable e)
 		{
 			Application.onThreadException(e);
 			
@@ -1441,7 +1441,7 @@ class DtoComDataObject: DflComObject, dfl.internal.wincom.IDataObject // package
 			
 			result = E_OUTOFMEMORY;
 		}
-		catch(Object e)
+		catch(DThrowable e)
 		{
 			Application.onThreadException(e);
 			
@@ -1485,7 +1485,7 @@ class DtoComDataObject: DflComObject, dfl.internal.wincom.IDataObject // package
 				result = E_NOTIMPL;
 			}
 		}
-		catch(Object e)
+		catch(DThrowable e)
 		{
 			Application.onThreadException(e);
 			

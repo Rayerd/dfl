@@ -349,7 +349,7 @@ private extern(Windows) int fbdHookProc(HWND hwnd, UINT msg, LPARAM lparam, LPAR
 			}
 		}
 	}
-	catch(Object e)
+	catch(DThrowable e)
 	{
 		Application.onThreadException(e);
 	}

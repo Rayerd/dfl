@@ -494,7 +494,7 @@ class Form: ContainerControl, IDialogResult // docmain
 		{
 			createChildren(); // Might throw.
 		}
-		catch(Object e)
+		catch(DThrowable e)
 		{
 			Application.onThreadException(e);
 		}

@@ -6,7 +6,7 @@
 module dfl.colordialog;
 
 private import dfl.commondialog, dfl.base, dfl.internal.winapi, dfl.internal.wincom;
-private import dfl.internal.utf, dfl.application, dfl.drawing;
+private import dfl.internal.utf, dfl.application, dfl.drawing, dfl.internal.dlib;
 
 
 ///
@@ -227,7 +227,7 @@ private extern(Windows) UINT ccHookProc(HWND hwnd, UINT msg, WPARAM wparam, LPAR
 			result = cast(UINT)cd.hookProc(hwnd, msg, wparam, lparam);
 		}
 	}
-	catch(Object e)
+	catch(DThrowable e)
 	{
 		Application.onThreadException(e);
 	}

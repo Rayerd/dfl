@@ -2959,7 +2959,7 @@ class Control: DObject, IWindow // docmain
 					
 					result = S_OK;
 				}
-				catch(Object e)
+				catch(DThrowable e)
 				{
 					Application.onThreadException(e);
 					
@@ -2985,7 +2985,7 @@ class Control: DObject, IWindow // docmain
 					
 					result = S_OK;
 				}
-				catch(Object e)
+				catch(DThrowable e)
 				{
 					Application.onThreadException(e);
 					
@@ -3008,7 +3008,7 @@ class Control: DObject, IWindow // docmain
 					
 					result = S_OK;
 				}
-				catch(Object e)
+				catch(DThrowable e)
 				{
 					Application.onThreadException(e);
 					
@@ -3035,7 +3035,7 @@ class Control: DObject, IWindow // docmain
 					
 					result = S_OK;
 				}
-				catch(Object e)
+				catch(DThrowable e)
 				{
 					Application.onThreadException(e);
 					
@@ -3204,7 +3204,7 @@ class Control: DObject, IWindow // docmain
 					
 					result = cast(HRESULT)ea.action;
 				}
-				catch(Object e)
+				catch(DThrowable e)
 				{
 					Application.onThreadException(e);
 					
@@ -3226,7 +3226,7 @@ class Control: DObject, IWindow // docmain
 					
 					result = ea.useDefaultCursors ? DRAGDROP_S_USEDEFAULTCURSORS : S_OK;
 				}
-				catch(Object e)
+				catch(DThrowable e)
 				{
 					Application.onThreadException(e);
 					
@@ -5624,7 +5624,7 @@ class Control: DObject, IWindow // docmain
 								{
 									createChildren(); // Might throw.
 								}
-								catch(Object e)
+								catch(DThrowable e)
 								{
 									Application.onThreadException(e);
 								}
@@ -5744,7 +5744,7 @@ class Control: DObject, IWindow // docmain
 						delayInvoke(function(Control cthis, size_t[] params){ cthis.cbits &= ~CBits.RECREATING; });
 					}
 				}
-				catch(Object e)
+				catch(DThrowable e)
 				{
 					Application.onThreadException(e);
 				}

@@ -5,7 +5,8 @@
 ///
 module dfl.timer;
 
-private import dfl.internal.winapi, dfl.event, dfl.base, dfl.application;
+private import dfl.internal.winapi, dfl.event, dfl.base, dfl.application,
+	dfl.internal.dlib;
 
 
 ///
@@ -174,7 +175,7 @@ extern(Windows) void timerProc(HWND hwnd, UINT uMsg, UINT idEvent, DWORD dwTime)
 				cprintf("Unknown timer 0x%X.\n", idEvent);
 		}
 	}
-	catch(Object e)
+	catch(DThrowable e)
 	{
 		Application.onThreadException(e);
 	}

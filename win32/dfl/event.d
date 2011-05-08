@@ -305,20 +305,20 @@ class ThreadExceptionEventArgs: EventArgs
 {
 	///
 	// The exception that occured.
-	this(Object theException)
+	this(DThrowable theException)
 	{
 		except = theException;
 	}
 	
 	
 	///
-	final Object exception() // getter
+	final DThrowable exception() // getter
 	{
 		return except;
 	}
 	
 	
 	private:
-	Object except;
+	DThrowable except;
 }
 

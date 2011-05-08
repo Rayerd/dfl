@@ -443,7 +443,7 @@ private extern(Windows) UINT fondHookProc(HWND hwnd, UINT msg, WPARAM wparam, LP
 			result = fd.hookProc(hwnd, msg, wparam, lparam);
 		}
 	}
-	catch(Object e)
+	catch(DThrowable e)
 	{
 		Application.onThreadException(e);
 	}

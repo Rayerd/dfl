@@ -35,6 +35,10 @@ class DflException: Exception // docmain
 
 
 ///
+alias DThrowable DflThrowable;
+
+
+///
 class StringObject: DObject
 {
 	///

@@ -375,6 +375,7 @@ version(Tango)
 	
 	
 	alias Object DObject;
+	alias Object DThrowable;
 }
 else // Phobos
 {
@@ -581,6 +582,21 @@ else // Phobos
 	
 	
 	alias Object DObject;
+	version(DFL_D2_AND_ABOVE)
+	{
+		version(DFL_CanThrowObject)
+		{
+			alias Object DThrowable;
+		}
+		else
+		{
+			alias Throwable DThrowable;
+		}
+	}
+	else
+	{
+		alias Object DThrowable;
+	}
 }
 
 

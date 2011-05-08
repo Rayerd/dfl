@@ -999,7 +999,7 @@ private extern(Windows) LRESULT ofnHookProc(HWND hwnd, UINT msg, WPARAM wparam, 
 			result = fd.hookProc(hwnd, msg, wparam, lparam);
 		}
 	}
-	catch(Object e)
+	catch(DThrowable e)
 	{
 		Application.onThreadException(e);
 	}

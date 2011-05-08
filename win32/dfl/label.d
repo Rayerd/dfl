@@ -415,7 +415,7 @@ version(LABEL_GRAYSTRING)
 					Rect(0, 0, clientSize.width, clientSize.height), tfmt);
 			}
 		}
-		catch(Object e)
+		catch(DThrowable e)
 		{
 			Application.onThreadException(e);
 			result = FALSE;
