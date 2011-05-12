@@ -598,6 +598,7 @@ class TabControl: TabControlBase // docmain
 	this()
 	{
 		tchildren = new TabPageCollection(this);
+		_pad = Point(6, 3);
 	}
 	
 	
@@ -954,7 +955,7 @@ class TabControl: TabControlBase // docmain
 	
 	
 	private:
-	Point _pad = {x: 6, y: 3};
+	Point _pad;
 	TabPageCollection tchildren;
 	
 	

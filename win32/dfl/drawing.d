@@ -51,19 +51,10 @@ struct Point // docmain
 	
 	
 	/// Construct a new Point.
-	static Point opCall(int x, int y)
+	this(int x, int y)
 	{
-		Point pt;
-		pt.x = x;
-		pt.y = y;
-		return pt;
-	}
-	
-	/// ditto
-	static Point opCall()
-	{
-		Point pt;
-		return pt;
+		this.x = x;
+		this.y = y;
 	}
 	
 	
@@ -138,31 +129,31 @@ struct Point // docmain
 /// Width and height.
 struct Size // docmain
 {
-	union
+	int width;
+	int height;
+	
+	
+	SIZE size() const
 	{
-		struct
-		{
-			int width;
-			int height;
-		}
-		SIZE size; // package
+		SIZE sz;
+		sz.cx = width;
+		sz.cy = height;
+		return sz;
+	}
+	
+	
+	void size(SIZE sz)
+	{
+		width = sz.cx;
+		height = sz.cy;
 	}
 	
 	
 	/// Construct a new Size.
-	static Size opCall(int width, int height)
+	this(int width, int height)
 	{
-		Size sz;
-		sz.width = width;
-		sz.height = height;
-		return sz;
-	}
-	
-	/// ditto
-	static Size opCall()
-	{
-		Size sz;
-		return sz;
+		this.width = width;
+		this.height = height;
 	}
 	
 	
