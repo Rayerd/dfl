@@ -575,6 +575,7 @@ class TreeNode: DObject
 			{
 				TV_ITEMA item;
 				Message m;
+				m = Message(tview.handle, TVM_SETITEMA, 0, cast(LPARAM)&item);
 				
 				item.mask = TVIF_HANDLE | TVIF_IMAGE;
 				item.hItem = hnode;
