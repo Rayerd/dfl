@@ -1352,12 +1352,6 @@ final class Application // docmain
 	}
 	else
 	{
-		ushort prevMenuID = FIRST_MENU_ID;
-		// malloc() is needed so the menus can be garbage collected.
-		uint nmenus = 0; // Number of -menus-.
-		Menu* menus = null; // WARNING: malloc()'d memory!
-		
-		
 		// Menus.
 		const ushort FIRST_MENU_ID = 200;
 		const ushort END_MENU_ID = 10000;
@@ -1365,6 +1359,12 @@ final class Application // docmain
 		// Controls.
 		const ushort FIRST_CTRL_ID = END_MENU_ID + 1;
 		const ushort LAST_CTRL_ID = 65500;
+		
+		
+		ushort prevMenuID = FIRST_MENU_ID;
+		// malloc() is needed so the menus can be garbage collected.
+		uint nmenus = 0; // Number of -menus-.
+		Menu* menus = null; // WARNING: malloc()'d memory!
 		
 		
 		// Destroy all menu handles at program exit because Windows will not
