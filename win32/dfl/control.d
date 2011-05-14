@@ -7631,7 +7631,7 @@ class ScrollableControl: Control // docmain
 	}
 	
 	
-	const Size DEFAULT_SCALE = { 5, 13 };
+	static const Size DEFAULT_SCALE = Size(5, 13);
 	
 	///
 	final void hScroll(bool byes) // setter
@@ -7951,7 +7951,7 @@ class ScrollableControl: Control // docmain
 	//Point autoscrollpos;
 	DockPaddingEdges dpad;
 	Size autossz = DEFAULT_SCALE;
-	Size scrollsz = { 0, 0 };
+	Size scrollsz = Size(0, 0);
 	int xspos = 0, yspos = 0;
 	
 	
