@@ -86,7 +86,7 @@ private
 	}
 	else
 	{
-		private import std.socket, std.intrinsic;
+		private import std.socket, core.bitop;
 		private import std.c.windows.winsock;
 		
 		alias InternetHost DInternetHost;
