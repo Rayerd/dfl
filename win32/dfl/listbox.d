@@ -388,7 +388,7 @@ class ListBox: ListControl // docmain
 	///
 	void borderStyle(BorderStyle bs) // setter
 	{
-		switch(bs)
+		final switch(bs)
 		{
 			case BorderStyle.FIXED_3D:
 				_style(_style() & ~WS_BORDER);
@@ -428,7 +428,7 @@ class ListBox: ListControl // docmain
 	{
 		LONG wl = _style() & ~(LBS_OWNERDRAWVARIABLE | LBS_OWNERDRAWFIXED);
 		
-		switch(dm)
+		final switch(dm)
 		{
 			case DrawMode.OWNER_DRAW_VARIABLE:
 				wl |= LBS_OWNERDRAWVARIABLE;
@@ -719,7 +719,7 @@ class ListBox: ListControl // docmain
 	{
 		LONG wl = _style() & ~(LBS_NOSEL | LBS_EXTENDEDSEL | LBS_MULTIPLESEL);
 		
-		switch(selmode)
+		final switch(selmode)
 		{
 			case SelectionMode.ONE:
 				break;

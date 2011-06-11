@@ -23,7 +23,7 @@ class Label: Control // docmain
 	///
 	void borderStyle(BorderStyle bs) // setter
 	{
-		switch(bs)
+		final switch(bs)
 		{
 			case BorderStyle.FIXED_3D:
 				_style(_style() & ~WS_BORDER);
@@ -141,7 +141,7 @@ class Label: Control // docmain
 	///
 	void textAlign(ContentAlignment calign) // setter
 	{
-		switch(calign)
+		final switch(calign)
 		{
 			case ContentAlignment.TOP_LEFT:
 				tfmt.alignment = TextAlignment.TOP | TextAlignment.LEFT;

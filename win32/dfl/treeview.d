@@ -1077,7 +1077,7 @@ class TreeView: ControlSuperClass // docmain
 	
 	final void borderStyle(BorderStyle bs) // setter
 	{
-		switch(bs)
+		final switch(bs)
 		{
 			case BorderStyle.FIXED_3D:
 				_style(_style() & ~WS_BORDER);

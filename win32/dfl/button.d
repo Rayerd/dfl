@@ -20,7 +20,7 @@ abstract class ButtonBase: ControlSuperClass // docmain
 	{
 		LONG wl = _bstyle() & ~(BS_BOTTOM | BS_CENTER | BS_TOP | BS_RIGHT | BS_LEFT | BS_VCENTER);
 		
-		switch(calign)
+		final switch(calign)
 		{
 			case ContentAlignment.TOP_LEFT:
 				wl |= BS_TOP | BS_LEFT;
@@ -553,7 +553,7 @@ class CheckBox: ButtonBase // docmain
 	///
 	final void appearance(Appearance ap) // setter
 	{
-		switch(ap)
+		final switch(ap)
 		{
 			case Appearance.NORMAL:
 				_bstyle(_bstyle() & ~BS_PUSHLIKE);
@@ -685,7 +685,7 @@ class RadioButton: ButtonBase // docmain
 	///
 	final void appearance(Appearance ap) // setter
 	{
-		switch(ap)
+		final switch(ap)
 		{
 			case Appearance.NORMAL:
 				_bstyle(_bstyle() & ~BS_PUSHLIKE);

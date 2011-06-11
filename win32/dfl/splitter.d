@@ -261,7 +261,7 @@ class Splitter: Control // docmain
 		Control splat; // Splitted.
 		// DMD 0.95: need 'this' to access member dock
 		//switch(dock())
-		switch(this.dock())
+		final switch(this.dock())
 		{
 			case DockStyle.LEFT:
 				foreach(Control ctrl; parent.controls())

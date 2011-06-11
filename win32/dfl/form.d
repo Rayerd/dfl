@@ -724,7 +724,7 @@ class Form: ContainerControl, IDialogResult // docmain
 			_exStyle(exst & EXSTNOTNONE);
 		}
 		
-		switch(bstyle)
+		final switch(bstyle)
 		{
 			case FormBorderStyle.FIXED_3D:
 				st &= ~(WS_BORDER | WS_THICKFRAME | WS_DLGFRAME);
@@ -1732,7 +1732,7 @@ class Form: ContainerControl, IDialogResult // docmain
 		// Not sure if visible should be checked here..
 		if(isHandleCreated && visible)
 		{
-			switch(state)
+			final switch(state)
 			{
 				case FormWindowState.MAXIMIZED:
 					ShowWindow(handle, SW_MAXIMIZE);
@@ -1753,7 +1753,7 @@ class Form: ContainerControl, IDialogResult // docmain
 		}
 		else
 		{
-			switch(state)
+			final switch(state)
 			{
 				case FormWindowState.MAXIMIZED:
 					_style(_style() & ~WS_MINIMIZE | WS_MAXIMIZE);
@@ -1953,7 +1953,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	///
 	final void layoutMdi(MdiLayout lay)
 	{
-		switch(lay)
+		final switch(lay)
 		{
 			case MdiLayout.ARRANGE_ICONS:
 				SendMessageA(handle, WM_MDIICONARRANGE, 0, 0);
@@ -3352,7 +3352,7 @@ version(NO_MDI) {} else
 		///
 		void borderStyle(BorderStyle bs) // setter
 		{
-			switch(bs)
+			final switch(bs)
 			{
 				case BorderStyle.FIXED_3D:
 					_style(_style() & ~WS_BORDER);

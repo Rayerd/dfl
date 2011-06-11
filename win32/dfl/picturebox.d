@@ -67,7 +67,7 @@ class PictureBox: Control // docmain
 		if(_mode == sm)
 			return;
 		
-		switch(sm)
+		final switch(sm)
 		{
 			case PictureBoxSizeMode.AUTO_SIZE:
 				if(img)
@@ -104,7 +104,7 @@ class PictureBox: Control // docmain
 	///
 	void borderStyle(BorderStyle bs) // setter
 	{
-		switch(bs)
+		final switch(bs)
 		{
 			case BorderStyle.FIXED_3D:
 				_style(_style() & ~WS_BORDER);
@@ -165,7 +165,7 @@ class PictureBox: Control // docmain
 	{
 		if(img)
 		{
-			switch(_mode)
+			final switch(_mode)
 			{
 				case PictureBoxSizeMode.NORMAL:
 				case PictureBoxSizeMode.AUTO_SIZE: // Drawn the same as normal.

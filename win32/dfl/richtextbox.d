@@ -670,7 +670,7 @@ class RichTextBox: TextBoxBase // docmain
 		st = _style() & ~(ES_DISABLENOSCROLL | WS_HSCROLL | WS_VSCROLL |
 			ES_AUTOHSCROLL | ES_AUTOVSCROLL);
 		
-		switch(sb)
+		final switch(sb)
 		{
 			case RichTextBoxScrollBars.FORCED_BOTH:
 				st |= ES_DISABLENOSCROLL;

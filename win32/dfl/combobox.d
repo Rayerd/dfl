@@ -46,7 +46,7 @@ class ComboBox: ListControl // docmain
 		LONG st;
 		st = _style() & ~(CBS_DROPDOWN | CBS_DROPDOWNLIST | CBS_SIMPLE);
 		
-		switch(ddstyle)
+		final switch(ddstyle)
 		{
 			case ComboBoxStyle.DROP_DOWN:
 				_style(st | CBS_DROPDOWN);
@@ -311,7 +311,7 @@ class ComboBox: ListControl // docmain
 	{
 		LONG wl = _style() & ~(CBS_OWNERDRAWVARIABLE | CBS_OWNERDRAWFIXED);
 		
-		switch(dm)
+		final switch(dm)
 		{
 			case DrawMode.OWNER_DRAW_VARIABLE:
 				wl |= CBS_OWNERDRAWVARIABLE;

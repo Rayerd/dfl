@@ -45,7 +45,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	///
 	void borderStyle(BorderStyle bs) // setter
 	{
-		switch(bs)
+		final switch(bs)
 		{
 			case BorderStyle.FIXED_3D:
 				_style(_style() & ~WS_BORDER);
@@ -1068,7 +1068,7 @@ class TextBox: TextBoxBase // docmain
 	{
 		LONG wl = _style() & ~(ES_UPPERCASE | ES_LOWERCASE);
 		
-		switch(cc)
+		final switch(cc)
 		{
 			case CharacterCasing.UPPER:
 				wl |= ES_UPPERCASE;
@@ -1161,7 +1161,7 @@ class TextBox: TextBoxBase // docmain
 				break;
 		}
 		+/
-		switch(sb)
+		final switch(sb)
 		{
 			case ScrollBars.BOTH:
 				_style(_style() | WS_VSCROLL);
@@ -1211,7 +1211,7 @@ class TextBox: TextBoxBase // docmain
 	{
 		LONG wl = _style() & ~(ES_RIGHT | ES_CENTER | ES_LEFT);
 		
-		switch(ha)
+		final switch(ha)
 		{
 			case HorizontalAlignment.RIGHT:
 				wl |= ES_RIGHT;
