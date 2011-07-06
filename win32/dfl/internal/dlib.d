@@ -469,7 +469,7 @@ else // Phobos
 		}
 	}
 	
-	alias std.string.find charFindInString;
+	alias std.algorithm.find charFindInString;
 	
 	alias std.string.toStringz stringToStringz;
 	
@@ -567,9 +567,9 @@ else // Phobos
 	}
 	
 	
-	private import std.ctype;
+	private import std.ascii;
 	
-	alias std.ctype.isxdigit charIsHexDigit;
+	alias std.ascii.isHexDigit charIsHexDigit;
 	
 	
 	private import std.stream;

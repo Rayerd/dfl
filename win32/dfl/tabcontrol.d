@@ -56,6 +56,10 @@ class TabPage: Panel
 		return text == getObjectString(o);
 	}
 	
+	override Dequ opEquals(Control o)
+	{
+		return super.opEquals(o);
+	}
 	
 	Dequ opEquals(Dstring val)
 	{
@@ -68,6 +72,10 @@ class TabPage: Panel
 		return stringICmp(text, getObjectString(o));
 	}
 	
+	override int opCmp(Control o)
+	{
+		return super.opCmp(o);
+	}
 	
 	int opCmp(Dstring val)
 	{
