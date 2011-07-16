@@ -379,13 +379,10 @@ class Button: ButtonBase, IButtonControl // docmain
 	
 	
 	override void text(Dstring txt) // setter
-	in
 	{
 		if(txt.length)
 			assert(!this.image, "Button image with text not supported");
-	}
-	body
-	{
+		
 		super.text = txt;
 	}
 	
