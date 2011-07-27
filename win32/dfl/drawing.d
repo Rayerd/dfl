@@ -3290,7 +3290,7 @@ class Icon: Image // docmain
 	}
 	
 	
-	int _imgtype(HGDIOBJ* ph) // internal
+	override int _imgtype(HGDIOBJ* ph) // internal
 	{
 		if(ph)
 			*ph = cast(HGDIOBJ)hi;

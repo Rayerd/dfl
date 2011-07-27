@@ -127,7 +127,7 @@ private const uint MAX_REG_BUFFER = 256;
 abstract class RegistryValue
 {
 	DWORD valueType(); // getter
-	Dstring toString();
+	override Dstring toString();
 	/+ package +/ protected LONG save(HKEY hkey, Dstring name); // package
 	package final RegistryValue _reg() { return this; }
 }
