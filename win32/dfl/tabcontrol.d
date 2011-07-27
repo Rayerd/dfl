@@ -112,7 +112,7 @@ class TabPage: Panel
 	+/
 	
 	
-	/+ package +/ /+ protected +/ int _rtype() // package
+	/+ package +/ /+ protected +/ override int _rtype() // package
 	{
 		return 4;
 	}

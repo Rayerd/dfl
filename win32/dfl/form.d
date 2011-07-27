@@ -2550,7 +2550,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	
-	/+ package +/ void _destroying() // package
+	/+ package +/ override void _destroying() // package
 	{
 		_removeFromOldOwner();
 		//wowner = null;
@@ -2572,7 +2572,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	
-	/+ package +/ /+ protected +/ int _rtype() // package
+	/+ package +/ /+ protected +/ override int _rtype() // package
 	{
 		return isMdiChild ? 2 : 0;
 	}
