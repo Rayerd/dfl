@@ -148,7 +148,6 @@ class ListBox: ListControl // docmain
 			
 			// If it's not found it's out of bounds and bad things happen.
 			assert(0);
-			return -1;
 		}
 		
 		
@@ -245,7 +244,6 @@ class ListBox: ListControl // docmain
 			
 			// If it's not found it's out of bounds and bad things happen.
 			assert(0);
-			return null;
 		}
 		
 		
@@ -1402,11 +1400,9 @@ class ListBox: ListControl // docmain
 				msg.result = LB_ERR;
 				return;
 			
-			default:
-				super.wndProc(msg);
-				return;
+			default: ;
 		}
-		prevWndProc(msg);
+		super.wndProc(msg);
 	}
 	
 	

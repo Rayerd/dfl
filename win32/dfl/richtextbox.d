@@ -674,18 +674,21 @@ class RichTextBox: TextBoxBase // docmain
 		{
 			case RichTextBoxScrollBars.FORCED_BOTH:
 				st |= ES_DISABLENOSCROLL;
+				goto case RichTextBoxScrollBars.BOTH;
 			case RichTextBoxScrollBars.BOTH:
 				st |= WS_HSCROLL | WS_VSCROLL | ES_AUTOHSCROLL | ES_AUTOVSCROLL;
 				break;
 			
 			case RichTextBoxScrollBars.FORCED_HORIZONTAL:
 				st |= ES_DISABLENOSCROLL;
+				goto case RichTextBoxScrollBars.HORIZONTAL;
 			case RichTextBoxScrollBars.HORIZONTAL:
 				st |= WS_HSCROLL | ES_AUTOHSCROLL;
 				break;
 			
 			case RichTextBoxScrollBars.FORCED_VERTICAL:
 				st |= ES_DISABLENOSCROLL;
+				goto case RichTextBoxScrollBars.VERTICAL;
 			case RichTextBoxScrollBars.VERTICAL:
 				st |= WS_VSCROLL | ES_AUTOVSCROLL;
 				break;

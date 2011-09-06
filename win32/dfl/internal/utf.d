@@ -2031,7 +2031,6 @@ BOOL _setMenuItemInfoW(HMENU hMenu, UINT uItem, BOOL fByPosition, LPMENUITEMINFO
 	else
 	{
 		assert(0);
-		return FALSE;
 	}
 }
 
@@ -2062,7 +2061,6 @@ BOOL _insertMenuItemW(HMENU hMenu, UINT uItem, BOOL fByPosition, LPMENUITEMINFOW
 	else
 	{
 		assert(0);
-		return FALSE;
 	}
 }
 

@@ -337,7 +337,8 @@ class Form: ContainerControl, IDialogResult // docmain
 							cp.y = area.bottom - cp.height;
 						break;
 					}
-					// No parent so use the screen.
+					break;
+				
 				case FormStartPosition.CENTER_SCREEN:
 					{
 						// TODO: map to client coords if MDI child.
@@ -355,6 +356,8 @@ class Form: ContainerControl, IDialogResult // docmain
 					cp.width = CW_USEDEFAULT;
 					cp.height = CW_USEDEFAULT;
 					//break; // DEFAULT_BOUNDS assumes default location.
+					goto case FormStartPosition.DEFAULT_LOCATION;
+				
 				case FormStartPosition.DEFAULT_LOCATION:
 					// WM_CREATE fixes these.
 					cp.x = CW_USEDEFAULT;
@@ -1092,13 +1095,14 @@ class Form: ContainerControl, IDialogResult // docmain
 		{
 			version(NO_MDI)
 			{
+				return null;
 			}
 			else
 			{
 				//if(isMdiChild)
 					return wmdiparent;
+				//return null;
 			}
-			return null;
 		}
 	}
 	
@@ -2060,7 +2064,10 @@ class Form: ContainerControl, IDialogResult // docmain
 				{
 					throw new DflException("Invalid dialog owner");
 				}
-				goto no_show;
+				else
+				{
+					goto no_show;
+				}
 			}
 			
 			//owner = null;
@@ -2550,7 +2557,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	
-	/+ package +/ void _destroying() // package
+	/+ package +/ override void _destroying() // package
 	{
 		_removeFromOldOwner();
 		//wowner = null;
@@ -2572,7 +2579,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	
-	/+ package +/ /+ protected +/ int _rtype() // package
+	/+ package +/ /+ protected +/ override int _rtype() // package
 	{
 		return isMdiChild ? 2 : 0;
 	}
@@ -3107,8 +3114,7 @@ class Form: ContainerControl, IDialogResult // docmain
 								}
 								return false;
 							
-							case Keys.UP, Keys.DOWN:
-							case Keys.RIGHT, Keys.LEFT:
+							case Keys.UP, Keys.DOWN, Keys.RIGHT, Keys.LEFT:
 								//if(dfl.internal.utf.isDialogMessage(form.handle, &m._winMsg)) // Stopped working after removing controlparent.
 								//	return true; // Prevent.
 								{
@@ -3171,9 +3177,8 @@ class Form: ContainerControl, IDialogResult // docmain
 											_dlgselnext(form, m.hWnd, true);
 										}
 									}
-									return true; // Prevent.
 								}
-								break;
+								return true; // Prevent.
 							
 							default: ;
 						}
