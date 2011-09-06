@@ -999,7 +999,6 @@ class ListView: ControlSuperClass // docmain
 			
 			// If it's not found it's out of bounds and bad things happen.
 			assert(0);
-			return -1;
 		}
 		
 		
@@ -1088,7 +1087,6 @@ class ListView: ControlSuperClass // docmain
 			
 			// If it's not found it's out of bounds and bad things happen.
 			assert(0);
-			return null;
 		}
 		
 		
@@ -1175,7 +1173,6 @@ class ListView: ControlSuperClass // docmain
 			
 			// If it's not found it's out of bounds and bad things happen.
 			assert(0);
-			return -1;
 		}
 		
 		
@@ -1571,7 +1568,6 @@ class ListView: ControlSuperClass // docmain
 			return item;
 		}
 		assert(0);
-		return null;
 	}
 	
 	

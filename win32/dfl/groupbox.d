@@ -38,7 +38,7 @@ class GroupBox: ControlSuperClass // docmain
 	
 	version(DFL_NO_DRAG_DROP) {} else
 	{
-		void allowDrop(bool dyes) // setter
+		override void allowDrop(bool dyes) // setter
 		{
 			//if(dyes)
 			//	throw new DflException("Cannot drop on a group box");
@@ -69,7 +69,7 @@ class GroupBox: ControlSuperClass // docmain
 	}
 	
 	
-	protected void onFontChanged(EventArgs ea)
+	protected override void onFontChanged(EventArgs ea)
 	{
 		_dispChanged();
 		
@@ -77,7 +77,7 @@ class GroupBox: ControlSuperClass // docmain
 	}
 	
 	
-	protected void onHandleCreated(EventArgs ea)
+	protected override void onHandleCreated(EventArgs ea)
 	{
 		super.onHandleCreated(ea);
 		

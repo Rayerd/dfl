@@ -703,7 +703,6 @@ class Control: DObject, IWindow // docmain
 				}
 				// Index out of bounds, bad things happen.
 				assert(0);
-				return null;
 			}
 			else
 			{
@@ -2370,7 +2369,6 @@ class Control: DObject, IWindow // docmain
 					goto case RightToLeft.YES;
 				}
 				goto case RightToLeft.NO;
-				break;
 			
 			case RightToLeft.YES:
 				_exStyle(_exStyle() | WS_EX_RTLREADING);
@@ -5376,9 +5374,8 @@ class Control: DObject, IWindow // docmain
 					if(!(GetKeyState(VK_MENU) & 0x8000))
 						msg.result |= DLGC_WANTCHARS;
 					
-					return;
 				}
-				break;
+				return;
 			
 			case WM_CLOSE:
 				/+{

@@ -138,7 +138,7 @@ class ComboBox: ListControl // docmain
 	
 	
 	///
-	void selectedIndex(int idx)
+	override void selectedIndex(int idx)
 	{
 		if(isHandleCreated)
 		{
@@ -147,7 +147,7 @@ class ComboBox: ListControl // docmain
 	}
 	
 	/// ditto
-	int selectedIndex()
+	override int selectedIndex()
 	{
 		if(isHandleCreated)
 		{

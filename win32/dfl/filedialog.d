@@ -445,7 +445,6 @@ abstract class FileDialog: CommonDialog // docmain
 	override bool runDialog(HWND owner)
 	{
 		assert(0);
-		return false;
 	}
 	
 	
