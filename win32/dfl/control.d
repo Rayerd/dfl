@@ -8181,7 +8181,7 @@ private:
 			throw new OomException();
 		
 		
-		static void fnentry(Control c, size_t[] p...)
+		static void fnentry(Control c, size_t[] p)
 		{
 			auto param = cast(InvokeParam*)p[0];
 			param.fn(c, param.args);
@@ -8207,7 +8207,7 @@ private:
 		if (!p)
 			throw new OomException();
 		
-		static void fnentry(Control c, size_t[] p...)
+		static void fnentry(Control c, size_t[] p)
 		{
 			auto fn = cast(void function(Control))p[0];
 			fn(c);
