@@ -152,7 +152,7 @@ class ListViewSubItem: DObject
 	
 	
 	///
-	final void text(Dstring newText) // setter
+	final @property void text(Dstring newText) // setter
 	{
 		settextin(newText);
 		
@@ -168,7 +168,7 @@ class ListViewSubItem: DObject
 	}
 	
 	/// ditto
-	final Dstring text() // getter
+	final @property Dstring text() // getter
 	{
 		return _txt;
 	}
@@ -261,13 +261,13 @@ class ListViewItem: DObject
 	
 	
 	///
-	final void checked(bool byes) // setter
+	final @property void checked(bool byes) // setter
 	{
 		return _setcheckstate(index, byes);
 	}
 	
 	/// ditto
-	final bool checked() // getter
+	final @property bool checked() // getter
 	{
 		return _getcheckstate(index);
 	}
@@ -311,7 +311,7 @@ class ListViewItem: DObject
 	
 	
 	///
-	final Rect bounds() // getter
+	final @property Rect bounds() // getter
 	{
 		if(lview)
 		{
@@ -324,7 +324,7 @@ class ListViewItem: DObject
 	
 	
 	///
-	final int index() // getter
+	final @property int index() // getter
 	{
 		if(lview)
 			return lview.litems.indexOf(this);
@@ -333,7 +333,7 @@ class ListViewItem: DObject
 	
 	
 	///
-	final void text(Dstring newText) // setter
+	final @property void text(Dstring newText) // setter
 	{
 		settextin(newText);
 		
@@ -342,14 +342,14 @@ class ListViewItem: DObject
 	}
 	
 	/// ditto
-	final Dstring text() // getter
+	final @property Dstring text() // getter
 	{
 		return _txt;
 	}
 	
 	
 	///
-	final void selected(bool byes) // setter
+	final @property void selected(bool byes) // setter
 	{
 		if(lview && lview.created)
 		{
@@ -362,7 +362,7 @@ class ListViewItem: DObject
 	}
 	
 	/// ditto
-	final bool selected() // getter
+	final @property bool selected() // getter
 	{
 		if(lview && lview.created)
 		{
@@ -374,20 +374,20 @@ class ListViewItem: DObject
 	
 	
 	///
-	final ListView listView() // getter
+	final @property ListView listView() // getter
 	{
 		return lview;
 	}
 	
 	
 	///
-	final void tag(Object obj) // setter
+	final @property void tag(Object obj) // setter
 	{
 		_tag = obj;
 	}
 	
 	/// ditto
-	final Object tag() // getter
+	final @property Object tag() // getter
 	{
 		return _tag;
 	}
@@ -410,7 +410,7 @@ class ListViewItem: DObject
 	
 	
 	///
-	final ListViewSubItemCollection subItems() // getter
+	final @property ListViewSubItemCollection subItems() // getter
 	{
 		return isubs;
 	}
@@ -422,7 +422,7 @@ class ListViewItem: DObject
 	else
 	{
 		///
-		final void imageIndex(int index) // setter
+		final @property void imageIndex(int index) // setter
 		{
 			this._imgidx = index;
 			
@@ -431,7 +431,7 @@ class ListViewItem: DObject
 		}
 		
 		/// ditto
-		final int imageIndex() // getter
+		final @property int imageIndex() // getter
 		{
 			return _imgidx;
 		}
@@ -473,14 +473,14 @@ class ColumnHeader: DObject
 	
 	
 	///
-	final ListView listView() // getter
+	final @property ListView listView() // getter
 	{
 		return lview;
 	}
 	
 	
 	///
-	final void text(Dstring newText) // setter
+	final @property void text(Dstring newText) // setter
 	{
 		_txt = newText;
 		
@@ -491,7 +491,7 @@ class ColumnHeader: DObject
 	}
 	
 	/// ditto
-	final Dstring text() // getter
+	final @property Dstring text() // getter
 	{
 		return _txt;
 	}
@@ -528,7 +528,7 @@ class ColumnHeader: DObject
 	
 	
 	///
-	final int index() // getter
+	final @property int index() // getter
 	{
 		if(lview)
 			lview.cols.indexOf(this);
@@ -537,7 +537,7 @@ class ColumnHeader: DObject
 	
 	
 	///
-	final void textAlign(HorizontalAlignment halign) // setter
+	final @property void textAlign(HorizontalAlignment halign) // setter
 	{
 		_align = halign;
 		
@@ -548,14 +548,14 @@ class ColumnHeader: DObject
 	}
 	
 	/// ditto
-	final HorizontalAlignment textAlign() // getter
+	final @property HorizontalAlignment textAlign() // getter
 	{
 		return _align;
 	}
 	
 	
 	///
-	final void width(int w) // setter
+	final @property void width(int w) // setter
 	{
 		_width = w;
 		
@@ -566,7 +566,7 @@ class ColumnHeader: DObject
 	}
 	
 	/// ditto
-	final int width() // getter
+	final @property int width() // getter
 	{
 		if(lview && lview.created)
 		{
@@ -605,27 +605,27 @@ class LabelEditEventArgs: EventArgs
 	
 	
 	///
-	final ListViewItem item() // getter
+	final @property ListViewItem item() // getter
 	{
 		return _item;
 	}
 	
 	
 	///
-	final Dstring label() // getter
+	final @property Dstring label() // getter
 	{
 		return _label;
 	}
 	
 	
 	///
-	final void cancelEdit(bool byes) // setter
+	final @property void cancelEdit(bool byes) // setter
 	{
 		_cancel = byes;
 	}
 	
 	/// ditto
-	final bool cancelEdit() // getter
+	final @property bool cancelEdit() // getter
 	{
 		return _cancel;
 	}
@@ -649,21 +649,21 @@ class ItemCheckEventArgs: EventArgs
 	}
 	
 	
-	final CheckState currentValue() // getter
+	final @property CheckState currentValue() // getter
 	{
 		return _ocs;
 	}
 	
 	
 	/+
-	final void newValue(CheckState cs) // setter
+	final @property void newValue(CheckState cs) // setter
 	{
 		_ncs = cs;
 	}
 	+/
 	
 	
-	final CheckState newValue() // getter
+	final @property CheckState newValue() // getter
 	{
 		return _ncs;
 	}
@@ -684,7 +684,7 @@ class ItemCheckedEventArgs: EventArgs
 	}
 	
 	
-	final ListViewItem item() // getter
+	final @property ListViewItem item() // getter
 	{
 		return this._item;
 	}
@@ -791,7 +791,7 @@ class ListView: ControlSuperClass // docmain
 		package ListViewItem[] _items;
 		
 		
-		package final bool created() // getter
+		package final @property bool created() // getter
 		{
 			return lv && lv.created();
 		}
@@ -895,7 +895,7 @@ class ListView: ControlSuperClass // docmain
 		ColumnHeader[] _headers;
 		
 		
-		package final bool created() // getter
+		package final @property bool created() // getter
 		{
 			return lv && lv.created();
 		}
@@ -974,7 +974,7 @@ class ListView: ControlSuperClass // docmain
 	{
 		deprecated alias length count;
 		
-		int length() // getter
+		@property int length() // getter
 		{
 			if(!lview.created)
 				return 0;
@@ -1062,7 +1062,7 @@ class ListView: ControlSuperClass // docmain
 	{
 		deprecated alias length count;
 		
-		int length() // getter
+		@property int length() // getter
 		{
 			if(!lview.created)
 				return 0;
@@ -1148,7 +1148,7 @@ class ListView: ControlSuperClass // docmain
 	{
 		deprecated alias length count;
 		
-		int length() // getter
+		@property int length() // getter
 		{
 			if(!lview.created)
 				return 0;
@@ -1246,7 +1246,7 @@ class ListView: ControlSuperClass // docmain
 	
 	
 	///
-	final void activation(ItemActivation ia) // setter
+	final @property void activation(ItemActivation ia) // setter
 	{
 		switch(ia)
 		{
@@ -1268,7 +1268,7 @@ class ListView: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final ItemActivation activation() // getter
+	final @property ItemActivation activation() // getter
 	{
 		DWORD lvex;
 		lvex = _lvexstyle();
@@ -1298,7 +1298,7 @@ class ListView: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final ListViewAlignment alignment() // getter
+	final @property ListViewAlignment alignment() // getter
 	{
 		// TODO
 	}
@@ -1306,20 +1306,20 @@ class ListView: ControlSuperClass // docmain
 	
 	
 	///
-	final void allowColumnReorder(bool byes) // setter
+	final @property void allowColumnReorder(bool byes) // setter
 	{
 		_lvexstyle(LVS_EX_HEADERDRAGDROP, byes ? LVS_EX_HEADERDRAGDROP : 0);
 	}
 	
 	/// ditto
-	final bool allowColumnReorder() // getter
+	final @property bool allowColumnReorder() // getter
 	{
 		return (_lvexstyle() & LVS_EX_HEADERDRAGDROP) == LVS_EX_HEADERDRAGDROP;
 	}
 	
 	
 	///
-	final void autoArrange(bool byes) // setter
+	final @property void autoArrange(bool byes) // setter
 	{
 		if(byes)
 			_style(_style() | LVS_AUTOARRANGE);
@@ -1330,13 +1330,13 @@ class ListView: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final bool autoArrange() // getter
+	final @property bool autoArrange() // getter
 	{
 		return (_style() & LVS_AUTOARRANGE) == LVS_AUTOARRANGE;
 	}
 	
 	
-	override void backColor(Color c) // setter
+	override @property void backColor(Color c) // setter
 	{
 		if(created)
 		{
@@ -1353,7 +1353,7 @@ class ListView: ControlSuperClass // docmain
 	}
 	
 	
-	override Color backColor() // getter
+	override @property Color backColor() // getter
 	{
 		if(Color.empty == backc)
 			return defaultBackColor;
@@ -1362,7 +1362,7 @@ class ListView: ControlSuperClass // docmain
 	
 	
 	///
-	final void borderStyle(BorderStyle bs) // setter
+	final @property void borderStyle(BorderStyle bs) // setter
 	{
 		final switch(bs)
 		{
@@ -1389,7 +1389,7 @@ class ListView: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final BorderStyle borderStyle() // getter
+	final @property BorderStyle borderStyle() // getter
 	{
 		if(_exStyle() & WS_EX_CLIENTEDGE)
 			return BorderStyle.FIXED_3D;
@@ -1400,13 +1400,13 @@ class ListView: ControlSuperClass // docmain
 	
 	
 	///
-	final void checkBoxes(bool byes) // setter
+	final @property void checkBoxes(bool byes) // setter
 	{
 		_lvexstyle(LVS_EX_CHECKBOXES, byes ? LVS_EX_CHECKBOXES : 0);
 	}
 	
 	/// ditto
-	final bool checkBoxes() // getter
+	final @property bool checkBoxes() // getter
 	{
 		return (_lvexstyle() & LVS_EX_CHECKBOXES) == LVS_EX_CHECKBOXES;
 	}
@@ -1414,7 +1414,7 @@ class ListView: ControlSuperClass // docmain
 	
 	///
 	// ListView.CheckedIndexCollection
-	final CheckedIndexCollection checkedIndices() // getter
+	final @property CheckedIndexCollection checkedIndices() // getter
 	{
 		return checkedis;
 	}
@@ -1423,7 +1423,7 @@ class ListView: ControlSuperClass // docmain
 	/+
 	///
 	// ListView.CheckedListViewItemCollection
-	final CheckedListViewItemCollection checkedItems() // getter
+	final @property CheckedListViewItemCollection checkedItems() // getter
 	{
 		// TODO
 	}
@@ -1431,7 +1431,7 @@ class ListView: ControlSuperClass // docmain
 	
 	
 	///
-	final ColumnHeaderCollection columns() // getter
+	final @property ColumnHeaderCollection columns() // getter
 	{
 		return cols;
 	}
@@ -1439,7 +1439,7 @@ class ListView: ControlSuperClass // docmain
 	
 	///
 	// Extra.
-	final int focusedIndex() // getter
+	final @property int focusedIndex() // getter
 	{
 		if(!created)
 			return -1;
@@ -1448,7 +1448,7 @@ class ListView: ControlSuperClass // docmain
 	
 	
 	///
-	final ListViewItem focusedItem() // getter
+	final @property ListViewItem focusedItem() // getter
 	{
 		int i;
 		i = focusedIndex;
@@ -1458,7 +1458,7 @@ class ListView: ControlSuperClass // docmain
 	}
 	
 	
-	override void foreColor(Color c) // setter
+	override @property void foreColor(Color c) // setter
 	{
 		if(created)
 			prevwproc(LVM_SETTEXTCOLOR, 0, cast(LPARAM)c.toRgb());
@@ -1467,7 +1467,7 @@ class ListView: ControlSuperClass // docmain
 	}
 	
 	
-	override Color foreColor() // getter
+	override @property Color foreColor() // getter
 	{
 		if(Color.empty == forec)
 			return defaultForeColor;
@@ -1476,26 +1476,26 @@ class ListView: ControlSuperClass // docmain
 	
 	
 	///
-	final void fullRowSelect(bool byes) // setter
+	final @property void fullRowSelect(bool byes) // setter
 	{
 		_lvexstyle(LVS_EX_FULLROWSELECT, byes ? LVS_EX_FULLROWSELECT : 0);
 	}
 	
 	/// ditto
-	final bool fullRowSelect() // getter
+	final @property bool fullRowSelect() // getter
 	{
 		return (_lvexstyle() & LVS_EX_FULLROWSELECT) == LVS_EX_FULLROWSELECT;
 	}
 	
 	
 	///
-	final void gridLines(bool byes) // setter
+	final @property void gridLines(bool byes) // setter
 	{
 		_lvexstyle(LVS_EX_GRIDLINES, byes ? LVS_EX_GRIDLINES : 0);
 	}
 	
 	/// ditto
-	final bool gridLines() // getter
+	final @property bool gridLines() // getter
 	{
 		return (_lvexstyle() & LVS_EX_GRIDLINES) == LVS_EX_GRIDLINES;
 	}
@@ -1503,13 +1503,13 @@ class ListView: ControlSuperClass // docmain
 	
 	/+
 	///
-	final void headerStyle(ColumnHeaderStyle chs) // setter
+	final @property void headerStyle(ColumnHeaderStyle chs) // setter
 	{
 		// TODO: LVS_NOCOLUMNHEADER ... default is clickable.
 	}
 	
 	/// ditto
-	final ColumnHeaderStyle headerStyle() // getter
+	final @property ColumnHeaderStyle headerStyle() // getter
 	{
 		// TODO
 	}
@@ -1517,7 +1517,7 @@ class ListView: ControlSuperClass // docmain
 	
 	
 	///
-	final void hideSelection(bool byes) // setter
+	final @property void hideSelection(bool byes) // setter
 	{
 		if(byes)
 			_style(_style() & ~LVS_SHOWSELALWAYS);
@@ -1526,27 +1526,27 @@ class ListView: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final bool hideSelection() // getter
+	final @property bool hideSelection() // getter
 	{
 		return (_style() & LVS_SHOWSELALWAYS) != LVS_SHOWSELALWAYS;
 	}
 	
 	
 	///
-	final void hoverSelection(bool byes) // setter
+	final @property void hoverSelection(bool byes) // setter
 	{
 		_lvexstyle(LVS_EX_TRACKSELECT, byes ? LVS_EX_TRACKSELECT : 0);
 	}
 	
 	/// ditto
-	final bool hoverSelection() // getter
+	final @property bool hoverSelection() // getter
 	{
 		return (_lvexstyle() & LVS_EX_TRACKSELECT) == LVS_EX_TRACKSELECT;
 	}
 	
 	
 	///
-	final ListViewItemCollection items() // getter
+	final @property ListViewItemCollection items() // getter
 	{
 		return litems;
 	}
@@ -1572,7 +1572,7 @@ class ListView: ControlSuperClass // docmain
 	
 	
 	///
-	final void labelEdit(bool byes) // setter
+	final @property void labelEdit(bool byes) // setter
 	{
 		if(byes)
 			_style(_style() | LVS_EDITLABELS);
@@ -1581,14 +1581,14 @@ class ListView: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final bool labelEdit() // getter
+	final @property bool labelEdit() // getter
 	{
 		return (_style() & LVS_EDITLABELS) == LVS_EDITLABELS;
 	}
 	
 	
 	///
-	final void labelWrap(bool byes) // setter
+	final @property void labelWrap(bool byes) // setter
 	{
 		if(byes)
 			_style(_style() & ~LVS_NOLABELWRAP);
@@ -1597,14 +1597,14 @@ class ListView: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final bool labelWrap() // getter
+	final @property bool labelWrap() // getter
 	{
 		return (_style() & LVS_NOLABELWRAP) != LVS_NOLABELWRAP;
 	}
 	
 	
 	///
-	final void multiSelect(bool byes) // setter
+	final @property void multiSelect(bool byes) // setter
 	{
 		if(byes)
 		{
@@ -1620,7 +1620,7 @@ class ListView: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final bool multiSelect() // getter
+	final @property bool multiSelect() // getter
 	{
 		return (_style() & LVS_SINGLESEL) != LVS_SINGLESEL;
 	}
@@ -1629,7 +1629,7 @@ class ListView: ControlSuperClass // docmain
 	///
 	// Note: scrollable=false is not compatible with the list or details(report) styles(views).
 	// See Knowledge Base Article Q137520.
-	final void scrollable(bool byes) // setter
+	final @property void scrollable(bool byes) // setter
 	{
 		if(byes)
 			_style(_style() & ~LVS_NOSCROLL);
@@ -1640,28 +1640,28 @@ class ListView: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final bool scrollable() // getter
+	final @property bool scrollable() // getter
 	{
 		return (_style() & LVS_NOSCROLL) != LVS_NOSCROLL;
 	}
 	
 	
 	///
-	final SelectedIndexCollection selectedIndices() // getter
+	final @property SelectedIndexCollection selectedIndices() // getter
 	{
 		return selidxcollection;
 	}
 	
 	
 	///
-	final SelectedItemCollection selectedItems() // getter
+	final @property SelectedItemCollection selectedItems() // getter
 	{
 		return selobjcollection;
 	}
 	
 	
 	///
-	final void view(View v) // setter
+	final @property void view(View v) // setter
 	{
 		switch(v)
 		{
@@ -1690,7 +1690,7 @@ class ListView: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final View view() // getter
+	final @property View view() // getter
 	{
 		LONG st;
 		st = _style();
@@ -1705,7 +1705,7 @@ class ListView: ControlSuperClass // docmain
 	
 	
 	///
-	final void sorting(SortOrder so) // setter
+	final @property void sorting(SortOrder so) // setter
 	{
 		if(so == _sortorder)
 			return;
@@ -1732,7 +1732,7 @@ class ListView: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final SortOrder sorting() // getter
+	final @property SortOrder sorting() // getter
 	{
 		return _sortorder;
 	}
@@ -1787,7 +1787,7 @@ class ListView: ControlSuperClass // docmain
 	
 	
 	///
-	final void sorter(int delegate(ListViewItem, ListViewItem) sortproc) // setter
+	final @property void sorter(int delegate(ListViewItem, ListViewItem) sortproc) // setter
 	{
 		if(sortproc == this._sortproc)
 			return;
@@ -1807,7 +1807,7 @@ class ListView: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final int delegate(ListViewItem, ListViewItem) sorter() // getter
+	final int delegate(ListViewItem, ListViewItem) sorter() @property // getter
 	{
 		return _sortproc;
 	}
@@ -1816,7 +1816,7 @@ class ListView: ControlSuperClass // docmain
 	/+
 	///
 	// Gets the first visible item.
-	final ListViewItem topItem() // getter
+	final @property ListViewItem topItem() // getter
 	{
 		if(!created)
 			return null;
@@ -1826,7 +1826,7 @@ class ListView: ControlSuperClass // docmain
 	
 	
 	///
-	final void arrangeIcons()
+	final @property void arrangeIcons()
 	{
 		if(created)
 		//	SendMessageA(hwnd, LVM_ARRANGE, LVA_DEFAULT, 0);
@@ -1964,7 +1964,7 @@ class ListView: ControlSuperClass // docmain
 	else
 	{
 		///
-		final void largeImageList(ImageList imglist) // setter
+		final @property void largeImageList(ImageList imglist) // setter
 		{
 			if(isHandleCreated)
 			{
@@ -1976,14 +1976,14 @@ class ListView: ControlSuperClass // docmain
 		}
 		
 		/// ditto
-		final ImageList largeImageList() // getter
+		final @property ImageList largeImageList() // getter
 		{
 			return _lgimglist;
 		}
 		
 		
 		///
-		final void smallImageList(ImageList imglist) // setter
+		final @property void smallImageList(ImageList imglist) // setter
 		{
 			if(isHandleCreated)
 			{
@@ -1995,7 +1995,7 @@ class ListView: ControlSuperClass // docmain
 		}
 		
 		/// ditto
-		final ImageList smallImageList() // getter
+		final @property ImageList smallImageList() // getter
 		{
 			return _smimglist;
 		}
@@ -2003,7 +2003,7 @@ class ListView: ControlSuperClass // docmain
 		
 		/+
 		///
-		final void stateImageList(ImageList imglist) // setter
+		final @property void stateImageList(ImageList imglist) // setter
 		{
 			if(isHandleCreated)
 			{
@@ -2015,7 +2015,7 @@ class ListView: ControlSuperClass // docmain
 		}
 		
 		/// ditto
-		final ImageList stateImageList() // getter
+		final @property ImageList stateImageList() // getter
 		{
 			return _stimglist;
 		}
@@ -2078,19 +2078,19 @@ class ListView: ControlSuperClass // docmain
 	}
 	
 	
-	protected override Size defaultSize() // getter
+	protected override @property Size defaultSize() // getter
 	{
 		return Size(120, 95);
 	}
 	
 	
-	static Color defaultBackColor() // getter
+	static @property Color defaultBackColor() // getter
 	{
 		return SystemColors.window;
 	}
 	
 	
-	static Color defaultForeColor() // getter
+	static @property Color defaultForeColor() // getter
 	{
 		return SystemColors.windowText;
 	}

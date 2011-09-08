@@ -23,40 +23,40 @@ class SplitterEventArgs: EventArgs
 	
 	
 	///
-	final int x() // getter
+	final @property int x() // getter
 	{
 		return _x;
 	}
 	
 	
 	///
-	final int y() // getter
+	final @property int y() // getter
 	{
 		return _y;
 	}
 	
 	
 	///
-	final void splitX(int val) // setter
+	final @property void splitX(int val) // setter
 	{
 		_splitX = val;
 	}
 	
 	/// ditto
-	final int splitX() // getter
+	final @property int splitX() // getter
 	{
 		return _splitX;
 	}
 	
 	
 	///
-	final void splitY(int val) // setter
+	final @property void splitY(int val) // setter
 	{
 		_splitY = val;
 	}
 	
 	/// ditto
-	final int splitY() // getter
+	final @property int splitY() // getter
 	{
 		return _splitY;
 	}
@@ -81,7 +81,7 @@ class Splitter: Control // docmain
 	
 	
 	/+
-	override void anchor(AnchorStyles a) // setter
+	override @property void anchor(AnchorStyles a) // setter
 	{
 		throw new DflException("Splitter cannot be anchored");
 	}
@@ -90,7 +90,7 @@ class Splitter: Control // docmain
 	+/
 	
 	
-	override void dock(DockStyle ds) // setter
+	override @property void dock(DockStyle ds) // setter
 	{
 		switch(ds)
 		{
@@ -160,7 +160,7 @@ class Splitter: Control // docmain
 	
 	
 	///
-	void movingGrip(bool byes) // setter
+	@property void movingGrip(bool byes) // setter
 	{
 		if(mgrip == byes)
 			return;
@@ -174,7 +174,7 @@ class Splitter: Control // docmain
 	}
 	
 	/// ditto
-	bool movingGrip() // getter
+	@property bool movingGrip() // getter
 	{
 		return mgrip;
 	}
@@ -422,13 +422,13 @@ class Splitter: Control // docmain
 	//    Reached end of child controls: stay -mextra- away from the edge.
 	
 	///
-	final void minExtra(int min) // setter
+	final @property void minExtra(int min) // setter
 	{
 		mextra = min;
 	}
 	
 	/// ditto
-	final int minExtra() // getter
+	final @property int minExtra() // getter
 	{
 		return mextra;
 	}
@@ -436,20 +436,20 @@ class Splitter: Control // docmain
 	
 	
 	///
-	final void minSize(int min) // setter
+	final @property void minSize(int min) // setter
 	{
 		msize = min;
 	}
 	
 	/// ditto
-	final int minSize() // getter
+	final @property int minSize() // getter
 	{
 		return msize;
 	}
 	
 	
 	///
-	final void splitPosition(int pos) // setter
+	final @property void splitPosition(int pos) // setter
 	{
 		auto splat = getSplitControl(); // Splitted.
 		if(splat)
@@ -475,7 +475,7 @@ class Splitter: Control // docmain
 	
 	/// ditto
 	// -1 if not docked to a control.
-	final int splitPosition() // getter
+	final @property int splitPosition() // getter
 	{
 		auto splat = getSplitControl(); // Splitted.
 		if(splat)
@@ -507,7 +507,7 @@ class Splitter: Control // docmain
 	
 	protected:
 	
-	override Size defaultSize() // getter
+	override @property Size defaultSize() // getter
 	{
 		//return Size(GetSystemMetrics(SM_CXSIZEFRAME), GetSystemMetrics(SM_CYSIZEFRAME));
 		int sx = GetSystemMetrics(SM_CXSIZEFRAME);

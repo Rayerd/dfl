@@ -47,14 +47,14 @@ class TreeViewCancelEventArgs: CancelEventArgs
 	
 	
 	///
-	final TreeViewAction action() // getter
+	final @property TreeViewAction action() // getter
 	{
 		return _action;
 	}
 	
 	
 	///
-	final TreeNode node() // getter
+	final @property TreeNode node() // getter
 	{
 		return _node;
 	}
@@ -85,14 +85,14 @@ class TreeViewEventArgs: EventArgs
 	
 	
 	///
-	final TreeViewAction action() // getter
+	final @property TreeViewAction action() // getter
 	{
 		return _action;
 	}
 	
 	
 	///
-	final TreeNode node() // getter
+	final @property TreeNode node() // getter
 	{
 		return _node;
 	}
@@ -122,27 +122,27 @@ class NodeLabelEditEventArgs: EventArgs
 	
 	
 	///
-	final TreeNode node() // getter
+	final @property TreeNode node() // getter
 	{
 		return _node;
 	}
 	
 	
 	///
-	final Dstring label() // getter
+	final @property Dstring label() // getter
 	{
 		return _label;
 	}
 	
 	
 	///
-	final void cancelEdit(bool byes) // setter
+	final @property void cancelEdit(bool byes) // setter
 	{
 		_cancel = byes;
 	}
 	
 	/// ditto
-	final bool cancelEdit() // getter
+	final @property bool cancelEdit() // getter
 	{
 		return _cancel;
 	}
@@ -196,13 +196,13 @@ class TreeNode: DObject
 	
 	/+
 	///
-	final void backColor(Color c) // setter
+	final @property void backColor(Color c) // setter
 	{
 		bcolor = c;
 	}
 	
 	/// ditto
-	final Color backColor() // getter
+	final @property Color backColor() // getter
 	{
 		return bcolor;
 	}
@@ -210,7 +210,7 @@ class TreeNode: DObject
 	
 	
 	///
-	final Rect bounds() // getter
+	final @property Rect bounds() // getter
 	{
 		Rect result;
 		
@@ -229,7 +229,7 @@ class TreeNode: DObject
 	
 	
 	///
-	final TreeNode firstNode() // getter
+	final @property TreeNode firstNode() // getter
 	{
 		if(tchildren.length)
 			return tchildren._nodes[0];
@@ -239,13 +239,13 @@ class TreeNode: DObject
 	
 	/+
 	///
-	final void foreColor(Color c) // setter
+	final @property void foreColor(Color c) // setter
 	{
 		fcolor = c;
 	}
 	
 	/// ditto
-	final Color foreColor() // getter
+	final @property Color foreColor() // getter
 	{
 		return fcolor;
 	}
@@ -254,7 +254,7 @@ class TreeNode: DObject
 	
 	///
 	// Path from the root to this node.
-	final Dstring fullPath() // getter
+	final @property Dstring fullPath() // getter
 	{
 		if(!tparent)
 			return ttext;
@@ -276,7 +276,7 @@ class TreeNode: DObject
 	
 	
 	///
-	final HTREEITEM handle() // getter
+	final @property HTREEITEM handle() // getter
 	{
 		return hnode;
 	}
@@ -284,7 +284,7 @@ class TreeNode: DObject
 	
 	///
 	// Index of this node in the parent node.
-	final int index() // getter
+	final @property int index() // getter
 	{
 		int result = -1;
 		if(tparent)
@@ -298,21 +298,21 @@ class TreeNode: DObject
 	
 	/+
 	///
-	final bool isEditing() // getter
+	final @property bool isEditing() // getter
 	{
 	}
 	+/
 	
 	
 	///
-	final bool isExpanded() // getter
+	final @property bool isExpanded() // getter
 	{
 		return isState(TVIS_EXPANDED);
 	}
 	
 	
 	///
-	final bool isSelected() // getter
+	final @property bool isSelected() // getter
 	{
 		return isState(TVIS_SELECTED);
 	}
@@ -320,14 +320,14 @@ class TreeNode: DObject
 	
 	/+
 	///
-	final bool isVisible() // getter
+	final @property bool isVisible() // getter
 	{
 	}
 	+/
 	
 	
 	///
-	final TreeNode lastNode() // getter
+	final @property TreeNode lastNode() // getter
 	{
 		if(tchildren.length)
 			return tchildren._nodes[tchildren.length - 1];
@@ -337,7 +337,7 @@ class TreeNode: DObject
 	
 	///
 	// Next sibling node.
-	final TreeNode nextNode() // getter
+	final @property TreeNode nextNode() // getter
 	{
 		if(tparent)
 		{
@@ -355,13 +355,13 @@ class TreeNode: DObject
 	
 	/+
 	///
-	final void nodeFont(Font f) // setter
+	final @property void nodeFont(Font f) // setter
 	{
 		tfont = f;
 	}
 	
 	/// ditto
-	final Font nodeFont() // getter
+	final @property Font nodeFont() // getter
 	{
 		return tfont;
 	}
@@ -369,14 +369,14 @@ class TreeNode: DObject
 	
 	
 	///
-	final TreeNodeCollection nodes() // getter
+	final @property TreeNodeCollection nodes() // getter
 	{
 		return tchildren;
 	}
 	
 	
 	///
-	final TreeNode parent() // getter
+	final @property TreeNode parent() // getter
 	{
 		return tparent;
 	}
@@ -384,7 +384,7 @@ class TreeNode: DObject
 	
 	///
 	// Previous sibling node.
-	final TreeNode prevNode() // getter
+	final @property TreeNode prevNode() // getter
 	{
 		if(tparent)
 		{
@@ -403,20 +403,20 @@ class TreeNode: DObject
 	
 	
 	///
-	final void tag(Object o) // setter
+	final @property void tag(Object o) // setter
 	{
 		ttag = o;
 	}
 	
 	/// ditto
-	final Object tag() // getter
+	final @property Object tag() // getter
 	{
 		return ttag;
 	}
 	
 	
 	///
-	final void text(Dstring newText) // setter
+	final @property void text(Dstring newText) // setter
 	{
 		ttext = newText;
 		
@@ -447,7 +447,7 @@ class TreeNode: DObject
 	}
 	
 	/// ditto
-	final Dstring text() // getter
+	final @property Dstring text() // getter
 	{
 		return ttext;
 	}
@@ -455,7 +455,7 @@ class TreeNode: DObject
 	
 	///
 	// Get the TreeView control this node belongs to.
-	final TreeView treeView() // getter
+	final @property TreeView treeView() // getter
 	{
 		return tview;
 	}
@@ -567,7 +567,7 @@ class TreeNode: DObject
 	else
 	{
 		///
-		final void imageIndex(int index) // setter
+		final @property void imageIndex(int index) // setter
 		{
 			this._imgidx = index;
 			
@@ -590,7 +590,7 @@ class TreeNode: DObject
 		}
 		
 		/// ditto
-		final int imageIndex() // getter
+		final @property int imageIndex() // getter
 		{
 			return _imgidx;
 		}
@@ -655,7 +655,7 @@ class TreeNode: DObject
 	+/
 	
 	
-	package final bool created() // getter
+	package final @property bool created() // getter
 	{
 		if(tview && tview.created())
 		{
@@ -811,7 +811,7 @@ class TreeNodeCollection
 	}
 	
 	
-	package final bool created() // getter
+	package final @property bool created() // getter
 	{
 		return tview && tview.created();
 	}
@@ -1031,13 +1031,13 @@ class TreeView: ControlSuperClass // docmain
 	+/
 	
 	
-	static Color defaultBackColor() // getter
+	static @property Color defaultBackColor() // getter
 	{
 		return SystemColors.window;
 	}
 	
 	
-	override Color backColor() // getter
+	override @property Color backColor() // getter
 	{
 		if(Color.empty == backc)
 			return defaultBackColor;
@@ -1045,7 +1045,7 @@ class TreeView: ControlSuperClass // docmain
 	}
 	
 	
-	override void backColor(Color b) // setter
+	override @property void backColor(Color b) // setter
 	{
 		super.backColor = b;
 		
@@ -1059,13 +1059,13 @@ class TreeView: ControlSuperClass // docmain
 	}
 	
 	
-	static Color defaultForeColor() //getter
+	static @property Color defaultForeColor() //getter
 	{
 		return SystemColors.windowText;
 	}
 	
 	
-	override Color foreColor() // getter
+	override @property Color foreColor() // getter
 	{
 		if(Color.empty == forec)
 			return defaultForeColor;
@@ -1075,7 +1075,7 @@ class TreeView: ControlSuperClass // docmain
 	alias Control.foreColor foreColor; // Overload.
 	
 	
-	final void borderStyle(BorderStyle bs) // setter
+	final @property void borderStyle(BorderStyle bs) // setter
 	{
 		final switch(bs)
 		{
@@ -1102,7 +1102,7 @@ class TreeView: ControlSuperClass // docmain
 	}
 	
 	
-	final BorderStyle borderStyle() // getter
+	final @property BorderStyle borderStyle() // getter
 	{
 		if(_exStyle() & WS_EX_CLIENTEDGE)
 			return BorderStyle.FIXED_3D;
@@ -1114,7 +1114,7 @@ class TreeView: ControlSuperClass // docmain
 	
 	/+
 	///
-	final void checkBoxes(bool byes) // setter
+	final @property void checkBoxes(bool byes) // setter
 	{
 		if(byes)
 			_style(_style() | TVS_CHECKBOXES);
@@ -1125,7 +1125,7 @@ class TreeView: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final bool checkBoxes() // getter
+	final @property bool checkBoxes() // getter
 	{
 		return (_style() & TVS_CHECKBOXES) != 0;
 	}
@@ -1133,7 +1133,7 @@ class TreeView: ControlSuperClass // docmain
 	
 	
 	///
-	final void fullRowSelect(bool byes) // setter
+	final @property void fullRowSelect(bool byes) // setter
 	{
 		if(byes)
 			_style(_style() | TVS_FULLROWSELECT);
@@ -1144,14 +1144,14 @@ class TreeView: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final bool fullRowSelect() // getter
+	final @property bool fullRowSelect() // getter
 	{
 		return (_style() & TVS_FULLROWSELECT) != 0;
 	}
 	
 	
 	///
-	final void hideSelection(bool byes) // setter
+	final @property void hideSelection(bool byes) // setter
 	{
 		if(byes)
 			_style(_style() & ~TVS_SHOWSELALWAYS);
@@ -1160,7 +1160,7 @@ class TreeView: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final bool hideSelection() // getter
+	final @property bool hideSelection() // getter
 	{
 		return (_style() & TVS_SHOWSELALWAYS) == 0;
 	}
@@ -1169,7 +1169,7 @@ class TreeView: ControlSuperClass // docmain
 	deprecated alias hoverSelection hotTracking;
 	
 	///
-	final void hoverSelection(bool byes) // setter
+	final @property void hoverSelection(bool byes) // setter
 	{
 		if(byes)
 			_style(_style() | TVS_TRACKSELECT);
@@ -1178,14 +1178,14 @@ class TreeView: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final bool hoverSelection() // getter
+	final @property bool hoverSelection() // getter
 	{
 		return (_style() & TVS_TRACKSELECT) != 0;
 	}
 	
 	
 	///
-	final void indent(int newIndent) // setter
+	final @property void indent(int newIndent) // setter
 	{
 		if(newIndent < 0)
 			newIndent = 0;
@@ -1199,7 +1199,7 @@ class TreeView: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final int indent() // getter
+	final @property int indent() // getter
 	{
 		if(created)
 			ind = cast(int)SendMessageA(hwnd, TVM_GETINDENT, 0, 0);
@@ -1208,7 +1208,7 @@ class TreeView: ControlSuperClass // docmain
 	
 	
 	///
-	final void itemHeight(int h) // setter
+	final @property void itemHeight(int h) // setter
 	{
 		if(h < 0)
 			h = 0;
@@ -1220,7 +1220,7 @@ class TreeView: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final int itemHeight() // getter
+	final @property int itemHeight() // getter
 	{
 		if(created)
 			iheight = cast(int)SendMessageA(hwnd, TVM_GETITEMHEIGHT, 0, 0);
@@ -1229,7 +1229,7 @@ class TreeView: ControlSuperClass // docmain
 	
 	
 	///
-	final void labelEdit(bool byes) // setter
+	final @property void labelEdit(bool byes) // setter
 	{
 		if(byes)
 			_style(_style() | TVS_EDITLABELS);
@@ -1238,34 +1238,34 @@ class TreeView: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final bool labelEdit() // getter
+	final @property bool labelEdit() // getter
 	{
 		return (_style() & TVS_EDITLABELS) != 0;
 	}
 	
 	
 	///
-	final TreeNodeCollection nodes() // getter
+	final @property TreeNodeCollection nodes() // getter
 	{
 		return tchildren;
 	}
 	
 	
 	///
-	final void pathSeparator(dchar sep) // setter
+	final @property void pathSeparator(dchar sep) // setter
 	{
 		pathsep = sep;
 	}
 	
 	/// ditto
-	final dchar pathSeparator() // getter
+	final @property dchar pathSeparator() // getter
 	{
 		return pathsep;
 	}
 	
 	
 	///
-	final void scrollable(bool byes) // setter
+	final @property void scrollable(bool byes) // setter
 	{
 		if(byes)
 			_style(_style() & ~TVS_NOSCROLL);
@@ -1277,14 +1277,14 @@ class TreeView: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final bool scrollable() // getter
+	final @property bool scrollable() // getter
 	{
 		return (_style & TVS_NOSCROLL) == 0;
 	}
 	
 	
 	///
-	final void selectedNode(TreeNode node) // setter
+	final @property void selectedNode(TreeNode node) // setter
 	{
 		if(created)
 		{
@@ -1301,7 +1301,7 @@ class TreeView: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final TreeNode selectedNode() // getter
+	final @property TreeNode selectedNode() // getter
 	{
 		if(created)
 		{
@@ -1315,7 +1315,7 @@ class TreeView: ControlSuperClass // docmain
 	
 	
 	///
-	final void showLines(bool byes) // setter
+	final @property void showLines(bool byes) // setter
 	{
 		if(byes)
 			_style(_style() | TVS_HASLINES);
@@ -1326,14 +1326,14 @@ class TreeView: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final bool showLines() // getter
+	final @property bool showLines() // getter
 	{
 		return (_style() & TVS_HASLINES) != 0;
 	}
 	
 	
 	///
-	final void showPlusMinus(bool byes) // setter
+	final @property void showPlusMinus(bool byes) // setter
 	{
 		if(byes)
 			_style(_style() | TVS_HASBUTTONS);
@@ -1344,7 +1344,7 @@ class TreeView: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final bool showPlusMinus() // getter
+	final @property bool showPlusMinus() // getter
 	{
 		return (_style() & TVS_HASBUTTONS) != 0;
 	}
@@ -1352,7 +1352,7 @@ class TreeView: ControlSuperClass // docmain
 	
 	///
 	// -showPlusMinus- should be false.
-	final void singleExpand(bool byes) // setter
+	final @property void singleExpand(bool byes) // setter
 	{
 		if(byes)
 			_style(_style() | TVS_SINGLEEXPAND);
@@ -1363,14 +1363,14 @@ class TreeView: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final bool singleExpand() // getter
+	final @property bool singleExpand() // getter
 	{
 		return (_style & TVS_SINGLEEXPAND) != 0;
 	}
 	
 	
 	///
-	final void showRootLines(bool byes) // setter
+	final @property void showRootLines(bool byes) // setter
 	{
 		if(byes)
 			_style(_style() | TVS_LINESATROOT);
@@ -1381,20 +1381,20 @@ class TreeView: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final bool showRootLines() // getter
+	final @property bool showRootLines() // getter
 	{
 		return (_style() & TVS_LINESATROOT) != 0;
 	}
 	
 	
 	///
-	final void sorted(bool byes) // setter
+	final @property void sorted(bool byes) // setter
 	{
 		_sort = byes;
 	}
 	
 	/// ditto
-	final bool sorted() // getter
+	final @property bool sorted() // getter
 	{
 		return _sort;
 	}
@@ -1402,7 +1402,7 @@ class TreeView: ControlSuperClass // docmain
 	
 	///
 	// First visible node, based on the scrolled position.
-	final TreeNode topNode() // getter
+	final @property TreeNode topNode() // getter
 	{
 		if(created)
 		{
@@ -1418,7 +1418,7 @@ class TreeView: ControlSuperClass // docmain
 	
 	///
 	// Number of visible nodes, including partially visible.
-	final int visibleCount() // getter
+	final @property int visibleCount() // getter
 	{
 		if(!created)
 			return 0;
@@ -1535,7 +1535,7 @@ class TreeView: ControlSuperClass // docmain
 	else
 	{
 		///
-		final void imageList(ImageList imglist) // setter
+		final @property void imageList(ImageList imglist) // setter
 		{
 			if(isHandleCreated)
 			{
@@ -1547,7 +1547,7 @@ class TreeView: ControlSuperClass // docmain
 		}
 		
 		/// ditto
-		final ImageList imageList() // getter
+		final @property ImageList imageList() // getter
 		{
 			return _imglist;
 		}
@@ -1556,13 +1556,13 @@ class TreeView: ControlSuperClass // docmain
 		/+
 		///
 		// Default image index (if -1 use this).
-		final void imageIndex(int index)
+		final @property void imageIndex(int index) // setter
 		{
 			_defimgidx = index;
 		}
 		
 		/// ditto
-		final int imageIndex() // getter
+		final @property int imageIndex() // getter
 		{
 			return _defimgidx;
 		}
@@ -1570,7 +1570,7 @@ class TreeView: ControlSuperClass // docmain
 		
 		
 		///
-		final void selectedImageIndex(int index)
+		final @property void selectedImageIndex(int index) // setter
 		{
 			//assert(index >= 0);
 			assert(index >= -1);
@@ -1586,14 +1586,14 @@ class TreeView: ControlSuperClass // docmain
 		}
 		
 		/// ditto
-		final int selectedImageIndex() // getter
+		final @property int selectedImageIndex() // getter
 		{
 			return _selimgidx;
 		}
 	}
 	
 	
-	protected override Size defaultSize() // getter
+	protected override @property Size defaultSize() // getter
 	{
 		return Size(120, 100);
 	}

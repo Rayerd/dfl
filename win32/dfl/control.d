@@ -279,20 +279,20 @@ class HelpEventArgs: EventArgs
 	
 	
 	///
-	final void handled(bool byes) // setter
+	final @property void handled(bool byes) // setter
 	{
 		hand = byes;
 	}
 	
 	/// ditto
-	final bool handled() // getter
+	final @property bool handled() // getter
 	{
 		return hand;
 	}
 	
 	
 	///
-	final Point mousePos() // getter
+	final @property Point mousePos() // getter
 	{
 		return mpos;
 	}
@@ -315,7 +315,7 @@ class InvalidateEventArgs: EventArgs
 	
 	
 	///
-	final Rect invalidRect() // getter
+	final @property Rect invalidRect() // getter
 	{
 		return ir;
 	}
@@ -382,7 +382,7 @@ class LayoutEventArgs: EventArgs
 	
 	
 	///
-	final Control affectedControl() // getter
+	final @property Control affectedControl() // getter
 	{
 		return ac;
 	}
@@ -412,28 +412,28 @@ version(DFL_NO_DRAG_DROP) {} else
 		
 		
 		///
-		final DragDropEffects allowedEffect() // getter
+		final @property DragDropEffects allowedEffect() // getter
 		{
 			return _allowedEffect;
 		}
 		
 		
 		///
-		final void effect(DragDropEffects newEffect) // setter
+		final @property void effect(DragDropEffects newEffect) // setter
 		{
 			_effect = newEffect;
 		}
 		
 		
 		/// ditto
-		final DragDropEffects effect() // getter
+		final @property DragDropEffects effect() // getter
 		{
 			return _effect;
 		}
 		
 		
 		///
-		final dfl.data.IDataObject data() // getter
+		final @property dfl.data.IDataObject data() // getter
 		{
 			return _dobj;
 		}
@@ -441,21 +441,21 @@ version(DFL_NO_DRAG_DROP) {} else
 		
 		///
 		// State of ctrl, alt, shift, and mouse buttons.
-		final int keyState() // getter
+		final @property int keyState() // getter
 		{
 			return _keyState;
 		}
 		
 		
 		///
-		final int x() // getter
+		final @property int x() // getter
 		{
 			return _x;
 		}
 		
 		
 		///
-		final int y() // getter
+		final @property int y() // getter
 		{
 			return _y;
 		}
@@ -481,20 +481,20 @@ version(DFL_NO_DRAG_DROP) {} else
 		
 		
 		///
-		final DragDropEffects effect() // getter
+		final @property DragDropEffects effect() // getter
 		{
 			return _effect;
 		}
 		
 		
 		///
-		final void useDefaultCursors(bool byes) // setter
+		final @property void useDefaultCursors(bool byes) // setter
 		{
 			udefcurs = byes;
 		}
 		
 		/// ditto
-		final bool useDefaultCursors() // getter
+		final @property bool useDefaultCursors() // getter
 		{
 			return udefcurs;
 		}
@@ -519,20 +519,20 @@ version(DFL_NO_DRAG_DROP) {} else
 		
 		
 		///
-		final void action(DragAction newAction) // setter
+		final @property void action(DragAction newAction) // setter
 		{
 			_action = newAction;
 		}
 		
 		/// ditto
-		final DragAction action() // getter
+		final @property DragAction action() // getter
 		{
 			return _action;
 		}
 		
 		
 		///
-		final bool escapePressed() // getter
+		final @property bool escapePressed() // getter
 		{
 			return escp;
 		}
@@ -540,7 +540,7 @@ version(DFL_NO_DRAG_DROP) {} else
 		
 		///
 		// State of ctrl, alt and shift.
-		final int keyState() // getter
+		final @property int keyState() // getter
 		{
 			return _keyState;
 		}
@@ -670,7 +670,7 @@ class Control: DObject, IWindow // docmain
 		deprecated alias length count;
 		
 		///
-		int length() // getter
+		@property int length() // getter
 		{
 			if(_owner.isHandleCreated)
 			{
@@ -690,7 +690,7 @@ class Control: DObject, IWindow // docmain
 		
 		
 		///
-		Control opIndex(int i) // getter
+		@property Control opIndex(int i) // getter
 		{
 			if(_owner.isHandleCreated)
 			{
@@ -829,7 +829,7 @@ class Control: DObject, IWindow // docmain
 		}
 		
 		
-		protected final Control owner() // getter
+		protected final @property Control owner() // getter
 		{
 			return _owner;
 		}
@@ -1056,7 +1056,7 @@ class Control: DObject, IWindow // docmain
 		}
 		
 		/// ditto
-		bool allowDrop() // getter
+		@property bool allowDrop() // getter
 		{
 			/+
 			return (_exStyle() & WS_EX_ACCEPTFILES) != 0;
@@ -1131,7 +1131,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	void backColor(Color c) // setter
+	@property void backColor(Color c) // setter
 	{
 		if(backc == c)
 			return;
@@ -1146,7 +1146,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	/// ditto
-	Color backColor() // getter
+	@property Color backColor() // getter
 	{
 		if(Color.empty == backc)
 		{
@@ -1161,27 +1161,27 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	final int bottom() // getter
+	final @property int bottom() // getter
 	{
 		return wrect.bottom;
 	}
 	
 	
 	///
-	final void bounds(Rect r) // setter
+	final @property void bounds(Rect r) // setter
 	{
 		setBoundsCore(r.x, r.y, r.width, r.height, BoundsSpecified.ALL);
 	}
 	
 	/// ditto
-	final Rect bounds() // getter
+	final @property Rect bounds() // getter
 	{
 		return wrect;
 	}
 	
 	
 	/+
-	final Rect originalBounds() // getter package
+	final @property Rect originalBounds() // getter package
 	{
 		return oldwrect;
 	}
@@ -1256,7 +1256,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	final bool canFocus() // getter
+	final @property bool canFocus() // getter
 	{
 		/+
 		LONG wl = _style();
@@ -1269,7 +1269,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	final bool canSelect() // getter
+	final @property bool canSelect() // getter
 	out(result)
 	{
 		if(result)
@@ -1294,13 +1294,13 @@ class Control: DObject, IWindow // docmain
 	
 	///
 	// Returns true if this control has the mouse capture.
-	final bool capture() // getter
+	final @property bool capture() // getter
 	{
 		return isHandleCreated && hwnd == GetCapture();
 	}
 	
 	/// ditto
-	final void capture(bool cyes) // setter
+	final @property void capture(bool cyes) // setter
 	{
 		if(cyes)
 			SetCapture(hwnd);
@@ -1339,7 +1339,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	final Rect clientRectangle() // getter
+	final @property Rect clientRectangle() // getter
 	{
 		return Rect(Point(0, 0), wclientsz);
 	}
@@ -1354,13 +1354,13 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	final Size clientSize() // getter
+	final @property Size clientSize() // getter
 	{
 		return wclientsz;
 	}
 	
 	/// ditto
-	final void clientSize(Size sz) // setter
+	final @property void clientSize(Size sz) // setter
 	{
 		setClientSizeCore(sz.width, sz.height);
 	}
@@ -1391,7 +1391,7 @@ class Control: DObject, IWindow // docmain
 	
 	///
 	// This window or one of its children has focus.
-	final bool containsFocus() // getter
+	final @property bool containsFocus() // getter
 	{
 		if(!isHandleCreated)
 			return false;
@@ -1414,7 +1414,7 @@ class Control: DObject, IWindow // docmain
 		
 		
 		///
-		void contextMenu(ContextMenu menu) // setter
+		@property void contextMenu(ContextMenu menu) // setter
 		{
 			if(cmenu is menu)
 				return;
@@ -1428,7 +1428,7 @@ class Control: DObject, IWindow // docmain
 		}
 		
 		/// ditto
-		ContextMenu contextMenu() // getter
+		@property ContextMenu contextMenu() // getter
 		{
 			return cmenu;
 		}
@@ -1436,7 +1436,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	final ControlCollection controls() // getter
+	final @property ControlCollection controls() // getter
 	{
 		//return new ControlCollection(this);
 		return ccollection;
@@ -1444,7 +1444,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	final bool created() // getter
+	final @property bool created() // getter
 	{
 		// To-do: only return true when createHandle finishes.
 		// Will also need to update uses of created/isHandleCreated.
@@ -1512,7 +1512,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	void cursor(Cursor cur) // setter
+	@property void cursor(Cursor cur) // setter
 	{
 		if(cur is wcurs)
 			return;
@@ -1524,7 +1524,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	/// ditto
-	Cursor cursor() // getter
+	@property Cursor cursor() // getter
 	{
 		if(!wcurs)
 		{
@@ -1539,14 +1539,14 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	static Color defaultBackColor() // getter
+	static @property Color defaultBackColor() // getter
 	{
 		return Color.systemColor(COLOR_BTNFACE);
 	}
 	
 	
 	///
-	static Color defaultForeColor() //getter
+	static @property Color defaultForeColor() //getter
 	{
 		return Color.systemColor(COLOR_BTNTEXT);
 	}
@@ -1633,7 +1633,7 @@ class Control: DObject, IWindow // docmain
 	deprecated alias defaultFont controlFont;
 	
 	///
-	static void defaultFont(ControlFont cf) // setter
+	static @property void defaultFont(ControlFont cf) // setter
 	{
 		if(_deffont)
 			throw new DflException("Control font already selected");
@@ -1641,7 +1641,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	/// ditto
-	static void defaultFont(Font f) // setter
+	static @property void defaultFont(Font f) // setter
 	{
 		if(_deffont)
 			throw new DflException("Control font already selected");
@@ -1649,7 +1649,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	/// ditto
-	static Font defaultFont() // getter
+	static @property Font defaultFont() // getter
 	{
 		if(!_deffont)
 		{
@@ -1682,7 +1682,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	package static Cursor _defaultCursor() // getter
+	package static @property Cursor _defaultCursor() // getter
 	{
 		static Cursor def = null;
 		
@@ -1700,7 +1700,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	Rect displayRectangle() // getter
+	@property Rect displayRectangle() // getter
 	{
 		return clientRectangle;
 	}
@@ -1727,13 +1727,13 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	DockStyle dock() // getter
+	@property DockStyle dock() // getter
 	{
 		return sdock;
 	}
 	
 	/// ditto
-	void dock(DockStyle ds) // setter
+	@property void dock(DockStyle ds) // setter
 	{
 		if(ds == sdock)
 			return;
@@ -1770,7 +1770,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	/// Get or set whether or not this control currently has its bounds managed. Fires onHasLayoutChanged as needed.
-	final bool hasLayout() // getter
+	final @property bool hasLayout() // getter
 	{
 		if(cbits & CBits.HAS_LAYOUT)
 			return true;
@@ -1778,7 +1778,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	/// ditto
-	final void hasLayout(bool byes) // setter
+	final @property void hasLayout(bool byes) // setter
 	{
 		//if(byes == hasLayout)
 		//	return; // No! setting this property again must trigger onHasLayoutChanged again.
@@ -1816,7 +1816,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	final void enabled(bool byes) // setter
+	final @property void enabled(bool byes) // setter
 	{
 		if(byes)
 			cbits |= CBits.ENABLED;
@@ -1841,7 +1841,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	///
-	final bool enabled() // getter
+	final @property bool enabled() // getter
 	{
 		/*
 		return IsWindowEnabled(hwnd) ? true : false;
@@ -1891,7 +1891,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	bool focused() // getter
+	@property bool focused() // getter
 	{
 		//return isHandleCreated && hwnd == GetFocus();
 		return created && fromChildHandle(GetFocus()) is this;
@@ -1899,7 +1899,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	void font(Font f) // setter
+	@property void font(Font f) // setter
 	{
 		if(wfont is f)
 			return;
@@ -1913,7 +1913,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	/// ditto
-	Font font() // getter
+	@property Font font() // getter
 	{
 		if(!wfont)
 		{
@@ -1967,7 +1967,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	void foreColor(Color c) // setter
+	@property void foreColor(Color c) // setter
 	{
 		if(c == forec)
 			return;
@@ -1981,7 +1981,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	/// ditto
-	Color foreColor() // getter
+	@property Color foreColor() // getter
 	{
 		if(Color.empty == forec)
 		{
@@ -1998,7 +1998,7 @@ class Control: DObject, IWindow // docmain
 	///
 	// Doesn't cause a ControlCollection to be constructed so
 	// it could improve performance when walking through children.
-	final bool hasChildren() // getter
+	final @property bool hasChildren() // getter
 	{
 		//return isHandleCreated && GetWindow(hwnd, GW_CHILD) != HWND.init;
 		
@@ -2014,7 +2014,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	final void height(int h) // setter
+	final @property void height(int h) // setter
 	{
 		/*
 		RECT rect;
@@ -2026,21 +2026,21 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	/// ditto
-	final int height() // getter
+	final @property int height() // getter
 	{
 		return wrect.height;
 	}
 	
 	
 	///
-	final bool isHandleCreated() // getter
+	final @property bool isHandleCreated() // getter
 	{
 		return hwnd != HWND.init;
 	}
 	
 	
 	///
-	final void left(int l) // setter
+	final @property void left(int l) // setter
 	{
 		/*
 		RECT rect;
@@ -2052,14 +2052,14 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	/// ditto
-	final int left() // getter
+	final @property int left() // getter
 	{
 		return wrect.x;
 	}
 	
 	
 	/// Property: get or set the X and Y location of the control.
-	final void location(Point pt) // setter
+	final @property void location(Point pt) // setter
 	{
 		/*
 		SetWindowPos(hwnd, HWND.init, pt.x, pt.y, 0, 0, SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOSIZE);
@@ -2069,14 +2069,14 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	/// ditto
-	final Point location() // getter
+	final @property Point location() // getter
 	{
 		return wrect.location;
 	}
 	
 	
 	/// Currently depressed modifier keys.
-	static Keys modifierKeys() // getter
+	static @property Keys modifierKeys() // getter
 	{
 		// Is there a better way to do this?
 		Keys ks = Keys.NONE;
@@ -2091,7 +2091,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	/// Currently depressed mouse buttons.
-	static MouseButtons mouseButtons() // getter
+	static @property MouseButtons mouseButtons() // getter
 	{
 		MouseButtons result;
 		
@@ -2118,7 +2118,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	static Point mousePosition() // getter
+	static @property Point mousePosition() // getter
 	{
 		Point pt;
 		GetCursorPos(&pt.point);
@@ -2127,13 +2127,13 @@ class Control: DObject, IWindow // docmain
 	
 	
 	/// Property: get or set the name of this control used in code.
-	final void name(Dstring txt) // setter
+	final @property void name(Dstring txt) // setter
 	{
 		_ctrlname = txt;
 	}
 	
 	/// ditto
-	final Dstring name() // getter
+	final @property Dstring name() // getter
 	{
 		return _ctrlname;
 	}
@@ -2181,7 +2181,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	final void parent(Control c) // setter
+	final @property void parent(Control c) // setter
 	{
 		if(c is wparent)
 			return;
@@ -2278,7 +2278,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	/// ditto
-	final Control parent() // getter
+	final @property Control parent() // getter
 	{
 		return wparent;
 	}
@@ -2301,7 +2301,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	final void region(Region rgn) // setter
+	final @property void region(Region rgn) // setter
 	{
 		if(isHandleCreated)
 		{
@@ -2313,7 +2313,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	/// ditto
-	final Region region() // getter
+	final @property Region region() // getter
 	{
 		return wregion;
 	}
@@ -2328,14 +2328,14 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	final int right() // getter
+	final @property int right() // getter
 	{
 		return wrect.right;
 	}
 	
 	
 	/+
-	void rightToLeft(bool byes) // setter
+	@property void rightToLeft(bool byes) // setter
 	{
 		LONG wl = _exStyle();
 		if(byes)
@@ -2346,14 +2346,14 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	bool rightToLeft() // getter
+	@property bool rightToLeft() // getter
 	{
 		return (_exStyle() & WS_EX_RTLREADING) != 0;
 	}
 	+/
 	
 	
-	deprecated void rightToLeft(bool byes) // setter
+	deprecated @property void rightToLeft(bool byes) // setter
 	{
 		rightToLeft = byes ? RightToLeft.YES : RightToLeft.NO;
 	}
@@ -2415,7 +2415,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	void rightToLeft(RightToLeft val) // setter
+	@property void rightToLeft(RightToLeft val) // setter
 	{
 		if(rtol != val)
 		{
@@ -2427,7 +2427,7 @@ class Control: DObject, IWindow // docmain
 	
 	/// ditto
 	// Returns YES or NO; if inherited, returns parent's setting.
-	RightToLeft rightToLeft() // getter
+	@property RightToLeft rightToLeft() // getter
 	{
 		if(RightToLeft.INHERIT == rtol)
 		{
@@ -2555,7 +2555,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	final void size(Size sz) // setter
+	final @property void size(Size sz) // setter
 	{
 		/*
 		SetWindowPos(hwnd, HWND.init, 0, 0, sz.width, sz.height, SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOMOVE);
@@ -2565,20 +2565,20 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	/// ditto
-	final Size size() // getter
+	final @property Size size() // getter
 	{
 		return wrect.size; // struct Size, not sizeof.
 	}
 	
 	
 	/+
-	final void tabIndex(int i) // setter
+	final @property void tabIndex(int i) // setter
 	{
 		// TODO: ?
 	}
 	
 	
-	final int tabIndex() // getter
+	final @property int tabIndex() // getter
 	{
 		return tabidx;
 	}
@@ -2594,7 +2594,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	final int zIndex() // getter
+	final @property int zIndex() // getter
 	out(result)
 	{
 		assert(result >= 0);
@@ -2620,7 +2620,7 @@ class Control: DObject, IWindow // docmain
 	
 	///
 	// True if control can be tabbed to.
-	final void tabStop(bool byes) // setter
+	final @property void tabStop(bool byes) // setter
 	{
 		LONG wl = _style();
 		if(byes)
@@ -2631,20 +2631,20 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	/// ditto
-	final bool tabStop() // getter
+	final @property bool tabStop() // getter
 	{
 		return (_style() & WS_TABSTOP) != 0;
 	}
 	
 	
 	/// Property: get or set additional data tagged onto the control.
-	final void tag(Object o) // setter
+	final @property void tag(Object o) // setter
 	{
 		otag = o;
 	}
 	
 	/// ditto
-	final Object tag() // getter
+	final @property Object tag() // getter
 	{
 		return otag;
 	}
@@ -2657,7 +2657,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	void text(Dstring txt) // setter
+	@property void text(Dstring txt) // setter
 	{
 		if(isHandleCreated)
 		{
@@ -2677,7 +2677,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	/// ditto
-	Dstring text() // getter
+	@property Dstring text() // getter
 	{
 		if(isHandleCreated)
 		{
@@ -2694,13 +2694,13 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	final void top(int t) // setter
+	final @property void top(int t) // setter
 	{
 		setBoundsCore(0, t, 0, 0, BoundsSpecified.Y);
 	}
 	
 	/// ditto
-	final int top() // getter
+	final @property int top() // getter
 	{
 		return wrect.y;
 	}
@@ -2709,7 +2709,7 @@ class Control: DObject, IWindow // docmain
 	/// Returns the topmost Control related to this control.
 	// Returns the owner control that has no parent.
 	// Returns this Control if no owner ?
-	final Control topLevelControl() // getter
+	final @property Control topLevelControl() // getter
 	{
 		if(isHandleCreated)
 		{
@@ -2751,13 +2751,13 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	final void visible(bool byes) // setter
+	final @property void visible(bool byes) // setter
 	{
 		setVisibleCore(byes);
 	}
 	
 	/// ditto
-	final bool visible() // getter
+	final @property bool visible() // getter
 	{
 		//if(isHandleCreated)
 		//	wstyle = GetWindowLongA(hwnd, GWL_STYLE); // ...
@@ -2767,13 +2767,13 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	final void width(int w) // setter
+	final @property void width(int w) // setter
 	{
 		setBoundsCore(0, 0, w, 0, BoundsSpecified.WIDTH);
 	}
 	
 	/// ditto
-	final int width() // getter
+	final @property int width() // getter
 	{
 		return wrect.width;
 	}
@@ -2864,7 +2864,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	// Note: true if no children, even if this not created.
-	package final bool areChildrenCreated() // getter
+	package final @property bool areChildrenCreated() // getter
 	{
 		return !ccollection.children.length;
 	}
@@ -3486,7 +3486,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	/// Returns true if the window does not belong to the current thread.
-	bool invokeRequired() // getter
+	@property bool invokeRequired() // getter
 	{
 		DWORD tid = GetWindowThreadProcessId(hwnd, null);
 		return tid != GetCurrentThreadId();
@@ -4050,7 +4050,7 @@ class Control: DObject, IWindow // docmain
 	///
 	// If mouseEnter, mouseHover and mouseLeave events are supported.
 	// Returns true on Windows 95 with IE 5.5, Windows 98+ or Windows NT 4.0+.
-	static bool supportsMouseTracking() // getter
+	static @property bool supportsMouseTracking() // getter
 	{
 		return trackMouseEvent != null;
 	}
@@ -6083,7 +6083,7 @@ class Control: DObject, IWindow // docmain
 	protected:
 	
 	///
-	Size defaultSize() // getter
+	@property Size defaultSize() // getter
 	{
 		return Size(0, 0);
 	}
@@ -6091,7 +6091,7 @@ class Control: DObject, IWindow // docmain
 	
 	/+
 	// TODO: implement.
-	EventHandlerList events() // getter
+	@property EventHandlerList events() // getter
 	{
 	}
 	+/
@@ -6101,13 +6101,13 @@ class Control: DObject, IWindow // docmain
 	// TODO: implement. Is this worth implementing?
 	
 	// Set to -1 to reset cache.
-	final void fontHeight(int fh) // setter
+	final @property void fontHeight(int fh) // setter
 	{
 		
 	}
 	
 	
-	final int fontHeight() // getter
+	final @property int fontHeight() // getter
 	{
 		return fonth;
 	}
@@ -6116,7 +6116,7 @@ class Control: DObject, IWindow // docmain
 	
 	///
 	//final void resizeRedraw(bool byes) // setter
-	public final void resizeRedraw(bool byes) // setter
+	public final @property void resizeRedraw(bool byes) // setter
 	{
 		/+
 		// These class styles get lost sometimes so don't rely on them.
@@ -6132,7 +6132,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	/// ditto
-	final bool resizeRedraw() // getter
+	final @property bool resizeRedraw() // getter
 	{
 		//return (_classStyle() & (CS_HREDRAW | CS_VREDRAW)) != 0;
 		return szdraw;
@@ -6393,7 +6393,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	public final bool recreatingHandle() // getter
+	public final @property bool recreatingHandle() // getter
 	{
 		if(cbits & CBits.RECREATING)
 			return true;
@@ -6882,9 +6882,9 @@ class Control: DObject, IWindow // docmain
 	version(SET_DFL_095)
 		package const ubyte _compat = CCompat.DFL095;
 	else version(DFL_NO_COMPAT)
-		package const ubyte _compat = CCompat.NONE;
+		package @property const ubyte _compat = CCompat.NONE;
 	else
-		package CCompat _compat() // getter
+		package @property CCompat _compat() // getter
 			{ if(Application._compat & DflCompat.CONTROL_RECREATE_095) return CCompat.DFL095; return CCompat.NONE; }
 	
 	
@@ -6975,20 +6975,20 @@ class Control: DObject, IWindow // docmain
 	
 	final:
 	
-	void menter(bool byes) // setter
+	@property void menter(bool byes) // setter
 		{ if(byes) cbits |= CBits.MENTER; else cbits &= ~CBits.MENTER; }
-	bool menter() // getter
+	@property bool menter() // getter
 		{ return (cbits & CBits.MENTER) != 0; }
 	
-	void killing(bool byes) // setter
+	@property void killing(bool byes) // setter
 		//{ if(byes) cbits |= CBits.KILLING; else cbits &= ~CBits.KILLING; }
 		{ assert(byes); if(byes) cbits |= CBits.KILLING; }
-	bool killing() // getter
+	@property bool killing() // getter
 		{ return (cbits & CBits.KILLING) != 0; }
 	
-	void owned(bool byes) // setter
+	@property void owned(bool byes) // setter
 		{ if(byes) cbits |= CBits.OWNED; else cbits &= ~CBits.OWNED; }
-	bool owned() // getter
+	@property bool owned() // getter
 		{ return (cbits & CBits.OWNED) != 0; }
 	
 	/+
@@ -6998,43 +6998,43 @@ class Control: DObject, IWindow // docmain
 		{ return (cbits & CBits.ALLOW_LAYOUT) != 0; }
 	+/
 	
-	void _clicking(bool byes) // setter
+	@property void _clicking(bool byes) // setter
 		{ if(byes) cbits |= CBits.CLICKING; else cbits &= ~CBits.CLICKING; }
-	bool _clicking() // getter
+	@property bool _clicking() // getter
 		{ return (cbits & CBits.CLICKING) != 0; }
 	
-	void needCalcSize(bool byes) // setter
+	@property void needCalcSize(bool byes) // setter
 		{ if(byes) cbits |= CBits.NEED_CALC_SIZE; else cbits &= ~CBits.NEED_CALC_SIZE; }
-	bool needCalcSize() // getter
+	@property bool needCalcSize() // getter
 		{ return (cbits & CBits.NEED_CALC_SIZE) != 0; }
 	
-	void szdraw(bool byes) // setter
+	@property void szdraw(bool byes) // setter
 		{ if(byes) cbits |= CBits.SZDRAW; else cbits &= ~CBits.SZDRAW; }
-	bool szdraw() // getter
+	@property bool szdraw() // getter
 		{ return (cbits & CBits.SZDRAW) != 0; }
 	
-	void ownedbg(bool byes) // setter
+	@property void ownedbg(bool byes) // setter
 		{ if(byes) cbits |= CBits.OWNEDBG; else cbits &= ~CBits.OWNEDBG; }
-	bool ownedbg() // getter
+	@property bool ownedbg() // getter
 		{ return (cbits & CBits.OWNEDBG) != 0; }
 	
 	debug
 	{
-		void _handlecreated(bool byes) // setter
+		@property void _handlecreated(bool byes) // setter
 			{ if(byes) cbits |= CBits.HANDLE_CREATED; else cbits &= ~CBits.HANDLE_CREATED; }
-		bool _handlecreated() // getter
+		@property bool _handlecreated() // getter
 			{ return (cbits & CBits.HANDLE_CREATED) != 0; }
 	}
 	
 	
-	LONG _exStyle()
+	@property LONG _exStyle()
 	{
 		// return GetWindowLongA(hwnd, GWL_EXSTYLE);
 		return wexstyle;
 	}
 	
 	
-	void _exStyle(LONG wl)
+	@property void _exStyle(LONG wl)
 	{
 		if(isHandleCreated)
 		{
@@ -7045,14 +7045,14 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	LONG _style()
+	@property LONG _style()
 	{
 		// return GetWindowLongA(hwnd, GWL_STYLE);
 		return wstyle;
 	}
 	
 	
-	void _style(LONG wl)
+	@property void _style(LONG wl)
 	{
 		if(isHandleCreated)
 		{
@@ -7063,7 +7063,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	HBRUSH hbrBg() // getter
+	@property HBRUSH hbrBg() // getter
 	{
 		if(_hbrBg)
 			return _hbrBg;
@@ -7078,7 +7078,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	void hbrBg(HBRUSH hbr) // setter
+	@property void hbrBg(HBRUSH hbr) // setter
 	in
 	{
 		if(hbr)
@@ -7334,13 +7334,13 @@ class ScrollableControl: Control // docmain
 	
 	
 	///
-	final Size autoScaleBaseSize() // getter
+	final @property Size autoScaleBaseSize() // getter
 	{
 		return autossz;
 	}
 	
 	/// ditto
-	final void autoScaleBaseSize(Size newSize) // setter
+	final @property void autoScaleBaseSize(Size newSize) // setter
 	in
 	{
 		assert(newSize.width > 0);
@@ -7353,7 +7353,7 @@ class ScrollableControl: Control // docmain
 	
 	
 	///
-	final void autoScale(bool byes) // setter
+	final @property void autoScale(bool byes) // setter
 	{
 		if(byes)
 			cbits |= CBits.ASCALE;
@@ -7362,13 +7362,13 @@ class ScrollableControl: Control // docmain
 	}
 	
 	/// ditto
-	final bool autoScale() // getter
+	final @property bool autoScale() // getter
 	{
 		return (cbits & CBits.ASCALE) == CBits.ASCALE;
 	}
 	
 	
-	final Point scrollPosition() // getter
+	final @property Point scrollPosition() // getter
 	{
 		return Point(xspos, yspos);
 	}
@@ -7478,7 +7478,7 @@ class ScrollableControl: Control // docmain
 	
 	
 	//override final Rect displayRectangle() // getter
-	override Rect displayRectangle() // getter
+	override @property Rect displayRectangle() // getter
 	{
 		Rect result = clientRectangle;
 		
@@ -7502,7 +7502,7 @@ class ScrollableControl: Control // docmain
 	
 	
 	///
-	final void scrollSize(Size sz) // setter
+	final @property void scrollSize(Size sz) // setter
 	{
 		scrollsz = sz;
 		
@@ -7510,7 +7510,7 @@ class ScrollableControl: Control // docmain
 	}
 	
 	/// ditto
-	final Size scrollSize() // getter
+	final @property Size scrollSize() // getter
 	{
 		return scrollsz;
 	}
@@ -7537,7 +7537,7 @@ class ScrollableControl: Control // docmain
 		public:
 		
 		///
-		void all(int x) // setter
+		@property void all(int x) // setter
 		{
 			_bottom = _right = _top = _left = _all = x;
 			
@@ -7545,13 +7545,13 @@ class ScrollableControl: Control // docmain
 		}
 		
 		/// ditto
-		final int all() // getter
+		final @property int all() // getter
 		{
 			return _all;
 		}
 		
 		/// ditto
-		void left(int x) // setter
+		@property void left(int x) // setter
 		{
 			_left = x;
 			
@@ -7559,13 +7559,13 @@ class ScrollableControl: Control // docmain
 		}
 		
 		/// ditto
-		int left() // getter
+		@property int left() // getter
 		{
 			return _left;
 		}
 		
 		/// ditto
-		void top(int x) // setter
+		@property void top(int x) // setter
 		{
 			_top = x;
 			
@@ -7573,13 +7573,13 @@ class ScrollableControl: Control // docmain
 		}
 		
 		/// ditto
-		int top() // getter
+		@property int top() // getter
 		{
 			return _top;
 		}
 		
 		/// ditto
-		void right(int x) // setter
+		@property void right(int x) // setter
 		{
 			_right = x;
 			
@@ -7587,13 +7587,13 @@ class ScrollableControl: Control // docmain
 		}
 		
 		/// ditto
-		int right() // getter
+		@property int right() // getter
 		{
 			return _right;
 		}
 		
 		/// ditto
-		void bottom(int x) // setter
+		@property void bottom(int x) // setter
 		{
 			_bottom = x;
 			
@@ -7601,7 +7601,7 @@ class ScrollableControl: Control // docmain
 		}
 		
 		/// ditto
-		int bottom() // getter
+		@property int bottom() // getter
 		{
 			return _bottom;
 		}
@@ -7609,7 +7609,7 @@ class ScrollableControl: Control // docmain
 	
 	
 	///
-	final DockPaddingEdges dockPadding() // getter
+	final @property DockPaddingEdges dockPadding() // getter
 	{
 		return dpad;
 	}
@@ -7631,7 +7631,7 @@ class ScrollableControl: Control // docmain
 	static const Size DEFAULT_SCALE = Size(5, 13);
 	
 	///
-	final void hScroll(bool byes) // setter
+	final @property void hScroll(bool byes) // setter
 	{
 		LONG wl = _style();
 		if(byes)
@@ -7646,14 +7646,14 @@ class ScrollableControl: Control // docmain
 	
 	
 	/// ditto
-	final bool hScroll() // getter
+	final @property bool hScroll() // getter
 	{
 		return (_style() & WS_HSCROLL) != 0;
 	}
 	
 	
 	///
-	final void vScroll(bool byes) // setter
+	final @property void vScroll(bool byes) // setter
 	{
 		LONG wl = _style();
 		if(byes)
@@ -7667,7 +7667,7 @@ class ScrollableControl: Control // docmain
 	}
 	
 	/// ditto
-	final bool vScroll() // getter
+	final @property bool vScroll() // getter
 	{
 		return (_style() & WS_VSCROLL) != 0;
 	}
@@ -8009,7 +8009,7 @@ class ScrollableControl: Control // docmain
 interface IContainerControl // docmain
 {
 	///
-	Control activeControl(); // getter
+	@property Control activeControl(); // getter
 	
 	deprecated void activeControl(Control); // setter
 	
@@ -8021,7 +8021,7 @@ interface IContainerControl // docmain
 class ContainerControl: ScrollableControl, IContainerControl // docmain
 {
 	///
-	Control activeControl() // getter
+	@property Control activeControl() // getter
 	{
 		/+
 		HWND hwfocus, hw;
@@ -8046,7 +8046,7 @@ class ContainerControl: ScrollableControl, IContainerControl // docmain
 	}
 	
 	/// ditto
-	void activeControl(Control ctrl) // setter
+	@property void activeControl(Control ctrl) // setter
 	{
 		if(!activateControl(ctrl))
 			throw new DflException("Unable to activate control");
@@ -8069,7 +8069,7 @@ class ContainerControl: ScrollableControl, IContainerControl // docmain
 	
 	
 	///
-	final Form parentForm() // getter
+	final @property Form parentForm() // getter
 	{
 		Control par;
 		Form f;

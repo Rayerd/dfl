@@ -35,7 +35,7 @@ class LinkClickedEventArgs: EventArgs
 	
 	
 	///
-	final Dstring linkText() // getter
+	final @property Dstring linkText() // getter
 	{
 		return _linktxt;
 	}
@@ -113,7 +113,7 @@ class RichTextBox: TextBoxBase // docmain
 	}
 	
 	
-	override Cursor cursor() // getter
+	override @property Cursor cursor() // getter
 	{
 		return wcurs; // Do return null and don't inherit.
 	}
@@ -121,7 +121,7 @@ class RichTextBox: TextBoxBase // docmain
 	alias TextBoxBase.cursor cursor; // Overload.
 	
 	
-	override Dstring selectedText() // getter
+	override @property Dstring selectedText() // getter
 	{
 		if(created)
 		{
@@ -141,7 +141,7 @@ class RichTextBox: TextBoxBase // docmain
 	alias TextBoxBase.selectedText selectedText; // Overload.
 	
 	
-	override void selectionLength(uint len) // setter
+	override @property void selectionLength(uint len) // setter
 	{
 		if(created)
 		{
@@ -156,7 +156,7 @@ class RichTextBox: TextBoxBase // docmain
 	// Current selection length, in characters.
 	// This does not necessarily correspond to the length of chars; some characters use multiple chars.
 	// An end of line (\r\n) takes up 2 characters.
-	override uint selectionLength() // getter
+	override @property uint selectionLength() // getter
 	{
 		if(created)
 		{
@@ -169,7 +169,7 @@ class RichTextBox: TextBoxBase // docmain
 	}
 	
 	
-	override void selectionStart(uint pos) // setter
+	override @property void selectionStart(uint pos) // setter
 	{
 		if(created)
 		{
@@ -186,7 +186,7 @@ class RichTextBox: TextBoxBase // docmain
 	// Current selection starting index, in characters.
 	// This does not necessarily correspond to the index of chars; some characters use multiple chars.
 	// An end of line (\r\n) takes up 2 characters.
-	override uint selectionStart() // getter
+	override @property uint selectionStart() // getter
 	{
 		if(created)
 		{
@@ -198,7 +198,7 @@ class RichTextBox: TextBoxBase // docmain
 	}
 	
 	
-	override void maxLength(uint len) // setter
+	override @property void maxLength(uint len) // setter
 	{
 		lim = len;
 		
@@ -209,7 +209,7 @@ class RichTextBox: TextBoxBase // docmain
 	alias TextBoxBase.maxLength maxLength; // Overload.
 	
 	
-	override Size defaultSize() // getter
+	override @property Size defaultSize() // getter
 	{
 		return Size(120, 120); // ?
 	}
@@ -227,7 +227,7 @@ class RichTextBox: TextBoxBase // docmain
 	}
 	
 	
-	override void backColor(Color c) // setter
+	override @property void backColor(Color c) // setter
 	{
 		_setbk(c);
 		super.backColor(c);
@@ -254,7 +254,7 @@ class RichTextBox: TextBoxBase // docmain
 	}
 	
 	
-	override void foreColor(Color c) // setter
+	override @property void foreColor(Color c) // setter
 	{
 		_setfc(c);
 		super.foreColor(c);
@@ -264,7 +264,7 @@ class RichTextBox: TextBoxBase // docmain
 	
 	
 	///
-	final bool canRedo() // getter
+	final @property bool canRedo() // getter
 	{
 		if(!created)
 			return false;
@@ -307,7 +307,7 @@ class RichTextBox: TextBoxBase // docmain
 	
 	
 	///
-	final void selectionCharOffset(int yoffset) // setter
+	final @property void selectionCharOffset(int yoffset) // setter
 	{
 		if(!created)
 			return;
@@ -322,7 +322,7 @@ class RichTextBox: TextBoxBase // docmain
 	}
 	
 	/// ditto
-	final int selectionCharOffset() // getter
+	final @property int selectionCharOffset() // getter
 	{
 		if(created)
 		{
@@ -337,7 +337,7 @@ class RichTextBox: TextBoxBase // docmain
 	
 	
 	///
-	final void selectionColor(Color c) // setter
+	final @property void selectionColor(Color c) // setter
 	{
 		if(!created)
 			return;
@@ -355,7 +355,7 @@ class RichTextBox: TextBoxBase // docmain
 	}
 	
 	/// ditto
-	final Color selectionColor() // getter
+	final @property Color selectionColor() // getter
 	{
 		if(created)
 		{
@@ -377,7 +377,7 @@ class RichTextBox: TextBoxBase // docmain
 	
 	
 	///
-	final void selectionBackColor(Color c) // setter
+	final @property void selectionBackColor(Color c) // setter
 	{
 		if(!created)
 			return;
@@ -395,7 +395,7 @@ class RichTextBox: TextBoxBase // docmain
 	}
 	
 	/// ditto
-	final Color selectionBackColor() // getter
+	final @property Color selectionBackColor() // getter
 	{
 		if(created)
 		{
@@ -417,7 +417,7 @@ class RichTextBox: TextBoxBase // docmain
 	
 	
 	///
-	final void selectionSubscript(bool byes) // setter
+	final @property void selectionSubscript(bool byes) // setter
 	{
 		if(!created)
 			return;
@@ -447,7 +447,7 @@ class RichTextBox: TextBoxBase // docmain
 	}
 	
 	/// ditto
-	final bool selectionSubscript() // getter
+	final @property bool selectionSubscript() // getter
 	{
 		if(created)
 		{
@@ -464,7 +464,7 @@ class RichTextBox: TextBoxBase // docmain
 	
 	
 	///
-	final void selectionSuperscript(bool byes) // setter
+	final @property void selectionSuperscript(bool byes) // setter
 	{
 		if(!created)
 			return;
@@ -494,7 +494,7 @@ class RichTextBox: TextBoxBase // docmain
 	}
 	
 	/// ditto
-	final bool selectionSuperscript() // getter
+	final @property bool selectionSuperscript() // getter
 	{
 		if(created)
 		{
@@ -514,7 +514,7 @@ class RichTextBox: TextBoxBase // docmain
 		CFM_UNDERLINE | CFM_CHARSET | CFM_FACE | CFM_SIZE | CFM_UNDERLINETYPE | CFM_WEIGHT;
 	
 	///
-	final void selectionFont(Font f) // setter
+	final @property void selectionFont(Font f) // setter
 	{
 		if(created)
 		{
@@ -549,7 +549,7 @@ class RichTextBox: TextBoxBase // docmain
 	
 	/// ditto
 	// Returns null if the selection has different fonts.
-	final Font selectionFont() // getter
+	final @property Font selectionFont() // getter
 	{
 		if(created)
 		{
@@ -596,7 +596,7 @@ class RichTextBox: TextBoxBase // docmain
 	
 	
 	///
-	final void selectionBold(bool byes) // setter
+	final @property void selectionBold(bool byes) // setter
 	{
 		if(!created)
 			return;
@@ -613,7 +613,7 @@ class RichTextBox: TextBoxBase // docmain
 	}
 	
 	/// ditto
-	final bool selectionBold() // getter
+	final @property bool selectionBold() // getter
 	{
 		if(created)
 		{
@@ -630,7 +630,7 @@ class RichTextBox: TextBoxBase // docmain
 	
 	
 	///
-	final void selectionUnderline(bool byes) // setter
+	final @property void selectionUnderline(bool byes) // setter
 	{
 		if(!created)
 			return;
@@ -647,7 +647,7 @@ class RichTextBox: TextBoxBase // docmain
 	}
 	
 	/// ditto
-	final bool selectionUnderline() // getter
+	final @property bool selectionUnderline() // getter
 	{
 		if(created)
 		{
@@ -664,7 +664,7 @@ class RichTextBox: TextBoxBase // docmain
 	
 	
 	///
-	final void scrollBars(RichTextBoxScrollBars sb) // setter
+	final @property void scrollBars(RichTextBoxScrollBars sb) // setter
 	{
 		LONG st;
 		st = _style() & ~(ES_DISABLENOSCROLL | WS_HSCROLL | WS_VSCROLL |
@@ -703,7 +703,7 @@ class RichTextBox: TextBoxBase // docmain
 	}
 	
 	/// ditto
-	final RichTextBoxScrollBars scrollBars() // getter
+	final @property RichTextBoxScrollBars scrollBars() // getter
 	{
 		LONG wl = _style();
 		
@@ -823,33 +823,33 @@ class RichTextBox: TextBoxBase // docmain
 	
 	
 	///
-	final void selectedRtf(Dstring rtf) // setter
+	final @property void selectedRtf(Dstring rtf) // setter
 	{
 		_streamIn(SF_RTF | SFF_SELECTION, rtf);
 	}
 	
 	/// ditto
-	final Dstring selectedRtf() // getter
+	final @property Dstring selectedRtf() // getter
 	{
 		return _streamOut(SF_RTF | SFF_SELECTION);
 	}
 	
 	
 	///
-	final void rtf(Dstring newRtf) // setter
+	final @property void rtf(Dstring newRtf) // setter
 	{
 		_streamIn(SF_RTF, rtf);
 	}
 	
 	/// ditto
-	final Dstring rtf() // getter
+	final @property Dstring rtf() // getter
 	{
 		return _streamOut(SF_RTF);
 	}
 	
 	
 	///
-	final void detectUrls(bool byes) // setter
+	final @property void detectUrls(bool byes) // setter
 	{
 		autoUrl = byes;
 		
@@ -860,7 +860,7 @@ class RichTextBox: TextBoxBase // docmain
 	}
 	
 	/// ditto
-	final bool detectUrls() // getter
+	final @property bool detectUrls() // getter
 	{
 		return autoUrl;
 	}

@@ -21,7 +21,7 @@ class Label: Control // docmain
 	
 	
 	///
-	void borderStyle(BorderStyle bs) // setter
+	@property void borderStyle(BorderStyle bs) // setter
 	{
 		final switch(bs)
 		{
@@ -48,7 +48,7 @@ class Label: Control // docmain
 	}
 	
 	/// ditto
-	BorderStyle borderStyle() // getter
+	@property BorderStyle borderStyle() // getter
 	{
 		if(_exStyle() & WS_EX_CLIENTEDGE)
 			return BorderStyle.FIXED_3D;
@@ -59,7 +59,7 @@ class Label: Control // docmain
 	
 	
 	///
-	final void useMnemonic(bool byes) // setter
+	final @property void useMnemonic(bool byes) // setter
 	{
 		if(byes)
 		{
@@ -77,14 +77,14 @@ class Label: Control // docmain
 	}
 	
 	/// ditto
-	final bool useMnemonic() // getter
+	final @property bool useMnemonic() // getter
 	{
 		return (tfmt.formatFlags & TextFormatFlags.NO_PREFIX) == 0;
 	}
 	
 	
 	///
-	Size preferredSize() // getter
+	@property Size preferredSize() // getter
 	{
 		Size result;
 		Graphics g;
@@ -104,7 +104,7 @@ class Label: Control // docmain
 	}
 	
 	
-	override void text(Dstring newText) // setter
+	override @property void text(Dstring newText) // setter
 	{
 		super.text = newText;
 		
@@ -118,7 +118,7 @@ class Label: Control // docmain
 	
 	
 	///
-	void autoSize(bool byes) // setter
+	@property void autoSize(bool byes) // setter
 	{
 		if(byes != autosz)
 		{
@@ -132,14 +132,14 @@ class Label: Control // docmain
 	}
 	
 	/// ditto
-	bool autoSize() // getter
+	@property bool autoSize() // getter
 	{
 		return autosz;
 	}
 	
 	
 	///
-	void textAlign(ContentAlignment calign) // setter
+	@property void textAlign(ContentAlignment calign) // setter
 	{
 		final switch(calign)
 		{
@@ -184,7 +184,7 @@ class Label: Control // docmain
 	}
 	
 	/// ditto
-	ContentAlignment textAlign() // getter
+	@property ContentAlignment textAlign() // getter
 	{
 		TextAlignment ta;
 		ta = tfmt.alignment;
@@ -237,7 +237,7 @@ class Label: Control // docmain
 	}
 	
 	
-	protected override Size defaultSize() // getter
+	protected override @property Size defaultSize() // getter
 	{
 		return Size(100, 23);
 	}
@@ -379,13 +379,13 @@ class Label: Control // docmain
 	bool autosz = false;
 	
 	
-	final void tfmt(TextFormat tf) // setter
+	final @property void tfmt(TextFormat tf) // setter
 	{
 		_tfmt = tf;
 	}
 	
 	
-	final TextFormat tfmt() // getter
+	final @property TextFormat tfmt() // getter
 	{
 		/+
 		// This causes it to invert.

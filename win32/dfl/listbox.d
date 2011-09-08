@@ -34,27 +34,27 @@ abstract class ListControl: ControlSuperClass // docmain
 	
 	
 	///
-	abstract void selectedIndex(int idx); // setter
+	abstract @property void selectedIndex(int idx); // setter
 	/// ditto
-	abstract int selectedIndex(); // getter
+	abstract @property int selectedIndex(); // getter
 	
 	///
-	abstract void selectedValue(Object val); // setter
+	abstract @property void selectedValue(Object val); // setter
 	/// ditto
 	
 	///
-	abstract void selectedValue(Dstring str); // setter
+	abstract @property void selectedValue(Dstring str); // setter
 	/// ditto
-	abstract Object selectedValue(); // getter
+	abstract @property Object selectedValue(); // getter
 	
 	
-	static Color defaultBackColor() // getter
+	static @property Color defaultBackColor() // getter
 	{
 		return SystemColors.window;
 	}
 	
 	
-	override Color backColor() // getter
+	override @property Color backColor() // getter
 	{
 		if(Color.empty == backc)
 			return defaultBackColor;
@@ -64,13 +64,13 @@ abstract class ListControl: ControlSuperClass // docmain
 	alias Control.backColor backColor; // Overload.
 	
 	
-	static Color defaultForeColor() //getter
+	static @property Color defaultForeColor() //getter
 	{
 		return SystemColors.windowText;
 	}
 	
 	
-	override Color foreColor() // getter
+	override @property Color foreColor() // getter
 	{
 		if(Color.empty == forec)
 			return defaultForeColor;
@@ -121,7 +121,7 @@ class ListBox: ListControl // docmain
 	{
 		deprecated alias length count;
 		
-		int length() // getter
+		@property int length() // getter
 		{
 			if(!lbox.isHandleCreated)
 				return 0;
@@ -217,7 +217,7 @@ class ListBox: ListControl // docmain
 	{
 		deprecated alias length count;
 		
-		int length() // getter
+		@property int length() // getter
 		{
 			if(!lbox.isHandleCreated)
 				return 0;
@@ -377,14 +377,14 @@ class ListBox: ListControl // docmain
 	const int NO_MATCHES = LB_ERR;
 	
 	
-	protected override Size defaultSize() // getter
+	protected override @property Size defaultSize() // getter
 	{
 		return Size(120, 95);
 	}
 	
 	
 	///
-	void borderStyle(BorderStyle bs) // setter
+	@property void borderStyle(BorderStyle bs) // setter
 	{
 		final switch(bs)
 		{
@@ -411,7 +411,7 @@ class ListBox: ListControl // docmain
 	}
 	
 	/// ditto
-	BorderStyle borderStyle() // getter
+	@property BorderStyle borderStyle() // getter
 	{
 		if(_exStyle() & WS_EX_CLIENTEDGE)
 			return BorderStyle.FIXED_3D;
@@ -422,7 +422,7 @@ class ListBox: ListControl // docmain
 	
 	
 	///
-	void drawMode(DrawMode dm) // setter
+	@property void drawMode(DrawMode dm) // setter
 	{
 		LONG wl = _style() & ~(LBS_OWNERDRAWVARIABLE | LBS_OWNERDRAWFIXED);
 		
@@ -446,7 +446,7 @@ class ListBox: ListControl // docmain
 	}
 	
 	/// ditto
-	DrawMode drawMode() // getter
+	@property DrawMode drawMode() // getter
 	{
 		LONG wl = _style();
 		
@@ -459,7 +459,7 @@ class ListBox: ListControl // docmain
 	
 	
 	///
-	final void horizontalExtent(int he) // setter
+	final @property void horizontalExtent(int he) // setter
 	{
 		if(isHandleCreated)
 			prevwproc(LB_SETHORIZONTALEXTENT, he, 0);
@@ -468,7 +468,7 @@ class ListBox: ListControl // docmain
 	}
 	
 	/// ditto
-	final int horizontalExtent() // getter
+	final @property int horizontalExtent() // getter
 	{
 		if(isHandleCreated)
 			hextent = cast(int)prevwproc(LB_GETHORIZONTALEXTENT, 0, 0);
@@ -477,7 +477,7 @@ class ListBox: ListControl // docmain
 	
 	
 	///
-	final void horizontalScrollbar(bool byes) // setter
+	final @property void horizontalScrollbar(bool byes) // setter
 	{
 		if(byes)
 			_style(_style() | WS_HSCROLL);
@@ -488,14 +488,14 @@ class ListBox: ListControl // docmain
 	}
 	
 	/// ditto
-	final bool horizontalScrollbar() // getter
+	final @property bool horizontalScrollbar() // getter
 	{
 		return (_style() & WS_HSCROLL) != 0;
 	}
 	
 	
 	///
-	final void integralHeight(bool byes) //setter
+	final @property void integralHeight(bool byes) //setter
 	{
 		if(byes)
 			_style(_style() & ~LBS_NOINTEGRALHEIGHT);
@@ -506,7 +506,7 @@ class ListBox: ListControl // docmain
 	}
 	
 	/// ditto
-	final bool integralHeight() // getter
+	final @property bool integralHeight() // getter
 	{
 		return (_style() & LBS_NOINTEGRALHEIGHT) == 0;
 	}
@@ -514,7 +514,7 @@ class ListBox: ListControl // docmain
 	
 	///
 	// This function has no effect if the drawMode is OWNER_DRAW_VARIABLE.
-	final void itemHeight(int h) // setter
+	final @property void itemHeight(int h) // setter
 	{
 		if(drawMode == DrawMode.OWNER_DRAW_VARIABLE)
 			return;
@@ -527,7 +527,7 @@ class ListBox: ListControl // docmain
 	
 	/// ditto
 	// Return value is meaningless when drawMode is OWNER_DRAW_VARIABLE.
-	final int itemHeight() // getter
+	final @property int itemHeight() // getter
 	{
 		// Requesting it like this when owner draw variable doesn't work.
 		/+
@@ -548,14 +548,14 @@ class ListBox: ListControl // docmain
 	
 	
 	///
-	final ObjectCollection items() // getter
+	final @property ObjectCollection items() // getter
 	{
 		return icollection;
 	}
 	
 	
 	///
-	final void multiColumn(bool byes) // setter
+	final @property void multiColumn(bool byes) // setter
 	{
 		// TODO: is this the correct implementation?
 		
@@ -568,14 +568,14 @@ class ListBox: ListControl // docmain
 	}
 	
 	/// ditto
-	final bool multiColumn() // getter
+	final @property bool multiColumn() // getter
 	{
 		return (_style() & LBS_MULTICOLUMN) != 0;
 	}
 	
 	
 	///
-	final void scrollAlwaysVisible(bool byes) // setter
+	final @property void scrollAlwaysVisible(bool byes) // setter
 	{
 		if(byes)
 			_style(_style() | LBS_DISABLENOSCROLL);
@@ -586,13 +586,13 @@ class ListBox: ListControl // docmain
 	}
 	
 	/// ditto
-	final bool scrollAlwaysVisible() // getter
+	final @property bool scrollAlwaysVisible() // getter
 	{
 		return (_style() & LBS_DISABLENOSCROLL) != 0;
 	}
 	
 	
-	override void selectedIndex(int idx) // setter
+	override @property void selectedIndex(int idx) // setter
 	{
 		if(isHandleCreated)
 		{
@@ -632,7 +632,7 @@ class ListBox: ListControl // docmain
 		}
 	}
 	
-	override int selectedIndex() // getter
+	override @property int selectedIndex() // getter
 	{
 		if(isHandleCreated)
 		{
@@ -654,7 +654,7 @@ class ListBox: ListControl // docmain
 	
 	
 	///
-	final void selectedItem(Object o) // setter
+	final @property void selectedItem(Object o) // setter
 	{
 		int i;
 		i = items.indexOf(o);
@@ -663,7 +663,7 @@ class ListBox: ListControl // docmain
 	}
 	
 	/// ditto
-	final void selectedItem(Dstring str) // setter
+	final @property void selectedItem(Dstring str) // setter
 	{
 		int i;
 		i = items.indexOf(str);
@@ -672,7 +672,7 @@ class ListBox: ListControl // docmain
 	}
 	
 	
-	final Object selectedItem() // getter
+	final @property Object selectedItem() // getter
 	{
 		int idx;
 		idx = selectedIndex;
@@ -682,38 +682,38 @@ class ListBox: ListControl // docmain
 	}
 	
 	
-	override void selectedValue(Object val) // setter
+	override @property void selectedValue(Object val) // setter
 	{
 		selectedItem = val;
 	}
 	
-	override void selectedValue(Dstring str) // setter
+	override @property void selectedValue(Dstring str) // setter
 	{
 		selectedItem = str;
 	}
 	
-	override Object selectedValue() // getter
+	override @property Object selectedValue() // getter
 	{
 		return selectedItem;
 	}
 	
 	
 	///
-	final SelectedIndexCollection selectedIndices() // getter
+	final @property SelectedIndexCollection selectedIndices() // getter
 	{
 		return selidxcollection;
 	}
 	
 	
 	///
-	final SelectedObjectCollection selectedItems() // getter
+	final @property SelectedObjectCollection selectedItems() // getter
 	{
 		return selobjcollection;
 	}
 	
 	
 	///
-	void selectionMode(SelectionMode selmode) // setter
+	@property void selectionMode(SelectionMode selmode) // setter
 	{
 		LONG wl = _style() & ~(LBS_NOSEL | LBS_EXTENDEDSEL | LBS_MULTIPLESEL);
 		
@@ -741,7 +741,7 @@ class ListBox: ListControl // docmain
 	}
 	
 	/// ditto
-	SelectionMode selectionMode() // getter
+	@property SelectionMode selectionMode() // getter
 	{
 		LONG wl = _style();
 		
@@ -756,7 +756,7 @@ class ListBox: ListControl // docmain
 	
 	
 	///
-	final void sorted(bool byes) // setter
+	final @property void sorted(bool byes) // setter
 	{
 		/+
 		if(byes)
@@ -768,7 +768,7 @@ class ListBox: ListControl // docmain
 	}
 	
 	/// ditto
-	final bool sorted() // getter
+	final @property bool sorted() // getter
 	{
 		//return (_style() & LBS_SORT) != 0;
 		return _sorting;
@@ -776,14 +776,14 @@ class ListBox: ListControl // docmain
 	
 	
 	///
-	final void topIndex(int idx) // setter
+	final @property void topIndex(int idx) // setter
 	{
 		if(isHandleCreated)
 			prevwproc(LB_SETTOPINDEX, idx, 0);
 	}
 	
 	/// ditto
-	final int topIndex() // getter
+	final @property int topIndex() // getter
 	{
 		if(isHandleCreated)
 			return prevwproc(LB_GETTOPINDEX, 0, 0);
@@ -792,7 +792,7 @@ class ListBox: ListControl // docmain
 	
 	
 	///
-	final void useTabStops(bool byes) // setter
+	final @property void useTabStops(bool byes) // setter
 	{
 		if(byes)
 			_style(_style() | LBS_USETABSTOPS);
@@ -803,7 +803,7 @@ class ListBox: ListControl // docmain
 	}
 	
 	/// ditto
-	final bool useTabStops() // getter
+	final @property bool useTabStops() // getter
 	{
 		return (_style() & LBS_USETABSTOPS) != 0;
 	}

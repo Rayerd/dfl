@@ -60,7 +60,7 @@ class ToolBarButton
 	else
 	{
 		///
-		final void imageIndex(int index) // setter
+		final @property void imageIndex(int index) // setter
 		{
 			this._imgidx = index;
 			
@@ -69,7 +69,7 @@ class ToolBarButton
 		}
 		
 		/// ditto
-		final int imageIndex() // getter
+		final @property int imageIndex() // getter
 		{
 			return _imgidx;
 		}
@@ -77,7 +77,7 @@ class ToolBarButton
 	
 	
 	///
-	void text(Dstring newText) // setter
+	@property void text(Dstring newText) // setter
 	{
 		_text = newText;
 		
@@ -86,14 +86,14 @@ class ToolBarButton
 	}
 	
 	/// ditto
-	Dstring text() // getter
+	@property Dstring text() // getter
 	{
 		return _text;
 	}
 	
 	
 	///
-	final void style(ToolBarButtonStyle st) // setter
+	final @property void style(ToolBarButtonStyle st) // setter
 	{
 		this._style = st;
 		
@@ -102,7 +102,7 @@ class ToolBarButton
 	}
 	
 	/// ditto
-	final ToolBarButtonStyle style() // getter
+	final @property ToolBarButtonStyle style() // getter
 	{
 		return _style;
 	}
@@ -139,13 +139,13 @@ class ToolBarButton
 	
 	
 	///
-	final void tag(Object o) // setter
+	final @property void tag(Object o) // setter
 	{
 		_tag = o;
 	}
 	
 	/// ditto
-	final Object tag() // getter
+	final @property Object tag() // getter
 	{
 		return _tag;
 	}
@@ -157,13 +157,13 @@ class ToolBarButton
 	else
 	{
 		///
-		final void dropDownMenu(ContextMenu cmenu) // setter
+		final @property void dropDownMenu(ContextMenu cmenu) // setter
 		{
 			_cmenu = cmenu;
 		}
 		
 		/// ditto
-		final ContextMenu dropDownMenu() // getter
+		final @property ContextMenu dropDownMenu() // getter
 		{
 			return _cmenu;
 		}
@@ -171,14 +171,14 @@ class ToolBarButton
 	
 	
 	///
-	final ToolBar parent() // getter
+	final @property ToolBar parent() // getter
 	{
 		return tbar;
 	}
 	
 	
 	///
-	final Rect rectangle() // getter
+	final @property Rect rectangle() // getter
 	{
 		//if(!tbar || !tbar.created)
 		if(!visible)
@@ -192,7 +192,7 @@ class ToolBarButton
 	
 	
 	///
-	final void visible(bool byes) // setter
+	final @property void visible(bool byes) // setter
 	{
 		if(byes)
 			_state &= ~TBSTATE_HIDDEN;
@@ -204,7 +204,7 @@ class ToolBarButton
 	}
 	
 	/// ditto
-	final bool visible() // getter
+	final @property bool visible() // getter
 	{
 		if(!tbar || !tbar.created)
 			return false;
@@ -213,7 +213,7 @@ class ToolBarButton
 	
 	
 	///
-	final void enabled(bool byes) // setter
+	final @property void enabled(bool byes) // setter
 	{
 		if(byes)
 			_state |= TBSTATE_ENABLED;
@@ -225,7 +225,7 @@ class ToolBarButton
 	}
 	
 	/// ditto
-	final bool enabled() // getter
+	final @property bool enabled() // getter
 	{
 		if(_state & TBSTATE_ENABLED)
 			return true;
@@ -234,7 +234,7 @@ class ToolBarButton
 	
 	
 	///
-	final void pushed(bool byes) // setter
+	final @property void pushed(bool byes) // setter
 	{
 		if(byes)
 			_state = (_state & ~TBSTATE_INDETERMINATE) | TBSTATE_CHECKED;
@@ -246,7 +246,7 @@ class ToolBarButton
 	}
 	
 	/// ditto
-	final bool pushed() // getter
+	final @property bool pushed() // getter
 	{
 		if(TBSTATE_CHECKED == (_state & TBSTATE_CHECKED))
 			return true;
@@ -255,7 +255,7 @@ class ToolBarButton
 	
 	
 	///
-	final void partialPush(bool byes) // setter
+	final @property void partialPush(bool byes) // setter
 	{
 		if(byes)
 			_state = (_state & ~TBSTATE_CHECKED) | TBSTATE_INDETERMINATE;
@@ -267,7 +267,7 @@ class ToolBarButton
 	}
 	
 	/// ditto
-	final bool partialPush() // getter
+	final @property bool partialPush() // getter
 	{
 		if(TBSTATE_INDETERMINATE == (_state & TBSTATE_INDETERMINATE))
 			return true;
@@ -309,7 +309,7 @@ class ToolBarButtonClickEventArgs: EventArgs
 	
 	
 	///
-	final ToolBarButton button() // getter
+	final @property ToolBarButton button() // getter
 	{
 		return _btn;
 	}
@@ -401,7 +401,7 @@ class ToolBar: ControlSuperClass // docmain
 	
 	
 	///
-	final ToolBarButtonCollection buttons() // getter
+	final @property ToolBarButtonCollection buttons() // getter
 	{
 		return _tbuttons;
 	}
@@ -411,7 +411,7 @@ class ToolBar: ControlSuperClass // docmain
 	
 	
 	///
-	final Size imageSize() // getter
+	final @property Size imageSize() // getter
 	{
 		version(DFL_NO_IMAGELIST)
 		{
@@ -431,7 +431,7 @@ class ToolBar: ControlSuperClass // docmain
 	else
 	{
 		///
-		final void imageList(ImageList imglist) // setter
+		final @property void imageList(ImageList imglist) // setter
 		{
 			if(isHandleCreated)
 			{
@@ -442,7 +442,7 @@ class ToolBar: ControlSuperClass // docmain
 		}
 		
 		/// ditto
-		final ImageList imageList() // getter
+		final @property ImageList imageList() // getter
 		{
 			return _imglist;
 		}
@@ -519,7 +519,7 @@ class ToolBar: ControlSuperClass // docmain
 	}
 	
 	
-	protected override Size defaultSize() // getter
+	protected override @property Size defaultSize() // getter
 	{
 		return Size(100, 16);
 	}

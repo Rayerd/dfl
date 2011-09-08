@@ -50,7 +50,7 @@ private:
 public:
 	
 	
-	const
+	const @property
 	size_t width()
 	{
 		return _width;
@@ -58,7 +58,7 @@ public:
 	
 	
 	///
-	const
+	const @property
 	size_t height()
 	{
 		return _height;
@@ -114,6 +114,7 @@ public:
 	
 	
 	///
+	@property
 	Region region()
 	{
 		if (_rgn is null) return null;
@@ -212,14 +213,14 @@ public:
 	
 	
 	///
-	Image clipping()
+	@property Image clipping()
 	{
 		return m_Image;
 	}
 	
 	
 	/// ditto
-	void clipping(Image img)
+	@property void clipping(Image img)
 	{
 		m_Image = img;
 	}

@@ -101,7 +101,7 @@ class FormShortcutEventArgs: EventArgs
 	
 	
 	///
-	final Keys shortcut() // getter
+	final @property Keys shortcut() // getter
 	{
 		return _shortcut;
 	}
@@ -123,7 +123,7 @@ version = OLD_MODAL_CLOSE; // New version destroys control info.
 class Form: ContainerControl, IDialogResult // docmain
 {
 	///
-	final void acceptButton(IButtonControl btn) // setter
+	final @property void acceptButton(IButtonControl btn) // setter
 	{
 		if(acceptBtn)
 			acceptBtn.notifyDefault(false);
@@ -135,14 +135,14 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	/// ditto
-	final IButtonControl acceptButton() // getter
+	final @property IButtonControl acceptButton() // getter
 	{
 		return acceptBtn;
 	}
 	
 	
 	///
-	final void cancelButton(IButtonControl btn) // setter
+	final @property void cancelButton(IButtonControl btn) // setter
 	{
 		cancelBtn = btn;
 		
@@ -156,7 +156,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	/// ditto
-	final IButtonControl cancelButton() // getter
+	final @property IButtonControl cancelButton() // getter
 	{
 		return cancelBtn;
 	}
@@ -194,20 +194,20 @@ class Form: ContainerControl, IDialogResult // docmain
 	
 	
 	///
-	static Form activeForm() // getter
+	static @property Form activeForm() // getter
 	{
 		return cast(Form)fromHandle(GetActiveWindow());
 	}
 	
 	
 	///
-	final Form getActiveMdiChild() // getter
+	final @property Form getActiveMdiChild() // getter
 	{
 		return cast(Form)fromHandle(cast(HWND)SendMessageA(handle, WM_MDIGETACTIVE, 0, 0));
 	}
 	
 	
-	protected override Size defaultSize() // getter
+	protected override @property Size defaultSize() // getter
 	{
 		return Size(300, 300);
 	}
@@ -217,7 +217,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	// it sounds like it should return the center point, but it
 	// returns the point that would center the current form.
 	
-	final Point screenCenter() // getter
+	final @property Point screenCenter() // getter
 	{
 		Rect area;
 		version(DFL_MULTIPLE_SCREENS)
@@ -250,7 +250,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	
-	final Point parentCenter() // getter
+	final @property Point parentCenter() // getter
 	{
 		Control cwparent;
 		if(wstyle & WS_CHILD)
@@ -566,13 +566,13 @@ class Form: ContainerControl, IDialogResult // docmain
 	/+
 	///
 	// Focused children are scrolled into view.
-	override void autoScroll(bool byes) // setter
+	override @property void autoScroll(bool byes) // setter
 	{
 		super.autoScroll(byes);
 	}
 	
 	/// ditto
-	override bool autoScroll() // getter
+	override @property bool autoScroll() // getter
 	{
 		return super.autoScroll(byes);
 	}
@@ -583,7 +583,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	// set to 4.0 or higher.
 	
 	///
-	final void controlBox(bool byes) // setter
+	final @property void controlBox(bool byes) // setter
 	{
 		if(byes)
 			_style(_style() | WS_SYSMENU);
@@ -608,14 +608,14 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	/// ditto
-	final bool controlBox() // getter
+	final @property bool controlBox() // getter
 	{
 		return (_style() & WS_SYSMENU) != 0;
 	}
 	
 	
 	///
-	final void desktopBounds(Rect r) // setter
+	final @property void desktopBounds(Rect r) // setter
 	{
 		RECT rect;
 		if(r.width < 0)
@@ -632,7 +632,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	/// ditto
-	final Rect desktopBounds() // getter
+	final @property Rect desktopBounds() // getter
 	{
 		RECT r;
 		GetWindowRect(handle, &r);
@@ -641,7 +641,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	
 	
 	///
-	final void desktopLocation(Point dp) // setter
+	final @property void desktopLocation(Point dp) // setter
 	{
 		//Control par = parent;
 		//if(par) // Convert from screen coords to parent coords.
@@ -651,7 +651,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	/// ditto
-	final Point desktopLocation() // getter
+	final @property Point desktopLocation() // getter
 	{
 		RECT r;
 		GetWindowRect(handle, &r);
@@ -660,7 +660,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	
 	
 	///
-	final void dialogResult(DialogResult dr) // setter
+	final @property void dialogResult(DialogResult dr) // setter
 	{
 		fresult = dr;
 		
@@ -672,13 +672,13 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	/// ditto
-	final DialogResult dialogResult() // getter
+	final @property DialogResult dialogResult() // getter
 	{
 		return fresult;
 	}
 	
 	
-	override Color backColor() // getter
+	override @property Color backColor() // getter
 	{
 		if(Color.empty == backc)
 			return defaultBackColor; // Control's.
@@ -689,7 +689,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	
 	
 	///
-	final void formBorderStyle(FormBorderStyle bstyle) // setter
+	final @property void formBorderStyle(FormBorderStyle bstyle) // setter
 	{
 		FormBorderStyle curbstyle;
 		curbstyle = formBorderStyle;
@@ -811,7 +811,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	/// ditto
-	final FormBorderStyle formBorderStyle() // getter
+	final @property FormBorderStyle formBorderStyle() // getter
 	{
 		LONG st = _style();
 		LONG exst = _exStyle();
@@ -848,7 +848,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	
 	///
 	// Ignored if min and max buttons are enabled.
-	final void helpButton(bool byes) // setter
+	final @property void helpButton(bool byes) // setter
 	{
 		if(byes)
 			_exStyle(_exStyle() | WS_EX_CONTEXTHELP);
@@ -859,7 +859,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	/// ditto
-	final bool helpButton() // getter
+	final @property bool helpButton() // getter
 	{
 		return (_exStyle() & WS_EX_CONTEXTHELP) != 0;
 	}
@@ -906,7 +906,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	
 	
 	///
-	final void icon(Icon ico) // setter
+	final @property void icon(Icon ico) // setter
 	{
 		wicon = ico;
 		
@@ -915,7 +915,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	/// ditto
-	final Icon icon() // getter
+	final @property Icon icon() // getter
 	{
 		return wicon;
 	}
@@ -926,7 +926,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	
 	
 	///
-	final bool isMdiChild() // getter
+	final @property bool isMdiChild() // getter
 	{
 		return (_exStyle() & WS_EX_MDICHILD) != 0;
 	}
@@ -956,7 +956,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	version(NO_MDI) {} else
 	{
 		///
-		final void isMdiContainer(bool byes) // setter
+		final @property void isMdiContainer(bool byes) // setter
 		{
 			if(mdiClient)
 			{
@@ -983,7 +983,7 @@ class Form: ContainerControl, IDialogResult // docmain
 		}
 		
 		/// ditto
-		final bool isMdiContainer() // getter
+		final @property bool isMdiContainer() // getter
 		{
 			version(NO_MDI)
 			{
@@ -1021,7 +1021,7 @@ class Form: ContainerControl, IDialogResult // docmain
 		version(NO_MDI) {} else
 		{
 			///
-			final void mdiParent(Form frm) // setter
+			final @property void mdiParent(Form frm) // setter
 			in
 			{
 				if(frm)
@@ -1091,7 +1091,7 @@ class Form: ContainerControl, IDialogResult // docmain
 		}
 		
 		/// ditto
-		final Form mdiParent() // getter
+		final @property Form mdiParent() // getter
 		{
 			version(NO_MDI)
 			{
@@ -1108,7 +1108,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	
 	
 	///
-	final void maximizeBox(bool byes) // setter
+	final @property void maximizeBox(bool byes) // setter
 	{
 		if(byes == maximizeBox)
 			return;
@@ -1127,14 +1127,14 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	/// ditto
-	final bool maximizeBox() // getter
+	final @property bool maximizeBox() // getter
 	{
 		return (_style() & WS_MAXIMIZEBOX) != 0;
 	}
 	
 	
 	///
-	final void minimizeBox(bool byes) // setter
+	final @property void minimizeBox(bool byes) // setter
 	{
 		if(byes == minimizeBox)
 			return;
@@ -1153,7 +1153,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	/// ditto
-	final bool minimizeBox() // getter
+	final @property bool minimizeBox() // getter
 	{
 		return (_style() & WS_MINIMIZEBOX) != 0;
 	}
@@ -1237,7 +1237,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	else
 	{
 		///
-		final void menu(MainMenu menu) // setter
+		final @property void menu(MainMenu menu) // setter
 		{
 			if(isHandleCreated)
 			{
@@ -1268,7 +1268,7 @@ class Form: ContainerControl, IDialogResult // docmain
 		}
 		
 		/// ditto
-		final MainMenu menu() // getter
+		final @property MainMenu menu() // getter
 		{
 			return wmenu;
 		}
@@ -1276,7 +1276,7 @@ class Form: ContainerControl, IDialogResult // docmain
 		
 		/+
 		///
-		final MainMenu mergedMenu() // getter
+		final @property MainMenu mergedMenu() // getter
 		{
 			// Return menu belonging to active MDI child if maximized ?
 		}
@@ -1285,7 +1285,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	
 	
 	///
-	final void minimumSize(Size min) // setter
+	final @property void minimumSize(Size min) // setter
 	{
 		if(!min.width && !min.height)
 		{
@@ -1322,14 +1322,14 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	/// ditto
-	final Size minimumSize() // getter
+	final @property Size minimumSize() // getter
 	{
 		return minsz;
 	}
 	
 	
 	///
-	final void maximumSize(Size max) // setter
+	final @property void maximumSize(Size max) // setter
 	{
 		if(!max.width && !max.height)
 		{
@@ -1366,14 +1366,14 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	/// ditto
-	final Size maximumSize() // getter
+	final @property Size maximumSize() // getter
 	{
 		return maxsz;
 	}
 	
 	
 	///
-	final bool modal() // getter
+	final @property bool modal() // getter
 	{
 		return wmodal;
 	}
@@ -1381,7 +1381,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	
 	///
 	// If opacity and transparency are supported.
-	static bool supportsOpacity() // getter
+	static @property bool supportsOpacity() // getter
 	{
 		return setLayeredWindowAttributes != null;
 	}
@@ -1396,7 +1396,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	///
 	// 1.0 is 100%, 0.0 is 0%, 0.75 is 75%.
 	// Does nothing if not supported.
-	final void opacity(double opa) // setter
+	final @property void opacity(double opa) // setter
 	{
 		if(setLayeredWindowAttributes)
 		{
@@ -1441,7 +1441,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	/// ditto
-	final double opacity() // getter
+	final @property double opacity() // getter
 	{
 		return opa;
 	}
@@ -1449,7 +1449,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	
 	/+
 	///
-	final Form[] ownedForms() // getter
+	final @property Form[] ownedForms() // getter
 	{
 		// TODO: implement.
 	}
@@ -1482,7 +1482,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	
 	
 	///
-	final void owner(Form frm) // setter
+	final @property void owner(Form frm) // setter
 	/+out
 	{
 		if(frm)
@@ -1548,7 +1548,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	/// ditto
-	final Form owner() // getter
+	final @property Form owner() // getter
 	{
 		return wowner;
 	}
@@ -1556,7 +1556,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	
 	///
 	// This function does not work in all cases.
-	final void showInTaskbar(bool byes) // setter
+	final @property void showInTaskbar(bool byes) // setter
 	{
 		if(isHandleCreated)
 		{
@@ -1618,14 +1618,14 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	/// ditto
-	final bool showInTaskbar() // getter
+	final @property bool showInTaskbar() // getter
 	{
 		return (_exStyle() & WS_EX_APPWINDOW) != 0;
 	}
 	
 	
 	///
-	final void sizingGrip(bool byes) // setter
+	final @property void sizingGrip(bool byes) // setter
 	{
 		if(grip == byes)
 			return;
@@ -1642,7 +1642,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	/// ditto
-	final bool sizingGrip() // getter
+	final @property bool sizingGrip() // getter
 	{
 		return grip;
 	}
@@ -1651,20 +1651,20 @@ class Form: ContainerControl, IDialogResult // docmain
 	
 	
 	///
-	final void startPosition(FormStartPosition startpos) // setter
+	final @property void startPosition(FormStartPosition startpos) // setter
 	{
 		this.startpos = startpos;
 	}
 	
 	/// ditto
-	final FormStartPosition startPosition() // getter
+	final @property FormStartPosition startPosition() // getter
 	{
 		return startpos;
 	}
 	
 	
 	///
-	final void topMost(bool byes) // setter
+	final @property void topMost(bool byes) // setter
 	{
 		/+
 		if(byes)
@@ -1687,14 +1687,14 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	/// ditto
-	final bool topMost() // getter
+	final @property bool topMost() // getter
 	{
 		return (_exStyle() & WS_EX_TOPMOST) != 0;
 	}
 	
 	
 	///
-	final void transparencyKey(Color c) // setter
+	final @property void transparencyKey(Color c) // setter
 	{
 		if(setLayeredWindowAttributes)
 		{
@@ -1724,14 +1724,14 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	/// ditto
-	final Color transparencyKey() // getter
+	final @property Color transparencyKey() // getter
 	{
 		return transKey;
 	}
 	
 	
 	///
-	final void windowState(FormWindowState state) // setter
+	final @property void windowState(FormWindowState state) // setter
 	{
 		// Not sure if visible should be checked here..
 		if(isHandleCreated && visible)
@@ -1775,7 +1775,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	/// ditto
-	final FormWindowState windowState() // getter
+	final @property FormWindowState windowState() // getter
 	{
 		LONG wl;
 		//wl = wstyle = GetWindowLongA(hwnd, GWL_STYLE);
@@ -2984,7 +2984,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	
 	version(NO_MDI) {} else
 	{
-		protected final MdiClient mdiClient() // getter
+		protected final @property MdiClient mdiClient() // getter
 		{ return _mdiClient; }
 	}
 	
@@ -3355,7 +3355,7 @@ version(NO_MDI) {} else
 		
 		
 		///
-		void borderStyle(BorderStyle bs) // setter
+		@property void borderStyle(BorderStyle bs) // setter
 		{
 			final switch(bs)
 			{
@@ -3382,7 +3382,7 @@ version(NO_MDI) {} else
 		}
 
 		/// ditto
-		BorderStyle borderStyle() // getter
+		@property BorderStyle borderStyle() // getter
 		{
 			if(_exStyle() & WS_EX_CLIENTEDGE)
 				return BorderStyle.FIXED_3D;
@@ -3393,7 +3393,7 @@ version(NO_MDI) {} else
 		
 		
 		///
-		final void hScroll(bool byes) // setter
+		final @property void hScroll(bool byes) // setter
 		{
 			LONG wl = _style();
 			if(byes)
@@ -3408,14 +3408,14 @@ version(NO_MDI) {} else
 
 
 		/// ditto
-		final bool hScroll() // getter
+		final @property bool hScroll() // getter
 		{
 			return (_style() & WS_HSCROLL) != 0;
 		}
 
 
 		///
-		final void vScroll(bool byes) // setter
+		final @property void vScroll(bool byes) // setter
 		{
 			LONG wl = _style();
 			if(byes)
@@ -3472,13 +3472,13 @@ version(NO_MDI) {} else
 		}
 		
 		
-		static Color defaultBackColor() // getter
+		static @property Color defaultBackColor() // getter
 		{
 			return Color.systemColor(COLOR_APPWORKSPACE);
 		}
 		
 		
-		override Color backColor() // getter
+		override @property Color backColor() // getter
 		{
 			if(Color.empty == backc)
 				return defaultBackColor;
@@ -3489,7 +3489,7 @@ version(NO_MDI) {} else
 		
 		
 		/+
-		static Color defaultForeColor() //getter
+		static @property Color defaultForeColor() //getter
 		{
 			return Color.systemColor(COLOR_WINDOWTEXT);
 		}

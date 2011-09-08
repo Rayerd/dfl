@@ -78,7 +78,7 @@ class TabPage: Panel
 	// imageIndex
 	
 	
-	override void text(Dstring newText) // setter
+	override @property void text(Dstring newText) // setter
 	{
 		// Note: this probably causes toStringz() to be called twice,
 		// allocating 2 of the same string.
@@ -98,13 +98,13 @@ class TabPage: Panel
 	
 	
 	/+
-	final void toolTipText(Dstring ttt) // setter
+	final @property void toolTipText(Dstring ttt) // setter
 	{
 		// TODO: ...
 	}
 	
 	
-	final Dstring toolTipText() // getter
+	final @property Dstring toolTipText() // getter
 	{
 		// TODO: ...
 		return null;
@@ -124,7 +124,7 @@ class TabPage: Panel
 	}
 	
 	
-	package final void realBounds(Rect r) // setter
+	package final @property void realBounds(Rect r) // setter
 	{
 		// DMD 0.124: if I don't put this here, super.setBoundsCore ends up calling setBoundsCore instead of super.setBoundsCore.
 		void delegate(int, int, int, int, BoundsSpecified) _foo = &setBoundsCore;
@@ -139,7 +139,7 @@ class TabPage: Panel
 	}
 	
 	
-	package final void realVisible(bool byes) // setter
+	package final @property void realVisible(bool byes) // setter
 	{
 		// DMD 0.124: if I don't put this here, super.setVisibleCore ends up calling setVisibleCore instead of super.setVisibleCore.
 		void delegate(bool byes) _foo = &setVisibleCore;
@@ -239,7 +239,7 @@ class TabPageCollection
 	}
 	
 	
-	package final bool created() // getter
+	package final @property bool created() // getter
 	{
 		return tc && tc.created();
 	}
@@ -375,7 +375,7 @@ class TabControlBase: ControlSuperClass
 	
 	
 	///
-	final void drawMode(TabDrawMode dm) // setter
+	final @property void drawMode(TabDrawMode dm) // setter
 	{
 		switch(dm)
 		{
@@ -395,7 +395,7 @@ class TabControlBase: ControlSuperClass
 	}
 	
 	/// ditto
-	final TabDrawMode drawMode() // getter
+	final @property TabDrawMode drawMode() // getter
 	{
 		if(wstyle & TCS_OWNERDRAWFIXED)
 			return TabDrawMode.OWNER_DRAW_FIXED;
@@ -403,7 +403,7 @@ class TabControlBase: ControlSuperClass
 	}
 	
 	
-	override Rect displayRectangle() // getter
+	override @property Rect displayRectangle() // getter
 	{
 		if(!created)
 		{
@@ -424,7 +424,7 @@ class TabControlBase: ControlSuperClass
 	}
 	
 	
-	protected override Size defaultSize() // getter
+	protected override @property Size defaultSize() // getter
 	{
 		return Size(200, 200); // ?
 	}
@@ -603,7 +603,7 @@ class TabControl: TabControlBase // docmain
 	
 	
 	///
-	final void alignment(TabAlignment talign) // setter
+	final @property void alignment(TabAlignment talign) // setter
 	{
 		switch(talign)
 		{
@@ -641,7 +641,7 @@ class TabControl: TabControlBase // docmain
 	}
 	
 	/// ditto
-	final TabAlignment alignment() // getter
+	final @property TabAlignment alignment() // getter
 	{
 		// Note: TCS_RIGHT and TCS_BOTTOM are the same flag.
 		
@@ -661,7 +661,7 @@ class TabControl: TabControlBase // docmain
 	
 	
 	///
-	final void appearance(TabAppearance tappear) // setter
+	final @property void appearance(TabAppearance tappear) // setter
 	{
 		switch(tappear)
 		{
@@ -693,7 +693,7 @@ class TabControl: TabControlBase // docmain
 	}
 	
 	/// ditto
-	final TabAppearance appearance() // getter
+	final @property TabAppearance appearance() // getter
 	{
 		if(wstyle & TCS_FLATBUTTONS)
 			return TabAppearance.FLAT_BUTTONS;
@@ -704,7 +704,7 @@ class TabControl: TabControlBase // docmain
 	
 	
 	///
-	final void padding(Point pad) // setter
+	final @property void padding(Point pad) // setter
 	{
 		if(created)
 		{
@@ -720,21 +720,21 @@ class TabControl: TabControlBase // docmain
 	}
 	
 	/// ditto
-	final Point padding() // getter
+	final @property Point padding() // getter
 	{
 		return _pad;
 	}
 	
 	
 	///
-	final TabPageCollection tabPages() // getter
+	final @property TabPageCollection tabPages() // getter
 	{
 		return tchildren;
 	}
 	
 	
 	///
-	final void multiline(bool byes) // setter
+	final @property void multiline(bool byes) // setter
 	{
 		if(byes)
 			_style(_style() | TCS_MULTILINE);
@@ -748,14 +748,14 @@ class TabControl: TabControlBase // docmain
 	}
 	
 	/// ditto
-	final bool multiline() // getter
+	final @property bool multiline() // getter
 	{
 		return (_style() & TCS_MULTILINE) != 0;
 	}
 	
 	
 	///
-	final int rowCount() // getter
+	final @property int rowCount() // getter
 	{
 		if(!created || !multiline)
 			return 0;
@@ -767,14 +767,14 @@ class TabControl: TabControlBase // docmain
 	
 	
 	///
-	final int tabCount() // getter
+	final @property int tabCount() // getter
 	{
 		return tchildren._pages.length;
 	}
 	
 	
 	///
-	final void selectedIndex(int i) // setter
+	final @property void selectedIndex(int i) // setter
 	{
 		if(!created || !tchildren._pages.length)
 			return;
@@ -791,7 +791,7 @@ class TabControl: TabControlBase // docmain
 	
 	/// ditto
 	// Returns -1 if there are no tabs selected.
-	final int selectedIndex() // getter
+	final @property int selectedIndex() // getter
 	{
 		if(!created || !tchildren._pages.length)
 			return -1;
@@ -803,7 +803,7 @@ class TabControl: TabControlBase // docmain
 	
 	
 	///
-	final void selectedTab(TabPage page) // setter
+	final @property void selectedTab(TabPage page) // setter
 	{
 		int i;
 		i = tabPages.indexOf(page);
@@ -812,7 +812,7 @@ class TabControl: TabControlBase // docmain
 	}
 	
 	/// ditto
-	final TabPage selectedTab() // getter
+	final @property TabPage selectedTab() // getter
 	{
 		int i;
 		i = selectedIndex;
@@ -824,7 +824,7 @@ class TabControl: TabControlBase // docmain
 	
 	/+
 	///
-	final void showToolTips(bool byes) // setter
+	final @property void showToolTips(bool byes) // setter
 	{
 		if(byes)
 			_style(_style() | TCS_TOOLTIPS);
@@ -833,7 +833,7 @@ class TabControl: TabControlBase // docmain
 	}
 	
 	/// ditto
-	final bool showToolTips() // getter
+	final @property bool showToolTips() // getter
 	{
 		return (_style() & TCS_TOOLTIPS) != 0;
 	}

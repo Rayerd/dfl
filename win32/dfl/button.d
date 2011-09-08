@@ -16,7 +16,7 @@ private extern(Windows) void _initButton();
 abstract class ButtonBase: ControlSuperClass // docmain
 {
 	///
-	void textAlign(ContentAlignment calign) // setter
+	@property void textAlign(ContentAlignment calign) // setter
 	{
 		LONG wl = _bstyle() & ~(BS_BOTTOM | BS_CENTER | BS_TOP | BS_RIGHT | BS_LEFT | BS_VCENTER);
 		
@@ -65,7 +65,7 @@ abstract class ButtonBase: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	ContentAlignment textAlign() // getter
+	@property ContentAlignment textAlign() // getter
 	{
 		LONG wl = _bstyle();
 		
@@ -208,13 +208,13 @@ abstract class ButtonBase: ControlSuperClass // docmain
 	protected:
 	
 	///
-	final void isDefault(bool byes) // setter
+	final @property void isDefault(bool byes) // setter
 	{
 		isdef = byes;
 	}
 	
 	/// ditto
-	final bool isDefault() // getter
+	final @property bool isDefault() // getter
 	{
 		//return (_bstyle() & BS_DEFPUSHBUTTON) == BS_DEFPUSHBUTTON;
 		//return GetDlgCtrlID(m.hWnd) == IDOK;
@@ -240,7 +240,7 @@ abstract class ButtonBase: ControlSuperClass // docmain
 	
 	
 	///
-	override Size defaultSize() // getter
+	override @property Size defaultSize() // getter
 	{
 		return Size(75, 23);
 	}
@@ -281,13 +281,13 @@ class Button: ButtonBase, IButtonControl // docmain
 	
 	
 	///
-	DialogResult dialogResult() // getter
+	@property DialogResult dialogResult() // getter
 	{
 		return dresult;
 	}
 	
 	/// ditto
-	void dialogResult(DialogResult dr) // setter
+	@property void dialogResult(DialogResult dr) // setter
 	{
 		dresult = dr;
 	}
@@ -378,7 +378,7 @@ class Button: ButtonBase, IButtonControl // docmain
 	}
 	
 	
-	override void text(Dstring txt) // setter
+	override @property void text(Dstring txt) // setter
 	{
 		if(txt.length)
 			assert(!this.image, "Button image with text not supported");
@@ -390,13 +390,13 @@ class Button: ButtonBase, IButtonControl // docmain
 	
 	
 	///
-	final Image image() // getter
+	final @property Image image() // getter
 	{
 		return _img;
 	}
 	
 	/// ditto
-	final void image(Image img) // setter
+	final @property void image(Image img) // setter
 	in
 	{
 		if(img)
@@ -548,7 +548,7 @@ class Button: ButtonBase, IButtonControl // docmain
 class CheckBox: ButtonBase // docmain
 {
 	///
-	final void appearance(Appearance ap) // setter
+	final @property void appearance(Appearance ap) // setter
 	{
 		final switch(ap)
 		{
@@ -565,7 +565,7 @@ class CheckBox: ButtonBase // docmain
 	}
 	
 	/// ditto
-	final Appearance appearance() // getter
+	final @property Appearance appearance() // getter
 	{
 		if(_bstyle() & BS_PUSHLIKE)
 			return Appearance.BUTTON;
@@ -574,7 +574,7 @@ class CheckBox: ButtonBase // docmain
 	
 	
 	///
-	final void autoCheck(bool byes) // setter
+	final @property void autoCheck(bool byes) // setter
 	{
 		if(byes)
 			_bstyle((_bstyle() & ~BS_CHECKBOX) | BS_AUTOCHECKBOX);
@@ -586,7 +586,7 @@ class CheckBox: ButtonBase // docmain
 	}
 	
 	/// ditto
-	final bool autoCheck() // getter
+	final @property bool autoCheck() // getter
 	{
 		/+
 		return (_bstyle() & BS_AUTOCHECKBOX) == BS_AUTOCHECKBOX;
@@ -612,7 +612,7 @@ class CheckBox: ButtonBase // docmain
 	
 	
 	///
-	final void checked(bool byes) // setter
+	final @property void checked(bool byes) // setter
 	{
 		if(byes)
 			_check = CheckState.CHECKED;
@@ -625,7 +625,7 @@ class CheckBox: ButtonBase // docmain
 	
 	/// ditto
 	// Returns true for indeterminate too.
-	final bool checked() // getter
+	final @property bool checked() // getter
 	{
 		if(isHandleCreated)
 			_updateState();
@@ -634,7 +634,7 @@ class CheckBox: ButtonBase // docmain
 	
 	
 	///
-	final void checkState(CheckState st) // setter
+	final @property void checkState(CheckState st) // setter
 	{
 		_check = st;
 		
@@ -643,7 +643,7 @@ class CheckBox: ButtonBase // docmain
 	}
 	
 	/// ditto
-	final CheckState checkState() // getter
+	final @property CheckState checkState() // getter
 	{
 		if(isHandleCreated)
 			_updateState();
@@ -680,7 +680,7 @@ class CheckBox: ButtonBase // docmain
 class RadioButton: ButtonBase // docmain
 {
 	///
-	final void appearance(Appearance ap) // setter
+	final @property void appearance(Appearance ap) // setter
 	{
 		final switch(ap)
 		{
@@ -697,7 +697,7 @@ class RadioButton: ButtonBase // docmain
 	}
 	
 	/// ditto
-	final Appearance appearance() // getter
+	final @property Appearance appearance() // getter
 	{
 		if(_bstyle() & BS_PUSHLIKE)
 			return Appearance.BUTTON;
@@ -706,7 +706,7 @@ class RadioButton: ButtonBase // docmain
 	
 	
 	///
-	final void autoCheck(bool byes) // setter
+	final @property void autoCheck(bool byes) // setter
 	{
 		/+
 		if(byes)
@@ -721,7 +721,7 @@ class RadioButton: ButtonBase // docmain
 	
 	
 	/// ditto
-	final bool autoCheck() // getter
+	final @property bool autoCheck() // getter
 	{
 		/+ // Also commented out when using BS_AUTORADIOBUTTON.
 		return (_bstyle() & BS_AUTOCHECKBOX) == BS_AUTOCHECKBOX;
@@ -772,7 +772,7 @@ class RadioButton: ButtonBase // docmain
 	
 	
 	///
-	final void checked(bool byes) // setter
+	final @property void checked(bool byes) // setter
 	{
 		if(byes)
 			_check = CheckState.CHECKED;
@@ -785,7 +785,7 @@ class RadioButton: ButtonBase // docmain
 	
 	/// ditto
 	// Returns true for indeterminate too.
-	final bool checked() // getter
+	final @property bool checked() // getter
 	{
 		if(isHandleCreated)
 			_updateState();
@@ -794,7 +794,7 @@ class RadioButton: ButtonBase // docmain
 	
 	
 	///
-	final void checkState(CheckState st) // setter
+	final @property void checkState(CheckState st) // setter
 	{
 		_check = st;
 		
@@ -803,7 +803,7 @@ class RadioButton: ButtonBase // docmain
 	}
 	
 	/// ditto
-	final CheckState checkState() // getter
+	final @property CheckState checkState() // getter
 	{
 		if(isHandleCreated)
 			_updateState();

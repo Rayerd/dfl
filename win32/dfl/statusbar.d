@@ -96,13 +96,13 @@ class StatusBarPanel: DObject
 	
 	/+
 	///
-	final void alignment(HorizontalAlignment ha) // setter
+	final @property void alignment(HorizontalAlignment ha) // setter
 	{
 		
 	}
 	
 	/// ditto
-	final HorizontalAlignment alignment() // getter
+	final @property HorizontalAlignment alignment() // getter
 	{
 		//LEFT
 	}
@@ -111,13 +111,13 @@ class StatusBarPanel: DObject
 	
 	/+
 	///
-	final void autoSize(StatusBarPanelAutoSize asize) // setter
+	final @property void autoSize(StatusBarPanelAutoSize asize) // setter
 	{
 		
 	}
 	
 	/// ditto
-	final StatusBarPanelAutoSize autoSize() // getter
+	final @property StatusBarPanelAutoSize autoSize() // getter
 	{
 		//NONE
 	}
@@ -125,7 +125,7 @@ class StatusBarPanel: DObject
 	
 	
 	///
-	final void borderStyle(StatusBarPanelBorderStyle bs) // setter
+	final @property void borderStyle(StatusBarPanelBorderStyle bs) // setter
 	{
 		switch(bs)
 		{
@@ -152,7 +152,7 @@ class StatusBarPanel: DObject
 	}
 	
 	/// ditto
-	final StatusBarPanelBorderStyle borderStyle() // getter
+	final @property StatusBarPanelBorderStyle borderStyle() // getter
 	{
 		if(_utype & SBT_POPOUT)
 			return StatusBarPanelBorderStyle.RAISED;
@@ -167,7 +167,7 @@ class StatusBarPanel: DObject
 	
 	/+
 	///
-	final void minWidth(int mw) // setter
+	final @property void minWidth(int mw) // setter
 	in
 	{
 		assert(mw >= 0);
@@ -178,7 +178,7 @@ class StatusBarPanel: DObject
 	}
 	
 	/// ditto
-	final int minWidth() // getter
+	final @property int minWidth() // getter
 	{
 		//10
 	}
@@ -186,7 +186,7 @@ class StatusBarPanel: DObject
 	
 	
 	///
-	final StatusBar parent() // getter
+	final @property StatusBar parent() // getter
 	{
 		return _parent;
 	}
@@ -196,7 +196,7 @@ class StatusBarPanel: DObject
 	
 	
 	///
-	final void text(Dstring txt) // setter
+	final @property void text(Dstring txt) // setter
 	{
 		if(_parent && _parent.isHandleCreated)
 		{
@@ -209,7 +209,7 @@ class StatusBarPanel: DObject
 	}
 	
 	/// ditto
-	final Dstring text() // getter
+	final @property Dstring text() // getter
 	{
 		return _txt;
 	}
@@ -217,13 +217,13 @@ class StatusBarPanel: DObject
 	
 	/+
 	///
-	final void toolTipText(Dstring txt) // setter
+	final @property void toolTipText(Dstring txt) // setter
 	{
 		
 	}
 	
 	/// ditto
-	final Dstring toolTipText() // getter
+	final @property Dstring toolTipText() // getter
 	{
 		//null
 	}
@@ -231,7 +231,7 @@ class StatusBarPanel: DObject
 	
 	
 	///
-	final void width(int w) // setter
+	final @property void width(int w) // setter
 	{
 		_width = w;
 		
@@ -242,7 +242,7 @@ class StatusBarPanel: DObject
 	}
 	
 	/// ditto
-	final int width() // getter
+	final @property int width() // getter
 	{
 		return _width;
 	}
@@ -421,7 +421,7 @@ class StatusBar: ControlSuperClass // docmain
 	// backColor / font / foreColor ...
 	
 	
-	override void dock(DockStyle ds) // setter
+	override @property void dock(DockStyle ds) // setter
 	{
 		switch(ds)
 		{
@@ -439,14 +439,14 @@ class StatusBar: ControlSuperClass // docmain
 	
 	
 	///
-	final StatusBarPanelCollection panels() // getter
+	final @property StatusBarPanelCollection panels() // getter
 	{
 		return lpanels;
 	}
 	
 	
 	///
-	final void showPanels(bool byes) // setter
+	final @property void showPanels(bool byes) // setter
 	{
 		if(!byes == _issimple)
 			return;
@@ -472,14 +472,14 @@ class StatusBar: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final bool showPanels() // getter
+	final @property bool showPanels() // getter
 	{
 		return !_issimple;
 	}
 	
 	
 	///
-	final void sizingGrip(bool byes) // setter
+	final @property void sizingGrip(bool byes) // setter
 	{
 		if(byes == sizingGrip)
 			return;
@@ -491,7 +491,7 @@ class StatusBar: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final bool sizingGrip() // getter
+	final @property bool sizingGrip() // getter
 	{
 		if(wstyle & SBARS_SIZEGRIP)
 			return true;
@@ -499,7 +499,7 @@ class StatusBar: ControlSuperClass // docmain
 	}
 	
 	
-	override void text(Dstring txt) // setter
+	override @property void text(Dstring txt) // setter
 	{
 		if(isHandleCreated && !showPanels)
 		{
@@ -512,7 +512,7 @@ class StatusBar: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	override Dstring text() // getter
+	override @property Dstring text() // getter
 	{
 		return this._simpletext;
 	}

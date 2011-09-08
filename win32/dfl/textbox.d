@@ -29,21 +29,21 @@ private extern(Windows) void _initTextBox();
 abstract class TextBoxBase: ControlSuperClass // docmain
 {
 	///
-	final void acceptsTab(bool byes) // setter
+	final @property void acceptsTab(bool byes) // setter
 	{
 		atab = byes;
 		setStyle(ControlStyles.WANT_TAB_KEY, atab);
 	}
 	
 	/// ditto
-	final bool acceptsTab() // getter
+	final @property bool acceptsTab() // getter
 	{
 		return atab;
 	}
 	
 	
 	///
-	void borderStyle(BorderStyle bs) // setter
+	@property void borderStyle(BorderStyle bs) // setter
 	{
 		final switch(bs)
 		{
@@ -70,7 +70,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	BorderStyle borderStyle() // getter
+	@property BorderStyle borderStyle() // getter
 	{
 		if(_exStyle() & WS_EX_CLIENTEDGE)
 			return BorderStyle.FIXED_3D;
@@ -81,7 +81,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	
 	
 	///
-	final bool canUndo() // getter
+	final @property bool canUndo() // getter
 	{
 		if(!created)
 			return false;
@@ -90,7 +90,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	
 	
 	///
-	final void hideSelection(bool byes) // setter
+	final @property void hideSelection(bool byes) // setter
 	{
 		if(byes)
 			_style(_style() & ~ES_NOHIDESEL);
@@ -99,14 +99,14 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final bool hideSelection() // getter
+	final @property bool hideSelection() // getter
 	{
 		return (_style() & ES_NOHIDESEL) == 0;
 	}
 	
 	
 	///
-	final void lines(Dstring[] lns) // setter
+	final @property void lines(Dstring[] lns) // setter
 	{
 		Dstring result;
 		foreach(Dstring s; lns)
@@ -119,14 +119,14 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final Dstring[] lines() // getter
+	final @property Dstring[] lines() // getter
 	{
 		return stringSplitLines(text);
 	}
 	
 	
 	///
-	void maxLength(uint len) // setter
+	@property void maxLength(uint len) // setter
 	{
 		if(!len)
 		{
@@ -149,7 +149,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	uint maxLength() // getter
+	@property uint maxLength() // getter
 	{
 		if(created)
 			lim = cast(uint)SendMessageA(handle, EM_GETLIMITTEXT, 0, 0);
@@ -190,14 +190,14 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	
 	
 	///
-	final void modified(bool byes) // setter
+	final @property void modified(bool byes) // setter
 	{
 		if(created)
 			SendMessageA(handle, EM_SETMODIFY, byes, 0);
 	}
 	
 	/// ditto
-	final bool modified() // getter
+	final @property bool modified() // getter
 	{
 		if(!created)
 			return false;
@@ -206,7 +206,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	
 	
 	///
-	void multiline(bool byes) // setter
+	@property void multiline(bool byes) // setter
 	{
 		/+
 		if(byes)
@@ -242,14 +242,14 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	bool multiline() // getter
+	@property bool multiline() // getter
 	{
 		return (_style() & ES_MULTILINE) != 0;
 	}
 	
 	
 	///
-	final void readOnly(bool byes) // setter
+	final @property void readOnly(bool byes) // setter
 	{
 		if(created)
 		{
@@ -266,14 +266,14 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final bool readOnly() // getter
+	final @property bool readOnly() // getter
 	{
 		return (_style() & ES_READONLY) != 0;
 	}
 	
 	
 	///
-	void selectedText(Dstring sel) // setter
+	@property void selectedText(Dstring sel) // setter
 	{
 		/+
 		if(created)
@@ -288,7 +288,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	Dstring selectedText() // getter
+	@property Dstring selectedText() // getter
 	{
 		/+
 		if(created)
@@ -314,7 +314,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	
 	
 	///
-	void selectionLength(uint len) // setter
+	@property void selectionLength(uint len) // setter
 	{
 		if(created)
 		{
@@ -329,7 +329,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	// Current selection length, in characters.
 	// This does not necessarily correspond to the length of chars; some characters use multiple chars.
 	// An end of line (\r\n) takes up 2 characters.
-	uint selectionLength() // getter
+	@property uint selectionLength() // getter
 	{
 		if(created)
 		{
@@ -343,7 +343,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	
 	
 	///
-	void selectionStart(uint pos) // setter
+	@property void selectionStart(uint pos) // setter
 	{
 		if(created)
 		{
@@ -359,7 +359,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	// Current selection starting index, in characters.
 	// This does not necessarily correspond to the index of chars; some characters use multiple chars.
 	// An end of line (\r\n) takes up 2 characters.
-	uint selectionStart() // getter
+	@property uint selectionStart() // getter
 	{
 		if(created)
 		{
@@ -377,7 +377,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	// An end of line (\r\n) takes up 2 characters.
 	// Return may be larger than the amount of characters.
 	// This is a lot faster than retrieving the text, but retrieving the text is completely accurate.
-	uint textLength() // getter
+	@property uint textLength() // getter
 	{
 		if(!(ctrlStyle & ControlStyles.CACHE_TEXT) && created())
 			//return cast(uint)SendMessageA(handle, WM_GETTEXTLENGTH, 0, 0);
@@ -387,7 +387,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	
 	
 	///
-	final void wordWrap(bool byes) // setter
+	@property final void wordWrap(bool byes) // setter
 	{
 		/+
 		if(byes)
@@ -428,7 +428,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final bool wordWrap() // getter
+	final @property bool wordWrap() // getter
 	{
 		//return (_style() & ES_AUTOVSCROLL) != 0;
 		
@@ -771,7 +771,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	}
 	
 	
-	override Color backColor() // getter
+	override @property Color backColor() // getter
 	{
 		if(Color.empty == backc)
 			return defaultBackColor;
@@ -781,13 +781,13 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	alias Control.backColor backColor; // Overload.
 	
 	
-	static Color defaultBackColor() // getter
+	static @property Color defaultBackColor() // getter
 	{
 		return Color.systemColor(COLOR_WINDOW);
 	}
 	
 	
-	override Color foreColor() // getter
+	override @property Color foreColor() // getter
 	{
 		if(Color.empty == forec)
 			return defaultForeColor;
@@ -797,13 +797,13 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	alias Control.foreColor foreColor; // Overload.
 	
 	
-	static Color defaultForeColor() //getter
+	static @property Color defaultForeColor() //getter
 	{
 		return Color.systemColor(COLOR_WINDOWTEXT);
 	}
 	
 	
-	override Cursor cursor() // getter
+	override @property Cursor cursor() // getter
 	{
 		if(!wcurs)
 			return _defaultCursor;
@@ -869,7 +869,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	}
 	
 	
-	package static Cursor _defaultCursor() // getter
+	package static @property Cursor _defaultCursor() // getter
 	{
 		static Cursor def = null;
 		
@@ -997,7 +997,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	}
 	
 	
-	override Size defaultSize() // getter
+	override @property Size defaultSize() // getter
 	{
 		return Size(120, 23); // ?
 	}
@@ -1011,14 +1011,14 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	bool atab = false;
 	
 	/+
-	bool atab() // getter
+	@property bool atab() // getter
 	{
 		if(_style() & X)
 			return true;
 		return false;
 	}
 	
-	void atab(bool byes) // setter
+	@property void atab(bool byes) // setter
 	{
 		if(byes)
 			_style(_style() | X);
@@ -1028,7 +1028,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	+/
 	
 	
-	void hscroll(bool byes) // setter
+	@property void hscroll(bool byes) // setter
 	{
 		_hscroll = byes;
 		
@@ -1037,7 +1037,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	}
 	
 	
-	bool hscroll() // getter
+	@property bool hscroll() // getter
 	{
 		return _hscroll;
 	}
@@ -1048,7 +1048,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 class TextBox: TextBoxBase // docmain
 {
 	///
-	final void acceptsReturn(bool byes) // setter
+	final @property void acceptsReturn(bool byes) // setter
 	{
 		if(byes)
 			_style(_style() | ES_WANTRETURN);
@@ -1057,14 +1057,14 @@ class TextBox: TextBoxBase // docmain
 	}
 	
 	/// ditto
-	final bool acceptsReturn() // getter
+	final @property bool acceptsReturn() // getter
 	{
 		return (_style() & ES_WANTRETURN) != 0;
 	}
 	
 	
 	///
-	final void characterCasing(CharacterCasing cc) // setter
+	final @property void characterCasing(CharacterCasing cc) // setter
 	{
 		LONG wl = _style() & ~(ES_UPPERCASE | ES_LOWERCASE);
 		
@@ -1086,7 +1086,7 @@ class TextBox: TextBoxBase // docmain
 	}
 	
 	/// ditto
-	final CharacterCasing characterCasing() // getter
+	final @property CharacterCasing characterCasing() // getter
 	{
 		LONG wl = _style();
 		if(wl & ES_UPPERCASE)
@@ -1099,7 +1099,7 @@ class TextBox: TextBoxBase // docmain
 	
 	///
 	// Set to 0 (NUL) to remove.
-	final void passwordChar(dchar pwc) // setter
+	final @property void passwordChar(dchar pwc) // setter
 	{
 		if(pwc)
 		{
@@ -1129,7 +1129,7 @@ class TextBox: TextBoxBase // docmain
 	}
 	
 	/// ditto
-	final dchar passwordChar() // getter
+	final @property dchar passwordChar() // getter
 	{
 		if(created)
 			//passchar = cast(dchar)SendMessageA(handle, EM_GETPASSWORDCHAR, 0, 0);
@@ -1139,7 +1139,7 @@ class TextBox: TextBoxBase // docmain
 	
 	
 	///
-	final void scrollBars(ScrollBars sb) // setter
+	final @property void scrollBars(ScrollBars sb) // setter
 	{
 		/+
 		switch(sb)
@@ -1189,7 +1189,7 @@ class TextBox: TextBoxBase // docmain
 	}
 	
 	/// ditto
-	final ScrollBars scrollBars() // getter
+	final @property ScrollBars scrollBars() // getter
 	{
 		LONG wl = _style();
 		
@@ -1207,7 +1207,7 @@ class TextBox: TextBoxBase // docmain
 	
 	
 	///
-	final void textAlign(HorizontalAlignment ha) // setter
+	final @property void textAlign(HorizontalAlignment ha) // setter
 	{
 		LONG wl = _style() & ~(ES_RIGHT | ES_CENTER | ES_LEFT);
 		
@@ -1232,7 +1232,7 @@ class TextBox: TextBoxBase // docmain
 	}
 	
 	/// ditto
-	final HorizontalAlignment textAlign() // getter
+	final @property HorizontalAlignment textAlign() // getter
 	{
 		LONG wl = _style();
 		
@@ -1250,7 +1250,7 @@ class TextBox: TextBoxBase // docmain
 	}
 	
 	
-	protected override void onHandleCreated(EventArgs ea)
+	protected override @property void onHandleCreated(EventArgs ea)
 	{
 		super.onHandleCreated(ea);
 		
@@ -1262,7 +1262,7 @@ class TextBox: TextBoxBase // docmain
 	
 	
 	/+
-	override void wndProc(ref Message msg)
+	override @property void wndProc(ref Message msg)
 	{
 		switch(msg.msg)
 		{

@@ -41,7 +41,7 @@ class ComboBox: ListControl // docmain
 	
 	
 	///
-	final void dropDownStyle(ComboBoxStyle ddstyle) // setter
+	final @property void dropDownStyle(ComboBoxStyle ddstyle) // setter
 	{
 		LONG st;
 		st = _style() & ~(CBS_DROPDOWN | CBS_DROPDOWNLIST | CBS_SIMPLE);
@@ -65,7 +65,7 @@ class ComboBox: ListControl // docmain
 	}
 	
 	/// ditto
-	final ComboBoxStyle dropDownStyle() // getter
+	final @property ComboBoxStyle dropDownStyle() // getter
 	{
 		LONG st;
 		st = _style() & (CBS_DROPDOWN | CBS_DROPDOWNLIST | CBS_SIMPLE);
@@ -87,7 +87,7 @@ class ComboBox: ListControl // docmain
 	
 	
 	///
-	final void integralHeight(bool byes) //setter
+	final @property void integralHeight(bool byes) //setter
 	{
 		if(byes)
 			_style(_style() & ~CBS_NOINTEGRALHEIGHT);
@@ -98,7 +98,7 @@ class ComboBox: ListControl // docmain
 	}
 	
 	/// ditto
-	final bool integralHeight() // getter
+	final @property bool integralHeight() // getter
 	{
 		return (_style() & CBS_NOINTEGRALHEIGHT) == 0;
 	}
@@ -106,7 +106,7 @@ class ComboBox: ListControl // docmain
 	
 	///
 	// This function has no effect if the drawMode is OWNER_DRAW_VARIABLE.
-	void itemHeight(int h) // setter
+	@property void itemHeight(int h) // setter
 	{
 		if(drawMode == DrawMode.OWNER_DRAW_VARIABLE)
 			return;
@@ -119,7 +119,7 @@ class ComboBox: ListControl // docmain
 	
 	/// ditto
 	// Return value is meaningless when drawMode is OWNER_DRAW_VARIABLE.
-	int itemHeight() // getter
+	@property int itemHeight() // getter
 	{
 		/+
 		if(drawMode == DrawMode.OWNER_DRAW_VARIABLE || !isHandleCreated)
@@ -138,7 +138,7 @@ class ComboBox: ListControl // docmain
 	
 	
 	///
-	override void selectedIndex(int idx)
+	override @property void selectedIndex(int idx) // setter
 	{
 		if(isHandleCreated)
 		{
@@ -147,7 +147,7 @@ class ComboBox: ListControl // docmain
 	}
 	
 	/// ditto
-	override int selectedIndex()
+	override @property int selectedIndex() //getter
 	{
 		if(isHandleCreated)
 		{
@@ -161,7 +161,7 @@ class ComboBox: ListControl // docmain
 	
 	
 	///
-	final void selectedItem(Object o) // setter
+	final @property void selectedItem(Object o) // setter
 	{
 		int i;
 		i = items.indexOf(o);
@@ -170,7 +170,7 @@ class ComboBox: ListControl // docmain
 	}
 	
 	/// ditto
-	final void selectedItem(Dstring str) // setter
+	final @property void selectedItem(Dstring str) // setter
 	{
 		int i;
 		i = items.indexOf(str);
@@ -179,7 +179,7 @@ class ComboBox: ListControl // docmain
 	}
 	
 	/// ditto
-	final Object selectedItem() // getter
+	final @property Object selectedItem() // getter
 	{
 		int idx;
 		idx = selectedIndex;
@@ -190,26 +190,26 @@ class ComboBox: ListControl // docmain
 	
 	
 	///
-	override void selectedValue(Object val) // setter
+	override @property void selectedValue(Object val) // setter
 	{
 		selectedItem = val;
 	}
 	
 	/// ditto
-	override void selectedValue(Dstring str) // setter
+	override @property void selectedValue(Dstring str) // setter
 	{
 		selectedItem = str;
 	}
 	
 	/// ditto
-	override Object selectedValue() // getter
+	override @property Object selectedValue() // getter
 	{
 		return selectedItem;
 	}
 	
 	
 	///
-	final void sorted(bool byes) // setter
+	final @property void sorted(bool byes) // setter
 	{
 		/+
 		if(byes)
@@ -221,7 +221,7 @@ class ComboBox: ListControl // docmain
 	}
 	
 	/// ditto
-	final bool sorted() // getter
+	final @property bool sorted() // getter
 	{
 		//return (_style() & CBS_SORT) != 0;
 		return _sorting;
@@ -307,7 +307,7 @@ class ComboBox: ListControl // docmain
 	
 	
 	///
-	final void drawMode(DrawMode dm) // setter
+	final @property void drawMode(DrawMode dm) // setter
 	{
 		LONG wl = _style() & ~(CBS_OWNERDRAWVARIABLE | CBS_OWNERDRAWFIXED);
 		
@@ -331,7 +331,7 @@ class ComboBox: ListControl // docmain
 	}
 	
 	/// ditto
-	final DrawMode drawMode() // getter
+	final @property DrawMode drawMode() // getter
 	{
 		LONG wl = _style();
 		
@@ -352,7 +352,7 @@ class ComboBox: ListControl // docmain
 	
 	
 	///
-	final void maxLength(uint len) // setter
+	final @property void maxLength(uint len) // setter
 	{
 		if(!len)
 			lim = 0x7FFFFFFE;
@@ -368,14 +368,14 @@ class ComboBox: ListControl // docmain
 	}
 	
 	/// ditto
-	final uint maxLength() // getter
+	final @property uint maxLength() // getter
 	{
 		return lim;
 	}
 	
 	
 	///
-	final void selectionLength(uint len) // setter
+	final @property void selectionLength(uint len) // setter
 	{
 		if(isHandleCreated)
 		{
@@ -387,7 +387,7 @@ class ComboBox: ListControl // docmain
 	}
 	
 	/// ditto
-	final uint selectionLength() // getter
+	final @property uint selectionLength() // getter
 	{
 		if(isHandleCreated)
 		{
@@ -401,7 +401,7 @@ class ComboBox: ListControl // docmain
 	
 	
 	///
-	final void selectionStart(uint pos) // setter
+	final @property void selectionStart(uint pos) // setter
 	{
 		if(isHandleCreated)
 		{
@@ -414,7 +414,7 @@ class ComboBox: ListControl // docmain
 	}
 	
 	/// ditto
-	final uint selectionStart() // getter
+	final @property uint selectionStart() // getter
 	{
 		if(isHandleCreated)
 		{
@@ -431,7 +431,7 @@ class ComboBox: ListControl // docmain
 	// This does not necessarily correspond to the number of chars; some characters use multiple chars.
 	// Return may be larger than the amount of characters.
 	// This is a lot faster than retrieving the text, but retrieving the text is completely accurate.
-	uint textLength() // getter
+	@property uint textLength() // getter
 	{
 		if(!(ctrlStyle & ControlStyles.CACHE_TEXT) && isHandleCreated)
 			//return cast(uint)SendMessageA(handle, WM_GETTEXTLENGTH, 0, 0);
@@ -441,14 +441,14 @@ class ComboBox: ListControl // docmain
 	
 	
 	///
-	final void droppedDown(bool byes) // setter
+	final @property void droppedDown(bool byes) // setter
 	{
 		if(isHandleCreated)
 			prevwproc(CB_SHOWDROPDOWN, cast(WPARAM)byes, 0);
 	}
 	
 	/// ditto
-	final bool droppedDown() // getter
+	final @property bool droppedDown() // getter
 	{
 		if(isHandleCreated)
 			return prevwproc(CB_GETDROPPEDSTATE, 0, 0) != FALSE;
@@ -457,7 +457,7 @@ class ComboBox: ListControl // docmain
 	
 	
 	///
-	final void dropDownWidth(int w) // setter
+	final @property void dropDownWidth(int w) // setter
 	{
 		if(dropw == w)
 			return;
@@ -476,7 +476,7 @@ class ComboBox: ListControl // docmain
 	}
 	
 	/// ditto
-	final int dropDownWidth() // getter
+	final @property int dropDownWidth() // getter
 	{
 		if(isHandleCreated)
 		{
@@ -496,7 +496,7 @@ class ComboBox: ListControl // docmain
 	
 	
 	///
-	final ObjectCollection items() // getter
+	final @property ObjectCollection items() // getter
 	{
 		return icollection;
 	}
@@ -724,7 +724,7 @@ class ComboBox: ListControl // docmain
 	}
 	
 	
-	package final bool hasDropList() // getter
+	package final @property bool hasDropList() // getter
 	{
 		return dropDownStyle != ComboBoxStyle.SIMPLE;
 	}
@@ -785,7 +785,7 @@ class ComboBox: ListControl // docmain
 	
 	
 	protected:
-	override Size defaultSize() // getter
+	override @property Size defaultSize() // getter
 	{
 		return Size(120, 23); // ?
 	}

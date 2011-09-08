@@ -19,7 +19,7 @@ version(NO_DRAG_DROP)
 ///
 class GroupBox: ControlSuperClass // docmain
 {
-	override Rect displayRectangle() // getter
+	override @property Rect displayRectangle() // getter
 	{
 		// Should only calculate this upon setting the text ?
 		
@@ -30,7 +30,7 @@ class GroupBox: ControlSuperClass // docmain
 	}
 	
 	
-	override Size defaultSize() // getter
+	override @property Size defaultSize() // getter
 	{
 		return Size(200, 100);
 	}
@@ -38,7 +38,7 @@ class GroupBox: ControlSuperClass // docmain
 	
 	version(DFL_NO_DRAG_DROP) {} else
 	{
-		override void allowDrop(bool dyes) // setter
+		override @property void allowDrop(bool dyes) // setter
 		{
 			//if(dyes)
 			//	throw new DflException("Cannot drop on a group box");

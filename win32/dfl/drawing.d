@@ -224,7 +224,7 @@ struct Rect // docmain
 	int x, y, width, height;
 	
 	// Used internally.
-	void getRect(RECT* r) // package
+	pure nothrow void getRect(RECT* r) // package
 	{
 		r.left = x;
 		r.right = x + width;

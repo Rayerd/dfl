@@ -26,7 +26,7 @@ class ProgressBar: ControlSuperClass // docmain
 	
 	
 	///
-	final void maximum(int max) // setter
+	final @property void maximum(int max) // setter
 	{
 		if(max <= 0 /+ || max < _min +/)
 		{
@@ -48,14 +48,14 @@ class ProgressBar: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final int maximum() // getter
+	final @property int maximum() // getter
 	{
 		return _max;
 	}
 	
 	
 	///
-	final void minimum(int min) // setter
+	final @property void minimum(int min) // setter
 	{
 		if(min < 0 /+ || min > _max +/)
 		{
@@ -76,14 +76,14 @@ class ProgressBar: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final int minimum() // getter
+	final @property int minimum() // getter
 	{
 		return _min;
 	}
 	
 	
 	///
-	final void step(int stepby) // setter
+	final @property void step(int stepby) // setter
 	{
 		if(stepby <= 0 /+ || stepby > _max +/)
 		{
@@ -102,14 +102,14 @@ class ProgressBar: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final int step() // getter
+	final @property int step() // getter
 	{
 		return _step;
 	}
 	
 	
 	///
-	final void value(int setval) // setter
+	final @property void value(int setval) // setter
 	{
 		if(setval < _min || setval > _max)
 		{
@@ -130,7 +130,7 @@ class ProgressBar: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final int value() // getter
+	final @property int value() // getter
 	{
 		return _val;
 	}
@@ -182,13 +182,13 @@ class ProgressBar: ControlSuperClass // docmain
 	}
 	
 	
-	protected override Size defaultSize() // getter
+	protected override @property Size defaultSize() // getter
 	{
 		return Size(100, 23);
 	}
 	
 	
-	static Color defaultForeColor() // getter
+	static @property Color defaultForeColor() // getter
 	{
 		return SystemColors.highlight;
 	}
