@@ -8149,6 +8149,14 @@ class ContainerControl: ScrollableControl, IContainerControl // docmain
 
 
 import std.traits, std.typecons;
+private template hasLocalAliasing(T...)
+{
+	static if( !T.length )
+		enum hasLocalAliasing = false;
+	else
+		enum hasLocalAliasing = std.traits.hasLocalAliasing!(T[0]) ||
+			dfl.control.hasLocalAliasing!(T[1 .. $]);
+}
 
 ///
 shared class SharedControl
