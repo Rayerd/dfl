@@ -128,7 +128,7 @@ public:
 		{
 			return new Region(hRgn);
 		}
-		throw new Exception("リージョンの生成に失敗");
+		throw new Exception("Failed to make a region data.");
 	}
 	
 	
@@ -137,7 +137,7 @@ public:
 		HDC hDC = CreateCompatibleDC(null);
 		auto h = _height;
 		auto w = _width;
-		if (!hDC) throw new Exception("デバイスコンテキストの取得に失敗");
+		if (!hDC) throw new Exception("Failed to get device context data.");
 		BITMAPINFOHEADER bi;
 		with(bi)
 		{

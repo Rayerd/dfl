@@ -240,7 +240,7 @@ abstract class ButtonBase: ControlSuperClass // docmain
 	
 	
 	///
-	Size defaultSize() // getter
+	override Size defaultSize() // getter
 	{
 		return Size(75, 23);
 	}

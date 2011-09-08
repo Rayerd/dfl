@@ -474,13 +474,11 @@ final class Application // docmain
 		{
 			//throw new DflException("Cannot have more than one message loop per thread");
 			assert(0, "Cannot have more than one message loop per thread");
-			return;
 		}
 		
 		if(threadFlags & TF.QUIT)
 		{
 			assert(0, "The application is shutting down");
-			return;
 		}
 		
 		version(CUSTOM_MSG_HOOK)
@@ -1258,7 +1256,6 @@ final class Application // docmain
 			if(messageLoop)
 			{
 				assert(0, "setCompat"); // Called too late, must enable compatibility sooner.
-				return;
 			}
 			
 			_compat |= dflcompat;
@@ -1719,9 +1716,8 @@ extern(Windows) LRESULT dflWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 							Application.onThreadException(e2);
 						}
 					}
-					return LRESULT_DFL_INVOKE;
 				}
-				break;
+				return LRESULT_DFL_INVOKE;
 			
 			case WPARAM_DFL_INVOKE_SIMPLE:
 				{
@@ -1743,9 +1739,8 @@ extern(Windows) LRESULT dflWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 							Application.onThreadException(e2);
 						}
 					}
-					return LRESULT_DFL_INVOKE;
 				}
-				break;
+				return LRESULT_DFL_INVOKE;
 			
 			case WPARAM_DFL_DELAY_INVOKE:
 				try

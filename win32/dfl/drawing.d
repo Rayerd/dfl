@@ -2677,11 +2677,7 @@ class Graphics // docmain
 	// to the previous point.
 	final void drawLines(Pen pen, Point[] points)
 	{
-		if(points.length < 2)
-		{
-			assert(0); // Not enough line points.
-			return;
-		}
+		assert(points.length < 2, "Not enough line points.");
 		
 		HPEN prevPen;
 		int i;
@@ -3290,7 +3286,7 @@ class Icon: Image // docmain
 	}
 	
 	
-	int _imgtype(HGDIOBJ* ph) // internal
+	override int _imgtype(HGDIOBJ* ph) // internal
 	{
 		if(ph)
 			*ph = cast(HGDIOBJ)hi;
