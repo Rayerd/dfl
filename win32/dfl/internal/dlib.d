@@ -483,11 +483,11 @@ else // Phobos
 	
 	private import std.path;
 	
-	alias std.path.getDirName pathGetDirName;
+	alias std.path.dirName pathGetDirName;
 	
 	alias std.path.linesep nativeLineSeparatorString;
 	
-	alias std.path.join pathJoin;
+	alias std.path.buildPath pathJoin;
 	
 	alias std.path.pathsep nativePathSeparatorString;
 	
@@ -533,7 +533,7 @@ else // Phobos
 	
 	alias std.utf.toUTF16 utf8stringtoUtf16string;
 	
-	alias std.utf.toUTF16z utf8stringToUtf16stringz;
+	alias std.utf.toUTFz!(typeof(Dwstring.init.ptr), Dstring) utf8stringToUtf16stringz;
 	
 	alias std.utf.toUTF8 utf32stringtoUtf8string;
 	
