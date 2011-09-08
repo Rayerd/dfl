@@ -107,7 +107,7 @@ else
 
 HMODULE _user32, _kernel32, _advapi32, _gdi32;
 
-package HMODULE advapi32() // getter
+package @property HMODULE advapi32() // getter
 {
 	// advapi32 generally always delay loads.
 	if(!_advapi32)
@@ -115,7 +115,7 @@ package HMODULE advapi32() // getter
 	return _advapi32;
 }
 
-package HMODULE gdi32() // getter
+package @property HMODULE gdi32() // getter
 {
 	// gdi32 sometimes delay loads.
 	version(DFL_GET_INTERNAL_LIBS)
@@ -126,7 +126,7 @@ package HMODULE gdi32() // getter
 	return _gdi32;
 }
 
-package HMODULE user32() // getter
+package @property HMODULE user32() // getter
 {
 	version(DFL_GET_INTERNAL_LIBS)
 	{
@@ -136,7 +136,7 @@ package HMODULE user32() // getter
 	return _user32;
 }
 
-package HMODULE kernel32() // getter
+package @property HMODULE kernel32() // getter
 {
 	version(DFL_GET_INTERNAL_LIBS)
 	{

@@ -26,7 +26,7 @@ class ColorDialog: CommonDialog // docmain
 	
 	
 	///
-	void allowFullOpen(bool byes) // setter
+	@property void allowFullOpen(bool byes) // setter
 	{
 		if(byes)
 			cc.Flags &= ~CC_PREVENTFULLOPEN;
@@ -35,14 +35,14 @@ class ColorDialog: CommonDialog // docmain
 	}
 	
 	/// ditto
-	bool allowFullOpen() // getter
+	@property bool allowFullOpen() // getter
 	{
 		return (cc.Flags & CC_PREVENTFULLOPEN) != CC_PREVENTFULLOPEN;
 	}
 	
 	
 	///
-	void anyColor(bool byes) // setter
+	@property void anyColor(bool byes) // setter
 	{
 		if(byes)
 			cc.Flags |= CC_ANYCOLOR;
@@ -51,14 +51,14 @@ class ColorDialog: CommonDialog // docmain
 	}
 	
 	/// ditto
-	bool anyColor() // getter
+	@property bool anyColor() // getter
 	{
 		return (cc.Flags & CC_ANYCOLOR) == CC_ANYCOLOR;
 	}
 	
 	
 	///
-	void solidColorOnly(bool byes) // setter
+	@property void solidColorOnly(bool byes) // setter
 	{
 		if(byes)
 			cc.Flags |= CC_SOLIDCOLOR;
@@ -67,27 +67,27 @@ class ColorDialog: CommonDialog // docmain
 	}
 	
 	/// ditto
-	bool solidColorOnly() // getter
+	@property bool solidColorOnly() // getter
 	{
 		return (cc.Flags & CC_SOLIDCOLOR) == CC_SOLIDCOLOR;
 	}
 	
 	
 	///
-	final void color(Color c) // setter
+	final @property void color(Color c) // setter
 	{
 		cc.rgbResult = c.toRgb();
 	}
 	
 	/// ditto
-	final Color color() // getter
+	final @property Color color() // getter
 	{
 		return Color.fromRgb(cc.rgbResult);
 	}
 	
 	
 	///
-	final void customColors(COLORREF[] colors) // setter
+	final @property void customColors(COLORREF[] colors) // setter
 	{
 		if(colors.length >= _cust.length)
 			_cust[] = colors[0 .. _cust.length];
@@ -96,14 +96,14 @@ class ColorDialog: CommonDialog // docmain
 	}
 	
 	/// ditto
-	final COLORREF[] customColors() // getter
+	final @property COLORREF[] customColors() // getter
 	{
 		return _cust;
 	}
 	
 	
 	///
-	void fullOpen(bool byes) // setter
+	@property void fullOpen(bool byes) // setter
 	{
 		if(byes)
 			cc.Flags |= CC_FULLOPEN;
@@ -112,14 +112,14 @@ class ColorDialog: CommonDialog // docmain
 	}
 	
 	/// ditto
-	bool fullOpen() // getter
+	@property bool fullOpen() // getter
 	{
 		return (cc.Flags & CC_FULLOPEN) == CC_FULLOPEN;
 	}
 	
 	
 	///
-	void showHelp(bool byes) // setter
+	@property void showHelp(bool byes) // setter
 	{
 		if(byes)
 			cc.Flags |= CC_SHOWHELP;
@@ -128,7 +128,7 @@ class ColorDialog: CommonDialog // docmain
 	}
 	
 	/// ditto
-	bool showHelp() // getter
+	@property bool showHelp() // getter
 	{
 		return (cc.Flags & CC_SHOWHELP) == CC_SHOWHELP;
 	}

@@ -39,7 +39,7 @@ class Registry // docmain
 	static:
 	
 	///
-	RegistryKey classesRoot() // getter
+	@property RegistryKey classesRoot() // getter
 	{
 		if(!_classesRoot)
 			_classesRoot = new RegistryKey(HKEY_CLASSES_ROOT, false);
@@ -47,7 +47,7 @@ class Registry // docmain
 	}
 	
 	/// ditto
-	RegistryKey currentConfig() // getter
+	@property RegistryKey currentConfig() // getter
 	{
 		if(!_currentConfig)
 			_currentConfig = new RegistryKey(HKEY_CURRENT_CONFIG, false);
@@ -55,7 +55,7 @@ class Registry // docmain
 	}
 	
 	/// ditto
-	RegistryKey currentUser() // getter
+	@property RegistryKey currentUser() // getter
 	{
 		if(!_currentUser)
 			_currentUser = new RegistryKey(HKEY_CURRENT_USER, false);
@@ -63,7 +63,7 @@ class Registry // docmain
 	}
 	
 	/// ditto
-	RegistryKey dynData() // getter
+	@property RegistryKey dynData() // getter
 	{
 		if(!_dynData)
 			_dynData = new RegistryKey(HKEY_DYN_DATA, false);
@@ -71,7 +71,7 @@ class Registry // docmain
 	}
 	
 	/// ditto
-	RegistryKey localMachine() // getter
+	@property RegistryKey localMachine() // getter
 	{
 		if(!_localMachine)
 			_localMachine = new RegistryKey(HKEY_LOCAL_MACHINE, false);
@@ -79,7 +79,7 @@ class Registry // docmain
 	}
 	
 	/// ditto
-	RegistryKey performanceData() // getter
+	@property RegistryKey performanceData() // getter
 	{
 		if(!_performanceData)
 			_performanceData = new RegistryKey(HKEY_PERFORMANCE_DATA, false);
@@ -87,7 +87,7 @@ class Registry // docmain
 	}
 	
 	/// ditto
-	RegistryKey users() // getter
+	@property RegistryKey users() // getter
 	{
 		if(!_users)
 			_users = new RegistryKey(HKEY_USERS, false);
@@ -126,7 +126,7 @@ private const uint MAX_REG_BUFFER = 256;
 ///
 abstract class RegistryValue
 {
-	DWORD valueType(); // getter
+	@property DWORD valueType(); // getter
 	override Dstring toString();
 	/+ package +/ protected LONG save(HKEY hkey, Dstring name); // package
 	package final RegistryValue _reg() { return this; }
@@ -152,7 +152,7 @@ class RegistryValueSz: RegistryValue
 	}
 	
 	
-	override DWORD valueType() // getter
+	override @property DWORD valueType() // getter
 	{
 		return REG_SZ;
 	}
@@ -193,7 +193,7 @@ class RegistryValueSzW: RegistryValue
 	}
 	
 	
-	override DWORD valueType() // getter
+	override @property DWORD valueType() // getter
 	{
 		return REG_SZ;
 	}
@@ -239,7 +239,7 @@ class RegistryValueMultiSz: RegistryValue
 	}
 	
 	
-	override DWORD valueType() // getter
+	override @property DWORD valueType() // getter
 	{
 		return REG_MULTI_SZ;
 	}
@@ -306,7 +306,7 @@ class RegistryValueExpandSz: RegistryValue
 	}
 	
 	
-	override DWORD valueType() // getter
+	override @property DWORD valueType() // getter
 	{
 		return REG_EXPAND_SZ;
 	}
@@ -385,7 +385,7 @@ class RegistryValueDword: RegistryValue
 	}
 	
 	
-	override DWORD valueType() // getter
+	override @property DWORD valueType() // getter
 	{
 		return REG_DWORD;
 	}
@@ -425,7 +425,7 @@ class RegistryValueDwordBigEndian: RegistryValue
 	}
 	
 	
-	override DWORD valueType() // getter
+	override @property DWORD valueType() // getter
 	{
 		return REG_DWORD_BIG_ENDIAN;
 	}
@@ -463,7 +463,7 @@ class RegistryValueBinary: RegistryValue
 	}
 	
 	
-	override DWORD valueType() // getter
+	override @property DWORD valueType() // getter
 	{
 		return REG_BINARY;
 	}
@@ -501,7 +501,7 @@ class RegistryValueLink: RegistryValue
 	}
 	
 	
-	override DWORD valueType() // getter
+	override @property DWORD valueType() // getter
 	{
 		return REG_LINK;
 	}
@@ -539,7 +539,7 @@ class RegistryValueResourceList: RegistryValue
 	}
 	
 	
-	override DWORD valueType() // getter
+	override @property DWORD valueType() // getter
 	{
 		return REG_RESOURCE_LIST;
 	}
@@ -577,7 +577,7 @@ class RegistryValueNone: RegistryValue
 	}
 	
 	
-	override DWORD valueType() // getter
+	override @property DWORD valueType() // getter
 	{
 		return REG_NONE;
 	}
@@ -635,7 +635,7 @@ class RegistryKey // docmain
 	/+
 	// An absolute key path.
 	// This doesn't work.
-	final Dstring name() // getter
+	final @property Dstring name() // getter
 	{
 		Dstring buf;
 		DWORD buflen;
@@ -652,7 +652,7 @@ class RegistryKey // docmain
 	
 	
 	///
-	final int subKeyCount() // getter
+	final @property int subKeyCount() // getter
 	{
 		DWORD count;
 		
@@ -666,7 +666,7 @@ class RegistryKey // docmain
 	
 	
 	///
-	final int valueCount() // getter
+	final @property int valueCount() // getter
 	{
 		DWORD count;
 		
@@ -1161,7 +1161,7 @@ class RegistryKey // docmain
 	
 	///
 	// Used internally.
-	final HKEY handle() // getter
+	final @property HKEY handle() // getter
 	{
 		return hkey;
 	}

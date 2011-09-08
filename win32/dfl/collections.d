@@ -56,7 +56,7 @@ template ListWrapArray(TValue, alias Array,
 	
 	
 	///
-	void opIndexAssign(TValue value, int index) // setter
+	void opIndexAssign(TValue value, int index)
 	{
 		TValue oldval = Array[index];
 		ItemRemovingCallback(index, oldval); // Removing.
@@ -78,7 +78,7 @@ template ListWrapArray(TValue, alias Array,
 	static if(OVERLOAD_OBJECT)
 	{
 		/// ditto
-		void opIndexAssign(Object value, int index) // setter
+		void opIndexAssign(Object value, int index)
 		{
 			TValue tval;
 			tval = cast(TValue)value;
@@ -92,7 +92,7 @@ template ListWrapArray(TValue, alias Array,
 	static if(OVERLOAD_STRING)
 	{
 		/// ditto
-		void opIndexAssign(Dstring value, int index) // setter
+		void opIndexAssign(Dstring value, int index)
 		{
 			return opIndexAssign(new TValueString(value), index);
 		}
@@ -100,7 +100,7 @@ template ListWrapArray(TValue, alias Array,
 	
 	
 	///
-	TValue opIndex(int index) // getter
+	@property TValue opIndex(int index) // getter
 	{
 		return Array[index];
 	}
@@ -415,7 +415,7 @@ template ListWrapArray(TValue, alias Array,
 	deprecated alias length count;
 	
 	///
-	size_t length() // getter
+	@property size_t length() // getter
 	{
 		return Array.length;
 	}

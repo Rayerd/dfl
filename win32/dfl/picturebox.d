@@ -33,7 +33,7 @@ class PictureBox: Control // docmain
 	
 	
 	///
-	final void image(Image img) // setter
+	final @property void image(Image img) // setter
 	{
 		if(this.img is img)
 			return;
@@ -55,14 +55,14 @@ class PictureBox: Control // docmain
 	}
 	
 	/// ditto
-	final Image image() // getter
+	final @property Image image() // getter
 	{
 		return img;
 	}
 	
 	
 	///
-	final void sizeMode(PictureBoxSizeMode sm) // setter
+	final @property void sizeMode(PictureBoxSizeMode sm) // setter
 	{
 		if(_mode == sm)
 			return;
@@ -95,14 +95,14 @@ class PictureBox: Control // docmain
 	}
 	
 	/// ditto
-	final PictureBoxSizeMode sizeMode() // getter
+	final @property PictureBoxSizeMode sizeMode() // getter
 	{
 		return _mode;
 	}
 	
 	
 	///
-	void borderStyle(BorderStyle bs) // setter
+	@property void borderStyle(BorderStyle bs) // setter
 	{
 		final switch(bs)
 		{
@@ -129,7 +129,7 @@ class PictureBox: Control // docmain
 	}
 	
 	/// ditto
-	BorderStyle borderStyle() // getter
+	@property BorderStyle borderStyle() // getter
 	{
 		if(_exStyle() & WS_EX_CLIENTEDGE)
 			return BorderStyle.FIXED_3D;

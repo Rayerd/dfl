@@ -116,27 +116,27 @@ version(Tango)
 				berkeley.open(family, type, protocol, create);
 			}
 			
-			socket_t handle()
+			@property socket_t handle()
 			{
 				return berkeley.handle();
 			}
 			
-			socket_t fileHandle()
+			@property socket_t fileHandle()
 			{
 				return berkeley.handle();
 			}
 			
-			bool isAlive()
+			@property bool isAlive()
 			{
 				return berkeley.isAlive();
 			}
 			
-			bool blocking() // getter
+			@property bool blocking() // getter
 			{
 				return berkeley.blocking();
 			}
 			
-			void blocking(bool byes) // setter
+			@property void blocking(bool byes) // setter
 			{
 				berkeley.blocking(byes);
 			}
@@ -186,12 +186,12 @@ version(Tango)
 				return this;
 			}
 			
-			Address remoteAddress()
+			@property Address remoteAddress()
 			{
 				return berkeley.remoteAddress();
 			}
 			
-			Address localAddress()
+			@property Address localAddress()
 			{
 				return berkeley.localAddress();
 			}
@@ -501,13 +501,13 @@ class AsyncSocket: DflSocket // docmain
 	}
 	else
 	{
-		override bool blocking() // getter
+		override @property bool blocking() // getter
 		{
 			return false;
 		}
 		
 		
-		override void blocking(bool byes) // setter
+		override @property void blocking(bool byes) // setter
 		{
 			if(byes)
 				assert(0);
@@ -573,7 +573,7 @@ private class GetHostWaitHandle: WaitHandle
 	
 	alias WaitHandle.handle handle; // Overload.
 	
-	override void handle(HANDLE h) // setter
+	override @property void handle(HANDLE h) // setter
 	{
 		assert(0);
 	}
@@ -601,19 +601,19 @@ private class GetHostAsyncResult, IAsyncResult
 	}
 	
 	
-	WaitHandle asyncWaitHandle() // getter
+	@property WaitHandle asyncWaitHandle() // getter
 	{
 		return wh;
 	}
 	
 	
-	bool completedSynchronously() // getter
+	@property bool completedSynchronously() // getter
 	{
 		return false;
 	}
 	
 	
-	bool isCompleted() // getter
+	@property bool isCompleted() // getter
 	{
 		return wh.handle != WaitHandle.INVALID_HANDLE;
 	}
@@ -767,7 +767,7 @@ class SocketQueue // docmain
 	
 	
 	///
-	final DflSocket socket() // getter
+	final @property DflSocket socket() // getter
 	{
 		return sock;
 	}
@@ -880,7 +880,7 @@ class SocketQueue // docmain
 	
 	///
 	// Number of bytes in send queue.
-	uint sendBytes() // getter
+	@property uint sendBytes() // getter
 	{
 		return writebuf.length;
 	}
@@ -888,7 +888,7 @@ class SocketQueue // docmain
 	
 	///
 	// Number of bytes in recv queue.
-	uint receiveBytes() // getter
+	@property uint receiveBytes() // getter
 	{
 		return rpos;
 	}
@@ -984,7 +984,7 @@ class SocketQueue // docmain
 	//bool canwrite = false;
 	
 	
-	bool canwrite() // getter
+	@property bool canwrite() // getter
 	{
 		return writebuf.length == 0;
 	}

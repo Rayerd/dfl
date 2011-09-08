@@ -234,13 +234,13 @@ struct Rect // docmain
 	
 	
 	///
-	Point location() // getter
+	@property Point location() // getter
 	{
 		return Point(x, y);
 	}
 	
 	/// ditto
-	void location(Point pt) // setter
+	@property void location(Point pt) // setter
 	{
 		x = pt.x;
 		y = pt.y;
@@ -248,13 +248,13 @@ struct Rect // docmain
 	
 	
 	///
-	Size size() //getter
+	@property Size size() //getter
 	{
 		return Size(width, height);
 	}
 	
 	/// ditto
-	void size(Size sz) // setter
+	@property void size(Size sz) // setter
 	{
 		width = sz.width;
 		height = sz.height;
@@ -262,14 +262,14 @@ struct Rect // docmain
 	
 	
 	///
-	int right() // getter
+	@property int right() // getter
 	{
 		return x + width;
 	}
 	
 	
 	///
-	int bottom() // getter
+	@property int bottom() // getter
 	{
 		return y + height;
 	}
@@ -481,19 +481,19 @@ unittest
 struct Color // docmain
 {
 	/// Red, green, blue and alpha channel color values.
-	ubyte r() // getter
+	@property ubyte r() // getter
 	{ validateColor(); return color.red; }
 	
 	/// ditto
-	ubyte g() // getter
+	@property ubyte g() // getter
 	{ validateColor(); return color.green; }
 	
 	/// ditto
-	ubyte b() // getter
+	@property ubyte b() // getter
 	{ validateColor(); return color.blue; }
 	
 	/// ditto
-	ubyte a() // getter
+	@property ubyte a() // getter
 	{ /+ validateColor(); +/ return color.alpha; }
 	
 	
@@ -599,14 +599,14 @@ struct Color // docmain
 	}
 	
 	/// ditto
-	static Color empty() // getter
+	static @property Color empty() // getter
 	{
 		return Color(0, 0, 0, 0);
 	}
 	
 	
 	/// Return a completely transparent color value.
-	static Color transparent() // getter
+	static @property Color transparent() // getter
 	{
 		return Color.fromArgb(0, 0xFF, 0xFF, 0xFF);
 	}
@@ -679,7 +679,7 @@ struct Color // docmain
 	
 	
 	// Gets color index or INVAILD_SYSTEM_COLOR_INDEX.
-	package int _systemColorIndex() // getter
+	package @property int _systemColorIndex() // getter
 	{
 		return sysIndex;
 	}
@@ -729,157 +729,157 @@ class SystemColors // docmain
 	static:
 	
 	///
-	Color activeBorder() // getter
+	@property Color activeBorder() // getter
 	{
 		return Color.systemColor(COLOR_ACTIVEBORDER);
 	}
 	
 	/// ditto
-	Color activeCaption() // getter
+	@property Color activeCaption() // getter
 	{
 		return Color.systemColor(COLOR_ACTIVECAPTION);
 	}
 	
 	/// ditto
-	Color activeCaptionText() // getter
+	@property Color activeCaptionText() // getter
 	{
 		return Color.systemColor(COLOR_CAPTIONTEXT);
 	}
 	
 	/// ditto
-	Color appWorkspace() // getter
+	@property Color appWorkspace() // getter
 	{
 		return Color.systemColor(COLOR_APPWORKSPACE);
 	}
 	
 	/// ditto
-	Color control() // getter
+	@property Color control() // getter
 	{
 		return Color.systemColor(COLOR_BTNFACE);
 	}
 	
 	/// ditto
-	Color controlDark() // getter
+	@property Color controlDark() // getter
 	{
 		return Color.systemColor(COLOR_BTNSHADOW);
 	}
 	
 	/// ditto
-	Color controlDarkDark() // getter
+	@property Color controlDarkDark() // getter
 	{
 		return Color.systemColor(COLOR_3DDKSHADOW); // ?
 	}
 	
 	/// ditto
-	Color controlLight() // getter
+	@property Color controlLight() // getter
 	{
 		return Color.systemColor(COLOR_3DLIGHT);
 	}
 	
 	/// ditto
-	Color controlLightLight() // getter
+	@property Color controlLightLight() // getter
 	{
 		return Color.systemColor(COLOR_BTNHIGHLIGHT); // ?
 	}
 	
 	/// ditto
-	Color controlText() // getter
+	@property Color controlText() // getter
 	{
 		return Color.systemColor(COLOR_BTNTEXT);
 	}
 	
 	/// ditto
-	Color desktop() // getter
+	@property Color desktop() // getter
 	{
 		return Color.systemColor(COLOR_DESKTOP);
 	}
 	
 	/// ditto
-	Color grayText() // getter
+	@property Color grayText() // getter
 	{
 		return Color.systemColor(COLOR_GRAYTEXT);
 	}
 	
 	/// ditto
-	Color highlight() // getter
+	@property Color highlight() // getter
 	{
 		return Color.systemColor(COLOR_HIGHLIGHT);
 	}
 	
 	/// ditto
-	Color highlightText() // getter
+	@property Color highlightText() // getter
 	{
 		return Color.systemColor(COLOR_HIGHLIGHTTEXT);
 	}
 	
 	/// ditto
-	Color hotTrack() // getter
+	@property Color hotTrack() // getter
 	{
 		return Color(0, 0, 0xFF); // ?
 	}
 	
 	/// ditto
-	Color inactiveBorder() // getter
+	@property Color inactiveBorder() // getter
 	{
 		return Color.systemColor(COLOR_INACTIVEBORDER);
 	}
 	
 	/// ditto
-	Color inactiveCaption() // getter
+	@property Color inactiveCaption() // getter
 	{
 		return Color.systemColor(COLOR_INACTIVECAPTION);
 	}
 	
 	/// ditto
-	Color inactiveCaptionText() // getter
+	@property Color inactiveCaptionText() // getter
 	{
 		return Color.systemColor(COLOR_INACTIVECAPTIONTEXT);
 	}
 	
 	/// ditto
-	Color info() // getter
+	@property Color info() // getter
 	{
 		return Color.systemColor(COLOR_INFOBK);
 	}
 	
 	/// ditto
-	Color infoText() // getter
+	@property Color infoText() // getter
 	{
 		return Color.systemColor(COLOR_INFOTEXT);
 	}
 	
 	/// ditto
-	Color menu() // getter
+	@property Color menu() // getter
 	{
 		return Color.systemColor(COLOR_MENU);
 	}
 	
 	/// ditto
-	Color menuText() // getter
+	@property Color menuText() // getter
 	{
 		return Color.systemColor(COLOR_MENUTEXT);
 	}
 	
 	/// ditto
-	Color scrollBar() // getter
+	@property Color scrollBar() // getter
 	{
 		return Color.systemColor(CTLCOLOR_SCROLLBAR);
 	}
 	
 	/// ditto
-	Color window() // getter
+	@property Color window() // getter
 	{
 		return Color.systemColor(COLOR_WINDOW);
 	}
 	
 	/// ditto
-	Color windowFrame() // getter
+	@property Color windowFrame() // getter
 	{
 		return Color.systemColor(COLOR_WINDOWFRAME);
 	}
 	
 	/// ditto
-	Color windowText() // getter
+	@property Color windowText() // getter
 	{
 		return Color.systemColor(COLOR_WINDOWTEXT);
 	}
@@ -897,31 +897,31 @@ class SystemIcons // docmain
 	static:
 	
 	///
-	Icon application() // getter
+	@property Icon application() // getter
 	{
 		return new Icon(LoadIconA(null, IDI_APPLICATION), false);
 	}
 	
 	/// ditto
-	Icon error() // getter
+	@property Icon error() // getter
 	{
 		return new Icon(LoadIconA(null, IDI_HAND), false);
 	}
 	
 	/// ditto
-	Icon question() // getter
+	@property Icon question() // getter
 	{
 		return new Icon(LoadIconA(null, IDI_QUESTION), false);
 	}
 	
 	/// ditto
-	Icon warning() // getter
+	@property Icon warning() // getter
 	{
 		return new Icon(LoadIconA(null, IDI_EXCLAMATION), false);
 	}
 	
 	/// ditto
-	Icon information() // getter
+	@property Icon information() // getter
 	{
 		return new Icon(LoadIconA(null, IDI_INFORMATION), false);
 	}
@@ -938,7 +938,7 @@ class ImageFormat
 	}
 	
 	
-	final guid() // getter
+	final @property guid() // getter
 	{
 		return guid;
 	}
@@ -947,13 +947,13 @@ class ImageFormat
 	
 	static:
 	
-	ImageFormat bmp() // getter
+	@property ImageFormat bmp() // getter
 	{
 		return null;
 	}
 	
 	
-	ImageFormat icon() // getter
+	@property ImageFormat icon() // getter
 	{
 		return null;
 	}
@@ -968,7 +968,7 @@ abstract class Image // docmain
 	
 	
 	/+
-	final ImageFormat rawFormat(); // getter
+	final @property ImageFormat rawFormat(); // getter
 	+/
 	
 	
@@ -993,18 +993,18 @@ abstract class Image // docmain
 	
 	
 	///
-	Size size(); // getter
+	@property Size size(); // getter
 	
 	
 	///
-	int width() // getter
+	@property int width() // getter
 	{
 		return size.width;
 	}
 	
 	
 	///
-	int height() // getter
+	@property int height() // getter
 	{
 		return size.height;
 	}
@@ -1040,7 +1040,7 @@ class Bitmap: Image // docmain
 	
 	
 	///
-	final HBITMAP handle() // getter
+	final @property HBITMAP handle() // getter
 	{
 		return hbm;
 	}
@@ -1054,7 +1054,7 @@ class Bitmap: Image // docmain
 	
 	
 	///
-	final override Size size() // getter
+	final override @property Size size() // getter
 	{
 		BITMAP bm;
 		_getInfo(&bm);
@@ -1063,14 +1063,14 @@ class Bitmap: Image // docmain
 	
 	
 	///
-	final override int width() // getter
+	final override @property int width() // getter
 	{
 		return size.width;
 	}
 	
 	
 	///
-	final override int height() // getter
+	final override @property int height() // getter
 	{
 		return size.height;
 	}
@@ -1289,7 +1289,7 @@ class Picture: Image // docmain
 	
 	
 	///
-	final OLE_XSIZE_HIMETRIC loghimX() // getter
+	final @property OLE_XSIZE_HIMETRIC loghimX() // getter
 	{
 		OLE_XSIZE_HIMETRIC xsz;
 		if(S_OK != ipic.get_Width(&xsz))
@@ -1298,7 +1298,7 @@ class Picture: Image // docmain
 	}
 	
 	/// ditto
-	final OLE_YSIZE_HIMETRIC loghimY() // getter
+	final @property OLE_YSIZE_HIMETRIC loghimY() // getter
 	{
 		OLE_YSIZE_HIMETRIC ysz;
 		if(S_OK != ipic.get_Height(&ysz))
@@ -1308,7 +1308,7 @@ class Picture: Image // docmain
 	
 	
 	///
-	final override int width() // getter
+	final override @property int width() // getter
 	{
 		Graphics g;
 		int result;
@@ -1320,7 +1320,7 @@ class Picture: Image // docmain
 	
 	
 	///
-	final override int height() // getter
+	final override @property int height() // getter
 	{
 		Graphics g;
 		int result;
@@ -1332,7 +1332,7 @@ class Picture: Image // docmain
 	
 	
 	///
-	final override Size size() // getter
+	final override @property Size size() // getter
 	{
 		Graphics g;
 		Size result;
@@ -1657,7 +1657,7 @@ class TextFormat
 	
 	
 	///
-	static TextFormat genericDefault() // getter
+	static @property TextFormat genericDefault() // getter
 	{
 		TextFormat result;
 		result = new TextFormat;
@@ -1668,46 +1668,46 @@ class TextFormat
 	}
 	
 	/// ditto
-	static TextFormat genericTypographic() // getter
+	static @property TextFormat genericTypographic() // getter
 	{
 		return new TextFormat;
 	}
 	
 	
 	///
-	final void alignment(TextAlignment ta) // setter
+	final @property void alignment(TextAlignment ta) // setter
 	{
 		_align = ta;
 	}
 	
 	/// ditto
-	final TextAlignment alignment() // getter
+	final @property TextAlignment alignment() // getter
 	{
 		return _align;
 	}
 	
 	
 	///
-	final void formatFlags(TextFormatFlags tff) // setter
+	final @property void formatFlags(TextFormatFlags tff) // setter
 	{
 		_flags = tff;
 	}
 	
 	/// ditto
-	final TextFormatFlags formatFlags() // getter
+	final @property TextFormatFlags formatFlags() // getter
 	{
 		return _flags;
 	}
 	
 	
 	///
-	final void trimming(TextTrimming tt) // getter
+	final @property void trimming(TextTrimming tt) // getter
 	{
 		_trim = tt;
 	}
 	
 	/// ditto
-	final TextTrimming trimming() // getter
+	final @property TextTrimming trimming() // getter
 	{
 		return _trim;
 	}
@@ -1716,13 +1716,13 @@ class TextFormat
 	// Units of the average character width.
 	
 	///
-	final void tabLength(int tablen) // setter
+	final @property void tabLength(int tablen) // setter
 	{
 		_params.iTabLength = tablen;
 	}
 	
 	/// ditto
-	final int tabLength() // getter
+	final @property int tabLength() // getter
 	{
 		return _params.iTabLength;
 	}
@@ -1731,13 +1731,13 @@ class TextFormat
 	// Units of the average character width.
 	
 	///
-	final void leftMargin(int sz) // setter
+	final @property void leftMargin(int sz) // setter
 	{
 		_params.iLeftMargin = sz;
 	}
 	
 	/// ditto
-	final int leftMargin() // getter
+	final @property int leftMargin() // getter
 	{
 		return _params.iLeftMargin;
 	}
@@ -1746,13 +1746,13 @@ class TextFormat
 	// Units of the average character width.
 	
 	///
-	final void rightMargin(int sz) // setter
+	final @property void rightMargin(int sz) // setter
 	{
 		_params.iRightMargin = sz;
 	}
 	
 	/// ditto
-	final int rightMargin() // getter
+	final @property int rightMargin() // getter
 	{
 		return _params.iRightMargin;
 	}
@@ -1770,7 +1770,7 @@ class TextFormat
 class Screen
 {
 	///
-	static Screen primaryScreen() // getter
+	static @property Screen primaryScreen() // getter
 	{
 		version(DFL_MULTIPLE_SCREENS)
 		{
@@ -1799,7 +1799,7 @@ class Screen
 	
 	
 	///
-	Rect bounds() // getter
+	@property Rect bounds() // getter
 	{
 		version(DFL_MULTIPLE_SCREENS)
 		{
@@ -1818,7 +1818,7 @@ class Screen
 	
 	
 	///
-	Rect workingArea() // getter
+	@property Rect workingArea() // getter
 	{
 		version(DFL_MULTIPLE_SCREENS)
 		{
@@ -1841,7 +1841,7 @@ class Screen
 		
 		debug
 		{
-			static void fakeMultipleScreens(bool byes) // setter
+			static @property void fakeMultipleScreens(bool byes) // setter
 			{
 				if(byes)
 				{
@@ -1853,7 +1853,7 @@ class Screen
 				}
 			}
 			
-			static bool fakeMultipleScreens() // getter
+			static @property bool fakeMultipleScreens() // getter
 			{
 				return _screens.length > 1
 					&& HMFAKE == _screens[1].hmonitor;
@@ -1864,7 +1864,7 @@ class Screen
 		
 		
 		///
-		static Screen[] allScreens() // getter
+		static @property Screen[] allScreens() // getter
 		{
 			version(DFL_MULTIPLE_SCREENS)
 			{
@@ -2952,7 +2952,7 @@ class Graphics // docmain
 	
 	
 	///
-	final HDC handle() // getter
+	final @property HDC handle() // getter
 	{
 		return hdc;
 	}
@@ -3032,14 +3032,14 @@ class MemoryGraphics: Graphics // docmain
 	
 	
 	///
-	final int width() // getter
+	final @property int width() // getter
 	{
 		return _w;
 	}
 	
 	
 	///
-	final int height() // getter
+	final @property int height() // getter
 	{
 		return _h;
 	}
@@ -3052,7 +3052,7 @@ class MemoryGraphics: Graphics // docmain
 	
 	
 	///
-	final HBITMAP hbitmap() // getter // package
+	final @property HBITMAP hbitmap() // getter // package
 	{
 		return hbm;
 	}
@@ -3255,7 +3255,7 @@ class Icon: Image // docmain
 	
 	
 	///
-	final override Size size() // getter
+	final override @property Size size() // getter
 	{
 		ICONINFO ii;
 		BITMAP bm;
@@ -3266,14 +3266,14 @@ class Icon: Image // docmain
 	
 	
 	///
-	final override int width() // getter
+	final override @property int width() // getter
 	{
 		return size.width;
 	}
 	
 	
 	///
-	final override int height() // getter
+	final override @property int height() // getter
 	{
 		return size.height;
 	}
@@ -3304,7 +3304,7 @@ class Icon: Image // docmain
 	
 	
 	///
-	final HICON handle() // getter
+	final @property HICON handle() // getter
 	{
 		return hi;
 	}
@@ -3350,7 +3350,7 @@ enum GenericFontFamilies
 /+
 abstract class FontCollection
 {
-	abstract FontFamily[] families(); // getter
+	abstract @property FontFamily[] families(); // getter
 }
 
 
@@ -3376,13 +3376,13 @@ class FontFamily
 	}
 	
 	
-	final Dstring name() // getter
+	final @property Dstring name() // getter
 	{
 		
 	}
 	
 	
-	static FontFamily[] families() // getter
+	static @property FontFamily[] families() // getter
 	{
 		
 	}
@@ -3391,19 +3391,19 @@ class FontFamily
 	/+
 	// TODO: implement.
 	
-	static FontFamily genericMonospace() // getter
+	static @property FontFamily genericMonospace() // getter
 	{
 		
 	}
 	
 	
-	static FontFamily genericSansSerif() // getter
+	static @property FontFamily genericSansSerif() // getter
 	{
 		
 	}
 	
 	
-	static FontFamily genericSerif() // getter
+	static @property FontFamily genericSerif() // getter
 	{
 		
 	}
@@ -3752,21 +3752,21 @@ class Font // docmain
 	
 	
 	///
-	final HFONT handle() // getter
+	final @property HFONT handle() // getter
 	{
 		return hf;
 	}
 	
 	
 	///
-	final GraphicsUnit unit() // getter
+	final @property GraphicsUnit unit() // getter
 	{
 		return _unit;
 	}
 	
 	
 	///
-	final float size() // getter
+	final @property float size() // getter
 	{
 		/+
 		LOGFONTA lf;
@@ -3796,20 +3796,20 @@ class Font // docmain
 	
 	
 	///
-	final FontStyle style() // getter
+	final @property FontStyle style() // getter
 	{
 		return _fstyle;
 	}
 	
 	
 	///
-	final Dstring name() // getter
+	final @property Dstring name() // getter
 	{
 		return lfName;
 	}
 	
 	
-	final ubyte gdiCharSet() // getter
+	final @property ubyte gdiCharSet() // getter
 	{
 		return lfCharSet;
 	}
@@ -3901,7 +3901,7 @@ class Pen // docmain
 	
 	
 	///
-	final HPEN handle() // getter
+	final @property HPEN handle() // getter
 	{
 		return hp;
 	}
@@ -3937,7 +3937,7 @@ class Brush // docmain
 	
 	
 	///
-	final HBRUSH handle() // getter
+	final @property HBRUSH handle() // getter
 	{
 		return hb;
 	}
@@ -3960,7 +3960,7 @@ class SolidBrush: Brush // docmain
 	
 	
 	/+
-	final void color(Color c) // setter
+	final @property void color(Color c) // setter
 	{
 		// delete..
 		super.hb = CreateSolidBrush(c.toRgb());
@@ -3969,7 +3969,7 @@ class SolidBrush: Brush // docmain
 	
 	
 	///
-	final Color color() // getter
+	final @property Color color() // getter
 	{
 		Color result;
 		LOGBRUSH lb;
@@ -4027,7 +4027,7 @@ class HatchBrush: Brush // docmain
 	
 	
 	///
-	final Color foregroundColor() // getter
+	final @property Color foregroundColor() // getter
 	{
 		Color result;
 		LOGBRUSH lb;
@@ -4042,7 +4042,7 @@ class HatchBrush: Brush // docmain
 	
 	
 	///
-	final HatchStyle hatchStyle() // getter
+	final @property HatchStyle hatchStyle() // getter
 	{
 		HatchStyle result;
 		LOGBRUSH lb;
@@ -4076,7 +4076,7 @@ class Region // docmain
 	
 	
 	///
-	final HRGN handle() // getter
+	final @property HRGN handle() // getter
 	{
 		return hrgn;
 	}

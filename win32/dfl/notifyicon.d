@@ -27,13 +27,13 @@ class NotifyIcon // docmain
 	else
 	{
 		///
-		final void contextMenu(ContextMenu menu) // setter
+		final @property void contextMenu(ContextMenu menu) // setter
 		{
 			this.cmenu = menu;
 		}
 		
 		/// ditto
-		final ContextMenu contextMenu() // getter
+		final @property ContextMenu contextMenu() // getter
 		{
 			return cmenu;
 		}
@@ -41,7 +41,7 @@ class NotifyIcon // docmain
 	
 	
 	///
-	final void icon(Icon ico) // setter
+	final @property void icon(Icon ico) // setter
 	{
 		_icon = ico;
 		nid.hIcon = ico ? ico.handle : null;
@@ -54,7 +54,7 @@ class NotifyIcon // docmain
 	}
 	
 	/// ditto
-	final Icon icon() // getter
+	final @property Icon icon() // getter
 	{
 		return _icon;
 	}
@@ -63,7 +63,7 @@ class NotifyIcon // docmain
 	///
 	// Must be less than 64 chars.
 	// To-do: hold reference to setter's string, use that for getter.. ?
-	final void text(Dstring txt) // setter
+	final @property void text(Dstring txt) // setter
 	{
 		if(txt.length >= nid.szTip.length)
 			throw new DflException("Notify icon text too long");
@@ -83,7 +83,7 @@ class NotifyIcon // docmain
 	}
 	
 	/// ditto
-	final Dstring text() // getter
+	final @property Dstring text() // getter
 	{
 		//return nid.szTip[0 .. tipLen]; // Returning possibly mutated text!
 		//return nid.szTip[0 .. tipLen].dup;
@@ -93,7 +93,7 @@ class NotifyIcon // docmain
 	
 	
 	///
-	final void visible(bool byes) // setter
+	final @property void visible(bool byes) // setter
 	{
 		if(byes)
 		{
@@ -117,7 +117,7 @@ class NotifyIcon // docmain
 	}
 	
 	/// ditto
-	final bool visible() // getter
+	final @property bool visible() // getter
 	{
 		return nid.uID != 0;
 	}

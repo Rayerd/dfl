@@ -40,21 +40,21 @@ class ToolTip // docmain
 	
 	
 	///
-	final HWND handle() // getter
+	final @property HWND handle() // getter
 	{
 		return hwtt;
 	}
 	
 	
 	///
-	final void active(bool byes) // setter
+	final @property void active(bool byes) // setter
 	{
 		SendMessageA(hwtt, TTM_ACTIVATE, byes, 0); // ?
 		_active = byes;
 	}
 	
 	/// ditto
-	final bool active() // getter
+	final @property bool active() // getter
 	{
 		return _active;
 	}
@@ -62,63 +62,63 @@ class ToolTip // docmain
 	
 	///
 	// Sets autoPopDelay, initialDelay and reshowDelay.
-	final void automaticDelay(DWORD ms) // setter
+	final @property void automaticDelay(DWORD ms) // setter
 	{
 		SendMessageA(hwtt, TTM_SETDELAYTIME, TTDT_AUTOMATIC, ms);
 	}
 	
 	/+
 	/// ditto
-	final DWORD automaticDelay() // getter
+	final @property DWORD automaticDelay() // getter
 	{
 	}
 	+/
 	
 	
 	///
-	final void autoPopDelay(DWORD ms) // setter
+	final @property void autoPopDelay(DWORD ms) // setter
 	{
 		SendMessageA(hwtt, TTM_SETDELAYTIME, TTDT_AUTOPOP, ms);
 	}
 	
 	/+
 	/// ditto
-	final DWORD autoPopDelay() // getter
+	final @property DWORD autoPopDelay() // getter
 	{
 	}
 	+/
 	
 	
 	///
-	final void initialDelay(DWORD ms) // setter
+	final @property void initialDelay(DWORD ms) // setter
 	{
 		SendMessageA(hwtt, TTM_SETDELAYTIME, TTDT_INITIAL, ms);
 	}
 	
 	/+
 	/// ditto
-	final DWORD initialDelay() // getter
+	final @property DWORD initialDelay() // getter
 	{
 	}
 	+/
 	
 	
 	///
-	final void reshowDelay(DWORD ms) // setter
+	final @property void reshowDelay(DWORD ms) // setter
 	{
 		SendMessageA(hwtt, TTM_SETDELAYTIME, TTDT_RESHOW, ms);
 	}
 	
 	/+
 	/// ditto
-	final DWORD reshowDelay() // getter
+	final @property DWORD reshowDelay() // getter
 	{
 	}
 	+/
 	
 	
 	///
-	final void showAlways(bool byes) // setter
+	final @property void showAlways(bool byes) // setter
 	{
 		LONG wl;
 		wl = GetWindowLongA(hwtt, GWL_STYLE);
@@ -138,7 +138,7 @@ class ToolTip // docmain
 	}
 	
 	/// ditto
-	final bool showAlways() // getter
+	final @property bool showAlways() // getter
 	{
 		return (GetWindowLongA(hwtt, GWL_STYLE) & TTS_ALWAYSTIP) != 0;
 	}

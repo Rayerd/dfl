@@ -12,7 +12,7 @@ private import dfl.control, dfl.base, dfl.internal.winapi;
 class Panel: ContainerControl // docmain
 {
 	///
-	void borderStyle(BorderStyle bs) // setter
+	@property void borderStyle(BorderStyle bs) // setter
 	{
 		final switch(bs)
 		{
@@ -39,7 +39,7 @@ class Panel: ContainerControl // docmain
 	}
 	
 	/// ditto
-	BorderStyle borderStyle() // getter
+	@property BorderStyle borderStyle() // getter
 	{
 		if(_exStyle() & WS_EX_CLIENTEDGE)
 			return BorderStyle.FIXED_3D;

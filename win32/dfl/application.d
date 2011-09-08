@@ -66,7 +66,7 @@ class ApplicationContext // docmain
 	
 	
 	///
-	final void mainForm(Form mainForm) // setter
+	final @property void mainForm(Form mainForm) // setter
 	{
 		if(mform)
 			mform.closed.removeHandler(&onMainFormClosed);
@@ -78,7 +78,7 @@ class ApplicationContext // docmain
 	}
 	
 	/// ditto
-	final Form mainForm() // getter
+	final @property Form mainForm() // getter
 	{
 		return mform;
 	}
@@ -285,7 +285,7 @@ final class Application // docmain
 	
 	/+
 	// ///
-	bool visualStyles() // getter
+	@property bool visualStyles() // getter
 	{
 		// IsAppThemed:
 		// "Do not call this function during DllMain or global objects contructors.
@@ -295,14 +295,14 @@ final class Application // docmain
 	
 	
 	/// Path of the executable including its file name.
-	Dstring executablePath() // getter
+	@property Dstring executablePath() // getter
 	{
 		return dfl.internal.utf.getModuleFileName(HMODULE.init);
 	}
 	
 	
 	/// Directory containing the executable.
-	Dstring startupPath() // getter
+	@property Dstring startupPath() // getter
 	{
 		return pathGetDirName(dfl.internal.utf.getModuleFileName(HMODULE.init));
 	}
@@ -329,14 +329,14 @@ final class Application // docmain
 	
 	
 	/// Application data base directory path, usually `C:\Documents and Settings\<user>\Application Data`; this directory might not exist yet.
-	Dstring userAppDataBasePath() // getter
+	@property Dstring userAppDataBasePath() // getter
 	{
 		return getSpecialPath("AppData");
 	}
 	
 	
 	///
-	bool messageLoop() // getter
+	@property bool messageLoop() // getter
 	{
 		return (threadFlags & TF.RUNNING) != 0;
 	}
@@ -595,7 +595,7 @@ final class Application // docmain
 	
 	
 	// Will be null if not in a successful Application.run.
-	package ApplicationContext context() // getter
+	package @property ApplicationContext context() // getter
 	{
 		return ctx;
 	}
@@ -1149,7 +1149,7 @@ final class Application // docmain
 	else
 	{
 		///
-		Resources resources() // getter
+		@property Resources resources() // getter
 		{
 			static Resources rc = null;
 			
@@ -1173,7 +1173,7 @@ final class Application // docmain
 	
 	
 	///
-	void autoCollect(bool byes) // setter
+	@property void autoCollect(bool byes) // setter
 	{
 		if(byes)
 		{
@@ -1194,7 +1194,7 @@ final class Application // docmain
 	}
 	
 	/// ditto
-	bool autoCollect() // getter
+	@property bool autoCollect() // getter
 	{
 		return gcinfo > 0;
 	}
@@ -1387,7 +1387,7 @@ final class Application // docmain
 	
 	
 	/+
-	void filters(IMessageFilter[] filters) // setter
+	@property void filters(IMessageFilter[] filters) // setter
 	{
 		// The TlsFilterValue is being garbage collected!
 		
@@ -1399,7 +1399,7 @@ final class Application // docmain
 	}
 	
 	
-	IMessageFilter[] filters() // getter
+	@property IMessageFilter[] filters() // getter
 	{
 		TlsFilterValue* val = cast(TlsFilterValue*)TlsGetValue(tlsFilter);
 		if(!val)
@@ -1411,13 +1411,13 @@ final class Application // docmain
 	
 	version(CUSTOM_MSG_HOOK)
 	{
-		void msghook(HHOOK hhook) // setter
+		@property void msghook(HHOOK hhook) // setter
 		{
 			TlsSetValue(tlsHook, cast(LPVOID)hhook);
 		}
 		
 		
-		HHOOK msghook() // getter
+		@property HHOOK msghook() // getter
 		{
 			return cast(HHOOK)TlsGetValue(tlsHook);
 		}
@@ -1439,13 +1439,13 @@ final class Application // docmain
 	}
 	
 	
-	TF threadFlags() // getter
+	@property TF threadFlags() // getter
 	{
 		return cast(TF)cast(DWORD)TlsGetValue(tlsThreadFlags);
 	}
 	
 	
-	void threadFlags(TF flags) // setter
+	@property void threadFlags(TF flags) // setter
 	{
 		if(!TlsSetValue(tlsThreadFlags, cast(LPVOID)cast(DWORD)flags))
 			assert(0);

@@ -57,7 +57,7 @@ else
 		
 		
 		///
-		final WORD language() // getter
+		final @property WORD language() // getter
 		{
 			return lang;
 		}

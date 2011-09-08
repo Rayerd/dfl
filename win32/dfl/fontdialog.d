@@ -43,7 +43,7 @@ class FontDialog: CommonDialog
 	
 	
 	///
-	final void allowSimulations(bool byes) // setter
+	final @property void allowSimulations(bool byes) // setter
 	{
 		if(byes)
 			cf.Flags &= ~CF_NOSIMULATIONS;
@@ -52,7 +52,7 @@ class FontDialog: CommonDialog
 	}
 	
 	/// ditto
-	final bool allowSimulations() // getter
+	final @property bool allowSimulations() // getter
 	{
 		if(cf.Flags & CF_NOSIMULATIONS)
 			return false;
@@ -61,7 +61,7 @@ class FontDialog: CommonDialog
 	
 	
 	///
-	final void allowVectorFonts(bool byes) // setter
+	final @property void allowVectorFonts(bool byes) // setter
 	{
 		if(byes)
 			cf.Flags &= ~CF_NOVECTORFONTS;
@@ -79,7 +79,7 @@ class FontDialog: CommonDialog
 	
 	
 	///
-	final void allowVerticalFonts(bool byes) // setter
+	final @property void allowVerticalFonts(bool byes) // setter
 	{
 		if(byes)
 			cf.Flags &= ~CF_NOVERTFONTS;
@@ -88,7 +88,7 @@ class FontDialog: CommonDialog
 	}
 	
 	/// ditto
-	final bool allowVerticalFonts() // getter
+	final @property bool allowVerticalFonts() // getter
 	{
 		if(cf.Flags & CF_NOVERTFONTS)
 			return false;
@@ -97,20 +97,20 @@ class FontDialog: CommonDialog
 	
 	
 	///
-	final void color(Color c) // setter
+	final @property void color(Color c) // setter
 	{
 		cf.rgbColors = c.toRgb();
 	}
 	
 	/// ditto
-	final Color color() // getter
+	final @property Color color() // getter
 	{
 		return Color.fromRgb(cf.rgbColors);
 	}
 	
 	
 	///
-	final void fixedPitchOnly(bool byes) // setter
+	final @property void fixedPitchOnly(bool byes) // setter
 	{
 		if(byes)
 			cf.Flags |= CF_FIXEDPITCHONLY;
@@ -119,7 +119,7 @@ class FontDialog: CommonDialog
 	}
 	
 	/// ditto
-	final bool fixedPitchOnly() // getter
+	final @property bool fixedPitchOnly() // getter
 	{
 		if(cf.Flags & CF_FIXEDPITCHONLY)
 			return true;
@@ -128,13 +128,13 @@ class FontDialog: CommonDialog
 	
 	
 	///
-	final void font(Font f) // setter
+	final @property void font(Font f) // setter
 	{
 		_fon = f;
 	}
 	
 	/// ditto
-	final Font font() // getter
+	final @property Font font() // getter
 	{
 		if(!_fon)
 			_fon = Control.defaultFont; // ?
@@ -143,7 +143,7 @@ class FontDialog: CommonDialog
 	
 	
 	///
-	final void fontMustExist(bool byes) // setter
+	final @property void fontMustExist(bool byes) // setter
 	{
 		if(byes)
 			cf.Flags |= CF_FORCEFONTEXIST;
@@ -152,7 +152,7 @@ class FontDialog: CommonDialog
 	}
 	
 	/// ditto
-	final bool fontMustExist() // getter
+	final @property bool fontMustExist() // getter
 	{
 		if(cf.Flags & CF_FORCEFONTEXIST)
 			return true;
@@ -161,7 +161,7 @@ class FontDialog: CommonDialog
 	
 	
 	///
-	final void maxSize(int max) // setter
+	final @property void maxSize(int max) // setter
 	{
 		if(max > 0)
 		{
@@ -178,7 +178,7 @@ class FontDialog: CommonDialog
 	}
 	
 	/// ditto
-	final int maxSize() // getter
+	final @property int maxSize() // getter
 	{
 		if(cf.Flags & CF_LIMITSIZE)
 			return cf.nSizeMax;
@@ -187,7 +187,7 @@ class FontDialog: CommonDialog
 	
 	
 	///
-	final void minSize(int min) // setter
+	final @property void minSize(int min) // setter
 	{
 		if(min > cf.nSizeMax)
 			cf.nSizeMax = min;
@@ -196,7 +196,7 @@ class FontDialog: CommonDialog
 	}
 	
 	/// ditto
-	final int minSize() // getter
+	final @property int minSize() // getter
 	{
 		if(cf.Flags & CF_LIMITSIZE)
 			return cf.nSizeMin;
@@ -205,7 +205,7 @@ class FontDialog: CommonDialog
 	
 	
 	///
-	final void scriptsOnly(bool byes) // setter
+	final @property void scriptsOnly(bool byes) // setter
 	{
 		if(byes)
 			cf.Flags |= CF_SCRIPTSONLY;
@@ -214,7 +214,7 @@ class FontDialog: CommonDialog
 	}
 	
 	/// ditto
-	final bool scriptsOnly() // getter
+	final @property bool scriptsOnly() // getter
 	{
 		if(cf.Flags & CF_SCRIPTSONLY)
 			return true;
@@ -223,7 +223,7 @@ class FontDialog: CommonDialog
 	
 	
 	///
-	final void showApply(bool byes) // setter
+	final @property void showApply(bool byes) // setter
 	{
 		if(byes)
 			cf.Flags |= CF_APPLY;
@@ -232,7 +232,7 @@ class FontDialog: CommonDialog
 	}
 	
 	/// ditto
-	final bool showApply() // getter
+	final @property bool showApply() // getter
 	{
 		if(cf.Flags & CF_APPLY)
 			return true;
@@ -241,7 +241,7 @@ class FontDialog: CommonDialog
 	
 	
 	///
-	final void showHelp(bool byes) // setter
+	final @property void showHelp(bool byes) // setter
 	{
 		if(byes)
 			cf.Flags |= CF_SHOWHELP;
@@ -250,7 +250,7 @@ class FontDialog: CommonDialog
 	}
 	
 	/// ditto
-	final bool showHelp() // getter
+	final @property bool showHelp() // getter
 	{
 		if(cf.Flags & CF_SHOWHELP)
 			return true;
@@ -259,7 +259,7 @@ class FontDialog: CommonDialog
 	
 	
 	///
-	final void showEffects(bool byes) // setter
+	final @property void showEffects(bool byes) // setter
 	{
 		if(byes)
 			cf.Flags |= CF_EFFECTS;
@@ -268,7 +268,7 @@ class FontDialog: CommonDialog
 	}
 	
 	/// ditto
-	final bool showEffects() // getter
+	final @property bool showEffects() // getter
 	{
 		if(cf.Flags & CF_EFFECTS)
 			return true;

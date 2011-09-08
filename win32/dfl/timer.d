@@ -17,7 +17,7 @@ class Timer // docmain
 	
 	
 	///
-	void enabled(bool on) // setter
+	@property void enabled(bool on) // setter
 	{
 		if(on)
 			start();
@@ -26,14 +26,14 @@ class Timer // docmain
 	}
 	
 	/// ditto
-	bool enabled() // getter
+	@property bool enabled() // getter
 	{
 		return timerId != 0;
 	}
 	
 	
 	///
-	final void interval(size_t timeout) // setter
+	final @property void interval(size_t timeout) // setter
 	{
 		if(!timeout)
 			throw new DflException("Invalid timer interval");
@@ -53,7 +53,7 @@ class Timer // docmain
 	}
 	
 	/// ditto
-	final size_t interval() // getter
+	final @property size_t interval() // getter
 	{
 		return _timeout;
 	}

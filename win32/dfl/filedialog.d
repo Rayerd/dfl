@@ -65,13 +65,13 @@ abstract class FileDialog: CommonDialog // docmain
 	
 	
 	/+
-	final void addExtension(bool byes) // setter
+	final @property void addExtension(bool byes) // setter
 	{
 		addext = byes;
 	}
 	
 	
-	final bool addExtension() // getter
+	final @property bool addExtension() // getter
 	{
 		return addext;
 	}
@@ -79,7 +79,7 @@ abstract class FileDialog: CommonDialog // docmain
 	
 	
 	///
-	void checkFileExists(bool byes) // setter
+	@property void checkFileExists(bool byes) // setter
 	{
 		if(byes)
 			ofn.Flags |= OFN_FILEMUSTEXIST;
@@ -88,14 +88,14 @@ abstract class FileDialog: CommonDialog // docmain
 	}
 	
 	/// ditto
-	bool checkFileExists() // getter
+	@property bool checkFileExists() // getter
 	{
 		return (ofn.Flags & OFN_FILEMUSTEXIST) != 0;
 	}
 	
 	
 	///
-	final void checkPathExists(bool byes) // setter
+	final @property void checkPathExists(bool byes) // setter
 	{
 		if(byes)
 			ofn.Flags |= OFN_PATHMUSTEXIST;
@@ -104,14 +104,14 @@ abstract class FileDialog: CommonDialog // docmain
 	}
 	
 	/// ditto
-	final bool checkPathExists() // getter
+	final @property bool checkPathExists() // getter
 	{
 		return (ofn.Flags & OFN_PATHMUSTEXIST) != 0;
 	}
 	
 	
 	///
-	final void defaultExt(Dstring ext) // setter
+	final @property void defaultExt(Dstring ext) // setter
 	{
 		if(!ext.length)
 		{
@@ -136,14 +136,14 @@ abstract class FileDialog: CommonDialog // docmain
 	}
 	
 	/// ditto
-	final Dstring defaultExt() // getter
+	final @property Dstring defaultExt() // getter
 	{
 		return _defext;
 	}
 	
 	
 	///
-	final void dereferenceLinks(bool byes) // setter
+	final @property void dereferenceLinks(bool byes) // setter
 	{
 		if(byes)
 			ofn.Flags &= ~OFN_NODEREFERENCELINKS;
@@ -152,14 +152,14 @@ abstract class FileDialog: CommonDialog // docmain
 	}
 	
 	/// ditto
-	final bool dereferenceLinks() // getter
+	final @property bool dereferenceLinks() // getter
 	{
 		return (ofn.Flags & OFN_NODEREFERENCELINKS) == 0;
 	}
 	
 	
 	///
-	final void fileName(Dstring fn) // setter
+	final @property void fileName(Dstring fn) // setter
 	{
 		// TODO: check if correct implementation.
 		
@@ -178,7 +178,7 @@ abstract class FileDialog: CommonDialog // docmain
 	}
 	
 	/// ditto
-	final Dstring fileName() // getter
+	final @property Dstring fileName() // getter
 	{
 		if(fileNames.length)
 			return fileNames[0];
@@ -187,7 +187,7 @@ abstract class FileDialog: CommonDialog // docmain
 	
 	
 	///
-	final Dstring[] fileNames() // getter
+	final @property Dstring[] fileNames() // getter
 	{
 		if(needRebuildFiles)
 			populateFiles();
@@ -198,7 +198,7 @@ abstract class FileDialog: CommonDialog // docmain
 	
 	///
 	// The format string is like "Text files (*.txt)|*.txt|All files (*.*)|*.*".
-	final void filter(Dstring filterString) // setter
+	final @property void filter(Dstring filterString) // setter
 	{
 		if(!filterString.length)
 		{
@@ -288,7 +288,7 @@ abstract class FileDialog: CommonDialog // docmain
 	}
 	
 	/// ditto
-	final Dstring filter() // getter
+	final @property Dstring filter() // getter
 	{
 		return _filter;
 	}
@@ -296,20 +296,20 @@ abstract class FileDialog: CommonDialog // docmain
 	
 	///
 	// Note: index is 1-based.
-	final void filterIndex(int index) // setter
+	final @property void filterIndex(int index) // setter
 	{
 		ofn.nFilterIndex = (index > 0) ? index : 1;
 	}
 	
 	/// ditto
-	final int filterIndex() // getter
+	final @property int filterIndex() // getter
 	{
 		return ofn.nFilterIndex;
 	}
 	
 	
 	///
-	final void initialDirectory(Dstring dir) // setter
+	final @property void initialDirectory(Dstring dir) // setter
 	{
 		if(!dir.length)
 		{
@@ -331,7 +331,7 @@ abstract class FileDialog: CommonDialog // docmain
 	}
 	
 	/// ditto
-	final Dstring initialDirectory() // getter
+	final @property Dstring initialDirectory() // getter
 	{
 		return _initDir;
 	}
@@ -340,27 +340,27 @@ abstract class FileDialog: CommonDialog // docmain
 	// Should be instance(), but conflicts with D's old keyword.
 	
 	///
-	protected void inst(HINSTANCE hinst) // setter
+	protected @property void inst(HINSTANCE hinst) // setter
 	{
 		ofn.hInstance = hinst;
 	}
 	
 	/// ditto
-	protected HINSTANCE inst() // getter
+	protected @property HINSTANCE inst() // getter
 	{
 		return ofn.hInstance;
 	}
 	
 	
 	///
-	protected DWORD options() // getter
+	protected @property DWORD options() // getter
 	{
 		return ofn.Flags;
 	}
 	
 	
 	///
-	final void restoreDirectory(bool byes) // setter
+	final @property void restoreDirectory(bool byes) // setter
 	{
 		if(byes)
 			ofn.Flags |= OFN_NOCHANGEDIR;
@@ -369,14 +369,14 @@ abstract class FileDialog: CommonDialog // docmain
 	}
 	
 	/// ditto
-	final bool restoreDirectory() // getter
+	final @property bool restoreDirectory() // getter
 	{
 		return (ofn.Flags & OFN_NOCHANGEDIR) != 0;
 	}
 	
 	
 	///
-	final void showHelp(bool byes) // setter
+	final @property void showHelp(bool byes) // setter
 	{
 		if(byes)
 			ofn.Flags |= OFN_SHOWHELP;
@@ -385,14 +385,14 @@ abstract class FileDialog: CommonDialog // docmain
 	}
 	
 	/// ditto
-	final bool showHelp() // getter
+	final @property bool showHelp() // getter
 	{
 		return (ofn.Flags & OFN_SHOWHELP) != 0;
 	}
 	
 	
 	///
-	final void title(Dstring newTitle) // setter
+	final @property void title(Dstring newTitle) // setter
 	{
 		if(!newTitle.length)
 		{
@@ -414,14 +414,14 @@ abstract class FileDialog: CommonDialog // docmain
 	}
 	
 	/// ditto
-	final Dstring title() // getter
+	final @property Dstring title() // getter
 	{
 		return _title;
 	}
 	
 	
 	///
-	final void validateNames(bool byes) // setter
+	final @property void validateNames(bool byes) // setter
 	{
 		if(byes)
 			ofn.Flags &= ~OFN_NOVALIDATE;
@@ -430,7 +430,7 @@ abstract class FileDialog: CommonDialog // docmain
 	}
 	
 	/// ditto
-	final bool validateNames() // getter
+	final @property bool validateNames() // getter
 	{
 		return(ofn.Flags & OFN_NOVALIDATE) == 0;
 	}
@@ -743,7 +743,7 @@ class OpenFileDialog: FileDialog // docmain
 	
 	
 	///
-	final void multiselect(bool byes) // setter
+	final @property void multiselect(bool byes) // setter
 	{
 		if(byes)
 			ofn.Flags |= OFN_ALLOWMULTISELECT;
@@ -752,14 +752,14 @@ class OpenFileDialog: FileDialog // docmain
 	}
 	
 	/// ditto
-	final bool multiselect() // getter
+	final @property bool multiselect() // getter
 	{
 		return (ofn.Flags & OFN_ALLOWMULTISELECT) != 0;
 	}
 	
 	
 	///
-	final void readOnlyChecked(bool byes) // setter
+	final @property void readOnlyChecked(bool byes) // setter
 	{
 		if(byes)
 			ofn.Flags |= OFN_READONLY;
@@ -768,14 +768,14 @@ class OpenFileDialog: FileDialog // docmain
 	}
 	
 	/// ditto
-	final bool readOnlyChecked() // getter
+	final @property bool readOnlyChecked() // getter
 	{
 		return (ofn.Flags & OFN_READONLY) != 0;
 	}
 	
 	
 	///
-	final void showReadOnly(bool byes) // setter
+	final @property void showReadOnly(bool byes) // setter
 	{
 		if(byes)
 			ofn.Flags &= ~OFN_HIDEREADONLY;
@@ -784,7 +784,7 @@ class OpenFileDialog: FileDialog // docmain
 	}
 	
 	/// ditto
-	final bool showReadOnly() // getter
+	final @property bool showReadOnly() // getter
 	{
 		return (ofn.Flags & OFN_HIDEREADONLY) == 0;
 	}
@@ -878,7 +878,7 @@ class SaveFileDialog: FileDialog // docmain
 	
 	
 	///
-	final void createPrompt(bool byes) // setter
+	final @property void createPrompt(bool byes) // setter
 	{
 		if(byes)
 			ofn.Flags |= OFN_CREATEPROMPT;
@@ -887,14 +887,14 @@ class SaveFileDialog: FileDialog // docmain
 	}
 	
 	/// ditto
-	final bool createPrompt() // getter
+	final @property bool createPrompt() // getter
 	{
 		return (ofn.Flags & OFN_CREATEPROMPT) != 0;
 	}
 	
 	
 	///
-	final void overwritePrompt(bool byes) // setter
+	final @property void overwritePrompt(bool byes) // setter
 	{
 		if(byes)
 			ofn.Flags |= OFN_OVERWRITEPROMPT;
@@ -903,7 +903,7 @@ class SaveFileDialog: FileDialog // docmain
 	}
 	
 	/// ditto
-	final bool overwritePrompt() // getter
+	final @property bool overwritePrompt() // getter
 	{
 		return (ofn.Flags & OFN_OVERWRITEPROMPT) != 0;
 	}

@@ -17,7 +17,7 @@ alias HWND HWindow;
 interface IWindow // docmain
 {
 	///
-	HWindow handle(); // getter
+	@property HWindow handle(); // getter
 }
 
 alias IWindow IWin32Window; // deprecated
@@ -370,13 +370,13 @@ abstract class WaitHandle
 	}
 	
 	
-	HANDLE handle() // getter
+	@property HANDLE handle() // getter
 	{
 		return h;
 	}
 	
 	
-	void handle(HANDLE h) // setter
+	@property void handle(HANDLE h) // setter
 	{
 		this.h = h;
 	}
@@ -472,13 +472,13 @@ abstract class WaitHandle
 
 interface IAsyncResult
 {
-	WaitHandle asyncWaitHandle(); // getter
+	@property WaitHandle asyncWaitHandle(); // getter
 	
 	// Usually just returns false.
-	bool completedSynchronously(); // getter
+	@property bool completedSynchronously(); // getter
 	
 	// When true, it is safe to release its resources.
-	bool isCompleted(); // getter
+	@property bool isCompleted(); // getter
 }
 
 
@@ -493,9 +493,9 @@ class AsyncResult: IAsyncResult
 interface IButtonControl // docmain
 {
 	///
-	DialogResult dialogResult(); // getter
+	@property DialogResult dialogResult(); // getter
 	/// ditto
-	void dialogResult(DialogResult); // setter
+	@property void dialogResult(DialogResult); // setter
 	
 	///
 	void notifyDefault(bool); // True if default button.
@@ -527,9 +527,9 @@ enum DialogResult: ubyte // docmain
 interface IDialogResult
 {
 	// ///
-	DialogResult dialogResult(); // getter
+	@property DialogResult dialogResult(); // getter
 	// /// ditto
-	void dialogResult(DialogResult); // setter
+	@property void dialogResult(DialogResult); // setter
 }
 
 
@@ -712,14 +712,14 @@ class PaintEventArgs: EventArgs
 	
 	
 	///
-	final Graphics graphics() // getter
+	final @property Graphics graphics() // getter
 	{
 		return g;
 	}
 	
 	
 	///
-	final Rect clipRectangle() // getter
+	final @property Rect clipRectangle() // getter
 	{
 		return cr;
 	}
@@ -749,13 +749,13 @@ class CancelEventArgs: EventArgs
 	
 	
 	///
-	final void cancel(bool byes) // setter
+	final @property void cancel(bool byes) // setter
 	{
 		cncl = byes;
 	}
 	
 	/// ditto
-	final bool cancel() // getter
+	final @property bool cancel() // getter
 	{
 		return cncl;
 	}
@@ -777,41 +777,41 @@ class KeyEventArgs: EventArgs
 	
 	
 	///
-	final bool alt() // getter
+	final @property bool alt() // getter
 	{
 		return (ks & Keys.ALT) != 0;
 	}
 	
 	
 	///
-	final bool control() // getter
+	final @property bool control() // getter
 	{
 		return (ks & Keys.CONTROL) != 0;
 	}
 	
 	
 	///
-	final void handled(bool byes) // setter
+	final @property void handled(bool byes) // setter
 	{
 		hand = byes;
 	}
 	
 	///
-	final bool handled() // getter
+	final @property bool handled() // getter
 	{
 		return hand;
 	}
 	
 	
 	///
-	final Keys keyCode() // getter
+	final @property Keys keyCode() // getter
 	{
 		return ks & Keys.KEY_CODE;
 	}
 	
 	
 	///
-	final Keys keyData() // getter
+	final @property Keys keyData() // getter
 	{
 		return ks;
 	}
@@ -819,21 +819,21 @@ class KeyEventArgs: EventArgs
 	
 	///
 	// -keyData- as an int.
-	final int keyValue() // getter
+	final @property int keyValue() // getter
 	{
 		return cast(int)ks;
 	}
 	
 	
 	///
-	final Keys modifiers() // getter
+	final @property Keys modifiers() // getter
 	{
 		return ks & Keys.MODIFIERS;
 	}
 	
 	
 	///
-	final bool shift() // getter
+	final @property bool shift() // getter
 	{
 		return (ks & Keys.SHIFT) != 0;
 	}
@@ -875,7 +875,7 @@ class KeyPressEventArgs: KeyEventArgs
 	
 	
 	///
-	final dchar keyChar() // getter
+	final @property dchar keyChar() // getter
 	{
 		return _keych;
 	}
@@ -902,35 +902,35 @@ class MouseEventArgs: EventArgs
 	
 	
 	///
-	final MouseButtons button() // getter
+	final @property MouseButtons button() // getter
 	{
 		return btn;
 	}
 	
 	
 	///
-	final int clicks() // getter
+	final @property int clicks() // getter
 	{
 		return clks;
 	}
 	
 	
 	///
-	final int delta() // getter
+	final @property int delta() // getter
 	{
 		return dlt;
 	}
 	
 	
 	///
-	final int x() // getter
+	final @property int x() // getter
 	{
 		return _x;
 	}
 	
 	
 	///
-	final int y() // getter
+	final @property int y() // getter
 	{
 		return _y;
 	}
@@ -963,13 +963,13 @@ class LabelEditEventArgs: EventArgs
 	
 	
 	///
-	final void cancelEdit(bool byes) // setter
+	final @property void cancelEdit(bool byes) // setter
 	{
 		cancl = byes;
 	}
 	
 	/// ditto
-	final bool cancelEdit() // getter
+	final @property bool cancelEdit() // getter
 	{
 		return cancl;
 	}
@@ -977,7 +977,7 @@ class LabelEditEventArgs: EventArgs
 	
 	///
 	// The text of the label's edit.
-	final Dstring label() // getter
+	final @property Dstring label() // getter
 	{
 		return ltxt;
 	}
@@ -985,7 +985,7 @@ class LabelEditEventArgs: EventArgs
 	
 	///
 	// Gets the item's index.
-	final int item() // getter
+	final @property int item() // getter
 	{
 		return idx;
 	}
@@ -1010,7 +1010,7 @@ class ColumnClickEventArgs: EventArgs
 	
 	
 	///
-	final int column() // getter
+	final @property int column() // getter
 	{
 		return col;
 	}
@@ -1044,49 +1044,49 @@ class DrawItemEventArgs: EventArgs
 	
 	
 	///
-	final Color backColor() // getter
+	final @property Color backColor() // getter
 	{
 		return bcolor;
 	}
 	
 	
 	///
-	final Rect bounds() // getter
+	final @property Rect bounds() // getter
 	{
 		return rect;
 	}
 	
 	
 	///
-	final Font font() // getter
+	final @property Font font() // getter
 	{
 		return fnt;
 	}
 	
 	
 	///
-	final Color foreColor() // getter
+	final @property Color foreColor() // getter
 	{
 		return fcolor;
 	}
 	
 	
 	///
-	final Graphics graphics() // getter
+	final @property Graphics graphics() // getter
 	{
 		return gpx;
 	}
 	
 	
 	///
-	final int index() // getter
+	final @property int index() // getter
 	{
 		return idx;
 	}
 	
 	
 	///
-	final DrawItemState state() // getter
+	final @property DrawItemState state() // getter
 	{
 		return distate;
 	}
@@ -1156,40 +1156,40 @@ class MeasureItemEventArgs: EventArgs
 	
 	
 	///
-	final Graphics graphics() // getter
+	final @property Graphics graphics() // getter
 	{
 		return gpx;
 	}
 	
 	
 	///
-	final int index() // getter
+	final @property int index() // getter
 	{
 		return idx;
 	}
 	
 	
 	///
-	final void itemHeight(int height) // setter
+	final @property void itemHeight(int height) // setter
 	{
 		iheight = height;
 	}
 	
 	/// ditto
-	final int itemHeight() // getter
+	final @property int itemHeight() // getter
 	{
 		return iheight;
 	}
 	
 	
 	///
-	final void itemWidth(int width) // setter
+	final @property void itemWidth(int width) // setter
 	{
 		iwidth = width;
 	}
 	
 	/// ditto
-	final int itemWidth() // getter
+	final @property int itemWidth() // getter
 	{
 		return iwidth;
 	}
@@ -1232,7 +1232,7 @@ class Cursor // docmain
 	
 	
 	///
-	static void current(Cursor cur) // setter
+	static @property void current(Cursor cur) // setter
 	{
 		// Keep a reference so that it doesn't get garbage collected until set again.
 		_cur = cur;
@@ -1241,7 +1241,7 @@ class Cursor // docmain
 	}
 	
 	/// ditto
-	static Cursor current() // getter
+	static @property Cursor current() // getter
 	{
 		HCURSOR hcur = GetCursor();
 		return hcur ? new Cursor(hcur, false) : null;
@@ -1249,7 +1249,7 @@ class Cursor // docmain
 	
 	
 	///
-	static void clip(Rect r) // setter
+	static @property void clip(Rect r) // setter
 	{
 		RECT rect;
 		r.getRect(&rect);
@@ -1257,7 +1257,7 @@ class Cursor // docmain
 	}
 	
 	/// ditto
-	static Rect clip() // getter
+	static @property Rect clip() // getter
 	{
 		RECT rect;
 		GetClipCursor(&rect);
@@ -1266,7 +1266,7 @@ class Cursor // docmain
 	
 	
 	///
-	final HCURSOR handle() // getter
+	final @property HCURSOR handle() // getter
 	{
 		return hcur;
 	}
@@ -1274,7 +1274,7 @@ class Cursor // docmain
 	
 	/+
 	// TODO:
-	final Size size() // getter
+	final @property Size size() // getter
 	{
 		Size result;
 		ICONINFO iinfo;
@@ -1352,13 +1352,13 @@ class Cursor // docmain
 	
 	
 	/// The position of the current mouse cursor.
-	static void position(Point pt) // setter
+	static @property void position(Point pt) // setter
 	{
 		SetCursorPos(pt.x, pt.y);
 	}
 	
 	/// ditto
-	static Point position() // getter
+	static @property Point position() // getter
 	{
 		Point pt;
 		GetCursorPos(&pt.point);
@@ -1381,24 +1381,24 @@ class Cursors // docmain
 	static:
 	
 	///
-	Cursor appStarting() // getter
+	@property Cursor appStarting() // getter
 	{ return new Cursor(LoadCursorA(HINSTANCE.init, IDC_APPSTARTING), false); }
 	
 	///
-	Cursor arrow() // getter
+	@property Cursor arrow() // getter
 	{ return new Cursor(LoadCursorA(HINSTANCE.init, IDC_ARROW), false); }
 	
 	///
-	Cursor cross() // getter
+	@property Cursor cross() // getter
 	{ return new Cursor(LoadCursorA(HINSTANCE.init, IDC_CROSS), false); }
 	
 	///
-	//Cursor default() // getter
-	Cursor defaultCursor() // getter
+	//@property Cursor default() // getter
+	@property Cursor defaultCursor() // getter
 	{ return arrow; }
 	
 	///
-	Cursor hand() // getter
+	@property Cursor hand() // getter
 	{
 		version(SUPPORTS_HAND_CURSOR) // Windows 98+
 		{
@@ -1455,7 +1455,7 @@ class Cursors // docmain
 	}
 	
 	///
-	Cursor help() // getter
+	@property Cursor help() // getter
 	{
 		HCURSOR hcur;
 		hcur = LoadCursorA(HINSTANCE.init, IDC_HELP);
@@ -1465,14 +1465,14 @@ class Cursors // docmain
 	}
 	
 	///
-	Cursor hSplit() // getter
+	@property Cursor hSplit() // getter
 	{
 		// ...
 		return sizeNS;
 	}
 	
 	/// ditto
-	Cursor vSplit() // getter
+	@property Cursor vSplit() // getter
 	{
 		// ...
 		return sizeWE;
@@ -1480,46 +1480,46 @@ class Cursors // docmain
 	
 	
 	///
-	Cursor iBeam() // getter
+	@property Cursor iBeam() // getter
 	{ return new Cursor(LoadCursorA(HINSTANCE.init, IDC_IBEAM), false); }
 	
 	///
-	Cursor no() // getter
+	@property Cursor no() // getter
 	{ return new Cursor(LoadCursorA(HINSTANCE.init, IDC_NO), false); }
 	
 	
 	///
-	Cursor sizeAll() // getter
+	@property Cursor sizeAll() // getter
 	{ return new Cursor(LoadCursorA(HINSTANCE.init, IDC_SIZEALL), false); }
 	
 	/// ditto
-	Cursor sizeNESW() // getter
+	@property Cursor sizeNESW() // getter
 	{ return new Cursor(LoadCursorA(HINSTANCE.init, IDC_SIZENESW), false); }
 	
 	/// ditto
-	Cursor sizeNS() // getter
+	@property Cursor sizeNS() // getter
 	{ return new Cursor(LoadCursorA(HINSTANCE.init, IDC_SIZENS), false); }
 	
 	/// ditto
-	Cursor sizeNWSE() // getter
+	@property Cursor sizeNWSE() // getter
 	{ return new Cursor(LoadCursorA(HINSTANCE.init, IDC_SIZENWSE), false); }
 	
 	/// ditto
-	Cursor sizeWE() // getter
+	@property Cursor sizeWE() // getter
 	{ return new Cursor(LoadCursorA(HINSTANCE.init, IDC_SIZEWE), false); }
 	
 	
 	/+
 	///
 	// Insertion point.
-	Cursor upArrow() // getter
+	@property Cursor upArrow() // getter
 	{
 		// ...
 	}
 	+/
 	
 	///
-	Cursor waitCursor() // getter
+	@property Cursor waitCursor() // getter
 	{ return new Cursor(LoadCursorA(HINSTANCE.init, IDC_WAIT), false); }
 }
 

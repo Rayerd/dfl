@@ -88,7 +88,7 @@ else
 	class MenuItem: Menu // docmain
 	{
 		///
-		final void text(Dstring txt) // setter
+		final @property void text(Dstring txt) // setter
 		{
 			if(!menuItems.length && txt == SEPARATOR_TEXT)
 			{
@@ -116,7 +116,7 @@ else
 		}
 		
 		/// ditto
-		final Dstring text() // getter
+		final @property Dstring text() // getter
 		{
 			// if(mparent) fetch text ?
 			return mtext;
@@ -124,13 +124,13 @@ else
 		
 		
 		///
-		final void parent(Menu m) // setter
+		final @property void parent(Menu m) // setter
 		{
 			m.menuItems.add(this);
 		}
 		
 		/// ditto
-		final Menu parent() // getter
+		final @property Menu parent() // getter
 		{
 			return mparent;
 		}
@@ -215,7 +215,7 @@ else
 		
 		
 		///
-		final void barBreak(bool byes) // setter
+		final @property void barBreak(bool byes) // setter
 		{
 			if(byes)
 				_type(_type() | MFT_MENUBARBREAK);
@@ -224,7 +224,7 @@ else
 		}
 		
 		/// ditto
-		final bool barBreak() // getter
+		final @property bool barBreak() // getter
 		{
 			return (_type() & MFT_MENUBARBREAK) != 0;
 		}
@@ -233,7 +233,7 @@ else
 		// Can't be break().
 		
 		///
-		final void breakItem(bool byes) // setter
+		final @property void breakItem(bool byes) // setter
 		{
 			if(byes)
 				_type(_type() | MFT_MENUBREAK);
@@ -242,14 +242,14 @@ else
 		}
 		
 		/// ditto
-		final bool breakItem() // getter
+		final @property bool breakItem() // getter
 		{
 			return (_type() & MFT_MENUBREAK) != 0;
 		}
 		
 		
 		///
-		final void checked(bool byes) // setter
+		final @property void checked(bool byes) // setter
 		{
 			if(byes)
 				_state(_state() | MFS_CHECKED);
@@ -258,14 +258,14 @@ else
 		}
 		
 		/// ditto
-		final bool checked() // getter
+		final @property bool checked() // getter
 		{
 			return (_state() & MFS_CHECKED) != 0;
 		}
 		
 		
 		///
-		final void defaultItem(bool byes) // setter
+		final @property void defaultItem(bool byes) // setter
 		{
 			if(byes)
 				_state(_state() | MFS_DEFAULT);
@@ -274,14 +274,14 @@ else
 		}
 		
 		/// ditto
-		final bool defaultItem() // getter
+		final @property bool defaultItem() // getter
 		{
 			return (_state() & MFS_DEFAULT) != 0;
 		}
 		
 		
 		///
-		final void enabled(bool byes) // setter
+		final @property void enabled(bool byes) // setter
 		{
 			if(byes)
 				_state(_state() & ~MFS_GRAYED);
@@ -290,14 +290,14 @@ else
 		}
 		
 		/// ditto
-		final bool enabled() // getter
+		final @property bool enabled() // getter
 		{
 			return (_state() & MFS_GRAYED) == 0;
 		}
 		
 		
 		///
-		final void index(int idx) // setter
+		final @property void index(int idx) // setter
 		{// Note: probably fails when the parent exists because mparent is still set and menuItems.insert asserts it's null.
 			if(mparent)
 			{
@@ -323,24 +323,24 @@ else
 		}
 		
 		/// ditto
-		final int index() // getter
+		final @property int index() // getter
 		{
 			return mindex;
 		}
 		
 		
-		override bool isParent() // getter
+		override @property bool isParent() // getter
 		{
 			return handle != null; // ?
 		}
 		
 		
-		deprecated final void mergeOrder(int ord) // setter
+		deprecated final @property void mergeOrder(int ord) // setter
 		{
 			//mergeord = ord;
 		}
 		
-		deprecated final int mergeOrder() // getter
+		deprecated final @property int mergeOrder() // getter
 		{
 			//return mergeord;
 			return 0;
@@ -352,7 +352,7 @@ else
 		
 		///
 		// Returns a NUL char if none.
-		final char mnemonic() // getter
+		final @property char mnemonic() // getter
 		{
 			bool singleAmp = false;
 			
@@ -379,12 +379,12 @@ else
 		/+
 		// TODO: implement owner drawn menus.
 		
-		final void ownerDraw(bool byes)
+		final @property void ownerDraw(bool byes) // setter
 		{
 			
 		}
 		
-		final bool ownerDraw() // getter
+		final @property bool ownerDraw() // getter
 		{
 			
 		}
@@ -392,7 +392,7 @@ else
 		
 		
 		///
-		final void radioCheck(bool byes) // setter
+		final @property void radioCheck(bool byes) // setter
 		{
 			auto par = parent;
 			auto pidx = index;
@@ -411,7 +411,7 @@ else
 		}
 		
 		/// ditto
-		final bool radioCheck() // getter
+		final @property bool radioCheck() // getter
 		{
 			return (_type() & MFT_RADIOCHECK) != 0;
 		}
@@ -423,13 +423,13 @@ else
 		/+
 		// TODO: need to fake this ?
 		
-		final void visible(bool byes) // setter
+		final @property void visible(bool byes) // setter
 		{
 			// ?
 			mvisible = byes;
 		}
 		
-		final bool visible() // getter
+		final @property bool visible() // getter
 		{
 			return mvisible;
 		}
@@ -589,7 +589,7 @@ else
 		protected:
 		
 		///
-		final int menuID() // getter
+		final @property int menuID() // getter
 		{
 			return mid;
 		}
@@ -649,7 +649,7 @@ else
 		}
 		
 		
-		void _type(UINT newType) // setter
+		@property void _type(UINT newType) // setter
 		{
 			if(mparent)
 			{
@@ -666,14 +666,14 @@ else
 		}
 		
 		
-		UINT _type() // getter
+		@property UINT _type() // getter
 		{
 			// if(mparent) fetch value ?
 			return fType;
 		}
 		
 		
-		void _state(UINT newState) // setter
+		@property void _state(UINT newState) // setter
 		{
 			if(mparent)
 			{
@@ -690,7 +690,7 @@ else
 		}
 		
 		
-		UINT _state() // getter
+		@property UINT _state() // getter
 		{
 			// if(mparent) fetch value ? No: Windows seems to add disabled/gray when the text is empty.
 			return fState;
@@ -720,7 +720,7 @@ else
 		else version(DFL_NO_COMPAT)
 			private const bool _compat092 = false;
 		else
-			private static bool _compat092() // getter
+			private static @property bool _compat092() // getter
 				{ return 0 != (Application._compat & DflCompat.MENU_092); }
 		
 		
@@ -923,34 +923,34 @@ else
 		
 		
 		///
-		final void tag(Object o) // setter
+		final @property void tag(Object o) // setter
 		{
 			ttag = o;
 		}
 		
 		/// ditto
-		final Object tag() // getter
+		final @property Object tag() // getter
 		{
 			return ttag;
 		}
 		
 		
 		///
-		final HMENU handle() // getter
+		final @property HMENU handle() // getter
 		{
 			return hmenu;
 		}
 		
 		
 		///
-		final MenuItemCollection menuItems() // getter
+		final @property MenuItemCollection menuItems() // getter
 		{
 			return items;
 		}
 		
 		
 		///
-		bool isParent() // getter
+		@property bool isParent() // getter
 		{
 			return false;
 		}

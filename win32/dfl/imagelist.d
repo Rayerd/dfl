@@ -95,7 +95,7 @@ else
 			
 			static class StripPart: Image
 			{
-				override Size size() // getter
+				override @property Size size() // getter
 				{
 					return partBounds.size;
 				}
@@ -220,7 +220,7 @@ else
 		
 		
 		///
-		final void colorDepth(ColorDepth depth) // setter
+		final @property void colorDepth(ColorDepth depth) // setter
 		{
 			assert(!isHandleCreated);
 			
@@ -228,14 +228,14 @@ else
 		}
 		
 		/// ditto
-		final ColorDepth colorDepth() // getter
+		final @property ColorDepth colorDepth() // getter
 		{
 			return _depth;
 		}
 		
 		
 		///
-		final void transparentColor(Color tc) // setter
+		final @property void transparentColor(Color tc) // setter
 		{
 			assert(!isHandleCreated);
 			
@@ -243,14 +243,14 @@ else
 		}
 		
 		/// ditto
-		final Color transparentColor() // getter
+		final @property Color transparentColor() // getter
 		{
 			return _transcolor;
 		}
 		
 		
 		///
-		final void imageSize(Size sz) // setter
+		final @property void imageSize(Size sz) // setter
 		{
 			assert(!isHandleCreated);
 			
@@ -261,27 +261,27 @@ else
 		}
 		
 		/// ditto
-		final Size imageSize() // getter
+		final @property Size imageSize() // getter
 		{
 			return Size(_w, _h);
 		}
 		
 		
 		///
-		final ImageCollection images() // getter
+		final @property ImageCollection images() // getter
 		{
 			return _cimages;
 		}
 		
 		
 		///
-		final void tag(Object t) // setter
+		final @property void tag(Object t) // setter
 		{
 			this._tag = t;
 		}
 		
 		/// ditto
-		final Object tag() // getter
+		final @property Object tag() // getter
 		{
 			return this._tag;
 		}
@@ -318,7 +318,7 @@ else
 		
 		
 		///
-		final bool isHandleCreated() // getter
+		final @property bool isHandleCreated() // getter
 		{
 			return HIMAGELIST.init != _hil;
 		}
@@ -327,7 +327,7 @@ else
 		
 		
 		///
-		final HIMAGELIST handle() // getter
+		final @property HIMAGELIST handle() // getter
 		{
 			if(!isHandleCreated)
 				_createimagelist();

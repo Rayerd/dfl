@@ -21,28 +21,28 @@ final class Environment // docmain
 	static:
 	
 	///
-	Dstring commandLine() // getter
+	@property Dstring commandLine() // getter
 	{
 		return dfl.internal.utf.getCommandLine();
 	}
 	
 	
 	///
-	void currentDirectory(Dstring cd) // setter
+	@property void currentDirectory(Dstring cd) // setter
 	{
 		if(!dfl.internal.utf.setCurrentDirectory(cd))
 			throw new DflException("Unable to set current directory");
 	}
 	
 	/// ditto
-	Dstring currentDirectory() // getter
+	@property Dstring currentDirectory() // getter
 	{
 		return dfl.internal.utf.getCurrentDirectory();
 	}
 	
 	
 	///
-	Dstring machineName() // getter
+	@property Dstring machineName() // getter
 	{
 		Dstring result;
 		result = dfl.internal.utf.getComputerName();
@@ -53,14 +53,14 @@ final class Environment // docmain
 	
 	
 	///
-	Dstring newLine() // getter
+	@property Dstring newLine() // getter
 	{
 		return nativeLineSeparatorString;
 	}
 	
 	
 	///
-	OperatingSystem osVersion() // getter
+	@property OperatingSystem osVersion() // getter
 	{
 		OSVERSIONINFOA osi;
 		Version ver;
@@ -90,7 +90,7 @@ final class Environment // docmain
 	
 	
 	///
-	Dstring systemDirectory() // getter
+	@property Dstring systemDirectory() // getter
 	{
 		Dstring result;
 		result = dfl.internal.utf.getSystemDirectory();
@@ -101,14 +101,14 @@ final class Environment // docmain
 	
 	
 	// Should return int ?
-	DWORD tickCount() // getter
+	@property DWORD tickCount() // getter
 	{
 		return GetTickCount();
 	}
 	
 	
 	///
-	Dstring userName() // getter
+	@property Dstring userName() // getter
 	{
 		Dstring result;
 		result = dfl.internal.utf.getUserName();
@@ -217,7 +217,7 @@ class PowerModeChangedEventArgs: EventArgs
 	}
 	
 	
-	final PowerModes mode() // getter
+	@property final PowerModes mode() // getter
 	{
 		return _pm;
 	}
@@ -249,7 +249,7 @@ class SystemEndedEventArgs: EventArgs
 	
 	
 	///
-	final SessionEndReasons reason() // getter
+	final @property SessionEndReasons reason() // getter
 	{
 		return this._reason;
 	}
@@ -271,20 +271,20 @@ class SessionEndingEventArgs: EventArgs
 	
 	
 	///
-	final SessionEndReasons reason() // getter
+	final @property SessionEndReasons reason() // getter
 	{
 		return this._reason;
 	}
 	
 	
 	///
-	final void cancel(bool byes) // setter
+	final @property void cancel(bool byes) // setter
 	{
 		this._cancel = byes;
 	}
 	
 	/// ditto
-	final bool cancel() // getter
+	final @property bool cancel() // getter
 	{
 		return this._cancel;
 	}
@@ -317,7 +317,7 @@ final class SystemEvents // docmain
 	
 	
 	/+
-	void useOwnThread(bool byes) // setter
+	@property void useOwnThread(bool byes) // setter
 	{
 		if(byes != useOwnThread)
 		{
@@ -334,7 +334,7 @@ final class SystemEvents // docmain
 	}
 	
 	
-	bool useOwnThread() // getter
+	@property bool useOwnThread() // getter
 	{
 		return _ownthread !is null;
 	}
@@ -595,27 +595,27 @@ class Version // docmain ?
 	
 	
 	///
-	int major() // getter
+	@property int major() // getter
 	{
 		return _major;
 	}
 	
 	/// ditto
-	int minor() // getter
+	@property int minor() // getter
 	{
 		return _minor;
 	}
 	
 	/// ditto
 	// -1 if no build.
-	int build() // getter
+	@property int build() // getter
 	{
 		return _build;
 	}
 	
 	/// ditto
 	// -1 if no revision.
-	int revision() // getter
+	@property int revision() // getter
 	{
 		return _revision;
 	}
@@ -679,7 +679,7 @@ final class OperatingSystem // docmain
 		
 		
 		///
-		PlatformId platform() // getter
+		@property PlatformId platform() // getter
 		{
 			return platId;
 		}
@@ -687,7 +687,7 @@ final class OperatingSystem // docmain
 		
 		///
 		// Should be version() :p
-		Version ver() // getter
+		@property Version ver() // getter
 		{
 			return vers;
 		}

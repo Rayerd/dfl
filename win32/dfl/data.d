@@ -18,14 +18,14 @@ class DataFormats // docmain
 	static class Format // docmain
 	{
 		/// Data format ID number.
-		final int id() // getter
+		final @property int id() // getter
 		{
 			return _id;
 		}
 		
 		
 		/// Data format name.
-		final Dstring name() // getter
+		final @property Dstring name() // getter
 		{
 			return _name;
 		}
@@ -45,87 +45,87 @@ class DataFormats // docmain
 	static:
 	
 	/// Predefined data formats.
-	Dstring bitmap() // getter
+	@property Dstring bitmap() // getter
 	{
 		return getFormat(CF_BITMAP).name;
 	}
 	
 	/+
 	/// ditto
-	Dstring commaSeparatedValue() // getter
+	@property Dstring commaSeparatedValue() // getter
 	{
 		return getFormat(?).name;
 	}
 	+/
 	
 	/// ditto
-	Dstring dib() // getter
+	@property Dstring dib() // getter
 	{
 		return getFormat(CF_DIB).name;
 	}
 	
 	/// ditto
-	Dstring dif() // getter
+	@property Dstring dif() // getter
 	{
 		return getFormat(CF_DIF).name;
 	}
 	
 	/// ditto
-	Dstring enhandedMetaFile() // getter
+	@property Dstring enhandedMetaFile() // getter
 	{
 		return getFormat(CF_ENHMETAFILE).name;
 	}
 	
 	/// ditto
-	Dstring fileDrop() // getter
+	@property Dstring fileDrop() // getter
 	{
 		return getFormat(CF_HDROP).name;
 	}
 	
 	/// ditto
-	Dstring html() // getter
+	@property Dstring html() // getter
 	{
 		return getFormat("HTML Format").name;
 	}
 	
 	/// ditto
-	Dstring locale() // getter
+	@property Dstring locale() // getter
 	{
 		return getFormat(CF_LOCALE).name;
 	}
 	
 	/// ditto
-	Dstring metafilePict() // getter
+	@property Dstring metafilePict() // getter
 	{
 		return getFormat(CF_METAFILEPICT).name;
 	}
 	
 	/// ditto
-	Dstring oemText() // getter
+	@property Dstring oemText() // getter
 	{
 		return getFormat(CF_OEMTEXT).name;
 	}
 	
 	/// ditto
-	Dstring palette() // getter
+	@property Dstring palette() // getter
 	{
 		return getFormat(CF_PALETTE).name;
 	}
 	
 	/// ditto
-	Dstring penData() // getter
+	@property Dstring penData() // getter
 	{
 		return getFormat(CF_PENDATA).name;
 	}
 	
 	/// ditto
-	Dstring riff() // getter
+	@property Dstring riff() // getter
 	{
 		return getFormat(CF_RIFF).name;
 	}
 	
 	/// ditto
-	Dstring rtf() // getter
+	@property Dstring rtf() // getter
 	{
 		return getFormat("Rich Text Format").name;
 	}
@@ -133,50 +133,50 @@ class DataFormats // docmain
 	
 	/+
 	/// ditto
-	Dstring serializable() // getter
+	@property Dstring serializable() // getter
 	{
 		return getFormat(?).name;
 	}
 	+/
 	
 	/// ditto
-	Dstring stringFormat() // getter
+	@property Dstring stringFormat() // getter
 	{
 		return utf8; // ?
 	}
 	
 	/// ditto
-	Dstring utf8() // getter
+	@property Dstring utf8() // getter
 	{
 		return getFormat("UTF-8").name;
 	}
 	
 	/// ditto
-	Dstring symbolicLink() // getter
+	@property Dstring symbolicLink() // getter
 	{
 		return getFormat(CF_SYLK).name;
 	}
 	
 	/// ditto
-	Dstring text() // getter
+	@property Dstring text() // getter
 	{
 		return getFormat(CF_TEXT).name;
 	}
 	
 	/// ditto
-	Dstring tiff() // getter
+	@property Dstring tiff() // getter
 	{
 		return getFormat(CF_TIFF).name;
 	}
 	
 	/// ditto
-	Dstring unicodeText() // getter
+	@property Dstring unicodeText() // getter
 	{
 		return getFormat(CF_UNICODETEXT).name;
 	}
 	
 	/// ditto
-	Dstring waveAudio() // getter
+	@property Dstring waveAudio() // getter
 	{
 		return getFormat(CF_WAVE).name;
 	}
@@ -510,14 +510,14 @@ private template stopAtNull(T)
 struct Data // docmain
 {
 	/// Information about the data type.
-	TypeInfo info() // getter
+	@property TypeInfo info() // getter
 	{
 		return _info;
 	}
 	
 	
 	/// The data's raw value.
-	void[] value() // getter
+	@property void[] value() // getter
 	{
 		return _value[0 .. _info.tsize()];
 	}

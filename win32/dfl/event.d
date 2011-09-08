@@ -173,14 +173,14 @@ template Event(T1, T2) // docmain
 		
 		
 		///
-		bool hasHandlers() // getter
+		@property bool hasHandlers() // getter
 		{
 			return _array.length > 1;
 		}
 		
 		
 		// Use opApply and hasHandlers instead.
-		deprecated Handler[] handlers() // getter
+		deprecated @property Handler[] handlers() // getter
 		{
 			if(!hasHandlers)
 				return null;
@@ -289,7 +289,7 @@ class EventArgs // docmain
 	
 	
 	/// Property: get a reusable, _empty EventArgs.
-	static EventArgs empty() // getter
+	static @property EventArgs empty() // getter
 	{
 		return _e;
 	}
@@ -312,7 +312,7 @@ class ThreadExceptionEventArgs: EventArgs
 	
 	
 	///
-	final DThrowable exception() // getter
+	final @property DThrowable exception() // getter
 	{
 		return except;
 	}

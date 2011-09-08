@@ -65,7 +65,7 @@ class FolderBrowserDialog: CommonDialog // docmain
 	
 	
 	///
-	final void description(Dstring desc) // setter
+	final @property void description(Dstring desc) // setter
 	{
 		// lpszTitle
 		
@@ -73,14 +73,14 @@ class FolderBrowserDialog: CommonDialog // docmain
 	}
 	
 	/// ditto
-	final Dstring description() // getter
+	final @property Dstring description() // getter
 	{
 		return _desc;
 	}
 	
 	
 	///
-	final void selectedPath(Dstring selpath) // setter
+	final @property void selectedPath(Dstring selpath) // setter
 	{
 		// pszDisplayName
 		
@@ -88,7 +88,7 @@ class FolderBrowserDialog: CommonDialog // docmain
 	}
 	
 	/// ditto
-	final Dstring selectedPath() // getter
+	final @property Dstring selectedPath() // getter
 	{
 		return _selpath;
 	}
@@ -96,7 +96,7 @@ class FolderBrowserDialog: CommonDialog // docmain
 	
 	// ///
 	// Currently only works for shell32.dll version 6.0+.
-	final void showNewFolderButton(bool byes) // setter
+	final @property void showNewFolderButton(bool byes) // setter
 	{
 		// BIF_NONEWFOLDERBUTTON exists with shell 6.0+.
 		// Might need to enum child windows looking for window title
@@ -109,7 +109,7 @@ class FolderBrowserDialog: CommonDialog // docmain
 	}
 	
 	// /// ditto
-	final bool showNewFolderButton() // getter
+	final @property bool showNewFolderButton() // getter
 	{
 		return (bi.ulFlags & BIF_NONEWFOLDERBUTTON) == 0;
 	}
