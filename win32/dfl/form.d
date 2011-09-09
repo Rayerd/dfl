@@ -2053,7 +2053,10 @@ class Form: ContainerControl, IDialogResult // docmain
 					{
 						throw new DflException("Unable to show dialog because it is already visible");
 					}
-					goto no_show;
+					else
+					{
+						goto no_show;
+					}
 				}
 			}
 			

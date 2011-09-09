@@ -47,7 +47,10 @@ else
 					{
 						assert(0, "Image list: addStrip needs bitmap");
 					}
-					_unableimg();
+					else
+					{
+						_unableimg();
+					}
 				}
 				
 				auto sz = imageSize;
@@ -58,7 +61,10 @@ else
 					{
 						assert(0, "Image list: invalid image size");
 					}
-					_unableimg();
+					else
+					{
+						_unableimg();
+					}
 				}
 				int num = img.width / sz.width;
 				
@@ -161,7 +167,10 @@ else
 						{
 							assert(0, "Image list: invalid image type");
 						}
-						_unableimg();
+						else
+						{
+							_unableimg();
+						}
 				}
 				
 				if(val.size != imageSize)
@@ -170,7 +179,10 @@ else
 					{
 						assert(0, "Image list: invalid image size");
 					}
-					_unableimg();
+					else
+					{
+						_unableimg();
+					}
 				}
 			}
 			
