@@ -2677,7 +2677,7 @@ class Graphics // docmain
 	// to the previous point.
 	final void drawLines(Pen pen, Point[] points)
 	{
-		assert(points.length < 2, "Not enough line points.");
+		assert(points.length >= 2, "Not enough line points.");
 		
 		HPEN prevPen;
 		int i;
