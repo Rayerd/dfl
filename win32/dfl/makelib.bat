@@ -45,7 +45,7 @@ set dfl_libs=%dmc_path%\lib\gdi32.lib %dmc_path%\lib\comctl32.lib %dmc_path%\lib
 @rem   -version=NO_DRAG_DROP -version=NO_MDI
 @rem   -debug=SHOW_MESSAGE_INFO -debug=MESSAGE_PAUSE
 @rem set dfl_flags=%dfl_flags% -debug=SHOW_MESSAGENFO
-set _dfl_flags=%dfl_flags% -d -wi
+set _dfl_flags=%dfl_flags% -wi
 
 if not "%dfl_debug_flags%" == "" goto dfl_debug_flags_set
 	set dfl_debug_flags=-debug -g
