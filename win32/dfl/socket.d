@@ -501,7 +501,7 @@ class AsyncSocket: DflSocket // docmain
 	}
 	else
 	{
-		override @property bool blocking() // getter
+		override @property bool blocking() const // getter
 		{
 			return false;
 		}
