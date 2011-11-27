@@ -1831,7 +1831,7 @@ extern(Windows) LRESULT dflWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 
 version(CUSTOM_MSG_HOOK)
 {
-	typedef CWPRETSTRUCT CustomMsg;
+	alias CWPRETSTRUCT CustomMsg;
 	
 	
 	// Needs to be re-entrant.
