@@ -1723,7 +1723,7 @@ extern(Windows):
 	const DWORD LF_FACESIZE = 32;
 	
 	
-	typedef HANDLE HIMAGELIST;
+	alias HANDLE HIMAGELIST;
 	
 	
 	enum: UINT

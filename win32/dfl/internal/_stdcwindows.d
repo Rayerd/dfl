@@ -52,7 +52,7 @@ extern(Windows):
  alias uint UINT;
  alias uint *PUINT;
 
- typedef void *HANDLE;
+ alias void *HANDLE;
  alias void *PVOID;
  alias HANDLE HGLOBAL;
  alias HANDLE HLOCAL;
