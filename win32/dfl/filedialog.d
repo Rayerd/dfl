@@ -259,7 +259,7 @@ abstract class FileDialog: CommonDialog // docmain
 					case '\r', '\n':
 						goto bad_filter;
 					
-					default: ;
+					default:
 				}
 			}
 			if(starti == i || !(nitems % 2))
@@ -478,13 +478,13 @@ abstract class FileDialog: CommonDialog // docmain
 							}
 							break;
 						
-						default: ;
+						default:
 							//cprintf("   nmhdr.code = %d/0x%X\n", nmhdr.code, nmhdr.code);
 					}
 				}
 				break;
 			
-			default: ;
+			default:
 		}
 		
 		return super.hookProc(hwnd, msg, wparam, lparam);

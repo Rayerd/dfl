@@ -558,7 +558,7 @@ class TabControlBase: ControlSuperClass
 			case TCM_SETTOOLTIPS:
 				return;
 			
-			default: ;
+			default:
 		}
 		
 		super.wndProc(m);
@@ -592,7 +592,7 @@ class TabControlBase: ControlSuperClass
 				m.result = FALSE; // Allow change.
 				return;
 			
-			default: ;
+			default:
 		}
 	}
 }
@@ -913,7 +913,7 @@ class TabControl: TabControlBase // docmain
 				break;
 			+/
 			
-			default: ;
+			default:
 		}
 		
 		super.wndProc(m);

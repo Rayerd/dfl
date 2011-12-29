@@ -71,7 +71,7 @@ else
 					popup(this, EventArgs.empty);
 					break;
 				
-				default: ;
+				default:
 			}
 		}
 		
@@ -573,7 +573,7 @@ else
 					onPopup(EventArgs.empty);
 					break;
 				
-				default: ;
+				default:
 			}
 		}
 		

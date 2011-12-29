@@ -332,7 +332,7 @@ class NotifyIcon // docmain
 					rect.right = abd.rc.right - 16;
 					break;
 				
-				default: ;
+				default:
 			}
 		}
 		else if(hwTaskbar)
@@ -438,7 +438,7 @@ class NotifyIconControl: Control
 						ni.doubleClick(ni, EventArgs.empty);
 						break;
 					
-					default: ;
+					default:
 				}
 			}
 		}

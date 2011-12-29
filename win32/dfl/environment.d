@@ -396,7 +396,7 @@ final class SystemEvents // docmain
 				timeChanged(typeid(SystemEvents), EventArgs.empty);
 				break;
 			
-			default: ;
+			default:
 		}
 	}
 	

@@ -52,12 +52,12 @@ abstract class CommonDialog // docmain
 							}
 							break;
 						
-						default: ;
+						default:
 					}
 				}
 				break;
 			
-			default: ;
+			default:
 		}
 		
 		return 0;

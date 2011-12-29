@@ -365,7 +365,7 @@ class Form: ContainerControl, IDialogResult // docmain
 					cp.y = visible ? SW_SHOW : SW_HIDE;
 					break;
 				
-				default: ;
+				default:
 			}
 		}
 	}
@@ -521,7 +521,7 @@ class Form: ContainerControl, IDialogResult // docmain
 					case FormStartPosition.CENTER_SCREEN:
 						centerToScreen();
 						break;
-					default: ;
+					default:
 				}
 			}
 			
@@ -2295,7 +2295,7 @@ class Form: ContainerControl, IDialogResult // docmain
 						break;
 						//return;
 					
-					default: ;
+					default:
 				}
 				break;
 			
@@ -2367,7 +2367,7 @@ class Form: ContainerControl, IDialogResult // docmain
 				}
 				return;
 			
-			default: ;
+			default:
 		}
 		
 		super.wndProc(msg);
@@ -2406,7 +2406,7 @@ class Form: ContainerControl, IDialogResult // docmain
 						onDeactivate(EventArgs.empty);
 						break;
 					
-					default: ;
+					default:
 				}
 				break;
 			
@@ -2511,7 +2511,7 @@ class Form: ContainerControl, IDialogResult // docmain
 				}
 				break;
 			
-			default: ;
+			default:
 		}
 	}
 	
@@ -2538,7 +2538,7 @@ class Form: ContainerControl, IDialogResult // docmain
 			
 			//case FormBorderStyle.SIZABLE:
 			//case FormBorderStyle.SIZABLE_TOOLWINDOW:
-			default: ;
+			default:
 		}
 		
 		if(!maximizeBox)
@@ -2868,7 +2868,7 @@ class Form: ContainerControl, IDialogResult // docmain
 						_seldeactivate();
 						break;
 					
-					default: ;
+					default:
 				}
 				return;
 			
@@ -3079,7 +3079,7 @@ class Form: ContainerControl, IDialogResult // docmain
 						}
 						break;
 					
-					default: ;
+					default:
 				}
 				
 				switch(m.msg)
@@ -3183,7 +3183,7 @@ class Form: ContainerControl, IDialogResult // docmain
 								}
 								return true; // Prevent.
 							
-							default: ;
+							default:
 						}
 						break;
 					
@@ -3283,7 +3283,7 @@ class Form: ContainerControl, IDialogResult // docmain
 						}
 						break;
 					
-					default: ;
+					default:
 				}
 			}
 			

@@ -508,12 +508,12 @@ class ToolBar: ControlSuperClass // docmain
 							m.result = TBDDRET_DEFAULT;
 							return;
 						
-						default: ;
+						default:
 					}
 				}
 				break;
 			
-			default: ;
+			default:
 				super.onReflectedMessage(m);
 		}
 	}

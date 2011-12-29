@@ -913,7 +913,7 @@ class SocketQueue // docmain
 				writeEvent();
 				break;
 			
-			default: ;
+			default:
 		}
 	}
 	
@@ -1033,7 +1033,7 @@ extern(Windows) LRESULT netWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 			}
 			break;
 		
-		default: ;
+		default:
 	}
 	
 	return 1;

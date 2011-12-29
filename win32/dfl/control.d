@@ -4488,7 +4488,7 @@ class Control: DObject, IWindow // docmain
 				m.result = cast(LRESULT)hbrBg;
 				break;
 			
-			default: ;
+			default:
 		}
 	}
 	
@@ -4930,7 +4930,7 @@ class Control: DObject, IWindow // docmain
 								//break;
 								return; // ?
 							
-							default: ;
+							default:
 						}
 						+/
 						
@@ -5185,7 +5185,7 @@ class Control: DObject, IWindow // docmain
 						_clicking = false;
 						break;
 					
-					default: ;
+					default:
 				}
 				break;
 			
@@ -5289,7 +5289,7 @@ class Control: DObject, IWindow // docmain
 						break;
 					+/
 					
-					default: ;
+					default:
 				}
 				break;
 			+/
@@ -5393,7 +5393,7 @@ class Control: DObject, IWindow // docmain
 				// Don't confuse with failed RegisterWindowMessage().
 				break;
 			
-			default: ;
+			default:
 				//defWndProc(msg);
 				version(DFL_NO_WM_GETCONTROLNAME)
 				{
@@ -5666,7 +5666,7 @@ class Control: DObject, IWindow // docmain
 						// ...
 						break;
 					
-					default: ;
+					default:
 				}
 				break;
 			+/
@@ -5762,7 +5762,7 @@ class Control: DObject, IWindow // docmain
 				hwnd = HWND.init;
 				break;
 			
-			default: ;
+			default:
 				/+
 				if(msg.msg == wmDfl)
 				{
@@ -5770,7 +5770,7 @@ class Control: DObject, IWindow // docmain
 					{
 						case WPARAM_DFL_:
 						
-						default: ;
+						default:
 					}
 				}
 				+/
@@ -6814,7 +6814,7 @@ class Control: DObject, IWindow // docmain
 				}
 				break;
 			
-			default: ;
+			default:
 		}
 		
 		defWndProc(msg);
@@ -7248,7 +7248,7 @@ package abstract class ControlSuperClass: Control // dapi.d
 				prevWndProc(m);
 				break;
 			
-			default: ;
+			default:
 		}
 	}
 	
@@ -7751,7 +7751,7 @@ class ScrollableControl: Control // docmain
 							case SB_TOP:
 								delta = -yspos;
 								break;
-							default: ;
+							default:
 						}
 						yspos += delta;
 						SetScrollPos(m.hWnd, SB_VERT, yspos, TRUE);
@@ -7814,7 +7814,7 @@ class ScrollableControl: Control // docmain
 							case SB_LEFT:
 								delta = -xspos;
 								break;
-							default: ;
+							default:
 						}
 						xspos += delta;
 						SetScrollPos(m.hWnd, SB_HORZ, xspos, TRUE);
@@ -7823,7 +7823,7 @@ class ScrollableControl: Control // docmain
 				}
 				break;
 			
-			default: ;
+			default:
 		}
 		
 		super.wndProc(m);

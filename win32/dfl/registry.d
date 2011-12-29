@@ -748,7 +748,7 @@ class RegistryKey // docmain
 					case ERROR_FILE_NOT_FOUND:
 						return;
 					
-					default: ;
+					default:
 				}
 			}
 			

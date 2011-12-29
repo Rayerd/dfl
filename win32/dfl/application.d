@@ -1769,7 +1769,7 @@ extern(Windows) LRESULT dflWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 				}
 				break;
 			
-			default: ;
+			default:
 		}
 	}
 	

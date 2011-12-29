@@ -152,11 +152,11 @@ abstract class ButtonBase: ControlSuperClass // docmain
 						onClick(EventArgs.empty);
 						break;
 					
-					default: ;
+					default:
 				}
 				break;
 			
-			default: ;
+			default:
 		}
 	}
 	
@@ -371,7 +371,7 @@ class Button: ButtonBase, IButtonControl // docmain
 				}
 				break;
 			
-			default: ;
+			default:
 		}
 		
 		super.wndProc(m);
@@ -858,7 +858,7 @@ class RadioButton: ButtonBase // docmain
 				break;
 			+/
 			
-			default: ;
+			default:
 		}
 	}
 	+/

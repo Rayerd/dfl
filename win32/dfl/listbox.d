@@ -1353,11 +1353,11 @@ class ListBox: ListControl // docmain
 						onSelectedIndexChanged(EventArgs.empty);
 						break;
 					
-					default: ;
+					default:
 				}
 				break;
 			
-			default: ;
+			default:
 		}
 	}
 	
@@ -1400,7 +1400,7 @@ class ListBox: ListControl // docmain
 				msg.result = LB_ERR;
 				return;
 			
-			default: ;
+			default:
 		}
 		super.wndProc(msg);
 	}

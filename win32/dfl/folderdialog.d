@@ -286,12 +286,12 @@ class FolderBrowserDialog: CommonDialog // docmain
 							break;
 						+/
 						
-						default: ;
+						default:
 					}
 				}
 				break;
 			
-			default: ;
+			default:
 		}
 		
 		return super.hookProc(hwnd, msg, wparam, lparam);
@@ -345,7 +345,7 @@ private extern(Windows) int fbdHookProc(HWND hwnd, UINT msg, LPARAM lparam, LPAR
 					}
 					break;
 				
-				default: ;
+				default:
 			}
 		}
 	}

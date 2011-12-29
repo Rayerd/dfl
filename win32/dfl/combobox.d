@@ -925,11 +925,11 @@ class ComboBox: ListControl // docmain
 						onTextChanged(EventArgs.empty); // ?
 						break;
 					
-					default: ;
+					default:
 				}
 				break;
 			
-			default: ;
+			default:
 		}
 	}
 	
@@ -977,7 +977,7 @@ class ComboBox: ListControl // docmain
 				prevWndProc(msg);
 				return; // Handled by reflected message.
 			
-			default: ;
+			default:
 		}
 		super.wndProc(msg);
 	}

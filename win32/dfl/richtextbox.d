@@ -982,12 +982,12 @@ class RichTextBox: TextBoxBase // docmain
 							}
 							break;
 							
-						default: ;
+						default:
 					}
 				}
 				break;
 			
-			default: ;
+			default:
 		}
 	}
 	

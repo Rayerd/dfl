@@ -398,7 +398,7 @@ class Splitter: Control // docmain
 						splat.bounds = Rect(splat.left, vx, splat.width, val);
 						break;
 					
-					default: ;
+					default:
 				}
 			}
 			
@@ -468,7 +468,7 @@ class Splitter: Control // docmain
 					splat.height = pos;
 					break;
 				
-				default: ;
+				default:
 			}
 		}
 	}
@@ -492,7 +492,7 @@ class Splitter: Control // docmain
 				case DockStyle.BOTTOM:
 					return splat.height;
 				
-				default: ;
+				default:
 			}
 		}
 		return -1;

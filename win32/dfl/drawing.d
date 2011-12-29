@@ -1511,7 +1511,7 @@ class Picture: Image // docmain
 					break;
 			}
 			
-			default: ;
+			default:
 		}
 		return null;
 	}
@@ -2547,7 +2547,7 @@ class Graphics // docmain
 				}
 				break;
 			
-			default: ;
+			default:
 				return text;
 		}
 	}

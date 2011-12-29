@@ -306,11 +306,11 @@ class FontDialog: CommonDialog
 						onApply(EventArgs.empty);
 						break;
 					
-					default: ;
+					default:
 				}
 				break;
 			
-			default: ;
+			default:
 		}
 		
 		return super.hookProc(hwnd, msg, wparam, lparam);

@@ -2113,7 +2113,7 @@ class ListView: ControlSuperClass // docmain
 					return;
 				break;
 			
-			default: ;
+			default:
 		}
 		
 		//msg.result = CallWindowProcA(listviewPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
@@ -2208,7 +2208,7 @@ class ListView: ControlSuperClass // docmain
 				m.result = FALSE;
 				return;
 			
-			default: ;
+			default:
 		}
 		super.wndProc(m);
 	}
@@ -2489,12 +2489,12 @@ class ListView: ControlSuperClass // docmain
 							}
 							break;
 						
-						default: ;
+						default:
 					}
 				}
 				break;
 			
-			default: ;
+			default:
 		}
 	}
 	

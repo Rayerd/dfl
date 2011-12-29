@@ -900,7 +900,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 						onTextChanged(EventArgs.empty);
 						break;
 					
-					default: ;
+					default:
 				}
 				break;
 			
@@ -914,7 +914,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 				break;
 			+/
 			
-			default: ;
+			default:
 		}
 	}
 	
@@ -965,7 +965,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 				}
 				break;
 			
-			default: ;
+			default:
 		}
 		return super.processKeyEventArgs(msg);
 	}
@@ -1277,7 +1277,7 @@ class TextBox: TextBoxBase // docmain
 				break;
 			+/
 			
-			default: ;
+			default:
 		}
 		
 		super.wndProc(msg);

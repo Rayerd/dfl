@@ -1674,7 +1674,7 @@ class TreeView: ControlSuperClass // docmain
 				m.result = cast(LRESULT)null;
 				return;
 			
-			default: ;
+			default:
 		}
 		
 		super.wndProc(m);
@@ -1906,7 +1906,7 @@ class TreeView: ControlSuperClass // docmain
 									m.result = cea.cancel;
 									break;
 								
-								default: ;
+								default:
 							}
 							break;
 						
@@ -1939,7 +1939,7 @@ class TreeView: ControlSuperClass // docmain
 									}
 									break;
 								
-								default: ;
+								default:
 							}
 							break;
 						
@@ -2020,12 +2020,12 @@ class TreeView: ControlSuperClass // docmain
 							}
 							break;
 						
-						default: ;
+						default:
 					}
 				}
 				break;
 			
-			default: ;
+			default:
 		}
 	}
 	
