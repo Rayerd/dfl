@@ -1001,7 +1001,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	final HWindow handle() // IWindow getter
+	@property final HWindow handle() // IWindow getter
 	{
 		if(!isHandleCreated)
 		{
