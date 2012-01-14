@@ -5,6 +5,7 @@
 module dfl.event;
 
 import dfl.internal.dlib;
+import std.functional;
 
 
 // Create an event handler; old style.
@@ -66,14 +67,14 @@ template Event(T1, T2) // docmain
 		{
 			mixin _validateHandler!(TDG);
 			
-			addHandlerExact(cast(Handler)handler);
+			addHandlerExact(cast(Handler)toDelegate(handler));
 		}
 		
 		
 		/// Shortcut for addHandler().
 		void opCatAssign(TDG)(TDG handler)
 		{
-			addHandler!(TDG)(handler);
+			addHandler(toDelegate(handler));
 		}
 		
 		
@@ -123,7 +124,7 @@ template Event(T1, T2) // docmain
 		{
 			mixin _validateHandler!(TDG);
 			
-			removeHandlerExact(cast(Handler)handler);
+			removeHandlerExact(cast(Handler)toDelegate(handler));
 		}
 		
 		
@@ -216,7 +217,7 @@ template Event(T1, T2) // docmain
 		// Thanks to Tomasz "h3r3tic" Stachowiak for his assistance.
 		template _validateHandler(TDG)
 		{
-			static assert(is(TDG == delegate), "DFL: Event handler must be a delegate");
+			static assert(is(typeof(toDelegate(TDG.init))), "DFL: Event handler must be a callable");
 			
 			alias ParameterTypeTuple!(TDG) TDGParams;
 			static assert(TDGParams.length == 2, "DFL: Event handler needs exactly 2 parameters");
