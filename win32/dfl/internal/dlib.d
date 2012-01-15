@@ -542,7 +542,7 @@ else // Phobos
 	
 	private import std.uni;
 	
-	alias std.uni.toUniLower utf32charToLower;
+	alias std.uni.toLower utf32charToLower;
 	
 	
 	private import std.conv;
