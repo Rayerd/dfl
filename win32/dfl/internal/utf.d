@@ -415,7 +415,7 @@ size_t toUnicodeLength(Dstring utf8)
 }
 
 
-private extern(Windows)
+extern(Windows)
 {
 	alias HWND function(DWORD dwExStyle, LPCWSTR lpClassName, LPCWSTR lpWindowName, DWORD dwStyle,
 		int x, int y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance,
