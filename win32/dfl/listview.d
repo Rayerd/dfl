@@ -2270,7 +2270,10 @@ class ListView: ControlSuperClass // docmain
 					{
 						case LVN_GETDISPINFOA:
 							if(dfl.internal.utf.useUnicode)
+							{
 								break;
+							}
+							else
 							{
 								LV_DISPINFOA* lvdi;
 								lvdi = cast(LV_DISPINFOA*)nmh;
@@ -2302,8 +2305,8 @@ class ListView: ControlSuperClass // docmain
 											lvdi.item.pszText = cast(typeof(lvdi.item.pszText))item.subItems[lvdi.item.iSubItem - 1].calltxt.ansi;
 									}
 								}
+								break;
 							}
-							break;
 						
 						case LVN_GETDISPINFOW:
 							{
@@ -2456,7 +2459,10 @@ class ListView: ControlSuperClass // docmain
 						
 						case LVN_ENDLABELEDITA:
 							if(dfl.internal.utf.useUnicode)
+							{
 								break;
+							}
+							else
 							{
 								Dstring label;
 								LV_DISPINFOA* nmdi;
@@ -2486,8 +2492,8 @@ class ListView: ControlSuperClass // docmain
 										m.result = TRUE;
 									}
 								}
+								break;
 							}
-							break;
 						
 						default:
 					}

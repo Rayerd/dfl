@@ -1992,7 +1992,10 @@ class TreeView: ControlSuperClass // docmain
 						
 						case TVN_ENDLABELEDITA:
 							if(dfl.internal.utf.useUnicode)
+							{
 								break;
+							}
+							else
 							{
 								Dstring label;
 								TV_DISPINFOA* nmdi;
@@ -2017,8 +2020,8 @@ class TreeView: ControlSuperClass // docmain
 										m.result = TRUE;
 									}
 								}
+								break;
 							}
-							break;
 						
 						default:
 					}
