@@ -47,7 +47,6 @@ version(Tango)
 else
 {
 	private import std.windows.charset;
-	private import std.file; // D2 useWfuncs.
 }
 
 
@@ -88,7 +87,7 @@ else
 	static if(is(typeof(&std.windows.charset.useWfuncs)))
 		alias std.windows.charset.useWfuncs useUnicode;
 	else
-		alias std.file.useWfuncs useUnicode;
+		enum useUnicode = true;
 }
 
 package:
@@ -473,7 +472,7 @@ extern(Windows)
 	alias typeof(&SetMenuItemInfoW) SetMenuItemInfoWProc;
 	alias typeof(&InsertMenuItemW) InsertMenuItemWProc;
 	alias typeof(&CreateFontIndirectW) CreateFontIndirectWProc;
-	alias typeof(&GetObjectW) GetObjectWProc;
+	package alias typeof(&GetObjectW) GetObjectWProc;
 }
 
 
