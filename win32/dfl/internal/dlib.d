@@ -485,7 +485,10 @@ else // Phobos
 	
 	alias std.path.dirName pathGetDirName;
 	
-	alias std.path.linesep nativeLineSeparatorString;
+	version(D_Version2)
+		alias std.ascii.newline nativeLineSeparatorString;
+	else
+		alias std.path.linesep nativeLineSeparatorString;
 	
 	alias std.path.buildPath pathJoin;
 	
