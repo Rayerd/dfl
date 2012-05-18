@@ -928,6 +928,90 @@ final class Application // docmain
 	///
 	Event!(Object, EventArgs) threadExit;
 	
+	struct HotkeyRegister
+	{
+	static:
+		alias void delegate(Object c, KeyEventArgs e) Handler;
+		void addHandler(Keys k, Handler dg)
+		{
+			if (auto pkid = k in hotkeyId)
+			{
+				immutable kid = *pkid;
+				hotkeyHandler[kid] ~= dg;
+			}
+			else
+			{
+				immutable kid = hotkeyHandler.length,
+				          mod = (k&Keys.MODIFIERS)>>16,
+				          keycode = k&Keys.KEY_CODE;
+				if (RegisterHotKey(null, kid, mod, keycode))
+				{
+					hotkeyHandler.length = hotkeyHandler.length + 1;
+					hotkeyId[k] = kid;
+					hotkeyHandler[kid] ~= dg;
+				}
+				else
+				{
+					throw new DflException("Hotkey cannot resistered.");
+				}
+			}
+		}
+		
+		struct IndexedCatAssigner
+		{
+			Keys k;
+			void opCatAssign(Handler dg)
+			{
+				addHandler(k, dg);
+			}
+		}
+		
+		IndexedCatAssigner opIndex(Keys k)
+		{
+			return IndexedCatAssigner(k);
+		}
+		
+		void removeHandler(Keys k, Handler dg)
+		{
+			if (auto pkid = k in hotkeyId)
+			{
+				immutable kid = *pkid;
+				if (UnregisterHotKey(null, kid))
+				{
+					hotkeyHandler[kid].removeHandler(dg);
+					hotkeyId.remove(k);
+				}
+				else
+				{
+					throw new DflException("Hotkey cannot unresistered.");
+				}
+			}
+		}
+		
+		void removeHandler(Keys k)
+		{
+			if (auto pkid = k in hotkeyId)
+			{
+				immutable kid = *pkid;
+				foreach (hnd; hotkeyHandler[kid])
+				{
+					hotkeyHandler[kid].removeHandler(hnd);
+					hotkeyId.remove(k);
+				}
+			}
+		}
+	}
+	
+	HotkeyRegister hotkeys;
+	
+	static ~this()
+	{
+		foreach (key; hotkeyId.keys)
+		{
+			hotkeys.removeHandler(key);
+		}
+		hotkeyId = null;
+	}
 	
 	// Returns null if not found.
 	package Control lookupHwnd(HWND hwnd)
@@ -1343,6 +1427,8 @@ final class Application // docmain
 	Control[HWND] controls;
 	HINSTANCE hinst;
 	ApplicationContext ctx = null;
+	int[Keys] hotkeyId;
+	Event!(Object, KeyEventArgs)[] hotkeyHandler;
 	
 	version(DFL_NO_MENUS)
 	{
@@ -1456,7 +1542,16 @@ final class Application // docmain
 	{
 		//debug(SHOW_MESSAGE_INFO)
 		//	showMessageInfo(msg);
-		
+		void handleHotkey()
+		{
+			immutable kid = cast(int)msg.wParam,
+			          mod = cast(uint) (msg.lParam&0x0000ffff),
+			          keycode = cast(uint)((msg.lParam&0xffff0000)>>16);
+			assert(kid < hotkeyHandler.length);
+			hotkeyHandler[kid](
+				typeid(Application),
+				new KeyEventArgs(cast(Keys)((mod << 16) | keycode)));
+		}
 		// Don't bother with this extra stuff if there aren't any filters.
 		if(filters.length)
 		{
@@ -1474,7 +1569,13 @@ final class Application // docmain
 						Control ctrl;
 						ctrl = lookupHwnd(msg.hWnd);
 						if(ctrl)
+						{
 							ctrl.mustWndProc(msg);
+						}
+						else if (msg.msg == WM_HOTKEY)
+						{
+							handleHotkey();
+						}
 						return;
 					}
 				}
@@ -1488,7 +1589,10 @@ final class Application // docmain
 				throw o;
 			}
 		}
-		
+		if (msg.msg == WM_HOTKEY)
+		{
+			handleHotkey();
+		}
 		TranslateMessage(&msg._winMsg);
 		//DispatchMessageA(&msg._winMsg);
 		dfl.internal.utf.dispatchMessage(&msg._winMsg);
