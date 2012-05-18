@@ -976,14 +976,14 @@ final class Application // docmain
 			if (auto pkid = k in hotkeyId)
 			{
 				immutable kid = *pkid;
-				if (UnregisterHotKey(null, kid))
+				hotkeyHandler[kid].removeHandler(dg);
+				hotkeyId.remove(k);
+				if (!hotkeyHandler[kid].hasHandlers)
 				{
-					hotkeyHandler[kid].removeHandler(dg);
-					hotkeyId.remove(k);
-				}
-				else
-				{
-					throw new DflException("Hotkey cannot unresistered.");
+					if (UnregisterHotKey(null, kid) == 0)
+					{
+						throw new DflException("Hotkey cannot unresistered.");
+					}
 				}
 			}
 		}
