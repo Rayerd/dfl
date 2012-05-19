@@ -928,87 +928,128 @@ final class Application // docmain
 	///
 	Event!(Object, EventArgs) threadExit;
 	
-	struct HotkeyRegister
+	
+	///
+	void addHotkey(Keys k,void delegate(Object sender, KeyEventArgs ea) dg)
 	{
-	static:
-		alias void delegate(Object c, KeyEventArgs e) Handler;
-		void addHandler(Keys k, Handler dg)
+		if (auto pkid = k in hotkeyId)
 		{
-			if (auto pkid = k in hotkeyId)
+			immutable kid = *pkid;
+			hotkeyHandler[kid] ~= dg;
+		}
+		else
+		{
+			immutable kid = hotkeyHandler.length,
+			          mod = (k&Keys.MODIFIERS)>>16,
+			          keycode = k&Keys.KEY_CODE;
+			if (RegisterHotKey(null, kid, mod, keycode))
 			{
-				immutable kid = *pkid;
+				hotkeyHandler.length = hotkeyHandler.length + 1;
+				hotkeyId[k] = kid;
 				hotkeyHandler[kid] ~= dg;
 			}
 			else
 			{
-				immutable kid = hotkeyHandler.length,
-				          mod = (k&Keys.MODIFIERS)>>16,
-				          keycode = k&Keys.KEY_CODE;
-				if (RegisterHotKey(null, kid, mod, keycode))
+				throw new DflException("Hotkey cannot resistered.");
+			}
+		}
+	}
+	
+	
+	///
+	void removeHotkey(Keys k, void delegate(Object sender, KeyEventArgs ea) dg)
+	{
+		if (auto pkid = k in hotkeyId)
+		{
+			immutable kid = *pkid;
+			hotkeyHandler[kid].removeHandler(dg);
+			hotkeyId.remove(k);
+			if (!hotkeyHandler[kid].hasHandlers)
+			{
+				if (UnregisterHotKey(null, kid) == 0)
 				{
-					hotkeyHandler.length = hotkeyHandler.length + 1;
-					hotkeyId[k] = kid;
-					hotkeyHandler[kid] ~= dg;
-				}
-				else
-				{
-					throw new DflException("Hotkey cannot resistered.");
+					throw new DflException("Hotkey cannot unresistered.");
 				}
 			}
 		}
+	}
+	
+	
+	///
+	void removeHotkey(Keys k)
+	{
+		if (auto pkid = k in hotkeyId)
+		{
+			immutable kid = *pkid;
+			foreach (hnd; hotkeyHandler[kid])
+			{
+				hotkeyHandler[kid].removeHandler(hnd);
+				hotkeyId.remove(k);
+			}
+		}
+	}
+	
+	
+	///
+	struct HotkeyRegister
+	{
+	static:
+		///
+		alias void delegate(Object c, KeyEventArgs e) Handler;
 		
+		
+		///
+		void addHandler(Keys k, Handler dg)
+		{
+			addHotkey(k, dg);
+		}
+		
+		
+		///
 		struct IndexedCatAssigner
 		{
 			Keys k;
+			
+			
+			///
 			void opCatAssign(Handler dg)
 			{
 				addHandler(k, dg);
 			}
 		}
 		
+		
+		///
 		IndexedCatAssigner opIndex(Keys k)
 		{
 			return IndexedCatAssigner(k);
 		}
 		
+		
+		///
 		void removeHandler(Keys k, Handler dg)
 		{
-			if (auto pkid = k in hotkeyId)
-			{
-				immutable kid = *pkid;
-				hotkeyHandler[kid].removeHandler(dg);
-				hotkeyId.remove(k);
-				if (!hotkeyHandler[kid].hasHandlers)
-				{
-					if (UnregisterHotKey(null, kid) == 0)
-					{
-						throw new DflException("Hotkey cannot unresistered.");
-					}
-				}
-			}
+			removeHotkey(k, dg);
 		}
 		
+		
+		///
 		void removeHandler(Keys k)
 		{
-			if (auto pkid = k in hotkeyId)
-			{
-				immutable kid = *pkid;
-				foreach (hnd; hotkeyHandler[kid])
-				{
-					hotkeyHandler[kid].removeHandler(hnd);
-					hotkeyId.remove(k);
-				}
-			}
+			removeHotkey(k);
 		}
 	}
 	
+	
+	/// helper
 	HotkeyRegister hotkeys;
+	
 	
 	static ~this()
 	{
 		foreach (key; hotkeyId.keys)
 		{
-			hotkeys.removeHandler(key);
+			removeHotkey(key);
 		}
 		hotkeyId = null;
 	}
