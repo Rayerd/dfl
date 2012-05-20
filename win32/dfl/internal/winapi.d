@@ -251,6 +251,7 @@ extern(Windows):
 		WM_MOUSEHOVER = 0x02A1,
 		WM_MOUSELEAVE = 0x02A3,
 		
+		WM_HOTKEY = 0x0312,
 		
 		WM_PRINT = 0x0317,
 		WM_PRINTCLIENT = 0x0318,
@@ -3023,6 +3024,7 @@ extern(Windows):
 	HMONITOR MonitorFromWindow(HWND hwnd, DWORD dwFlags);
 	HMONITOR MonitorFromPoint(POINT pt, DWORD dwFlags);
 	HMONITOR MonitorFromRect(LPCRECT lprc, DWORD dwFlags);
-
+	BOOL RegisterHotKey(HWND hWnd, int id, UINT fsModifiers, UINT vk);
+	BOOL UnregisterHotKey(HWND hWnd, int id);
 //} // Temporary.
 

@@ -92,6 +92,7 @@ enum Keys: uint // docmain
 	SHIFT =    0x10000, /// Modifier keys.
 	CONTROL =  0x20000, /// ditto
 	ALT =      0x40000, /// ditto
+	WINDOWS =  0x80000, /// ditto
 	
 	A = 'A', /// Letters.
 	B = 'B', /// ditto
@@ -836,6 +837,13 @@ class KeyEventArgs: EventArgs
 	final @property bool shift() // getter
 	{
 		return (ks & Keys.SHIFT) != 0;
+	}
+	
+	
+	///
+	final @property bool windows() // getter
+	{
+		return (ks & Keys.WINDOWS) != 0;
 	}
 	
 	
