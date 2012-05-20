@@ -939,14 +939,31 @@ final class Application // docmain
 		}
 		else
 		{
-			immutable kid = hotkeyHandler.length,
-			          mod = (k&Keys.MODIFIERS)>>16,
+			int kid = 0;
+			foreach (aak, aav; hotkeyHandler)
+			{
+				if (!aav.hasHandlers)
+				{
+					kid = aak;
+					break;
+				}
+				++kid;
+			}
+			immutable mod = (k&Keys.MODIFIERS)>>16,
 			          keycode = k&Keys.KEY_CODE;
 			if (RegisterHotKey(null, kid, mod, keycode))
 			{
-				hotkeyHandler.length = hotkeyHandler.length + 1;
 				hotkeyId[k] = kid;
-				hotkeyHandler[kid] ~= dg;
+				if (auto h = kid in hotkeyHandler)
+				{
+					*h ~= dg;
+				}
+				else
+				{
+					typeof(hotkeyHandler[kid]) e;
+					e ~= dg;
+					hotkeyHandler[kid] = e;
+				}
 			}
 			else
 			{
@@ -963,13 +980,14 @@ final class Application // docmain
 		{
 			immutable kid = *pkid;
 			hotkeyHandler[kid].removeHandler(dg);
-			hotkeyId.remove(k);
 			if (!hotkeyHandler[kid].hasHandlers)
 			{
 				if (UnregisterHotKey(null, kid) == 0)
 				{
 					throw new DflException("Hotkey cannot unresistered.");
 				}
+				hotkeyHandler.remove(kid);
+				hotkeyId.remove(k);
 			}
 		}
 	}
@@ -984,8 +1002,14 @@ final class Application // docmain
 			foreach (hnd; hotkeyHandler[kid])
 			{
 				hotkeyHandler[kid].removeHandler(hnd);
-				hotkeyId.remove(k);
 			}
+			assert(!hotkeyHandler[kid].hasHandlers);
+			if (UnregisterHotKey(null, kid) == 0)
+			{
+				throw new DflException("Hotkey cannot unresistered.");
+			}
+			hotkeyHandler.remove(kid);
+			hotkeyId.remove(k);
 		}
 	}
 	
@@ -1469,7 +1493,7 @@ final class Application // docmain
 	HINSTANCE hinst;
 	ApplicationContext ctx = null;
 	int[Keys] hotkeyId;
-	Event!(Object, KeyEventArgs)[] hotkeyHandler;
+	Event!(Object, KeyEventArgs)[int] hotkeyHandler;
 	
 	version(DFL_NO_MENUS)
 	{
