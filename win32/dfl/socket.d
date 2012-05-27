@@ -670,6 +670,7 @@ class GetHost // docmain
 	private:
 	HANDLE h;
 	GetHostCallback callback;
+	DThrowable exception;
 	ubyte[/+MAXGETHOSTSTRUCT+/ 1024] hostentBytes;
 	
 	
@@ -997,6 +998,7 @@ struct EventInfo
 {
 	DflSocket sock;
 	RegisterEventCallback callback;
+	DThrowable exception;
 }
 
 
@@ -1009,7 +1011,7 @@ GetHost[HANDLE] allGetHosts;
 HWND hwNet;
 
 
-extern(Windows) LRESULT netWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+extern(Windows) LRESULT netWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) nothrow
 {
 	switch(msg)
 	{
@@ -1017,7 +1019,14 @@ extern(Windows) LRESULT netWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 			if(cast(socket_t)wparam in allEvents)
 			{
 				EventInfo ei = allEvents[cast(socket_t)wparam];
-				ei.callback(ei.sock, cast(EventType)LOWORD(lparam), HIWORD(lparam));
+				try
+				{
+					ei.callback(ei.sock, cast(EventType)LOWORD(lparam), HIWORD(lparam));
+				}
+				catch (DThrowable e)
+				{
+					ei.exception = e;
+				}
 			}
 			break;
 		
@@ -1029,7 +1038,14 @@ extern(Windows) LRESULT netWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 				assert(gh !is null);
 				//delete allGetHosts[cast(HANDLE)wparam];
 				allGetHosts.remove(cast(HANDLE)wparam);
-				gh._gotEvent(lparam);
+				try
+				{
+					gh._gotEvent(lparam);
+				}
+				catch (DThrowable e)
+				{
+					gh.exception = e;
+				}
 			}
 			break;
 		

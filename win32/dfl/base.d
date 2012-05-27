@@ -46,7 +46,7 @@ class StringObject: DObject
 	
 	
 	///
-	this(Dstring str)
+	this(Dstring str) pure nothrow
 	{
 		this.value = str;
 	}
@@ -92,6 +92,7 @@ enum Keys: uint // docmain
 	SHIFT =    0x10000, /// Modifier keys.
 	CONTROL =  0x20000, /// ditto
 	ALT =      0x40000, /// ditto
+	WINDOWS =  0x80000, /// ditto
 	
 	A = 'A', /// Letters.
 	B = 'B', /// ditto
@@ -327,15 +328,13 @@ struct Message // docmain
 	
 	
 	/// Construct a Message struct.
-	static Message opCall(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+	this(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) pure nothrow
 	{
-		Message m;
-		m.hWnd = hWnd;
-		m.msg = msg;
-		m.wParam = wParam;
-		m.lParam = lParam;
-		m.result = 0;
-		return m;
+		hWnd = hWnd;
+		msg = msg;
+		wParam = wParam;
+		lParam = lParam;
+		result = 0;
 	}
 }
 
@@ -370,7 +369,7 @@ abstract class WaitHandle
 	}
 	
 	
-	@property HANDLE handle() // getter
+	@property HANDLE handle() nothrow // getter
 	{
 		return h;
 	}
@@ -704,7 +703,7 @@ enum ColorDepth: ubyte
 class PaintEventArgs: EventArgs
 {
 	///
-	this(Graphics graphics, Rect clipRect)
+	this(Graphics graphics, Rect clipRect) pure nothrow
 	{
 		g = graphics;
 		cr = clipRect;
@@ -712,14 +711,14 @@ class PaintEventArgs: EventArgs
 	
 	
 	///
-	final @property Graphics graphics() // getter
+	final @property Graphics graphics() pure nothrow // getter
 	{
 		return g;
 	}
 	
 	
 	///
-	final @property Rect clipRectangle() // getter
+	final @property Rect clipRectangle() pure nothrow // getter
 	{
 		return cr;
 	}
@@ -736,26 +735,26 @@ class CancelEventArgs: EventArgs
 {
 	///
 	// Initialize cancel to false.
-	this()
+	this() pure nothrow
 	{
 		cncl = false;
 	}
 	
 	/// ditto
-	this(bool cancel)
+	this(bool cancel) pure nothrow
 	{
 		cncl = cancel;
 	}
 	
 	
 	///
-	final @property void cancel(bool byes) // setter
+	final @property void cancel(bool byes) pure nothrow // setter
 	{
 		cncl = byes;
 	}
 	
 	/// ditto
-	final @property bool cancel() // getter
+	final @property bool cancel() pure nothrow // getter
 	{
 		return cncl;
 	}
@@ -770,48 +769,48 @@ class CancelEventArgs: EventArgs
 class KeyEventArgs: EventArgs
 {
 	///
-	this(Keys keys)
+	this(Keys keys) pure nothrow
 	{
 		ks = keys;
 	}
 	
 	
 	///
-	final @property bool alt() // getter
+	final @property bool alt() pure nothrow // getter
 	{
 		return (ks & Keys.ALT) != 0;
 	}
 	
 	
 	///
-	final @property bool control() // getter
+	final @property bool control() pure nothrow // getter
 	{
 		return (ks & Keys.CONTROL) != 0;
 	}
 	
 	
 	///
-	final @property void handled(bool byes) // setter
+	final @property void handled(bool byes) pure nothrow // setter
 	{
 		hand = byes;
 	}
 	
 	///
-	final @property bool handled() // getter
+	final @property bool handled() pure nothrow // getter
 	{
 		return hand;
 	}
 	
 	
 	///
-	final @property Keys keyCode() // getter
+	final @property Keys keyCode() pure nothrow // getter
 	{
 		return ks & Keys.KEY_CODE;
 	}
 	
 	
 	///
-	final @property Keys keyData() // getter
+	final @property Keys keyData() pure nothrow // getter
 	{
 		return ks;
 	}
@@ -819,23 +818,30 @@ class KeyEventArgs: EventArgs
 	
 	///
 	// -keyData- as an int.
-	final @property int keyValue() // getter
+	final @property int keyValue() pure nothrow // getter
 	{
 		return cast(int)ks;
 	}
 	
 	
 	///
-	final @property Keys modifiers() // getter
+	final @property Keys modifiers() pure nothrow // getter
 	{
 		return ks & Keys.MODIFIERS;
 	}
 	
 	
 	///
-	final @property bool shift() // getter
+	final @property bool shift() pure nothrow // getter
 	{
 		return (ks & Keys.SHIFT) != 0;
+	}
+	
+	
+	///
+	final @property bool windows() pure nothrow // getter
+	{
+		return (ks & Keys.WINDOWS) != 0;
 	}
 	
 	
@@ -891,7 +897,7 @@ class MouseEventArgs: EventArgs
 {
 	///
 	// -delta- is mouse wheel rotations.
-	this(MouseButtons button, int clicks, int x, int y, int delta)
+	this(MouseButtons button, int clicks, int x, int y, int delta) pure nothrow
 	{
 		btn = button;
 		clks = clicks;
@@ -902,35 +908,35 @@ class MouseEventArgs: EventArgs
 	
 	
 	///
-	final @property MouseButtons button() // getter
+	final @property MouseButtons button() pure nothrow // getter
 	{
 		return btn;
 	}
 	
 	
 	///
-	final @property int clicks() // getter
+	final @property int clicks() pure nothrow // getter
 	{
 		return clks;
 	}
 	
 	
 	///
-	final @property int delta() // getter
+	final @property int delta() pure nothrow // getter
 	{
 		return dlt;
 	}
 	
 	
 	///
-	final @property int x() // getter
+	final @property int x() pure nothrow // getter
 	{
 		return _x;
 	}
 	
 	
 	///
-	final @property int y() // getter
+	final @property int y() pure nothrow // getter
 	{
 		return _y;
 	}
@@ -1003,14 +1009,14 @@ class LabelEditEventArgs: EventArgs
 class ColumnClickEventArgs: EventArgs
 {
 	///
-	this(int col)
+	this(int col) pure nothrow
 	{
 		this.col = col;
 	}
 	
 	
 	///
-	final @property int column() // getter
+	final @property int column() pure nothrow // getter
 	{
 		return col;
 	}
@@ -1025,13 +1031,13 @@ class ColumnClickEventArgs: EventArgs
 class DrawItemEventArgs: EventArgs
 {
 	///
-	this(Graphics g, Font f, Rect r, int i, DrawItemState dis)
+	this(Graphics g, Font f, Rect r, int i, DrawItemState dis) pure nothrow
 	{
 		this(g, f, r, i , dis, Color.empty, Color.empty);
 	}
 	
 	/// ditto
-	this(Graphics g, Font f, Rect r, int i, DrawItemState dis, Color fc, Color bc)
+	this(Graphics g, Font f, Rect r, int i, DrawItemState dis, Color fc, Color bc) pure nothrow
 	{
 		gpx = g;
 		fnt = f;
@@ -1044,49 +1050,49 @@ class DrawItemEventArgs: EventArgs
 	
 	
 	///
-	final @property Color backColor() // getter
+	final @property Color backColor() pure nothrow // getter
 	{
 		return bcolor;
 	}
 	
 	
 	///
-	final @property Rect bounds() // getter
+	final @property Rect bounds() pure nothrow // getter
 	{
 		return rect;
 	}
 	
 	
 	///
-	final @property Font font() // getter
+	final @property Font font() pure nothrow // getter
 	{
 		return fnt;
 	}
 	
 	
 	///
-	final @property Color foreColor() // getter
+	final @property Color foreColor() pure nothrow // getter
 	{
 		return fcolor;
 	}
 	
 	
 	///
-	final @property Graphics graphics() // getter
+	final @property Graphics graphics() pure nothrow // getter
 	{
 		return gpx;
 	}
 	
 	
 	///
-	final @property int index() // getter
+	final @property int index() pure nothrow // getter
 	{
 		return idx;
 	}
 	
 	
 	///
-	final @property DrawItemState state() // getter
+	final @property DrawItemState state() pure nothrow // getter
 	{
 		return distate;
 	}
