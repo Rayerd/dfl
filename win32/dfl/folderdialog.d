@@ -11,7 +11,7 @@ private import dfl.commondialog, dfl.base, dfl.internal.winapi, dfl.internal.win
 private import dfl.internal.utf, dfl.application;
 
 
-private extern(Windows)
+private extern(Windows) nothrow
 {
 	alias LPITEMIDLIST function(LPBROWSEINFOW lpbi) SHBrowseForFolderWProc;
 	alias BOOL function(LPCITEMIDLIST pidl, LPWSTR pszPath) SHGetPathFromIDListWProc;
@@ -321,7 +321,7 @@ class FolderBrowserDialog: CommonDialog // docmain
 
 private:
 
-private extern(Windows) int fbdHookProc(HWND hwnd, UINT msg, LPARAM lparam, LPARAM lpData)
+private extern(Windows) int fbdHookProc(HWND hwnd, UINT msg, LPARAM lparam, LPARAM lpData) nothrow
 {
 	FolderBrowserDialog fd;
 	int result = 0;

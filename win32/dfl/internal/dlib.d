@@ -414,9 +414,15 @@ else // Phobos
 			core.memory.GC.collect();
 		}
 		
-		void gcFullCollect()
+		void gcFullCollect() nothrow
 		{
-			core.memory.GC.collect();
+			try
+			{
+				core.memory.GC.collect();
+			}
+			catch (Throwable e)
+			{
+			}
 		}
 	}
 	

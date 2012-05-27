@@ -581,46 +581,75 @@ version(_DFL_WINDOWS_HUNG_WORKAROUND)
 	}
 }
 
-
-package alias BOOL delegate(HWND) EnumWindowsCallback;
+alias BOOL delegate(HWND) EnumWindowsCallback;
+package struct EnumWindowsCallbackData
+{
+	EnumWindowsCallback callback;
+	DThrowable exception;
+}
 
 
 // Callback for EnumWindows() and EnumChildWindows().
-private extern(Windows) BOOL enumingWindows(HWND hwnd, LPARAM lparam)
+private extern(Windows) BOOL enumingWindows(HWND hwnd, LPARAM lparam) nothrow
 {
-	EnumWindowsCallback dg = *(cast(EnumWindowsCallback*)lparam);
-	return dg(hwnd);
+	auto cbd = *(cast(EnumWindowsCallbackData*)lparam);
+	try
+	{
+		return cbd.callback(hwnd);
+	}
+	catch (DThrowable e)
+	{
+		cbd.exception = e;
+		return FALSE;
+	}
+	assert(0);
 }
 
 
 private struct Efi
 {
 	HWND hwParent;
-	EnumWindowsCallback dg;
+	EnumWindowsCallbackData cbd;
 }
 
 
 // Callback for EnumChildWindows(). -lparam- = pointer to Efi;
-private extern(Windows) BOOL enumingFirstWindows(HWND hwnd, LPARAM lparam)
+private extern(Windows) BOOL enumingFirstWindows(HWND hwnd, LPARAM lparam) nothrow
 {
-	Efi* efi = cast(Efi*)lparam;
+	auto efi = cast(Efi*)lparam;
 	if(efi.hwParent == GetParent(hwnd))
-		return efi.dg(hwnd);
-	return true;
+	{
+		try
+		{
+			return efi.cbd.callback(hwnd);
+		}
+		catch (DThrowable e)
+		{
+			efi.cbd.exception = e;
+			return FALSE;
+		}
+	}
+	return TRUE;
 }
 
 
 package BOOL enumWindows(EnumWindowsCallback dg)
 {
-	static assert((&dg).sizeof <= LPARAM.sizeof);
-	return EnumWindows(&enumingWindows, cast(LPARAM)&dg);
+	EnumWindowsCallbackData cbd;
+	cbd.callback = dg;
+	scope (exit) if (cbd.exception) throw cbd.exception;
+	static assert((&cbd).sizeof <= LPARAM.sizeof);
+	return EnumWindows(&enumingWindows, cast(LPARAM)&cbd);
 }
 
 
 package BOOL enumChildWindows(HWND hwParent, EnumWindowsCallback dg)
 {
-	static assert((&dg).sizeof <= LPARAM.sizeof);
-	return EnumChildWindows(hwParent, &enumingWindows, cast(LPARAM)&dg);
+	EnumWindowsCallbackData cbd;
+	cbd.callback = dg;
+	scope (exit) if (cbd.exception) throw cbd.exception;
+	static assert((&cbd).sizeof <= LPARAM.sizeof);
+	return EnumChildWindows(hwParent, &enumingWindows, cast(LPARAM)&cbd);
 }
 
 
@@ -629,7 +658,8 @@ package BOOL enumFirstChildWindows(HWND hwParent, EnumWindowsCallback dg)
 {
 	Efi efi;
 	efi.hwParent = hwParent;
-	efi.dg = dg;
+	efi.cbd.callback = dg;
+	scope (exit) if (efi.cbd.exception) throw efi.cbd.exception;
 	return EnumChildWindows(hwParent, &enumingFirstWindows, cast(LPARAM)&efi);
 }
 
@@ -2608,8 +2638,28 @@ class Control: DObject, IWindow // docmain
 		{
 			GetZIndex gzi;
 			gzi.find = this;
-			EnumChildWindows(parent.hwnd, &getZIndexCallback, cast(LPARAM)&gzi);
-			return gzi.index;
+			int index;
+			int tmp;
+			
+			BOOL getZIndexCallback(HWND hWnd)
+			{
+				if(hWnd is hwnd)
+				{
+					index = tmp;
+					return FALSE; // Stop, found it.
+				}
+				
+				auto ctrl = Control.fromHandle(hWnd);
+				if(ctrl && ctrl.parent is parent)
+				{
+					tmp++;
+				}
+				
+				return TRUE; // Keep looking.
+			}
+			
+			enumChildWindows(parent.hwnd, &getZIndexCallback);
+			return index;
 		}
 		else
 		{
