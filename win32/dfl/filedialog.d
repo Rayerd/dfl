@@ -969,7 +969,7 @@ class SaveFileDialog: FileDialog // docmain
 }
 
 
-private extern(Windows) LRESULT ofnHookProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+private extern(Windows) LRESULT ofnHookProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) nothrow
 {
 	alias dfl.internal.winapi.HANDLE HANDLE; // Otherwise, odd conflict with wine.
 	

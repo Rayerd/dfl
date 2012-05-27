@@ -161,7 +161,7 @@ private:
 Timer[UINT] allTimers;
 
 
-extern(Windows) void timerProc(HWND hwnd, UINT uMsg, UINT idEvent, DWORD dwTime)
+extern(Windows) void timerProc(HWND hwnd, UINT uMsg, UINT idEvent, DWORD dwTime) nothrow
 {
 	try
 	{

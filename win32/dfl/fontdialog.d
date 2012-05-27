@@ -418,7 +418,7 @@ class FontDialog: CommonDialog
 // WM_CHOOSEFONT_SETFLAGS to update flags after dialog creation ... ?
 
 
-private extern(Windows) UINT fondHookProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+private extern(Windows) UINT fondHookProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) nothrow
 {
 	const Dstring PROP_STR = "DFL_FontDialog";
 	FontDialog fd;

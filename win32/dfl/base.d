@@ -328,15 +328,13 @@ struct Message // docmain
 	
 	
 	/// Construct a Message struct.
-	static Message opCall(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+	this(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) nothrow
 	{
-		Message m;
-		m.hWnd = hWnd;
-		m.msg = msg;
-		m.wParam = wParam;
-		m.lParam = lParam;
-		m.result = 0;
-		return m;
+		hWnd = hWnd;
+		msg = msg;
+		wParam = wParam;
+		lParam = lParam;
+		result = 0;
 	}
 }
 

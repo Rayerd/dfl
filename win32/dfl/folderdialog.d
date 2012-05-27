@@ -321,7 +321,7 @@ class FolderBrowserDialog: CommonDialog // docmain
 
 private:
 
-private extern(Windows) int fbdHookProc(HWND hwnd, UINT msg, LPARAM lparam, LPARAM lpData)
+private extern(Windows) int fbdHookProc(HWND hwnd, UINT msg, LPARAM lparam, LPARAM lpData) nothrow
 {
 	FolderBrowserDialog fd;
 	int result = 0;

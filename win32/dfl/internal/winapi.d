@@ -65,7 +65,7 @@ else
 //version = DFL_D1_AND_ABOVE;
 
 
-extern(Windows):
+extern(Windows) nothrow:
 	
 	struct SIZE
 	{
