@@ -790,19 +790,12 @@ class OpenFileDialog: FileDialog // docmain
 	}
 	
 	
-	version(Tango)
+	private import std.stream; // TO-DO: remove this import; use dfl.internal.dlib.
+	
+	///
+	final Stream openFile()
 	{
-		// TO-DO: not implemented yet.
-	}
-	else
-	{
-		private import std.stream; // TO-DO: remove this import; use dfl.internal.dlib.
-		
-		///
-		final Stream openFile()
-		{
-			return new File(fileName(), FileMode.In);
-		}
+		return new File(fileName(), FileMode.In);
 	}
 	
 	
@@ -909,21 +902,14 @@ class SaveFileDialog: FileDialog // docmain
 	}
 	
 	
-	version(Tango)
+	private import std.stream; // TO-DO: remove this import; use dfl.internal.dlib.
+		
+	///
+	// Opens and creates with read and write access.
+	// Warning: if file exists, it's truncated.
+	final Stream openFile()
 	{
-		// TO-DO: not implemented yet.
-	}
-	else
-	{
-		private import std.stream; // TO-DO: remove this import; use dfl.internal.dlib.
-			
-		///
-		// Opens and creates with read and write access.
-		// Warning: if file exists, it's truncated.
-		final Stream openFile()
-		{
-			return new File(fileName(), FileMode.OutNew | FileMode.Out | FileMode.In);
-		}
+		return new File(fileName(), FileMode.OutNew | FileMode.Out | FileMode.In);
 	}
 	
 	
