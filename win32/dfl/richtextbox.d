@@ -1019,7 +1019,7 @@ class RichTextBox: TextBoxBase // docmain
 }
 
 
-private extern(Windows) DWORD _streamingInStr(DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG* pcb)
+private extern(Windows) DWORD _streamingInStr(DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG* pcb) nothrow
 {
 	RichTextBox._StreamStr* si;
 	si = cast(typeof(si))dwCookie;
@@ -1046,7 +1046,7 @@ private extern(Windows) DWORD _streamingInStr(DWORD dwCookie, LPBYTE pbBuff, LON
 }
 
 
-private extern(Windows) DWORD _streamingOutStr(DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG* pcb)
+private extern(Windows) DWORD _streamingOutStr(DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG* pcb) nothrow
 {
 	RichTextBox._StreamStr* so;
 	so = cast(typeof(so))dwCookie;

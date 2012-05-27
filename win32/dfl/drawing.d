@@ -481,24 +481,24 @@ unittest
 struct Color // docmain
 {
 	/// Red, green, blue and alpha channel color values.
-	@property ubyte r() // getter
+	@property ubyte r() nothrow // getter
 	{ validateColor(); return color.red; }
 	
 	/// ditto
-	@property ubyte g() // getter
+	@property ubyte g() nothrow // getter
 	{ validateColor(); return color.green; }
 	
 	/// ditto
-	@property ubyte b() // getter
+	@property ubyte b() nothrow // getter
 	{ validateColor(); return color.blue; }
 	
 	/// ditto
-	@property ubyte a() // getter
+	@property ubyte a() nothrow // getter
 	{ /+ validateColor(); +/ return color.alpha; }
 	
 	
 	/// Return the numeric color value.
-	COLORREF toArgb()
+	COLORREF toArgb() nothrow
 	{
 		validateColor();
 		return color.cref;
@@ -506,7 +506,7 @@ struct Color // docmain
 	
 	
 	/// Return the numeric red, green and blue color value.
-	COLORREF toRgb()
+	COLORREF toRgb() nothrow
 	{
 		validateColor();
 		return color.cref & 0x00FFFFFF;
@@ -514,7 +514,7 @@ struct Color // docmain
 	
 	
 	// Used internally.
-	HBRUSH createBrush() // package
+	HBRUSH createBrush() nothrow // package
 	{
 		HBRUSH hbr;
 		if(_systemColorIndex == Color.INVAILD_SYSTEM_COLOR_INDEX)
@@ -525,10 +525,10 @@ struct Color // docmain
 	}
 	
 	
-	Color* Dthisptr(Color* t) { return t; }
-	Color* Dthisptr(ref Color t) { return &t; }
-	Color Dthisval(Color* t) { return *t; }
-	Color Dthisval(Color t) { return t; }
+	Color* Dthisptr(Color* t) pure nothrow { return t; }
+	Color* Dthisptr(ref Color t) pure nothrow { return &t; }
+	Color Dthisval(Color* t) pure nothrow { return *t; }
+	Color Dthisval(Color t) pure nothrow { return t; }
 	
 	
 	deprecated static Color opCall(COLORREF argb)
@@ -540,36 +540,32 @@ struct Color // docmain
 	
 	
 	/// Construct a new color.
-	static Color opCall(ubyte alpha, Color c)
+	this(ubyte alpha, Color c) pure nothrow
 	{
-		Color nc;
-		nc.color.blue = c.color.blue;
-		nc.color.green = c.color.green;
-		nc.color.red = c.color.red;
-		nc.color.alpha = alpha;
-		return nc;
+		color.blue = c.color.blue;
+		color.green = c.color.green;
+		color.red = c.color.red;
+		color.alpha = alpha;
 	}
 	
 	/// ditto
-	static Color opCall(ubyte red, ubyte green, ubyte blue)
+	this(ubyte red, ubyte green, ubyte blue) pure nothrow
 	{
-		Color nc;
-		nc.color.blue = blue;
-		nc.color.green = green;
-		nc.color.red = red;
-		nc.color.alpha = 0xFF;
-		return nc;
+		color.blue = blue;
+		color.green = green;
+		color.red = red;
+		color.alpha = 0xFF;
 	}
 	
 	/// ditto
-	static Color opCall(ubyte alpha, ubyte red, ubyte green, ubyte blue)
+	this(ubyte alpha, ubyte red, ubyte green, ubyte blue) pure nothrow
 	{
-		return fromArgb(alpha, red, green, blue);
+		this = fromArgb(alpha, red, green, blue);
 	}
 	
 	/// ditto
 	//alias opCall fromArgb;
-	static Color fromArgb(ubyte alpha, ubyte red, ubyte green, ubyte blue)
+	static Color fromArgb(ubyte alpha, ubyte red, ubyte green, ubyte blue) pure nothrow
 	{
 		Color nc;
 		nc.color.blue = blue;
@@ -580,7 +576,7 @@ struct Color // docmain
 	}
 	
 	/// ditto
-	static Color fromRgb(COLORREF rgb)
+	static Color fromRgb(COLORREF rgb) pure nothrow
 	{
 		if(CLR_NONE == rgb)
 			return empty;
@@ -591,7 +587,7 @@ struct Color // docmain
 	}
 	
 	/// ditto
-	static Color fromRgb(ubyte alpha, COLORREF rgb)
+	static Color fromRgb(ubyte alpha, COLORREF rgb) pure nothrow
 	{
 		Color nc;
 		nc.color.cref = rgb | ((cast(COLORREF)alpha) << 24);
@@ -599,14 +595,14 @@ struct Color // docmain
 	}
 	
 	/// ditto
-	static @property Color empty() // getter
+	static @property Color empty() pure nothrow // getter
 	{
 		return Color(0, 0, 0, 0);
 	}
 	
 	
 	/// Return a completely transparent color value.
-	static @property Color transparent() // getter
+	static @property Color transparent() nothrow // getter
 	{
 		return Color.fromArgb(0, 0xFF, 0xFF, 0xFF);
 	}
@@ -619,7 +615,7 @@ struct Color // docmain
 	// Blends the color channels half way.
 	// Does not consider alpha channels and discards them.
 	// The new blended color is returned; -this- Color is not modified.
-	Color blendColor(Color wc)
+	Color blendColor(Color wc) nothrow
 	{
 		if(Dthisval(this) == Color.empty)
 			return wc;
@@ -640,7 +636,7 @@ struct Color // docmain
 	// Returns the new solid color, or the original color if no opacity.
 	// If backColor has opacity, it is ignored.
 	// The new blended color is returned; -this- Color is not modified.
-	Color solidColor(Color backColor)
+	Color solidColor(Color backColor) nothrow
 	{
 		//if(0x7F == this.color.alpha)
 		//	return blendColor(backColor);
@@ -669,7 +665,7 @@ struct Color // docmain
 	}
 	
 	
-	package static Color systemColor(int colorIndex)
+	package static Color systemColor(int colorIndex) pure nothrow
 	{
 		Color c;
 		c.sysIndex = cast(ubyte)colorIndex;
@@ -679,13 +675,13 @@ struct Color // docmain
 	
 	
 	// Gets color index or INVAILD_SYSTEM_COLOR_INDEX.
-	package @property int _systemColorIndex() // getter
+	package @property int _systemColorIndex() pure nothrow // getter
 	{
 		return sysIndex;
 	}
 	
 	
-	package const ubyte INVAILD_SYSTEM_COLOR_INDEX = ubyte.max;
+	package enum ubyte INVAILD_SYSTEM_COLOR_INDEX = ubyte.max;
 	
 	
 	private:
@@ -707,7 +703,7 @@ struct Color // docmain
 	ubyte sysIndex = INVAILD_SYSTEM_COLOR_INDEX;
 	
 	
-	void validateColor()
+	void validateColor() nothrow
 	{
 		if(sysIndex != INVAILD_SYSTEM_COLOR_INDEX)
 		{
@@ -2222,7 +2218,7 @@ class Screen
 version(DFL_MULTIPLE_SCREENS)
 {
 	private extern(Windows) BOOL _gettingScreens(HMONITOR hmonitor,
-		HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData)
+		HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) nothrow
 	{
 		for(int i = 0; i < Screen._screens.length; i++)
 		{

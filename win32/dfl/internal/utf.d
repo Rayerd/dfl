@@ -106,7 +106,7 @@ else
 
 HMODULE _user32, _kernel32, _advapi32, _gdi32;
 
-package @property HMODULE advapi32() // getter
+package @property HMODULE advapi32() nothrow // getter
 {
 	// advapi32 generally always delay loads.
 	if(!_advapi32)
@@ -114,7 +114,7 @@ package @property HMODULE advapi32() // getter
 	return _advapi32;
 }
 
-package @property HMODULE gdi32() // getter
+package @property HMODULE gdi32() nothrow // getter
 {
 	// gdi32 sometimes delay loads.
 	version(DFL_GET_INTERNAL_LIBS)
@@ -125,7 +125,7 @@ package @property HMODULE gdi32() // getter
 	return _gdi32;
 }
 
-package @property HMODULE user32() // getter
+package @property HMODULE user32() nothrow // getter
 {
 	version(DFL_GET_INTERNAL_LIBS)
 	{
@@ -135,7 +135,7 @@ package @property HMODULE user32() // getter
 	return _user32;
 }
 
-package @property HMODULE kernel32() // getter
+package @property HMODULE kernel32() nothrow // getter
 {
 	version(DFL_GET_INTERNAL_LIBS)
 	{
@@ -197,7 +197,7 @@ template _getlen(T)
 
 public:
 
-Dstringz unsafeStringz(Dstring s)
+Dstringz unsafeStringz(Dstring s) nothrow
 {
 	if(!s.length)
 		return "";

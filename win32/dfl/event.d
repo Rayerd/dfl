@@ -174,18 +174,25 @@ template Event(T1, T2) // docmain
 		
 		
 		///
-		@property bool hasHandlers() // getter
+		@property bool hasHandlers() pure nothrow // getter
 		{
 			return _array.length > 1;
 		}
 		
 		
 		// Use opApply and hasHandlers instead.
-		deprecated @property Handler[] handlers() // getter
+		deprecated @property Handler[] handlers() pure nothrow // getter
 		{
 			if(!hasHandlers)
 				return null;
-			return _array[1 .. _array.length].dup; // Because _array can be modified. Function is deprecated anyway.
+			try
+			{
+				return _array[1 .. _array.length].dup; // Because _array can be modified. Function is deprecated anyway.
+			}
+			catch (DThrowable e)
+			{
+				return null;
+			}
 		}
 		
 		
@@ -290,7 +297,7 @@ class EventArgs // docmain
 	
 	
 	/// Property: get a reusable, _empty EventArgs.
-	static @property EventArgs empty() // getter
+	static @property EventArgs empty() nothrow // getter
 	{
 		return _e;
 	}
@@ -306,14 +313,14 @@ class ThreadExceptionEventArgs: EventArgs
 {
 	///
 	// The exception that occured.
-	this(DThrowable theException)
+	this(DThrowable theException) pure nothrow
 	{
 		except = theException;
 	}
 	
 	
 	///
-	final @property DThrowable exception() // getter
+	final @property DThrowable exception() pure nothrow // getter
 	{
 		return except;
 	}

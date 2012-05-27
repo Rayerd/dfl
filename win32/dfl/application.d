@@ -78,7 +78,7 @@ class ApplicationContext // docmain
 	}
 	
 	/// ditto
-	final @property Form mainForm() // getter
+	final @property Form mainForm() nothrow // getter
 	{
 		return mform;
 	}
@@ -117,7 +117,7 @@ class ApplicationContext // docmain
 }
 
 
-private extern(Windows)
+private extern(Windows) nothrow
 {
 	alias UINT function(LPCWSTR lpPathName, LPCWSTR lpPrefixString, UINT uUnique,
 		LPWSTR lpTempFileName) GetTempFileNameWProc;
@@ -285,7 +285,7 @@ final class Application // docmain
 	
 	/+
 	// ///
-	@property bool visualStyles() // getter
+	@property bool visualStyles() nothrow // getter
 	{
 		// IsAppThemed:
 		// "Do not call this function during DllMain or global objects contructors.
@@ -336,7 +336,7 @@ final class Application // docmain
 	
 	
 	///
-	@property bool messageLoop() // getter
+	@property bool messageLoop() nothrow // getter
 	{
 		return (threadFlags & TF.RUNNING) != 0;
 	}
@@ -595,7 +595,7 @@ final class Application // docmain
 	
 	
 	// Will be null if not in a successful Application.run.
-	package @property ApplicationContext context() // getter
+	package @property ApplicationContext context() nothrow // getter
 	{
 		return ctx;
 	}
@@ -871,53 +871,59 @@ final class Application // docmain
 	
 	
 	///
-	void onThreadException(DThrowable e)
+	void onThreadException(DThrowable e) nothrow
 	{
-		static bool except = false;
-		
-		version(WINDOWS_HUNG_WORKAROUND)
+		try
 		{
-			version(WINDOWS_HUNG_WORKAROUND_NO_IGNORE)
-			{
-			}
-			else
-			{
-				if(cast(WindowsHungDflException)e)
-					return;
-			}
-		}
-		
-		if(except)
-		{
-			cprintf("Error: %.*s\n", cast(int)getObjectString(e).length, getObjectString(e).ptr);
+			static bool except = false;
 			
-			abort();
-			return;
-		}
-		
-		except = true;
-		//if(threadException.handlers.length)
-		if(threadException.hasHandlers)
-		{
-			threadException(typeid(Application), new ThreadExceptionEventArgs(e));
-			except = false;
-			return;
-		}
-		else
-		{
-			// No thread exception handlers, display a dialog.
-			if(showDefaultExceptionDialog(e))
+			version(WINDOWS_HUNG_WORKAROUND)
 			{
+				version(WINDOWS_HUNG_WORKAROUND_NO_IGNORE)
+				{
+				}
+				else
+				{
+					if(cast(WindowsHungDflException)e)
+						return;
+				}
+			}
+			
+			if(except)
+			{
+				cprintf("Error: %.*s\n", cast(int)getObjectString(e).length, getObjectString(e).ptr);
+				
+				abort();
+				return;
+			}
+			
+			except = true;
+			//if(threadException.handlers.length)
+			if(threadException.hasHandlers)
+			{
+				threadException(typeid(Application), new ThreadExceptionEventArgs(e));
 				except = false;
 				return;
 			}
+			else
+			{
+				// No thread exception handlers, display a dialog.
+				if(showDefaultExceptionDialog(e))
+				{
+					except = false;
+					return;
+				}
+			}
+			//except = false;
+			
+			//throw e;
+			cprintf("Error: %.*s\n", cast(int)getObjectString(e).length, getObjectString(e).ptr);
+			//exitThread();
+			Environment.exit(EXIT_FAILURE);
 		}
-		//except = false;
-		
-		//throw e;
-		cprintf("Error: %.*s\n", cast(int)getObjectString(e).length, getObjectString(e).ptr);
-		//exitThread();
-		Environment.exit(EXIT_FAILURE);
+		catch (DThrowable e)
+		{
+		}
 	}
 	
 	
@@ -1079,7 +1085,7 @@ final class Application // docmain
 	}
 	
 	// Returns null if not found.
-	package Control lookupHwnd(HWND hwnd)
+	package Control lookupHwnd(HWND hwnd) nothrow
 	{
 		//if(hwnd in controls)
 		//	return controls[hwnd];
@@ -1286,7 +1292,7 @@ final class Application // docmain
 	}
 	
 	
-	package void creatingControl(Control ctrl)
+	package void creatingControl(Control ctrl) nothrow
 	{
 		TlsSetValue(tlsControl, cast(Control*)ctrl);
 	}
@@ -1343,7 +1349,7 @@ final class Application // docmain
 	}
 	
 	/// ditto
-	@property bool autoCollect() // getter
+	@property bool autoCollect() nothrow // getter
 	{
 		return gcinfo > 0;
 	}
@@ -1550,7 +1556,7 @@ final class Application // docmain
 	}
 	
 	
-	@property IMessageFilter[] filters() // getter
+	@property IMessageFilter[] filters() nothrow // getter
 	{
 		TlsFilterValue* val = cast(TlsFilterValue*)TlsGetValue(tlsFilter);
 		if(!val)
@@ -1568,14 +1574,14 @@ final class Application // docmain
 		}
 		
 		
-		@property HHOOK msghook() // getter
+		@property HHOOK msghook() nothrow // getter
 		{
 			return cast(HHOOK)TlsGetValue(tlsHook);
 		}
 	}
 	
 	
-	Control getCreatingControl()
+	Control getCreatingControl() nothrow
 	{
 		return cast(Control)cast(Control*)TlsGetValue(tlsControl);
 	}
@@ -1590,7 +1596,7 @@ final class Application // docmain
 	}
 	
 	
-	@property TF threadFlags() // getter
+	@property TF threadFlags() nothrow // getter
 	{
 		return cast(TF)cast(DWORD)TlsGetValue(tlsThreadFlags);
 	}
@@ -1668,7 +1674,7 @@ final class Application // docmain
 package:
 
 
-extern(Windows) void _gcTimeout(HWND hwnd, UINT uMsg, UINT idEvent, DWORD dwTime)
+extern(Windows) void _gcTimeout(HWND hwnd, UINT uMsg, UINT idEvent, DWORD dwTime) nothrow
 {
 	KillTimer(hwnd, Application.gctimer);
 	Application.gctimer = 0;
@@ -1857,7 +1863,7 @@ debug(SHOW_MESSAGE_INFO)
 }
 
 
-extern(Windows) LRESULT dflWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+extern(Windows) LRESULT dflWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) nothrow
 {
 	//cprintf("HWND %p; WM %d(0x%X); WPARAM %d(0x%X); LPARAM %d(0x%X);\n", hwnd, msg, msg, wparam, wparam, lparam, lparam);
 	
@@ -1990,9 +1996,15 @@ extern(Windows) LRESULT dflWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 	if(ctrl)
 	{
 		do_msg:
-		ctrl.mustWndProc(dm);
-		if(!ctrl.preProcessMessage(dm))
-			ctrl._wndProc(dm);
+		try
+		{
+			ctrl.mustWndProc(dm);
+			if(!ctrl.preProcessMessage(dm))
+				ctrl._wndProc(dm);
+		}
+		catch (DThrowable e)
+		{
+		}
 	}
 	return dm.result;
 }
