@@ -10,7 +10,7 @@ private import dfl.base, dfl.commondialog, dfl.internal.winapi, dfl.application,
 	dfl.internal.dlib;
 
 
-private extern(Windows)
+private extern(Windows) nothrow
 {
 	alias BOOL function(LPCHOOSEFONTW lpcf) ChooseFontWProc;
 }

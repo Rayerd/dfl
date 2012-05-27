@@ -78,7 +78,7 @@ class ApplicationContext // docmain
 	}
 	
 	/// ditto
-	final @property Form mainForm() // getter
+	final @property Form mainForm() nothrow // getter
 	{
 		return mform;
 	}
@@ -285,7 +285,7 @@ final class Application // docmain
 	
 	/+
 	// ///
-	@property bool visualStyles() // getter
+	@property bool visualStyles() nothrow // getter
 	{
 		// IsAppThemed:
 		// "Do not call this function during DllMain or global objects contructors.
@@ -336,7 +336,7 @@ final class Application // docmain
 	
 	
 	///
-	@property bool messageLoop() // getter
+	@property bool messageLoop() nothrow // getter
 	{
 		return (threadFlags & TF.RUNNING) != 0;
 	}
@@ -595,7 +595,7 @@ final class Application // docmain
 	
 	
 	// Will be null if not in a successful Application.run.
-	package @property ApplicationContext context() // getter
+	package @property ApplicationContext context() nothrow // getter
 	{
 		return ctx;
 	}
@@ -1349,7 +1349,7 @@ final class Application // docmain
 	}
 	
 	/// ditto
-	@property bool autoCollect() // getter
+	@property bool autoCollect() nothrow // getter
 	{
 		return gcinfo > 0;
 	}
@@ -1556,7 +1556,7 @@ final class Application // docmain
 	}
 	
 	
-	@property IMessageFilter[] filters() // getter
+	@property IMessageFilter[] filters() nothrow // getter
 	{
 		TlsFilterValue* val = cast(TlsFilterValue*)TlsGetValue(tlsFilter);
 		if(!val)
@@ -1574,7 +1574,7 @@ final class Application // docmain
 		}
 		
 		
-		@property HHOOK msghook() // getter
+		@property HHOOK msghook() nothrow // getter
 		{
 			return cast(HHOOK)TlsGetValue(tlsHook);
 		}
@@ -1596,7 +1596,7 @@ final class Application // docmain
 	}
 	
 	
-	@property TF threadFlags() // getter
+	@property TF threadFlags() nothrow // getter
 	{
 		return cast(TF)cast(DWORD)TlsGetValue(tlsThreadFlags);
 	}

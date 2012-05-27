@@ -718,7 +718,7 @@ abstract class FileDialog: CommonDialog // docmain
 }
 
 
-private extern(Windows)
+private extern(Windows) nothrow
 {
 	alias BOOL function(LPOPENFILENAMEW lpofn) GetOpenFileNameWProc;
 	alias BOOL function(LPOPENFILENAMEW lpofn) GetSaveFileNameWProc;
