@@ -330,10 +330,10 @@ struct Message // docmain
 	/// Construct a Message struct.
 	this(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) pure nothrow
 	{
-		hWnd = hWnd;
-		msg = msg;
-		wParam = wParam;
-		lParam = lParam;
+		this.hWnd = hWnd;
+		this.msg = msg;
+		this.wParam = wParam;
+		this.lParam = lParam;
 		result = 0;
 	}
 }
