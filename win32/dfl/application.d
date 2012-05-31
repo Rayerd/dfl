@@ -755,7 +755,6 @@ final class Application // docmain
 				dispose();
 				assert(!isHandleCreated);
 				
-				//thread1.resume(); // Not supported by Tango...
 				thread1 = null;
 			}
 			
@@ -776,12 +775,8 @@ final class Application // docmain
 			// This is very important for some messages, such as socket events.
 			thread1 = Thread.getThis(); // Problems with DMD 2.x
 			Thread thd;
-			version(Tango)
-				thd = new Thread(&tinThread2);
-			else
-				thd = new Thread(&inThread2);
+			thd = new Thread(&inThread2);
 			thd.start();
-			//SuspendThread(GetCurrentThread()); // Thread2 will resume me. Not supported by Tango.
 			do
 			{
 				Sleep(200);

@@ -26,28 +26,7 @@ private import dfl.internal.dlib, dfl.internal.clib;
 private import dfl.internal.winapi;
 
 
-version(Tango)
-{
-	version(DFL_BOTH_STRINGS)
-	{
-		pragma(msg, "DFL: warning: this Tango version might not support DFL_BOTH_STRINGS");
-	}
-	else
-	{
-		version(Win32SansUnicode)
-		{
-			version = DFL_ANSI;
-		}
-		else
-		{
-			version = DFL_UNICODE;
-		}
-	}
-}
-else
-{
-	private import std.windows.charset;
-}
+private import std.windows.charset;
 
 
 version(DFL_NO_D2_AND_ABOVE)

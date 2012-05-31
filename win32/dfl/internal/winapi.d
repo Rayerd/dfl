@@ -4,39 +4,7 @@
 module dfl.internal.winapi;
 
 
-version(Tango)
-{
-	version(Tangobos)
-		version = HASstdcwindowswindows;
-}
-else
-{
-	version = HASstdcwindowswindows;
-}
-
-
-/+
-version(Tango)
-{
-	/+
-	public import tango.sys.win32.Macros;
-	//public import tango.sys.win32.Process;
-	public import tango.sys.win32.Types;
-	public import tango.sys.win32.UserGdi;
-	+/
-}
-+/
-
-
-
-version(HASstdcwindowswindows)
-{
-	public import std.c.windows.windows;
-}
-else
-{
-	public import dfl.internal._stdcwindows;
-}
+public import core.sys.windows.windows;
 private import dfl.internal.wincom;
 
 
@@ -60,9 +28,8 @@ else version(D_Version4)
 }
 else
 {
-	version = DFL_D1;
+	static assert(0, "This environment is not supported.");
 }
-//version = DFL_D1_AND_ABOVE;
 
 
 extern(Windows) nothrow:

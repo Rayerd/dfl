@@ -6,8 +6,6 @@ module dfl.internal.wincom;
 private import dfl.internal.winapi;
 
 
-version(Tango)
-	version = _dfl_needcom;
 version(WINE)
 	version = _dfl_needcom;
 

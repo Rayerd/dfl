@@ -6,23 +6,6 @@
 module dfl.socket;
 
 
-version(Tango)
-{
-	version(DFL_TangoNetDeviceBerkeley)
-	{
-		version = _DFL_TangoBerkeleySocket;
-	}
-	else version(Old)
-	{
-		version = _DFL_TangoHasOldSocket;
-	}
-	else
-	{
-		version = _DFL_TangoSocketConduit;
-	}
-}
-
-
 version(WINE)
 {
 	version = DFL_NoSocket;
@@ -39,259 +22,19 @@ private import dfl.internal.dlib, dfl.internal.clib;
 
 private
 {
-	version(Tango)
+	private import std.socket, core.bitop;
+	private import std.c.windows.winsock;
+	
+	alias InternetHost DInternetHost;
+	alias InternetAddress DInternetAddress;
+	
+	socket_t getSocketHandle(Socket sock)
 	{
-		
-		version(_DFL_TangoBerkeleySocket)
-		{
-			private import std.intrinsic;
-			private import tango.net.device.Berkeley;
-			
-			alias NetHost DInternetHost;
-			alias IPv4Address DInternetAddress;
-			
-			socket_t getSocketHandle(DflSocket sock)
-			{
-				return sock.fileHandle;
-			}
-		}
-		else version(_DFL_TangoHasOldSocket)
-		{
-			private import std.intrinsic;
-			private import tango.net.Socket;
-			
-			alias NetHost DInternetHost;
-			alias IPv4Address DInternetAddress;
-			
-			socket_t getSocketHandle(DflSocket sock)
-			{
-				return sock.fileHandle;
-			}
-		}
-		else version(_DFL_TangoSocketConduit)
-		{
-			private import std.intrinsic;
-			private import tango.net.device.Socket;
-			private import tango.net.device.Berkeley;
-			
-			alias NetHost DInternetHost;
-			alias IPv4Address DInternetAddress;
-			
-			socket_t getSocketHandle(DflSocket sock)
-			{
-				return sock.native.handle;
-			}
-		}
-		
-	}
-	else
-	{
-		private import std.socket, core.bitop;
-		private import std.c.windows.winsock;
-		
-		alias InternetHost DInternetHost;
-		alias InternetAddress DInternetAddress;
-		
-		socket_t getSocketHandle(Socket sock)
-		{
-			return sock.handle;
-		}
+		return sock.handle;
 	}
 }
 
-version(Tango)
-{
-	version(_DFL_TangoBerkeleySocket)
-	{
-		class DflSocket ///
-		{
-			Berkeley berkeley;
-			
-			package this()
-			{
-			}
-			
-			this(AddressFamily family, SocketType type, ProtocolType protocol, bool create = true)
-			{
-				berkeley.open(family, type, protocol, create);
-			}
-			
-			@property socket_t handle()
-			{
-				return berkeley.handle();
-			}
-			
-			@property socket_t fileHandle()
-			{
-				return berkeley.handle();
-			}
-			
-			@property bool isAlive()
-			{
-				return berkeley.isAlive();
-			}
-			
-			@property bool blocking() // getter
-			{
-				return berkeley.blocking();
-			}
-			
-			@property void blocking(bool byes) // setter
-			{
-				berkeley.blocking(byes);
-			}
-			
-			DflSocket bind(Address addr)
-			{
-				berkeley.bind(addr);
-				return this;
-			}
-			
-			DflSocket connect(Address to)
-			{
-				berkeley.connect(to);
-				return this;
-			}
-			
-			DflSocket listen (int backlog)
-			{
-				berkeley.listen(backlog);
-				return this;
-			}
-			
-			DflSocket accept()
-			{
-				return accept(new DflSocket());
-			}
-			
-			DflSocket accept(DflSocket sock)
-			{
-				berkeley.accept(sock.berkeley);
-				return sock;
-			}
-			
-			void initialize(socket_t sock = socket_t.init)
-			{
-				berkeley.reopen(sock);
-			}
-			
-			void reopen(socket_t sock = socket_t.init)
-			{
-				initialize(sock);
-			}
-			
-			DflSocket shutdown(SocketShutdown how)
-			{
-				berkeley.shutdown(how);
-				return this;
-			}
-			
-			@property Address remoteAddress()
-			{
-				return berkeley.remoteAddress();
-			}
-			
-			@property Address localAddress()
-			{
-				return berkeley.localAddress();
-			}
-			
-			void detach()
-			{
-				berkeley.detach();
-			}
-			
-			const int ERROR = Berkeley.ERROR;
-			
-			int send(void[] buf, SocketFlags flags = SocketFlags.NONE)
-			{
-				return berkeley.send(buf, flags);
-			}
-			
-			int sendTo(void[] buf, SocketFlags flags, Address to)
-			{
-				return berkeley.sendTo(buf, flags, to);
-			}
-			
-			int sendTo(void[] buf, Address to)
-			{
-				return berkeley.sendTo(buf, to);
-			}
-			
-			int sendTo(void[] buf, SocketFlags flags = SocketFlags.NONE)
-			{
-				return berkeley.sendTo(buf, flags);
-			}
-			
-			int receive(void[] buf, SocketFlags flags = SocketFlags.NONE)
-			{
-				return berkeley.receive(buf, flags);
-			}
-			
-			int receiveFrom(void[] buf, SocketFlags flags, Address from)
-			{
-				return berkeley.receiveFrom(buf, flags, from);
-			}
-			
-			int receiveFrom(void[] buf, Address from)
-			{
-				return berkeley.receiveFrom(buf, from);
-			}
-			
-			int receiveFrom(void[] buf, SocketFlags flags = SocketFlags.NONE)
-			{
-				return berkeley.receiveFrom(buf, flags);
-			}
-			
-			int getOption(SocketOptionLevel level, SocketOption option, void[] result)
-			{
-				return berkeley.getOption(level, option, result);
-			}
-			
-			DflSocket setOption(SocketOptionLevel level, SocketOption option, void[] value)
-			{
-				berkeley.setOption(level, option, value);
-				return this;
-			}
-			
-			DflSocket linger(int period)
-			{
-				berkeley.linger(period);
-				return this;
-			}
-			
-			DflSocket addressReuse(bool enabled)
-			{
-				berkeley.addressReuse(enabled);
-				return this;
-			}
-			
-			DflSocket noDelay(bool enabled)
-			{
-				berkeley.noDelay(enabled);
-				return this;
-			}
-			
-			
-		}
-	}
-	else version(_DFL_TangoHasOldSocket)
-	{
-		
-		alias tango.net.Socket.Socket DflSocket; ///
-		
-	}
-	else version(_DFL_TangoSocketConduit)
-	{
-		
-		alias tango.net.device.Socket.Socket DflSocket; ///
-		
-	}
-}
-else
-{
-	alias std.socket.Socket DflSocket; ///
-}
+alias std.socket.Socket DflSocket; ///
 
 private import dfl.internal.winapi, dfl.application, dfl.base, dfl.internal.utf;
 
@@ -350,21 +93,7 @@ void registerEvent(DflSocket sock, EventType events, RegisterEventCallback callb
 	if(!hwNet)
 		_init();
 	
-	version(Tango)
-	{
-		version(_DFL_TangoBerkeleySocket)
-		{
-			sock.blocking = false; // So the getter will be correct.
-		}
-		else version(_DFL_TangoHasOldSocket)
-		{
-			sock.blocking = false; // So the getter will be correct.
-		}
-	}
-	else
-	{
-		sock.blocking = false; // So the getter will be correct.
-	}
+	sock.blocking = false; // So the getter will be correct.
 	
 	// SOCKET_ERROR
 	if(-1 == WSAAsyncSelect(getSocketHandle(sock), hwNet, WM_DFL_NETEVENT, cast(int)events))
@@ -394,56 +123,27 @@ class AsyncSocket: DflSocket // docmain
 	this(AddressFamily af, SocketType type, ProtocolType protocol)
 	{
 		super(af, type, protocol);
-		version(_DFL_TangoSocketConduit)
-		{
-			this.native.blocking = false;
-		}
-		else
-		{
-			super.blocking = false;
-		}
+		super.blocking = false;
 	}
 	
-	version(Tango)
+	/// ditto
+	this(AddressFamily af, SocketType type)
 	{
-		version(_DFL_TangoSocketConduit)
-		{
-			
-			this()
-			{
-				super();
-				this.native.blocking = false;
-			}
-			
-		}
-	}
-	else
-	{
-		/// ditto
-		this(AddressFamily af, SocketType type)
-		{
-			super(af, type);
-			super.blocking = false;
-		}
-		
-		/// ditto
-		this(AddressFamily af, SocketType type, Dstring protocolName)
-		{
-			super(af, type, protocolName);
-			super.blocking = false;
-		}
+		super(af, type);
+		super.blocking = false;
 	}
 	
-	version(_DFL_TangoSocketConduit)
+	/// ditto
+	this(AddressFamily af, SocketType type, Dstring protocolName)
 	{
+		super(af, type, protocolName);
+		super.blocking = false;
 	}
-	else
+	
+	/// ditto
+	// For use with accept().
+	protected this()
 	{
-		/// ditto
-		// For use with accept().
-		protected this()
-		{
-		}
 	}
 	
 	
@@ -454,64 +154,29 @@ class AsyncSocket: DflSocket // docmain
 	}
 	
 	
-	version(Tango)
+	protected override AsyncSocket accepting()
 	{
-		version(_DFL_TangoBerkeleySocket)
-		{
-			override DflSocket accept()
-			{
-				return accept(new AsyncSocket());
-			}
-			
-			DflSocket accept(AsyncSocket sock)
-			{
-				return super.accept(sock);
-			}
-		}
-	}
-	else
-	{
-		protected override AsyncSocket accepting()
-		{
-			return new AsyncSocket;
-		}
+		return new AsyncSocket;
 	}
 	
 	
-	version(Tango)
+	override void close()
 	{
-		override void detach()
-		{
-			unregisterEvent(this);
-			super.detach();
-		}
-	}
-	else
-	{
-		override void close()
-		{
-			unregisterEvent(this);
-			super.close();
-		}
+		unregisterEvent(this);
+		super.close();
 	}
 	
 	
-	version(_DFL_TangoSocketConduit)
+	override @property bool blocking() const // getter
 	{
+		return false;
 	}
-	else
+	
+	
+	override @property void blocking(bool byes) // setter
 	{
-		override @property bool blocking() const // getter
-		{
-			return false;
-		}
-		
-		
-		override @property void blocking(bool byes) // setter
-		{
-			if(byes)
-				assert(0);
-		}
+		if(byes)
+			assert(0);
 	}
 	
 }
@@ -848,14 +513,7 @@ class SocketQueue // docmain
 			else
 				st = buf.length;
 			
-			version(_DFL_TangoSocketConduit)
-			{
-				st = sock.write(buf[0 .. st]);
-			}
-			else
-			{
-				st = sock.send(buf[0 .. st]);
-			}
+			st = sock.send(buf[0 .. st]);
 			if(st > 0)
 			{
 				if(buf.length - st)
@@ -926,14 +584,7 @@ class SocketQueue // docmain
 		if(readbuf.length - rpos < 1024)
 			readbuf.length = readbuf.length + 2048;
 		
-		version(_DFL_TangoSocketConduit)
-		{
-			int rd = sock.read(readbuf[rpos .. readbuf.length]);
-		}
-		else
-		{
-			int rd = sock.receive(readbuf[rpos .. readbuf.length]);
-		}
+		int rd = sock.receive(readbuf[rpos .. readbuf.length]);
 		if(rd > 0)
 			rpos += cast(uint)rd;
 	}
@@ -952,14 +603,7 @@ class SocketQueue // docmain
 			else
 				buf = writebuf;
 			
-			version(_DFL_TangoSocketConduit)
-			{
-				int st = sock.write(buf);
-			}
-			else
-			{
-				int st = sock.send(buf);
-			}
+			int st = sock.send(buf);
 			if(st > 0)
 				writebuf = writebuf[st .. writebuf.length];
 		}
