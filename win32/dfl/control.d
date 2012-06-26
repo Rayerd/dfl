@@ -4132,6 +4132,11 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
+	protected void onMoving(MovingEventArgs cea)
+	{
+		moving(this, cea);
+	}
+	
 	///
 	protected void onMove(EventArgs ea)
 	{
@@ -4147,6 +4152,11 @@ class Control: DObject, IWindow // docmain
 	+/
 	alias onMove onLocationChanged;
 	
+	
+	protected void onSizing(SizingEventArgs cea)
+	{
+		sizing(this, cea);
+	}
 	
 	///
 	protected void onResize(EventArgs ea)
@@ -4730,31 +4740,28 @@ class Control: DObject, IWindow // docmain
 				}
 				break;
 			
-			/+
 			case WM_WINDOWPOSCHANGING:
 				{
 					WINDOWPOS* wp = cast(WINDOWPOS*)msg.lParam;
 					
-					/+
-					//if(!(wp.flags & SWP_NOSIZE))
-					if(width != wp.cx || height != wp.cy)
+					if (!(wp.flags & SWP_NOMOVE)
+					 && (location.x != wp.x || location.y != wp.y))
 					{
-						scope BeforeResizeEventArgs ea = new BeforeResizeEventArgs(wp.cx, wp.cy);
-						onBeforeResize(ea);
-						/+if(wp.cx == ea.width && wp.cy == ea.height)
-						{
-							wp.flags |= SWP_NOSIZE;
-						}
-						else+/
-						{
-							wp.cx = ea.width;
-							wp.cy = ea.height;
-						}
+						scope e = new MovingEventArgs(Point(wp.x, wp.y));
+						onMoving(e);
+						wp.x = e.x;
+						wp.y = e.y;
 					}
-					+/
+					if (!(wp.flags & SWP_NOSIZE)
+					 && (width != wp.cx || height != wp.cy))
+					{
+						scope e = new SizingEventArgs(Size(wp.cx, wp.cy));
+						onSizing(e);
+						wp.cx = e.width;
+						wp.cy = e.height;
+					}
 				}
 				break;
-			+/
 			
 			case WM_MOUSEMOVE:
 				if(_clicking)
@@ -5928,6 +5935,8 @@ class Control: DObject, IWindow // docmain
 	Event!(Control, MouseEventArgs) mouseUp; ///
 	//MouseEventHandler mouseWheel;
 	Event!(Control, MouseEventArgs) mouseWheel; ///
+	//EventHandler moving;
+	Event!(Control, MovingEventArgs) moving; ///
 	//EventHandler move;
 	Event!(Control, EventArgs) move; ///
 	//EventHandler locationChanged;
@@ -5936,6 +5945,8 @@ class Control: DObject, IWindow // docmain
 	Event!(Control, PaintEventArgs) paint; ///
 	//EventHandler parentChanged;
 	Event!(Control, EventArgs) parentChanged; ///
+	//EventHandler sizing;
+	Event!(Control, SizingEventArgs) sizing; ///
 	//EventHandler resize;
 	Event!(Control, EventArgs) resize; ///
 	//EventHandler sizeChanged;

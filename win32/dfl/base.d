@@ -764,6 +764,107 @@ class CancelEventArgs: EventArgs
 	bool cncl;
 }
 
+///
+class SizingEventArgs: EventArgs
+{
+	///
+	// Initialize cancel to false.
+	this(Size sz) pure nothrow
+	{
+		_sz = sz;
+	}
+	
+	///
+	@property Size size() pure nothrow
+	{
+		return _sz;
+	}
+	
+	/// ditto
+	@property void size(Size sz) pure nothrow
+	{
+		_sz = sz;
+	}
+	
+	///
+	@property void width(size_t w) pure nothrow
+	{
+		_sz.width = w;
+	}
+	
+	/// ditto
+	@property size_t width() pure nothrow
+	{
+		return _sz.width;
+	}
+	
+	///
+	@property void height(size_t h) pure nothrow
+	{
+		_sz.height = h;
+	}
+	
+	/// ditto
+	@property size_t height() pure nothrow
+	{
+		return _sz.height;
+	}
+	
+	
+	private:
+	Size _sz;
+}
+
+///
+class MovingEventArgs: EventArgs
+{
+	///
+	// Initialize cancel to false.
+	this(Point loc) pure nothrow
+	{
+		_loc = loc;
+	}
+	
+	///
+	@property Point location() pure nothrow
+	{
+		return _loc;
+	}
+	
+	/// ditto
+	@property void location(Point loc) pure nothrow
+	{
+		_loc = loc;
+	}
+	
+	///
+	@property void x(size_t posX) pure nothrow
+	{
+		_loc.x = posX;
+	}
+	
+	/// ditto
+	@property size_t x() pure nothrow
+	{
+		return _loc.x;
+	}
+	
+	///
+	@property void y(size_t posY) pure nothrow
+	{
+		_loc.y = posY;
+	}
+	
+	/// ditto
+	@property size_t y() pure nothrow
+	{
+		return _loc.y;
+	}
+	
+	
+	private:
+	Point _loc;
+}
 
 ///
 class KeyEventArgs: EventArgs
