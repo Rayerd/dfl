@@ -58,25 +58,25 @@ class StringObject: DObject
 	}
 	
 	
-	override Dequ opEquals(Object o)
+	override equals_t opEquals(const Object o) const
 	{
 		return value == getObjectString(o); // ?
 	}
 	
 	
-	Dequ opEquals(StringObject s)
+	equals_t opEquals(const StringObject s) const
 	{
 		return value == s.value;
 	}
 	
 	
-	override int opCmp(Object o)
+	override int opCmp(const Object o) const
 	{
 		return stringICmp(value, getObjectString(o)); // ?
 	}
 	
 	
-	int opCmp(StringObject s)
+	int opCmp(const StringObject s) const
 	{
 		return stringICmp(value, s.value);
 	}
@@ -1327,16 +1327,16 @@ class Cursor // docmain
 	}
 	
 	
-	override Dequ opEquals(Object o)
+	override equals_t opEquals(const Object o) const
 	{
-		Cursor cur = cast(Cursor)o;
+		const cur = cast(const Cursor)o;
 		if(!cur)
 			return 0; // Not equal.
 		return opEquals(cur);
 	}
 	
 	
-	Dequ opEquals(Cursor cur)
+	equals_t opEquals(const Cursor cur) const
 	{
 		return hcur == cur.hcur;
 	}

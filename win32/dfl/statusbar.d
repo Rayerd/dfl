@@ -62,33 +62,33 @@ class StatusBarPanel: DObject
 	}
 	
 	
-	override Dequ opEquals(Object o)
+	override equals_t opEquals(const Object o) const
 	{
 		return _txt == getObjectString(o); // ?
 	}
 	
-	Dequ opEquals(StatusBarPanel pnl)
+	equals_t opEquals(const StatusBarPanel pnl) const
 	{
 		return _txt == pnl._txt;
 	}
 	
-	Dequ opEquals(Dstring val)
+	equals_t opEquals(string val) const
 	{
 		return _txt == val;
 	}
 	
 	
-	override int opCmp(Object o)
+	override int opCmp(const Object o) const
 	{
 		return stringICmp(_txt, getObjectString(o)); // ?
 	}
 	
-	int opCmp(StatusBarPanel pnl)
+	int opCmp(const StatusBarPanel pnl) const
 	{
 		return stringICmp(_txt, pnl._txt);
 	}
 	
-	int opCmp(Dstring val)
+	int opCmp(string val) const
 	{
 		return stringICmp(_txt, val);
 	}

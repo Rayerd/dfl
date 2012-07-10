@@ -870,7 +870,7 @@ class RegistryKey // docmain
 	}
 	
 	
-	override Dequ opEquals(Object o)
+	override equals_t opEquals(const Object o) const
 	{
 		RegistryKey rk;
 		
@@ -881,7 +881,7 @@ class RegistryKey // docmain
 	}
 	
 	
-	Dequ opEquals(RegistryKey rk)
+	equals_t opEquals(const RegistryKey rk) const
 	{
 		return hkey == rk.hkey;
 	}

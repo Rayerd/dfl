@@ -86,7 +86,7 @@ class ToolBarButton
 	}
 	
 	/// ditto
-	@property Dstring text() // getter
+	@property string text() const // getter
 	{
 		return _text;
 	}
@@ -108,31 +108,31 @@ class ToolBarButton
 	}
 	
 	
-	override Dstring toString()
+	override string toString() const
 	{
 		return text;
 	}
 	
 	
-	override Dequ opEquals(Object o)
+	override equals_t opEquals(const Object o) const
 	{
 		return text == getObjectString(o);
 	}
 	
 	
-	Dequ opEquals(Dstring val)
+	equals_t opEquals(string val) const
 	{
 		return text == val;
 	}
 	
 	
-	override int opCmp(Object o)
+	override int opCmp(const Object o) const
 	{
 		return stringICmp(text, getObjectString(o));
 	}
 	
 	
-	int opCmp(Dstring val)
+	int opCmp(string val) const
 	{
 		return stringICmp(text, val);
 	}

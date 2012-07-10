@@ -129,11 +129,7 @@ version(DFL_NO_USE_CORE_MEMORY)
 
 public import std.traits;
 
-
-alias ReturnType!(Object.opEquals) Dequ; // Since D2 changes mid-stream.
-
-
-Dstring getObjectString(Object o)
+Dstring getObjectString(const Object o)
 {
 	return o.toString();
 }

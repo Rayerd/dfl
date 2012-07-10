@@ -58,27 +58,16 @@ struct Point // docmain
 	}
 	
 	
-	version(DFL_D2_AND_ABOVE)
+	///
+	equals_t opEquals(ref const Point pt) const
 	{
-		///
-		const Dequ opEquals(ref ConstType!(Point) pt)
-		{
-			return x == pt.x && y == pt.y;
-		}
-		
-		/// ditto
-		const Dequ opEquals(Point pt)
-		{
-			return x == pt.x && y == pt.y;
-		}
+		return x == pt.x && y == pt.y;
 	}
-	else
+	
+	/// ditto
+	equals_t opEquals(const Point pt) const
 	{
-		///
-		Dequ opEquals(Point pt)
-		{
-			return x == pt.x && y == pt.y;
-		}
+		return x == pt.x && y == pt.y;
 	}
 	
 	
@@ -157,27 +146,17 @@ struct Size // docmain
 	}
 	
 	
-	version(DFL_D2_AND_ABOVE)
+	///
+	equals_t opEquals(ref const Size sz) const
 	{
-		///
-		const Dequ opEquals(ref ConstType!(Size) sz)
-		{
-			return width == sz.width && height == sz.height;
-		}
-		
-		/// ditto
-		const Dequ opEquals(Size sz)
-		{
-			return width == sz.width && height == sz.height;
-		}
+		return width == sz.width && height == sz.height;
 	}
-	else
+	
+	
+	/// ditto
+	equals_t opEquals(const Size sz) const
 	{
-		///
-		Dequ opEquals(Size sz)
-		{
-			return width == sz.width && height == sz.height;
-		}
+		return width == sz.width && height == sz.height;
 	}
 	
 	
@@ -329,30 +308,19 @@ struct Rect // docmain
 	}
 	
 	
-	version(DFL_D2_AND_ABOVE)
+	///
+	equals_t opEquals(ref const Rect r) const
 	{
-		///
-		const Dequ opEquals(ref ConstType!(Rect) r)
-		{
-			return x == r.x && y == r.y &&
-				width == r.width && height == r.height;
-		}
-		
-		/// ditto
-		const Dequ opEquals(Rect r)
-		{
-			return x == r.x && y == r.y &&
-				width == r.width && height == r.height;
-		}
+		return x == r.x && y == r.y &&
+			width == r.width && height == r.height;
 	}
-	else
+	
+	
+	/// ditto
+	equals_t opEquals(const Rect r) const
 	{
-		///
-		Dequ opEquals(Rect r)
-		{
-			return x == r.x && y == r.y &&
-				width == r.width && height == r.height;
-		}
+		return x == r.x && y == r.y &&
+			width == r.width && height == r.height;
 	}
 	
 	
@@ -4078,16 +4046,16 @@ class Region // docmain
 	}
 	
 	
-	override Dequ opEquals(Object o)
+	override equals_t opEquals(const Object o) const
 	{
-		Region rgn = cast(Region)o;
+		const rgn = cast(const Region)o;
 		if(!rgn)
 			return 0; // Not equal.
 		return opEquals(rgn);
 	}
 	
 	
-	Dequ opEquals(Region rgn)
+	equals_t opEquals(const Region rgn) const
 	{
 		return hrgn == rgn.hrgn;
 	}

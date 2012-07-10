@@ -2057,7 +2057,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	final @property bool isHandleCreated() // getter
+	final @property bool isHandleCreated() const// getter
 	{
 		return hwnd != HWND.init;
 	}
@@ -2694,9 +2694,10 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	private final Dstring _fetchText()
+	private final string _fetchText() const
 	{
-		return dfl.internal.utf.getWindowText(hwnd);
+		//@@@TODO@@@ const correctness
+		return dfl.internal.utf.getWindowText(cast(HWND)hwnd);
 	}
 	
 	
@@ -2721,7 +2722,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	/// ditto
-	@property Dstring text() // getter
+	@property string text() const // getter
 	{
 		if(isHandleCreated)
 		{
@@ -3338,7 +3339,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	override Dequ opEquals(Object o)
+	override equals_t opEquals(const Object o) const
 	{
 		Control ctrl = cast(Control)o;
 		if(!ctrl)
@@ -3347,7 +3348,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	Dequ opEquals(Control ctrl)
+	equals_t opEquals(const Control ctrl) const
 	{
 		if(!isHandleCreated)
 			return super.opEquals(ctrl);
@@ -3355,16 +3356,16 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	override int opCmp(Object o)
+	override int opCmp(const Object o) const
 	{
-		Control ctrl = cast(Control)o;
+		const ctrl = cast(const Control)o;
 		if(!ctrl)
 			return -1;
 		return opCmp(ctrl);
 	}
 	
 	
-	int opCmp(Control ctrl)
+	int opCmp(const Control ctrl) const
 	{
 		if(!isHandleCreated || hwnd != ctrl.hwnd)
 			return super.opCmp(ctrl);
