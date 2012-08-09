@@ -3633,6 +3633,10 @@ class Font // docmain
 				result = cast(float)MulDiv(lfHeight, 72, GetDeviceCaps(hdc, LOGPIXELSY));
 				break;
 			
+			case GraphicsUnit.DISPLAY:
+				result = cast(float)MulDiv(lfHeight, 75, GetDeviceCaps(hdc, LOGPIXELSY));
+				break;
+			
 			case GraphicsUnit.MILLIMETER:
 				result = cast(float)MulDiv(lfHeight, 254, GetDeviceCaps(hdc, LOGPIXELSY)) / 10.0;
 				break;
