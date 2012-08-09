@@ -115,6 +115,48 @@ class FolderBrowserDialog: CommonDialog // docmain
 	}
 	
 	
+	// ///
+	// Currently only works for shell32.dll version 6.0+.
+	final @property void showNewStyleDialog(bool byes) // setter
+	{
+		// BIF_NONEWFOLDERBUTTON exists with shell 6.0+.
+		// Might need to enum child windows looking for window title
+		// "&New Folder" and hide it, then shift "OK" and "Cancel" over.
+		
+		if(byes)
+			bi.ulFlags |= BIF_NEWDIALOGSTYLE;
+		else
+			bi.ulFlags &= ~BIF_NEWDIALOGSTYLE;
+	}
+	
+	// /// ditto
+	final @property bool showNewFolderButton() // getter
+	{
+		return (bi.ulFlags & BIF_NONEWFOLDERBUTTON) != 0;
+	}
+	
+	
+	// ///
+	// Currently only works for shell32.dll version 6.0+.
+	final @property void showTextBox(bool byes) // setter
+	{
+		// BIF_NONEWFOLDERBUTTON exists with shell 6.0+.
+		// Might need to enum child windows looking for window title
+		// "&New Folder" and hide it, then shift "OK" and "Cancel" over.
+		
+		if(byes)
+			bi.ulFlags |= BIF_EDITBOX;
+		else
+			bi.ulFlags &= ~BIF_EDITBOX;
+	}
+	
+	// /// ditto
+	final @property bool showTextBox() // getter
+	{
+		return (bi.ulFlags & BIF_EDITBOX) != 0;
+	}
+	
+	
 	private void _errPathTooLong()
 	{
 		throw new DflException("Path name is too long");
