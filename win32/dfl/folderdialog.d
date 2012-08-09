@@ -130,9 +130,9 @@ class FolderBrowserDialog: CommonDialog // docmain
 	}
 	
 	// /// ditto
-	final @property bool showNewFolderButton() // getter
+	final @property bool showNewStyleDialog() // getter
 	{
-		return (bi.ulFlags & BIF_NONEWFOLDERBUTTON) != 0;
+		return (bi.ulFlags & BIF_NEWDIALOGSTYLE) != 0;
 	}
 	
 	
