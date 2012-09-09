@@ -5972,7 +5972,7 @@ class Control: DObject, IWindow // docmain
 	/// Construct a new Control instance.
 	this()
 	{
-		name = DObject.toString(); // ?
+		//name = DObject.toString(); // ?
 		
 		wrect.size = defaultSize;
 		//oldwrect = wrect;
