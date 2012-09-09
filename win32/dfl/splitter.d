@@ -314,6 +314,14 @@ class Splitter: Control // docmain
 					splat = ctrl;
 				}
 				break;
+			
+			case DockStyle.FILL:
+				assert("DockStyle.FILL is not allowed in Splitter");
+				break;
+			
+			case DockStyle.NONE:
+				assert("DockStyle.NONE is not allowed in Splitter");
+				break;
 		}
 		return null;
 	}
