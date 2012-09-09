@@ -1999,6 +1999,7 @@ extern(Windows) LRESULT dflWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 		}
 		catch (DThrowable e)
 		{
+			Application.onThreadException(e);
 		}
 	}
 	return dm.result;
