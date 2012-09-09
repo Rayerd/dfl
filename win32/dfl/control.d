@@ -1042,7 +1042,7 @@ class Control: DObject, IWindow // docmain
 	version(DFL_NO_DRAG_DROP) {} else
 	{
 		///
-		void allowDrop(bool byes) // setter
+		@property void allowDrop(bool byes) // setter
 		{
 			/+
 			if(dyes)
