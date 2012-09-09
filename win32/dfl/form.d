@@ -3006,8 +3006,8 @@ class Form: ContainerControl, IDialogResult // docmain
 	Color transKey;
 	bool grip = false;
 	FormStartPosition startpos = FormStartPosition.DEFAULT_LOCATION;
-	//FormMessageFilter mfilter;
-	const FormMessageFilter mfilter;
+	FormMessageFilter mfilter;
+	//const FormMessageFilter mfilter;
 	bool _loaded = false;
 	void delegate(Object sender, FormShortcutEventArgs ea)[Keys] _shortcuts;
 	Form[] _owned, _mdiChildren; // Always set because they can be created and destroyed at any time.
