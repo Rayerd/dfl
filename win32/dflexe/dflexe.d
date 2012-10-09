@@ -551,14 +551,14 @@ string getshortpath(string fn)
 		DWORD len;
 		wchar[MAX_PATH] s;
 		len = proc(dfl.internal.utf.toUnicodez(fn), s.ptr, s.length);
-		return to!string(s);
+		return to!string(s[0..len]);
 	}
 	else
 	{
 		DWORD len;
 		char[MAX_PATH] s;
 		len = GetShortPathNameA(dfl.internal.utf.toAnsiz(fn), s.ptr, s.length);
-		return to!string(s);
+		return to!string(s[0..len]);
 	}
 }
 
@@ -1100,10 +1100,9 @@ int main(/+ string[] args +/)
 			
 			string dmdver;
 			x2 = "dmd" ~ to!string(uniform(1, 10000)) ~ ".info";
-			std.process.system(getshortpath(std.path.buildPath(dmdpath_windows, "bin\\dmd.exe"))
-				~ " > " ~ x2);
-			x = cast(string)std.file.read(x2);
-			std.file.remove(x2);
+			std.process.system(getshortpath(std.path.buildPath(dmdpath_windows, "bin\\dmd.exe")) ~ " > " ~ x2);
+			scope(exit) std.file.remove(x2);
+			x = std.file.readText(x2);
 			dmdver = scanDmdOut(x, xver);
 			if(dmdver.length)
 			{
