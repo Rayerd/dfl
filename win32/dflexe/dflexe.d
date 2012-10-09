@@ -19,13 +19,21 @@
 */
 
 
-private import std.stdio, std.string, std.path, std.file,
+private import std.conv, std.stdio, std.string, std.path, std.file,
 	std.random, std.cstream, std.stream;
 private import std.process;
 private import std.c.stdlib;
 
 private import dfl.all, dfl.internal.winapi, dfl.internal.utf;
 
+alias dfl.internal.winapi.ShellExecuteA ShellExecuteA;
+alias dfl.environment.Environment Environment;
+
+pragma(lib, "ole32.lib");
+pragma(lib, "oleAut32.lib");
+pragma(lib, "gdi32.lib");
+pragma(lib, "Comctl32.lib");
+pragma(lib, "Comdlg32.lib");
 
 private extern(Windows)
 {
@@ -54,16 +62,16 @@ enum Flags: DWORD
 
 RegistryKey rkey;
 Flags flags = Flags.NONE;
-char[] startpath, basepath;
-char[] dmdpath, dmdpath_windows = "\0";
-char[] libfile = "dfl_debug.lib";
+string startpath, basepath;
+string dmdpath, dmdpath_windows = "\0";
+string libfile = "dfl_debug.lib";
 bool isPrepared = false;
 bool isDebug = true;
 bool debugSpecified = false;
-char[] dlibname; // Read from sc.ini
+string dlibname; // Read from sc.ini
 
-char[] optExet = "nt"; // Exe type.
-char[] optSu = "console:4.0"; // Subsystem.
+string optExet = "nt"; // Exe type.
+string optSu = "console:4.0"; // Subsystem.
 bool optForceInstall = false;
 bool optBuild = false; // Build dfl.lib.
 bool optShowVer = false;
@@ -75,11 +83,11 @@ bool optPhobos = false;
 bool optNoDflc = false; // Don't compile dflc_ bat files.
 
 
-bool isValidDmdDir(char[] dir)
+bool isValidDmdDir(string dir)
 {
-	if(std.path.isabs(dir)
-		&& (std.file.exists(std.path.join(dir, "bin\\dmd.exe"))
-			|| std.file.exists(std.path.join(dir, "windows\\bin\\dmd.exe")))
+	if(std.path.isAbsolute(dir)
+		&& (std.file.exists(std.path.buildPath(dir, "bin\\dmd.exe"))
+			|| std.file.exists(std.path.buildPath(dir, "windows\\bin\\dmd.exe")))
 		)
 		return true;
 	return false;
@@ -88,9 +96,9 @@ bool isValidDmdDir(char[] dir)
 
 void install()
 {
-	char[] s;
+	string s;
 	
-	bool mboxdmdpath(char[] xpath)
+	bool mboxdmdpath(string xpath)
 	{
 		switch(msgBox("Found DMD at '" ~ xpath ~ "'.\r\n"
 			"Would you like to use this path?\r\n\r\n"
@@ -145,7 +153,7 @@ void install()
 			{
 				if(GetDriveTypeA(p) == DRIVE_FIXED) // Only check fixed disks.
 				{
-					s = std.path.join(.toString(p), "dmd");
+					s = std.path.buildPath(to!string(p), "dmd");
 					if(std.file.exists(s))
 					{
 						if(isValidDmdDir(s))
@@ -238,9 +246,9 @@ void prepare()
 	
 	dmdpath_windows = dmdpath;
 	{
-		char[] dpw = std.path.join(dmdpath, "windows");
-		if(std.file.exists(std.path.join(dpw, "bin\\dmd.exe"))
-			&& std.file.isdir(dpw))
+		string dpw = std.path.buildPath(dmdpath, "windows");
+		if(std.file.exists(std.path.buildPath(dpw, "bin\\dmd.exe"))
+			&& std.file.isDir(dpw))
 		{
 			dmdpath_windows = dpw;
 		}
@@ -250,12 +258,12 @@ void prepare()
 
 // Returns true if it's actually a DFL switch.
 // The "-dfl-" part must be stripped.
-bool doDflSwitch(char[] arg)
+bool doDflSwitch(string arg)
 {
 	int i;
-	char[] equ = null;
+	string equ = null;
 	
-	i = std.string.find(arg, '=');
+	i = std.string.indexOf(arg, '=');
 	if(i != -1)
 	{
 		equ = arg[i + 1 .. arg.length];
@@ -263,7 +271,7 @@ bool doDflSwitch(char[] arg)
 	}
 	
 	
-	void oops(char[] equName = "value")
+	void oops(string equName = "value")
 	{
 		writefln("Expected %s=<%s>", arg, equName);
 		exit(2);
@@ -274,16 +282,16 @@ bool doDflSwitch(char[] arg)
 	{
 		case "dmd":
 			prepare();
-			std.process.system(quotearg(std.path.join(dmdpath_windows, "bin\\dmd.exe\"")));
-			exit(0);
+			std.process.system(quotearg(std.path.buildPath(dmdpath_windows, "bin\\dmd.exe\"")));
+			exit(0); assert(0);
 		
 		case "gui", "winexe", "windowed":
-			i = std.string.find(optSu, ':');
+			i = std.string.indexOf(optSu, ':');
 			optSu = "windows:" ~ optSu[i + 1 .. optSu.length];
 			break;
 		
 		case "con", "console", "exe":
-			i = std.string.find(optSu, ':');
+			i = std.string.indexOf(optSu, ':');
 			optSu = "console:" ~ optSu[i + 1 .. optSu.length];
 			break;
 		
@@ -320,7 +328,7 @@ bool doDflSwitch(char[] arg)
 			break;
 		
 		case "su", "subsystem":
-			if(equ.length > 3 && std.string.find(equ, ':') != -1)
+			if(equ.length > 3 && std.string.indexOf(equ, ':') != -1)
 			{
 				optSu = equ;
 			}
@@ -331,32 +339,32 @@ bool doDflSwitch(char[] arg)
 			break;
 		
 		case "doc":
-			arg = std.path.join(basepath, "packages\\dfl\\doc\\index.html");
+			arg = std.path.buildPath(basepath, "packages\\dfl\\doc\\index.html");
 			if(!std.file.exists(arg))
 				throw new Exception("'" ~ arg ~ "' not found");
 			ShellExecuteA(null, null, std.string.toStringz(quotearg(arg)), null, null, 0);
-			exit(0);
+			exit(0); assert(0);
 		
 		case "readme":
-			arg = std.path.join(basepath, "packages\\dfl\\readme.txt");
+			arg = std.path.buildPath(basepath, "packages\\dfl\\readme.txt");
 			if(!std.file.exists(arg))
 				throw new Exception("'" ~ arg ~ "' not found");
 			ShellExecuteA(null, null, std.string.toStringz(quotearg(arg)), null, null, SW_SHOWNORMAL);
-			exit(0);
+			exit(0); assert(0);
 		
 		case "tips":
-			arg = std.path.join(basepath, "packages\\dfl\\tips.txt");
+			arg = std.path.buildPath(basepath, "packages\\dfl\\tips.txt");
 			if(!std.file.exists(arg))
 				throw new Exception("'" ~ arg ~ "' not found");
 			ShellExecuteA(null, null, std.string.toStringz(quotearg(arg)), null, null, SW_SHOWNORMAL);
-			exit(0);
+			exit(0); assert(0);
 		
 		case "examples", "samples", "eg", "ex":
-			arg = std.path.join(basepath, "packages\\dfl\\examples");
+			arg = std.path.buildPath(basepath, "packages\\dfl\\examples");
 			if(!std.file.exists(arg))
 				throw new Exception("'" ~ arg ~ "' not found");
 			ShellExecuteA(null, "explore", std.string.toStringz(quotearg(arg)), null, null, SW_SHOWNORMAL);
-			exit(0);
+			exit(0); assert(0);
 		
 		case "release":
 			if(debugSpecified)
@@ -434,20 +442,20 @@ void showUsage()
 }
 
 
-char[] quotearg(char[] s)
+string quotearg(string s)
 {
-	if(std.string.find(s, ' ') != -1)
+	if(std.string.indexOf(s, ' ') != -1)
 		return `"` ~ s ~ `"`;
 	return s;
 }
 
 
-char[][] quoteexpandwcfile(char[] s)
+string[] quoteexpandwcfile(string s)
 {
-	char[][] result;
+	string[] result;
 	if(s.length)
 	{
-		char[] wc, ppath;
+		string wc, ppath;
 		bool foundwc = false;
 		size_t iw;
 		for(iw = s.length - 1;; iw--)
@@ -496,34 +504,30 @@ char[][] quoteexpandwcfile(char[] s)
 				return result;
 			}
 			
-			if(!std.file.isdir(ppath))
+			if(!std.file.isDir(ppath))
 			{
 				throw new Exception("Unable to expand wildcard path '" ~ s ~ "'");
 			}
 		}
 		
 		// This version of listdir is not recursive.
-		listdir(ppath,
-			(DirEntry* de)
+		foreach(de; dirEntries(ppath, SpanMode.shallow))
+			if(de.isFile)
 			{
-				if(de.isfile)
+				string sf;
+				size_t iwsf;
+				sf = de.name;
+				if(std.path.globMatch(sf, wc)) // Note: also does [] stuff.
 				{
-					char[] sf;
-					size_t iwsf;
-					sf = de.name;
-					if(std.path.fnmatch(sf, wc)) // Note: also does [] stuff.
-					{
-						result ~= quotearg(sf);
-					}
+					result ~= quotearg(sf);
 				}
-				return true; // Continue listing.
-			});
+			}
 	}
 	return result;
 }
 
 
-char[] getshortpath(char[] fn)
+string getshortpath(string fn)
 {
 	if(dfl.internal.utf.useUnicode)
 	{
@@ -533,7 +537,7 @@ char[] getshortpath(char[] fn)
 		}
 		else
 		{
-			const char[] NAME = "GetShortPathNameW";
+			const string NAME = "GetShortPathNameW";
 			static GetShortPathNameWProc proc = null;
 			
 			if(!proc)
@@ -545,23 +549,21 @@ char[] getshortpath(char[] fn)
 		}
 		
 		DWORD len;
-		wchar[] s;
-		s = new wchar[MAX_PATH];
+		wchar[MAX_PATH] s;
 		len = proc(dfl.internal.utf.toUnicodez(fn), s.ptr, s.length);
-		return fromUnicode(s.ptr, len);
+		return to!string(s);
 	}
 	else
 	{
 		DWORD len;
-		char[] s;
-		s = new char[MAX_PATH];
+		char[MAX_PATH] s;
 		len = GetShortPathNameA(dfl.internal.utf.toAnsiz(fn), s.ptr, s.length);
-		return fromAnsi(s.ptr, len);
+		return to!string(s);
 	}
 }
 
 
-char[] getParentDir(char[] dir)
+string getParentDir(string dir)
 {
 	int i;
 	
@@ -574,7 +576,7 @@ char[] getParentDir(char[] dir)
 		else
 			break;
 	}
-	char[] result = null;
+	string result = null;
 	for(i = dir.length - 1;;)
 	{
 		if(dir[i] == '/' || dir[i] == '\\')
@@ -589,7 +591,7 @@ char[] getParentDir(char[] dir)
 }
 
 
-int main(/+ char[][] args +/)
+int main(/+ string[] args +/)
 {
 	startpath = getshortpath(Application.startupPath);
 	basepath = getParentDir(startpath);
@@ -601,7 +603,7 @@ int main(/+ char[][] args +/)
 		{
 			basepath = basepath[0 .. basepath.length - 1];
 		}
-		char[] platformdirname = "windows";
+		string platformdirname = "windows";
 		if(basepath.length > platformdirname.length
 			&& ('\\' == basepath[basepath.length - 1 - platformdirname.length]
 				|| '/' == basepath[basepath.length - 1 - platformdirname.length])
@@ -615,10 +617,10 @@ int main(/+ char[][] args +/)
 	rkey = Registry.currentUser.createSubKey("Software\\DFL");
 	
 	bool gotargfn = false;
-	char[][] dmdargs = null;
+	string[] dmdargs = null;
 	int i;
 	
-	char[][] args;
+	string[] args;
 	args = Environment.getCommandLineArgs();
 	
 	if(args.length > 1
@@ -630,13 +632,13 @@ int main(/+ char[][] args +/)
 	
 	if(args.length > 1)
 	{
-		foreach(char[] _origarg; args[1 .. args.length])
+		foreach(string _origarg; args[1 .. args.length])
 		{
 			if(_origarg.length && (_origarg[0] == '-' || _origarg[0] == '/'))
 			{
-				char[] arg;
+				string arg;
 				arg = _origarg[1 .. _origarg.length];
-				i = std.string.find(arg, '-');
+				i = std.string.indexOf(arg, '-');
 				
 				if(i == -1)
 					goto regular_switch;
@@ -677,28 +679,28 @@ int main(/+ char[][] args +/)
 		prepare();
 		
 		
-		char[] dfllib;
-		char[] importdir;
+		string dfllib;
+		string importdir;
 		
 		
 		void findimportdir()
 		{
 			if(!importdir.length)
 			{
-				importdir = std.path.join(basepath, "import");
-				if(!std.file.exists(importdir) || !std.file.exists(std.path.join(importdir, "dfl")))
+				importdir = std.path.buildPath(basepath, "import");
+				if(!std.file.exists(importdir) || !std.file.exists(std.path.buildPath(importdir, "dfl")))
 				{
-					importdir = std.path.join(dmdpath, "import");
-					if(!std.file.exists(importdir) || !std.file.exists(std.path.join(importdir, "dfl")))
+					importdir = std.path.buildPath(dmdpath, "import");
+					if(!std.file.exists(importdir) || !std.file.exists(std.path.buildPath(importdir, "dfl")))
 					{
-						importdir = std.path.join(dmdpath_windows, "import");
-						if(!std.file.exists(importdir) || !std.file.exists(std.path.join(importdir, "dfl")))
+						importdir = std.path.buildPath(dmdpath_windows, "import");
+						if(!std.file.exists(importdir) || !std.file.exists(std.path.buildPath(importdir, "dfl")))
 						{
-							importdir = std.path.join(dmdpath, "src");
-							if(!std.file.exists(importdir) || !std.file.exists(std.path.join(importdir, "dfl")))
+							importdir = std.path.buildPath(dmdpath, "src");
+							if(!std.file.exists(importdir) || !std.file.exists(std.path.buildPath(importdir, "dfl")))
 							{
-								importdir = std.path.join(dmdpath, "src\\phobos");
-								if(!std.file.exists(importdir) || !std.file.exists(std.path.join(importdir, "dfl")))
+								importdir = std.path.buildPath(dmdpath, "src\\phobos");
+								if(!std.file.exists(importdir) || !std.file.exists(std.path.buildPath(importdir, "dfl")))
 								{
 									importdir = null;
 									throw new Exception("DFL import directory not found");
@@ -711,7 +713,7 @@ int main(/+ char[][] args +/)
 				/+
 				if(!optTangobos)
 				{
-					if(std.file.exists(std.path.join(importdir, "tangobos")))
+					if(std.file.exists(std.path.buildPath(importdir, "tangobos")))
 					{
 						writefln("Tangobos detected; use switch -tangobos to use Tangobos.");
 					}
@@ -749,8 +751,8 @@ int main(/+ char[][] args +/)
 			dlibname = "Phobos";
 			try
 			{
-				char[] scx = cast(char[])std.file.read(std.path.join(basepath, "bin\\sc.ini"));
-				if(-1 != std.string.find(scx, "-version=Tango"))
+				string scx = cast(string)std.file.read(std.path.buildPath(basepath, "bin\\sc.ini"));
+				if(-1 != std.string.indexOf(scx, "-version=Tango"))
 					dlibname = "Tango";
 			}
 			catch
@@ -767,19 +769,19 @@ int main(/+ char[][] args +/)
 			
 			findimportdir();
 			
-			char[] dflsrcdir = std.path.join(importdir, "dfl");
-			char[] batfilepath = std.path.join(dflsrcdir, "_dflexe.bat");
+			string dflsrcdir = std.path.buildPath(importdir, "dfl");
+			string batfilepath = std.path.buildPath(dflsrcdir, "_dflexe.bat");
 			
-			char[] dmcpathbefore, dmcpathafter;
-			char[] dmcpath;
-			if(std.file.exists(std.path.join(dmdpath_windows, "bin\\link.exe"))
-				&& std.file.exists(std.path.join(dmdpath_windows, "bin\\lib.exe")))
+			string dmcpathbefore, dmcpathafter;
+			string dmcpath;
+			if(std.file.exists(std.path.buildPath(dmdpath_windows, "bin\\link.exe"))
+				&& std.file.exists(std.path.buildPath(dmdpath_windows, "bin\\lib.exe")))
 			{
 				dmcpath = dmdpath_windows;
 			}
 			else
 			{
-				dmcpath = std.path.join(dmdpath, "..\\dm");
+				dmcpath = std.path.buildPath(dmdpath, "..\\dm");
 			}
 			if(std.file.exists(dmcpath))
 			{
@@ -792,19 +794,20 @@ int main(/+ char[][] args +/)
 					;
 			}
 			
-			char[] oldcwd = getcwd();
-			char[] olddrive = std.path.getDrive(oldcwd);
+			string oldcwd = getcwd();
+			string olddrive = std.path.driveName(oldcwd);
 			
-			char[][] dflcs;
+			string[] dflcs;
 			if(!optNoDflc)
-				//dflcs = listdir(dflsrcdir, "dflc_*.bat"); // Not working.
-				listdir(dflsrcdir, (char[] filename) { if(fnmatch(filename, "dflc_*.bat")) dflcs ~= filename; return true; });
+				foreach(filename; dirEntries(dflsrcdir, SpanMode.shallow))
+					if(globMatch(filename, "dflc_*.bat"))
+						dflcs ~= filename;
 			
 			//@
 			scope batf = new BufferedFile(batfilepath, FileMode.OutNew);
 			
 			batf.writeString(
-				"\r\n   @" ~ std.path.getDrive(dflsrcdir)
+				"\r\n   @" ~ std.path.driveName(dflsrcdir)
 				~ "\r\n   @cd \"" ~ dflsrcdir ~ "\"");
 			
 			batf.writeString(
@@ -827,8 +830,8 @@ int main(/+ char[][] args +/)
 			
 			batf.writeString("\r\n   @set dfl_failed=-1"); // Let makelib.bat unset this.
 			
-			//batf.writeString("\r\n   @call \"" ~ std.path.join(dflsrcdir, "go.bat") ~ "\"\r\n");
-			batf.writeString("\r\n   @call \"" ~ std.path.join(dflsrcdir, "makelib.bat") ~ "\"\r\n");
+			//batf.writeString("\r\n   @call \"" ~ std.path.buildPath(dflsrcdir, "go.bat") ~ "\"\r\n");
+			batf.writeString("\r\n   @call \"" ~ std.path.buildPath(dflsrcdir, "makelib.bat") ~ "\"\r\n");
 			
 			batf.writeString("\r\n" `@if not "%dfl_failed%" == "" goto fail`); // No longer using go.bat for this.
 			
@@ -847,9 +850,9 @@ int main(/+ char[][] args +/)
 						ssd = ssd[0 .. $ - 4];
 					if(0 == ssd.length)
 						continue;
-					ssd = std.string.toupper(ssd[0 .. 1]) ~ ssd[1 .. $];
+					ssd = std.string.toUpper(ssd[0 .. 1]) ~ ssd[1 .. $];
 					batf.writeString("\r\n   @echo.\r\n   @echo Setting up DFL " ~ ssd ~ "...");
-					batf.writeString("\r\n   @call \"" ~ std.path.join(dflsrcdir, dflc) ~ "\"\r\n");
+					batf.writeString("\r\n   @call \"" ~ std.path.buildPath(dflsrcdir, dflc) ~ "\"\r\n");
 				}
 				
 				batf.writeString("\r\n   @set dflc=");
@@ -892,7 +895,7 @@ int main(/+ char[][] args +/)
 			char userc = 'y';
 			for(;;)
 			{
-				char[] s = std.string.tolower(din.readLine());
+				string s = to!string(std.string.toLower(din.readLine()));
 				if((!s.length && 'y' == userc)
 					|| "y" == s || "yes" == s)
 				{
@@ -922,10 +925,10 @@ int main(/+ char[][] args +/)
 			try_lib_again:
 			if(!dfllib.length)
 			{
-				//dfllib = std.path.join(basepath, "lib\\" ~ libfile);
+				//dfllib = std.path.buildPath(basepath, "lib\\" ~ libfile);
 				//if(!std.file.exists(dfllib))
 				{
-					dfllib = std.path.join(dmdpath_windows, "lib\\" ~ libfile);
+					dfllib = std.path.buildPath(dmdpath_windows, "lib\\" ~ libfile);
 					if(!std.file.exists(dfllib))
 					{
 						dfllib = null;
@@ -947,12 +950,12 @@ int main(/+ char[][] args +/)
 		
 		
 		// Version number returned; fullver filled with entire version string.
-		char[] scanDmdOut(char[] data, out char[] fullver)
+		string scanDmdOut(string data, out string fullver)
 		{
-			char[] xver, x2, result;
+			string xver, x2, result;
 			int ix;
-			const char[] FINDDMDVER = "Digital Mars D Compiler v";
-			ix = std.string.find(data, FINDDMDVER);
+			const string FINDDMDVER = "Digital Mars D Compiler v";
+			ix = std.string.indexOf(data, FINDDMDVER);
 			if(-1 != ix && (!ix || '\n' == data[ix - 1]))
 			{
 				x2 = data[ix + FINDDMDVER.length .. data.length];
@@ -987,14 +990,14 @@ int main(/+ char[][] args +/)
 			if(vcVerbose)
 				writefln("Using %s library", dlibname);
 			
-			char[] x, x2, xver;
+			string x, x2, xver;
 			int ix;
 			
-			//x = cast(char[])std.file.read(std.path.join(importdir, r"dfl\readme.txt"));
-			x = cast(char[])std.file.read(std.path.join(basepath, "packages\\dfl\\readme.txt"));
+			//x = cast(string)std.file.read(std.path.buildPath(importdir, r"dfl\readme.txt"));
+			x = cast(string)std.file.read(std.path.buildPath(basepath, "packages\\dfl\\readme.txt"));
 			
-			const char[] FINDDFLVER = "\nVersion ";
-			ix = std.string.find(x, FINDDFLVER);
+			const string FINDDFLVER = "\nVersion ";
+			ix = std.string.indexOf(x, FINDDFLVER);
 			if(-1 == ix)
 			{
 				bad_readme_ver:
@@ -1009,16 +1012,16 @@ int main(/+ char[][] args +/)
 					break;
 				}
 			}
-			ix = std.string.find(xver, " by Christopher E. Miller");
+			ix = std.string.indexOf(xver, " by Christopher E. Miller");
 			if(-1 == ix)
 				goto bad_readme_ver;
 			xver = std.string.strip(xver[0 .. ix]); // DFL version.
 			if(vcVerbose)
 				writefln("DFL version %s", xver);
 			
-			char[] dmdverdfl;
-			const char[] FINDTESTEDDMDVER = "\nTested with DMD v";
-			ix = std.string.find(x, FINDTESTEDDMDVER);
+			string dmdverdfl;
+			const string FINDTESTEDDMDVER = "\nTested with DMD v";
+			ix = std.string.indexOf(x, FINDTESTEDDMDVER);
 			if(-1 == ix)
 			{
 				//goto bad_readme_ver;
@@ -1050,12 +1053,12 @@ int main(/+ char[][] args +/)
 					dmdverdfl = xver[0 .. ix - 1];
 			}
 			
-			char[] dfllibdmdver;
-			char[] dfllibdlibname = "Phobos";
-			char[] dfllibdfloptions = "";
+			string dfllibdmdver;
+			string dfllibdlibname = "Phobos";
+			string dfllibdfloptions = "";
 			try
 			{
-				x = cast(char[])std.file.read(std.path.join(importdir, r"dfl\dflcompile.info"));
+				x = cast(string)std.file.read(std.path.buildPath(importdir, r"dfl\dflcompile.info"));
 				
 				dfllibdmdver = scanDmdOut(x, xver);
 				if(dfllibdmdver.length)
@@ -1065,12 +1068,12 @@ int main(/+ char[][] args +/)
 				}
 				
 				{
-					const char[] finding = "dlib=";
-					int idx = std.string.find(x, finding);
+					const string finding = "dlib=";
+					int idx = std.string.indexOf(x, finding);
 					if(-1 != idx)
 					{
-						char[] sub = x[idx + finding.length .. $];
-						idx = std.string.find(sub, '\n');
+						string sub = x[idx + finding.length .. $];
+						idx = std.string.indexOf(sub, '\n');
 						if(-1 != idx)
 						{
 							dfllibdlibname = std.string.strip(sub[0 .. idx]);
@@ -1078,12 +1081,12 @@ int main(/+ char[][] args +/)
 					}
 				}
 				{
-					const char[] finding = "dfl_options=";
-					int idx = std.string.find(x, finding);
+					const string finding = "dfl_options=";
+					int idx = std.string.indexOf(x, finding);
 					if(-1 != idx)
 					{
-						char[] sub = x[idx + finding.length .. $];
-						idx = std.string.find(sub, '\n');
+						string sub = x[idx + finding.length .. $];
+						idx = std.string.indexOf(sub, '\n');
 						if(-1 != idx)
 						{
 							dfllibdfloptions = std.string.strip(sub[0 .. idx]);
@@ -1095,11 +1098,11 @@ int main(/+ char[][] args +/)
 			{
 			}
 			
-			char[] dmdver;
-			x2 = "dmd" ~ std.string.toString(std.random.rand() % 20000 + 10000) ~ ".info";
-			std.process.system(getshortpath(std.path.join(dmdpath_windows, "bin\\dmd.exe"))
+			string dmdver;
+			x2 = "dmd" ~ to!string(uniform(1, 10000)) ~ ".info";
+			std.process.system(getshortpath(std.path.buildPath(dmdpath_windows, "bin\\dmd.exe"))
 				~ " > " ~ x2);
-			x = cast(char[])std.file.read(x2);
+			x = cast(string)std.file.read(x2);
 			std.file.remove(x2);
 			dmdver = scanDmdOut(x, xver);
 			if(dmdver.length)
@@ -1110,7 +1113,7 @@ int main(/+ char[][] args +/)
 			
 			if(vcPrintIssues)
 			{
-				char[] dfloptions = std.string.strip(Environment.getEnvironmentVariable("dfl_options", false)); // throwIfMissing=false
+				string dfloptions = std.string.strip(Environment.getEnvironmentVariable("dfl_options", false)); // throwIfMissing=false
 				if(!dmdver.length || !dfllibdmdver.length)
 				{
 					writefln("*** Warning: Unable to verify if current DFL and DMD versions are compatible.");
@@ -1207,7 +1210,7 @@ int main(/+ char[][] args +/)
 			if(!optTangobos && "Tango" != dlibname) // Tango's std and Tangobos' std conflict; Tango automatically has this -I anyway.
 				dmdargs ~= "-I" ~ getshortpath(importdir);
 			{
-				char[] dfl_options = Environment.getEnvironmentVariable("dfl_options", false); // throwIfMissing=false
+				string dfl_options = Environment.getEnvironmentVariable("dfl_options", false); // throwIfMissing=false
 				if(dfl_options.length)
 				{
 					dmdargs ~= dfl_options;
@@ -1218,9 +1221,9 @@ int main(/+ char[][] args +/)
 			
 			// Call DMD.
 			assert(dmdpath_windows.length);
-			char[] cmdline;
+			string cmdline;
 			int sc;
-			cmdline = getshortpath(std.path.join(dmdpath_windows, "bin\\dmd.exe")) ~ " " ~ std.string.join(dmdargs, " ");
+			cmdline = getshortpath(std.path.buildPath(dmdpath_windows, "bin\\dmd.exe")) ~ " " ~ std.string.join(dmdargs, " ");
 			writefln("%s", cmdline);
 			sc = std.process.system(cmdline);
 			if(sc)
