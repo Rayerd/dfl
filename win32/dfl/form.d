@@ -937,7 +937,6 @@ class Form: ContainerControl, IDialogResult // docmain
 		version(NO_MDI)
 		{
 			assert(0, "MDI disabled");
-			return null;
 		}
 		else
 		{
@@ -2933,7 +2932,7 @@ class Form: ContainerControl, IDialogResult // docmain
 		{
 			auto hasmenu = wmenu;
 		}
-		AdjustWindowRectEx(&r, wl, !(wl & WS_CHILD) && hasmenu, _exStyle());
+		AdjustWindowRectEx(&r, wl, !(wl & WS_CHILD) && hasmenu !is null, _exStyle());
 		
 		setBoundsCore(0, 0, r.right - r.left, r.bottom - r.top, BoundsSpecified.SIZE);
 	}
@@ -3325,7 +3324,7 @@ class Form: ContainerControl, IDialogResult // docmain
 		{
 			auto hasmenu = wmenu;
 		}
-		AdjustWindowRectEx(&r, wl, hasmenu && !(wl & WS_CHILD), _exStyle());
+		AdjustWindowRectEx(&r, wl, hasmenu !is null && !(wl & WS_CHILD), _exStyle());
 		
 		// Subtract the difference.
 		wclientsz = Size(wrect.width - ((r.right - r.left) - wrect.width), wrect.height - ((r.bottom - r.top) - wrect.height));
