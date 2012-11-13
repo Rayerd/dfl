@@ -1174,7 +1174,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	{
 		super.onResize(ea);
 		
-		if(_isPaintingSizeGrip)
+		if(_isPaintingSizeGrip())
 		{
 			RECT rect;
 			_getSizeGripArea(&rect);
@@ -1210,7 +1210,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	{
 		super.onPaint(ea);
 		
-		if(_isPaintingSizeGrip)
+		if(_isPaintingSizeGrip())
 		{
 			/+
 			RECT rect;
@@ -2370,7 +2370,7 @@ class Form: ContainerControl, IDialogResult // docmain
 				//if(msg.result == HTCLIENT || msg.result == HTBORDER)
 				if(msg.result != HTNOWHERE && msg.result != HTERROR)
 				{
-					if(_isPaintingSizeGrip)
+					if(_isPaintingSizeGrip())
 					{
 						RECT rect;
 						_getSizeGripArea(&rect);
@@ -2432,7 +2432,7 @@ class Form: ContainerControl, IDialogResult // docmain
 					
 					if(!(wp.flags & SWP_NOSIZE))
 					{
-						if(_isPaintingSizeGrip)
+						if(_isPaintingSizeGrip())
 						{
 							// This comparison is needed to prevent some painting glitches
 							// when moving the window...

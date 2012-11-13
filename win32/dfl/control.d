@@ -10,7 +10,7 @@ private import dfl.internal.dlib, dfl.internal.clib;
 private import dfl.base, dfl.form, dfl.drawing;
 private import dfl.internal.winapi, dfl.application, dfl.event, dfl.label;
 private import dfl.internal.wincom, dfl.internal.utf, dfl.collections, dfl.internal.com;
-
+private import core.memory;
 
 version(NO_DRAG_DROP)
 	version = DFL_NO_DRAG_DROP;
@@ -257,7 +257,7 @@ class ControlEventArgs: EventArgs
 	
 	
 	///
-	final Control control() // getter
+	final @property Control control() // getter
 	{
 		return ctrl;
 	}
@@ -2960,6 +2960,14 @@ class Control: DObject, IWindow // docmain
 			{
 				this.ctrl = ctrl;
 			}
+			~this()
+			{
+				if (dataObj)
+				{
+					GC.removeRoot(cast(void*)dataObj);
+					clear(dataObj);
+				}
+			}
 			
 			
 			extern(Windows):
@@ -3097,9 +3105,16 @@ class Control: DObject, IWindow // docmain
 			
 			void ensureDataObj(dfl.internal.wincom.IDataObject pDataObject)
 			{
-				if(!dataObj || !dataObj.isSameDataObject(pDataObject))
+				if(!dataObj)
 				{
 					dataObj = new ComToDdataObject(pDataObject);
+					GC.addRoot(cast(void*)dataObj);
+				}
+				else if (!dataObj.isSameDataObject(pDataObject))
+				{
+					GC.removeRoot(cast(void*)dataObj);
+					dataObj = new ComToDdataObject(pDataObject);
+					GC.addRoot(cast(void*)dataObj);
 				}
 			}
 			
