@@ -595,7 +595,7 @@ else
 		}
 		
 		
-		package final int _menuID()
+		package final @property int _menuID()
 		{
 			return mid;
 		}
@@ -901,8 +901,8 @@ else
 		
 		
 		// Don't call directly.
-		this(MenuItem[] items)
-		{
+		@disable this(MenuItem[] items);
+		/+{
 			/+
 			this.owned = true;
 			
@@ -912,7 +912,7 @@ else
 			+/
 			
 			assert(0);
-		}
+		}+/
 		
 		
 		~this()

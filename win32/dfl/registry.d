@@ -129,7 +129,7 @@ abstract class RegistryValue
 	@property DWORD valueType(); // getter
 	override Dstring toString();
 	/+ package +/ protected LONG save(HKEY hkey, Dstring name); // package
-	package final RegistryValue _reg() { return this; }
+	package final @property RegistryValue _reg() { return this; }
 }
 
 
