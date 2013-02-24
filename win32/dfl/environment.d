@@ -528,16 +528,18 @@ class Version // docmain ?
 	{
 		Dstring[] stuff = stringSplit(str, ".");
 		
-		// Note: fallthrough.
 		switch(stuff.length)
 		{
 			case 4:
 				_revision = stringToInt(stuff[3]);
+				goto case 3;
 			case 3:
 				_build = stringToInt(stuff[2]);
+				goto case 2;
 			case 2:
 				_minor = stringToInt(stuff[1]);
 				_major = stringToInt(stuff[0]);
+				break;
 			default:
 				throw new DflException("Invalid version parameter");
 		}

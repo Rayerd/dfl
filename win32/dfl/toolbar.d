@@ -381,7 +381,7 @@ class ToolBar: ControlSuperClass // docmain
 	}
 	
 	
-	private ToolBar tbar()
+	private @property ToolBar tbar()
 	{
 		return this;
 	}
