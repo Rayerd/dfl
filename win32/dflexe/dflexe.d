@@ -19,6 +19,8 @@
 */
 
 
+import std.algorithm;
+import std.array;
 private import std.conv, std.stdio, std.string, std.path, std.file,
 	std.random, std.cstream, std.stream;
 private import std.process;
@@ -949,39 +951,7 @@ int main(/+ string[] args +/)
 		}
 		
 		
-		// Version number returned; fullver filled with entire version string.
-		string scanDmdOut(string data, out string fullver)
-		{
-			string xver, x2, result;
-			int ix;
-			const string FINDDMDVER = "Digital Mars D Compiler v";
-			ix = std.string.indexOf(data, FINDDMDVER);
-			if(-1 != ix && (!ix || '\n' == data[ix - 1]))
-			{
-				x2 = data[ix + FINDDMDVER.length .. data.length];
-				xver = data[ix .. data.length];
-				for(ix = 0;; ix++)
-				{
-					if(ix == xver.length || '\r' == xver[ix] || '\n' == xver[ix])
-					{
-						xver = xver[0 .. ix];
-						break;
-					}
-				}
-				fullver = std.string.strip(xver);
-				
-				xver = x2;
-				for(ix = 0;; ix++)
-				{
-					if(ix == xver.length || ' ' == xver[ix] || '\r' == xver[ix] || '\n' == xver[ix])
-						break;
-				}
-				result = std.string.strip(xver[0 .. ix]);
-			}
-			return result;
-		}
-		
-		
+
 		void doVerCheck(bool vcVerbose = false, bool vcPrintIssues = true)
 		{
 			findpaths();
@@ -1109,7 +1079,7 @@ int main(/+ string[] args +/)
 				if(vcVerbose)
 					writefln("Installed compiler is %s", xver);
 			}
-			
+
 			if(vcPrintIssues)
 			{
 				string dfloptions = std.string.strip(Environment.getEnvironmentVariable("dfl_options", false)); // throwIfMissing=false
@@ -1124,15 +1094,14 @@ int main(/+ string[] args +/)
 						|| std.string.icmp(dfllibdlibname, dlibname))
 					{
 						writefln("*** Warning: DFL lib files were not compiled with the current DMD compiler."
-							"\nIt is recommended you rebuild the DFL lib files to ensure binary compatibility,"
-							"\nor go to www.dprogramming.com and look for a possible DFL update."
+							"\nIt is recommended you rebuild the DFL lib files to ensure binary compatibility."
 							/+ "\n (-nover skips this check) " +/);
 						askBuildDflNow();
 					}
 					else if(dfloptions != dfllibdfloptions)
 					{
 						writefln("*** Warning: DFL lib files were not compiled with the current dfl_options."
-							"\nIt is recommended you rebuild the DFL lib files to ensure binary compatibility,"
+							"\nIt is recommended you rebuild the DFL lib files to ensure binary compatibility."
 							);
 						askBuildDflNow();
 					}
@@ -1238,3 +1207,23 @@ int main(/+ string[] args +/)
 	return 0;
 }
 
+// Version number returned; fullver filled with entire version string.
+string scanDmdOut(string data, out string fullver)
+{
+	const string FINDDMDVER = "D Compiler v";
+	if(!data.findSkip(FINDDMDVER))
+		return "";
+	auto ver = to!string(array(data.until("\n")));
+	fullver = "v"~ver;
+	return ver;
+}
+
+unittest {
+	auto data = "hello D Compiler v2.60\nbye";
+	string fullver;
+
+	auto ver =scanDmdOut(data, fullver);
+
+	assert(ver == "2.60", "Not: " ~ ver);
+	assert(fullver == "v2.60", "Not: " ~ fullver);
+}
