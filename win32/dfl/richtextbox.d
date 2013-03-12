@@ -510,7 +510,7 @@ class RichTextBox: TextBoxBase // docmain
 	}
 	
 	
-	private const DWORD FONT_MASK = CFM_BOLD | CFM_ITALIC | CFM_STRIKEOUT |
+	private enum DWORD FONT_MASK = CFM_BOLD | CFM_ITALIC | CFM_STRIKEOUT |
 		CFM_UNDERLINE | CFM_CHARSET | CFM_FACE | CFM_SIZE | CFM_UNDERLINETYPE | CFM_WEIGHT;
 	
 	///
@@ -1031,13 +1031,13 @@ private extern(Windows) DWORD _streamingInStr(DWORD dwCookie, LPBYTE pbBuff, LON
 	}
 	else if(cb >= si.str.length)
 	{
-		pbBuff[0 .. si.str.length] = cast(BYTE[])si.str;
+		pbBuff[0 .. si.str.length] = (cast(BYTE[])si.str)[];
 		*pcb = si.str.length;
 		si.str = null;
 	}
 	else
 	{
-		pbBuff[0 .. cb] = cast(BYTE[])si.str[0 .. cb];
+		pbBuff[0 .. cb] = (cast(BYTE[])si.str)[0 .. cb];
 		*pcb = cb;
 		si.str = si.str[cb .. si.str.length];
 	}

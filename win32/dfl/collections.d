@@ -433,7 +433,7 @@ template ListWrapArray(TValue, alias Array,
 	///
 	void copyTo(TValue[] dest, int destIndex)
 	{
-		dest[destIndex .. destIndex + Array.length] = Array;
+		dest[destIndex .. destIndex + Array.length] = Array[];
 	}
 	
 	

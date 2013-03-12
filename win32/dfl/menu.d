@@ -632,7 +632,7 @@ else
 		int mindex = -1; //0;
 		//int mergeord = 0;
 		
-		const Dstring SEPARATOR_TEXT = "-";
+		enum SEPARATOR_TEXT = "-";
 		
 		static assert(!MFS_UNCHECKED);
 		static assert(!MFT_STRING);
@@ -716,9 +716,9 @@ else
 		}
 		
 		version(SET_DFL_092)
-			private const bool _compat092 = true;
+			private enum _compat092 = true;
 		else version(DFL_NO_COMPAT)
-			private const bool _compat092 = false;
+			private enum _compat092 = false;
 		else
 			private static @property bool _compat092() // getter
 				{ return 0 != (Application._compat & DflCompat.MENU_092); }

@@ -176,7 +176,7 @@ final class Application // docmain
 	// Does nothing if not supported.
 	void enableVisualStyles()
 	{
-		const Dstring MANIFEST = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` "\r\n"
+		enum MANIFEST = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` "\r\n"
 			`<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">` "\r\n"
 				`<description>DFL manifest</description>` "\r\n"
 				`<dependency>` "\r\n"
@@ -647,7 +647,7 @@ final class Application // docmain
 		}
 		
 		
-		const int PADDING = 10;
+		enum PADDING = 10;
 		
 		
 		void onOkClick(Object sender, EventArgs ea)
@@ -1104,7 +1104,7 @@ final class Application // docmain
 	}
 	else
 	{
-		package const Dstring ZOMBIE_PROP = "DFL_Zombie";
+		package enum ZOMBIE_PROP = "DFL_Zombie";
 		
 		// Doesn't do any good since the child controls still reference this control.
 		package void zombieHwnd(Control c)
@@ -1390,7 +1390,7 @@ final class Application // docmain
 	
 	
 	version(DFL_NO_COMPAT)
-		package const DflCompat _compat = DflCompat.NONE;
+		package enum _compat = DflCompat.NONE;
 	else
 		package DflCompat _compat = DflCompat.NONE;
 	
@@ -1502,12 +1502,12 @@ final class Application // docmain
 	else
 	{
 		// Menus.
-		const ushort FIRST_MENU_ID = 200;
-		const ushort END_MENU_ID = 10000;
+		enum short FIRST_MENU_ID = 200;
+		enum short END_MENU_ID = 10000;
 		
 		// Controls.
-		const ushort FIRST_CTRL_ID = END_MENU_ID + 1;
-		const ushort LAST_CTRL_ID = 65500;
+		enum ushort FIRST_CTRL_ID = END_MENU_ID + 1;
+		enum ushort LAST_CTRL_ID = 65500;
 		
 		
 		ushort prevMenuID = FIRST_MENU_ID;
@@ -2042,7 +2042,7 @@ else
 }
 
 
-const LRESULT LRESULT_DFL_INVOKE = 0x95FADF; // Magic number.
+enum LRESULT LRESULT_DFL_INVOKE = 0x95FADF; // Magic number.
 
 
 struct InvokeData
@@ -2114,20 +2114,20 @@ SetThemeAppPropertiesProc setThemeAppProperties;
 +/
 
 
-const Dstring CONTROL_CLASSNAME = "DFL_Control";
-const Dstring FORM_CLASSNAME = "DFL_Form";
-const Dstring TEXTBOX_CLASSNAME = "DFL_TextBox";
-const Dstring LISTBOX_CLASSNAME = "DFL_ListBox";
-//const Dstring LABEL_CLASSNAME = "DFL_Label";
-const Dstring BUTTON_CLASSNAME = "DFL_Button";
-const Dstring MDICLIENT_CLASSNAME = "DFL_MdiClient";
-const Dstring RICHTEXTBOX_CLASSNAME = "DFL_RichTextBox";
-const Dstring COMBOBOX_CLASSNAME = "DFL_ComboBox";
-const Dstring TREEVIEW_CLASSNAME = "DFL_TreeView";
-const Dstring TABCONTROL_CLASSNAME = "DFL_TabControl";
-const Dstring LISTVIEW_CLASSNAME = "DFL_ListView";
-const Dstring STATUSBAR_CLASSNAME = "DFL_StatusBar";
-const Dstring PROGRESSBAR_CLASSNAME = "DFL_ProgressBar";
+enum CONTROL_CLASSNAME = "DFL_Control";
+enum FORM_CLASSNAME = "DFL_Form";
+enum TEXTBOX_CLASSNAME = "DFL_TextBox";
+enum LISTBOX_CLASSNAME = "DFL_ListBox";
+//enum LABEL_CLASSNAME = "DFL_Label";
+enum BUTTON_CLASSNAME = "DFL_Button";
+enum MDICLIENT_CLASSNAME = "DFL_MdiClient";
+enum RICHTEXTBOX_CLASSNAME = "DFL_RichTextBox";
+enum COMBOBOX_CLASSNAME = "DFL_ComboBox";
+enum TREEVIEW_CLASSNAME = "DFL_TreeView";
+enum TABCONTROL_CLASSNAME = "DFL_TabControl";
+enum LISTVIEW_CLASSNAME = "DFL_ListView";
+enum STATUSBAR_CLASSNAME = "DFL_StatusBar";
+enum PROGRESSBAR_CLASSNAME = "DFL_ProgressBar";
 
 WNDPROC textBoxPrevWndProc;
 WNDPROC listboxPrevWndProc;
@@ -2158,12 +2158,12 @@ LONG progressbarClassStyle;
 HMODULE hmodRichtextbox;
 
 // DMD 0.93: CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS is not an expression
-//const UINT WNDCLASS_STYLE = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
-//const UINT WNDCLASS_STYLE = 11;
+//enum UINT WNDCLASS_STYLE = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
+//enum UINT WNDCLASS_STYLE = 11;
 
-//const UINT WNDCLASS_STYLE = CS_DBLCLKS;
+//enum UINT WNDCLASS_STYLE = CS_DBLCLKS;
 // DMD 0.106: CS_DBLCLKS is not an expression
-const UINT WNDCLASS_STYLE = 0x0008;
+enum UINT WNDCLASS_STYLE = 0x0008;
 
 
 extern(Windows)

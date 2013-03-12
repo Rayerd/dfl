@@ -439,7 +439,7 @@ class DataFormats // docmain
 		if(CF_TEXT == id)
 		{
 			// ANSI text.
-			const ubyte[] UBYTE_ZERO = [0];
+			enum ubyte[] UBYTE_ZERO = [0];
 			return data.getText() ~ UBYTE_ZERO;
 		}
 		//else if(data.info == typeid(Dstring))
@@ -1361,7 +1361,7 @@ class DtoComDataObject: DflComObject, dfl.internal.wincom.IDataObject // package
 					}
 					else
 					{
-						pmem[0 .. src.length] = src;
+						pmem[0 .. src.length] = src[];
 						GlobalUnlock(hg);
 						
 						pmedium.tymed = TYMED_HGLOBAL;

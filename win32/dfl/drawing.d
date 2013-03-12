@@ -1855,7 +1855,7 @@ class Screen
 					&& HMFAKE == _screens[1].hmonitor;
 			}
 			
-			private const HMONITOR HMFAKE = cast(HMONITOR)1969253357;
+			private enum HMONITOR HMFAKE = cast(HMONITOR)1969253357;
 		}
 		
 		
@@ -2297,9 +2297,9 @@ class Graphics // docmain
 	// vSplit=true means the move grip moves left to right; false means top to bottom.
 	final void drawMoveGrip(Rect movableArea, bool vSplit = true, size_t count = 5) // package
 	{
-		const int MSPACE = 4;
-		const int MWIDTH = 3;
-		const int MHEIGHT = 3;
+		enum MSPACE = 4;
+		enum MWIDTH = 3;
+		enum MHEIGHT = 3;
 		
 		if(!count || !movableArea.width || !movableArea.height)
 			return;
@@ -2452,7 +2452,7 @@ class Graphics // docmain
 	+/
 	
 	
-	private const int DEFAULT_MEASURE_SIZE = short.max; // Has to be smaller because it's 16-bits on win9x.
+	private enum int DEFAULT_MEASURE_SIZE = short.max; // Has to be smaller because it's 16-bits on win9x.
 	
 	
 	///
@@ -2911,7 +2911,7 @@ class Graphics // docmain
 		Size result;
 		version(DIALOG_BOX_SCALE)
 		{
-			const Dstring SAMPLE = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+			enum SAMPLE = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 			result = measureText(SAMPLE, f);
 			result.width = (result.width / (SAMPLE.length / 2) + 1) / 2;
 			TEXTMETRICA tma;
@@ -2920,7 +2920,7 @@ class Graphics // docmain
 		}
 		else
 		{
-			const Dstring SAMPLE = "Abcdefghijklmnopqrstuvwxyz";
+			enum SAMPLE = "Abcdefghijklmnopqrstuvwxyz";
 			result = measureText(SAMPLE, f);
 			result.width /= SAMPLE.length;
 		}

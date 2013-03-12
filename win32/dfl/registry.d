@@ -120,7 +120,7 @@ class Registry // docmain
 }
 
 
-private const uint MAX_REG_BUFFER = 256;
+private enum uint MAX_REG_BUFFER = 256;
 
 
 ///
@@ -275,7 +275,7 @@ class RegistryValueMultiSz: RegistryValue
 			if(!s.length)
 				throw new DflRegistryException("Empty strings are not allowed in multi_sz registry values");
 			
-			multi[i .. i + s.length] = s;
+			multi[i .. i + s.length] = s[];
 			i += s.length;
 			multi[i++] = 0;
 		}
@@ -348,7 +348,7 @@ body
 	result = new char[ntmp + stmp.length];
 	result[0 .. 2] = "0x";
 	result[2 .. ntmp] = '0';
-	result[ntmp .. result.length] = stmp;
+	result[ntmp .. result.length] = stmp[];
 	
 	//return result;
 	return cast(Dstring)result; // Needed in D2.

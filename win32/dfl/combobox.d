@@ -502,8 +502,8 @@ class ComboBox: ListControl // docmain
 	}
 	
 	
-	const int DEFAULT_ITEM_HEIGHT = 13;
-	const int NO_MATCHES = CB_ERR;
+	enum DEFAULT_ITEM_HEIGHT = 13;
+	enum NO_MATCHES = CB_ERR;
 	
 	
 	///

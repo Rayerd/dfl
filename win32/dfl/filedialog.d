@@ -509,10 +509,10 @@ abstract class FileDialog: CommonDialog // docmain
 	//bool addext = true;
 	bool needRebuildFiles = false;
 	
-	const DWORD INIT_FLAGS = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY |
+	enum DWORD INIT_FLAGS = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY |
 		OFN_ENABLEHOOK | OFN_ENABLESIZING;
-	const int INIT_FILTER_INDEX = 0;
-	const int FILE_BUF_LEN = 4096; // ? 12288 ? 12800 ?
+	enum INIT_FILTER_INDEX = 0;
+	enum FILE_BUF_LEN = 4096; // ? 12288 ? 12800 ?
 	
 	
 	void beginOfn(HWND owner)
@@ -526,7 +526,7 @@ abstract class FileDialog: CommonDialog // docmain
 			{
 				Dwstring ts;
 				ts = dfl.internal.utf.toUnicode(_fileNames[0]);
-				buf[0 .. ts.length] = ts;
+				buf[0 .. ts.length] = ts[];
 				buf[ts.length] = 0;
 			}
 			
@@ -542,7 +542,7 @@ abstract class FileDialog: CommonDialog // docmain
 			{
 				Dstring ts;
 				ts = dfl.internal.utf.unsafeAnsi(_fileNames[0]);
-				buf[0 .. ts.length] = ts;
+				buf[0 .. ts.length] = ts[];
 				buf[ts.length] = 0;
 			}
 			
@@ -823,7 +823,7 @@ class OpenFileDialog: FileDialog // docmain
 		{
 			if(dfl.internal.utf.useUnicode)
 			{
-				const Dstring NAME = "GetOpenFileNameW";
+				enum NAME = "GetOpenFileNameW";
 				static GetOpenFileNameWProc proc = null;
 				
 				if(!proc)
@@ -923,7 +923,7 @@ class SaveFileDialog: FileDialog // docmain
 		{
 			if(dfl.internal.utf.useUnicode)
 			{
-				const Dstring NAME = "GetSaveFileNameW";
+				enum NAME = "GetSaveFileNameW";
 				static GetSaveFileNameWProc proc = null;
 				
 				if(!proc)
@@ -959,7 +959,7 @@ private extern(Windows) LRESULT ofnHookProc(HWND hwnd, UINT msg, WPARAM wparam, 
 {
 	alias dfl.internal.winapi.HANDLE HANDLE; // Otherwise, odd conflict with wine.
 	
-	const Dstring PROP_STR = "DFL_FileDialog";
+	enum PROP_STR = "DFL_FileDialog";
 	FileDialog fd;
 	LRESULT result = 0;
 	

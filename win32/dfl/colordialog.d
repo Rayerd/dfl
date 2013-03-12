@@ -92,7 +92,7 @@ class ColorDialog: CommonDialog // docmain
 		if(colors.length >= _cust.length)
 			_cust[] = colors[0 .. _cust.length];
 		else
-			_cust[0 .. colors.length] = colors;
+			_cust[0 .. colors.length] = colors[];
 	}
 	
 	/// ditto
@@ -184,7 +184,7 @@ class ColorDialog: CommonDialog // docmain
 	
 	
 	private:
-	const DWORD INIT_FLAGS = CC_ENABLEHOOK;
+	enum DWORD INIT_FLAGS = CC_ENABLEHOOK;
 	
 	CHOOSECOLORA cc;
 	COLORREF[16] _cust;
@@ -204,7 +204,7 @@ class ColorDialog: CommonDialog // docmain
 
 private extern(Windows) UINT ccHookProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
-	const char[] PROP_STR = "DFL_ColorDialog";
+	enum PROP_STR = "DFL_ColorDialog";
 	ColorDialog cd;
 	UINT result = 0;
 	

@@ -148,8 +148,8 @@ class FolderBrowserDialog: CommonDialog // docmain
 		
 		if(dfl.internal.utf.useUnicode)
 		{
-			const Dstring BROWSE_NAME = "SHBrowseForFolderW";
-			const Dstring PATH_NAME = "SHGetPathFromIDListW";
+			enum BROWSE_NAME = "SHBrowseForFolderW";
+			enum PATH_NAME = "SHGetPathFromIDListW";
 			static SHBrowseForFolderWProc browseproc = null;
 			static SHGetPathFromIDListWProc pathproc = null;
 			
@@ -176,7 +176,7 @@ class FolderBrowserDialog: CommonDialog // docmain
 				tmp = dfl.internal.utf.toUnicode(_desc);
 				if(tmp.length >= MAX_PATH)
 					_errPathTooLong();
-				biw.pszDisplayName[0 .. tmp.length] = tmp;
+				biw.pszDisplayName[0 .. tmp.length] = tmp[];
 				biw.pszDisplayName[tmp.length] = 0;
 			}
 			else
@@ -225,7 +225,7 @@ class FolderBrowserDialog: CommonDialog // docmain
 				tmp = dfl.internal.utf.toAnsi(_desc);
 				if(tmp.length >= MAX_PATH)
 					_errPathTooLong();
-				bia.pszDisplayName[0 .. tmp.length] = tmp;
+				bia.pszDisplayName[0 .. tmp.length] = tmp[];
 				bia.pszDisplayName[tmp.length] = 0;
 			}
 			else
@@ -315,7 +315,7 @@ class FolderBrowserDialog: CommonDialog // docmain
 	Dstring _selpath;
 	
 	
-	const UINT INIT_FLAGS = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE;
+	enum UINT INIT_FLAGS = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE;
 }
 
 
