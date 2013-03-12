@@ -285,8 +285,8 @@ class ToolTip // docmain
 	
 	
 	private:
-	const Dstring _TOOLTIPS_CLASSA = "tooltips_class32";
-	const size_t MAX_TIP_TEXT_LENGTH = 2045;
+	enum _TOOLTIPS_CLASSA = "tooltips_class32";
+	enum size_t MAX_TIP_TEXT_LENGTH = 2045;
 	
 	HWND hwtt; // Tooltip control handle.
 	bool _active = true;

@@ -211,10 +211,10 @@ class ProgressBar: ControlSuperClass // docmain
 	
 	private:
 	
-	const int MIN_INIT = 0;
-	const int MAX_INIT = 100;
-	const int STEP_INIT = 10;
-	const int VAL_INIT = 0;
+	enum MIN_INIT = 0;
+	enum MAX_INIT = 100;
+	enum STEP_INIT = 10;
+	enum VAL_INIT = 0;
 	
 	int _min = MIN_INIT, _max = MAX_INIT, _step = STEP_INIT, _val = VAL_INIT;
 	

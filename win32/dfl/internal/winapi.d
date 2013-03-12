@@ -673,10 +673,10 @@ extern(Windows) nothrow:
 	
 	
 	// enum can't derive from HWND.
-	const HWND HWND_TOP = cast(HWND)0;
-	const HWND HWND_BOTTOM = cast(HWND)1;
-	const HWND HWND_TOPMOST = cast(HWND)-1;
-	const HWND HWND_NOTOPMOST = cast(HWND)-2;
+	enum HWND_TOP = cast(HWND)0;
+	enum HWND_BOTTOM = cast(HWND)1;
+	enum HWND_TOPMOST = cast(HWND)-1;
+	enum HWND_NOTOPMOST = cast(HWND)-2;
 	
 	
 	enum: UINT
@@ -706,7 +706,7 @@ extern(Windows) nothrow:
 	}
 	
 	
-	const DWORD HOVER_DEFAULT = 0xFFFFFFFF;
+	enum DWORD HOVER_DEFAULT = 0xFFFFFFFF;
 	
 	
 	enum: UINT
@@ -779,17 +779,17 @@ extern(Windows) nothrow:
 	}
 	
 	
-	const LPSTR IDC_APPSTARTING =  cast(LPSTR)32650;
-	const LPSTR IDC_HAND = cast(LPSTR)32649; // Windows 98+
-	const LPSTR IDC_HELP = cast(LPSTR)32651;
-	const LPSTR IDC_IBEAM = cast(LPSTR)32513;
-	const LPSTR IDC_NO = cast(LPSTR)32648;
-	const LPSTR IDC_SIZEALL = cast(LPSTR)32646;
-	const LPSTR IDC_SIZENESW = cast(LPSTR)32643;
-	const LPSTR IDC_SIZENS = cast(LPSTR)32645;
-	const LPSTR IDC_SIZENWSE = cast(LPSTR)32642;
-	const LPSTR IDC_SIZEWE = cast(LPSTR)32644;
-	const LPSTR IDC_WAIT = cast(LPSTR)32514;
+	enum LPSTR IDC_APPSTARTING =  cast(LPSTR)32650;
+	enum LPSTR IDC_HAND = cast(LPSTR)32649; // Windows 98+
+	enum LPSTR IDC_HELP = cast(LPSTR)32651;
+	enum LPSTR IDC_IBEAM = cast(LPSTR)32513;
+	enum LPSTR IDC_NO = cast(LPSTR)32648;
+	enum LPSTR IDC_SIZEALL = cast(LPSTR)32646;
+	enum LPSTR IDC_SIZENESW = cast(LPSTR)32643;
+	enum LPSTR IDC_SIZENS = cast(LPSTR)32645;
+	enum LPSTR IDC_SIZENWSE = cast(LPSTR)32642;
+	enum LPSTR IDC_SIZEWE = cast(LPSTR)32644;
+	enum LPSTR IDC_WAIT = cast(LPSTR)32514;
 	
 	
 	enum: WORD
@@ -979,7 +979,7 @@ extern(Windows) nothrow:
 	}
 	
 	
-	const int I_CHILDRENCALLBACK = -1;
+	enum int I_CHILDRENCALLBACK = -1;
 	
 	
 	enum: UINT
@@ -1133,8 +1133,8 @@ extern(Windows) nothrow:
 	}
 	
 	
-	const LPWSTR LPSTR_TEXTCALLBACKW = cast(LPWSTR)-1L;
-	const LPSTR LPSTR_TEXTCALLBACKA = cast(LPSTR)-1L;
+	enum LPWSTR LPSTR_TEXTCALLBACKW = cast(LPWSTR)-1L;
+	enum LPSTR LPSTR_TEXTCALLBACKA = cast(LPSTR)-1L;
 	
 	
 	enum: UINT
@@ -1624,14 +1624,14 @@ extern(Windows) nothrow:
 	}
 	
 	
-	const LPCSTR IDI_HAND = cast(LPCSTR)32513;
-	const LPCSTR IDI_QUESTION = cast(LPCSTR)32514;
-	const LPCSTR IDI_EXCLAMATION = cast(LPCSTR)32515;
-	const LPCSTR IDI_ASTERISK = cast(LPCSTR)32516;
-	const LPCSTR IDI_INFORMATION = IDI_ASTERISK;
+	enum LPCSTR IDI_HAND = cast(LPCSTR)32513;
+	enum LPCSTR IDI_QUESTION = cast(LPCSTR)32514;
+	enum LPCSTR IDI_EXCLAMATION = cast(LPCSTR)32515;
+	enum LPCSTR IDI_ASTERISK = cast(LPCSTR)32516;
+	enum LPCSTR IDI_INFORMATION = IDI_ASTERISK;
 	
 	
-	const LPCSTR RT_STRING = cast(LPCSTR)6;
+	enum LPCSTR RT_STRING = cast(LPCSTR)6;
 	
 	
 	enum: LONG
@@ -1686,9 +1686,9 @@ extern(Windows) nothrow:
 	}
 	
 	
-	const DWORD MAX_COMPUTERNAME_LENGTH = 15;
+	enum DWORD MAX_COMPUTERNAME_LENGTH = 15;
 	
-	const DWORD LF_FACESIZE = 32;
+	enum DWORD LF_FACESIZE = 32;
 	
 	
 	alias HANDLE HIMAGELIST;
@@ -2609,7 +2609,7 @@ extern(Windows) nothrow:
 	alias MAKELONG MAKELRESULT;
 	
 	
-	const int DLGWINDOWEXTRA = 30;
+	enum int DLGWINDOWEXTRA = 30;
 	
 	
 	extern(C) COLORREF RGB(int r, int g , int b)

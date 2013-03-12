@@ -661,7 +661,7 @@ class ToolBar: ControlSuperClass // docmain
 
 private
 {
-	const Dstring TOOLBAR_CLASSNAME = "DFL_ToolBar";
+	enum TOOLBAR_CLASSNAME = "DFL_ToolBar";
 	
 	WNDPROC toolbarPrevWndProc;
 	

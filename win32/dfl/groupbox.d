@@ -190,7 +190,7 @@ class GroupBox: ControlSuperClass // docmain
 	
 	private:
 	
-	const int DEFTEXTHEIGHT_INIT = -1;
+	enum int DEFTEXTHEIGHT_INIT = -1;
 	static int _defTextHeight = DEFTEXTHEIGHT_INIT;
 	int _textHeight = -1;
 	

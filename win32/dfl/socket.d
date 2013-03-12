@@ -646,9 +646,9 @@ struct EventInfo
 }
 
 
-const UINT WM_DFL_NETEVENT = WM_USER + 104;
-const UINT WM_DFL_HOSTEVENT = WM_USER + 105;
-const Dstring NETEVENT_CLASSNAME = "DFL_NetEvent";
+enum UINT WM_DFL_NETEVENT = WM_USER + 104;
+enum UINT WM_DFL_HOSTEVENT = WM_USER + 105;
+enum NETEVENT_CLASSNAME = "DFL_NetEvent";
 
 EventInfo[socket_t] allEvents;
 GetHost[HANDLE] allGetHosts;

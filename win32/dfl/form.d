@@ -709,8 +709,8 @@ class Form: ContainerControl, IDialogResult // docmain
 		exst = _exStyle();
 		//csz = clientSize;
 		
-		const DWORD STNOTNONE = ~(WS_BORDER | WS_THICKFRAME | WS_CAPTION | WS_DLGFRAME);
-		const DWORD EXSTNOTNONE = ~(WS_EX_TOOLWINDOW | WS_EX_CLIENTEDGE
+		enum DWORD STNOTNONE = ~(WS_BORDER | WS_THICKFRAME | WS_CAPTION | WS_DLGFRAME);
+		enum DWORD EXSTNOTNONE = ~(WS_EX_TOOLWINDOW | WS_EX_CLIENTEDGE
 			| WS_EX_DLGMODALFRAME | WS_EX_STATICEDGE | WS_EX_WINDOWEDGE);
 		
 		// This is needed to work on Vista.
@@ -2926,7 +2926,7 @@ class Form: ContainerControl, IDialogResult // docmain
 		LONG wl = _style();
 		version(DFL_NO_MENUS)
 		{
-			const hasmenu = null;
+			enum hasmenu = null;
 		}
 		else
 		{
@@ -3032,7 +3032,7 @@ class Form: ContainerControl, IDialogResult // docmain
 		protected bool preFilterMessage(ref Message m)
 		{
 			version(NO_MDI)
-				const bool mdistuff = false;
+				enum bool mdistuff = false;
 			else
 				bool mdistuff = form.mdiClient && form.mdiClient.isHandleCreated
 					&& (form.mdiClient.handle == m.hWnd || IsChild(form.mdiClient.handle, m.hWnd));
@@ -3318,7 +3318,7 @@ class Form: ContainerControl, IDialogResult // docmain
 		LONG wl = _style();
 		version(DFL_NO_MENUS)
 		{
-			const hasmenu = null;
+			enum hasmenu = null;
 		}
 		else
 		{
@@ -3554,7 +3554,7 @@ version(DFL_PARK_WINDOW)
 	}
 	
 	
-	const Dstring PARK_CLASSNAME = "DFL_Parking";
+	enum PARK_CLASSNAME = "DFL_Parking";
 	
 	HWND _hwPark; // Don't use directly; use getParkHwnd().
 }

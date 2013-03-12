@@ -72,7 +72,7 @@ class NotifyIcon // docmain
 		
 		txt = unsafeAnsi(txt); // ...
 		nid.szTip[txt.length] = 0;
-		nid.szTip[0 .. txt.length] = txt;
+		nid.szTip[0 .. txt.length] = txt[];
 		tipLen = txt.length;
 		
 		if(visible)
@@ -356,7 +356,7 @@ class NotifyIcon // docmain
 package:
 
 
-const UINT WM_NOTIFYICON = WM_USER + 34; // -wparam- is id, -lparam- is the mouse message such as WM_LBUTTONDBLCLK.
+enum UINT WM_NOTIFYICON = WM_USER + 34; // -wparam- is id, -lparam- is the mouse message such as WM_LBUTTONDBLCLK.
 UINT wmTaskbarCreated;
 NotifyIcon[UINT] allNotifyIcons; // Indexed by ID.
 UINT lastId = 1;

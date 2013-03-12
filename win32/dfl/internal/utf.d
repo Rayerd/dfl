@@ -49,11 +49,11 @@ else
 // Determine if using the "W" functions on Windows NT.
 version(DFL_UNICODE)
 {
-	const bool useUnicode = true;
+	enum useUnicode = true;
 }
 else version(DFL_ANSI)
 {
-	const bool useUnicode = false;
+	enum useUnicode = false;
 }
 else
 {
@@ -188,7 +188,7 @@ Dstringz unsafeStringz(Dstring s) nothrow
 	// Need to duplicate with null terminator.
 	char[] result;
 	result = new char[s.length + 1];
-	result[0 .. s.length] = s;
+	result[0 .. s.length] = s[];
 	result[s.length] = 0;
 	//return result.ptr;
 	return cast(Dstringz)result.ptr; // Needed in D2.
@@ -482,7 +482,7 @@ HANDLE loadImage(HINSTANCE hinst, Dstring name, UINT uType, int cxDesired, int c
 		}
 		else
 		{
-			const Dstring NAME = "LoadImageW";
+			enum NAME = "LoadImageW";
 			static LoadImageWProc proc = null;
 			
 			if(!proc)
@@ -514,7 +514,7 @@ HWND createWindowEx(DWORD dwExStyle, Dstring className, Dstring windowName, DWOR
 		}
 		else
 		{
-			const Dstring NAME = "CreateWindowExW";
+			enum NAME = "CreateWindowExW";
 			static CreateWindowExWProc proc = null;
 			
 			if(!proc)
@@ -557,10 +557,10 @@ Dstring getWindowText(HWND hwnd)
 		}
 		else
 		{
-			const Dstring NAME = "GetWindowTextW";
+			enum NAME = "GetWindowTextW";
 			static GetWindowTextWProc proc = null;
 			
-			const Dstring NAMELEN = "GetWindowTextLengthW";
+			enum NAMELEN = "GetWindowTextLengthW";
 			static GetWindowTextLengthWProc proclen = null;
 			
 			if(!proc)
@@ -617,7 +617,7 @@ BOOL setWindowText(HWND hwnd, Dstring str)
 		}
 		else
 		{
-			const Dstring NAME = "SetWindowTextW";
+			enum NAME = "SetWindowTextW";
 			static SetWindowTextWProc proc = null;
 			
 			if(!proc)
@@ -647,7 +647,7 @@ Dstring getModuleFileName(HMODULE hmod)
 		}
 		else
 		{
-			const Dstring NAME = "GetModuleFileNameW";
+			enum NAME = "GetModuleFileNameW";
 			static GetModuleFileNameWProc proc = null;
 			
 			if(!proc)
@@ -694,7 +694,7 @@ else
 	{
 		private SendMessageWProc _loadSendMessageW()
 		{
-			const Dstring NAME = "SendMessageW";
+			enum NAME = "SendMessageW";
 			static SendMessageWProc proc = null;
 			
 			if(!proc)
@@ -940,7 +940,7 @@ LRESULT callWindowProc(WNDPROC lpPrevWndFunc, HWND hwnd, UINT msg, WPARAM wparam
 		}
 		else
 		{
-			const Dstring NAME = "CallWindowProcW";
+			enum NAME = "CallWindowProcW";
 			static CallWindowProcWProc proc = null;
 			
 			if(!proc)
@@ -970,7 +970,7 @@ UINT registerClipboardFormat(Dstring formatName)
 		}
 		else
 		{
-			const Dstring NAME = "RegisterClipboardFormatW";
+			enum NAME = "RegisterClipboardFormatW";
 			static RegisterClipboardFormatWProc proc = null;
 			
 			if(!proc)
@@ -1000,7 +1000,7 @@ Dstring getClipboardFormatName(UINT format)
 		}
 		else
 		{
-			const Dstring NAME = "GetClipboardFormatNameW";
+			enum NAME = "GetClipboardFormatNameW";
 			static GetClipboardFormatNameWProc proc = null;
 			
 			if(!proc)
@@ -1048,7 +1048,7 @@ int drawTextEx(HDC hdc, Dstring text, LPRECT lprc, UINT dwDTFormat, LPDRAWTEXTPA
 		}
 		else
 		{
-			const Dstring NAME = "DrawTextExW";
+			enum NAME = "DrawTextExW";
 			static DrawTextExWProc proc = null;
 			
 			if(!proc)
@@ -1132,7 +1132,7 @@ BOOL setCurrentDirectory(Dstring pathName)
 			}
 			else
 			{
-				const Dstring NAME = "SetCurrentDirectoryW";
+				enum NAME = "SetCurrentDirectoryW";
 				static SetCurrentDirectoryWProc proc = null;
 				
 				if(!proc)
@@ -1165,7 +1165,7 @@ Dstring getCurrentDirectory()
 			}
 			else
 			{
-				const Dstring NAME = "GetCurrentDirectoryW";
+				enum NAME = "GetCurrentDirectoryW";
 				static GetCurrentDirectoryWProc proc = null;
 				
 				if(!proc)
@@ -1214,7 +1214,7 @@ Dstring getFullPathName(Dstring fileName)
 			}
 			else
 			{
-				const Dstring NAME = "GetFullPathNameW";
+				enum NAME = "GetFullPathNameW";
 				static GetFullPathNameWProc proc = null;
 				
 				if(!proc)
@@ -1265,7 +1265,7 @@ Dstring getComputerName()
 		}
 		else
 		{
-			const Dstring NAME = "GetComputerNameW";
+			enum NAME = "GetComputerNameW";
 			static GetComputerNameWProc proc = null;
 			
 			if(!proc)
@@ -1305,7 +1305,7 @@ Dstring getSystemDirectory()
 		}
 		else
 		{
-			const Dstring NAME = "GetSystemDirectoryW";
+			enum NAME = "GetSystemDirectoryW";
 			static GetSystemDirectoryWProc proc = null;
 			
 			if(!proc)
@@ -1347,7 +1347,7 @@ Dstring getUserName()
 		}
 		else
 		{
-			const Dstring NAME = "GetUserNameW";
+			enum NAME = "GetUserNameW";
 			static GetUserNameWProc proc = null;
 			
 			if(!proc)
@@ -1386,7 +1386,7 @@ DWORD expandEnvironmentStrings(Dstring src, out Dstring result)
 		}
 		else
 		{
-			const Dstring NAME = "ExpandEnvironmentStringsW";
+			enum NAME = "ExpandEnvironmentStringsW";
 			static ExpandEnvironmentStringsWProc proc = null;
 			
 			if(!proc)
@@ -1440,7 +1440,7 @@ Dstring getEnvironmentVariable(Dstring name)
 		}
 		else
 		{
-			const Dstring NAME = "GetEnvironmentVariableW";
+			enum NAME = "GetEnvironmentVariableW";
 			static GetEnvironmentVariableWProc proc = null;
 			
 			if(!proc)
@@ -1506,7 +1506,7 @@ ATOM registerClass(ref WndClass wc)
 		}
 		else
 		{
-			const Dstring NAME = "RegisterClassW";
+			enum NAME = "RegisterClassW";
 			static RegisterClassWProc proc = null;
 			
 			if(!proc)
@@ -1540,7 +1540,7 @@ BOOL getClassInfo(HINSTANCE hinst, Dstring className, ref WndClass wc)
 		}
 		else
 		{
-			const Dstring NAME = "GetClassInfoW";
+			enum NAME = "GetClassInfoW";
 			static GetClassInfoWProc proc = null;
 			
 			if(!proc)
@@ -1571,7 +1571,7 @@ deprecated BOOL getTextExtentPoint32(HDC hdc, Dstring text, LPSIZE lpSize)
 		}
 		else
 		{
-			const Dstring NAME = "GetTextExtentPoint32W";
+			enum NAME = "GetTextExtentPoint32W";
 			static GetTextExtentPoint32WProc proc = null;
 			
 			if(!proc)
@@ -1610,7 +1610,7 @@ Dstring dragQueryFile(HDROP hDrop, UINT iFile)
 		}
 		else
 		{
-			const Dstring NAME = "DragQueryFileW";
+			enum NAME = "DragQueryFileW";
 			static DragQueryFileWProc proc = null;
 			
 			if(!proc)
@@ -1680,7 +1680,7 @@ LRESULT defWindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 		}
 		else
 		{
-			const Dstring NAME = "DefWindowProcW";
+			enum NAME = "DefWindowProcW";
 			static DefWindowProcWProc proc = null;
 			
 			if(!proc)
@@ -1710,7 +1710,7 @@ LRESULT defDlgProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 		}
 		else
 		{
-			const Dstring NAME = "DefDlgProcW";
+			enum NAME = "DefDlgProcW";
 			static DefDlgProcWProc proc = null;
 			
 			if(!proc)
@@ -1740,7 +1740,7 @@ LRESULT defFrameProc(HWND hwnd, HWND hwndMdiClient, UINT msg, WPARAM wparam, LPA
 		}
 		else
 		{
-			const Dstring NAME = "DefFrameProcW";
+			enum NAME = "DefFrameProcW";
 			static DefFrameProcWProc proc = null;
 			
 			if(!proc)
@@ -1770,7 +1770,7 @@ LRESULT defMDIChildProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 		}
 		else
 		{
-			const Dstring NAME = "DefMDIChildProcW";
+			enum NAME = "DefMDIChildProcW";
 			static DefMDIChildProcWProc proc = null;
 			
 			if(!proc)
@@ -1804,7 +1804,7 @@ LONG dispatchMessage(MSG* pmsg)
 		}
 		else
 		{
-			const Dstring DISPATCHNAME = "DispatchMessageW";
+			enum DISPATCHNAME = "DispatchMessageW";
 			static DispatchMessageWProc dispatchproc = null;
 			
 			if(!dispatchproc)
@@ -1834,7 +1834,7 @@ BOOL peekMessage(MSG* pmsg, HWND hwnd = HWND.init, UINT wmFilterMin = 0, UINT wm
 		}
 		else
 		{
-			const Dstring PEEKNAME = "PeekMessageW";
+			enum PEEKNAME = "PeekMessageW";
 			static PeekMessageWProc peekproc = null;
 			
 			if(!peekproc)
@@ -1903,7 +1903,7 @@ BOOL isDialogMessage(HWND hwnd, MSG* pmsg)
 		}
 		else
 		{
-			const Dstring NAME = "IsDialogMessageW";
+			enum NAME = "IsDialogMessageW";
 			static IsDialogMessageWProc proc = null;
 			
 			if(!proc)
@@ -1933,7 +1933,7 @@ HANDLE findFirstChangeNotification(Dstring pathName, BOOL watchSubtree, DWORD no
 		}
 		else
 		{
-			const Dstring NAME = "FindFirstChangeNotificationW";
+			enum NAME = "FindFirstChangeNotificationW";
 			static FindFirstChangeNotificationWProc proc = null;
 			
 			if(!proc)
@@ -1963,7 +1963,7 @@ HINSTANCE loadLibraryEx(Dstring libFileName, DWORD flags)
 		}
 		else
 		{
-			const Dstring NAME = "LoadLibraryExW";
+			enum NAME = "LoadLibraryExW";
 			static LoadLibraryExWProc proc = null;
 			
 			if(!proc)
@@ -1993,7 +1993,7 @@ BOOL _setMenuItemInfoW(HMENU hMenu, UINT uItem, BOOL fByPosition, LPMENUITEMINFO
 		}
 		else
 		{
-			const Dstring NAME = "SetMenuItemInfoW";
+			enum NAME = "SetMenuItemInfoW";
 			static SetMenuItemInfoWProc proc = null;
 			
 			if(!proc)
@@ -2023,7 +2023,7 @@ BOOL _insertMenuItemW(HMENU hMenu, UINT uItem, BOOL fByPosition, LPMENUITEMINFOW
 		}
 		else
 		{
-			const Dstring NAME = "InsertMenuItemW";
+			enum NAME = "InsertMenuItemW";
 			static InsertMenuItemWProc proc = null;
 			
 			if(!proc)
@@ -2059,7 +2059,7 @@ Dstring regQueryValueString(HKEY hkey, Dstring valueName, LPDWORD lpType = null)
 		}
 		else
 		{
-			const Dstring NAME = "RegQueryValueExW";
+			enum NAME = "RegQueryValueExW";
 			static RegQueryValueExWProc proc = null;
 			
 			if(!proc)
@@ -2120,7 +2120,7 @@ HFONT createFontIndirect(ref LogFont lf)
 		}
 		else
 		{
-			const Dstring NAME = "CreateFontIndirectW";
+			enum NAME = "CreateFontIndirectW";
 			static CreateFontIndirectWProc proc = null;
 			
 			if(!proc)
@@ -2169,7 +2169,7 @@ int getLogFont(HFONT hf, ref LogFont lf)
 		}
 		else
 		{
-			const Dstring NAME = "GetObjectW";
+			enum NAME = "GetObjectW";
 			static GetObjectWProc proc = null;
 			
 			if(!proc)

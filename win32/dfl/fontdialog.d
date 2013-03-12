@@ -339,7 +339,7 @@ class FontDialog: CommonDialog
 		{
 			font._info(&lfw); // -font- gets default font if not set.
 			
-			const Dstring NAME = "ChooseFontW";
+			enum NAME = "ChooseFontW";
 			static ChooseFontWProc proc = null;
 			
 			if(!proc)
@@ -420,7 +420,7 @@ class FontDialog: CommonDialog
 
 private extern(Windows) UINT fondHookProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) nothrow
 {
-	const Dstring PROP_STR = "DFL_FontDialog";
+	enum PROP_STR = "DFL_FontDialog";
 	FontDialog fd;
 	LRESULT result = 0;
 	

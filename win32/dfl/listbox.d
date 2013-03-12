@@ -372,9 +372,9 @@ class ListBox: ListControl // docmain
 	
 	
 	///
-	const int DEFAULT_ITEM_HEIGHT = 13;
+	enum int DEFAULT_ITEM_HEIGHT = 13;
 	///
-	const int NO_MATCHES = LB_ERR;
+	enum int NO_MATCHES = LB_ERR;
 	
 	
 	protected override @property Size defaultSize() // getter
