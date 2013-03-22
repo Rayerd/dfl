@@ -188,7 +188,7 @@ Dstringz unsafeStringz(Dstring s) nothrow
 	// Need to duplicate with null terminator.
 	char[] result;
 	result = new char[s.length + 1];
-	result[0 .. s.length] = s;
+	result[0 .. s.length] = s[];
 	result[s.length] = 0;
 	//return result.ptr;
 	return cast(Dstringz)result.ptr; // Needed in D2.

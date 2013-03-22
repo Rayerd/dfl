@@ -1361,7 +1361,7 @@ class DtoComDataObject: DflComObject, dfl.internal.wincom.IDataObject // package
 					}
 					else
 					{
-						pmem[0 .. src.length] = src;
+						pmem[0 .. src.length] = src[];
 						GlobalUnlock(hg);
 						
 						pmedium.tymed = TYMED_HGLOBAL;

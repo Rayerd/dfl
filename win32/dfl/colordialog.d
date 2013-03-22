@@ -92,7 +92,7 @@ class ColorDialog: CommonDialog // docmain
 		if(colors.length >= _cust.length)
 			_cust[] = colors[0 .. _cust.length];
 		else
-			_cust[0 .. colors.length] = colors;
+			_cust[0 .. colors.length] = colors[];
 	}
 	
 	/// ditto
