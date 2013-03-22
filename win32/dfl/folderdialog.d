@@ -176,7 +176,7 @@ class FolderBrowserDialog: CommonDialog // docmain
 				tmp = dfl.internal.utf.toUnicode(_desc);
 				if(tmp.length >= MAX_PATH)
 					_errPathTooLong();
-				biw.pszDisplayName[0 .. tmp.length] = tmp;
+				biw.pszDisplayName[0 .. tmp.length] = tmp[];
 				biw.pszDisplayName[tmp.length] = 0;
 			}
 			else
@@ -225,7 +225,7 @@ class FolderBrowserDialog: CommonDialog // docmain
 				tmp = dfl.internal.utf.toAnsi(_desc);
 				if(tmp.length >= MAX_PATH)
 					_errPathTooLong();
-				bia.pszDisplayName[0 .. tmp.length] = tmp;
+				bia.pszDisplayName[0 .. tmp.length] = tmp[];
 				bia.pszDisplayName[tmp.length] = 0;
 			}
 			else

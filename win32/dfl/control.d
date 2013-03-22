@@ -3636,7 +3636,7 @@ class Control: DObject, IWindow // docmain
 		
 		p.fp = fn;
 		p.nparams = params.length;
-		p.params.ptr[0 .. params.length] = params;
+		p.params.ptr[0 .. params.length] = params[];
 		
 		PostMessageA(hwnd, wmDfl, WPARAM_DFL_DELAY_INVOKE_PARAMS, cast(LPARAM)p);
 	}
@@ -5482,7 +5482,7 @@ class Control: DObject, IWindow // docmain
 											ansi = dfl.internal.utf.toAnsi(this.name);
 											if(msg.wParam <= ansi.length)
 												ansi = ansi[0 .. msg.wParam - 1];
-											(cast(char*)msg.lParam)[0 .. ansi.length] = ansi;
+											(cast(char*)msg.lParam)[0 .. ansi.length] = ansi[];
 											(cast(char*)msg.lParam)[ansi.length] = 0;
 											msg.result = ansi.length + 1;
 										}
@@ -5494,7 +5494,7 @@ class Control: DObject, IWindow // docmain
 										uni = dfl.internal.utf.toUnicode(this.name);
 										if(msg.wParam <= uni.length)
 											uni = uni[0 .. msg.wParam - 1];
-										(cast(wchar*)msg.lParam)[0 .. uni.length] = uni;
+										(cast(wchar*)msg.lParam)[0 .. uni.length] = uni[];
 										(cast(wchar*)msg.lParam)[uni.length] = 0;
 										msg.result = uni.length + 1;
 									}

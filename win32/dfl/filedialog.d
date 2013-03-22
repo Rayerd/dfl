@@ -526,7 +526,7 @@ abstract class FileDialog: CommonDialog // docmain
 			{
 				Dwstring ts;
 				ts = dfl.internal.utf.toUnicode(_fileNames[0]);
-				buf[0 .. ts.length] = ts;
+				buf[0 .. ts.length] = ts[];
 				buf[ts.length] = 0;
 			}
 			
@@ -542,7 +542,7 @@ abstract class FileDialog: CommonDialog // docmain
 			{
 				Dstring ts;
 				ts = dfl.internal.utf.unsafeAnsi(_fileNames[0]);
-				buf[0 .. ts.length] = ts;
+				buf[0 .. ts.length] = ts[];
 				buf[ts.length] = 0;
 			}
 			
