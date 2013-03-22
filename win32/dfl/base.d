@@ -351,8 +351,8 @@ interface IMessageFilter // docmain
 
 abstract class WaitHandle
 {
-	const int WAIT_TIMEOUT = dfl.internal.winapi.WAIT_TIMEOUT; // DMD 1.028: needs fqn, otherwise conflicts with std.thread
-	const HANDLE INVALID_HANDLE = .INVALID_HANDLE_VALUE;
+	enum int WAIT_TIMEOUT = dfl.internal.winapi.WAIT_TIMEOUT; // DMD 1.028: needs fqn, otherwise conflicts with std.thread
+	enum HANDLE INVALID_HANDLE = .INVALID_HANDLE_VALUE;
 	
 	
 	this()
