@@ -246,7 +246,7 @@ else
 
 alias std.path.buildPath pathJoin;
 
-alias std.path.pathsep nativePathSeparatorString;
+alias std.path.pathSeparator nativePathSeparatorString;
 
 
 version(_DFL_NO_USE_CORE_EXCEPTION_OUTOFMEMORY_EXCEPTION)
