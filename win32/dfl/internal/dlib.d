@@ -290,7 +290,7 @@ alias std.utf.toUTF8 utf16stringtoUtf8string;
 
 alias std.utf.toUTF16 utf8stringtoUtf16string;
 
-alias std.utf.toUTFz!(typeof(Dwstring.init.ptr), Dstring) utf8stringToUtf16stringz;
+alias std.utf.toUTFz!(typeof(Dwstring.init.ptr)) utf8stringToUtf16stringz;
 
 alias std.utf.toUTF8 utf32stringtoUtf8string;
 
