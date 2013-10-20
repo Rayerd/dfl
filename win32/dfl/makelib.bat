@@ -101,7 +101,7 @@ if not "%dfl_release_flags%" == "" goto dfl_release_flags_set
 @echo.
 @echo Making debug lib...
 
-%dmc_path%\bin\lib -c -n -p64 dfl_debug.lib %dfl_libs% %dfl_objs%
+%dmc_path%\bin\lib -c -n -p128 dfl_debug.lib %dfl_libs% %dfl_objs%
 @if errorlevel 1 goto oops
 
 
@@ -114,7 +114,7 @@ if not "%dfl_release_flags%" == "" goto dfl_release_flags_set
 @echo.
 @echo Making release lib...
 
-%dmc_path%\bin\lib -c -n -p64 dfl.lib %dfl_libs% %dfl_objs%
+%dmc_path%\bin\lib -c -n -p128 dfl.lib %dfl_libs% %dfl_objs%
 @if errorlevel 1 goto oops
 
 @echo.
