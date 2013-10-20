@@ -540,21 +540,21 @@ struct Color // docmain
 	
 	
 	/// Construct a new color.
+	private this(_color c) pure nothrow
+	{
+		color = c;
+	}
+	
+	/// Construct a new color.
 	this(ubyte alpha, Color c) pure nothrow
 	{
-		color.blue = c.color.blue;
-		color.green = c.color.green;
-		color.red = c.color.red;
-		color.alpha = alpha;
+		this = fromRgb(alpha, c.color.cref);
 	}
 	
 	/// ditto
 	this(ubyte red, ubyte green, ubyte blue) pure nothrow
 	{
-		color.blue = blue;
-		color.green = green;
-		color.red = red;
-		color.alpha = 0xFF;
+		this = fromArgb(0xff, red, green, blue);
 	}
 	
 	/// ditto
@@ -567,12 +567,7 @@ struct Color // docmain
 	//alias opCall fromArgb;
 	static Color fromArgb(ubyte alpha, ubyte red, ubyte green, ubyte blue) pure nothrow
 	{
-		Color nc;
-		nc.color.blue = blue;
-		nc.color.green = green;
-		nc.color.red = red;
-		nc.color.alpha = alpha;
-		return nc;
+		return Color(_color((alpha << 24) | (blue << 16) | (green << 8) | red));
 	}
 	
 	/// ditto
@@ -580,18 +575,13 @@ struct Color // docmain
 	{
 		if(CLR_NONE == rgb)
 			return empty;
-		Color nc;
-		nc.color.cref = rgb;
-		nc.color.alpha = 0xFF;
-		return nc;
+		return Color(_color(cast(COLORREF)(rgb | 0xff000000)));
 	}
 	
 	/// ditto
 	static Color fromRgb(ubyte alpha, COLORREF rgb) pure nothrow
 	{
-		Color nc;
-		nc.color.cref = rgb | ((cast(COLORREF)alpha) << 24);
-		return nc;
+		return Color(_color(rgb | ((cast(COLORREF)alpha) << 24)));
 	}
 	
 	/// ditto
@@ -687,6 +677,7 @@ struct Color // docmain
 	private:
 	union _color
 	{
+		COLORREF cref;
 		struct
 		{
 			align(1):
@@ -695,7 +686,6 @@ struct Color // docmain
 			ubyte blue;
 			ubyte alpha;
 		}
-		COLORREF cref;
 	}
 	static assert(_color.sizeof == uint.sizeof);
 	_color color;
@@ -712,7 +702,10 @@ struct Color // docmain
 		}
 	}
 }
-
+unittest
+{
+	enum red = Color.fromArgb(0xff, 0xff, 0x00, 0x00);
+}
 
 ///
 class SystemColors // docmain
