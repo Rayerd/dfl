@@ -51,7 +51,7 @@ struct Point // docmain
 	
 	
 	/// Construct a new Point.
-	this(int x, int y)
+	this(int x, int y) pure
 	{
 		this.x = x;
 		this.y = y;
@@ -83,7 +83,7 @@ struct Point // docmain
 	
 	
 	///
-	Point opAdd(Size sz)
+	Point opAdd(Size sz) pure const
 	{
 		Point result;
 		result.x = x + sz.width;
@@ -93,7 +93,7 @@ struct Point // docmain
 	
 	
 	///
-	Point opSub(Size sz)
+	Point opSub(Size sz) pure const
 	{
 		Point result;
 		result.x = x - sz.width;
@@ -103,7 +103,7 @@ struct Point // docmain
 	
 	
 	///
-	void opAddAssign(Size sz)
+	void opAddAssign(Size sz) pure
 	{
 		x += sz.width;
 		y += sz.height;
@@ -111,7 +111,7 @@ struct Point // docmain
 	
 	
 	///
-	void opSubAssign(Size sz)
+	void opSubAssign(Size sz) pure
 	{
 		x -= sz.width;
 		y -= sz.height;
@@ -119,7 +119,7 @@ struct Point // docmain
 	
 	
 	///
-	Point opNeg()
+	Point opNeg() pure const
 	{
 		return Point(-x, -y);
 	}
@@ -133,7 +133,7 @@ struct Size // docmain
 	int height;
 	
 	
-	SIZE size() const
+	SIZE size() pure const
 	{
 		SIZE sz;
 		sz.cx = width;
@@ -142,7 +142,7 @@ struct Size // docmain
 	}
 	
 	
-	void size(SIZE sz)
+	void size(SIZE sz) pure
 	{
 		width = sz.cx;
 		height = sz.cy;
@@ -150,7 +150,7 @@ struct Size // docmain
 	
 	
 	/// Construct a new Size.
-	this(int width, int height)
+	this(int width, int height) pure
 	{
 		this.width = width;
 		this.height = height;
@@ -182,7 +182,7 @@ struct Size // docmain
 	
 	
 	///
-	Size opAdd(Size sz)
+	Size opAdd(Size sz) pure const
 	{
 		Size result;
 		result.width = width + sz.width;
@@ -192,7 +192,7 @@ struct Size // docmain
 	
 	
 	///
-	Size opSub(Size sz)
+	Size opSub(Size sz) pure const
 	{
 		Size result;
 		result.width = width - sz.width;
@@ -202,7 +202,7 @@ struct Size // docmain
 	
 	
 	///
-	void opAddAssign(Size sz)
+	void opAddAssign(Size sz) pure
 	{
 		width += sz.width;
 		height += sz.height;
@@ -210,7 +210,7 @@ struct Size // docmain
 	
 	
 	///
-	void opSubAssign(Size sz)
+	void opSubAssign(Size sz) pure
 	{
 		width -= sz.width;
 		height -= sz.height;
@@ -224,7 +224,7 @@ struct Rect // docmain
 	int x, y, width, height;
 	
 	// Used internally.
-	pure nothrow void getRect(RECT* r) // package
+	pure nothrow void getRect(RECT* r) pure // package
 	{
 		r.left = x;
 		r.right = x + width;
@@ -234,13 +234,13 @@ struct Rect // docmain
 	
 	
 	///
-	@property Point location() // getter
+	Point location() pure const @property// getter
 	{
 		return Point(x, y);
 	}
 	
 	/// ditto
-	@property void location(Point pt) // setter
+	void location(Point pt) pure @property // setter
 	{
 		x = pt.x;
 		y = pt.y;
@@ -248,13 +248,13 @@ struct Rect // docmain
 	
 	
 	///
-	@property Size size() //getter
+	Size size() pure const @property //getter
 	{
 		return Size(width, height);
 	}
 	
 	/// ditto
-	@property void size(Size sz) // setter
+	void size(Size sz) pure @property // setter
 	{
 		width = sz.width;
 		height = sz.height;
@@ -262,58 +262,45 @@ struct Rect // docmain
 	
 	
 	///
-	@property int right() // getter
+	int right() pure const @property // getter
 	{
 		return x + width;
 	}
 	
 	
 	///
-	@property int bottom() // getter
+	int bottom() pure const @property // getter
 	{
 		return y + height;
 	}
 	
 	
 	/// Construct a new Rect.
-	static Rect opCall(int x, int y, int width, int height)
+	this(int x, int y, int width, int height) pure
 	{
-		Rect r;
-		r.x = x;
-		r.y = y;
-		r.width = width;
-		r.height = height;
-		return r;
+		this.x = x;
+		this.y = y;
+		this.width = width;
+		this.height = height;
 	}
 	
 	/// ditto
-	static Rect opCall(Point location, Size size)
+	this(Point location, Size size) pure
 	{
-		Rect r;
-		r.x = location.x;
-		r.y = location.y;
-		r.width = size.width;
-		r.height = size.height;
-		return r;
-	}
-	
-	/// ditto
-	static Rect opCall()
-	{
-		Rect r;
-		return r;
+		x = location.x;
+		y = location.y;
+		width = size.width;
+		height = size.height;
 	}
 	
 	
 	// Used internally.
-	static Rect opCall(RECT* rect) // package
+	this(RECT* rect) pure // package
 	{
-		Rect r;
-		r.x = rect.left;
-		r.y = rect.top;
-		r.width = rect.right - rect.left;
-		r.height = rect.bottom - rect.top;
-		return r;
+		x = rect.left;
+		y = rect.top;
+		width = rect.right - rect.left;
+		height = rect.bottom - rect.top;
 	}
 	
 	
@@ -357,7 +344,7 @@ struct Rect // docmain
 	
 	
 	///
-	bool contains(int c_x, int c_y)
+	bool contains(int c_x, int c_y) pure const
 	{
 		if(c_x >= x && c_y >= y)
 		{
@@ -368,14 +355,14 @@ struct Rect // docmain
 	}
 	
 	/// ditto
-	bool contains(Point pos)
+	bool contains(Point pos) pure const
 	{
 		return contains(pos.x, pos.y);
 	}
 	
 	/// ditto
 	// Contained entirely within -this-.
-	bool contains(Rect r)
+	bool contains(Rect r) pure const
 	{
 		if(r.x >= x && r.y >= y)
 		{
@@ -404,7 +391,7 @@ struct Rect // docmain
 	
 	///
 	// Just tests if there's an intersection.
-	bool intersectsWith(Rect r)
+	bool intersectsWith(Rect r) pure const
 	{
 		if(r.right >= x && r.bottom >= y)
 		{
