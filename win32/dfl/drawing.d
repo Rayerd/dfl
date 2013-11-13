@@ -58,6 +58,13 @@ struct Point // docmain
 	}
 	
 	
+	this(in POINT* pt) pure nothrow
+	{
+		this.x = pt.x;
+		this.y = pt.y;
+	}
+	
+	
 	version(DFL_D2_AND_ABOVE)
 	{
 		///
@@ -154,6 +161,14 @@ struct Size // docmain
 	{
 		this.width = width;
 		this.height = height;
+	}
+	
+	
+	/// Construct a new Size.
+	this(in SIZE* size) pure nothrow
+	{
+		this.width  = size.cx;
+		this.height = size.cy;
 	}
 	
 	
@@ -295,7 +310,7 @@ struct Rect // docmain
 	
 	
 	// Used internally.
-	this(RECT* rect) pure nothrow // package
+	this(in RECT* rect) pure nothrow // package
 	{
 		x = rect.left;
 		y = rect.top;
