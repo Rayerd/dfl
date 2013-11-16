@@ -3273,10 +3273,15 @@ public:
 		}
 		if (area != Rect.init)
 		{
-			rc.left   = MulDiv(_area.x,      GetDeviceCaps(hdcref, HORZSIZE) * 100, GetDeviceCaps(hdcref, HORZRES));
-			rc.top    = MulDiv(_area.y,      GetDeviceCaps(hdcref, VERTSIZE) * 100, GetDeviceCaps(hdcref, VERTRES));
-			rc.right  = MulDiv(_area.right,  GetDeviceCaps(hdcref, HORZSIZE) * 100, GetDeviceCaps(hdcref, HORZRES));
-			rc.bottom = MulDiv(_area.bottom, GetDeviceCaps(hdcref, VERTSIZE) * 100, GetDeviceCaps(hdcref, VERTRES));
+			auto tmphdc = CreateEnhMetaFileW(hdcref, null, null, null);
+			auto tmpemf = CloseEnhMetaFile(tmphdc);
+			ENHMETAHEADER tmphdr;
+			GetEnhMetaFileHeader(tmpemf, ENHMETAHEADER.sizeof, &tmphdr);
+			DeleteEnhMetaFile(tmpemf);
+			rc.left   = MulDiv(_area.x,      GetDeviceCaps(hdcref, HORZSIZE) * 100, tmphdr.szlDevice.cx);
+			rc.top    = MulDiv(_area.y,      GetDeviceCaps(hdcref, VERTSIZE) * 100, tmphdr.szlDevice.cy);
+			rc.right  = MulDiv(_area.right,  GetDeviceCaps(hdcref, HORZSIZE) * 100, tmphdr.szlDevice.cx);
+			rc.bottom = MulDiv(_area.bottom, GetDeviceCaps(hdcref, VERTSIZE) * 100, tmphdr.szlDevice.cy);
 			pRc = &rc;
 		}
 		import std.utf;
