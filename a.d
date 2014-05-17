@@ -22,7 +22,7 @@ namespace WFACaseTracerMS
     /// </summary>
     public partial class CT_CaseDeliver : CT_BaseForm, IRefreshData
     {
-        #region 作者
+        #region 作者1
         /// <summary>
         /// 软件开发： 山西省肿瘤医院 药学部 王斌
         /// 电话：15234080782
