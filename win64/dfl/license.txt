@@ -1,0 +1,52 @@
+The DFL License Agreement
+
+
+DFL is Copyright (C) 2004-2010 Christopher E. Miller
+Official DFL website: http://www.dprogramming.com/dfl.php
+
+
+The DFL library is under a 3-choice license.
+You may choose any of the below based on your use of the code.
+
+License Choice 1)
+    LGPL (GNU Lesser General Public License) described in lgpl.txt
+
+License Choice 2)
+    zlib license (libpng/zlib license) described in zlib.txt may be
+    used if the code in no way depends on the Windows Win32 API.
+    This allows the code to be translated to another API.
+
+License Choice 3)
+    Unmodified versions of the DFL library obtained directly from the
+    official DFL package at http://www.dprogramming.com/dfl.php may
+    be used, including redistributions in source or binary form and
+    commercial applications, subject to the following:
+        
+        3a) This software is provided 'as-is', without any express or
+        implied warranty. In no event will the authors be held liable
+        for any damages arising from the use of this software.
+        
+        3b) The origin of this software must not be misrepresented;
+        you must not claim that you wrote the original software.
+        
+        3c) Source redistributions must include the DFL license
+        in the source code directory, and the above copyright notice
+        and official software website address must be included in
+        supporting documentation.
+        
+        3d) For source redistributions, any accompanying files not
+        from the original package must reside in separate file
+        directories.
+
+
+Terminology:
+
+"the code" refers to the source code of the DFL library.
+
+"binary form" refers to the resulting executable code when the DFL
+source code is compiled.
+
+"Win32 API" refers to the Microsoft Windows API, including Win32 for
+64-bit Windows (Win64), or any of the user32, kernel32 or gdi32 DLLs
+or any future version counterparts designed for the Windows platform.
+
