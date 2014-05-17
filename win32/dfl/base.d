@@ -397,13 +397,14 @@ abstract class WaitHandle
 	
 	private static DWORD _wait(WaitHandle[] handles, BOOL waitall, DWORD msTimeout)
 	{
+		DWORD result;
+		HANDLE* hs;
 		// Some implementations fail with > 64 handles, but that will return WAIT_FAILED;
 		// all implementations fail with >= 128 handles due to WAIT_ABANDONED_0 being 128.
 		if(handles.length >= 128)
 			goto fail;
 		
-		DWORD result;
-		HANDLE* hs;
+		
 		//hs = new HANDLE[handles.length];
 		hs = cast(HANDLE*)alloca(HANDLE.sizeof * handles.length);
 		
