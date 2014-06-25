@@ -248,8 +248,8 @@ extern(Windows) nothrow:
 	struct NMMOUSE
 	{
 		NMHDR hdr;
-		DWORD dwItemSpec;
-		DWORD dwItemData;
+		DWORD_PTR dwItemSpec;
+		DWORD_PTR dwItemData;
 		POINT pt;
 		LPARAM dwHitInfo;
 	}
@@ -1892,7 +1892,7 @@ extern(Windows) nothrow:
 	struct NMHDR
 	{ 
 		HWND hwndFrom;
-		UINT idFrom;
+		UINT_PTR idFrom;
 		UINT code;
 	}
 	alias NMHDR* LPNMHDR;
@@ -1904,7 +1904,7 @@ extern(Windows) nothrow:
 		DWORD dwDrawStage;
 		HDC hdc;
 		RECT rc;
-		/+ DWORD_PTR +/ DWORD dwItemSpec;
+		DWORD_PTR dwItemSpec;
 		UINT uItemState;
 		LPARAM lItemlParam;
 	}
@@ -2034,9 +2034,13 @@ extern(Windows) nothrow:
 		int idCommand;
 		BYTE fsState;
 		BYTE fsStyle;
-		BYTE[2] bReserved;
-		DWORD dwData;
-		int iString;
+		version (Win64) {
+			BYTE[6] bReserved;
+		} else {
+			BYTE[2] bReserved;
+		}
+		DWORD_PTR dwData;
+		INT_PTR iString;
 	}
 	alias TBBUTTON* PTBBUTTON, LPTBBUTTON, LPCTBBUTTON;
 	
@@ -2270,7 +2274,7 @@ extern(Windows) nothrow:
 	// Rich edit.
 	struct EDITSTREAM
 	{
-		/+ DWORD_PTR +/ DWORD dwCookie;
+		DWORD_PTR dwCookie;
 		DWORD dwError;
 		EDITSTREAMCALLBACK pfnCallback;
 	}
@@ -2608,7 +2612,7 @@ extern(Windows) nothrow:
 		UINT cbSize;
 		UINT uFlags;
 		HWND hwnd;
-		UINT uId;
+		UINT_PTR uId;
 		RECT rect;
 		HINSTANCE hinst;
 		LPSTR lpszText;
@@ -2679,7 +2683,7 @@ extern(Windows) nothrow:
 		UINT itemID;
 		UINT itemWidth;
 		UINT itemHeight;
-		DWORD itemData;
+		ULONG_PTR itemData;
 	}
 	alias MEASUREITEMSTRUCT* LPMEASUREITEMSTRUCT;
 	

@@ -568,7 +568,7 @@ class ToolBar: ControlSuperClass // docmain
 	{
 		super.onHandleCreated(ea);
 		
-		static assert(TBBUTTON.sizeof == 20);
+		//static assert(TBBUTTON.sizeof == 20);
 		prevwproc(TB_BUTTONSTRUCTSIZE, TBBUTTON.sizeof, 0);
 		
 		//prevwproc(TB_SETPADDING, 0, MAKELPARAM(0, 0));
