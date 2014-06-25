@@ -2483,7 +2483,7 @@ extern(Windows) nothrow:
 	
 	struct CHOOSEFONTW
 	{
-		align(1):
+		//align(1):
 		DWORD lStructSize;
 		HWND hwndOwner;
 		HDC hDC;
@@ -2497,7 +2497,7 @@ extern(Windows) nothrow:
 		HINSTANCE hInstance;
 		LPWSTR lpszStyle;
 		WORD nFontType;
-		WORD ___MISSING_ALIGNMENT__;
+		//WORD ___MISSING_ALIGNMENT__;
 		INT nSizeMin;
 		INT nSizeMax;
 	}
@@ -2507,7 +2507,7 @@ extern(Windows) nothrow:
 	
 	struct CHOOSEFONTA
 	{
-		align(1):
+		//align(1):
 		DWORD lStructSize;
 		HWND hwndOwner;
 		HDC hDC;
@@ -2521,7 +2521,7 @@ extern(Windows) nothrow:
 		HINSTANCE hInstance;
 		LPSTR lpszStyle;
 		WORD nFontType;
-		WORD ___MISSING_ALIGNMENT__;
+		//WORD ___MISSING_ALIGNMENT__;
 		INT nSizeMin;
 		INT nSizeMax;
 	}
