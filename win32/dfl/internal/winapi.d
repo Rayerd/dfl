@@ -2823,8 +2823,8 @@ extern(Windows) nothrow:
 	BOOL IsDialogMessageW(HWND hDlg, LPMSG lpMsg);
 	HBRUSH GetSysColorBrush(int nIndex);
 	BOOL PostMessageA(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
-	UINT SetTimer(HWND hWnd, UINT nIDEvent, UINT uElapse, TIMERPROC lpTimerFunc);
-	BOOL KillTimer(HWND hWnd, UINT uIDEvent);
+	UINT_PTR SetTimer(HWND hWnd, UINT_PTR nIDEvent, UINT uElapse, TIMERPROC lpTimerFunc);
+	BOOL KillTimer(HWND hWnd, UINT_PTR uIDEvent);
 	LPSTR GetCommandLineA();
 	LPWSTR GetCommandLineW();
 	BOOL SetCurrentDirectoryW(LPCWSTR lpPathName);

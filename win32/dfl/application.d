@@ -1318,7 +1318,7 @@ final class Application // docmain
 	}
 	
 	
-	private UINT gctimer = 0;
+	private UINT_PTR gctimer = 0;
 	private DWORD gcinfo = 1;
 	
 	
@@ -1669,7 +1669,7 @@ final class Application // docmain
 package:
 
 
-extern(Windows) void _gcTimeout(HWND hwnd, UINT uMsg, UINT idEvent, DWORD dwTime) nothrow
+extern(Windows) void _gcTimeout(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime) nothrow
 {
 	KillTimer(hwnd, Application.gctimer);
 	Application.gctimer = 0;
