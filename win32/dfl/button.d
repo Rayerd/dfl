@@ -189,7 +189,7 @@ abstract class ButtonBase: ControlSuperClass // docmain
 		/+
 		// Done in createParams() now.
 		if(isdef)
-			SetWindowLongA(handle, GWL_ID, IDOK);
+			SetWindowLongPtrA(handle, GWL_ID, IDOK);
 		+/
 	}
 	+/

@@ -121,7 +121,7 @@ class ToolTip // docmain
 	final @property void showAlways(bool byes) // setter
 	{
 		LONG wl;
-		wl = GetWindowLongA(hwtt, GWL_STYLE);
+		wl = GetWindowLongPtrA(hwtt, GWL_STYLE);
 		if(byes)
 		{
 			if(wl & TTS_ALWAYSTIP)
@@ -134,13 +134,13 @@ class ToolTip // docmain
 				return;
 			wl &= ~TTS_ALWAYSTIP;
 		}
-		SetWindowLongA(hwtt, GWL_STYLE, wl);
+		SetWindowLongPtrA(hwtt, GWL_STYLE, wl);
 	}
 	
 	/// ditto
 	final @property bool showAlways() // getter
 	{
-		return (GetWindowLongA(hwtt, GWL_STYLE) & TTS_ALWAYSTIP) != 0;
+		return (GetWindowLongPtrA(hwtt, GWL_STYLE) & TTS_ALWAYSTIP) != 0;
 	}
 	
 	
