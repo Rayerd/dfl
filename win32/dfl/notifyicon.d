@@ -192,7 +192,7 @@ class NotifyIcon // docmain
 		HWND hwnd;
 		
 		hwnd = win.handle;
-		style = GetWindowLongA(hwnd, GWL_STYLE);
+		style = GetWindowLongPtrA(hwnd, GWL_STYLE);
 		
 		if(style & WS_VISIBLE)
 		{
@@ -220,7 +220,7 @@ class NotifyIcon // docmain
 		HWND hwnd;
 		
 		hwnd = win.handle;
-		style = GetWindowLongA(hwnd, GWL_STYLE);
+		style = GetWindowLongPtrA(hwnd, GWL_STYLE);
 		
 		if(!(style & WS_VISIBLE))
 		{

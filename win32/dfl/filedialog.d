@@ -472,7 +472,7 @@ abstract class FileDialog: CommonDialog // docmain
 								onFileOk(cea);
 								if(cea.cancel)
 								{
-									SetWindowLongA(hwnd, DWL_MSGRESULT, 1);
+									SetWindowLongPtrA(hwnd, DWL_MSGRESULT, 1);
 									return 1;
 								}
 							}

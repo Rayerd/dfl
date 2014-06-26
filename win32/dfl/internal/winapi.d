@@ -2760,10 +2760,21 @@ extern(Windows) nothrow:
 	HWND CreateWindowExW(DWORD dwExStyle, LPCWSTR lpClassName, LPCWSTR lpWindowName, DWORD dwStyle, int x, int y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam);
 	LRESULT SendMessageW(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 	int MessageBoxW(HWND hWnd, LPCWSTR lpText, LPCWSTR lpCaption, UINT uType);
-	DWORD SetClassLongA(HWND hWnd, int nIndex, LONG dwNewLong);
-	DWORD GetClassLongA(HWND hWnd, int nIndex);
-	LONG SetWindowLongA(HWND hWnd, int nIndex, LONG dwNewLong);
-	LONG GetWindowLongA(HWND hWnd, int nIndex);
+	DWORD SetClassLongA(HWND hWnd, int nIndex, LONG dwNewLong); // deprecated
+	DWORD GetClassLongA(HWND hWnd, int nIndex); // deprecated
+	LONG SetWindowLongA(HWND hWnd, int nIndex, LONG dwNewLong); // deprecated
+	LONG GetWindowLongA(HWND hWnd, int nIndex); // deprecated
+	version (Win64) {
+		ULONG_PTR SetClassLongPtrA(HWND hWnd, int nIndex, LONG_PTR dwNewLong);
+		ULONG_PTR GetClassLongPtrA(HWND hWnd, int nIndex);
+		LONG_PTR SetWindowLongPtrA(HWND hWnd, int nIndex, LONG_PTR dwNewLong);
+		LONG_PTR GetWindowLongPtrA(HWND hWnd, int nIndex);
+	} else {
+		alias SetClassLongPtrA = SetClassLongA;
+		alias GetClassLongPtrA = GetClassLongA;
+		alias SetWindowLongPtrA = SetWindowLongA;
+		alias GetWindowLongPtrA = GetWindowLongA;
+	}
 	DWORD GetSysColor(int nIndex);
 	BOOL EnableWindow(HWND hWnd, BOOL bEnable);
 	BOOL IsWindowEnabled(HWND hWnd);

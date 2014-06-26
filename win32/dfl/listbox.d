@@ -1167,7 +1167,7 @@ class ListBox: ListControl // docmain
 		
 		// Set the Ctrl ID to the HWND so that it is unique
 		// and WM_MEASUREITEM will work properly.
-		SetWindowLongA(hwnd, GWL_ID, cast(LONG)hwnd);
+		SetWindowLongPtrA(hwnd, GWL_ID, cast(LONG_PTR)hwnd);
 		
 		if(hextent != 0)
 			prevwproc(LB_SETHORIZONTALEXTENT, hextent, 0);
