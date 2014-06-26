@@ -1714,7 +1714,7 @@ extern(Windows) nothrow:
 	
 	
 	// Rich edit.
-	alias DWORD function(/+ DWORD_PTR +/ DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG* pcb) EDITSTREAMCALLBACK;
+	alias DWORD function(DWORD_PTR dwCookie, LPBYTE pbBuff, LONG cb, LONG* pcb) EDITSTREAMCALLBACK;
 	
 	
 	alias DWORD LCID;
@@ -2363,10 +2363,10 @@ extern(Windows) nothrow:
 	alias OPENFILENAMEW* LPOPENFILENAMEW;
 	
 	
-	alias UINT function(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam) LPCCHOOKPROC;
+	alias UINT_PTR function(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam) LPCCHOOKPROC;
 	
 	
-	alias UINT function(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam) LPCFHOOKPROC;
+	alias UINT_PTR function(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam) LPCFHOOKPROC;
 	
 	
 	alias BOOL function(HDC hdc, LPARAM lpData, int cchData) GRAYSTRINGPROC;

@@ -27,7 +27,7 @@ class FontDialog: CommonDialog
 		cf.Flags = INIT_FLAGS;
 		cf.lpLogFont = cast(typeof(cf.lpLogFont))&lfw;
 		cf.lCustData = cast(typeof(cf.lCustData))cast(void*)this;
-		cf.lpfnHook = &fondHookProc;
+		cf.lpfnHook = &fontHookProc;
 		cf.rgbColors = 0;
 	}
 	
@@ -418,11 +418,11 @@ class FontDialog: CommonDialog
 // WM_CHOOSEFONT_SETFLAGS to update flags after dialog creation ... ?
 
 
-private extern(Windows) UINT fondHookProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) nothrow
+private extern(Windows) UINT_PTR fontHookProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) nothrow
 {
 	enum PROP_STR = "DFL_FontDialog";
 	FontDialog fd;
-	LRESULT result = 0;
+	UINT_PTR result = 0;
 	
 	try
 	{
