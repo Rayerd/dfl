@@ -1783,11 +1783,23 @@ class TreeView: ControlSuperClass // docmain
 							{
 								NMTVCUSTOMDRAW* tvcd;
 								tvcd = cast(NMTVCUSTOMDRAW*)nmh;
-								//if(tvcd.nmcd.dwDrawStage & CDDS_ITEM)
+								if(tvcd.nmcd.dwDrawStage == CDDS_PREPAINT)
 								{
-									//if(tvcd.nmcd.uItemState & CDIS_SELECTED)
-									if((tvcd.nmcd.dwDrawStage & CDDS_ITEM)
-										&& (tvcd.nmcd.uItemState & CDIS_SELECTED))
+									 m.result |= CDRF_NOTIFYITEMDRAW;
+									 return;
+								}
+								if(tvcd.nmcd.dwDrawStage == CDDS_ITEMPREPAINT)
+								{
+									Font fon;
+									fon = this.font;
+									if(fon)
+									{
+										SelectObject(tvcd.nmcd.hdc, fon.handle);
+										m.result |= CDRF_NEWFONT;
+									}
+									if(tvcd.nmcd.uItemState & CDIS_SELECTED)
+									//if((tvcd.nmcd.dwDrawStage & CDDS_ITEM)
+									//	&& (tvcd.nmcd.uItemState & CDIS_SELECTED))
 									{
 										// Note: might not look good with custom colors.
 										tvcd.clrText = SystemColors.highlightText.toRgb();
@@ -1799,16 +1811,8 @@ class TreeView: ControlSuperClass // docmain
 										tvcd.clrText = foreColor.solidColor(backColor).toRgb();
 										tvcd.clrTextBk = backColor.toRgb();
 									}
-								}
-								m.result |= CDRF_NOTIFYITEMDRAW; // | CDRF_NOTIFYITEMERASE;
-								
-								// This doesn't seem to be doing anything.
-								Font fon;
-								fon = this.font;
-								if(fon)
-								{
-									SelectObject(tvcd.nmcd.hdc, fon.handle);
-									m.result |= CDRF_NEWFONT;
+									 m.result |= CDRF_DODEFAULT;
+									return;
 								}
 							}
 							break;
