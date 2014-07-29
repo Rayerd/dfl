@@ -2965,7 +2965,7 @@ class Control: DObject, IWindow // docmain
 				if (dataObj)
 				{
 					GC.removeRoot(cast(void*)dataObj);
-					clear(dataObj);
+					destroy(dataObj);
 				}
 			}
 			

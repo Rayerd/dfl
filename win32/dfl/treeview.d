@@ -959,7 +959,7 @@ class TreeNodeCollection
 				}
 				else
 				{
-					m.lParam = TVI_ROOT;
+					m.lParam = cast(LPARAM)TVI_ROOT;
 					tview.prevWndProc(m);
 					foreach(TreeNode node; nodes)
 					{
