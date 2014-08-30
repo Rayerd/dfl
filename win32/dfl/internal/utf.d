@@ -45,29 +45,9 @@ else
 	}
 }
 
-
-// Determine if using the "W" functions on Windows NT.
-version(DFL_UNICODE)
-{
-	enum useUnicode = true;
-}
-else version(DFL_ANSI)
-{
-	enum useUnicode = false;
-}
-else
-{
-	version = DFL_BOTH_STRINGS;
-	
-	//bool useUnicode = false;
-	//alias std.windows.charset.useWfuncs useUnicode; // D2 has this in std.file.
-	//alias useWfuncs useUnicode; // D1 has it in both, causing a conflict.
-	// std.windows.charset is a better place for it, so use that one if present.
-	static if(is(typeof(&std.windows.charset.useWfuncs)))
-		alias std.windows.charset.useWfuncs useUnicode;
-	else
-		enum useUnicode = true;
-}
+// Do not support Win9x.
+version = DFL_UNICODE;
+enum useUnicode = true;
 
 package:
 
