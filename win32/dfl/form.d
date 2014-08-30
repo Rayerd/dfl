@@ -10,6 +10,10 @@ private import dfl.internal.dlib;
 private import dfl.control, dfl.internal.winapi, dfl.event, dfl.drawing;
 private import dfl.application, dfl.base, dfl.internal.utf;
 private import dfl.collections;
+debug(APP_PRINT)
+{
+	private import dfl.internal.clib;
+}
 
 version(DFL_NO_MENUS)
 {
@@ -1830,7 +1834,7 @@ class Form: ContainerControl, IDialogResult // docmain
 			}
 		}
 		
-		return super.setVisibleCore(byes);
+		super.setVisibleCore(byes);
 	}
 	
 	

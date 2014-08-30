@@ -9,7 +9,10 @@ private import dfl.internal.dlib;
 
 private import dfl.internal.winapi, dfl.control, dfl.base, dfl.event;
 private import dfl.internal.utf, dfl.drawing, dfl.application, dfl.collections;
-
+debug(APP_PRINT)
+{
+	private import dfl.internal.clib;
+}
 
 version(DFL_NO_MENUS)
 {

@@ -7,7 +7,10 @@ module dfl.timer;
 
 private import dfl.internal.winapi, dfl.event, dfl.base, dfl.application,
 	dfl.internal.dlib;
-
+debug(APP_PRINT)
+{
+	private import dfl.internal.clib;
+}
 
 ///
 class Timer // docmain
