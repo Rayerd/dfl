@@ -2965,7 +2965,7 @@ class Control: DObject, IWindow // docmain
 				if (dataObj)
 				{
 					GC.removeRoot(cast(void*)dataObj);
-					clear(dataObj);
+					destroy(dataObj);
 				}
 			}
 			
@@ -5472,7 +5472,7 @@ class Control: DObject, IWindow // docmain
 								{
 									if(osver.dwPlatformId <= VER_PLATFORM_WIN32_WINDOWS)
 									{
-										version(DFL_UNICODE)
+										if(dfl.internal.utf.useUnicode)
 										{
 										}
 										else
@@ -6417,7 +6417,7 @@ class Control: DObject, IWindow // docmain
 					cprintf("CreateWindowEx failed."
 						" (exStyle=0x%X, className=`%.*s`, caption=`%.*s`, style=0x%X, x=%d, y=%d, width=%d, height=%d,"
 						" parent=0x%X, menu=0x%X, inst=0x%X, param=0x%X)\n",
-						exStyle, className, caption, style, x, y, width, height,
+						exStyle, className.ptr, caption.ptr, style, x, y, width, height,
 						parent, menu, inst, param);
 				}
 				

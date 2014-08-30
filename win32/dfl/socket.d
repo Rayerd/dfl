@@ -28,7 +28,7 @@ private
 	alias InternetHost DInternetHost;
 	alias InternetAddress DInternetAddress;
 	
-	socket_t getSocketHandle(Socket sock)
+	socket_t getSocketHandle(Socket sock) nothrow @nogc
 	{
 		return sock.handle;
 	}
@@ -54,7 +54,7 @@ private
 	}
 	
 	
-	extern(Windows) int WSAAsyncSelect(socket_t s, HWND hWnd, UINT wMsg, int lEvent);
+	extern(Windows) int WSAAsyncSelect(socket_t s, HWND hWnd, UINT wMsg, int lEvent) nothrow @nogc;
 }
 
 
@@ -107,7 +107,7 @@ void registerEvent(DflSocket sock, EventType events, RegisterEventCallback callb
 }
 
 
-void unregisterEvent(DflSocket sock) // deprecated
+void unregisterEvent(DflSocket sock) @trusted @nogc nothrow // deprecated
 {
 	WSAAsyncSelect(getSocketHandle(sock), hwNet, 0, 0);
 	
@@ -142,7 +142,7 @@ class AsyncSocket: DflSocket // docmain
 	
 	/// ditto
 	// For use with accept().
-	protected this()
+	protected this() pure @safe nothrow
 	{
 	}
 	
