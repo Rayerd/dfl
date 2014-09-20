@@ -27,9 +27,9 @@ alias IWindow IWin32Window; // deprecated
 class DflException: Exception // docmain
 {
 	///
-	this(Dstring msg)
+	this(Dstring msg, string file = __FILE__, int line = __LINE__)
 	{
-		super(msg);
+		super(msg, file, line);
 	}
 }
 
