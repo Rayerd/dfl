@@ -775,7 +775,7 @@ class TabControl: TabControlBase // docmain
 	///
 	final @property int tabCount() // getter
 	{
-		return tchildren._pages.length;
+		return tchildren._pages.length.toI32;
 	}
 	
 	

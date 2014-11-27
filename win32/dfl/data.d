@@ -814,7 +814,7 @@ class DataObject: dfl.data.IDataObject // docmain
 			{
 				if(fix && all[i].obj.info == typeid(_DataConvert))
 					fixPairEntry(all[i]);
-				return i;
+				return i.toI32;
 			}
 		}
 		return -1;
@@ -1178,7 +1178,7 @@ package class EnumDataObjectFORMATETC: DflComObject, IEnumFORMATETC
 				if(end > fmts.length)
 				{
 					result = S_FALSE; // ?
-					end = fmts.length;
+					end = fmts.length.toI32;
 					
 					if(pceltFetched)
 						*pceltFetched = end - idx;
@@ -1346,7 +1346,7 @@ class DtoComDataObject: DflComObject, dfl.internal.wincom.IDataObject // package
 				
 				//src = data.value;
 				src = DataFormats.getClipboardValueFromData(dfmt.id, data);
-				hg = GlobalAlloc(GMEM_SHARE, src.length);
+				hg = GlobalAlloc(GMEM_SHARE, src.length.toI32);
 				if(!hg)
 				{
 					result = STG_E_MEDIUMFULL;

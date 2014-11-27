@@ -299,7 +299,7 @@ class ComboBox: ListControl // docmain
 	///
 	final int getItemHeight(int idx)
 	{
-		int result = prevwproc(CB_GETITEMHEIGHT, idx, 0);
+		int result = prevwproc(CB_GETITEMHEIGHT, idx, 0).toI32;
 		if(CB_ERR == result)
 			throw new DflException("Unable to obtain item height");
 		return result;
@@ -436,7 +436,7 @@ class ComboBox: ListControl // docmain
 		if(!(ctrlStyle & ControlStyles.CACHE_TEXT) && isHandleCreated)
 			//return cast(uint)SendMessageA(handle, WM_GETTEXTLENGTH, 0, 0);
 			return cast(uint)dfl.internal.utf.sendMessage(handle, WM_GETTEXTLENGTH, 0, 0);
-		return wtext.length;
+		return wtext.length.toI32;
 	}
 	
 	
@@ -969,7 +969,7 @@ class ComboBox: ListControl // docmain
 				return;
 			
 			case CB_LIMITTEXT:
-				maxLength = msg.wParam;
+				maxLength = msg.wParam.toI32;
 				return;
 			
 			case WM_SETFOCUS:

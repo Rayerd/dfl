@@ -895,7 +895,7 @@ class ListBox: ListControl // docmain
 	///
 	final int getItemHeight(int idx)
 	{
-		int result = prevwproc(LB_GETITEMHEIGHT, idx, 0);
+		int result = prevwproc(LB_GETITEMHEIGHT, idx, 0).toI32;
 		if(LB_ERR == result)
 			throw new DflException("Unable to obtain item height");
 		return result;

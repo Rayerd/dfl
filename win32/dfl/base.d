@@ -412,7 +412,7 @@ abstract class WaitHandle
 			hs[i] = wh.handle;
 		}
 		
-		result = WaitForMultipleObjects(handles.length, hs, waitall, msTimeout);
+		result = WaitForMultipleObjects(handles.length.toI32, hs, waitall, msTimeout);
 		if(WAIT_FAILED == result)
 		{
 			fail:

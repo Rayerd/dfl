@@ -73,7 +73,7 @@ class NotifyIcon // docmain
 		txt = unsafeAnsi(txt); // ...
 		nid.szTip[txt.length] = 0;
 		nid.szTip[0 .. txt.length] = txt[];
-		tipLen = txt.length;
+		tipLen = txt.length.toI32;
 		
 		if(visible)
 		{
@@ -192,7 +192,7 @@ class NotifyIcon // docmain
 		HWND hwnd;
 		
 		hwnd = win.handle;
-		style = GetWindowLongPtrA(hwnd, GWL_STYLE);
+		style = GetWindowLongPtrA(hwnd, GWL_STYLE).toI32;
 		
 		if(style & WS_VISIBLE)
 		{
@@ -220,7 +220,7 @@ class NotifyIcon // docmain
 		HWND hwnd;
 		
 		hwnd = win.handle;
-		style = GetWindowLongPtrA(hwnd, GWL_STYLE);
+		style = GetWindowLongPtrA(hwnd, GWL_STYLE).toI32;
 		
 		if(!(style & WS_VISIBLE))
 		{

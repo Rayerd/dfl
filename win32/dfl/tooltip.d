@@ -121,7 +121,7 @@ class ToolTip // docmain
 	final @property void showAlways(bool byes) // setter
 	{
 		LONG wl;
-		wl = GetWindowLongPtrA(hwtt, GWL_STYLE);
+		wl = GetWindowLongPtrA(hwtt, GWL_STYLE).toI32;
 		if(byes)
 		{
 			if(wl & TTS_ALWAYSTIP)

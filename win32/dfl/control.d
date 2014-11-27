@@ -708,7 +708,7 @@ class Control: DObject, IWindow // docmain
 			}
 			else
 			{
-				return children.length;
+				return children.length.toI32;
 			}
 		}
 		
@@ -1524,7 +1524,7 @@ class Control: DObject, IWindow // docmain
 				{
 					SendMessageA(hwnd, WM_SETCURSOR, cast(WPARAM)hwnd,
 						MAKELPARAM(
-							SendMessageA(hwnd, WM_NCHITTEST, 0, MAKELPARAM(curpt.x, curpt.y)),
+							SendMessageA(hwnd, WM_NCHITTEST, 0, MAKELPARAM(curpt.x, curpt.y)).toI32,
 							WM_MOUSEMOVE)
 							);
 				}
@@ -3866,7 +3866,7 @@ class Control: DObject, IWindow // docmain
 				return false;
 			xiter--;
 			
-			LONG st = GetWindowLongPtrA(hw, GWL_STYLE);
+			LONG st = GetWindowLongPtrA(hw, GWL_STYLE).toI32;
 			if(!(st & WS_VISIBLE))
 				continue;
 			if(st & WS_DISABLED)
@@ -5629,7 +5629,7 @@ class Control: DObject, IWindow // docmain
 					if((wp.flags & (SWP_SHOWWINDOW | SWP_HIDEWINDOW)) || !(wp.flags & SWP_NOSIZE))
 					{
 						DWORD rstyle;
-						rstyle = GetWindowLongPtrA(msg.hWnd, GWL_STYLE);
+						rstyle = GetWindowLongPtrA(msg.hWnd, GWL_STYLE).toI32;
 						rstyle &= WS_MAXIMIZE | WS_MINIMIZE;
 						wstyle &= ~(WS_MAXIMIZE | WS_MINIMIZE);
 						wstyle |= rstyle;
@@ -5721,7 +5721,7 @@ class Control: DObject, IWindow // docmain
 				else
 					wstyle |= WS_DISABLED;
 				+/
-				wstyle = GetWindowLongPtrA(hwnd, GWL_STYLE);
+				wstyle = GetWindowLongPtrA(hwnd, GWL_STYLE).toI32;
 				break;
 			
 			/+
@@ -7188,7 +7188,7 @@ class Control: DObject, IWindow // docmain
 		if(isHandleCreated)
 		{
 			// Always fetch because it's not guaranteed to be accurate.
-			wclassStyle = _fetchClassLongPtr();
+			wclassStyle = _fetchClassLongPtr().toI32;
 		}
 		
 		return wclassStyle;
