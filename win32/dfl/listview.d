@@ -2301,7 +2301,7 @@ class ListView: ControlSuperClass // docmain
 								{
 									if(lvdi.item.mask & LVIF_TEXT)
 									{
-										if(lvdi.item.iSubItem <= item.subItems.length)
+										if(lvdi.item.iSubItem <= item.subItems.length.toI32)
 											lvdi.item.pszText = cast(typeof(lvdi.item.pszText))item.subItems[lvdi.item.iSubItem - 1].calltxt.ansi;
 									}
 								}
@@ -2337,7 +2337,7 @@ class ListView: ControlSuperClass // docmain
 								{
 									if(lvdi.item.mask & LVIF_TEXT)
 									{
-										if(lvdi.item.iSubItem <= item.subItems.length)
+										if(lvdi.item.iSubItem <= item.subItems.length.toI32)
 											lvdi.item.pszText = cast(typeof(lvdi.item.pszText))item.subItems[lvdi.item.iSubItem - 1].calltxt.unicode;
 									}
 								}

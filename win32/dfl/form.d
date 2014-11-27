@@ -2079,7 +2079,7 @@ class Form: ContainerControl, IDialogResult // docmain
 		{
 			if(sowner)
 			{
-				LONG owl = GetWindowLongPtrA(sowner, GWL_STYLE);
+				LONG owl = GetWindowLongPtrA(sowner, GWL_STYLE).toI32;
 				if(owl & WS_CHILD)
 					goto bad_owner;
 				

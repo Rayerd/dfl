@@ -1,6 +1,7 @@
 ﻿module dfl.clippingform;
 
 private import dfl.all, dfl.internal.winapi;
+private import dfl.internal.dlib : toI32;
 private import core.memory;
 
 private extern (Windows)
@@ -122,8 +123,8 @@ public:
 		{
 			dwSize = RGNDATAHEADER.sizeof;
 			iType  = RDH_RECTANGLES;
-			nRgnSize = RGNDATAHEADER.sizeof + RECT.sizeof*nCount;
-			rcBound = RECT(0,0,_width,_height);
+			nRgnSize = RGNDATAHEADER.sizeof.toI32 + RECT.sizeof.toI32*nCount.toI32;
+			rcBound = RECT(0,0,_width.toI32,_height.toI32);
 		}
 		if (auto hRgn = ExtCreateRegion(null, _rgn.rdh.nRgnSize, _rgn))
 		{
@@ -143,8 +144,8 @@ public:
 		with(bi)
 		{
 			biSize        = BITMAPINFOHEADER.sizeof;
-			biWidth       = w;
-			biHeight      = h;
+			biWidth       = w.toI32;
+			biHeight      = h.toI32;
 			biPlanes      = 1;
 			biBitCount    = 32;
 			biCompression = BI_RGB;
@@ -153,7 +154,7 @@ public:
 		COLORREF tr;
 		for (int y = 1; y < h; ++y)
 		{
-			GetDIBits(hDC, hBitmap, h-y, 1, pxs.ptr, cast(BITMAPINFO*)&bi, DIB_RGB_COLORS);
+			GetDIBits(hDC, hBitmap, h.toI32-y, 1, pxs.ptr, cast(BITMAPINFO*)&bi, DIB_RGB_COLORS);
 			if (y == 1) tr = pxs[0];
 			for (int x = 0; x < w; x++)
 			{

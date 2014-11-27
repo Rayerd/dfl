@@ -739,7 +739,7 @@ class RichTextBox: TextBoxBase // docmain
 			return -1; // ...
 		if(charIndex < 0)
 			return -1;
-		return SendMessageA(hwnd, EM_EXLINEFROMCHAR, 0, charIndex);
+		return SendMessageA(hwnd, EM_EXLINEFROMCHAR, 0, charIndex).toI32;
 	}
 	
 	
@@ -944,7 +944,7 @@ class RichTextBox: TextBoxBase // docmain
 		tr.lpstrText = s.ptr;
 		
 		//max = SendMessageA(handle, EM_GETTEXTRANGE, 0, cast(LPARAM)&tr);
-		max = dfl.internal.utf.sendMessage(handle, EM_GETTEXTRANGE, 0, cast(LPARAM)&tr);
+		max = dfl.internal.utf.sendMessage(handle, EM_GETTEXTRANGE, 0, cast(LPARAM)&tr).toI32;
 		Dstring result;
 		if(dfl.internal.utf.useUnicode)
 			result = fromUnicode(cast(wchar*)s.ptr, max);
@@ -1032,7 +1032,7 @@ private extern(Windows) DWORD _streamingInStr(DWORD_PTR dwCookie, LPBYTE pbBuff,
 	else if(cb >= si.str.length)
 	{
 		pbBuff[0 .. si.str.length] = (cast(BYTE[])si.str)[];
-		*pcb = si.str.length;
+		*pcb = si.str.length.toI32;
 		si.str = null;
 	}
 	else

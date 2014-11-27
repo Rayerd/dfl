@@ -5,7 +5,7 @@
 ///
 module dfl.imagelist;
 
-import dfl.base, dfl.drawing, dfl.internal.winapi;
+import dfl.base, dfl.drawing, dfl.internal.winapi, dfl.internal.dlib;
 import dfl.collections;
 
 
@@ -27,7 +27,7 @@ else
 			
 			void insert(int index, Image img)
 			{
-				if(index >= _images.length)
+				if(index >= _images.length.toI32)
 				{
 					add(img);
 				}
@@ -207,7 +207,7 @@ else
 					}
 					else
 					{
-						imageListRemove(handle, idx);
+						imageListRemove(handle, idx.toI32);
 					}
 				}
 			}
@@ -403,7 +403,7 @@ else
 			}
 			
 			// Note: cGrow is not a limit, but how many images to preallocate each grow.
-			_hil = imageListCreate(_w, _h, flags, _cimages._images.length, 4 + _cimages._images.length / 4);
+			_hil = imageListCreate(_w, _h, flags, _cimages._images.length.toI32, 4 + _cimages._images.length.toI32 / 4);
 			if(!_hil)
 				throw new DflException("Unable to create image list");
 			

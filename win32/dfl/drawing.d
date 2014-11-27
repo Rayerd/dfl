@@ -2678,7 +2678,7 @@ class Graphics // docmain
 		{
 			LineTo(hdc, points[i].x, points[i].y);
 			
-			if(++i == points.length)
+			if(++i == points.length.toI32)
 				break;
 		}
 		
@@ -2757,7 +2757,7 @@ class Graphics // docmain
 		static assert(Point.sizeof == POINT.sizeof);
 		cpts = cast(POINT*)cast(Point*)points;
 		
-		PolyBezier(hdc, cpts, points.length);
+		PolyBezier(hdc, cpts, points.length.toI32);
 		
 		// Reset stuff.
 		SelectObject(hdc, prevPen);
@@ -2813,7 +2813,7 @@ class Graphics // docmain
 		static assert(Point.sizeof == POINT.sizeof);
 		cpts = cast(POINT*)cast(Point*)points;
 		
-		Polygon(hdc, cpts, points.length);
+		Polygon(hdc, cpts, points.length.toI32);
 		
 		// Reset stuff.
 		SelectObject(hdc, prevPen);
