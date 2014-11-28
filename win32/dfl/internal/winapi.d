@@ -1084,28 +1084,38 @@ extern(Windows) nothrow:
 	}
 	
 	
-	version(DFL_D2_AND_ABOVE)
+	version(Win64)
 	{
-		/+ // DMD 2.012: Error: cannot implicitly convert expression (cast(HANDLE)cast(void*)-65536u) of type const(HANDLE) to int
-		const HTREEITEM TVI_ROOT = cast(HTREEITEM)-0x10000;
-		const HTREEITEM TVI_FIRST = cast(HTREEITEM)-0x0FFFF;
-		const HTREEITEM TVI_LAST = cast(HTREEITEM)-0x0FFFE;
-		const HTREEITEM TVI_SORT = cast(HTREEITEM)-0x0FFFD;
-		+/
-		enum: HTREEITEM
-		{
-			TVI_ROOT = cast(HTREEITEM)-0x10000,
-			TVI_FIRST = cast(HTREEITEM)-0x0FFFF,
-			TVI_LAST = cast(HTREEITEM)-0x0FFFE,
-			TVI_SORT = cast(HTREEITEM)-0x0FFFD,
+		enum: HTREEITEM {
+			TVI_ROOT  = cast(HTREEITEM) cast(ULONG_PTR)-0x10000,
+			TVI_FIRST = cast(HTREEITEM) cast(ULONG_PTR)-0xFFFF,
+			TVI_LAST  = cast(HTREEITEM) cast(ULONG_PTR)-0xFFFE,
+			TVI_SORT  = cast(HTREEITEM) cast(ULONG_PTR)-0xFFFD,
 		}
-	}
-	else
-	{
-		const HTREEITEM TVI_ROOT = cast(HTREEITEM)-0x10000;
-		const HTREEITEM TVI_FIRST = cast(HTREEITEM)-0x0FFFF;
-		const HTREEITEM TVI_LAST = cast(HTREEITEM)-0x0FFFE;
-		const HTREEITEM TVI_SORT = cast(HTREEITEM)-0x0FFFD;
+	} else {
+		version(DFL_D2_AND_ABOVE)
+		{
+			/+ // DMD 2.012: Error: cannot implicitly convert expression (cast(HANDLE)cast(void*)-65536u) of type const(HANDLE) to int
+			const HTREEITEM TVI_ROOT = cast(HTREEITEM)-0x10000;
+			const HTREEITEM TVI_FIRST = cast(HTREEITEM)-0x0FFFF;
+			const HTREEITEM TVI_LAST = cast(HTREEITEM)-0x0FFFE;
+			const HTREEITEM TVI_SORT = cast(HTREEITEM)-0x0FFFD;
+			+/
+			enum: HTREEITEM
+			{
+				TVI_ROOT = cast(HTREEITEM)-0x10000,
+				TVI_FIRST = cast(HTREEITEM)-0x0FFFF,
+				TVI_LAST = cast(HTREEITEM)-0x0FFFE,
+				TVI_SORT = cast(HTREEITEM)-0x0FFFD,
+			}
+		}
+		else
+		{
+			const HTREEITEM TVI_ROOT = cast(HTREEITEM)-0x10000;
+			const HTREEITEM TVI_FIRST = cast(HTREEITEM)-0x0FFFF;
+			const HTREEITEM TVI_LAST = cast(HTREEITEM)-0x0FFFE;
+			const HTREEITEM TVI_SORT = cast(HTREEITEM)-0x0FFFD;
+		}
 	}
 	
 	
