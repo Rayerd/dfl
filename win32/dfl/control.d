@@ -3647,7 +3647,7 @@ class Control: DObject, IWindow // docmain
 	///
 	static bool isMnemonic(dchar charCode, Dstring text)
 	{
-		uint ui;
+		size_t ui;
 		for(ui = 0; ui != text.length; ui++)
 		{
 			if('&' == text[ui])

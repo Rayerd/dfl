@@ -355,7 +355,7 @@ final class Application // docmain
 	/// ditto
 	void removeMessageFilter(IMessageFilter mf)
 	{
-		uint i;
+		size_t i;
 		for(i = 0; i != filters.length; i++)
 		{
 			if(mf is filters[i])
