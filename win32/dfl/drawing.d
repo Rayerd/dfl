@@ -2288,7 +2288,7 @@ class Graphics // docmain
 	
 	// Used internally.
 	// vSplit=true means the move grip moves left to right; false means top to bottom.
-	final void drawMoveGrip(Rect movableArea, bool vSplit = true, size_t count = 5) // package
+	final void drawMoveGrip(Rect movableArea, bool vSplit = true, uint count = 5) // package
 	{
 		enum MSPACE = 4;
 		enum MWIDTH = 3;

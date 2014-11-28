@@ -494,7 +494,7 @@ private template stopAtNull(T)
 {
 	T[] stopAtNull(T[] array)
 	{
-		int i;
+		size_t i;
 		for(i = 0; i != array.length; i++)
 		{
 			if(!array[i])
@@ -807,7 +807,7 @@ class DataObject: dfl.data.IDataObject // docmain
 	
 	int find(Dstring fmt, bool fix = true)
 	{
-		int i;
+		size_t i;
 		for(i = 0; i != all.length; i++)
 		{
 			if(!stringICmp(all[i].fmt, fmt))

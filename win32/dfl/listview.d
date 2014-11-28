@@ -242,8 +242,8 @@ class ListViewItem: DObject
 		if(lview && lview.created)
 		{
 			LV_ITEMA li;
-			li.stateMask = LVIS_STATEIMAGEMASK;
-			li.state = cast(LPARAM)(bchecked ? 2 : 1) << 12;
+			li.stateMask = LVIS_STATEIMAGEMASK; // Bits 12 through 15 of the member state
+			li.state = cast(UINT)(bchecked ? 2 : 1) << 12;
 			lview.prevwproc(LVM_SETITEMSTATE, cast(WPARAM)thisindex, cast(LPARAM)&li);
 		}
 	}
