@@ -128,7 +128,7 @@ class ListBox: ListControl // docmain
 			
 			if(lbox.isMultSel())
 			{
-				return lbox.prevwproc(LB_GETSELCOUNT, 0, 0);
+				return lbox.prevwproc(LB_GETSELCOUNT, 0, 0).toI32;
 			}
 			else
 			{
@@ -224,7 +224,7 @@ class ListBox: ListControl // docmain
 			
 			if(lbox.isMultSel())
 			{
-				return lbox.prevwproc(LB_GETSELCOUNT, 0, 0);
+				return lbox.prevwproc(LB_GETSELCOUNT, 0, 0).toI32;
 			}
 			else
 			{
@@ -786,7 +786,7 @@ class ListBox: ListControl // docmain
 	final @property int topIndex() // getter
 	{
 		if(isHandleCreated)
-			return prevwproc(LB_GETTOPINDEX, 0, 0);
+			return prevwproc(LB_GETTOPINDEX, 0, 0).toI32;
 		return 0;
 	}
 	
@@ -847,9 +847,9 @@ class ListBox: ListControl // docmain
 		if(created)
 		{
 			if(dfl.internal.utf.useUnicode)
-				result = prevwproc(LB_FINDSTRING, startIndex, cast(LPARAM)dfl.internal.utf.toUnicodez(str));
+				result = prevwproc(LB_FINDSTRING, startIndex, cast(LPARAM)dfl.internal.utf.toUnicodez(str)).toI32;
 			else
-				result = prevwproc(LB_FINDSTRING, startIndex, cast(LPARAM)dfl.internal.utf.unsafeAnsiz(str));
+				result = prevwproc(LB_FINDSTRING, startIndex, cast(LPARAM)dfl.internal.utf.unsafeAnsiz(str)).toI32;
 			if(result == LB_ERR) // Redundant.
 				result = NO_MATCHES;
 		}
@@ -874,9 +874,9 @@ class ListBox: ListControl // docmain
 		if(created)
 		{
 			if(dfl.internal.utf.useUnicode)
-				result = prevwproc(LB_FINDSTRINGEXACT, startIndex, cast(LPARAM)dfl.internal.utf.toUnicodez(str));
+				result = prevwproc(LB_FINDSTRINGEXACT, startIndex, cast(LPARAM)dfl.internal.utf.toUnicodez(str)).toI32;
 			else
-				result = prevwproc(LB_FINDSTRINGEXACT, startIndex, cast(LPARAM)dfl.internal.utf.unsafeAnsiz(str));
+				result = prevwproc(LB_FINDSTRINGEXACT, startIndex, cast(LPARAM)dfl.internal.utf.unsafeAnsiz(str)).toI32;
 			if(result == LB_ERR) // Redundant.
 				result = NO_MATCHES;
 		}
@@ -934,7 +934,7 @@ class ListBox: ListControl // docmain
 		
 		if(created)
 		{
-			result = prevwproc(LB_ITEMFROMPOINT, 0, MAKELPARAM(x, y));
+			result = prevwproc(LB_ITEMFROMPOINT, 0, MAKELPARAM(x, y)).toI32;
 			if(!HIWORD(result)) // In client area
 			{
 				//result = LOWORD(result); // High word already 0.
@@ -1072,7 +1072,7 @@ class ListBox: ListControl // docmain
 		
 		LRESULT insert2(WPARAM idx, Dstring val)
 		{
-			insert(idx, val);
+			insert(idx.toI32, val);
 			return idx;
 		}
 		
@@ -1082,7 +1082,7 @@ class ListBox: ListControl // docmain
 			int i;
 			if(lbox.sorted)
 			{
-				for(i = 0; i != _items.length; i++)
+				for(i = 0; i != _items.length.toI32; i++)
 				{
 					if(val < _items[i])
 						break;
@@ -1090,7 +1090,7 @@ class ListBox: ListControl // docmain
 			}
 			else
 			{
-				i = _items.length;
+				i = _items.length.toI32;
 			}
 			
 			insert(i, val);
@@ -1379,7 +1379,7 @@ class ListBox: ListControl // docmain
 				return;
 			
 			case LB_DELETESTRING:
-				icollection.removeAt(msg.wParam);
+				icollection.removeAt(msg.wParam.toI32);
 				msg.result = icollection.length;
 				return;
 			

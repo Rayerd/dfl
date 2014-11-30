@@ -719,11 +719,11 @@ class ListView: ControlSuperClass // docmain
 			switch(lv.sorting)
 			{
 				case SortOrder.NONE: // Add to end.
-					ii = _items.length;
+					ii = _items.length.toI32;
 					break;
 				
 				case SortOrder.ASCENDING: // Insertion sort.
-					for(ii = 0; ii != _items.length; ii++)
+					for(ii = 0; ii != _items.length.toI32; ii++)
 					{
 						assert(lv._sortproc);
 						//if(item < _items[ii])
@@ -733,7 +733,7 @@ class ListView: ControlSuperClass // docmain
 					break;
 				
 				case SortOrder.DESCENDING: // Insertion sort.
-					for(ii = 0; ii != _items.length; ii++)
+					for(ii = 0; ii != _items.length.toI32; ii++)
 					{
 						assert(lv._sortproc);
 						//if(item >= _items[ii])
@@ -842,7 +842,7 @@ class ListView: ControlSuperClass // docmain
 			int i;
 			if(created)
 			{
-				i = lv._ins(idx, val);
+				i = lv._ins(idx.toI32, val);
 				assert(-1 != i);
 			}
 		}
@@ -938,7 +938,7 @@ class ListView: ControlSuperClass // docmain
 			int i;
 			if(created)
 			{
-				i = lv._ins(idx, val);
+				i = lv._ins(idx.toI32, val);
 				assert(-1 != i);
 			}
 		}
@@ -1203,9 +1203,9 @@ class ListView: ControlSuperClass // docmain
 			int result = 0;
 			foreach(ref size_t i, ref ListViewItem lvitem; lview.items)
 			{
-				if(lvitem._getcheckstate(i))
+				if(lvitem._getcheckstate(i.toI32))
 				{
-					int dgidx = i; // Prevent ref.
+					int dgidx = i.toI32; // Prevent ref.
 					result = dg(dgidx);
 					if(result)
 						break;
@@ -1775,7 +1775,7 @@ class ListView: ControlSuperClass // docmain
 					SendMessageA(handle, LVM_DELETEALLITEMS, 0, 0); // Note: this sends LVN_DELETEALLITEMS.
 					foreach(idx, lvi; sitems)
 					{
-						_ins(idx, lvi);
+						_ins(idx.toI32, lvi);
 					}
 					endUpdate();
 				}
@@ -2575,7 +2575,7 @@ class ListView: ControlSuperClass // docmain
 	
 	// If -subItemIndex- is 0 it's an item not a sub item.
 	// Returns the insertion index or -1 on failure.
-	package final LRESULT _ins(int index, LPARAM lparam, Dstring itemText, int subItemIndex, int imageIndex = -1)
+	package final int _ins(int index, LPARAM lparam, Dstring itemText, int subItemIndex, int imageIndex = -1)
 	in
 	{
 		assert(created);
@@ -2605,36 +2605,36 @@ class ListView: ControlSuperClass // docmain
 		//lvi.pszText = toStringz(itemText);
 		lvi.pszText = LPSTR_TEXTCALLBACKA;
 		lvi.lParam = lparam;
-		return prevwproc(LVM_INSERTITEMA, 0, cast(LPARAM)&lvi);
+		return prevwproc(LVM_INSERTITEMA, 0, cast(LPARAM)&lvi).toI32;
 	}
 	
 	
-	package final LRESULT _ins(int index, ListViewItem item)
+	package final int _ins(int index, ListViewItem item)
 	{
 		//return _ins(index, cast(LPARAM)cast(void*)item, item.text, 0);
 		version(DFL_NO_IMAGELIST)
 		{
-			return _ins(index, cast(LPARAM)cast(void*)item, item.text, 0, -1);
+			return _ins(index, cast(LPARAM)cast(void*)item, item.text, 0, -1).toI32;
 		}
 		else
 		{
-			return _ins(index, cast(LPARAM)cast(void*)item, item.text, 0, item._imgidx);
+			return _ins(index, cast(LPARAM)cast(void*)item, item.text, 0, item._imgidx).toI32;
 		}
 	}
 	
 	
-	package final LRESULT _ins(int index, ListViewSubItem subItem, int subItemIndex)
+	package final int _ins(int index, ListViewSubItem subItem, int subItemIndex)
 	in
 	{
 		assert(subItemIndex > 0);
 	}
 	body
 	{
-		return _ins(index, cast(LPARAM)cast(void*)subItem, subItem.text, subItemIndex);
+		return _ins(index, cast(LPARAM)cast(void*)subItem, subItem.text, subItemIndex).toI32;
 	}
 	
 	
-	package final LRESULT _ins(int index, ColumnHeader header)
+	package final int _ins(int index, ColumnHeader header)
 	{
 		// TODO: column inserted at index 0 can only be left aligned, so will need to
 		// insert a dummy column to change the alignment, then delete the dummy column.
@@ -2660,12 +2660,12 @@ class ListView: ControlSuperClass // docmain
 		if(dfl.internal.utf.useUnicode)
 		{
 			lvc.lvcw.pszText = cast(typeof(lvc.lvcw.pszText))dfl.internal.utf.toUnicodez(header.text);
-			return prevwproc(LVM_INSERTCOLUMNW, cast(WPARAM)index, cast(LPARAM)&lvc.lvcw);
+			return prevwproc(LVM_INSERTCOLUMNW, cast(WPARAM)index, cast(LPARAM)&lvc.lvcw).toI32;
 		}
 		else
 		{
 			lvc.lvca.pszText = cast(typeof(lvc.lvca.pszText))dfl.internal.utf.toAnsiz(header.text);
-			return prevwproc(LVM_INSERTCOLUMNA, cast(WPARAM)index, cast(LPARAM)&lvc.lvca);
+			return prevwproc(LVM_INSERTCOLUMNA, cast(WPARAM)index, cast(LPARAM)&lvc.lvca).toI32;
 		}
 	}
 	
