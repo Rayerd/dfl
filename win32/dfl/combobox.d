@@ -252,9 +252,9 @@ class ComboBox: ListControl // docmain
 		if(isHandleCreated)
 		{
 			if(dfl.internal.utf.useUnicode)
-				result = prevwproc(CB_FINDSTRING, startIndex, cast(LPARAM)dfl.internal.utf.toUnicodez(str));
+				result = prevwproc(CB_FINDSTRING, startIndex, cast(LPARAM)dfl.internal.utf.toUnicodez(str)).toI32;
 			else
-				result = prevwproc(CB_FINDSTRING, startIndex, cast(LPARAM)dfl.internal.utf.unsafeAnsiz(str));
+				result = prevwproc(CB_FINDSTRING, startIndex, cast(LPARAM)dfl.internal.utf.unsafeAnsiz(str)).toI32;
 			if(result == CB_ERR) // Redundant.
 				result = NO_MATCHES;
 		}
@@ -279,9 +279,9 @@ class ComboBox: ListControl // docmain
 		if(isHandleCreated)
 		{
 			if(dfl.internal.utf.useUnicode)
-				result = prevwproc(CB_FINDSTRINGEXACT, startIndex, cast(LPARAM)dfl.internal.utf.toUnicodez(str));
+				result = prevwproc(CB_FINDSTRINGEXACT, startIndex, cast(LPARAM)dfl.internal.utf.toUnicodez(str)).toI32;
 			else
-				result = prevwproc(CB_FINDSTRINGEXACT, startIndex, cast(LPARAM)dfl.internal.utf.unsafeAnsiz(str));
+				result = prevwproc(CB_FINDSTRINGEXACT, startIndex, cast(LPARAM)dfl.internal.utf.unsafeAnsiz(str)).toI32;
 			if(result == CB_ERR) // Redundant.
 				result = NO_MATCHES;
 		}
@@ -586,7 +586,7 @@ class ComboBox: ListControl // docmain
 		
 		LRESULT insert2(WPARAM idx, Dstring val)
 		{
-			insert(idx, val);
+			insert(idx.toI32, val);
 			return idx;
 		}
 		
@@ -596,7 +596,7 @@ class ComboBox: ListControl // docmain
 			int i;
 			if(lbox.sorted)
 			{
-				for(i = 0; i != _items.length; i++)
+				for(i = 0; i != _items.length.toI32; i++)
 				{
 					if(val < _items[i])
 						break;
@@ -604,7 +604,7 @@ class ComboBox: ListControl // docmain
 			}
 			else
 			{
-				i = _items.length;
+				i = _items.length.toI32;
 			}
 			
 			insert(i, val);
@@ -951,7 +951,7 @@ class ComboBox: ListControl // docmain
 				return;
 			
 			case CB_DELETESTRING:
-				icollection.removeAt(msg.wParam);
+				icollection.removeAt(msg.wParam.toI32);
 				msg.result = icollection.length;
 				return;
 			
