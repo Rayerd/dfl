@@ -145,7 +145,7 @@ else
 			mparent = newParent;
 			
 			if(cast(size_t)mindex > mparent.menuItems.length)
-				mindex = mparent.menuItems.length;
+				mindex = mparent.menuItems.length.toI32;
 			
 			_setParent();
 		}
@@ -779,7 +779,7 @@ else
 			{
 				if(!Menu._compat092)
 				{
-					mi.mindex = length;
+					mi.mindex = length.toI32;
 				}
 				
 				/+
@@ -829,7 +829,7 @@ else
 			
 			void _added(size_t idx, MenuItem val)
 			{
-				val.mindex = idx;
+				val.mindex = idx.toI32;
 				val._setParent(_owner);
 				_additem(val);
 			}
