@@ -11,7 +11,7 @@ private import dfl.internal.dlib;
 
 private import dfl.internal.winapi, dfl.base, dfl.internal.utf;
 
-
+version (Win64) { /* not supported at this point */ } else:
 class DflRegistryException: DflException // package
 {
 	this(Dstring msg, int errorCode = 0)

@@ -4,7 +4,7 @@
 
 ///
 module dfl.socket;
-
+version (Win64) { /* not supported at this point */ } else:
 
 version(WINE)
 {
