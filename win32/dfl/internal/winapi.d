@@ -810,10 +810,46 @@ extern(Windows) nothrow:
 	}
 	
 	
-	enum
+	enum: int
 	{
-		LOGPIXELSX = 88,
-		LOGPIXELSY = 90,
+		DRIVERVERSION   = 0,
+		TECHNOLOGY      = 2,
+		HORZSIZE        = 4,
+		VERTSIZE        = 6,
+		HORZRES         = 8,
+		VERTRES         = 10,
+		BITSPIXEL       = 12,
+		PLANES          = 14,
+		NUMBRUSHES      = 16,
+		NUMPENS         = 18,
+		NUMMARKERS      = 20,
+		NUMFONTS        = 22,
+		NUMCOLORS       = 24,
+		PDEVICESIZE     = 26,
+		CURVECAPS       = 28,
+		LINECAPS        = 30,
+		POLYGONALCAPS   = 32,
+		TEXTCAPS        = 34,
+		CLIPCAPS        = 36,
+		RASTERCAPS      = 38,
+		ASPECTX         = 40,
+		ASPECTY         = 42,
+		ASPECTXY        = 44,
+		LOGPIXELSX      = 88,
+		LOGPIXELSY      = 90,
+		SIZEPALETTE     = 104,
+		NUMRESERVED     = 106,
+		COLORRES        = 108,
+		PHYSICALWIDTH   = 110,
+		PHYSICALHEIGHT  = 111,
+		PHYSICALOFFSETX = 112,
+		PHYSICALOFFSETY = 113,
+		SCALINGFACTORX  = 114,
+		SCALINGFACTORY  = 115,
+		VREFRESH        = 116,
+		DESKTOPVERTRES  = 117,
+		DESKTOPHORZRES  = 118,
+		BLTALIGNMENT    = 119
 	}
 	
 	
@@ -2749,6 +2785,32 @@ extern(Windows) nothrow:
 	}
 	
 	
+	struct ENHMETAHEADER
+	{
+		alias SIZE SIZEL;
+		alias RECT RECTL;
+		DWORD iType = 1;
+		DWORD nSize = ENHMETAHEADER.sizeof;
+		RECTL rclBounds;
+		RECTL rclFrame;
+		DWORD dSignature = 1179469088;
+		DWORD nVersion;
+		DWORD nBytes;
+		DWORD nRecords;
+		WORD nHandles;
+		WORD sReserved;
+		DWORD nDescription;
+		DWORD offDescription;
+		DWORD nPalEntries;
+		SIZEL szlDevice;
+		SIZEL szlMillimeters;
+		DWORD cbPixelFormat;
+		DWORD offPixelFormat;
+		DWORD bOpenGL;
+		SIZEL szlMicrometers;
+	}
+	
+	
 	BOOL DrawIconEx(HDC hdc, int xLeft, int yTop, HICON hIcon, int cxWidth, int cyWidth, UINT istepIfAniCur, HBRUSH hbrFlickerFreeDraw, UINT diFlags);
 	BOOL DrawIcon(HDC hDC, int X, int Y, HICON hIcon);
 	BOOL SetWindowPos(HWND hWnd, HWND hWndInsertAfter, int X, int Y, int cx, int cy, UINT uFlags);
@@ -2965,6 +3027,12 @@ extern(Windows) nothrow:
 	BOOL IsMenu(HMENU hMenu);
 	HMENU GetSystemMenu(HWND hWnd, BOOL bRevert);
 	DWORD GetModuleFileNameW(HMODULE hModule, LPWSTR lpFilename, DWORD nSize);
+	HDC CreateEnhMetaFileW(HDC hdcRef, LPCWSTR lpFilename, in RECT* lpRect, LPCWSTR lpDescription  );
+	BOOL PlayEnhMetaFile(HDC hdc, HENHMETAFILE hemf, in RECT* lpRect);
+	HENHMETAFILE CloseEnhMetaFile(HDC hdc);
+	BOOL DeleteEnhMetaFile(HENHMETAFILE hemf);
+	HENHMETAFILE GetEnhMetaFileW(LPCWSTR lpszMetaFile);
+	UINT GetEnhMetaFileHeader(HENHMETAFILE hemf, UINT cbBuffer, ENHMETAHEADER* cbBuffer);
 	HBITMAP CreateBitmap(int nWidth, int nHeight, UINT cPlanes, UINT cBitsPerPel, VOID *lpvBits);
 	BOOL SetBrushOrgEx(HDC hdc, int nXOrg, int nYOrg, LPPOINT lppt);
 	BOOL PatBlt(HDC hdc, int nXLeft, int nYLeft, int nWidth, int nHeight, DWORD dwRop);

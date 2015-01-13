@@ -1173,6 +1173,125 @@ class Bitmap: Image // docmain
 
 
 ///
+final class EnhancedMetaFile: Image
+{
+private:
+	HENHMETAFILE hemf;
+	ENHMETAHEADER emfh;
+	HDC hdcref;
+	bool owned;
+public:
+	// Used internally.
+	this(HENHMETAFILE hemf, HDC hdcref = null, bool owned = true)
+	{
+		this.hemf = hemf;
+		GetEnhMetaFileHeader(hemf, ENHMETAHEADER.sizeof, &emfh);
+		assert(hdcref || owned);
+		if (!hdcref)
+		{
+			this.hdcref = GetDC(null);
+			this.owned = true;
+		}
+	}	
+	
+	/// Load from a emf file.
+	this(string fileName, HDC hdcref = null)
+	{
+		import std.utf;
+		auto tmp = GetEnhMetaFileW(fileName.toUTF16z());
+		if(!tmp)
+			throw new DflException("Unable to load EnhanceMetaFile from file '" ~ fileName ~ "'");
+		this(tmp, hdcref);
+	}
+	
+	///
+	void dispose()
+	{
+		DeleteEnhMetaFile(hemf);
+		hemf = null;
+		if (owned)
+			ReleaseDC(null, hdcref);
+	}
+	
+	
+	~this()
+	{
+		dispose();
+	}
+
+	
+	///
+	final HENHMETAFILE handle() @property // getter
+	{
+		return hemf;
+	}
+	
+	///
+	Rect bounds() const nothrow @property
+	{
+		with (emfh)
+		{
+			auto rc = RECT(
+				MulDiv(rclBounds.left   * 1000, szlDevice.cx * GetDeviceCaps(cast(HDC)hdcref, HORZSIZE), szlMicrometers.cx * GetDeviceCaps(cast(HDC)hdcref, HORZRES)),
+				MulDiv(rclBounds.top    * 1000, szlDevice.cy * GetDeviceCaps(cast(HDC)hdcref, VERTSIZE), szlMicrometers.cy * GetDeviceCaps(cast(HDC)hdcref, VERTRES)),
+				MulDiv(rclBounds.right  * 1000, szlDevice.cx * GetDeviceCaps(cast(HDC)hdcref, HORZSIZE), szlMicrometers.cx * GetDeviceCaps(cast(HDC)hdcref, HORZRES)),
+				MulDiv(rclBounds.bottom * 1000, szlDevice.cy * GetDeviceCaps(cast(HDC)hdcref, VERTSIZE), szlMicrometers.cy * GetDeviceCaps(cast(HDC)hdcref, VERTRES)));
+			return Rect(&rc);
+		}
+	}
+	
+	///
+	override int width() const pure nothrow @property // getter
+	{
+		with (emfh)
+			return MulDiv(rclFrame.right  - rclFrame.left,   szlDevice.cx * 10, szlMicrometers.cx);
+	}
+	
+	///
+	override int height() const pure nothrow @property // getter
+	{
+		with (emfh)
+			return MulDiv(rclFrame.bottom - rclFrame.top,    szlDevice.cy * 10, szlMicrometers.cy);
+	}
+	
+	///
+	override Size size() const pure nothrow @property // getter
+	{
+		return Size(width, height);
+	}
+	
+	///
+	Rect frameRectangle() const pure nothrow @property
+	{
+		with (emfh)
+		{
+			return Rect(
+				MulDiv(rclFrame.left,   szlDevice.cx * 10, szlMicrometers.cx),
+				MulDiv(rclFrame.top,    szlDevice.cy * 10, szlMicrometers.cy),
+				width, height);
+		}
+	}
+	
+	///
+	override void draw(Graphics g, Point pt)
+	{
+		auto sz = size;
+		RECT rc;
+		Rect(pt.x, pt.y, sz.width, sz.height).getRect(&rc);
+		PlayEnhMetaFile(g.handle, hemf, &rc);
+	}
+	
+	///
+	override void drawStretched(Graphics g, Rect r)
+	{
+		RECT rc;
+		r.getRect(&rc);
+		PlayEnhMetaFile(g.handle, hemf, &rc);
+	}
+}
+
+
+///
 class Picture: Image // docmain
 {
 	// Note: requires OleInitialize(null).
@@ -3122,6 +3241,106 @@ class MemoryGraphics: Graphics // docmain
 	HGDIOBJ hbmOld;
 	HBITMAP hbm;
 	int _w, _h;
+}
+
+///
+final class EmfGraphics: Graphics
+{
+private:
+	HDC _hdc;
+	Rect _area;
+public:
+	
+	///
+	this(Graphics refGraphics = null, Rect area = Rect.init, string filename = null, string description = null)
+	{
+		_area = area;
+		RECT rc;
+		RECT* pRc;
+		HDC hdcref;
+		if (refGraphics)
+		{
+			hdcref = refGraphics.handle;
+		}
+		else
+		{
+			hdcref = GetDC(null);
+		}
+		scope (exit)
+		{
+			if (!refGraphics)
+				ReleaseDC(null, hdcref);
+		}
+		if (area != Rect.init)
+		{
+			auto tmphdc = CreateEnhMetaFileW(hdcref, null, null, null);
+			auto tmpemf = CloseEnhMetaFile(tmphdc);
+			ENHMETAHEADER tmphdr;
+			GetEnhMetaFileHeader(tmpemf, ENHMETAHEADER.sizeof, &tmphdr);
+			DeleteEnhMetaFile(tmpemf);
+			rc.left   = MulDiv(_area.x,      GetDeviceCaps(hdcref, HORZSIZE) * 100, tmphdr.szlDevice.cx);
+			rc.top    = MulDiv(_area.y,      GetDeviceCaps(hdcref, VERTSIZE) * 100, tmphdr.szlDevice.cy);
+			rc.right  = MulDiv(_area.right,  GetDeviceCaps(hdcref, HORZSIZE) * 100, tmphdr.szlDevice.cx);
+			rc.bottom = MulDiv(_area.bottom, GetDeviceCaps(hdcref, VERTSIZE) * 100, tmphdr.szlDevice.cy);
+			pRc = &rc;
+		}
+		import std.utf;
+		_hdc = CreateEnhMetaFileW(
+			hdcref,
+			filename.length ? filename.toUTF16z(): null,
+			pRc,
+			description.length ? description.toUTF16z(): null);
+		super(_hdc, false);
+	}
+	
+	///
+	this(Rect area, string filename = null, string description = null)
+	{
+		this(null, area, filename, description);
+	}
+	
+	///
+	this(uint width, uint height, string filename = null, string description = null)
+	{
+		this(null, Rect(0, 0, width, height), filename, description);
+	}
+	
+	override void dispose()
+	{
+		super.dispose();
+		if (_hdc)
+			DeleteEnhMetaFile(CloseEnhMetaFile(_hdc));
+	}
+	
+	///
+	Size size() const pure nothrow @property
+	{
+		return _area.size;
+	}
+	
+	///
+	uint width() const pure nothrow @property
+	{
+		return _area.width;
+	}
+	
+	///
+	uint height() const pure nothrow @property
+	{
+		return _area.height;
+	}
+	
+	///
+	Rect frameRectangle() const pure nothrow @property
+	{
+		return _area;
+	}
+	
+	///
+	EnhancedMetaFile toEnhancedMetaFile()
+	{
+		return new EnhancedMetaFile(CloseEnhMetaFile(_hdc));
+	}
 }
 
 
