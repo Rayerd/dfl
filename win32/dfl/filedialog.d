@@ -243,7 +243,7 @@ abstract class FileDialog: CommonDialog // docmain
 						if(dfl.internal.utf.useUnicode)
 						{
 							str.sw ~= dfl.internal.utf.toUnicode(filterString[starti .. i]);
-							str.sw ~= "\0";
+							str.sw ~= "\0"w;
 						}
 						else
 						{
@@ -267,7 +267,7 @@ abstract class FileDialog: CommonDialog // docmain
 			if(dfl.internal.utf.useUnicode)
 			{
 				str.sw ~= dfl.internal.utf.toUnicode(filterString[starti .. i]);
-				str.sw ~= "\0\0";
+				str.sw ~= "\0\0"w;
 				
 				ofnw.lpstrFilter = str.sw.ptr;
 			}

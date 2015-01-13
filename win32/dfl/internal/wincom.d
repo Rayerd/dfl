@@ -47,7 +47,7 @@ version(_dfl_needcom)
 		DWORD Data1;
 		WORD  Data2;
 		WORD  Data3;
-		BYTE  Data4[8];
+		BYTE[8]  Data4;
 	}
 	
 	enum

@@ -10,6 +10,7 @@ private import dfl.internal.dlib;
 private import dfl.internal.winapi, dfl.control, dfl.base, dfl.application;
 private import dfl.drawing, dfl.event, dfl.collections;
 
+private import std.algorithm;
 
 private extern(C) void* memmove(void*, void*, size_t len);
 
@@ -979,7 +980,7 @@ class ListBox: ListControl // docmain
 		{
 			Object[] itemscopy;
 			itemscopy = icollection._items.dup;
-			itemscopy.sort;
+			std.algorithm.sort(itemscopy);
 			
 			items.clear();
 			
