@@ -787,25 +787,25 @@ class SizingEventArgs: EventArgs
 	}
 	
 	///
-	@property void width(size_t w) pure nothrow
+	@property void width(int w) pure nothrow
 	{
 		_sz.width = w;
 	}
 	
 	/// ditto
-	@property size_t width() pure nothrow
+	@property int width() pure nothrow
 	{
 		return _sz.width;
 	}
 	
 	///
-	@property void height(size_t h) pure nothrow
+	@property void height(int h) pure nothrow
 	{
 		_sz.height = h;
 	}
 	
 	/// ditto
-	@property size_t height() pure nothrow
+	@property int height() pure nothrow
 	{
 		return _sz.height;
 	}
@@ -838,25 +838,25 @@ class MovingEventArgs: EventArgs
 	}
 	
 	///
-	@property void x(size_t posX) pure nothrow
+	@property void x(int posX) pure nothrow
 	{
 		_loc.x = posX;
 	}
 	
 	/// ditto
-	@property size_t x() pure nothrow
+	@property int x() pure nothrow
 	{
 		return _loc.x;
 	}
 	
 	///
-	@property void y(size_t posY) pure nothrow
+	@property void y(int posY) pure nothrow
 	{
 		_loc.y = posY;
 	}
 	
 	/// ditto
-	@property size_t y() pure nothrow
+	@property int y() pure nothrow
 	{
 		return _loc.y;
 	}
