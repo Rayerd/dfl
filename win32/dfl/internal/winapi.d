@@ -2881,7 +2881,7 @@ extern(Windows) nothrow:
 	LRESULT DefMDIChildProcW(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	VOID SetLastError(DWORD dwErrCode);
 	HWND CreateMDIWindowA(LPSTR lpClassName, LPSTR lpWindowName, DWORD dwStyle, int X, int Y, int nWidth, int nHeight, HWND hWndParent, HINSTANCE hInstance, LPARAM lParam);
-	int MulDiv(int nNumber, int nNumerator, int nDenominator);
+	int MulDiv(int nNumber, int nNumerator, int nDenominator) pure nothrow;
 	BOOL FillRgn(HDC hdc, HRGN hrgn, HBRUSH hbr);
 	COLORREF GetNearestColor(HDC hdc,COLORREF crColor);
 	int DrawTextA(HDC hDC, LPCSTR lpString, int nCount, LPRECT lpRect, UINT uFormat);

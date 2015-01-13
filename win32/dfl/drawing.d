@@ -51,10 +51,17 @@ struct Point // docmain
 	
 	
 	/// Construct a new Point.
-	this(int x, int y)
+	this(int x, int y) pure nothrow
 	{
 		this.x = x;
 		this.y = y;
+	}
+	
+	
+	this(in POINT* pt) pure nothrow
+	{
+		this.x = pt.x;
+		this.y = pt.y;
 	}
 	
 	
@@ -83,7 +90,7 @@ struct Point // docmain
 	
 	
 	///
-	Point opAdd(Size sz)
+	Point opAdd(Size sz) const pure nothrow
 	{
 		Point result;
 		result.x = x + sz.width;
@@ -93,7 +100,7 @@ struct Point // docmain
 	
 	
 	///
-	Point opSub(Size sz)
+	Point opSub(Size sz) const pure nothrow
 	{
 		Point result;
 		result.x = x - sz.width;
@@ -103,7 +110,7 @@ struct Point // docmain
 	
 	
 	///
-	void opAddAssign(Size sz)
+	void opAddAssign(Size sz) pure nothrow
 	{
 		x += sz.width;
 		y += sz.height;
@@ -111,7 +118,7 @@ struct Point // docmain
 	
 	
 	///
-	void opSubAssign(Size sz)
+	void opSubAssign(Size sz) pure nothrow
 	{
 		x -= sz.width;
 		y -= sz.height;
@@ -119,7 +126,7 @@ struct Point // docmain
 	
 	
 	///
-	Point opNeg()
+	Point opNeg() const pure nothrow
 	{
 		return Point(-x, -y);
 	}
@@ -133,7 +140,7 @@ struct Size // docmain
 	int height;
 	
 	
-	SIZE size() const
+	SIZE size() const pure nothrow
 	{
 		SIZE sz;
 		sz.cx = width;
@@ -142,7 +149,7 @@ struct Size // docmain
 	}
 	
 	
-	void size(SIZE sz)
+	void size(SIZE sz) pure nothrow
 	{
 		width = sz.cx;
 		height = sz.cy;
@@ -150,10 +157,18 @@ struct Size // docmain
 	
 	
 	/// Construct a new Size.
-	this(int width, int height)
+	this(int width, int height) pure nothrow
 	{
 		this.width = width;
 		this.height = height;
+	}
+	
+	
+	/// Construct a new Size.
+	this(in SIZE* size) pure nothrow
+	{
+		this.width  = size.cx;
+		this.height = size.cy;
 	}
 	
 	
@@ -182,7 +197,7 @@ struct Size // docmain
 	
 	
 	///
-	Size opAdd(Size sz)
+	Size opAdd(Size sz) const pure nothrow
 	{
 		Size result;
 		result.width = width + sz.width;
@@ -192,7 +207,7 @@ struct Size // docmain
 	
 	
 	///
-	Size opSub(Size sz)
+	Size opSub(Size sz) const pure nothrow
 	{
 		Size result;
 		result.width = width - sz.width;
@@ -202,7 +217,7 @@ struct Size // docmain
 	
 	
 	///
-	void opAddAssign(Size sz)
+	void opAddAssign(Size sz) pure nothrow
 	{
 		width += sz.width;
 		height += sz.height;
@@ -210,7 +225,7 @@ struct Size // docmain
 	
 	
 	///
-	void opSubAssign(Size sz)
+	void opSubAssign(Size sz) pure nothrow
 	{
 		width -= sz.width;
 		height -= sz.height;
@@ -224,7 +239,7 @@ struct Rect // docmain
 	int x, y, width, height;
 	
 	// Used internally.
-	pure nothrow void getRect(RECT* r) // package
+	void getRect(RECT* r) pure nothrow // package
 	{
 		r.left = x;
 		r.right = x + width;
@@ -234,13 +249,13 @@ struct Rect // docmain
 	
 	
 	///
-	@property Point location() // getter
+	Point location() const pure nothrow @property // getter
 	{
 		return Point(x, y);
 	}
 	
 	/// ditto
-	@property void location(Point pt) // setter
+	void location(Point pt) pure nothrow @property // setter
 	{
 		x = pt.x;
 		y = pt.y;
@@ -248,13 +263,13 @@ struct Rect // docmain
 	
 	
 	///
-	@property Size size() //getter
+	Size size() const pure nothrow @property //getter
 	{
 		return Size(width, height);
 	}
 	
 	/// ditto
-	@property void size(Size sz) // setter
+	void size(Size sz) pure nothrow @property // setter
 	{
 		width = sz.width;
 		height = sz.height;
@@ -262,63 +277,50 @@ struct Rect // docmain
 	
 	
 	///
-	@property int right() // getter
+	int right() const pure nothrow @property // getter
 	{
 		return x + width;
 	}
 	
 	
 	///
-	@property int bottom() // getter
+	int bottom() const pure nothrow @property // getter
 	{
 		return y + height;
 	}
 	
 	
 	/// Construct a new Rect.
-	static Rect opCall(int x, int y, int width, int height)
+	this(int x, int y, int width, int height) pure nothrow
 	{
-		Rect r;
-		r.x = x;
-		r.y = y;
-		r.width = width;
-		r.height = height;
-		return r;
+		this.x = x;
+		this.y = y;
+		this.width = width;
+		this.height = height;
 	}
 	
 	/// ditto
-	static Rect opCall(Point location, Size size)
+	this(Point location, Size size) pure nothrow
 	{
-		Rect r;
-		r.x = location.x;
-		r.y = location.y;
-		r.width = size.width;
-		r.height = size.height;
-		return r;
-	}
-	
-	/// ditto
-	static Rect opCall()
-	{
-		Rect r;
-		return r;
+		x = location.x;
+		y = location.y;
+		width = size.width;
+		height = size.height;
 	}
 	
 	
 	// Used internally.
-	static Rect opCall(RECT* rect) // package
+	this(in RECT* rect) pure nothrow // package
 	{
-		Rect r;
-		r.x = rect.left;
-		r.y = rect.top;
-		r.width = rect.right - rect.left;
-		r.height = rect.bottom - rect.top;
-		return r;
+		x = rect.left;
+		y = rect.top;
+		width = rect.right - rect.left;
+		height = rect.bottom - rect.top;
 	}
 	
 	
 	/// Construct a new Rect from left, top, right and bottom values.
-	static Rect fromLTRB(int left, int top, int right, int bottom)
+	static Rect fromLTRB(int left, int top, int right, int bottom) pure nothrow
 	{
 		Rect r;
 		r.x = left;
@@ -357,7 +359,7 @@ struct Rect // docmain
 	
 	
 	///
-	bool contains(int c_x, int c_y)
+	bool contains(int c_x, int c_y) const pure nothrow
 	{
 		if(c_x >= x && c_y >= y)
 		{
@@ -368,14 +370,14 @@ struct Rect // docmain
 	}
 	
 	/// ditto
-	bool contains(Point pos)
+	bool contains(Point pos) const pure nothrow
 	{
 		return contains(pos.x, pos.y);
 	}
 	
 	/// ditto
 	// Contained entirely within -this-.
-	bool contains(Rect r)
+	bool contains(Rect r) const pure nothrow
 	{
 		if(r.x >= x && r.y >= y)
 		{
@@ -387,7 +389,7 @@ struct Rect // docmain
 	
 	
 	///
-	void inflate(int i_width, int i_height)
+	void inflate(int i_width, int i_height) pure nothrow
 	{
 		x -= i_width;
 		width += i_width * 2;
@@ -396,7 +398,7 @@ struct Rect // docmain
 	}
 	
 	/// ditto
-	void inflate(Size insz)
+	void inflate(Size insz) pure nothrow
 	{
 		inflate(insz.width, insz.height);
 	}
@@ -404,7 +406,7 @@ struct Rect // docmain
 	
 	///
 	// Just tests if there's an intersection.
-	bool intersectsWith(Rect r)
+	bool intersectsWith(Rect r) const pure nothrow
 	{
 		if(r.right >= x && r.bottom >= y)
 		{
@@ -416,14 +418,14 @@ struct Rect // docmain
 	
 	
 	///
-	void offset(int x, int y)
+	void offset(int x, int y) pure nothrow
 	{
 		this.x += x;
 		this.y += y;
 	}
 	
 	/// ditto
-	void offset(Point pt)
+	void offset(Point pt) pure nothrow
 	{
 		//return offset(pt.x, pt.y);
 		this.x += pt.x;
