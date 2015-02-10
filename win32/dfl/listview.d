@@ -2181,7 +2181,7 @@ class ListView: ControlSuperClass // docmain
 				return;
 			
 			case LVM_SETIMAGELIST:
-				m.result = cast(LRESULT)null;
+				m.result = cast(LRESULT)0;
 				return;
 			
 			case LVM_SETITEMA:

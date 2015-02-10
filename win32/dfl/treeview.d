@@ -1306,7 +1306,7 @@ class TreeView: ControlSuperClass // docmain
 		if(created)
 		{
 			HTREEITEM hnode;
-			hnode = cast(HTREEITEM)SendMessageA(hwnd, TVM_GETNEXTITEM, TVGN_CARET, cast(LPARAM)null);
+			hnode = cast(HTREEITEM)SendMessageA(hwnd, TVM_GETNEXTITEM, TVGN_CARET, cast(LPARAM)0);
 			if(hnode)
 				return treeNodeFromHandle(hnode);
 		}
@@ -1408,7 +1408,7 @@ class TreeView: ControlSuperClass // docmain
 		{
 			HTREEITEM hnode;
 			hnode = cast(HTREEITEM)SendMessageA(hwnd, TVM_GETNEXTITEM,
-				TVGN_FIRSTVISIBLE, cast(LPARAM)null);
+				TVGN_FIRSTVISIBLE, cast(LPARAM)0);
 			if(hnode)
 				return treeNodeFromHandle(hnode);
 		}
@@ -1658,7 +1658,7 @@ class TreeView: ControlSuperClass // docmain
 		{
 			case TVM_INSERTITEMA:
 			case TVM_INSERTITEMW:
-				m.result = cast(LRESULT)null;
+				m.result = cast(LRESULT)0;
 				return;
 			
 			case TVM_SETITEMA:
@@ -1671,7 +1671,7 @@ class TreeView: ControlSuperClass // docmain
 				return;
 			
 			case TVM_SETIMAGELIST:
-				m.result = cast(LRESULT)null;
+				m.result = cast(LRESULT)0;
 				return;
 			
 			default:

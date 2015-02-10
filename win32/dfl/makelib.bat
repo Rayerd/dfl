@@ -48,7 +48,7 @@ set dfl_libs=%dmc_path%\lib\gdi32.lib %dmc_path%\lib\comctl32.lib %dmc_path%\lib
 set _dfl_flags=%dfl_flags% -wi
 
 if not "%dfl_debug_flags%" == "" goto dfl_debug_flags_set
-	set dfl_debug_flags=-debug -g -version=DFL_UNICODE
+	set dfl_debug_flags=-debug -version=DFL_UNICODE
 :dfl_debug_flags_set
 
 if not "%dfl_release_flags%" == "" goto dfl_release_flags_set

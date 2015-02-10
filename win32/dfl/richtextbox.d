@@ -299,7 +299,7 @@ class RichTextBox: TextBoxBase // docmain
 	{
 		if(created)
 		{
-			SendMessageA(handle, EM_PASTESPECIAL, df.id, cast(LPARAM)null);
+			SendMessageA(handle, EM_PASTESPECIAL, df.id, cast(LPARAM)0);
 		}
 	}
 	
