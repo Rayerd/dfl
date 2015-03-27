@@ -1,9 +1,23 @@
 rem DFL64 minimum link batch
+rem This requies DMD tools _and_ MSVC build tools (tested with MSVC 2013 Community Ed.),
 
-rem You have to change this paths to your machine environment.
-set LIBCMD="C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\amd64\lib.exe"
-set VCCOMMON="C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE"
-set VCLIB64="C:\Program Files (x86)\Windows Kits\8.0\Lib\Win8\um\x64"
+rem You have to change these paths to your machine environment.
+rem "Visual Studio 12.0" means MSVC 2013.
+rem sc.ini in dmd2/windows/bin will help you.
+
+rem path to linker
+rem set LIBCMD="C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\amd64\lib.exe"
+set LIBCMD="C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\lib.exe"
+
+rem path to mspdb120.dll, mspdb110.dll, mspdb100.dll, and so on
+rem IMPORTANT: The MSVC build tools may depends on dlls which are separated into x86/x64 on installation,
+rem            then you MUST choose a path to the suitable version.
+rem set VCCOMMON="C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE"
+rem set VCCOMMON=C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\amd64
+set VCCOMMON=C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin
+
+rem path to Windows SDK static libs (ex.gdi32.lib)
+set VCLIB64="C:\Program Files (x86)\Windows Kits\8.1\Lib\winv6.3\um\x64"
 
 @set PATH=%VCCOMMON%;%PATH%
 
