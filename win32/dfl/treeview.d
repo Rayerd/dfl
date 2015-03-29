@@ -714,7 +714,7 @@ class TreeNodeCollection
 		}
 		else
 		{
-			i = _nodes.length;
+			i = _nodes.length.toI32;
 		}
 		
 		insert(i, node);

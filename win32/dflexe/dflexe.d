@@ -71,6 +71,7 @@ bool isPrepared = false;
 bool isDebug = true;
 bool debugSpecified = false;
 string dlibname; // Read from sc.ini
+bool isWin64 = false;
 
 string optExet = "nt"; // Exe type.
 string optSu = "console:4.0"; // Subsystem.
@@ -667,6 +668,7 @@ int main(/+ string[] args +/)
 						break;
 					
 					default: regular_switch:
+                        if (_origarg == "-m64") isWin64 = true;
 						if(!doDflSwitch(arg))
 							dmdargs ~= quotearg(_origarg);
 				}
@@ -930,7 +932,8 @@ int main(/+ string[] args +/)
 				//dfllib = std.path.buildPath(basepath, "lib\\" ~ libfile);
 				//if(!std.file.exists(dfllib))
 				{
-					dfllib = std.path.buildPath(dmdpath_windows, "lib\\" ~ libfile);
+                    string libsubdir = isWin64 ? "lib64" : "lib";
+					dfllib = std.path.buildPath(dmdpath_windows, libsubdir ~ "\\" ~ libfile);
 					if(!std.file.exists(dfllib))
 					{
 						dfllib = null;
@@ -1184,7 +1187,8 @@ int main(/+ string[] args +/)
 					dmdargs ~= dfl_options;
 				}
 			}
-			dmdargs ~= "-L/exet:" ~ optExet ~ "/su:" ~ optSu;
+            if (!isWin64)
+                dmdargs ~= "-L/exet:" ~ optExet ~ "/su:" ~ optSu;
 			dmdargs ~= getshortpath(dfllib);
 			
 			// Call DMD.

@@ -56,7 +56,7 @@ template ListWrapArray(TValue, alias Array,
 	
 	
 	///
-	void opIndexAssign(TValue value, int index)
+	void opIndexAssign(TValue value, size_t index)
 	{
 		TValue oldval = Array[index];
 		ItemRemovingCallback(index, oldval); // Removing.
@@ -78,7 +78,7 @@ template ListWrapArray(TValue, alias Array,
 	static if(OVERLOAD_OBJECT)
 	{
 		/// ditto
-		void opIndexAssign(Object value, int index)
+		void opIndexAssign(Object value, size_t index)
 		{
 			TValue tval;
 			tval = cast(TValue)value;
@@ -92,7 +92,7 @@ template ListWrapArray(TValue, alias Array,
 	static if(OVERLOAD_STRING)
 	{
 		/// ditto
-		void opIndexAssign(Dstring value, int index)
+		void opIndexAssign(Dstring value, size_t index)
 		{
 			return opIndexAssign(new TValueString(value), index);
 		}
@@ -100,7 +100,7 @@ template ListWrapArray(TValue, alias Array,
 	
 	
 	///
-	@property TValue opIndex(int index) // getter
+	@property TValue opIndex(size_t index) // getter
 	{
 		return Array[index];
 	}
@@ -240,7 +240,7 @@ template ListWrapArray(TValue, alias Array,
 			}
 			else
 			{
-				foreach(size_t idx, TValue onval; Array)
+				foreach(int idx, TValue onval; Array)
 				{
 					if(onval == value) // TValue must have opEquals.
 						return idx;
@@ -260,12 +260,12 @@ template ListWrapArray(TValue, alias Array,
 				static if(is(TValue == TValueString))
 				{
 					if(onval == value) // TValue must have opEquals.
-						return idx;
+						return idx.toI32;
 				}
 				else
 				{
 					if(getObjectString(onval) == value)
-						return idx;
+						return idx.toI32;
 				}
 			}
 			return -1;
@@ -275,8 +275,8 @@ template ListWrapArray(TValue, alias Array,
 	
 	private final void _insert(int index, TValue value)
 	{
-		if(index > Array.length)
-			index = Array.length;
+		if(index > Array.length.toI32)
+			index = Array.length.toI32;
 		ItemAddingCallback(index, value); // Adding.
 		static if(COW)
 		{

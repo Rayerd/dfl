@@ -20,7 +20,7 @@ class ColorDialog: CommonDialog // docmain
 		cc.Flags = INIT_FLAGS;
 		cc.rgbResult = Color.empty.toArgb();
 		cc.lCustData = cast(typeof(cc.lCustData))cast(void*)this;
-		cc.lpfnHook = cast(typeof(cc.lpfnHook))&ccHookProc;
+		cc.lpfnHook = /*cast(typeof(cc.lpfnHook))*/&ccHookProc;
 		_initcust();
 	}
 	
@@ -202,11 +202,11 @@ class ColorDialog: CommonDialog // docmain
 }
 
 
-private extern(Windows) UINT ccHookProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+private extern(Windows) UINT_PTR ccHookProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) nothrow
 {
 	enum PROP_STR = "DFL_ColorDialog";
 	ColorDialog cd;
-	UINT result = 0;
+	UINT_PTR result = 0;
 	
 	try
 	{
@@ -224,7 +224,7 @@ private extern(Windows) UINT ccHookProc(HWND hwnd, UINT msg, WPARAM wparam, LPAR
 		
 		if(cd)
 		{
-			result = cast(UINT)cd.hookProc(hwnd, msg, wparam, lparam);
+			result = cd.hookProc(hwnd, msg, wparam, lparam);
 		}
 	}
 	catch(DThrowable e)

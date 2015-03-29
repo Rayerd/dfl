@@ -472,7 +472,7 @@ abstract class FileDialog: CommonDialog // docmain
 								onFileOk(cea);
 								if(cea.cancel)
 								{
-									SetWindowLongA(hwnd, DWL_MSGRESULT, 1);
+									SetWindowLongPtrA(hwnd, DWL_MSGRESULT, 1);
 									return 1;
 								}
 							}
@@ -530,7 +530,7 @@ abstract class FileDialog: CommonDialog // docmain
 				buf[ts.length] = 0;
 			}
 			
-			ofnw.nMaxFile = buf.length;
+			ofnw.nMaxFile = buf.length.toI32;
 			ofnw.lpstrFile = buf.ptr;
 		}
 		else
@@ -546,7 +546,7 @@ abstract class FileDialog: CommonDialog // docmain
 				buf[ts.length] = 0;
 			}
 			
-			ofna.nMaxFile = buf.length;
+			ofna.nMaxFile = buf.length.toI32;
 			ofna.lpstrFile = buf.ptr;
 		}
 		

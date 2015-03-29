@@ -248,8 +248,8 @@ extern(Windows) nothrow:
 	struct NMMOUSE
 	{
 		NMHDR hdr;
-		DWORD dwItemSpec;
-		DWORD dwItemData;
+		DWORD_PTR dwItemSpec;
+		DWORD_PTR dwItemData;
 		POINT pt;
 		LPARAM dwHitInfo;
 	}
@@ -1084,28 +1084,38 @@ extern(Windows) nothrow:
 	}
 	
 	
-	version(DFL_D2_AND_ABOVE)
+	version(Win64)
 	{
-		/+ // DMD 2.012: Error: cannot implicitly convert expression (cast(HANDLE)cast(void*)-65536u) of type const(HANDLE) to int
-		const HTREEITEM TVI_ROOT = cast(HTREEITEM)-0x10000;
-		const HTREEITEM TVI_FIRST = cast(HTREEITEM)-0x0FFFF;
-		const HTREEITEM TVI_LAST = cast(HTREEITEM)-0x0FFFE;
-		const HTREEITEM TVI_SORT = cast(HTREEITEM)-0x0FFFD;
-		+/
-		enum: HTREEITEM
-		{
-			TVI_ROOT = cast(HTREEITEM)-0x10000,
-			TVI_FIRST = cast(HTREEITEM)-0x0FFFF,
-			TVI_LAST = cast(HTREEITEM)-0x0FFFE,
-			TVI_SORT = cast(HTREEITEM)-0x0FFFD,
+		enum: HTREEITEM {
+			TVI_ROOT  = cast(HTREEITEM) cast(ULONG_PTR)-0x10000,
+			TVI_FIRST = cast(HTREEITEM) cast(ULONG_PTR)-0xFFFF,
+			TVI_LAST  = cast(HTREEITEM) cast(ULONG_PTR)-0xFFFE,
+			TVI_SORT  = cast(HTREEITEM) cast(ULONG_PTR)-0xFFFD,
 		}
-	}
-	else
-	{
-		const HTREEITEM TVI_ROOT = cast(HTREEITEM)-0x10000;
-		const HTREEITEM TVI_FIRST = cast(HTREEITEM)-0x0FFFF;
-		const HTREEITEM TVI_LAST = cast(HTREEITEM)-0x0FFFE;
-		const HTREEITEM TVI_SORT = cast(HTREEITEM)-0x0FFFD;
+	} else {
+		version(DFL_D2_AND_ABOVE)
+		{
+			/+ // DMD 2.012: Error: cannot implicitly convert expression (cast(HANDLE)cast(void*)-65536u) of type const(HANDLE) to int
+			const HTREEITEM TVI_ROOT = cast(HTREEITEM)-0x10000;
+			const HTREEITEM TVI_FIRST = cast(HTREEITEM)-0x0FFFF;
+			const HTREEITEM TVI_LAST = cast(HTREEITEM)-0x0FFFE;
+			const HTREEITEM TVI_SORT = cast(HTREEITEM)-0x0FFFD;
+			+/
+			enum: HTREEITEM
+			{
+				TVI_ROOT = cast(HTREEITEM)-0x10000,
+				TVI_FIRST = cast(HTREEITEM)-0x0FFFF,
+				TVI_LAST = cast(HTREEITEM)-0x0FFFE,
+				TVI_SORT = cast(HTREEITEM)-0x0FFFD,
+			}
+		}
+		else
+		{
+			const HTREEITEM TVI_ROOT = cast(HTREEITEM)-0x10000;
+			const HTREEITEM TVI_FIRST = cast(HTREEITEM)-0x0FFFF;
+			const HTREEITEM TVI_LAST = cast(HTREEITEM)-0x0FFFE;
+			const HTREEITEM TVI_SORT = cast(HTREEITEM)-0x0FFFD;
+		}
 	}
 	
 	
@@ -1751,7 +1761,7 @@ extern(Windows) nothrow:
 	
 	
 	// Rich edit.
-	alias DWORD function(/+ DWORD_PTR +/ DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG* pcb) EDITSTREAMCALLBACK;
+	alias DWORD function(DWORD_PTR dwCookie, LPBYTE pbBuff, LONG cb, LONG* pcb) EDITSTREAMCALLBACK;
 	
 	
 	alias DWORD LCID;
@@ -1892,7 +1902,7 @@ extern(Windows) nothrow:
 	struct NMHDR
 	{ 
 		HWND hwndFrom;
-		UINT idFrom;
+		UINT_PTR idFrom;
 		UINT code;
 	}
 	alias NMHDR* LPNMHDR;
@@ -1904,7 +1914,7 @@ extern(Windows) nothrow:
 		DWORD dwDrawStage;
 		HDC hdc;
 		RECT rc;
-		/+ DWORD_PTR +/ DWORD dwItemSpec;
+		DWORD_PTR dwItemSpec;
 		UINT uItemState;
 		LPARAM lItemlParam;
 	}
@@ -2034,9 +2044,13 @@ extern(Windows) nothrow:
 		int idCommand;
 		BYTE fsState;
 		BYTE fsStyle;
-		BYTE[2] bReserved;
-		DWORD dwData;
-		int iString;
+		version (Win64) {
+			BYTE[6] bReserved;
+		} else {
+			BYTE[2] bReserved;
+		}
+		DWORD_PTR dwData;
+		INT_PTR iString;
 	}
 	alias TBBUTTON* PTBBUTTON, LPTBBUTTON, LPCTBBUTTON;
 	
@@ -2270,7 +2284,7 @@ extern(Windows) nothrow:
 	// Rich edit.
 	struct EDITSTREAM
 	{
-		/+ DWORD_PTR +/ DWORD dwCookie;
+		DWORD_PTR dwCookie;
 		DWORD dwError;
 		EDITSTREAMCALLBACK pfnCallback;
 	}
@@ -2396,10 +2410,10 @@ extern(Windows) nothrow:
 	alias OPENFILENAMEW* LPOPENFILENAMEW;
 	
 	
-	alias UINT function(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam) LPCCHOOKPROC;
+	alias UINT_PTR function(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam) LPCCHOOKPROC;
 	
 	
-	alias UINT function(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam) LPCFHOOKPROC;
+	alias UINT_PTR function(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam) LPCFHOOKPROC;
 	
 	
 	alias BOOL function(HDC hdc, LPARAM lpData, int cchData) GRAYSTRINGPROC;
@@ -2479,7 +2493,7 @@ extern(Windows) nothrow:
 	
 	struct CHOOSEFONTW
 	{
-		align(1):
+		//align(1):
 		DWORD lStructSize;
 		HWND hwndOwner;
 		HDC hDC;
@@ -2493,7 +2507,7 @@ extern(Windows) nothrow:
 		HINSTANCE hInstance;
 		LPWSTR lpszStyle;
 		WORD nFontType;
-		WORD ___MISSING_ALIGNMENT__;
+		//WORD ___MISSING_ALIGNMENT__;
 		INT nSizeMin;
 		INT nSizeMax;
 	}
@@ -2503,7 +2517,7 @@ extern(Windows) nothrow:
 	
 	struct CHOOSEFONTA
 	{
-		align(1):
+		//align(1):
 		DWORD lStructSize;
 		HWND hwndOwner;
 		HDC hDC;
@@ -2517,7 +2531,7 @@ extern(Windows) nothrow:
 		HINSTANCE hInstance;
 		LPSTR lpszStyle;
 		WORD nFontType;
-		WORD ___MISSING_ALIGNMENT__;
+		//WORD ___MISSING_ALIGNMENT__;
 		INT nSizeMin;
 		INT nSizeMax;
 	}
@@ -2608,7 +2622,7 @@ extern(Windows) nothrow:
 		UINT cbSize;
 		UINT uFlags;
 		HWND hwnd;
-		UINT uId;
+		UINT_PTR uId;
 		RECT rect;
 		HINSTANCE hinst;
 		LPSTR lpszText;
@@ -2679,7 +2693,7 @@ extern(Windows) nothrow:
 		UINT itemID;
 		UINT itemWidth;
 		UINT itemHeight;
-		DWORD itemData;
+		ULONG_PTR itemData;
 	}
 	alias MEASUREITEMSTRUCT* LPMEASUREITEMSTRUCT;
 	
@@ -2823,10 +2837,21 @@ extern(Windows) nothrow:
 	HWND CreateWindowExW(DWORD dwExStyle, LPCWSTR lpClassName, LPCWSTR lpWindowName, DWORD dwStyle, int x, int y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam);
 	LRESULT SendMessageW(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 	int MessageBoxW(HWND hWnd, LPCWSTR lpText, LPCWSTR lpCaption, UINT uType);
-	DWORD SetClassLongA(HWND hWnd, int nIndex, LONG dwNewLong);
-	DWORD GetClassLongA(HWND hWnd, int nIndex);
-	LONG SetWindowLongA(HWND hWnd, int nIndex, LONG dwNewLong);
-	LONG GetWindowLongA(HWND hWnd, int nIndex);
+	DWORD SetClassLongA(HWND hWnd, int nIndex, LONG dwNewLong); // deprecated
+	DWORD GetClassLongA(HWND hWnd, int nIndex); // deprecated
+	LONG SetWindowLongA(HWND hWnd, int nIndex, LONG dwNewLong); // deprecated
+	LONG GetWindowLongA(HWND hWnd, int nIndex); // deprecated
+	version (Win64) {
+		ULONG_PTR SetClassLongPtrA(HWND hWnd, int nIndex, LONG_PTR dwNewLong);
+		ULONG_PTR GetClassLongPtrA(HWND hWnd, int nIndex);
+		LONG_PTR SetWindowLongPtrA(HWND hWnd, int nIndex, LONG_PTR dwNewLong);
+		LONG_PTR GetWindowLongPtrA(HWND hWnd, int nIndex);
+	} else {
+		alias SetClassLongPtrA = SetClassLongA;
+		alias GetClassLongPtrA = GetClassLongA;
+		alias SetWindowLongPtrA = SetWindowLongA;
+		alias GetWindowLongPtrA = GetWindowLongA;
+	}
 	DWORD GetSysColor(int nIndex);
 	BOOL EnableWindow(HWND hWnd, BOOL bEnable);
 	BOOL IsWindowEnabled(HWND hWnd);
@@ -2871,8 +2896,8 @@ extern(Windows) nothrow:
 	BOOL IsDialogMessageW(HWND hDlg, LPMSG lpMsg);
 	HBRUSH GetSysColorBrush(int nIndex);
 	BOOL PostMessageA(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
-	UINT SetTimer(HWND hWnd, UINT nIDEvent, UINT uElapse, TIMERPROC lpTimerFunc);
-	BOOL KillTimer(HWND hWnd, UINT uIDEvent);
+	UINT_PTR SetTimer(HWND hWnd, UINT_PTR nIDEvent, UINT uElapse, TIMERPROC lpTimerFunc);
+	BOOL KillTimer(HWND hWnd, UINT_PTR uIDEvent);
 	LPSTR GetCommandLineA();
 	LPWSTR GetCommandLineW();
 	BOOL SetCurrentDirectoryW(LPCWSTR lpPathName);

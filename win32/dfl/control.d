@@ -708,7 +708,7 @@ class Control: DObject, IWindow // docmain
 			}
 			else
 			{
-				return children.length;
+				return children.length.toI32;
 			}
 		}
 		
@@ -1524,7 +1524,7 @@ class Control: DObject, IWindow // docmain
 				{
 					SendMessageA(hwnd, WM_SETCURSOR, cast(WPARAM)hwnd,
 						MAKELPARAM(
-							SendMessageA(hwnd, WM_NCHITTEST, 0, MAKELPARAM(curpt.x, curpt.y)),
+							SendMessageA(hwnd, WM_NCHITTEST, 0, MAKELPARAM(curpt.x, curpt.y)).toI32,
 							WM_MOUSEMOVE)
 							);
 				}
@@ -2788,7 +2788,7 @@ class Control: DObject, IWindow // docmain
 	private DWORD _fetchVisible()
 	{
 		//return IsWindowVisible(hwnd) != FALSE;
-		wstyle = GetWindowLongA(hwnd, GWL_STYLE);
+		wstyle = GetWindowLongPtrA(hwnd, GWL_STYLE);
 		return wstyle & WS_VISIBLE;
 	}
 	+/
@@ -2804,7 +2804,7 @@ class Control: DObject, IWindow // docmain
 	final @property bool visible() // getter
 	{
 		//if(isHandleCreated)
-		//	wstyle = GetWindowLongA(hwnd, GWL_STYLE); // ...
+		//	wstyle = GetWindowLongPtrA(hwnd, GWL_STYLE); // ...
 		//return (wstyle & WS_VISIBLE) != 0;
 		return (cbits & CBits.VISIBLE) != 0;
 	}
@@ -3647,7 +3647,7 @@ class Control: DObject, IWindow // docmain
 	///
 	static bool isMnemonic(dchar charCode, Dstring text)
 	{
-		uint ui;
+		size_t ui;
 		for(ui = 0; ui != text.length; ui++)
 		{
 			if('&' == text[ui])
@@ -3866,7 +3866,7 @@ class Control: DObject, IWindow // docmain
 				return false;
 			xiter--;
 			
-			LONG st = GetWindowLongA(hw, GWL_STYLE);
+			LONG st = GetWindowLongPtrA(hw, GWL_STYLE).toI32;
 			if(!(st & WS_VISIBLE))
 				continue;
 			if(st & WS_DISABLED)
@@ -3877,7 +3877,7 @@ class Control: DObject, IWindow // docmain
 			
 			if(nested)
 			{
-				//LONG exst = GetWindowLongA(hw, GWL_EXSTYLE);
+				//LONG exst = GetWindowLongPtrA(hw, GWL_EXSTYLE);
 				//if(exst & WS_EX_CONTROLPARENT) // It's no longer added.
 				{
 					HWND hwc = GetWindow(hw, GW_CHILD);
@@ -3931,7 +3931,7 @@ class Control: DObject, IWindow // docmain
 					}
 					else
 					{
-						if(!tabStopOnly || (GetWindowLongA(hw, GWL_STYLE) & WS_TABSTOP))
+						if(!tabStopOnly || (GetWindowLongPtrA(hw, GWL_STYLE) & WS_TABSTOP))
 						{
 							if(!selectableOnly || _isHwndControlSel(hw))
 							{
@@ -3978,7 +3978,7 @@ class Control: DObject, IWindow // docmain
 							return false; // Break.
 						}
 					}
-					if(!tabStopOnly || (GetWindowLongA(hw, GWL_STYLE) & WS_TABSTOP))
+					if(!tabStopOnly || (GetWindowLongPtrA(hw, GWL_STYLE) & WS_TABSTOP))
 					{
 						if(!selectableOnly || _isHwndControlSel(hw))
 						{
@@ -4817,13 +4817,13 @@ class Control: DObject, IWindow // docmain
 					cur = cursor;
 					if(cur)
 					{
-						if(cast(HCURSOR)GetClassLongA(hwnd, GCL_HCURSOR) != cur.handle)
-							SetClassLongA(hwnd, GCL_HCURSOR, cast(LONG)cur.handle);
+						if(cast(HCURSOR)GetClassLongPtrA(hwnd, GCL_HCURSOR) != cur.handle)
+							SetClassLongPtrA(hwnd, GCL_HCURSOR, cast(LONG_PTR)cur.handle);
 					}
 					else
 					{
-						if(cast(HCURSOR)GetClassLongA(hwnd, GCL_HCURSOR) != HCURSOR.init)
-							SetClassLongA(hwnd, GCL_HCURSOR, cast(LONG)cast(HCURSOR)null);
+						if(cast(HCURSOR)GetClassLongPtrA(hwnd, GCL_HCURSOR) != HCURSOR.init)
+							SetClassLongPtrA(hwnd, GCL_HCURSOR, cast(LONG_PTR)cast(HCURSOR)null);
 					}
 					Control.defWndProc(msg);
 					return;
@@ -5602,10 +5602,10 @@ class Control: DObject, IWindow // docmain
 					
 					if(!recreatingHandle)
 					{
-						//wstyle = GetWindowLongA(hwnd, GWL_STYLE); // ..WM_SHOWWINDOW.
+						//wstyle = GetWindowLongPtrA(hwnd, GWL_STYLE); // ..WM_SHOWWINDOW.
 						if(wp.flags & (SWP_HIDEWINDOW | SWP_SHOWWINDOW))
 						{
-							//wstyle = GetWindowLongA(hwnd, GWL_STYLE);
+							//wstyle = GetWindowLongPtrA(hwnd, GWL_STYLE);
 							cbits |= CBits.VISIBLE;
 							wstyle |= WS_VISIBLE;
 							if(wp.flags & SWP_HIDEWINDOW) // Hiding.
@@ -5629,7 +5629,7 @@ class Control: DObject, IWindow // docmain
 					if((wp.flags & (SWP_SHOWWINDOW | SWP_HIDEWINDOW)) || !(wp.flags & SWP_NOSIZE))
 					{
 						DWORD rstyle;
-						rstyle = GetWindowLongA(msg.hWnd, GWL_STYLE);
+						rstyle = GetWindowLongPtrA(msg.hWnd, GWL_STYLE).toI32;
 						rstyle &= WS_MAXIMIZE | WS_MINIMIZE;
 						wstyle &= ~(WS_MAXIMIZE | WS_MINIMIZE);
 						wstyle |= rstyle;
@@ -5674,7 +5674,7 @@ class Control: DObject, IWindow // docmain
 					{
 						cbits &= ~(CBits.SW_SHOWN | CBits.SW_HIDDEN);
 						DWORD rstyle;
-						rstyle = GetWindowLongA(msg.hWnd, GWL_STYLE);
+						rstyle = GetWindowLongPtrA(msg.hWnd, GWL_STYLE);
 						if(cast(BOOL)msg.wParam)
 						{
 							//wstyle |= WS_VISIBLE;
@@ -5706,7 +5706,7 @@ class Control: DObject, IWindow // docmain
 						}
 					}
 					+/
-					wstyle = GetWindowLongA(msg.hWnd, GWL_STYLE);
+					wstyle = GetWindowLongPtrA(msg.hWnd, GWL_STYLE);
 					//if(cbits & CBits.FVISIBLE)
 					//	wstyle |= WS_VISIBLE;
 				}
@@ -5721,7 +5721,7 @@ class Control: DObject, IWindow // docmain
 				else
 					wstyle |= WS_DISABLED;
 				+/
-				wstyle = GetWindowLongA(hwnd, GWL_STYLE);
+				wstyle = GetWindowLongPtrA(hwnd, GWL_STYLE).toI32;
 				break;
 			
 			/+
@@ -5774,8 +5774,8 @@ class Control: DObject, IWindow // docmain
 					+/
 					
 					// If class style was changed, update.
-					if(_fetchClassLong() != wclassStyle)
-						SetClassLongA(hwnd, GCL_STYLE, wclassStyle);
+					if(_fetchClassLongPtr() != wclassStyle)
+						SetClassLongPtrA(hwnd, GCL_STYLE, wclassStyle);
 					
 					// Need to update clientSize in case of styles in createParams().
 					wclientsz = _fetchClientSize();
@@ -6528,7 +6528,7 @@ class Control: DObject, IWindow // docmain
 		if(!(ctrlStyle & ControlStyles.CACHE_TEXT))
 			wtext = _fetchText();
 		
-		//wclassStyle = _fetchClassLong(); // ?
+		//wclassStyle = _fetchClassLongPtr(); // ?
 		
 		// Fetch children.
 		Control[] ccs;
@@ -6800,7 +6800,7 @@ class Control: DObject, IWindow // docmain
 	{
 		if(isHandleCreated)
 		{
-			//wstyle = GetWindowLongA(hwnd, GWL_STYLE);
+			//wstyle = GetWindowLongPtrA(hwnd, GWL_STYLE);
 			if(visible == byes)
 				return;
 			
@@ -7092,7 +7092,7 @@ class Control: DObject, IWindow // docmain
 	
 	@property LONG _exStyle()
 	{
-		// return GetWindowLongA(hwnd, GWL_EXSTYLE);
+		// return GetWindowLongPtrA(hwnd, GWL_EXSTYLE);
 		return wexstyle;
 	}
 	
@@ -7101,7 +7101,7 @@ class Control: DObject, IWindow // docmain
 	{
 		if(isHandleCreated)
 		{
-			SetWindowLongA(hwnd, GWL_EXSTYLE, wl);
+			SetWindowLongPtrA(hwnd, GWL_EXSTYLE, wl);
 		}
 		
 		wexstyle = wl;
@@ -7110,7 +7110,7 @@ class Control: DObject, IWindow // docmain
 	
 	@property LONG _style()
 	{
-		// return GetWindowLongA(hwnd, GWL_STYLE);
+		// return GetWindowLongPtrA(hwnd, GWL_STYLE);
 		return wstyle;
 	}
 	
@@ -7119,7 +7119,7 @@ class Control: DObject, IWindow // docmain
 	{
 		if(isHandleCreated)
 		{
-			SetWindowLongA(hwnd, GWL_STYLE, wl);
+			SetWindowLongPtrA(hwnd, GWL_STYLE, wl);
 		}
 		
 		wstyle = wl;
@@ -7174,21 +7174,21 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	LONG _fetchClassLong()
+	LONG_PTR _fetchClassLongPtr()
 	{
-		return GetClassLongA(hwnd, GCL_STYLE);
+		return GetClassLongPtrA(hwnd, GCL_STYLE);
 	}
 	
 	
 	LONG _classStyle()
 	{
-		// return GetClassLongA(hwnd, GCL_STYLE);
+		// return GetClassLongPtrA(hwnd, GCL_STYLE);
 		// return wclassStyle;
 		
 		if(isHandleCreated)
 		{
 			// Always fetch because it's not guaranteed to be accurate.
-			wclassStyle = _fetchClassLong();
+			wclassStyle = _fetchClassLongPtr().toI32;
 		}
 		
 		return wclassStyle;
@@ -7199,7 +7199,7 @@ class Control: DObject, IWindow // docmain
 	{
 		if(isHandleCreated)
 		{
-			SetClassLongA(hwnd, GCL_STYLE, cl);
+			SetClassLongPtrA(hwnd, GCL_STYLE, cl);
 		}
 		
 		wclassStyle = cl;

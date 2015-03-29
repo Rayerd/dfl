@@ -2409,7 +2409,7 @@ class Graphics // docmain
 	
 	// Used internally.
 	// vSplit=true means the move grip moves left to right; false means top to bottom.
-	final void drawMoveGrip(Rect movableArea, bool vSplit = true, size_t count = 5) // package
+	final void drawMoveGrip(Rect movableArea, bool vSplit = true, uint count = 5) // package
 	{
 		enum MSPACE = 4;
 		enum MWIDTH = 3;
@@ -2799,7 +2799,7 @@ class Graphics // docmain
 		{
 			LineTo(hdc, points[i].x, points[i].y);
 			
-			if(++i == points.length)
+			if(++i == points.length.toI32)
 				break;
 		}
 		
@@ -2878,7 +2878,7 @@ class Graphics // docmain
 		static assert(Point.sizeof == POINT.sizeof);
 		cpts = cast(POINT*)cast(Point*)points;
 		
-		PolyBezier(hdc, cpts, points.length);
+		PolyBezier(hdc, cpts, points.length.toI32);
 		
 		// Reset stuff.
 		SelectObject(hdc, prevPen);
@@ -2934,7 +2934,7 @@ class Graphics // docmain
 		static assert(Point.sizeof == POINT.sizeof);
 		cpts = cast(POINT*)cast(Point*)points;
 		
-		Polygon(hdc, cpts, points.length);
+		Polygon(hdc, cpts, points.length.toI32);
 		
 		// Reset stuff.
 		SelectObject(hdc, prevPen);
