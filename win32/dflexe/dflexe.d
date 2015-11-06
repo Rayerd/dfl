@@ -801,9 +801,9 @@ int main(/+ string[] args +/)
 			
 			string[] dflcs;
 			if(!optNoDflc)
-				foreach(filename; dirEntries(dflsrcdir, SpanMode.shallow))
-					if(globMatch(filename, "dflc_*.bat"))
-						dflcs ~= filename;
+				foreach(de; dirEntries(dflsrcdir, SpanMode.shallow))
+					if(globMatch(de.name, "dflc_*.bat"))
+						dflcs ~= de.name;
 			
 			//@
 			scope batf = new BufferedFile(batfilepath, FileMode.OutNew);
