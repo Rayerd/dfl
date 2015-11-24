@@ -1,6 +1,6 @@
 *.info
 *.json
-*.bat
+_dflexe.bat
 *.lib
 *.sh
 *.obj
