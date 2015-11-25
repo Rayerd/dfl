@@ -71,6 +71,7 @@ bool isPrepared = false;
 bool isDebug = true;
 bool debugSpecified = false;
 string dlibname; // Read from sc.ini
+string model = "32"; // 32,64,or 32mscoff
 
 string optExet = "nt"; // Exe type.
 string optSu = "console:4.0"; // Subsystem.
@@ -667,6 +668,10 @@ int main(/+ string[] args +/)
 						break;
 					
 					default: regular_switch:
+						if (_origarg == "-m32mscoff") model = "32mscoff";
+						else if (_origarg == "-m32") model = "32"; // default
+						else if (_origarg == "-m64") model = "64";
+						
 						if(!doDflSwitch(arg))
 							dmdargs ~= quotearg(_origarg);
 				}
@@ -930,7 +935,8 @@ int main(/+ string[] args +/)
 				//dfllib = std.path.buildPath(basepath, "lib\\" ~ libfile);
 				//if(!std.file.exists(dfllib))
 				{
-					dfllib = std.path.buildPath(dmdpath_windows, "lib\\" ~ libfile);
+                    string libsubdir = model != "32" ? "lib" ~ model : "lib"; // lib64, lib32mscoff
+					dfllib = std.path.buildPath(dmdpath_windows, libsubdir ~ "\\" ~ libfile);
 					if(!std.file.exists(dfllib))
 					{
 						dfllib = null;
@@ -1184,7 +1190,8 @@ int main(/+ string[] args +/)
 					dmdargs ~= dfl_options;
 				}
 			}
-			dmdargs ~= "-L/exet:" ~ optExet ~ "/su:" ~ optSu;
+            if (model=="32") // for dmd/optlink only
+                dmdargs ~= "-L/exet:" ~ optExet ~ "/su:" ~ optSu;
 			dmdargs ~= getshortpath(dfllib);
 			
 			// Call DMD.
