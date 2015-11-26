@@ -817,6 +817,9 @@ int main(/+ string[] args +/)
 				"\r\n   @" ~ std.path.driveName(dflsrcdir)
 				~ "\r\n   @cd \"" ~ dflsrcdir ~ "\"");
 			
+            // argument %1 will be passed by the call to system() below
+			batf.writeString("\r\n   @set MODEL=%1");
+            
 			batf.writeString(
 				"\r\n   @set _old_dmd_path=%dmd_path%"
 				"\r\n   @set dmd_path=" ~ dmdpath
@@ -838,7 +841,8 @@ int main(/+ string[] args +/)
 			batf.writeString("\r\n   @set dfl_failed=-1"); // Let makelib.bat unset this.
 			
 			//batf.writeString("\r\n   @call \"" ~ std.path.buildPath(dflsrcdir, "go.bat") ~ "\"\r\n");
-			batf.writeString("\r\n   @call \"" ~ std.path.buildPath(dflsrcdir, "makelib.bat") ~ "\"\r\n");
+            // call the batch with the model parameter
+			batf.writeString("\r\n   @call \"" ~ std.path.buildPath(dflsrcdir, "makelib.bat") ~ "\" %MODEL%\r\n");
 			
 			batf.writeString("\r\n" `@if not "%dfl_failed%" == "" goto fail`); // No longer using go.bat for this.
 			
@@ -866,7 +870,13 @@ int main(/+ string[] args +/)
 				batf.writeString("\r\n   @set path=%_old_path%");
 			}
 			
-			batf.writeString("\r\n   @move /Y dfl*.lib %dmd_path_windows%\\lib > NUL"); // Important! no longer using go.bat for this.
+			batf.writeString("\r\n   @if %MODEL%==32 (");
+			batf.writeString("\r\n   @set lib_dest=lib");
+			batf.writeString("\r\n   ) else (");
+			batf.writeString("\r\n   @set lib_dest=lib%MODEL%");
+			batf.writeString("\r\n   )");
+			batf.writeString("\r\n   @move /Y dfl*.lib %dmd_path_windows%\\%lib_dest% > NUL"); // Important! no longer using go.bat for this.
+			batf.writeString("\r\n   @set lib_dest=");
 			
 			batf.writeString("\r\n:fail\r\n");
 			
@@ -887,7 +897,7 @@ int main(/+ string[] args +/)
 			
 			batf.close();
 			
-			std.process.system(batfilepath);
+            std.process.system(batfilepath ~ " " ~ model); // pass model as %1
 			
 			std.file.remove(batfilepath);
 		}
