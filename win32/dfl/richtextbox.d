@@ -793,7 +793,7 @@ class RichTextBox: TextBoxBase // docmain
 		EDITSTREAM es;
 		
 		si.str = str;
-		es.dwCookie = cast(DWORD)&si;
+		es.dwCookie = cast(DWORD_PTR)&si;
 		es.pfnCallback = &_streamingInStr;
 		
 		//if(SendMessageA(handle, EM_STREAMIN, cast(WPARAM)fmt, cast(LPARAM)&es) != str.length)
@@ -814,7 +814,7 @@ class RichTextBox: TextBoxBase // docmain
 		EDITSTREAM es;
 		
 		so.str = null;
-		es.dwCookie = cast(DWORD)&so;
+		es.dwCookie = cast(DWORD_PTR)&so;
 		es.pfnCallback = &_streamingOutStr;
 		
 		SendMessageA(handle, EM_STREAMOUT, cast(WPARAM)fmt, cast(LPARAM)&es);
