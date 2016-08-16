@@ -123,7 +123,7 @@ abstract class FileDialog: CommonDialog // docmain
 			if(ext.length && ext[0] == '.')
 				ext = ext[1 .. ext.length];
 			
-			if(dfl.internal.utf.useUnicode)
+			static if(dfl.internal.utf.useUnicode)
 			{
 				ofnw.lpstrDefExt = dfl.internal.utf.toUnicodez(ext);
 			}
@@ -220,7 +220,7 @@ abstract class FileDialog: CommonDialog // docmain
 			size_t i, starti;
 			size_t nitems = 0;
 			
-			if(dfl.internal.utf.useUnicode)
+			static if(dfl.internal.utf.useUnicode)
 			{
 				str.sw = new wchar[filterString.length + 2];
 				str.sw = str.sw[0 .. 0];
@@ -240,7 +240,7 @@ abstract class FileDialog: CommonDialog // docmain
 						if(starti == i)
 							goto bad_filter;
 						
-						if(dfl.internal.utf.useUnicode)
+						static if(dfl.internal.utf.useUnicode)
 						{
 							str.sw ~= dfl.internal.utf.toUnicode(filterString[starti .. i]);
 							str.sw ~= "\0"w;
@@ -264,7 +264,7 @@ abstract class FileDialog: CommonDialog // docmain
 			}
 			if(starti == i || !(nitems % 2))
 				goto bad_filter;
-			if(dfl.internal.utf.useUnicode)
+			static if(dfl.internal.utf.useUnicode)
 			{
 				str.sw ~= dfl.internal.utf.toUnicode(filterString[starti .. i]);
 				str.sw ~= "\0\0"w;
@@ -318,7 +318,7 @@ abstract class FileDialog: CommonDialog // docmain
 		}
 		else
 		{
-			if(dfl.internal.utf.useUnicode)
+			static if(dfl.internal.utf.useUnicode)
 			{
 				ofnw.lpstrInitialDir = dfl.internal.utf.toUnicodez(dir);
 			}
@@ -401,7 +401,7 @@ abstract class FileDialog: CommonDialog // docmain
 		}
 		else
 		{
-			if(dfl.internal.utf.useUnicode)
+			static if(dfl.internal.utf.useUnicode)
 			{
 				ofnw.lpstrTitle = dfl.internal.utf.toUnicodez(newTitle);
 			}
@@ -492,15 +492,15 @@ abstract class FileDialog: CommonDialog // docmain
 	
 	
 	private:
-	union
-	{
+	static if(dfl.internal.utf.useUnicode) {
 		OPENFILENAMEW ofnw;
+		alias ofn = ofnw;
+	} else {
 		OPENFILENAMEA ofna;
-		alias ofnw ofn;
-		
-		static assert(OPENFILENAMEW.sizeof == OPENFILENAMEA.sizeof);
-		static assert(OPENFILENAMEW.Flags.offsetof == OPENFILENAMEA.Flags.offsetof);
+		alias ofn = ofna;
 	}
+	static assert(OPENFILENAMEW.Flags.offsetof == OPENFILENAMEA.Flags.offsetof);
+
 	Dstring[] _fileNames;
 	Dstring _filter;
 	Dstring _initDir;
@@ -517,7 +517,7 @@ abstract class FileDialog: CommonDialog // docmain
 	
 	void beginOfn(HWND owner)
 	{
-		if(dfl.internal.utf.useUnicode)
+		static if(dfl.internal.utf.useUnicode)
 		{
 			auto buf = new wchar[(ofn.Flags & OFN_ALLOWMULTISELECT) ? FILE_BUF_LEN : MAX_PATH];
 			buf[0] = 0;
@@ -568,7 +568,7 @@ abstract class FileDialog: CommonDialog // docmain
 			_fileNames = new Dstring[4];
 			_fileNames = _fileNames[0 .. 0];
 			
-			if(dfl.internal.utf.useUnicode)
+			static if(dfl.internal.utf.useUnicode)
 			{
 				wchar* startp, p;
 				p = startp = ofnw.lpstrFile;
@@ -642,7 +642,7 @@ abstract class FileDialog: CommonDialog // docmain
 		else
 		{
 			_fileNames = new Dstring[1];
-			if(dfl.internal.utf.useUnicode)
+			static if(dfl.internal.utf.useUnicode)
 			{
 				_fileNames[0] = dfl.internal.utf.fromUnicodez(ofnw.lpstrFile);
 			}
@@ -821,7 +821,7 @@ class OpenFileDialog: FileDialog // docmain
 		
 		//synchronized(typeid(dfl.internal.utf.CurDirLockType))
 		{
-			if(dfl.internal.utf.useUnicode)
+			static if(dfl.internal.utf.useUnicode)
 			{
 				enum NAME = "GetOpenFileNameW";
 				static GetOpenFileNameWProc proc = null;
@@ -921,7 +921,7 @@ class SaveFileDialog: FileDialog // docmain
 		
 		//synchronized(typeid(dfl.internal.utf.CurDirLockType))
 		{
-			if(dfl.internal.utf.useUnicode)
+			static if(dfl.internal.utf.useUnicode)
 			{
 				enum NAME = "GetSaveFileNameW";
 				static GetSaveFileNameWProc proc = null;

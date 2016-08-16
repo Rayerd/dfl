@@ -3,8 +3,9 @@
 
 module dfl.internal.wincom;
 
-private import dfl.internal.winapi;
-
+import core.sys.windows.windef;
+import core.sys.windows.winbase;
+import core.sys.windows.objidl;
 
 version(WINE)
 	version = _dfl_needcom;
@@ -531,22 +532,6 @@ alias DWORD TYMED;
 enum
 {
 	DATADIR_GET = 1,
-}
-
-
-enum: HRESULT
-{
-	DRAGDROP_S_DROP = 0x00040100,
-	DRAGDROP_S_CANCEL = 0x00040101,
-	DRAGDROP_S_USEDEFAULTCURSORS = 0x00040102,
-	V_E_LINDEX = cast(HRESULT)0x80040068,
-	STG_E_MEDIUMFULL = cast(HRESULT)0x80030070,
-	STG_E_INVALIDFUNCTION = cast(HRESULT)0x80030001,
-	DV_E_TYMED = cast(HRESULT)0x80040069,
-	DV_E_DVASPECT = cast(HRESULT)0x8004006B,
-	DV_E_FORMATETC = cast(HRESULT)0x80040064,
-	DV_E_LINDEX = cast(HRESULT)0x80040068,
-	DRAGDROP_E_ALREADYREGISTERED = cast(HRESULT)0x80040101,
 }
 
 

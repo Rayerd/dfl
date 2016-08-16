@@ -23,8 +23,14 @@ module dfl.internal.utf;
 
 private import dfl.internal.dlib, dfl.internal.clib;
 
-private import dfl.internal.winapi;
-
+import core.sys.windows.windef;
+import core.sys.windows.winuser;
+import core.sys.windows.winreg;
+import core.sys.windows.wingdi;
+import core.sys.windows.winbase;
+import core.sys.windows.shellapi;
+import core.sys.windows.winnls;
+import core.sys.windows.richedit;
 
 private import std.windows.charset;
 

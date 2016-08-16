@@ -194,7 +194,7 @@ final class Application // docmain
 			`</assembly>` "\r\n";
 		
 		HMODULE kernel32;
-		kernel32 = GetModuleHandleA("kernel32.dll");
+		kernel32 = GetModuleHandle("kernel32.dll");
 		//if(kernel32)
 		assert(kernel32);
 		{

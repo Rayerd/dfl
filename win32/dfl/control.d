@@ -1715,7 +1715,7 @@ class Control: DObject, IWindow // docmain
 			synchronized
 			{
 				if(!def)
-					def = new SafeCursor(LoadCursorA(HINSTANCE.init, IDC_ARROW));
+					def = new SafeCursor(LoadCursor(HINSTANCE.init, IDC_ARROW));
 			}
 		}
 		

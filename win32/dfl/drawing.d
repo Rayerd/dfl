@@ -890,7 +890,7 @@ class SystemIcons // docmain
 	///
 	@property Icon application() // getter
 	{
-		return new Icon(LoadIconA(null, IDI_APPLICATION), false);
+		return new Icon(LoadIcon(null, IDI_APPLICATION), false);
 	}
 	
 	/// ditto

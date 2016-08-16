@@ -4,7 +4,12 @@
 module dfl.internal.winapi;
 
 
-public import core.sys.windows.windows;
+public import core.sys.windows.windef;
+public import core.sys.windows.winuser;
+public import core.sys.windows.winreg;
+public import core.sys.windows.wingdi;
+public import core.sys.windows.commdlg;
+public import core.sys.windows.winbase;
 private import dfl.internal.wincom;
 
 
@@ -34,19 +39,9 @@ else
 
 extern(Windows) nothrow:
 	
-	struct SIZE
-	{
-		LONG cx;
-		LONG cy;
-	}
 	alias SIZE* LPSIZE;
 	
 	
-	struct POINTL
-	{
-		LONG x;
-		LONG y;
-	}
 	alias POINTL* LPPOINTL;
 	
 	
@@ -65,40 +60,6 @@ extern(Windows) nothrow:
 	
 	
 	alias HRESULT THEMEAPI;
-	
-	
-	union LARGE_INTEGER
-	{
-		struct
-		{
-			DWORD LowPart;
-			LONG HighPart;
-		}
-		private struct _U
-		{
-			DWORD LowPart;
-			LONG HighPart;
-		}
-		_U u;
-		LONGLONG QuadPart;
-	}
-	
-	
-	union ULARGE_INTEGER
-	{
-		struct
-		{
-			DWORD LowPart;
-			DWORD HighPart;
-		}
-		private struct _U
-		{
-			DWORD LowPart;
-			DWORD HighPart;
-		}
-		_U u;
-		DWORDLONG QuadPart;
-	}
 	
 	
 	enum: UINT
@@ -1503,14 +1464,6 @@ extern(Windows) nothrow:
 	}
 	
 	
-	enum: DWORD
-	{
-		VER_PLATFORM_WIN32s = 0,
-		VER_PLATFORM_WIN32_WINDOWS = 1,
-		VER_PLATFORM_WIN32_NT = 2,
-	}
-	
-	
 	enum: UINT
 	{
 		SIF_RANGE = 0x0001,
@@ -1573,26 +1526,12 @@ extern(Windows) nothrow:
 	
 	enum: UINT
 	{
-		DT_TOP = 0x00000000,
-		DT_LEFT = 0x00000000,
-		DT_CENTER = 0x00000001,
-		DT_RIGHT = 0x00000002,
-		DT_VCENTER = 0x00000004,
-		DT_BOTTOM = 0x00000008,
-		DT_WORDBREAK = 0x00000010,
-		DT_SINGLELINE = 0x00000020,
 		DT_EXPANDTABS = 0x00000040,
 		DT_TABSTOP = 0x00000080,
-		DT_NOCLIP = 0x00000100,
 		DT_EXTERNALLEADING = 0x00000200,
 		DT_CALCRECT = 0x00000400,
-		DT_NOPREFIX = 0x00000800,
 		DT_INTERNAL = 0x00001000,
-		DT_EDITCONTROL = 0x00002000,
-		DT_PATH_ELLIPSIS = 0x00004000,
-		DT_END_ELLIPSIS = 0x00008000,
 		DT_MODIFYSTRING = 0x00010000,
-		DT_RTLREADING = 0x00020000,
 		DT_WORD_ELLIPSIS = 0x00040000,
 	}
 	
@@ -1643,18 +1582,6 @@ extern(Windows) nothrow:
 	
 	enum: UINT
 	{
-		PS_SOLID = 0,
-		PS_DASH = 1,
-		PS_DOT = 2,
-		PS_DASHDOT = 3,
-		PS_DASHDOTDOT = 4,
-		PS_NULL = 5,
-		PS_INSIDEFRAME = 6,
-	}
-	
-	
-	enum: UINT
-	{
 		IMAGE_BITMAP = 0,
 		IMAGE_ICON = 1,
 		IMAGE_CURSOR = 2,
@@ -1669,17 +1596,6 @@ extern(Windows) nothrow:
 	
 	
 	enum LPCSTR RT_STRING = cast(LPCSTR)6;
-	
-	
-	enum: LONG
-	{
-		HS_HORIZONTAL = 0,
-		HS_VERTICAL = 1,
-		HS_FDIAGONAL = 2,
-		HS_BDIAGONAL = 3,
-		HS_CROSS = 4,
-		HS_DIAGCROSS = 5,
-	}
 	
 	
 	enum: DWORD
@@ -1878,14 +1794,6 @@ extern(Windows) nothrow:
 	alias LOGBRUSH* LPLOGBRUSH;
 	
 	
-	struct DRAWTEXTPARAMS
-	{ 
-		UINT cbSize; 
-		int iTabLength; 
-		int iLeftMargin; 
-		int iRightMargin; 
-		UINT uiLengthDrawn; 
-	}
 	alias DRAWTEXTPARAMS* LPDRAWTEXTPARAMS;
 	
 	
@@ -2321,39 +2229,6 @@ extern(Windows) nothrow:
 	}
 	
 	
-	struct MENUITEMINFOA
-	{
-		UINT cbSize;
-		UINT fMask;
-		UINT fType;
-		UINT fState;
-		UINT wID;
-		HMENU hSubMenu;
-		HBITMAP hbmpChecked;
-		HBITMAP hbmpUnchecked;
-		DWORD dwItemData;
-		LPSTR dwTypeData;
-		UINT cch;
-		//HBITMAP hbmpItem;
-	}
-	alias MENUITEMINFOA* LPMENUITEMINFOA;
-	
-	
-	struct MENUITEMINFOW
-	{
-		UINT cbSize;
-		UINT fMask;
-		UINT fType;
-		UINT fState;
-		UINT wID;
-		HMENU hSubMenu;
-		HBITMAP hbmpChecked;
-		HBITMAP hbmpUnchecked;
-		DWORD dwItemData;
-		LPWSTR dwTypeData;
-		UINT cch;
-		//HBITMAP hbmpItem;
-	}
 	alias MENUITEMINFOW* LPMENUITEMINFOW;
 	
 	
@@ -2435,23 +2310,6 @@ extern(Windows) nothrow:
 	alias CHOOSECOLORA* LPCHOOSECOLORA;
 	
 	
-	struct LOGFONTW
-	{
-		LONG lfHeight;
-		LONG lfWidth;
-		LONG lfEscapement;
-		LONG lfOrientation;
-		LONG lfWeight;
-		BYTE lfItalic;
-		BYTE lfUnderline;
-		BYTE lfStrikeOut;
-		BYTE lfCharSet;
-		BYTE lfOutPrecision;
-		BYTE lfClipPrecision;
-		BYTE lfQuality;
-		BYTE lfPitchAndFamily;
-		WCHAR[32] lfFaceName;
-	}
 	alias LOGFONTW* PLOGFONTW;
 	alias LOGFONTW* LPLOGFONTW;
 	
@@ -2525,14 +2383,6 @@ extern(Windows) nothrow:
 	alias CHOOSEFONTA* LPCHOOSEFONTA;
 	
 	
-	struct ICONINFO
-	{
-		BOOL fIcon;
-		DWORD xHotspot;
-		DWORD yHotspot;
-		HBITMAP hbmMask;
-		HBITMAP hbmColor;
-	}
 	alias ICONINFO* LPICONINFO;
 	alias ICONINFO* PICONINFO;
 	
@@ -2575,19 +2425,6 @@ extern(Windows) nothrow:
 	alias CREATESTRUCTA* LPCREATESTRUCTA;
 	
 	
-	struct ACTCTXW
-	{
-		ULONG cbSize;
-		DWORD dwFlags;
-		LPCWSTR lpSource;
-		USHORT wProcessorArchitecture;
-		LANGID wLangId;
-		LPCWSTR lpAssemblyDirectory;
-		LPCWSTR lpResourceName;
-		LPCWSTR lpApplicationName;
-		HMODULE hModule;
-	}
-	alias ACTCTXW* PACTCTXW;
 	alias ACTCTXW* LPACTCTXW;
 	
 	
@@ -2784,31 +2621,6 @@ extern(Windows) nothrow:
 		MONITOR_DEFAULTTONEAREST = 0x00000002,
 	}
 	
-	
-	struct ENHMETAHEADER
-	{
-		alias SIZE SIZEL;
-		alias RECT RECTL;
-		DWORD iType = 1;
-		DWORD nSize = ENHMETAHEADER.sizeof;
-		RECTL rclBounds;
-		RECTL rclFrame;
-		DWORD dSignature = 1179469088;
-		DWORD nVersion;
-		DWORD nBytes;
-		DWORD nRecords;
-		WORD nHandles;
-		WORD sReserved;
-		DWORD nDescription;
-		DWORD offDescription;
-		DWORD nPalEntries;
-		SIZEL szlDevice;
-		SIZEL szlMillimeters;
-		DWORD cbPixelFormat;
-		DWORD offPixelFormat;
-		DWORD bOpenGL;
-		SIZEL szlMicrometers;
-	}
 	
 	
 	BOOL DrawIconEx(HDC hdc, int xLeft, int yTop, HICON hIcon, int cxWidth, int cyWidth, UINT istepIfAniCur, HBRUSH hbrFlickerFreeDraw, UINT diFlags);

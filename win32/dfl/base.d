@@ -972,7 +972,8 @@ class KeyPressEventArgs: KeyEventArgs
 		_keych = ch;
 		
 		int vk;
-		if(dfl.internal.utf.useUnicode)
+		static import dfl.internal.utf;
+		static if(dfl.internal.utf.useUnicode)
 			vk = 0xFF & VkKeyScanW(cast(WCHAR)ch);
 		else
 			vk = 0xFF & VkKeyScanA(cast(char)ch);
@@ -1493,11 +1494,11 @@ class Cursors // docmain
 	
 	///
 	@property Cursor arrow() // getter
-	{ return new Cursor(LoadCursorA(HINSTANCE.init, IDC_ARROW), false); }
+	{ return new Cursor(LoadCursor(HINSTANCE.init, IDC_ARROW), false); }
 	
 	///
 	@property Cursor cross() // getter
-	{ return new Cursor(LoadCursorA(HINSTANCE.init, IDC_CROSS), false); }
+	{ return new Cursor(LoadCursor(HINSTANCE.init, IDC_CROSS), false); }
 	
 	///
 	//@property Cursor default() // getter
