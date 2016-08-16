@@ -5,6 +5,8 @@ private import dfl.base, dfl.control, dfl.drawing, dfl.application,
 	dfl.event, dfl.collections;
 private import dfl.internal.winapi, dfl.internal.dlib;
 
+static import dfl.internal.utf;
+
 version(DFL_NO_IMAGELIST)
 {
 }

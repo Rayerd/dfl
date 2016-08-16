@@ -461,6 +461,7 @@ class Form: ContainerControl, IDialogResult // docmain
 			{
 				debug
 				{
+					static import std.string;
 					er = std.string.format("CreateWindowEx failed {className=%s;exStyle=0x%X;style=0x%X;parent=0x%X;menu=0x%X;inst=0x%X;}",
 						className, exStyle, style, cast(void*)parent, cast(void*)menu, cast(void*)inst);
 				}

@@ -10,6 +10,8 @@ private import dfl.internal.dlib;
 private import dfl.control, dfl.panel, dfl.internal.winapi, dfl.drawing;
 private import dfl.application, dfl.event, dfl.base, dfl.collections;
 
+static import dfl.internal.utf;
+
 
 private extern(Windows) void _initTabcontrol();
 

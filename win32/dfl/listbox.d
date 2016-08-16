@@ -10,6 +10,8 @@ private import dfl.internal.dlib;
 private import dfl.internal.winapi, dfl.control, dfl.base, dfl.application;
 private import dfl.drawing, dfl.event, dfl.collections;
 
+static import dfl.internal.utf;
+
 private import std.algorithm;
 
 private extern(C) void* memmove(void*, void*, size_t len);

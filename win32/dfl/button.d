@@ -8,6 +8,8 @@ module dfl.button;
 private import dfl.base, dfl.control, dfl.application, dfl.internal.winapi;
 private import dfl.event, dfl.drawing, dfl.internal.dlib;
 
+static import dfl.internal.utf;
+
 
 private extern(Windows) void _initButton();
 

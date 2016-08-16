@@ -9,6 +9,8 @@ private import dfl.base, dfl.control, dfl.drawing, dfl.application,
 	dfl.event;
 private import dfl.internal.winapi;
 
+static import dfl.internal.utf;
+
 
 private extern(Windows) void _initProgressbar();
 

@@ -200,38 +200,3 @@ class ColorDialog: CommonDialog // docmain
 		}
 	}
 }
-
-
-private extern(Windows) UINT ccHookProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
-{
-	enum PROP_STR = "DFL_ColorDialog";
-	ColorDialog cd;
-	UINT result = 0;
-	
-	try
-	{
-		if(msg == WM_INITDIALOG)
-		{
-			CHOOSECOLORA* cc;
-			cc = cast(CHOOSECOLORA*)lparam;
-			SetPropA(hwnd, PROP_STR.ptr, cast(HANDLE)cc.lCustData);
-			cd = cast(ColorDialog)cast(void*)cc.lCustData;
-		}
-		else
-		{
-			cd = cast(ColorDialog)cast(void*)GetPropA(hwnd, PROP_STR.ptr);
-		}
-		
-		if(cd)
-		{
-			result = cast(UINT)cd.hookProc(hwnd, msg, wparam, lparam);
-		}
-	}
-	catch(DThrowable e)
-	{
-		Application.onThreadException(e);
-	}
-	
-	return result;
-}
-

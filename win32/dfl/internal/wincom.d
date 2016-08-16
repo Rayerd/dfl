@@ -259,7 +259,7 @@ version(_dfl_needcom)
 }
 else
 {
-	public import std.c.windows.com;
+	public import core.sys.windows.com;
 }
 
 

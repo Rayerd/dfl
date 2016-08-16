@@ -437,7 +437,7 @@ extern(Windows)
 	alias typeof(&SetMenuItemInfoW) SetMenuItemInfoWProc;
 	alias typeof(&InsertMenuItemW) InsertMenuItemWProc;
 	alias typeof(&CreateFontIndirectW) CreateFontIndirectWProc;
-	package alias typeof(&GetObjectW) GetObjectWProc;
+	alias typeof(&GetObjectW) GetObjectWProc;
 }
 
 
@@ -2147,7 +2147,7 @@ HFONT createFontIndirect(ref LogFont lf)
 // GetObject for a LogFont.
 int getLogFont(HFONT hf, ref LogFont lf)
 {
-	if(useUnicode)
+	static if(useUnicode)
 	{
 		version(STATIC_UNICODE)
 		{

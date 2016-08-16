@@ -6936,7 +6936,7 @@ class Control: DObject, IWindow // docmain
 		}
 	}
 	
-	private enum CCompat: ubyte
+	package enum CCompat: ubyte
 	{
 		NONE = 0,
 		DFL095 = 1,
