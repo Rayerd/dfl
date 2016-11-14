@@ -1750,7 +1750,7 @@ class Form: ContainerControl, IDialogResult // docmain
 					//wstyle = wstyle & ~(WS_MINIMIZE | WS_MAXIMIZE);
 					break;
 			}
-			//wstyle = GetWindowLongA(hwnd, GWL_STYLE);
+			//wstyle = GetWindowLongPtrA(hwnd, GWL_STYLE);
 		}
 		else
 		{
@@ -1775,7 +1775,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	final @property FormWindowState windowState() // getter
 	{
 		LONG wl;
-		//wl = wstyle = GetWindowLongA(hwnd, GWL_STYLE);
+		//wl = wstyle = GetWindowLongPtrA(hwnd, GWL_STYLE);
 		wl = _style();
 		
 		if(wl & WS_MAXIMIZE)
@@ -2080,7 +2080,7 @@ class Form: ContainerControl, IDialogResult // docmain
 		{
 			if(sowner)
 			{
-				LONG owl = GetWindowLongA(sowner, GWL_STYLE);
+				LONG owl = GetWindowLongPtrA(sowner, GWL_STYLE).toI32;
 				if(owl & WS_CHILD)
 					goto bad_owner;
 				
@@ -2299,8 +2299,8 @@ class Form: ContainerControl, IDialogResult // docmain
 			//case WM_CREATE: // WM_NCCREATE seems like a better choice.
 			case WM_NCCREATE:
 				// Make sure Windows doesn't magically change the styles.
-				SetWindowLongA(hwnd, GWL_EXSTYLE, wexstyle);
-				SetWindowLongA(hwnd, GWL_STYLE, wstyle & ~WS_VISIBLE);
+				SetWindowLongPtrA(hwnd, GWL_EXSTYLE, wexstyle);
+				SetWindowLongPtrA(hwnd, GWL_STYLE, wstyle & ~WS_VISIBLE);
 				
 				SetWindowPos(hwnd, HWND.init, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE
 					| SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE); // Recalculate the frame.
@@ -2769,7 +2769,7 @@ class Form: ContainerControl, IDialogResult // docmain
 					enumChildWindows(msg.hWnd,
 						(HWND hw)
 						{
-							auto wl = GetWindowLongA(hw, GWL_STYLE);
+							auto wl = GetWindowLongPtrA(hw, GWL_STYLE);
 							if(((WS_VISIBLE | WS_TABSTOP) == ((WS_VISIBLE | WS_TABSTOP) & wl))
 								&& !(WS_DISABLED & wl))
 							{

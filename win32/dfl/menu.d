@@ -145,7 +145,7 @@ else
 			mparent = newParent;
 			
 			if(cast(size_t)mindex > mparent.menuItems.length)
-				mindex = mparent.menuItems.length;
+				mindex = mparent.menuItems.length.toI32;
 			
 			_setParent();
 		}
@@ -779,7 +779,7 @@ else
 			{
 				if(!Menu._compat092)
 				{
-					mi.mindex = length;
+					mi.mindex = length.toI32;
 				}
 				
 				/+
@@ -802,7 +802,7 @@ else
 				
 				foreach(MenuItem it; items)
 				{
-					insert(length, it);
+					insert(length.toI32, it);
 				}
 			}
 			
@@ -813,7 +813,7 @@ else
 				
 				foreach(Dstring it; items)
 				{
-					insert(length, it);
+					insert(length.toI32, it);
 				}
 			}
 			
@@ -829,7 +829,7 @@ else
 			
 			void _added(size_t idx, MenuItem val)
 			{
-				val.mindex = idx;
+				val.mindex = idx.toI32;
 				val._setParent(_owner);
 				_additem(val);
 			}
@@ -845,8 +845,8 @@ else
 					val._unsetParent();
 					//RemoveMenu(_owner.handle, val._menuID, MF_BYCOMMAND);
 					//_owner._remove(val._menuID, MF_BYCOMMAND);
-					_owner._remove(idx, MF_BYPOSITION);
-					_delitem(idx);
+					_owner._remove(idx.toI32, MF_BYPOSITION);
+					_delitem(idx.toI32);
 				}
 			}
 			
@@ -864,7 +864,7 @@ else
 		// Extra.
 		deprecated final void opCatAssign(MenuItem mi)
 		{
-			menuItems.insert(menuItems.length, mi);
+			menuItems.insert(menuItems.length.toI32, mi);
 		}
 		
 		

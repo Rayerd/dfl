@@ -252,9 +252,9 @@ class ComboBox: ListControl // docmain
 		if(isHandleCreated)
 		{
 			if(dfl.internal.utf.useUnicode)
-				result = prevwproc(CB_FINDSTRING, startIndex, cast(LPARAM)dfl.internal.utf.toUnicodez(str));
+				result = prevwproc(CB_FINDSTRING, startIndex, cast(LPARAM)dfl.internal.utf.toUnicodez(str)).toI32;
 			else
-				result = prevwproc(CB_FINDSTRING, startIndex, cast(LPARAM)dfl.internal.utf.unsafeAnsiz(str));
+				result = prevwproc(CB_FINDSTRING, startIndex, cast(LPARAM)dfl.internal.utf.unsafeAnsiz(str)).toI32;
 			if(result == CB_ERR) // Redundant.
 				result = NO_MATCHES;
 		}
@@ -279,9 +279,9 @@ class ComboBox: ListControl // docmain
 		if(isHandleCreated)
 		{
 			if(dfl.internal.utf.useUnicode)
-				result = prevwproc(CB_FINDSTRINGEXACT, startIndex, cast(LPARAM)dfl.internal.utf.toUnicodez(str));
+				result = prevwproc(CB_FINDSTRINGEXACT, startIndex, cast(LPARAM)dfl.internal.utf.toUnicodez(str)).toI32;
 			else
-				result = prevwproc(CB_FINDSTRINGEXACT, startIndex, cast(LPARAM)dfl.internal.utf.unsafeAnsiz(str));
+				result = prevwproc(CB_FINDSTRINGEXACT, startIndex, cast(LPARAM)dfl.internal.utf.unsafeAnsiz(str)).toI32;
 			if(result == CB_ERR) // Redundant.
 				result = NO_MATCHES;
 		}
@@ -299,7 +299,7 @@ class ComboBox: ListControl // docmain
 	///
 	final int getItemHeight(int idx)
 	{
-		int result = prevwproc(CB_GETITEMHEIGHT, idx, 0);
+		int result = prevwproc(CB_GETITEMHEIGHT, idx, 0).toI32;
 		if(CB_ERR == result)
 			throw new DflException("Unable to obtain item height");
 		return result;
@@ -436,7 +436,7 @@ class ComboBox: ListControl // docmain
 		if(!(ctrlStyle & ControlStyles.CACHE_TEXT) && isHandleCreated)
 			//return cast(uint)SendMessageA(handle, WM_GETTEXTLENGTH, 0, 0);
 			return cast(uint)dfl.internal.utf.sendMessage(handle, WM_GETTEXTLENGTH, 0, 0);
-		return wtext.length;
+		return wtext.length.toI32;
 	}
 	
 	
@@ -586,7 +586,7 @@ class ComboBox: ListControl // docmain
 		
 		LRESULT insert2(WPARAM idx, Dstring val)
 		{
-			insert(idx, val);
+			insert(idx.toI32, val);
 			return idx;
 		}
 		
@@ -596,7 +596,7 @@ class ComboBox: ListControl // docmain
 			int i;
 			if(lbox.sorted)
 			{
-				for(i = 0; i != _items.length; i++)
+				for(i = 0; i != _items.length.toI32; i++)
 				{
 					if(val < _items[i])
 						break;
@@ -604,7 +604,7 @@ class ComboBox: ListControl // docmain
 			}
 			else
 			{
-				i = _items.length;
+				i = _items.length.toI32;
 			}
 			
 			insert(i, val);
@@ -672,7 +672,7 @@ class ComboBox: ListControl // docmain
 		
 		// Set the Ctrl ID to the HWND so that it is unique
 		// and WM_MEASUREITEM will work properly.
-		SetWindowLongA(hwnd, GWL_ID, cast(LONG)hwnd);
+		SetWindowLongPtrA(hwnd, GWL_ID, cast(LONG_PTR)hwnd);
 		
 		//prevwproc(EM_SETLIMITTEXT, cast(WPARAM)lim, 0);
 		maxLength = lim; // Call virtual function.
@@ -951,7 +951,7 @@ class ComboBox: ListControl // docmain
 				return;
 			
 			case CB_DELETESTRING:
-				icollection.removeAt(msg.wParam);
+				icollection.removeAt(msg.wParam.toI32);
 				msg.result = icollection.length;
 				return;
 			
@@ -969,7 +969,7 @@ class ComboBox: ListControl // docmain
 				return;
 			
 			case CB_LIMITTEXT:
-				maxLength = msg.wParam;
+				maxLength = msg.wParam.toI32;
 				return;
 			
 			case WM_SETFOCUS:

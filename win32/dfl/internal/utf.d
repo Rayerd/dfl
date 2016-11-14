@@ -190,11 +190,11 @@ Dstring unicodeToAnsi(Dwstringz unicode, size_t ulen)
 	char[] result;
 	int len;
 	
-	len = WideCharToMultiByte(0, 0, unicode, ulen, null, 0, null, null);
+	len = WideCharToMultiByte(0, 0, unicode, ulen.toI32, null, 0, null, null);
 	assert(len > 0);
 	
 	result = new char[len];
-	len = WideCharToMultiByte(0, 0, unicode, ulen, result.ptr, len, null, null);
+	len = WideCharToMultiByte(0, 0, unicode, ulen.toI32, result.ptr, len, null, null);
 	assert(len == result.length);
 	//return result[0 .. len - 1];
 	return cast(Dstring)result[0 .. len - 1]; // Needed in D2.
@@ -208,7 +208,7 @@ Dwstring ansiToUnicode(Dstringz ansi, size_t len)
 	len++;
 	ws = new wchar[len];
 	
-	len = MultiByteToWideChar(0, 0, ansi, len, ws.ptr, len);
+	len = MultiByteToWideChar(0, 0, ansi, len.toI32, ws.ptr, len.toI32);
 	//assert(len == ws.length);
 	ws = ws[0 .. len - 1]; // Exclude null char at end.
 	
@@ -573,7 +573,7 @@ Dstring getWindowText(HWND hwnd)
 		len++;
 		buf = (new wchar[len]).ptr;
 		
-		len = proc(hwnd, buf, len);
+		len = proc(hwnd, buf, len.toI32);
 		return fromUnicode(buf, len);
 	}
 	else
@@ -587,7 +587,7 @@ Dstring getWindowText(HWND hwnd)
 		len++;
 		buf = (new char[len]).ptr;
 		
-		len = GetWindowTextA(hwnd, buf, len);
+		len = GetWindowTextA(hwnd, buf, len.toI32);
 		return fromAnsi(buf, len);
 	}
 }
@@ -647,7 +647,7 @@ Dstring getModuleFileName(HMODULE hmod)
 		wchar[] s;
 		DWORD len;
 		s = new wchar[MAX_PATH];
-		len = proc(hmod, s.ptr, s.length);
+		len = proc(hmod, s.ptr, s.length.toI32);
 		return fromUnicode(s.ptr, len);
 	}
 	else
@@ -655,7 +655,7 @@ Dstring getModuleFileName(HMODULE hmod)
 		char[] s;
 		DWORD len;
 		s = new char[MAX_PATH];
-		len = GetModuleFileNameA(hmod, s.ptr, s.length);
+		len = GetModuleFileNameA(hmod, s.ptr, s.length.toI32);
 		return fromAnsi(s.ptr, len);
 	}
 }
@@ -752,14 +752,14 @@ Dstring getSelectedText(HWND hwnd)
 			return null;
 		assert(v2 > v1);
 		
-		len = proc(hwnd, WM_GETTEXTLENGTH, 0, 0);
+		len = proc(hwnd, WM_GETTEXTLENGTH, 0, 0).toI32;
 		if(len)
 		{
 			len++;
 			wchar* buf;
 			buf = (new wchar[len]).ptr;
 			
-			len = proc(hwnd, WM_GETTEXT, len, cast(LPARAM)buf);
+			len = proc(hwnd, WM_GETTEXT, len, cast(LPARAM)buf).toI32;
 			if(len)
 			{
 				wchar[] s;
@@ -775,14 +775,14 @@ Dstring getSelectedText(HWND hwnd)
 			return null;
 		assert(v2 > v1);
 		
-		len = SendMessageA(hwnd, WM_GETTEXTLENGTH, 0, 0);
+		len = SendMessageA(hwnd, WM_GETTEXTLENGTH, 0, 0).toI32;
 		if(len)
 		{
 			len++;
 			char* buf;
 			buf = (new char[len]).ptr;
 			
-			len = SendMessageA(hwnd, WM_GETTEXT, len, cast(LPARAM)buf);
+			len = SendMessageA(hwnd, WM_GETTEXT, len, cast(LPARAM)buf).toI32;
 			if(len)
 			{
 				char[] s;
@@ -1000,7 +1000,7 @@ Dstring getClipboardFormatName(UINT format)
 		wchar[] buf;
 		int len;
 		buf = new wchar[64];
-		len = proc(format, buf.ptr, buf.length);
+		len = proc(format, buf.ptr, buf.length.toI32);
 		if(!len)
 			return null;
 		return fromUnicode(buf.ptr, len);
@@ -1010,7 +1010,7 @@ Dstring getClipboardFormatName(UINT format)
 		char[] buf;
 		int len;
 		buf = new char[64];
-		len = GetClipboardFormatNameA(format, buf.ptr, buf.length);
+		len = GetClipboardFormatNameA(format, buf.ptr, buf.length.toI32);
 		if(!len)
 			return null;
 		return fromAnsi(buf.ptr, len);
@@ -1061,7 +1061,7 @@ int drawTextEx(HDC hdc, Dstring text, LPRECT lprc, UINT dwDTFormat, LPDRAWTEXTPA
 			str = cast(Dwstring)tempStr[0 .. 1]; // Needed in D2.
 		}
 		//return proc(hdc, str.ptr, str.length, lprc, dwDTFormat, lpDTParams);
-		return proc(hdc, cast(wchar*)str.ptr, str.length, lprc, dwDTFormat, lpDTParams); // Needed in D2.
+		return proc(hdc, cast(wchar*)str.ptr, str.length.toI32, lprc, dwDTFormat, lpDTParams); // Needed in D2.
 	}
 	else
 	{
@@ -1081,7 +1081,7 @@ int drawTextEx(HDC hdc, Dstring text, LPRECT lprc, UINT dwDTFormat, LPDRAWTEXTPA
 			str = cast(Dstring)tempStr[0 .. 1]; // Needed in D2.
 		}
 		//return DrawTextExA(hdc, str.ptr, str.length, lprc, dwDTFormat, lpDTParams);
-		return DrawTextExA(hdc, cast(char*)str.ptr, str.length, lprc, dwDTFormat, lpDTParams); // Needed in D2.
+		return DrawTextExA(hdc, cast(char*)str.ptr, str.length.toI32, lprc, dwDTFormat, lpDTParams); // Needed in D2.
 	}
 }
 
@@ -1219,7 +1219,7 @@ Dstring getFullPathName(Dstring fileName)
 			wchar[] wbuf = _wbuf;
 			if(len > _wbuf.sizeof)
 				wbuf = new wchar[len];
-			len = proc(fnw, wbuf.length, wbuf.ptr, null);
+			len = proc(fnw, wbuf.length.toI32, wbuf.ptr, null);
 			assert(len < wbuf.length);
 			return fromUnicode(wbuf.ptr, len);
 		}
@@ -1233,7 +1233,7 @@ Dstring getFullPathName(Dstring fileName)
 			char[] abuf = _abuf;
 			if(len > _abuf.sizeof)
 				abuf = new char[len];
-			len = GetFullPathNameA(fna, abuf.length, abuf.ptr, null);
+			len = GetFullPathNameA(fna, abuf.length.toI32, abuf.ptr, null);
 			assert(len < abuf.length);
 			return fromAnsi(abuf.ptr, len);
 		}
@@ -1305,7 +1305,7 @@ Dstring getSystemDirectory()
 		wchar[] buf;
 		UINT len;
 		buf = new wchar[MAX_PATH];
-		len = proc(buf.ptr, buf.length);
+		len = proc(buf.ptr, buf.length.toI32);
 		if(!len)
 			return null;
 		return fromUnicode(buf.ptr, len);
@@ -1315,7 +1315,7 @@ Dstring getSystemDirectory()
 		char[] buf;
 		UINT len;
 		buf = new char[MAX_PATH];
-		len = GetSystemDirectoryA(buf.ptr, buf.length);
+		len = GetSystemDirectoryA(buf.ptr, buf.length.toI32);
 		if(!len)
 			return null;
 		return fromAnsi(buf.ptr, len);
@@ -1570,7 +1570,7 @@ deprecated BOOL getTextExtentPoint32(HDC hdc, Dstring text, LPSIZE lpSize)
 		
 		Dwstring str;
 		str = toUnicode(text);
-		return proc(hdc, str.ptr, str.length, lpSize);
+		return proc(hdc, str.ptr, str.length.toI32, lpSize);
 	}
 	else
 	{
@@ -1578,7 +1578,7 @@ deprecated BOOL getTextExtentPoint32(HDC hdc, Dstring text, LPSIZE lpSize)
 		// to keep the measurements accurate with DrawTextA.
 		Dstring str;
 		str = unsafeAnsi(text);
-		return GetTextExtentPoint32A(hdc, str.ptr, str.length, lpSize);
+		return GetTextExtentPoint32A(hdc, str.ptr, str.length.toI32, lpSize);
 	}
 }
 
@@ -1613,7 +1613,7 @@ Dstring dragQueryFile(HDROP hDrop, UINT iFile)
 		if(!len)
 			return null;
 		str = new wchar[len + 1];
-		proc(hDrop, iFile, str.ptr, str.length);
+		proc(hDrop, iFile, str.ptr, str.length.toI32);
 		return fromUnicode(str.ptr, len);
 	}
 	else
@@ -1624,7 +1624,7 @@ Dstring dragQueryFile(HDROP hDrop, UINT iFile)
 		if(!len)
 			return null;
 		str = new char[len + 1];
-		DragQueryFileA(hDrop, iFile, str.ptr, str.length);
+		DragQueryFileA(hDrop, iFile, str.ptr, str.length.toI32);
 		return fromAnsi(str.ptr, len);
 	}
 }

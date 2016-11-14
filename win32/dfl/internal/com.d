@@ -33,13 +33,13 @@ class DflComObject: ComObject // package
 	override ULONG AddRef()
 	{
 		//cprintf("AddRef `%.*s`\n", cast(int)toString().length, toString().ptr);
-		return C_refCountInc(cast(void*)this);
+		return C_refCountInc(cast(void*)this).toI32;
 	}
 	
 	override ULONG Release()
 	{
 		//cprintf("Release `%.*s`\n", cast(int)toString().length, toString().ptr);
-		return C_refCountDec(cast(void*)this);
+		return C_refCountDec(cast(void*)this).toI32;
 	}
 }
 
@@ -89,7 +89,7 @@ class DStreamToIStream: DflComObject, dfl.internal.wincom.IStream
 		
 		try
 		{
-			read = stm.readBlock(pv, cb);
+			read = stm.readBlock(pv, cb).toI32;
 		}
 		catch(DStreamException e)
 		{
@@ -113,7 +113,7 @@ class DStreamToIStream: DflComObject, dfl.internal.wincom.IStream
 		{
 			if(!stm.writeable)
 				return E_NOTIMPL;
-			written = stm.writeBlock(pv, cb);
+			written = stm.writeBlock(pv, cb).toI32;
 		}
 		catch(DStreamException e)
 		{
@@ -294,7 +294,7 @@ class MemoryIStream: DflComObject, dfl.internal.wincom.IStream
 		seekpos += count;
 		
 		if(pcbRead)
-			*pcbRead = count;
+			*pcbRead = count.toI32;
 		return S_OK;
 	}
 	

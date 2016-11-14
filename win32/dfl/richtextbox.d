@@ -739,7 +739,7 @@ class RichTextBox: TextBoxBase // docmain
 			return -1; // ...
 		if(charIndex < 0)
 			return -1;
-		return SendMessageA(hwnd, EM_EXLINEFROMCHAR, 0, charIndex);
+		return SendMessageA(hwnd, EM_EXLINEFROMCHAR, 0, charIndex).toI32;
 	}
 	
 	
@@ -793,7 +793,7 @@ class RichTextBox: TextBoxBase // docmain
 		EDITSTREAM es;
 		
 		si.str = str;
-		es.dwCookie = cast(DWORD)&si;
+		es.dwCookie = cast(DWORD_PTR)&si;
 		es.pfnCallback = &_streamingInStr;
 		
 		//if(SendMessageA(handle, EM_STREAMIN, cast(WPARAM)fmt, cast(LPARAM)&es) != str.length)
@@ -814,7 +814,7 @@ class RichTextBox: TextBoxBase // docmain
 		EDITSTREAM es;
 		
 		so.str = null;
-		es.dwCookie = cast(DWORD)&so;
+		es.dwCookie = cast(DWORD_PTR)&so;
 		es.pfnCallback = &_streamingOutStr;
 		
 		SendMessageA(handle, EM_STREAMOUT, cast(WPARAM)fmt, cast(LPARAM)&es);
@@ -944,7 +944,7 @@ class RichTextBox: TextBoxBase // docmain
 		tr.lpstrText = s.ptr;
 		
 		//max = SendMessageA(handle, EM_GETTEXTRANGE, 0, cast(LPARAM)&tr);
-		max = dfl.internal.utf.sendMessage(handle, EM_GETTEXTRANGE, 0, cast(LPARAM)&tr);
+		max = dfl.internal.utf.sendMessage(handle, EM_GETTEXTRANGE, 0, cast(LPARAM)&tr).toI32;
 		Dstring result;
 		if(dfl.internal.utf.useUnicode)
 			result = fromUnicode(cast(wchar*)s.ptr, max);
@@ -1019,7 +1019,7 @@ class RichTextBox: TextBoxBase // docmain
 }
 
 
-private extern(Windows) DWORD _streamingInStr(DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG* pcb) nothrow
+private extern(Windows) DWORD _streamingInStr(DWORD_PTR dwCookie, LPBYTE pbBuff, LONG cb, LONG* pcb) nothrow
 {
 	RichTextBox._StreamStr* si;
 	si = cast(typeof(si))dwCookie;
@@ -1032,7 +1032,7 @@ private extern(Windows) DWORD _streamingInStr(DWORD dwCookie, LPBYTE pbBuff, LON
 	else if(cb >= si.str.length)
 	{
 		pbBuff[0 .. si.str.length] = (cast(BYTE[])si.str)[];
-		*pcb = si.str.length;
+		*pcb = si.str.length.toI32;
 		si.str = null;
 	}
 	else
@@ -1046,7 +1046,7 @@ private extern(Windows) DWORD _streamingInStr(DWORD dwCookie, LPBYTE pbBuff, LON
 }
 
 
-private extern(Windows) DWORD _streamingOutStr(DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG* pcb) nothrow
+private extern(Windows) DWORD _streamingOutStr(DWORD_PTR dwCookie, LPBYTE pbBuff, LONG cb, LONG* pcb) nothrow
 {
 	RichTextBox._StreamStr* so;
 	so = cast(typeof(so))dwCookie;

@@ -386,7 +386,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 		if(!(ctrlStyle & ControlStyles.CACHE_TEXT) && created())
 			//return cast(uint)SendMessageA(handle, WM_GETTEXTLENGTH, 0, 0);
 			return cast(uint)dfl.internal.utf.sendMessage(handle, WM_GETTEXTLENGTH, 0, 0);
-		return wtext.length;
+		return wtext.length.toI32;
 	}
 	
 	
@@ -824,7 +824,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 			return -1; // ...
 		if(line < 0)
 			return -1;
-		return SendMessageA(hwnd, EM_LINEINDEX, line, 0);
+		return SendMessageA(hwnd, EM_LINEINDEX, line, 0).toI32;
 	}
 	
 	/// ditto
@@ -832,7 +832,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	{
 		if(!isHandleCreated)
 			return -1; // ...
-		return SendMessageA(hwnd, EM_LINEINDEX, -1, 0);
+		return SendMessageA(hwnd, EM_LINEINDEX, -1, 0).toI32;
 	}
 	
 	
@@ -843,7 +843,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 			return -1; // ...
 		if(charIndex < 0)
 			return -1;
-		return SendMessageA(hwnd, EM_LINEFROMCHAR, charIndex, 0);
+		return SendMessageA(hwnd, EM_LINEFROMCHAR, charIndex, 0).toI32;
 	}
 	
 	

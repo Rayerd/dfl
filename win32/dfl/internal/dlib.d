@@ -32,6 +32,10 @@ alias typeof(""d[]) Ddstring;
 alias typeof(""d.ptr) Ddstringz;
 alias typeof(" "d[0]) Ddchar;
 
+uint toI32(size_t val) @property @safe pure nothrow
+{
+	return cast(uint)val;
+}
 
 version(D_Version2)
 {

@@ -20,7 +20,7 @@ class ColorDialog: CommonDialog // docmain
 		cc.Flags = INIT_FLAGS;
 		cc.rgbResult = Color.empty.toArgb();
 		cc.lCustData = cast(typeof(cc.lCustData))cast(void*)this;
-		cc.lpfnHook = cast(typeof(cc.lpfnHook))&ccHookProc;
+		cc.lpfnHook = /*cast(typeof(cc.lpfnHook))*/&ccHookProc;
 		_initcust();
 	}
 	
@@ -199,4 +199,37 @@ class ColorDialog: CommonDialog // docmain
 			cref = cdef;
 		}
 	}
+}
+
+private extern(Windows) UINT_PTR ccHookProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) nothrow
+{
+	enum PROP_STR = "DFL_ColorDialog";
+	ColorDialog cd;
+	UINT_PTR result = 0;
+	
+	try
+	{
+		if(msg == WM_INITDIALOG)
+		{
+			CHOOSECOLORA* cc;
+			cc = cast(CHOOSECOLORA*)lparam;
+			SetPropA(hwnd, PROP_STR.ptr, cast(HANDLE)cc.lCustData);
+			cd = cast(ColorDialog)cast(void*)cc.lCustData;
+		}
+		else
+		{
+			cd = cast(ColorDialog)cast(void*)GetPropA(hwnd, PROP_STR.ptr);
+		}
+		
+		if(cd)
+		{
+			result = cd.hookProc(hwnd, msg, wparam, lparam);
+		}
+	}
+	catch(DThrowable e)
+	{
+		Application.onThreadException(e);
+	}
+	
+	return result;
 }
