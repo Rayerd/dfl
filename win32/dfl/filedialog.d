@@ -790,7 +790,7 @@ class OpenFileDialog: FileDialog // docmain
 	}
 	
 	
-	private import std.stream; // TO-DO: remove this import; use dfl.internal.dlib.
+	private import dfl.internal.stream; // TO-DO: remove this import; use dfl.internal.dlib.
 	
 	///
 	final Stream openFile()
@@ -902,7 +902,7 @@ class SaveFileDialog: FileDialog // docmain
 	}
 	
 	
-	private import std.stream; // TO-DO: remove this import; use dfl.internal.dlib.
+	private import dfl.internal.stream; // TO-DO: remove this import; use dfl.internal.dlib.
 		
 	///
 	// Opens and creates with read and write access.

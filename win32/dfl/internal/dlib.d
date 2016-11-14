@@ -333,13 +333,13 @@ private import std.ascii;
 alias std.ascii.isHexDigit charIsHexDigit;
 
 
-private import std.stream;
+private import dfl.internal.stream;
 
-alias std.stream.Stream DStream;
+alias dfl.internal.stream.Stream DStream;
 
-alias std.stream.OutputStream DOutputStream;
+alias dfl.internal.stream.OutputStream DOutputStream;
 
-alias std.stream.StreamException DStreamException;
+alias dfl.internal.stream.StreamException DStreamException;
 
 
 alias Object DObject;
