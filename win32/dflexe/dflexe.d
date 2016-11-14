@@ -22,11 +22,12 @@
 import std.algorithm;
 import std.array;
 private import std.conv, std.stdio, std.string, std.path, std.file,
-	std.random, std.cstream, std.stream;
+	std.random;
 private import std.process;
 private import std.c.stdlib;
+import core.sys.windows.winbase;
 
-private import dfl.all, dfl.internal.winapi, dfl.internal.utf;
+private import dfl.all, dfl.internal.winapi, dfl.internal.utf, dfl.internal.stream;
 
 alias dfl.internal.winapi.ShellExecuteA ShellExecuteA;
 alias dfl.environment.Environment Environment;
@@ -39,17 +40,6 @@ pragma(lib, "Comdlg32.lib");
 
 private extern(Windows)
 {
-	DWORD GetLogicalDriveStringsA(DWORD nBufferLength,LPSTR lpBuffer);
-	UINT GetDriveTypeA(LPCTSTR lpRootPathName);
-	DWORD GetShortPathNameA(LPCSTR lpszLongPath, LPSTR lpszShortPath, DWORD cchBuffer);
-	
-	
-	enum: UINT
-	{
-		DRIVE_FIXED = 3,
-	}
-	
-	
 	alias DWORD function(LPCWSTR lpszLongPath, LPWSTR lpszShortPath, DWORD cchBuffer) GetShortPathNameWProc;
 }
 
@@ -285,7 +275,7 @@ bool doDflSwitch(string arg)
 	{
 		case "dmd":
 			prepare();
-			std.process.system(quotearg(std.path.buildPath(dmdpath_windows, "bin\\dmd.exe\"")));
+			writeln(std.process.executeShell(quotearg(std.path.buildPath(dmdpath_windows, "bin\\dmd.exe\""))).output);
 			exit(0); assert(0);
 		
 		case "gui", "winexe", "windowed":
@@ -897,7 +887,7 @@ int main(/+ string[] args +/)
 			
 			batf.close();
 			
-            std.process.system(batfilepath ~ " " ~ model); // pass model as %1
+            writeln(std.process.executeShell(batfilepath ~ " " ~ model).output); // pass model as %1
 			
 			std.file.remove(batfilepath);
 		}
@@ -912,7 +902,7 @@ int main(/+ string[] args +/)
 			char userc = 'y';
 			for(;;)
 			{
-				string s = to!string(std.string.toLower(din.readLine()));
+				string s = to!string(std.string.toLower(readln().strip));
 				if((!s.length && 'y' == userc)
 					|| "y" == s || "yes" == s)
 				{
@@ -1086,7 +1076,7 @@ int main(/+ string[] args +/)
 			
 			string dmdver;
 			x2 = "dmd" ~ to!string(uniform(1, 10000)) ~ ".info";
-			std.process.system(getshortpath(std.path.buildPath(dmdpath_windows, "bin\\dmd.exe")) ~ " > " ~ x2);
+			writeln(std.process.executeShell(getshortpath(std.path.buildPath(dmdpath_windows, "bin\\dmd.exe")) ~ " > " ~ x2).output);
 			scope(exit) std.file.remove(x2);
 			x = std.file.readText(x2);
 			dmdver = scanDmdOut(x, xver);
@@ -1207,12 +1197,12 @@ int main(/+ string[] args +/)
 			// Call DMD.
 			assert(dmdpath_windows.length);
 			string cmdline;
-			int sc;
 			cmdline = getshortpath(std.path.buildPath(dmdpath_windows, "bin\\dmd.exe")) ~ " " ~ std.string.join(dmdargs, " ");
 			writefln("%s", cmdline);
-			sc = std.process.system(cmdline);
-			if(sc)
-				writef("\nReturned status code %d\n", sc);
+			auto sc = std.process.executeShell(cmdline);
+			writeln(sc.output);
+			if(sc.status)
+				writef("\nReturned status code %d\n", sc.status);
 		}
 	}
 	else

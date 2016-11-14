@@ -10,7 +10,7 @@
 
 dfl -dfl-build
 
-dmd -debug -ofbin\dfl.exe dflexe.d -Ic:\dmd\import dfl_debug.lib -L/exet:nt/su:console:4.0 %mydflflags%
+dmd -debug -ofbin\dfl.exe dflexe.d -I.. dfl_debug.lib -L/exet:nt/su:console:4.0 %mydflflags%
 
 @set dfl_flags=
 @set dfl_options=%_old_dfl_options%
