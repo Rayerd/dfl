@@ -85,12 +85,12 @@ abstract class CommonDialog // docmain
 	}
 }
 
-package extern(Windows) UINT ccHookProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+private extern(Windows) UINT_PTR ccHookProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) nothrow
 {
 	import dfl.internal.dlib;
 	enum PROP_STR = "DFL_ColorDialog";
 	ColorDialog cd;
-	UINT result = 0;
+	UINT_PTR result = 0;
 	
 	try
 	{
@@ -108,7 +108,7 @@ package extern(Windows) UINT ccHookProc(HWND hwnd, UINT msg, WPARAM wparam, LPAR
 		
 		if(cd)
 		{
-			result = cast(UINT)cd.hookProc(hwnd, msg, wparam, lparam);
+			result = cd.hookProc(hwnd, msg, wparam, lparam);
 		}
 	}
 	catch(DThrowable e)
