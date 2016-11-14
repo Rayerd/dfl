@@ -71,6 +71,7 @@ bool isPrepared = false;
 bool isDebug = true;
 bool debugSpecified = false;
 string dlibname; // Read from sc.ini
+string model = "32"; // 32,64,or 32mscoff
 
 string optExet = "nt"; // Exe type.
 string optSu = "console:4.0"; // Subsystem.
@@ -667,6 +668,10 @@ int main(/+ string[] args +/)
 						break;
 					
 					default: regular_switch:
+						if (_origarg == "-m32mscoff") model = "32mscoff";
+						else if (_origarg == "-m32") model = "32"; // default
+						else if (_origarg == "-m64") model = "64";
+						
 						if(!doDflSwitch(arg))
 							dmdargs ~= quotearg(_origarg);
 				}
@@ -812,6 +817,9 @@ int main(/+ string[] args +/)
 				"\r\n   @" ~ std.path.driveName(dflsrcdir)
 				~ "\r\n   @cd \"" ~ dflsrcdir ~ "\"");
 			
+            // argument %1 will be passed by the call to system() below
+			batf.writeString("\r\n   @set MODEL=%1");
+            
 			batf.writeString(
 				"\r\n   @set _old_dmd_path=%dmd_path%"
 				"\r\n   @set dmd_path=" ~ dmdpath
@@ -833,7 +841,8 @@ int main(/+ string[] args +/)
 			batf.writeString("\r\n   @set dfl_failed=-1"); // Let makelib.bat unset this.
 			
 			//batf.writeString("\r\n   @call \"" ~ std.path.buildPath(dflsrcdir, "go.bat") ~ "\"\r\n");
-			batf.writeString("\r\n   @call \"" ~ std.path.buildPath(dflsrcdir, "makelib.bat") ~ "\"\r\n");
+            // call the batch with the model parameter
+			batf.writeString("\r\n   @call \"" ~ std.path.buildPath(dflsrcdir, "makelib.bat") ~ "\" %MODEL%\r\n");
 			
 			batf.writeString("\r\n" `@if not "%dfl_failed%" == "" goto fail`); // No longer using go.bat for this.
 			
@@ -861,7 +870,13 @@ int main(/+ string[] args +/)
 				batf.writeString("\r\n   @set path=%_old_path%");
 			}
 			
-			batf.writeString("\r\n   @move /Y dfl*.lib %dmd_path_windows%\\lib > NUL"); // Important! no longer using go.bat for this.
+			batf.writeString("\r\n   @if %MODEL%==32 (");
+			batf.writeString("\r\n   @set lib_dest=lib");
+			batf.writeString("\r\n   ) else (");
+			batf.writeString("\r\n   @set lib_dest=lib%MODEL%");
+			batf.writeString("\r\n   )");
+			batf.writeString("\r\n   @move /Y dfl*.lib %dmd_path_windows%\\%lib_dest% > NUL"); // Important! no longer using go.bat for this.
+			batf.writeString("\r\n   @set lib_dest=");
 			
 			batf.writeString("\r\n:fail\r\n");
 			
@@ -882,7 +897,7 @@ int main(/+ string[] args +/)
 			
 			batf.close();
 			
-			std.process.system(batfilepath);
+            std.process.system(batfilepath ~ " " ~ model); // pass model as %1
 			
 			std.file.remove(batfilepath);
 		}
@@ -930,7 +945,8 @@ int main(/+ string[] args +/)
 				//dfllib = std.path.buildPath(basepath, "lib\\" ~ libfile);
 				//if(!std.file.exists(dfllib))
 				{
-					dfllib = std.path.buildPath(dmdpath_windows, "lib\\" ~ libfile);
+                    string libsubdir = model != "32" ? "lib" ~ model : "lib"; // lib64, lib32mscoff
+					dfllib = std.path.buildPath(dmdpath_windows, libsubdir ~ "\\" ~ libfile);
 					if(!std.file.exists(dfllib))
 					{
 						dfllib = null;
@@ -1184,7 +1200,8 @@ int main(/+ string[] args +/)
 					dmdargs ~= dfl_options;
 				}
 			}
-			dmdargs ~= "-L/exet:" ~ optExet ~ "/su:" ~ optSu;
+            if (model=="32") // for dmd/optlink only
+                dmdargs ~= "-L/exet:" ~ optExet ~ "/su:" ~ optSu;
 			dmdargs ~= getshortpath(dfllib);
 			
 			// Call DMD.
