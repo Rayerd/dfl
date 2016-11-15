@@ -23,7 +23,7 @@ private import dfl.internal.dlib, dfl.internal.clib;
 private
 {
 	private import std.socket, core.bitop;
-	private import std.c.windows.winsock;
+	private import core.sys.windows.winsock2;
 	
 	alias InternetHost DInternetHost;
 	alias InternetAddress DInternetAddress;

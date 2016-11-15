@@ -85,7 +85,7 @@ abstract class CommonDialog // docmain
 	}
 }
 
-private extern(Windows) UINT_PTR ccHookProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) nothrow
+package extern(Windows) UINT_PTR ccHookProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) nothrow
 {
 	import dfl.internal.dlib;
 	enum PROP_STR = "DFL_ColorDialog";
