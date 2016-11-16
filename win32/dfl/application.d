@@ -176,22 +176,22 @@ final class Application // docmain
 	// Does nothing if not supported.
 	void enableVisualStyles()
 	{
-		enum MANIFEST = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>` "\r\n"
-			`<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">` "\r\n"
-				`<description>DFL manifest</description>` "\r\n"
-				`<dependency>` "\r\n"
-					`<dependentAssembly>` "\r\n"
-						`<assemblyIdentity `
-							`type="win32" `
-							`name="Microsoft.Windows.Common-Controls" `
-							`version="6.0.0.0" `
-							`processorArchitecture="*" `
-							`publicKeyToken="6595b64144ccf1df" `
-							`language="*" `
-						`/>` "\r\n"
-					`</dependentAssembly>` "\r\n"
-				`</dependency>` "\r\n"
-			`</assembly>` "\r\n";
+		enum MANIFEST = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>`~"\r\n"
+			~`<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">`~"\r\n"
+				~`<description>DFL manifest</description>`~"\r\n"
+				~`<dependency>`~"\r\n"
+					~`<dependentAssembly>`~"\r\n"
+						~`<assemblyIdentity `
+							~`type="win32" `
+							~`name="Microsoft.Windows.Common-Controls" `
+							~`version="6.0.0.0" `
+							~`processorArchitecture="*" `
+							~`publicKeyToken="6595b64144ccf1df" `
+							~`language="*" `
+						~`/>`~"\r\n"
+					~`</dependentAssembly>`~"\r\n"
+				~`</dependency>`~"\r\n"
+			~`</assembly>`~"\r\n";
 		
 		HMODULE kernel32;
 		kernel32 = GetModuleHandle("kernel32.dll");
@@ -683,7 +683,7 @@ final class Application // docmain
 			{
 				bounds = Rect(PADDING, PADDING, this.clientSize.width - PADDING * 2, 40);
 				label.text = "An application exception has occured. Click Continue to allow "
-					"the application to ignore this error and attempt to continue.";
+					~"the application to ignore this error and attempt to continue.";
 				parent = this;
 			}
 			

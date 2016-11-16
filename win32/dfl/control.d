@@ -1600,7 +1600,7 @@ class Control: DObject, IWindow // docmain
 				result = new Font("MS Shell Dlg 2", result.getSize(GraphicsUnit.POINT), GraphicsUnit.POINT);
 			}
 		}
-		catch
+		catch(Exception)
 		{
 		}
 		
@@ -5506,7 +5506,7 @@ class Control: DObject, IWindow // docmain
 										msg.result = uni.length + 1;
 									}
 								}
-								catch
+								catch(Exception)
 								{
 								}
 								return;
@@ -6426,8 +6426,8 @@ class Control: DObject, IWindow // docmain
 				debug(APP_PRINT)
 				{
 					cprintf("CreateWindowEx failed."
-						" (exStyle=0x%X, className=`%.*s`, caption=`%.*s`, style=0x%X, x=%d, y=%d, width=%d, height=%d,"
-						" parent=0x%X, menu=0x%X, inst=0x%X, param=0x%X)\n",
+						~" (exStyle=0x%X, className=`%.*s`, caption=`%.*s`, style=0x%X, x=%d, y=%d, width=%d, height=%d,"
+						~" parent=0x%X, menu=0x%X, inst=0x%X, param=0x%X)\n",
 						exStyle, className.ptr, caption.ptr, style, x, y, width, height,
 						parent, menu, inst, param);
 				}
