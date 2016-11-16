@@ -1075,10 +1075,7 @@ int main(/+ string[] args +/)
 			}
 			
 			string dmdver;
-			x2 = "dmd" ~ to!string(uniform(1, 10000)) ~ ".info";
-			writeln(std.process.executeShell(getshortpath(std.path.buildPath(dmdpath_windows, "bin\\dmd.exe")) ~ " > " ~ x2).output);
-			scope(exit) std.file.remove(x2);
-			x = std.file.readText(x2);
+			x = std.process.executeShell(getshortpath(std.path.buildPath(dmdpath_windows, "bin\\dmd.exe"))).output;
 			dmdver = scanDmdOut(x, xver);
 			if(dmdver.length)
 			{
