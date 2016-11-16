@@ -158,10 +158,4 @@ if not "%dfl_release_flags%" == "" goto dfl_release_flags_set
 
 :done
 @echo.
-@echo Done.
-
-
-@rem   @del %dfl_objs%
-@del *.obj
-
-pause
+@echo makecoff.bat completed.
