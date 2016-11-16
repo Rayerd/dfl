@@ -969,66 +969,6 @@ int main(/+ string[] args +/)
 			string x, x2, xver;
 			int ix;
 			
-			//x = cast(string)std.file.read(std.path.buildPath(importdir, r"dfl\readme.txt"));
-			x = cast(string)std.file.read(std.path.buildPath(basepath, "packages\\dfl\\readme.txt"));
-			
-			const string FINDDFLVER = "\nVersion ";
-			ix = std.string.indexOf(x, FINDDFLVER);
-			if(-1 == ix)
-			{
-				bad_readme_ver:
-				throw new Exception("Unable to find version information from readme.txt");
-			}
-			xver = x[ix + FINDDFLVER.length .. x.length];
-			for(ix = 0;; ix++)
-			{
-				if(ix == xver.length || '\r' == xver[ix] || '\n' == xver[ix])
-				{
-					xver = xver[0 .. ix];
-					break;
-				}
-			}
-			ix = std.string.indexOf(xver, " by Christopher E. Miller");
-			if(-1 == ix)
-				goto bad_readme_ver;
-			xver = std.string.strip(xver[0 .. ix]); // DFL version.
-			if(vcVerbose)
-				writefln("DFL version %s", xver);
-			
-			string dmdverdfl;
-			const string FINDTESTEDDMDVER = "\nTested with DMD v";
-			ix = std.string.indexOf(x, FINDTESTEDDMDVER);
-			if(-1 == ix)
-			{
-				//goto bad_readme_ver;
-			}
-			else
-			{
-				x2 = x[ix + FINDTESTEDDMDVER.length .. x.length];
-				xver = x[ix + 1 .. x.length];
-				for(ix = 0;; ix++)
-				{
-					if(ix == xver.length || '\r' == xver[ix] || '\n' == xver[ix])
-					{
-						xver = xver[0 .. ix];
-						break;
-					}
-				}
-				xver = std.string.strip(xver);
-				if(vcVerbose)
-					writefln("%s", xver);
-				
-				xver = x2;
-				for(ix = 0;; ix++)
-				{
-					if(ix == xver.length || ' ' == xver[ix] || '\r' == xver[ix] || '\n' == xver[ix])
-						break;
-				}
-				dmdverdfl = std.string.strip(xver[0 .. ix]);
-				if(ix && '.' == xver[ix - 1])
-					dmdverdfl = xver[0 .. ix - 1];
-			}
-			
 			string dfllibdmdver;
 			string dfllibdlibname = "Phobos";
 			string dfllibdfloptions = "";
