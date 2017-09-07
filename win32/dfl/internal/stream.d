@@ -80,6 +80,7 @@ private {
   import std.conv;
   import std.algorithm;
   import std.ascii;
+  import std.format;
   import std.system;    // for Endian enumeration
   import std.utf;
   import core.bitop; // for bswap
@@ -1212,8 +1213,8 @@ class Stream : InputStream, OutputStream {
 
   private void doFormatCallback(dchar c) {
     char[4] buf;
-    auto b = std.utf.toUTF8(buf, c);
-    writeString(b);
+    auto b = std.utf.encode(buf, c);
+    writeString(buf);
   }
 
   // writes data to stream using writef() syntax,
@@ -3070,52 +3071,272 @@ class SliceStream : FilterStream {
     assert (m.toString() == "HellVrooorld\nBlaho, etcetera.");
   }
 }
-enum Mangle : char
+
+
+// This stuff has been removed from the docs and is planned for deprecation.
+/*
+ * Interprets variadic argument list pointed to by argptr whose types
+ * are given by arguments[], formats them according to embedded format
+ * strings in the variadic argument list, and sends the resulting
+ * characters to putc.
+ *
+ * The variadic arguments are consumed in order.  Each is formatted
+ * into a sequence of chars, using the default format specification
+ * for its type, and the characters are sequentially passed to putc.
+ * If a $(D char[]), $(D wchar[]), or $(D dchar[]) argument is
+ * encountered, it is interpreted as a format string. As many
+ * arguments as specified in the format string are consumed and
+ * formatted according to the format specifications in that string and
+ * passed to putc. If there are too few remaining arguments, a
+ * $(D FormatException) is thrown. If there are more remaining arguments than
+ * needed by the format specification, the default processing of
+ * arguments resumes until they are all consumed.
+ *
+ * Params:
+ *        putc =        Output is sent do this delegate, character by character.
+ *        arguments = Array of $(D TypeInfo)s, one for each argument to be formatted.
+ *        argptr = Points to variadic argument list.
+ *
+ * Throws:
+ *        Mismatched arguments and formats result in a $(D FormatException) being thrown.
+ *
+ * Format_String:
+ *        <a name="format-string">$(I Format strings)</a>
+ *        consist of characters interspersed with
+ *        $(I format specifications). Characters are simply copied
+ *        to the output (such as putc) after any necessary conversion
+ *        to the corresponding UTF-8 sequence.
+ *
+ *        A $(I format specification) starts with a '%' character,
+ *        and has the following grammar:
+
+$(CONSOLE
+$(I FormatSpecification):
+    $(B '%%')
+    $(B '%') $(I Flags) $(I Width) $(I Precision) $(I FormatChar)
+
+$(I Flags):
+    $(I empty)
+    $(B '-') $(I Flags)
+    $(B '+') $(I Flags)
+    $(B '#') $(I Flags)
+    $(B '0') $(I Flags)
+    $(B ' ') $(I Flags)
+
+$(I Width):
+    $(I empty)
+    $(I Integer)
+    $(B '*')
+
+$(I Precision):
+    $(I empty)
+    $(B '.')
+    $(B '.') $(I Integer)
+    $(B '.*')
+
+$(I Integer):
+    $(I Digit)
+    $(I Digit) $(I Integer)
+
+$(I Digit):
+    $(B '0')
+    $(B '1')
+    $(B '2')
+    $(B '3')
+    $(B '4')
+    $(B '5')
+    $(B '6')
+    $(B '7')
+    $(B '8')
+    $(B '9')
+
+$(I FormatChar):
+    $(B 's')
+    $(B 'b')
+    $(B 'd')
+    $(B 'o')
+    $(B 'x')
+    $(B 'X')
+    $(B 'e')
+    $(B 'E')
+    $(B 'f')
+    $(B 'F')
+    $(B 'g')
+    $(B 'G')
+    $(B 'a')
+    $(B 'A')
+)
+    $(DL
+    $(DT $(I Flags))
+    $(DL
+        $(DT $(B '-'))
+        $(DD
+        Left justify the result in the field.
+        It overrides any $(B 0) flag.)
+
+        $(DT $(B '+'))
+        $(DD Prefix positive numbers in a signed conversion with a $(B +).
+        It overrides any $(I space) flag.)
+
+        $(DT $(B '#'))
+        $(DD Use alternative formatting:
+        $(DL
+            $(DT For $(B 'o'):)
+            $(DD Add to precision as necessary so that the first digit
+            of the octal formatting is a '0', even if both the argument
+            and the $(I Precision) are zero.)
+            $(DT For $(B 'x') ($(B 'X')):)
+            $(DD If non-zero, prefix result with $(B 0x) ($(B 0X)).)
+            $(DT For floating point formatting:)
+            $(DD Always insert the decimal point.)
+            $(DT For $(B 'g') ($(B 'G')):)
+            $(DD Do not elide trailing zeros.)
+        ))
+
+        $(DT $(B '0'))
+        $(DD For integer and floating point formatting when not nan or
+        infinity, use leading zeros
+        to pad rather than spaces.
+        Ignore if there's a $(I Precision).)
+
+        $(DT $(B ' '))
+        $(DD Prefix positive numbers in a signed conversion with a space.)
+    )
+
+    $(DT $(I Width))
+    $(DD
+    Specifies the minimum field width.
+    If the width is a $(B *), the next argument, which must be
+    of type $(B int), is taken as the width.
+    If the width is negative, it is as if the $(B -) was given
+    as a $(I Flags) character.)
+
+    $(DT $(I Precision))
+    $(DD Gives the precision for numeric conversions.
+    If the precision is a $(B *), the next argument, which must be
+    of type $(B int), is taken as the precision. If it is negative,
+    it is as if there was no $(I Precision).)
+
+    $(DT $(I FormatChar))
+    $(DD
+    $(DL
+        $(DT $(B 's'))
+        $(DD The corresponding argument is formatted in a manner consistent
+        with its type:
+        $(DL
+            $(DT $(B bool))
+            $(DD The result is <tt>'true'</tt> or <tt>'false'</tt>.)
+            $(DT integral types)
+            $(DD The $(B %d) format is used.)
+            $(DT floating point types)
+            $(DD The $(B %g) format is used.)
+            $(DT string types)
+            $(DD The result is the string converted to UTF-8.)
+            A $(I Precision) specifies the maximum number of characters
+            to use in the result.
+            $(DT classes derived from $(B Object))
+            $(DD The result is the string returned from the class instance's
+            $(B .toString()) method.
+            A $(I Precision) specifies the maximum number of characters
+            to use in the result.)
+            $(DT non-string static and dynamic arrays)
+            $(DD The result is [s<sub>0</sub>, s<sub>1</sub>, ...]
+            where s<sub>k</sub> is the kth element
+            formatted with the default format.)
+        ))
+
+        $(DT $(B 'b','d','o','x','X'))
+        $(DD The corresponding argument must be an integral type
+        and is formatted as an integer. If the argument is a signed type
+        and the $(I FormatChar) is $(B d) it is converted to
+        a signed string of characters, otherwise it is treated as
+        unsigned. An argument of type $(B bool) is formatted as '1'
+        or '0'. The base used is binary for $(B b), octal for $(B o),
+        decimal
+        for $(B d), and hexadecimal for $(B x) or $(B X).
+        $(B x) formats using lower case letters, $(B X) uppercase.
+        If there are fewer resulting digits than the $(I Precision),
+        leading zeros are used as necessary.
+        If the $(I Precision) is 0 and the number is 0, no digits
+        result.)
+
+        $(DT $(B 'e','E'))
+        $(DD A floating point number is formatted as one digit before
+        the decimal point, $(I Precision) digits after, the $(I FormatChar),
+        &plusmn;, followed by at least a two digit exponent: $(I d.dddddd)e$(I &plusmn;dd).
+        If there is no $(I Precision), six
+        digits are generated after the decimal point.
+        If the $(I Precision) is 0, no decimal point is generated.)
+
+        $(DT $(B 'f','F'))
+        $(DD A floating point number is formatted in decimal notation.
+        The $(I Precision) specifies the number of digits generated
+        after the decimal point. It defaults to six. At least one digit
+        is generated before the decimal point. If the $(I Precision)
+        is zero, no decimal point is generated.)
+
+        $(DT $(B 'g','G'))
+        $(DD A floating point number is formatted in either $(B e) or
+        $(B f) format for $(B g); $(B E) or $(B F) format for
+        $(B G).
+        The $(B f) format is used if the exponent for an $(B e) format
+        is greater than -5 and less than the $(I Precision).
+        The $(I Precision) specifies the number of significant
+        digits, and defaults to six.
+        Trailing zeros are elided after the decimal point, if the fractional
+        part is zero then no decimal point is generated.)
+
+        $(DT $(B 'a','A'))
+        $(DD A floating point number is formatted in hexadecimal
+        exponential notation 0x$(I h.hhhhhh)p$(I &plusmn;d).
+        There is one hexadecimal digit before the decimal point, and as
+        many after as specified by the $(I Precision).
+        If the $(I Precision) is zero, no decimal point is generated.
+        If there is no $(I Precision), as many hexadecimal digits as
+        necessary to exactly represent the mantissa are generated.
+        The exponent is written in as few digits as possible,
+        but at least one, is in decimal, and represents a power of 2 as in
+        $(I h.hhhhhh)*2<sup>$(I &plusmn;d)</sup>.
+        The exponent for zero is zero.
+        The hexadecimal digits, x and p are in upper case if the
+        $(I FormatChar) is upper case.)
+    )
+
+    Floating point NaN's are formatted as $(B nan) if the
+    $(I FormatChar) is lower case, or $(B NAN) if upper.
+    Floating point infinities are formatted as $(B inf) or
+    $(B infinity) if the
+    $(I FormatChar) is lower case, or $(B INF) or $(B INFINITY) if upper.
+    ))
+
+Example:
+
+-------------------------
+import core.stdc.stdio;
+import std.format;
+
+void myPrint(...)
 {
-    Tvoid     = 'v',
-    Tbool     = 'b',
-    Tbyte     = 'g',
-    Tubyte    = 'h',
-    Tshort    = 's',
-    Tushort   = 't',
-    Tint      = 'i',
-    Tuint     = 'k',
-    Tlong     = 'l',
-    Tulong    = 'm',
-    Tfloat    = 'f',
-    Tdouble   = 'd',
-    Treal     = 'e',
+    void putc(dchar c)
+    {
+        fputc(c, stdout);
+    }
 
-    Tifloat   = 'o',
-    Tidouble  = 'p',
-    Tireal    = 'j',
-    Tcfloat   = 'q',
-    Tcdouble  = 'r',
-    Tcreal    = 'c',
-
-    Tchar     = 'a',
-    Twchar    = 'u',
-    Tdchar    = 'w',
-
-    Tarray    = 'A',
-    Tsarray   = 'G',
-    Taarray   = 'H',
-    Tpointer  = 'P',
-    Tfunction = 'F',
-    Tident    = 'I',
-    Tclass    = 'C',
-    Tstruct   = 'S',
-    Tenum     = 'E',
-    Ttypedef  = 'T',
-    Tdelegate = 'D',
-
-    Tconst    = 'x',
-    Timmutable = 'y',
+    std.format.doFormat(&putc, _arguments, _argptr);
 }
 
+void main()
+{
+    int x = 27;
+
+    // prints 'The answer is 27:6'
+    myPrint("The answer is %s:", x, 6);
+}
+------------------------
+ */
 void doFormat()(scope void delegate(dchar) putc, TypeInfo[] arguments, va_list ap)
 {
-    import std.utf : toUCSindex, isValidDchar, UTFException, toUTF8;
+    import std.utf : toUCSindex, isValidDchar, UTFException, encode;
     import core.stdc.string : strlen;
     import core.stdc.stdlib : alloca, malloc, realloc, free;
     import core.stdc.stdio : snprintf;
@@ -3125,7 +3346,7 @@ void doFormat()(scope void delegate(dchar) putc, TypeInfo[] arguments, va_list a
     scope(exit) free(argBuffer);
 
     size_t bufUsed = 0;
-    foreach (ti; arguments)
+    foreach(ti; arguments)
     {
         // Ensure the required alignment
         bufUsed += ti.talign - 1;
@@ -3215,7 +3436,7 @@ void doFormat()(scope void delegate(dchar) putc, TypeInfo[] arguments, va_list a
         void putstr(const char[] s)
         {
             //printf("putstr: s = %.*s, flags = x%x\n", s.length, s.ptr, flags);
-            immutable ptrdiff_t padding = field_width -
+            ptrdiff_t padding = field_width -
                 (strlen(prefix) + toUCSindex(s, s.length));
             ptrdiff_t prepad = 0;
             ptrdiff_t postpad = 0;
@@ -3265,7 +3486,7 @@ void doFormat()(scope void delegate(dchar) putc, TypeInfo[] arguments, va_list a
                 default:
                     //printf("fc = '%c'\n", fc);
                 Lerror:
-                    throw new Exception("incompatible format character for floating point type");
+                    throw new FormatException("incompatible format character for floating point type");
             }
             version (DigitalMarsC)
             {
@@ -3319,7 +3540,7 @@ void doFormat()(scope void delegate(dchar) putc, TypeInfo[] arguments, va_list a
                         import std.math : isNaN, isInfinity;
                         if (isNaN(v)) // snprintf writes 1.#QNAN
                             n = snprintf(fbuf.ptr, sl, "nan");
-                        else if (isInfinity(v)) // snprintf writes 1.#INF
+                        else if(isInfinity(v)) // snprintf writes 1.#INF
                             n = snprintf(fbuf.ptr, sl, v < 0 ? "-inf" : "inf");
                         else
                             n = snprintf(fbuf.ptr, sl, format.ptr, field_width,
@@ -3362,7 +3583,7 @@ void doFormat()(scope void delegate(dchar) putc, TypeInfo[] arguments, va_list a
           //printf("\nputArray(len = %u), tsize = %u\n", len, valti.tsize);
           putc('[');
           valti = skipCI(valti);
-          immutable tsize = valti.tsize;
+          size_t tsize = valti.tsize;
           auto argptrSave = argptr;
           auto tiSave = ti;
           auto mSave = m;
@@ -3392,7 +3613,7 @@ void doFormat()(scope void delegate(dchar) putc, TypeInfo[] arguments, va_list a
             auto mSave = m;
             valti = skipCI(valti);
             keyti = skipCI(keyti);
-            foreach (ref fakevalue; vaa)
+            foreach(ref fakevalue; vaa)
             {
                 if (comma) putc(',');
                 comma = true;
@@ -3403,11 +3624,11 @@ void doFormat()(scope void delegate(dchar) putc, TypeInfo[] arguments, va_list a
                     pkey -= (long.sizeof + size_t.sizeof - 1) & ~(size_t.sizeof - 1);
 
                 // the key comes before the value
-                immutable keysize = keyti.tsize;
+                auto keysize = keyti.tsize;
                 version (D_LP64)
-                    immutable keysizet = (keysize + 15) & ~(15);
+                    auto keysizet = (keysize + 15) & ~(15);
                 else
-                    immutable keysizet = (keysize + size_t.sizeof - 1) & ~(size_t.sizeof - 1);
+                    auto keysizet = (keysize + size_t.sizeof - 1) & ~(size_t.sizeof - 1);
 
                 void* pvalue = pkey + keysizet;
 
@@ -3474,7 +3695,8 @@ void doFormat()(scope void delegate(dchar) putc, TypeInfo[] arguments, va_list a
                 {   if (!isValidDchar(vdchar))
                         throw new UTFException("invalid dchar in format");
                     char[4] vbuf;
-                    putstr(toUTF8(vbuf, vdchar));
+					encode(vbuf, vdchar);
+                    putstr(vbuf);
                 }
                 return;
 
@@ -3620,7 +3842,7 @@ void doFormat()(scope void delegate(dchar) putc, TypeInfo[] arguments, va_list a
                             s = toUTF8(getArg!(dstring)());
                         Lputstr:
                             if (fc != 's')
-                                throw new Exception("string");
+                                throw new FormatException("string");
                             if (flags & FLprecision && precision < s.length)
                                 s = s[0 .. precision];
                             putstr(s);
@@ -3642,12 +3864,6 @@ void doFormat()(scope void delegate(dchar) putc, TypeInfo[] arguments, va_list a
                 }
                 assert(0);
 
-            case Mangle.Ttypedef:
-                ti = (cast(TypeInfo_Typedef)ti).base;
-                m = cast(Mangle)typeid(ti).name[9];
-                formatArg(fc);
-                return;
-
             case Mangle.Tenum:
                 ti = (cast(TypeInfo_Enum)ti).base;
                 m = cast(Mangle)typeid(ti).name[9];
@@ -3657,7 +3873,7 @@ void doFormat()(scope void delegate(dchar) putc, TypeInfo[] arguments, va_list a
             case Mangle.Tstruct:
             {        TypeInfo_Struct tis = cast(TypeInfo_Struct)ti;
                 if (tis.xtoString is null)
-                    throw new Exception("Can't convert " ~ tis.toString()
+                    throw new FormatException("Can't convert " ~ tis.toString()
                             ~ " to string: \"string toString()\" not defined");
                 s = tis.xtoString(skipArg(tis));
                 goto Lputstr;
@@ -3758,7 +3974,7 @@ void doFormat()(scope void delegate(dchar) putc, TypeInfo[] arguments, va_list a
         {
             ptrdiff_t n = tmpbuf.length;
             char c;
-            immutable hexoffset = uc ? ('A' - ('9' + 1)) : ('a' - ('9' + 1));
+            int hexoffset = uc ? ('A' - ('9' + 1)) : ('a' - ('9' + 1));
 
             while (vnumber)
             {
@@ -3795,7 +4011,7 @@ void doFormat()(scope void delegate(dchar) putc, TypeInfo[] arguments, va_list a
         return;
 
     Lerror:
-        throw new Exception("formatArg");
+        throw new FormatException("formatArg");
     }
 
     for (int j = 0; j < arguments.length; )
@@ -3880,7 +4096,7 @@ void doFormat()(scope void delegate(dchar) putc, TypeInfo[] arguments, va_list a
                 dchar getFmtChar()
                 {   // Valid format specifier characters will never be UTF
                     if (i == fmt.length)
-                        throw new Exception("invalid specifier");
+                        throw new FormatException("invalid specifier");
                     return fmt[i++];
                 }
 
@@ -3891,7 +4107,7 @@ void doFormat()(scope void delegate(dchar) putc, TypeInfo[] arguments, va_list a
                     {
                         n = n * 10 + (c - '0');
                         if (n < 0)        // overflow
-                            throw new Exception("int overflow");
+                            throw new FormatException("int overflow");
                         c = getFmtChar();
                         if (c < '0' || c > '9')
                             break;
@@ -3904,11 +4120,11 @@ void doFormat()(scope void delegate(dchar) putc, TypeInfo[] arguments, va_list a
                     TypeInfo ti;
 
                     if (j == arguments.length)
-                        throw new Exception("too few arguments");
+                        throw new FormatException("too few arguments");
                     ti = arguments[j++];
                     m = cast(Mangle)typeid(ti).name[9];
                     if (m != Mangle.Tint)
-                        throw new Exception("int argument expected");
+                        throw new FormatException("int argument expected");
                     return getArg!(int)();
                 }
 
@@ -4011,8 +4227,9 @@ void doFormat()(scope void delegate(dchar) putc, TypeInfo[] arguments, va_list a
     return;
 
   Lerror:
-    throw new Exception("");
+    throw new FormatException();
 }
+
 // return the TypeInfo for a primitive type and null otherwise.  This
 // is required since for arrays of ints we only have the mangled char
 // to work from. If arrays always subclassed TypeInfo_Array this
@@ -4021,8 +4238,7 @@ private TypeInfo primitiveTypeInfo(Mangle m)
 {
     // BUG: should fix this in static this() to avoid double checked locking bug
     __gshared TypeInfo[Mangle] dic;
-    if (!dic.length)
-    {
+    if (!dic.length) {
         dic = [
             Mangle.Tvoid : typeid(void),
             Mangle.Tbool : typeid(bool),
