@@ -13,7 +13,7 @@
 
 @rem   you can change the default object model here
 set MODEL=32mscoff
-if not "%1"=="" set MODEL=%1
+if not "%~1"=="" set MODEL=%~1
 
 
 @rem   You have to change these paths to your machine environment.
@@ -21,23 +21,22 @@ if not "%1"=="" set MODEL=%1
 @rem   sc.ini in dmd2/windows/bin will help you.
 
 @rem   path to linker
-@rem set LIBCMD="C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\amd64\lib.exe"
-set LIBCMD="C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\lib.exe"
+set LIBCMD="%VCINSTALLDIR%\bin\lib.exe"
 
 @rem   path to mspdb120.dll, mspdb110.dll, mspdb100.dll, and so on
 @rem   IMPORTANT: The MSVC build tools may depends on dlls which are separated into x86/x64 on installation,
 @rem              then you MUST choose a path to the suitable version.
 @rem set VCCOMMON="C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE"
 @rem set VCCOMMON=C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\amd64
-set VCCOMMON=C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin
+set VCCOMMON="%VCINSTALLDIR%\bin
 
 @rem   path to Windows SDK static libs (ex.gdi32.lib)
-@if "%MODEL%"=="64" (
+@if %MODEL%=="64" (
   @rem set WINSDKLIB="C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Lib\x64"
-  set WINSDKLIB="C:\Program Files (x86)\Windows Kits\8.1\Lib\winv6.3\um\x64"
+  set WINSDKLIB="%WINSDKLIB%\Lib\winv6.3\um\x64"
 ) else (
   @rem set WINSDKLIB="C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A"
-  set WINSDKLIB="C:\Program Files (x86)\Windows Kits\8.1\Lib\winv6.3\um\x86"
+  set WINSDKLIB="%WINSDKLIB%\Lib\winv6.3\um\x86"
 )
 
 @set PATH=%VCCOMMON%;%PATH%

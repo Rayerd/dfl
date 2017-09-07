@@ -817,6 +817,15 @@ int main(/+ string[] args +/)
 				~"\r\n   @set dmd_path_windows=" ~ dmdpath_windows
 				
 				);
+
+			auto dmdIni = readText(dmdpath_windows.buildPath("bin", "sc.ini"));
+			dmdIni = dmdIni.find("VCINSTALLDIR=");
+			assert(dmdIni.skipOver("VCINSTALLDIR="));
+			batf.writeString("\r\n   @set VCINSTALLDIR=" ~ dmdIni.until("\n").to!string);
+
+			dmdIni = dmdIni.find("WindowsSdkDir=");
+			assert(dmdIni.skipOver("WindowsSdkDir="));
+			batf.writeString("\r\n   @set WINSDKLIB=" ~ dmdIni.until("\n").to!string);
 			
 			batf.writeString(dmcpathbefore);
 			

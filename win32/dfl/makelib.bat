@@ -4,11 +4,11 @@
 @rem   Requires DMD and DMC's libs
 @rem   Free downloads from http://www.digitalmars.com/d/dcompiler.html and http://www.digitalmars.com/download/freecompiler.html
 
-if "%1"=="64" (
+if "%~1"=="64" (
   @call makecoff.bat %1
   goto done
 )
-if "%1"=="32mscoff" (
+if "%~1"=="32mscoff" (
   @call makecoff.bat %1
   goto done
 )
