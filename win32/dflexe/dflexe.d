@@ -887,7 +887,7 @@ int main(/+ string[] args +/)
 			
 			batf.close();
 			
-            writeln(std.process.executeShell(batfilepath ~ " " ~ model).output); // pass model as %1
+            writeln(std.process.execute([batfilepath, model]).output); // pass model as %1
 			
 			std.file.remove(batfilepath);
 		}
