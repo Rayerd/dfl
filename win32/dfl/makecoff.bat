@@ -31,7 +31,7 @@ set LIBCMD="%VCINSTALLDIR%\bin\lib.exe"
 set VCCOMMON="%VCINSTALLDIR%\bin
 
 @rem   path to Windows SDK static libs (ex.gdi32.lib)
-@if %MODEL%=="64" (
+@if "%MODEL%"=="64" (
   @rem set WINSDKLIB="C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Lib\x64"
   set WINSDKLIB="%WINSDKLIB%\Lib\winv6.3\um\x64"
 ) else (
