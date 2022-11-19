@@ -192,7 +192,7 @@ class ListViewItem: DObject
 		{
 			assert(!owner.isubs);
 		}
-		body
+		do
 		{
 			_item = owner;
 		}
@@ -706,7 +706,7 @@ class ListView: ControlSuperClass // docmain
 		{
 			assert(lv.litems is null);
 		}
-		body
+		do
 		{
 			this.lv = lv;
 		}
@@ -802,7 +802,7 @@ class ListView: ControlSuperClass // docmain
 		{
 			assert(created);
 		}
-		body
+		do
 		{
 			int ii;
 			foreach(int i, ListViewItem item; _items)
@@ -884,7 +884,7 @@ class ListView: ControlSuperClass // docmain
 		{
 			assert(!owner.cols);
 		}
-		body
+		do
 		{
 			lv = owner;
 		}
@@ -913,7 +913,7 @@ class ListView: ControlSuperClass // docmain
 		{
 			assert(created);
 		}
-		body
+		do
 		{
 			int ii;
 			foreach(int i, ColumnHeader header; _headers)
@@ -2560,7 +2560,7 @@ class ListView: ControlSuperClass // docmain
 	{
 		assert(mask);
 	}
-	body
+	do
 	{
 		wlvexstyle = (wlvexstyle & ~mask) | (flags & mask);
 		if(created)
@@ -2580,7 +2580,7 @@ class ListView: ControlSuperClass // docmain
 	{
 		assert(created);
 	}
-	body
+	do
 	{
 		/+
 		cprintf("^ Insert item:  index=%d, lparam=0x%X, text='%.*s', subItemIndex=%d\n",
@@ -2628,7 +2628,7 @@ class ListView: ControlSuperClass // docmain
 	{
 		assert(subItemIndex > 0);
 	}
-	body
+	do
 	{
 		return _ins(index, cast(LPARAM)cast(void*)subItem, subItem.text, subItemIndex).toI32;
 	}
@@ -2677,7 +2677,7 @@ class ListView: ControlSuperClass // docmain
 	{
 		assert(created);
 	}
-	body
+	do
 	{
 		return prevwproc(LVM_REDRAWITEMS, cast(WPARAM)index, cast(LPARAM)index);
 	}

@@ -1632,7 +1632,7 @@ class Picture: Image // docmain
 	{
 		assert(stm !is null);
 	}
-	body
+	do
 	{
 		scope DStreamToIStream istm = new DStreamToIStream(stm);
 		return _fromIStream(istm);

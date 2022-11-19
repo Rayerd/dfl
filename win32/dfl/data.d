@@ -246,7 +246,7 @@ class DataFormats // docmain
 		{
 			assert(!(id in fmts));
 		}
-		body
+		do
 		{
 			Format fmt;
 			fmt = new Format;
@@ -482,11 +482,6 @@ class DataFormats // docmain
 			return data.value; // ?
 		}
 	}
-	
-	
-	this()
-	{
-	}
 }
 
 
@@ -529,7 +524,7 @@ struct Data // docmain
 	{
 		assert(_arguments.length == 1);
 	}
-	body
+	do
 	{
 		Data result;
 		result._info = _arguments[0];

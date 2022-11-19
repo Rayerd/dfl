@@ -182,7 +182,7 @@ class TabPageCollection
 	{
 		assert(owner.tchildren is null);
 	}
-	body
+	do
 	{
 		tc = owner;
 	}
@@ -199,7 +199,7 @@ class TabPageCollection
 	{
 		assert(created);
 	}
-	body
+	do
 	{
 		Rect area;
 		area = tc.displayRectangle;
@@ -988,7 +988,7 @@ class TabControl: TabControlBase // docmain
 	{
 		assert(created);
 	}
-	body
+	do
 	{
 		int i;
 		i = tabPages.indexOf(page);

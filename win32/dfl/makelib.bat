@@ -12,6 +12,8 @@ if "%~1"=="32mscoff" (
   @call makecoff.bat %1
   goto done
 )
+if "%~1"=="32omf" set dmd_omf_flag=-m32omf
+else set dmd_omf_flag=
 
 @echo off
 @cls
@@ -42,18 +44,18 @@ set _stdcwindowsd=internal/_stdcwindows.d
 set _stdcwindowsobj=_stdcwindows.obj
 :dfl_not_tango_files
 
-set dfl_files=package.d all.d base.d application.d internal/stream.d internal/dlib.d internal/clib.d internal/utf.d internal/com.d control.d clippingform.d form.d registry.d drawing.d menu.d notifyicon.d commondialog.d filedialog.d folderdialog.d panel.d textbox.d richtextbox.d picturebox.d listbox.d groupbox.d splitter.d usercontrol.d button.d label.d collections.d internal/winapi.d internal/wincom.d event.d socket.d timer.d environment.d messagebox.d tooltip.d combobox.d treeview.d tabcontrol.d colordialog.d listview.d data.d clipboard.d fontdialog.d progressbar.d resources.d statusbar.d imagelist.d toolbar.d %_stdcwindowsd%
+set dfl_files=package.d all.d base.d application.d internal/dlib.d internal/clib.d internal/utf.d internal/com.d control.d clippingform.d form.d registry.d drawing.d menu.d notifyicon.d commondialog.d filedialog.d folderdialog.d panel.d textbox.d richtextbox.d picturebox.d listbox.d groupbox.d splitter.d usercontrol.d button.d label.d collections.d internal/winapi.d internal/wincom.d event.d socket.d timer.d environment.d messagebox.d tooltip.d combobox.d treeview.d tabcontrol.d colordialog.d listview.d data.d clipboard.d fontdialog.d progressbar.d resources.d statusbar.d imagelist.d toolbar.d %_stdcwindowsd%
 
-set dfl_objs=package.obj all.obj base.obj application.obj stream.obj dlib.obj clib.obj utf.obj com.obj control.obj clippingform.obj form.obj registry.obj drawing.obj menu.obj notifyicon.obj commondialog.obj filedialog.obj folderdialog.obj panel.obj textbox.obj richtextbox.obj picturebox.obj listbox.obj groupbox.obj splitter.obj usercontrol.obj button.obj label.obj collections.obj winapi.obj wincom.obj event.obj socket.obj timer.obj environment.obj messagebox.obj tooltip.obj combobox.obj treeview.obj tabcontrol.obj colordialog.obj listview.obj data.obj clipboard.obj fontdialog.obj progressbar.obj resources.obj statusbar.obj imagelist.obj toolbar.obj %_stdcwindowsobj%
+set dfl_objs=package.obj all.obj base.obj application.obj dlib.obj clib.obj utf.obj com.obj control.obj clippingform.obj form.obj registry.obj drawing.obj menu.obj notifyicon.obj commondialog.obj filedialog.obj folderdialog.obj panel.obj textbox.obj richtextbox.obj picturebox.obj listbox.obj groupbox.obj splitter.obj usercontrol.obj button.obj label.obj collections.obj winapi.obj wincom.obj event.obj socket.obj timer.obj environment.obj messagebox.obj tooltip.obj combobox.obj treeview.obj tabcontrol.obj colordialog.obj listview.obj data.obj clipboard.obj fontdialog.obj progressbar.obj resources.obj statusbar.obj imagelist.obj toolbar.obj %_stdcwindowsobj%
 
 @rem   Also update link pragmas for build.
-set dfl_libs_dfl=user32_dfl.lib shell32_dfl.lib olepro32_dfl.lib
+set dfl_libs_dfl=user32_dfl.lib shell32_dfl.lib olepro32_dfl.lib %dmd_path%\lib\undead.lib
 set dfl_libs=%dmc_path%\lib\gdi32.lib %dmc_path%\lib\comctl32.lib %dmc_path%\lib\advapi32.lib %dmc_path%\lib\comdlg32.lib %dmc_path%\lib\ole32.lib %dmc_path%\lib\uuid.lib %dmd_path_windows%\lib\ws2_32.lib %dfl_libs_dfl%
 
 @rem   -version=NO_DRAG_DROP -version=NO_MDI
 @rem   -debug=SHOW_MESSAGE_INFO -debug=MESSAGE_PAUSE
 @rem set dfl_flags=%dfl_flags% -debug=SHOW_MESSAGENFO
-set _dfl_flags=%dfl_flags% -wi
+set _dfl_flags=%dfl_flags% -wi %dmd_omf_flag%
 
 if not "%dfl_debug_flags%" == "" goto dfl_debug_flags_set
 	set dfl_debug_flags=-debug -version=DFL_UNICODE

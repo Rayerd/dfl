@@ -149,7 +149,7 @@ template _getlen(T)
 	{
 		assert(tz);
 	}
-	body
+	do
 	{
 		T* p;
 		for(p = tz; *p; p++)

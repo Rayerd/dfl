@@ -214,7 +214,7 @@ class ToolTip // docmain
 			//throw o;
 		}
 	}
-	body
+	do
 	{
 		TOOLINFOA tool;
 		tool.cbSize = TOOLINFOA.sizeof;

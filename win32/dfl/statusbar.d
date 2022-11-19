@@ -172,7 +172,7 @@ class StatusBarPanel: DObject
 	{
 		assert(mw >= 0);
 	}
-	body
+	do
 	{
 		
 	}
@@ -286,7 +286,7 @@ class StatusBar: ControlSuperClass // docmain
 		{
 			assert(sb.lpanels is null);
 		}
-		body
+		do
 		{
 			this.sb = sb;
 		}

@@ -809,7 +809,7 @@ class ComboBox: ListControl // docmain
 		assert(dis.hwndItem == handle);
 		assert(dis.CtlType == ODT_COMBOBOX);
 	}
-	body
+	do
 	{
 		DrawItemState state;
 		state = cast(DrawItemState)dis.itemState;
@@ -849,7 +849,7 @@ class ComboBox: ListControl // docmain
 	{
 		assert(mis.CtlType == ODT_COMBOBOX);
 	}
-	body
+	do
 	{
 		MeasureItemEventArgs miea;
 		scope Graphics gpx = new CommonGraphics(handle(), GetDC(handle));

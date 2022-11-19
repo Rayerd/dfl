@@ -1073,8 +1073,7 @@ class Control: DObject, IWindow // docmain
 			}
 			else
 			{
-				delete droptarget;
-				droptarget = null;
+				destroy(droptarget); // delete is deprecated.
 				RevokeDragDrop(hwnd);
 			}
 		}
@@ -1301,7 +1300,7 @@ class Control: DObject, IWindow // docmain
 			assert(isHandleCreated);
 		}
 	}
-	body
+	do
 	{
 		// All parent controls need to be visible and enabled, too.
 		// Don't need to check -isHandleCreated- because IsWindowVisible() will fail from a null HWND.
@@ -2623,7 +2622,7 @@ class Control: DObject, IWindow // docmain
 	{
 		assert(result >= 0);
 	}
-	body
+	do
 	{
 		if(!parent)
 			return 0;
@@ -6065,7 +6064,7 @@ class Control: DObject, IWindow // docmain
 	{
 		assert(hwnd);
 	}
-	body
+	do
 	{
 		this.hwnd = hwnd;
 		owned = false;
@@ -6480,7 +6479,7 @@ class Control: DObject, IWindow // docmain
 	{
 		assert(!recreatingHandle);
 	}
-	body
+	do
 	{
 		if(!isHandleCreated)
 			return;
@@ -7149,7 +7148,7 @@ class Control: DObject, IWindow // docmain
 			assert(!_hbrBg);
 		}
 	}
-	body
+	do
 	{
 		_hbrBg = hbr;
 		ownedbg = true;
@@ -7409,7 +7408,7 @@ class ScrollableControl: Control // docmain
 		assert(newSize.width > 0);
 		assert(newSize.height > 0);
 	}
-	body
+	do
 	{
 		autossz = newSize;
 	}
@@ -7443,7 +7442,7 @@ class ScrollableControl: Control // docmain
 		assert(fromScale.width);
 		assert(fromScale.height);
 	}
-	body
+	do
 	{
 		area.width = cast(int)(cast(float)area.width / cast(float)fromScale.width * cast(float)toScale.width);
 		area.height = cast(int)(cast(float)area.height / cast(float)fromScale.height * cast(float)toScale.height);

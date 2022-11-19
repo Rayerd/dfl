@@ -404,7 +404,7 @@ class Button: ButtonBase, IButtonControl // docmain
 		if(img)
 			assert(!this.text.length, "Button image with text not supported");
 	}
-	body
+	do
 	{
 		/+
 		if(_picbm)
@@ -472,7 +472,7 @@ class Button: ButtonBase, IButtonControl // docmain
 	{
 		assert(isHandleCreated);
 	}
-	body
+	do
 	{
 		WPARAM wparam = 0;
 		LPARAM lparam = 0;

@@ -227,7 +227,9 @@ else
 	}
 }
 
-alias std.algorithm.find charFindInString;
+private import std.algorithm.searching;
+
+alias std.algorithm.searching.find charFindInString;
 
 alias std.string.toStringz stringToStringz;
 
@@ -333,13 +335,13 @@ private import std.ascii;
 alias std.ascii.isHexDigit charIsHexDigit;
 
 
-private import dfl.internal.stream;
+private import undead.stream;// dfl.internal.stream is deprecated.
 
-alias dfl.internal.stream.Stream DStream;
+alias undead.stream.Stream DStream;// dfl.internal.stream.Stream is deprecated.
 
-alias dfl.internal.stream.OutputStream DOutputStream;
+alias undead.stream.OutputStream DOutputStream;//dfl.internal.stream.OutputStream is deprecated.
 
-alias dfl.internal.stream.StreamException DStreamException;
+alias undead.stream.StreamException DStreamException;//dfl.internal.stream.StreamException is deprecated.
 
 
 alias Object DObject;

@@ -101,7 +101,7 @@ class Timer // docmain
 		if(dg)
 		{
 			this._dg = dg;
-			tick ~= &_dgcall;
+			tick.addHandler(&_dgcall);
 		}
 	}
 	
@@ -111,7 +111,7 @@ class Timer // docmain
 		assert(dg !is null);
 		
 		this();
-		tick ~= dg;
+		tick.addHandler(dg);
 	}
 	
 	/// ditto
@@ -120,7 +120,7 @@ class Timer // docmain
 		assert(dg !is null);
 		
 		this();
-		tick ~= dg;
+		tick.addHandler(dg);
 	}
 	
 	

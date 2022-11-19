@@ -69,7 +69,7 @@ else
 		{
 			assert(id >= WORD.min && id <= WORD.max);
 		}
-		body
+		do
 		{
 			/+
 			HICON hi;
@@ -110,7 +110,7 @@ else
 		{
 			assert(id >= WORD.min && id <= WORD.max);
 		}
-		body
+		do
 		{
 			// Can't have size 0 (plus causes Windows to use the actual size).
 			//if(width <= 0 || height <= 0)
@@ -146,7 +146,7 @@ else
 		{
 			assert(id >= WORD.min && id <= WORD.max);
 		}
-		body
+		do
 		{
 			HBITMAP h;
 			h = cast(HBITMAP)LoadImageA(hinst, cast(LPCSTR)cast(WORD)id, IMAGE_BITMAP,
@@ -176,7 +176,7 @@ else
 		{
 			assert(id >= WORD.min && id <= WORD.max);
 		}
-		body
+		do
 		{
 			HCURSOR h;
 			h = cast(HCURSOR)LoadImageA(hinst, cast(LPCSTR)cast(WORD)id, IMAGE_CURSOR,
@@ -206,7 +206,7 @@ else
 		{
 			assert(id >= WORD.min && id <= WORD.max);
 		}
-		body
+		do
 		{
 			// Not casting to wDstring because a resource isn't guaranteed to be the same size.
 			wchar* ws = cast(wchar*)_getData(cast(LPCWSTR)RT_STRING, cast(LPCWSTR)cast(WORD)(id / 16 + 1)).ptr;
@@ -250,7 +250,7 @@ else
 			assert(type >= WORD.min && type <= WORD.max);
 			assert(id >= WORD.min && id <= WORD.max);
 		}
-		body
+		do
 		{
 			return _getData(cast(LPCWSTR)type, cast(LPCWSTR)id);
 		}
@@ -261,7 +261,7 @@ else
 		{
 			assert(id >= WORD.min && id <= WORD.max);
 		}
-		body
+		do
 		{
 			return _getData(utf8stringToUtf16stringz(type), cast(LPCWSTR)id);
 		}
@@ -272,7 +272,7 @@ else
 		{
 			assert(type >= WORD.min && type <= WORD.max);
 		}
-		body
+		do
 		{
 			return _getData(cast(LPCWSTR)type, utf8stringToUtf16stringz(name));
 		}

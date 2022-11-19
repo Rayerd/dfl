@@ -967,7 +967,7 @@ class KeyPressEventArgs: KeyEventArgs
 	{
 		assert((modifiers & Keys.MODIFIERS) == modifiers, "modifiers parameter can only contain modifiers");
 	}
-	body
+	do
 	{
 		_keych = ch;
 		

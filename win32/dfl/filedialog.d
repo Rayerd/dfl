@@ -560,7 +560,7 @@ abstract class FileDialog: CommonDialog // docmain
 	{
 		assert(ofn.lpstrFile !is null);
 	}
-	body
+	do
 	{
 		if(ofn.Flags & OFN_ALLOWMULTISELECT)
 		{
@@ -790,7 +790,7 @@ class OpenFileDialog: FileDialog // docmain
 	}
 	
 	
-	private import dfl.internal.stream; // TO-DO: remove this import; use dfl.internal.dlib.
+	private import undead.stream;
 	
 	///
 	final Stream openFile()
@@ -902,7 +902,7 @@ class SaveFileDialog: FileDialog // docmain
 	}
 	
 	
-	private import dfl.internal.stream; // TO-DO: remove this import; use dfl.internal.dlib.
+	private import undead.stream;
 		
 	///
 	// Opens and creates with read and write access.

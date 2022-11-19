@@ -336,7 +336,7 @@ out(result)
 		assert(charIsHexDigit(ch));
 	}
 }
-body
+do
 {
 	char[] result;
 	Dstring stmp;

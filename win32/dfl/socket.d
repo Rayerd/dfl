@@ -160,7 +160,7 @@ class AsyncSocket: DflSocket // docmain
 	}
 	
 	
-	override void close()
+	override void close() @nogc scope @trusted
 	{
 		unregisterEvent(this);
 		super.close();
@@ -426,7 +426,7 @@ class SocketQueue // docmain
 	{
 		assert(sock !is null);
 	}
-	body
+	do
 	{
 		this.sock = sock;
 	}
@@ -560,7 +560,7 @@ class SocketQueue // docmain
 	{
 		assert(_sock is sock);
 	}
-	body
+	do
 	{
 		switch(type)
 		{

@@ -174,7 +174,7 @@ class Form: ContainerControl, IDialogResult // docmain
 		assert(shortcut & Keys.KEY_CODE); // At least one key code.
 		assert(pressed !is null);
 	}
-	body
+	do
 	{
 		if(shortcut in _shortcuts)
 			throw new DflException("Shortcut key conflict");
@@ -1043,7 +1043,7 @@ class Form: ContainerControl, IDialogResult // docmain
 					assert(found);
 				}
 			}+/
-			body
+			do
 			{
 				if(wmdiparent is frm)
 					return;
@@ -1496,7 +1496,7 @@ class Form: ContainerControl, IDialogResult // docmain
 			assert(found);
 		}
 	}+/
-	body
+	do
 	{
 		if(wowner is frm)
 			return;

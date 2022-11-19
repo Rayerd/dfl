@@ -80,11 +80,11 @@ class RichTextBox: TextBoxBase // docmain
 			with(miredo = new MenuItem)
 			{
 				text = "&Redo";
-				click ~= &menuRedo;
+				click.addHandler(&menuRedo);
 				contextMenu.menuItems.insert(1, miredo);
 			}
 			
-			contextMenu.popup ~= &menuPopup2;
+			contextMenu.popup.addHandler(&menuPopup2);
 		}
 	}
 	
@@ -748,7 +748,7 @@ class RichTextBox: TextBoxBase // docmain
 	{
 		assert(created);
 	}
-	body
+	do
 	{
 		//SendMessageA(handle, EM_GETCHARFORMAT, selection, cast(LPARAM)cf);
 		//CallWindowProcA(richtextboxPrevWndProc, hwnd, EM_GETCHARFORMAT, selection, cast(LPARAM)cf);
@@ -761,7 +761,7 @@ class RichTextBox: TextBoxBase // docmain
 	{
 		assert(created);
 	}
-	body
+	do
 	{
 		/+
 		//if(!SendMessageA(handle, EM_SETCHARFORMAT, scf, cast(LPARAM)cf))
@@ -787,7 +787,7 @@ class RichTextBox: TextBoxBase // docmain
 	{
 		assert(created);
 	}
-	body
+	do
 	{
 		_StreamStr si;
 		EDITSTREAM es;
@@ -808,7 +808,7 @@ class RichTextBox: TextBoxBase // docmain
 	{
 		assert(created);
 	}
-	body
+	do
 	{
 		_StreamStr so;
 		EDITSTREAM es;
@@ -927,7 +927,7 @@ class RichTextBox: TextBoxBase // docmain
 		assert(max >= 0);
 		assert(max >= min);
 	}
-	body
+	do
 	{
 		if(min == max)
 			return null;

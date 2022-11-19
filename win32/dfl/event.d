@@ -34,7 +34,7 @@ template Event(T1, T2) // docmain
 		{
 			assert(handler);
 		}
-		body
+		do
 		{
 			if(!_array.length)
 			{
@@ -63,7 +63,7 @@ template Event(T1, T2) // docmain
 		{
 			assert(handler);
 		}
-		body
+		do
 		{
 			mixin _validateHandler!(TDG);
 			

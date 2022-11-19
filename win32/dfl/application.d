@@ -61,7 +61,7 @@ class ApplicationContext // docmain
 	this(Form mainForm)
 	{
 		mform = mainForm;
-		mainForm.closed ~= &onMainFormClosed;
+		mainForm.closed.addHandler(&onMainFormClosed);
 	}
 	
 	
@@ -74,7 +74,7 @@ class ApplicationContext // docmain
 		mform = mainForm;
 		
 		if(mainForm)
-			mainForm.closed ~= &onMainFormClosed;
+			mainForm.closed.addHandler(&onMainFormClosed);
 	}
 	
 	/// ditto
@@ -428,7 +428,7 @@ final class Application // docmain
 		scope tmr = new TMR.Timer();
 		bool keep = true;
 		tmr.interval = msDelay;
-		tmr.tick ~= (TMR.Timer sender, EventArgs ea) { sender.stop(); keep = false; };
+		tmr.tick.addHandler((TMR.Timer sender, EventArgs ea) { sender.stop(); keep = false; });
 		tmr.start();
 		while(keep)
 		{
@@ -497,7 +497,7 @@ final class Application // docmain
 		
 		
 		ctx = appcon;
-		ctx.threadExit ~= &threadJustExited;
+		ctx.threadExit.addHandler(&threadJustExited);
 		try
 		{
 			threadFlags = threadFlags | TF.RUNNING;
@@ -704,7 +704,7 @@ final class Application // docmain
 					this.clientSize.height - height - PADDING);
 				text = "&Continue";
 				parent = this;
-				click ~= &onOkClick;
+				click.addHandler(&onOkClick);
 			}
 			acceptButton = okBtn;
 			
@@ -715,7 +715,7 @@ final class Application // docmain
 					this.clientSize.height - height - PADDING);
 				text = "&Quit";
 				parent = this;
-				click ~= &onCancelClick;
+				click.addHandler(&onCancelClick);
 			}
 			
 			autoScale = true;
@@ -936,7 +936,7 @@ final class Application // docmain
 		if (auto pkid = k in hotkeyId)
 		{
 			immutable kid = *pkid;
-			hotkeyHandler[kid] ~= dg;
+			hotkeyHandler[kid].addHandler(dg);
 		}
 		else
 		{
@@ -957,12 +957,12 @@ final class Application // docmain
 				hotkeyId[k] = kid;
 				if (auto h = kid in hotkeyHandler)
 				{
-					*h ~= dg;
+					(*h).addHandler(dg);
 				}
 				else
 				{
 					typeof(hotkeyHandler[kid]) e;
-					e ~= dg;
+					e.addHandler(dg);
 					hotkeyHandler[kid] = e;
 				}
 			}
@@ -1114,7 +1114,7 @@ final class Application // docmain
 			assert(c.isHandleCreated);
 			assert(lookupHwnd(c.handle));
 		}
-		body
+		do
 		{
 			SetPropA(c.handle, ZOMBIE_PROP.ptr, cast(HANDLE)cast(void*)c);
 			removeHwnd(c.handle);
@@ -1128,7 +1128,7 @@ final class Application // docmain
 			assert(c.isHandleCreated);
 			assert(!lookupHwnd(c.handle));
 		}
-		body
+		do
 		{
 			RemovePropA(c.handle, ZOMBIE_PROP.ptr);
 			controls[c.handle] = c;
@@ -1141,7 +1141,7 @@ final class Application // docmain
 		{
 			assert(c !is null);
 		}
-		body
+		do
 		{
 			if(c.isHandleCreated)
 			{
@@ -2317,7 +2317,7 @@ in
 	assert(!Application.hinst);
 	assert(inst);
 }
-body
+do
 {
 	Application.hinst = inst;
 	

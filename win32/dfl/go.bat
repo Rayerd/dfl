@@ -1,4 +1,4 @@
-call makelib
+call makelib "%~1"
 @rem   This errorlevel check fails on Win9x because of the previous delete.
 @rem   @if errorlevel 1 goto fail
 @if not "%dfl_failed%" == "" goto fail
