@@ -80,11 +80,11 @@ class RichTextBox: TextBoxBase // docmain
 			with(miredo = new MenuItem)
 			{
 				text = "&Redo";
-				click.addHandler(&menuRedo);
+				click ~= &menuRedo;
 				contextMenu.menuItems.insert(1, miredo);
 			}
 			
-			contextMenu.popup.addHandler(&menuPopup2);
+			contextMenu.popup ~= &menuPopup2;
 		}
 	}
 	

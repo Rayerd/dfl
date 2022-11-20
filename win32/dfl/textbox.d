@@ -724,11 +724,11 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 			MenuItem mi;
 			
 			cmenu = new ContextMenu;
-			cmenu.popup.addHandler(&menuPopup);
+			cmenu.popup ~= &menuPopup;
 			
 			miundo = new MenuItem;
 			miundo.text = "&Undo";
-			miundo.click.addHandler(&menuUndo);
+			miundo.click ~= &menuUndo;
 			miundo.index = 0;
 			cmenu.menuItems.add(miundo);
 			
@@ -739,25 +739,25 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 			
 			micut = new MenuItem;
 			micut.text = "Cu&t";
-			micut.click.addHandler(&menuCut);
+			micut.click ~= &menuCut;
 			micut.index = 2;
 			cmenu.menuItems.add(micut);
 			
 			micopy = new MenuItem;
 			micopy.text = "&Copy";
-			micopy.click.addHandler(&menuCopy);
+			micopy.click ~= &menuCopy;
 			micopy.index = 3;
 			cmenu.menuItems.add(micopy);
 			
 			mipaste = new MenuItem;
 			mipaste.text = "&Paste";
-			mipaste.click.addHandler(&menuPaste);
+			mipaste.click ~= &menuPaste;
 			mipaste.index = 4;
 			cmenu.menuItems.add(mipaste);
 			
 			midel = new MenuItem;
 			midel.text = "&Delete";
-			midel.click.addHandler(&menuDelete);
+			midel.click ~= &menuDelete;
 			midel.index = 5;
 			cmenu.menuItems.add(midel);
 			
@@ -768,7 +768,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 			
 			misel = new MenuItem;
 			misel.text = "Select &All";
-			misel.click.addHandler(&menuSelectAll);
+			misel.click ~= &menuSelectAll;
 			misel.index = 7;
 			cmenu.menuItems.add(misel);
 		}

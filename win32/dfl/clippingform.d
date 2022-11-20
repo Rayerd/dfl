@@ -108,7 +108,7 @@ public:
 	
 	
 	/// ditto
-	void opCatAssign(RECT rc)
+	void opOpAssign(string op)(RECT rc) if (op == "~")
 	{
 		add(rc);
 	}

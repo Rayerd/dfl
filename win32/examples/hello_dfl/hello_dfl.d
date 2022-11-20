@@ -22,7 +22,7 @@ class MainForm : Form {
 		_listbox.size = Size(60, 150);
 		_listbox.items.add("foo");
 		_listbox.items.addRange(["hoge", "piyo"]);
-		_listbox.click.addHandler(
+		_listbox.click ~=
 			(Control c, EventArgs ea) {
 				int index = _listbox.selectedIndex;
 				msgBox(to!string(index));
@@ -30,8 +30,7 @@ class MainForm : Form {
 					string msg = _listbox.selectedItem.toString();
 					msgBox(msg);
 				}
-			}
-		);
+			};
 		
 		_menu = new MainMenu();
 		MenuItem item = new MenuItem();
@@ -39,7 +38,7 @@ class MainForm : Form {
 		MenuItem subItem = new MenuItem();
 		subItem.text = "Open";
 		auto menuClickHandler = (MenuItem mi, EventArgs ea){ msgBox("open the door"); };
-		subItem.click.addHandler(menuClickHandler);
+		subItem.click.addHandler(menuClickHandler); // same =~
 		item.menuItems.add(subItem);
 		_menu.menuItems.add(item);
 		this.menu = _menu;

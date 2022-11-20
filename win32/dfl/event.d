@@ -72,7 +72,7 @@ template Event(T1, T2) // docmain
 		
 		
 		/// Shortcut for addHandler().
-		void opCatAssign(TDG)(TDG handler)
+		void opOpAssign(string op, TDG)(TDG handler)
 		{
 			addHandler(toDelegate(handler));
 		}

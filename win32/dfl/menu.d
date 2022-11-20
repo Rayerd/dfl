@@ -862,7 +862,7 @@ else
 		
 		
 		// Extra.
-		deprecated final void opCatAssign(MenuItem mi)
+		deprecated final void opOpAssign(string op)(MenuItem mi) if (op == "~")
 		{
 			menuItems.insert(menuItems.length.toI32, mi);
 		}

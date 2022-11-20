@@ -61,7 +61,7 @@ class ApplicationContext // docmain
 	this(Form mainForm)
 	{
 		mform = mainForm;
-		mainForm.closed.addHandler(&onMainFormClosed);
+		mainForm.closed ~= &onMainFormClosed;
 	}
 	
 	
@@ -74,7 +74,7 @@ class ApplicationContext // docmain
 		mform = mainForm;
 		
 		if(mainForm)
-			mainForm.closed.addHandler(&onMainFormClosed);
+			mainForm.closed ~= &onMainFormClosed;
 	}
 	
 	/// ditto
@@ -428,7 +428,7 @@ final class Application // docmain
 		scope tmr = new TMR.Timer();
 		bool keep = true;
 		tmr.interval = msDelay;
-		tmr.tick.addHandler((TMR.Timer sender, EventArgs ea) { sender.stop(); keep = false; });
+		tmr.tick ~= (TMR.Timer sender, EventArgs ea) { sender.stop(); keep = false; };
 		tmr.start();
 		while(keep)
 		{
@@ -497,7 +497,7 @@ final class Application // docmain
 		
 		
 		ctx = appcon;
-		ctx.threadExit.addHandler(&threadJustExited);
+		ctx.threadExit ~= &threadJustExited;
 		try
 		{
 			threadFlags = threadFlags | TF.RUNNING;
@@ -704,7 +704,7 @@ final class Application // docmain
 					this.clientSize.height - height - PADDING);
 				text = "&Continue";
 				parent = this;
-				click.addHandler(&onOkClick);
+				click ~= &onOkClick;
 			}
 			acceptButton = okBtn;
 			
@@ -715,7 +715,7 @@ final class Application // docmain
 					this.clientSize.height - height - PADDING);
 				text = "&Quit";
 				parent = this;
-				click.addHandler(&onCancelClick);
+				click ~= &onCancelClick;
 			}
 			
 			autoScale = true;
@@ -936,7 +936,7 @@ final class Application // docmain
 		if (auto pkid = k in hotkeyId)
 		{
 			immutable kid = *pkid;
-			hotkeyHandler[kid].addHandler(dg);
+			hotkeyHandler[kid] ~= dg;
 		}
 		else
 		{
@@ -957,12 +957,12 @@ final class Application // docmain
 				hotkeyId[k] = kid;
 				if (auto h = kid in hotkeyHandler)
 				{
-					(*h).addHandler(dg);
+					*h ~= dg;
 				}
 				else
 				{
 					typeof(hotkeyHandler[kid]) e;
-					e.addHandler(dg);
+					e ~= dg;
 					hotkeyHandler[kid] = e;
 				}
 			}
@@ -1037,7 +1037,7 @@ final class Application // docmain
 			
 			
 			///
-			void opCatAssign(Handler dg)
+			void opOpAssign(string op)(Handler dg) if (op == "~")
 			{
 				addHandler(k, dg);
 			}
