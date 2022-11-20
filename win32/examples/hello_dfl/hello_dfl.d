@@ -10,6 +10,7 @@ class MainForm : Form {
 	
 	this() {
 		text = "Hello DFL";
+		resizeRedraw = true;
 		
 		_button = new TestButton();
 		_button.text = "ok";
@@ -42,10 +43,6 @@ class MainForm : Form {
 		item.menuItems.add(subItem);
 		_menu.menuItems.add(item);
 		this.menu = _menu;
-	}
-	
-	override void onResize(EventArgs ea) {
-		refresh();
 	}
 }
 
