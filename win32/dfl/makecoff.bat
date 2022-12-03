@@ -2,44 +2,23 @@
 @rem   http://www.dprogramming.com/dfl.php
 @rem   Modified for 64-bit and COFF object format
 
+@rem   How to use:
+@rem     makecoff.bat          # Same as 32mscoff
+@rem     makecoff.bat 32mscoff # 32-bit COFF
+@rem     makecoff.bat 64       # 64-bit
+
 @rem   Requires DMD and DMC's libs
-@rem   Free downloads from http://www.digitalmars.com/d/dcompiler.html and http://www.digitalmars.com/download/freecompiler.html
+@rem   Free downloads from https://dlang.org/download.html
 
 @rem   If you prefer to make DFL64 or 32-bit COFF library format,
-@rem   This requies DMD tools _and_ MSVC build tools (tested with MSVC 2013 Community Ed.),
+@rem   This requies DMD tools _and_ MSVC build tools (tested with MSVC 2015 Community Ed.),
 
 @echo off
 @cls
 
-@rem   you can change the default object model here
+@rem   You can change the default object model here
 set MODEL=32mscoff
 if not "%~1"=="" set MODEL=%~1
-
-
-@rem   You have to change these paths to your machine environment.
-@rem   "Visual Studio 12.0" means MSVC 2013.
-@rem   sc.ini in dmd2/windows/bin will help you.
-
-@rem   path to linker
-set LIBCMD="%VCINSTALLDIR%\bin\lib.exe"
-
-@rem   path to mspdb120.dll, mspdb110.dll, mspdb100.dll, and so on
-@rem   IMPORTANT: The MSVC build tools may depends on dlls which are separated into x86/x64 on installation,
-@rem              then you MUST choose a path to the suitable version.
-@rem set VCCOMMON="C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE"
-@rem set VCCOMMON=C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\amd64
-set VCCOMMON="%VCINSTALLDIR%\bin
-
-@rem   path to Windows SDK static libs (ex.gdi32.lib)
-@if "%MODEL%"=="64" (
-  @rem set WINSDKLIB="C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Lib\x64"
-  set WINSDKLIB="%WINSDKLIB%\Lib\winv6.3\um\x64"
-) else (
-  @rem set WINSDKLIB="C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A"
-  set WINSDKLIB="%WINSDKLIB%\Lib\winv6.3\um\x86"
-)
-
-@set PATH=%VCCOMMON%;%PATH%
 
 @rem   Either set the environment variables dmd_path and dmc_path
 @rem   or fix the paths below.
@@ -56,13 +35,46 @@ set _stdcwindowsd=internal/_stdcwindows.d
 set _stdcwindowsobj=_stdcwindows.obj
 :dfl_not_tango_files
 
-set dfl_files=package.d all.d base.d application.d internal/stream.d internal/dlib.d internal/clib.d internal/utf.d internal/com.d control.d clippingform.d form.d registry.d drawing.d menu.d notifyicon.d commondialog.d filedialog.d folderdialog.d panel.d textbox.d richtextbox.d picturebox.d listbox.d groupbox.d splitter.d usercontrol.d button.d label.d collections.d internal/winapi.d internal/wincom.d event.d socket.d timer.d environment.d messagebox.d tooltip.d combobox.d treeview.d tabcontrol.d colordialog.d listview.d data.d clipboard.d fontdialog.d progressbar.d resources.d statusbar.d imagelist.d toolbar.d %_stdcwindowsd%
+@rem   You have to change these paths to your machine environment.
+@rem   "Visual Studio 14.0" means MSVC 2015.
+@rem   sc.ini in dmd2/windows/bin will help you.
 
-set dfl_objs=package.obj all.obj base.obj application.obj stream.obj dlib.obj clib.obj utf.obj com.obj control.obj clippingform.obj form.obj registry.obj drawing.obj menu.obj notifyicon.obj commondialog.obj filedialog.obj folderdialog.obj panel.obj textbox.obj richtextbox.obj picturebox.obj listbox.obj groupbox.obj splitter.obj usercontrol.obj button.obj label.obj collections.obj winapi.obj wincom.obj event.obj socket.obj timer.obj environment.obj messagebox.obj tooltip.obj combobox.obj treeview.obj tabcontrol.obj colordialog.obj listview.obj data.obj clipboard.obj fontdialog.obj progressbar.obj resources.obj statusbar.obj imagelist.obj toolbar.obj %_stdcwindowsobj%
+@rem   path to linker
+set LIBCMD="%VCINSTALLDIR%\bin\lib.exe"
+
+@rem   path to mspdb140.dll, mspdb120.dll, mspdb110.dll, mspdb100.dll, and so on
+@rem   IMPORTANT: The MSVC build tools may depends on dlls which are separated into x86/x64 on installation,
+@rem              then you MUST choose a path to the suitable version.
+@rem set VCCOMMON="C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE"
+@rem set VCCOMMON="C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\amd64"
+set VCCOMMON="%VCINSTALLDIR%\bin"
+
+@rem   path to Windows SDK static libs (ex.gdi32.lib)
+@if "%MODEL%" == "64" (
+  @rem set WINSDKLIB="C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Lib\x64"
+  @rem set WINSDKLIB="%WINSDKLIB%\Lib\winv6.3\um\x64"
+  set WINSDKLIB="%dmd_path%\lib64\mingw"
+  set dmd_lib_path="%dmd_path%\lib64"
+) else if "%MODEL%" == "32mscoff" (
+  @rem set WINSDKLIB="C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A"
+  @rem set WINSDKLIB="%WINSDKLIB%\Lib\winv6.3\um\x86"
+  set WINSDKLIB="%dmd_path%\lib32mscoff\mingw"
+  set dmd_lib_path="%dmd_path%\lib32mscoff"
+)
+
+@set PATH=%VCCOMMON%;%PATH%
+
+set dfl_files=package.d all.d base.d application.d internal/dlib.d internal/clib.d internal/utf.d internal/com.d control.d clippingform.d form.d registry.d drawing.d menu.d notifyicon.d commondialog.d filedialog.d folderdialog.d panel.d textbox.d richtextbox.d picturebox.d listbox.d groupbox.d splitter.d usercontrol.d button.d label.d collections.d internal/winapi.d internal/wincom.d event.d socket.d timer.d environment.d messagebox.d tooltip.d combobox.d treeview.d tabcontrol.d colordialog.d listview.d data.d clipboard.d fontdialog.d progressbar.d resources.d statusbar.d imagelist.d toolbar.d %_stdcwindowsd%
+
+set dfl_objs=package.obj all.obj base.obj application.obj dlib.obj clib.obj utf.obj com.obj control.obj clippingform.obj form.obj registry.obj drawing.obj menu.obj notifyicon.obj commondialog.obj filedialog.obj folderdialog.obj panel.obj textbox.obj richtextbox.obj picturebox.obj listbox.obj groupbox.obj splitter.obj usercontrol.obj button.obj label.obj collections.obj winapi.obj wincom.obj event.obj socket.obj timer.obj environment.obj messagebox.obj tooltip.obj combobox.obj treeview.obj tabcontrol.obj colordialog.obj listview.obj data.obj clipboard.obj fontdialog.obj progressbar.obj resources.obj statusbar.obj imagelist.obj toolbar.obj %_stdcwindowsobj%
 
 @rem   Also update link pragmas for build.
 @rem set dfl_libs_dfl=user32_dfl.lib shell32_dfl.lib olepro32_dfl.lib
-set dfl_libs_dfl=user32.lib shell32.lib oleaut32.lib
+@if "%MODEL%"=="64" (
+  set dfl_libs_dfl=user32.lib shell32.lib oleaut32.lib %dmd_path%\lib64\undead.lib
+) else (
+  set dfl_libs_dfl=user32.lib shell32.lib oleaut32.lib %dmd_path%\lib32mscoff\undead.lib
+)
 set dfl_libs=gdi32.lib comctl32.lib advapi32.lib comdlg32.lib ole32.lib uuid.lib ws2_32.lib %dfl_libs_dfl%
 
 @rem   -version=NO_DRAG_DROP -version=NO_MDI

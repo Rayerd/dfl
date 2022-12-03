@@ -2,17 +2,27 @@
 @rem   http://www.dprogramming.com/dfl.php
 
 @rem   Requires DMD and DMC's libs
-@rem   Free downloads from http://www.digitalmars.com/d/dcompiler.html and http://www.digitalmars.com/download/freecompiler.html
+@rem   Free downloads from https://dlang.org/download.html
 
-if "%~1"=="64" (
+@rem  How to use:
+@rem    makelib.bat           # Same as 32mscoff
+@rem    makelib.bat 32mscoff  # 32-Bit COFF
+@rem    makelib.bat 32omf     # 32-bit OMF
+@rem    makelib.bat 64        # 64-Bit
+
+if "%~1" == "64" (
   @call makecoff.bat %1
   goto done
 )
-if "%~1"=="32mscoff" (
+if "%~1" == "32mscoff" (
   @call makecoff.bat %1
   goto done
 )
-if "%~1"=="32omf" set dmd_omf_flag=-m32omf
+if "%~1" == "" (
+  @call makecoff.bat
+  goto done
+)
+if "%~1" == "32omf" set dmd_omf_flag=-m32omf
 else set dmd_omf_flag=
 
 @echo off
@@ -155,4 +165,3 @@ if not "%dfl_release_flags%" == "" goto dfl_release_flags_set
 
 @rem   @del %dfl_objs%
 @del *.obj
-
