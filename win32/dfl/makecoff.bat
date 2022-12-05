@@ -69,13 +69,13 @@ set dfl_files=package.d all.d base.d application.d internal/dlib.d internal/clib
 set dfl_objs=package.obj all.obj base.obj application.obj dlib.obj clib.obj utf.obj com.obj control.obj clippingform.obj form.obj registry.obj drawing.obj menu.obj notifyicon.obj commondialog.obj filedialog.obj folderdialog.obj panel.obj textbox.obj richtextbox.obj picturebox.obj listbox.obj groupbox.obj splitter.obj usercontrol.obj button.obj label.obj collections.obj winapi.obj wincom.obj event.obj socket.obj timer.obj environment.obj messagebox.obj tooltip.obj combobox.obj treeview.obj tabcontrol.obj colordialog.obj listview.obj data.obj clipboard.obj fontdialog.obj progressbar.obj resources.obj statusbar.obj imagelist.obj toolbar.obj %_stdcwindowsobj%
 
 @rem   Also update link pragmas for build.
-@rem set dfl_libs_dfl=user32_dfl.lib shell32_dfl.lib olepro32_dfl.lib
-@if "%MODEL%"=="64" (
-  set dfl_libs_dfl=user32.lib shell32.lib oleaut32.lib %dmd_path%\lib64\undead.lib
+if  "%MODEL%" == "64" (
+  set dfl_libs_dfl=%dmd_path%\lib64\undead.lib
 ) else (
-  set dfl_libs_dfl=user32.lib shell32.lib oleaut32.lib %dmd_path%\lib32mscoff\undead.lib
+  set dfl_libs_dfl=%dmd_path%\lib32mscoff\undead.lib
 )
-set dfl_libs=gdi32.lib comctl32.lib advapi32.lib comdlg32.lib ole32.lib uuid.lib ws2_32.lib %dfl_libs_dfl%
+set dfl_libs_dfl=%WINSDKLIB%\user32.lib %WINSDKLIB%\shell32.lib %WINSDKLIB%\oleaut32.lib %dfl_libs_dfl%
+set dfl_libs=%WINSDKLIB%\gdi32.lib %WINSDKLIB%\comctl32.lib %WINSDKLIB%\advapi32.lib %WINSDKLIB%\comdlg32.lib %WINSDKLIB%\ole32.lib %WINSDKLIB%\uuid.lib %WINSDKLIB%\ws2_32.lib %dfl_libs_dfl%
 
 @rem   -version=NO_DRAG_DROP -version=NO_MDI
 @rem   -debug=SHOW_MESSAGE_INFO -debug=MESSAGE_PAUSE
@@ -145,18 +145,6 @@ if not "%dfl_release_flags%" == "" goto dfl_release_flags_set
 @if errorlevel 1 goto oops
 @echo We may ignore warnings of 4006,4221...
 
-@echo.
-@rem this may probably be Win32 only...
-@rem   @echo Making build lib...
-
-@rem   %LIBCMD% /out:dfl_build.lib
-@rem   @if errorlevel 1 goto oops
-
-
-@rem   This file is used by dfl.exe
-@echo dlib=%dlib%>dflcompile.info
-@echo dfl_options=%dfl_options%>>dflcompile.info
-@%dmd_path_windows%\bin\dmd>>dflcompile.info
 
 @rem this flag used when called from go.bat
 @set dfl_failed=

@@ -10,19 +10,19 @@
 @rem    makelib.bat 32omf     # 32-bit OMF
 @rem    makelib.bat 64        # 64-Bit
 
-if "%~1" == "64" (
+@if "%~1" == "64" (
   @call makecoff.bat %1
   goto done
 )
-if "%~1" == "32mscoff" (
+@if "%~1" == "32mscoff" (
   @call makecoff.bat %1
   goto done
 )
-if "%~1" == "" (
+@if "%~1" == "" (
   @call makecoff.bat
   goto done
 )
-if "%~1" == "32omf" set dmd_omf_flag=-m32omf
+@if "%~1" == "32omf" set dmd_omf_flag=-m32omf
 else set dmd_omf_flag=
 
 @echo off
@@ -59,7 +59,7 @@ set dfl_files=package.d all.d base.d application.d internal/dlib.d internal/clib
 set dfl_objs=package.obj all.obj base.obj application.obj dlib.obj clib.obj utf.obj com.obj control.obj clippingform.obj form.obj registry.obj drawing.obj menu.obj notifyicon.obj commondialog.obj filedialog.obj folderdialog.obj panel.obj textbox.obj richtextbox.obj picturebox.obj listbox.obj groupbox.obj splitter.obj usercontrol.obj button.obj label.obj collections.obj winapi.obj wincom.obj event.obj socket.obj timer.obj environment.obj messagebox.obj tooltip.obj combobox.obj treeview.obj tabcontrol.obj colordialog.obj listview.obj data.obj clipboard.obj fontdialog.obj progressbar.obj resources.obj statusbar.obj imagelist.obj toolbar.obj %_stdcwindowsobj%
 
 @rem   Also update link pragmas for build.
-set dfl_libs_dfl=user32_dfl.lib shell32_dfl.lib olepro32_dfl.lib %dmd_path%\lib\undead.lib
+set dfl_libs_dfl=%dmd_path%\lib\user32.lib %dmd_path%\lib\shell32.lib %dmd_path%\lib\oleaut32.lib %dmd_path%\lib\undead.lib
 set dfl_libs=%dmc_path%\lib\gdi32.lib %dmc_path%\lib\comctl32.lib %dmc_path%\lib\advapi32.lib %dmc_path%\lib\comdlg32.lib %dmc_path%\lib\ole32.lib %dmc_path%\lib\uuid.lib %dmd_path_windows%\lib\ws2_32.lib %dfl_libs_dfl%
 
 @rem   -version=NO_DRAG_DROP -version=NO_MDI
@@ -96,15 +96,6 @@ if not "%dfl_release_flags%" == "" goto dfl_release_flags_set
 :after_dfl_ddoc
 
 
-@rem   DMC's Basic Utilities required to make these libs.
-@rem   %dmc_path%\bin\implib user32_dfl.lib user32_dfl.def
-@rem   @if errorlevel 1 goto oops
-@rem   %dmc_path%\bin\implib shell32_dfl.lib shell32_dfl.def
-@rem   @if errorlevel 1 goto oops
-@rem   %dmc_path%\bin\implib olepro32_dfl.lib olepro32_dfl.def
-@rem   @if errorlevel 1 goto oops
-
-
 @rem   @echo.
 @rem   @echo Generating headers...
 @rem   @del *.di
@@ -136,18 +127,6 @@ if not "%dfl_release_flags%" == "" goto dfl_release_flags_set
 
 %dmc_path%\bin\lib -c -n -p128 dfl.lib %dfl_libs% %dfl_objs%
 @if errorlevel 1 goto oops
-
-@echo.
-@echo Making build lib...
-
-%dmc_path%\bin\lib -c -n dfl_build.lib %dfl_libs_dfl%
-@if errorlevel 1 goto oops
-
-
-@rem   This file is used by dfl.exe
-@echo dlib=%dlib%>dflcompile.info
-@echo dfl_options=%dfl_options%>>dflcompile.info
-@%dmd_path_windows%\bin\dmd>>dflcompile.info
 
 
 @set dfl_failed=

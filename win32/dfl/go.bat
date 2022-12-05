@@ -1,3 +1,9 @@
+@rem  How to use:
+@rem    go.bat           # Same as 32mscoff
+@rem    go.bat 32mscoff  # 32-Bit COFF
+@rem    go.bat 32omf     # 32-bit OMF
+@rem    go.bat 64        # 64-Bit
+
 call makelib "%~1"
 @rem   This errorlevel check fails on Win9x because of the previous delete.
 @rem   @if errorlevel 1 goto fail
@@ -23,8 +29,6 @@ call makelib "%~1"
 @rem   @move /Y dfl_debug.lib %dmd_lib_path%
 @rem   @if errorlevel 1 goto fail
 @rem   @move /Y dfl.lib %dmd_lib_path%
-@rem   @if errorlevel 1 goto fail
-@rem   @move /Y dfl_build.lib %dmd_lib_path%
 @rem   @if errorlevel 1 goto fail
 
 @move /Y dfl*.lib %dmd_lib_path%

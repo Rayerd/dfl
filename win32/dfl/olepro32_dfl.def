@@ -1,5 +1,0 @@
-LIBRARY 'OLEPRO32.DLL'
-
-EXPORTS
-_OleLoadPicture@20 = OleLoadPicture
-
