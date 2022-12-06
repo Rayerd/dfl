@@ -1,4 +1,5 @@
 
+
 # DFL
 This unofficial project is a migration of [D Forms Library (DFL)](http://http://wiki.dprogramming.com/Dfl/HomePage "D Forms Library (DFL)") that is managed on SVN.
 DFL is a Win32 windowing library for the D language.
@@ -6,14 +7,14 @@ DFL is a Win32 windowing library for the D language.
 ## Recent major features
  - Remove dflexe.
  - Remove GTK-based DFL.
- - Remove some bundled libraries such as user32_dfl.lib etc.. (From now on, use dmd-bundled libraries such as the MinGW platform library and so on.)
+ - Remove some bundled libraries such as user32_dfl.lib etc... (From now on, use dmd-bundled libraries such as the MinGW platform library and so on.)
 
 ## Build and Install
 ### 1. Set environment variables
 Fix the paths below:
 ```bat
 set dmd_path=c:\d\dmd2\windows
-set dmc_path=c:\dmd\dm
+set dmc_path=c:\dmc\dm
 ```
 ### 2. Install the undeaD library
 DFL is required the undeaD library (**undead.lib**).
