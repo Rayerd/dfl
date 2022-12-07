@@ -16,6 +16,9 @@
 @echo off
 @cls
 
+@rem   For DUB.
+pushd source\dfl
+
 @rem   You can change the default object model here
 set MODEL=32mscoff
 if not "%~1"=="" set MODEL=%~1
@@ -158,3 +161,6 @@ if not "%dfl_release_flags%" == "" goto dfl_release_flags_set
 :done
 @echo.
 @echo makecoff.bat completed.
+
+@rem   For DUB.
+@popd

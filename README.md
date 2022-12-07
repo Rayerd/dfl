@@ -1,15 +1,15 @@
 
-
 # DFL
 This unofficial project is a migration of [D Forms Library (DFL)](http://http://wiki.dprogramming.com/Dfl/HomePage "D Forms Library (DFL)") that is managed on SVN.
 DFL is a Win32 windowing library for the D language.
 
 ## Recent major features
- - Remove dflexe.
- - Remove GTK-based DFL.
- - Remove some bundled libraries such as user32_dfl.lib etc... (From now on, use dmd-bundled libraries such as the MinGW platform library and so on.)
+- DUB is available for DFL.
+- Remove dflexe.
+- Remove GTK-based DFL.
+- Remove some bundled libraries such as user32_dfl.lib etc... (From now on, use dmd-bundled libraries such as the MinGW platform library and so on.)
 
-## Build and Install
+## Build and Install (dfl.lib and dfl_debug.lib)
 ### 1. Set environment variables
 Fix the paths below:
 ```bat
@@ -19,7 +19,7 @@ set dmc_path=c:\dmc\dm
 ### 2. Install the undeaD library
 DFL is required the undeaD library (**undead.lib**).
 Download a ZIP file from https://github.com/dlang/undead.
-Extract **undeaD-master.zip** and run the bellow with either option -a=x86_omf, x86_32mscoff or x86_64:
+Extract **undeaD-master.zip** and run the below with either option -a=x86_omf, x86_32mscoff or x86_64:
 ```bat
 > cd undeaD-master
 > dub build -a=x86_omf
@@ -50,11 +50,32 @@ or (MSVC required)
 ```
 Also copy **dfl.lib** and **dfl_debug.lib** to your/lib/dir.
 
-In order to make and move *.lib to paths bellow:
+**IMPORTANT**: Both library files are containing the **undead.lib** and WINSDK libraries such as **user32.lib**, **gdi32.lib** and so on.
+
+In order to make and move *.lib to paths below:
 - **go32omf.bat** : Make and move *.lib to %dmd_path%\lib
 - **go.bat** (MSVC required) : Make and move *.lib to %dmd_path%\lib32mscoff
 - **go.bat 32mscoff** (MSVC required) : ditto
 - **go64.bat** (MSVC required) : Make and move *.lib to %dmd_path%\lib64
+
+## With DUB
+First, in order to add to local DUB registry:
+```bat
+> cd dfl
+> dub add-local .
+> dub list
+Packages present in the system and known to dub:
+  dfl ~master: c:\your\path\dfl\
+```
+Build and run your GUI applications with DUB as below:
+```bat
+> cd examples\hello_dfl
+> dub build -a=x86_omf
+> dub run
+```
+See also **./examples/hello_dfl/dub.json**.
+
+**IMPORTANT**: DUB is building **dfl_dub.lib** that is **not** containing **undead.lib** and WINSDK libraries.
 
 ## License
 boost and/or zlib/libpng

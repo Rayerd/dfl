@@ -31,6 +31,8 @@ call makelib "%~1"
 @rem   @move /Y dfl.lib %dmd_lib_path%
 @rem   @if errorlevel 1 goto fail
 
+@pushd source\dfl
+
 @move /Y dfl*.lib %dmd_lib_path%
 @if errorlevel 1 goto fail
 
@@ -47,3 +49,5 @@ call makelib "%~1"
 
 :done
 @echo Done.
+
+@popd

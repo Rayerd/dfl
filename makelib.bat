@@ -22,12 +22,17 @@
   @call makecoff.bat
   goto done
 )
-@if "%~1" == "32omf" set dmd_omf_flag=-m32omf
-else set dmd_omf_flag=
+@if "%~1" == "32omf" (
+  set dmd_omf_flag=-m32omf
+) else (
+  set dmd_omf_flag=
+)
 
 @echo off
 @cls
 
+@rem   For DUB.
+pushd source\dfl
 
 @rem   Either set the environment variables dmd_path and dmc_path
 @rem   or fix the paths below.
@@ -144,3 +149,6 @@ if not "%dfl_release_flags%" == "" goto dfl_release_flags_set
 
 @rem   @del %dfl_objs%
 @del *.obj
+
+@rem   For DUB.
+@popd

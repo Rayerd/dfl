@@ -1,0 +1,52 @@
+{
+	"authors": [
+		"various"
+	],
+	"dependencies": {
+		"undead": "~>1.1.8"
+	},
+	"description": "D Forms Library, or DFL, is a Win32 windowing library for the D language.",
+	"license": "in license.txt",
+	"name": "dfl",
+	"targetType": "staticLibrary",
+	"targetPath": "bin",
+	"targetName": "dfl_dub",
+	"homepage": "https://github.com/Rayerd/dfl",
+	"versions": [
+		"DFL_UNICODE",
+		"REDEFINE_UUIDS"
+	],
+	"libs-windows-x86_omf-dmd": [
+		"$DFL_PACKAGE_DIR/lib/windows-x86_omf/user32",
+		"$DFL_PACKAGE_DIR/lib/windows-x86_omf/shell32",
+		"$DFL_PACKAGE_DIR/lib/windows-x86_omf/gdi32",
+		"$DFL_PACKAGE_DIR/lib/windows-x86_omf/comctl32",
+		"$DFL_PACKAGE_DIR/lib/windows-x86_omf/advapi32",
+		"$DFL_PACKAGE_DIR/lib/windows-x86_omf/comdlg32",
+		"$DFL_PACKAGE_DIR/lib/windows-x86_omf/ole32",
+		"$DFL_PACKAGE_DIR/lib/windows-x86_omf/OLEAUT32",
+		"$DFL_PACKAGE_DIR/lib/windows-x86_omf/ws2_32"
+	],
+	"libs-windows-x86_mscoff-dmd": [
+		"$DFL_PACKAGE_DIR/lib/windows-x86_mscoff/user32",
+		"$DFL_PACKAGE_DIR/lib/windows-x86_mscoff/shell32",
+		"$DFL_PACKAGE_DIR/lib/windows-x86_mscoff/gdi32",
+		"$DFL_PACKAGE_DIR/lib/windows-x86_mscoff/comctl32",
+		"$DFL_PACKAGE_DIR/lib/windows-x86_mscoff/advapi32",
+		"$DFL_PACKAGE_DIR/lib/windows-x86_mscoff/comdlg32",
+		"$DFL_PACKAGE_DIR/lib/windows-x86_mscoff/ole32",
+		"$DFL_PACKAGE_DIR/lib/windows-x86_mscoff/OLEAUT32",
+		"$DFL_PACKAGE_DIR/lib/windows-x86_mscoff/ws2_32"
+	],
+	"libs-windows-x86_64-dmd": [
+		"$DFL_PACKAGE_DIR/lib/windows-x86_64/user32",
+		"$DFL_PACKAGE_DIR/lib/windows-x86_64/shell32",
+		"$DFL_PACKAGE_DIR/lib/windows-x86_64/gdi32",
+		"$DFL_PACKAGE_DIR/lib/windows-x86_64/comctl32",
+		"$DFL_PACKAGE_DIR/lib/windows-x86_64/advapi32",
+		"$DFL_PACKAGE_DIR/lib/windows-x86_64/comdlg32",
+		"$DFL_PACKAGE_DIR/lib/windows-x86_64/ole32",
+		"$DFL_PACKAGE_DIR/lib/windows-x86_64/OLEAUT32",
+		"$DFL_PACKAGE_DIR/lib/windows-x86_64/ws2_32"
+	]
+}
