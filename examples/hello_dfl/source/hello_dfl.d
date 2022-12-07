@@ -1,7 +1,13 @@
 import std.conv : to;
 import dfl;
 
-pragma(lib, "dfl.lib");
+version(Have_dfl) // For DUB.
+{
+}
+else
+{
+	pragma(lib, "dfl.lib");
+}
 
 class MainForm : Form {
 	private Button _button;
