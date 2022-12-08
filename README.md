@@ -59,7 +59,7 @@ In order to make and move *.lib to paths below:
 - **go64.bat** (MSVC required) : Make and move *.lib to %dmd_path%\lib64
 
 ## With DUB
-First, in order to add to local DUB registry:
+First, add DFL to local DUB registry:
 ```bat
 > cd dfl
 > dub add-local .
