@@ -14,4 +14,4 @@ public import dfl.base, dfl.menu, dfl.control, dfl.usercontrol,
 	dfl.clipboard, dfl.commondialog, dfl.richtextbox, dfl.tooltip,
 	dfl.combobox, dfl.treeview, dfl.picturebox, dfl.tabcontrol,
 	dfl.listview, dfl.statusbar, dfl.progressbar, dfl.resources,
-	dfl.imagelist, dfl.toolbar;
+	dfl.imagelist, dfl.toolbar, dfl.trackbar;

@@ -162,8 +162,8 @@ enum ControlStyles: uint
 	
 	OPAQUE =                           0x4, /// ditto
 	RESIZE_REDRAW =                    0x10, /// ditto
-	//FIXED_WIDTH =                      0x20, // TODO: implement.
-	//FIXED_HEIGHT =                     0x40, // TODO: implement.
+	FIXED_WIDTH =                      0x20, /// ditto (Implemented for TrackBar)
+	FIXED_HEIGHT =                     0x40, /// ditto (Implemented for TrackBar)
 	STANDARD_CLICK =                   0x100, /// ditto
 	SELECTABLE =                       0x200, /// ditto
 	
@@ -176,9 +176,11 @@ enum ControlStyles: uint
 	CACHE_TEXT =                       0x4000, /// ditto
 	ENABLE_NOTIFY_MESSAGE =            0x8000, // deprecated. Calls onNotifyMessage() for every message.
 	//DOUBLE_BUFFER =                    0x10000, // TODO: implement.
-	
-	WANT_TAB_KEY = 0x01000000,
-	WANT_ALL_KEYS = 0x02000000,
+	//OPTIMIZED_DOUBLE_BUFFER =          0x20000, // TODO: implement.
+	USE_TEXT_FOR_ACCESSIBILITY =       0x40000, /// ditto
+
+	WANT_TAB_KEY =                     0x01000000,
+	WANT_ALL_KEYS =                    0x02000000,
 }
 
 
@@ -5045,6 +5047,22 @@ class Control: DObject, IWindow // docmain
 					}
 					break;
 				
+				case WM_HSCROLL:
+				case WM_VSCROLL:
+					{
+						Control ctrl;
+						HWND hWnd;
+
+						hWnd = cast(HWND)msg.lParam;
+						ctrl = Control.fromChildHandle(hWnd);
+						if(ctrl)
+						{
+							ctrl.onReflectedMessage(msg);
+							return;
+						}
+					}
+					break;
+
 				version(DFL_NO_MENUS)
 				{
 				}

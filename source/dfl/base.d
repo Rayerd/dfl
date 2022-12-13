@@ -1051,6 +1051,27 @@ class MouseEventArgs: EventArgs
 	int dlt;
 }
 
+///
+class HandledMouseEventArgs: MouseEventArgs
+{
+	this(MouseButtons button, int clicks, int x, int y, int delta)
+	{
+		this(button, clicks, x, y, delta, false);
+	}
+
+	package this(MouseButtons button, int clicks, Point location, int delta)
+	{
+		this(button, clicks, location.x, location.y, delta, false);
+	}
+
+	this(MouseButtons button, int clicks, int x, int y, int delta, bool defaultHandledValue)
+	{
+		super(button, clicks, x, y, delta);
+		handled = defaultHandledValue;
+	}
+
+	bool handled;
+}
 
 /+
 ///
@@ -1631,3 +1652,17 @@ class Cursors // docmain
 	{ return new Cursor(LoadCursorA(HINSTANCE.init, IDC_WAIT), false); }
 }
 
+///
+static class SystemInformation
+{
+	static uint mouseWheelScrollLines()
+	{
+		uint lines;
+		uint result = SystemParametersInfo(SPI_GETWHEELSCROLLLINES, 0, &lines, 0);
+		if (result == 0)
+		{
+			throw new DflException("MouseWheelScrollLines failure");
+		}
+		return lines;
+	}
+}
