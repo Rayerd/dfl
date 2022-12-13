@@ -1,0 +1,16 @@
+{
+	"authors": ["haru-s"],
+	"copyright": "Copyright (C) 2022 haru-s",
+	"description": "DFL sample code.",
+	"name": "trackbar_sample",
+	"targetType": "executable",
+	"targetPath": "bin",
+	"dependencies": {
+		"dfl": {
+			"path": "../../../dfl"
+		}
+	},
+	"lflags-windows-x86_omf-dmd":    ["/exet:nt/su:windows:6.0"],
+	"lflags-windows-x86_mscoff-dmd": ["/SUBSYSTEM:WINDOWS", "/ENTRY:mainCRTStartup"],
+	"lflags-windows-x86_64-dmd":     ["/SUBSYSTEM:WINDOWS", "/ENTRY:mainCRTStartup"]
+}
