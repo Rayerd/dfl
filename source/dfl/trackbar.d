@@ -1,3 +1,12 @@
+// trackbar.d
+//
+// The original is TrackBar.cs in Windows Forms Liblary.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See https://opensource.org/licenses/MIT
+//
+// Translations and modifications copyright (C) 2022 haru-s
+
 ///
 module dfl.trackbar;
 
