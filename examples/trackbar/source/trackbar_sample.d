@@ -1,5 +1,3 @@
-module trackbar_sample;
-
 import dfl;
 
 import std.conv;
@@ -40,7 +38,7 @@ class MainForm : Form
 			_trackbar1.value = TRACKBAR_INITIAL_POSITION;
 			_trackbar2.value = TRACKBAR_INITIAL_POSITION;
 
-			// If the out side of range is safe.
+			// Even if TrackBar position is the outside of range, it is safe.
 			// _trackbar1.setRange(10, 20);
 			// _trackbar2.setRange(90, 100);
 		};
