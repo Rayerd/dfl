@@ -343,7 +343,7 @@ class TrackBar : ControlSuperClass
 			_minimum = v;
 		}
 
-		setRange(_minimum, value);
+		setRange(_minimum, v);
 	}
 
 	///
