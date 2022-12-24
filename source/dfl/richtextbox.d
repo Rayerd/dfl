@@ -5,9 +5,14 @@
 ///
 module dfl.richtextbox;
 
-private import dfl.textbox, dfl.internal.winapi, dfl.event, dfl.application;
-private import dfl.base, dfl.drawing, dfl.data;
-private import dfl.control, dfl.internal.utf, dfl.internal.dlib;
+private import dfl.textboxbase;
+private import dfl.base, dfl.application;
+private import dfl.event, dfl.drawing, dfl.data;
+private import dfl.control;
+
+private import dfl.internal.winapi;
+private import dfl.internal.utf;
+private import dfl.internal.dlib;
 
 version(DFL_NO_MENUS)
 {
@@ -118,7 +123,7 @@ class RichTextBox: TextBoxBase // docmain
 		return wcurs; // Do return null and don't inherit.
 	}
 	
-	alias TextBoxBase.cursor cursor; // Overload.
+	alias cursor = TextBoxBase.cursor; // Overload.
 	
 	
 	override @property Dstring selectedText() // getter
@@ -138,7 +143,7 @@ class RichTextBox: TextBoxBase // docmain
 		return null;
 	}
 	
-	alias TextBoxBase.selectedText selectedText; // Overload.
+	alias selectedText = TextBoxBase.selectedText; // Overload.
 	
 	
 	override @property void selectionLength(uint len) // setter
@@ -200,13 +205,13 @@ class RichTextBox: TextBoxBase // docmain
 	
 	override @property void maxLength(uint len) // setter
 	{
-		lim = len;
+		_lim = len;
 		
 		if(created)
 			SendMessageA(handle, EM_EXLIMITTEXT, 0, cast(LPARAM)len);
 	}
 	
-	alias TextBoxBase.maxLength maxLength; // Overload.
+	alias maxLength = TextBoxBase.maxLength; // Overload.
 	
 	
 	override @property Size defaultSize() // getter
@@ -233,7 +238,7 @@ class RichTextBox: TextBoxBase // docmain
 		super.backColor(c);
 	}
 	
-	alias TextBoxBase.backColor backColor; // Overload.
+	alias backColor = TextBoxBase.backColor; // Overload.
 	
 	
 	private void _setfc(Color c)
@@ -260,7 +265,7 @@ class RichTextBox: TextBoxBase // docmain
 		super.foreColor(c);
 	}
 	
-	alias TextBoxBase.foreColor foreColor; // Overload.
+	alias foreColor = TextBoxBase.foreColor; // Overload.
 	
 	
 	///
@@ -303,7 +308,7 @@ class RichTextBox: TextBoxBase // docmain
 		}
 	}
 	
-	alias TextBoxBase.paste paste; // Overload.
+	alias paste = TextBoxBase.paste; // Overload.
 	
 	
 	///

@@ -5,12 +5,15 @@
 ///
 module dfl.control;
 
-private import dfl.internal.dlib, dfl.internal.clib;
-	
 private import dfl.base, dfl.form, dfl.drawing;
-private import dfl.internal.winapi, dfl.application, dfl.event, dfl.label;
-private import dfl.internal.wincom, dfl.internal.utf, dfl.collections, dfl.internal.com;
+private import dfl.application, dfl.event, dfl.label;
+private import dfl.collections;
 private import core.memory;
+
+private import dfl.internal.dlib, dfl.internal.clib;
+private import dfl.internal.winapi, dfl.internal.wincom;
+private import dfl.internal.utf;
+private import dfl.internal.com;
 
 version(NO_DRAG_DROP)
 	version = DFL_NO_DRAG_DROP;
@@ -178,9 +181,6 @@ enum ControlStyles: uint
 	//DOUBLE_BUFFER =                    0x10000, // TODO: implement.
 	//OPTIMIZED_DOUBLE_BUFFER =          0x20000, // TODO: implement.
 	USE_TEXT_FOR_ACCESSIBILITY =       0x40000, /// ditto
-
-	WANT_TAB_KEY =                     0x01000000,
-	WANT_ALL_KEYS =                    0x02000000,
 }
 
 
@@ -3704,11 +3704,92 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	///
-	// Return true if processed.
+	/// Process shortcut key (ctrl+A etc).
+	// Returns false when parent is none, otherwise call parent form's one.
+	protected bool processCmdKey(ref Message msg, Keys keyData)
+	{
+		if (parent)
+			return parent.processCmdKey(msg, keyData);
+		else
+			return false;
+	}
+
+	/// Process dialog key (TAB, RETURN, ESC, UP, DOWN, LEFT, RIGHT and so on).
+	// Returns false when parent is none, otherwise call parent form's one.
+	protected bool processDialogKey(Keys keyData)
+	{
+		if (parent)
+			return parent.processDialogKey(keyData);
+		else
+			return false;
+	}
+
+	/// Process mnemonic (access key) such as Alt+T.
+	// Returns false when parent is none, otherwise call parent form's one.
+	protected bool processDialogChar(char charCode)
+	{
+		if (parent)
+			return parent.processDialogChar(charCode);
+		else
+			return false;
+	}
+
+	/// Pre-process keybord message
+	// This function called from Application.DflWndProc().
+	// If return true, processed message,
+	// then wndProc() be not called after preProcessMessage().
+	// If return false, wndProc() be called after preProcessMessage().
 	bool preProcessMessage(ref Message msg)
 	{
-		return false;
+		bool result/+ = false+/;
+
+		if (msg.msg == WM_KEYDOWN || msg.msg == WM_SYSKEYDOWN)
+		{
+			// TODO: Implement
+			// if (!getExtendedState(ExtendedStates.UiCues))
+			// {
+			// 	processUICues(msg);
+			// }
+			
+			Keys keyData = cast(Keys)msg.wParam | modifierKeys;
+
+			// processCmdKey returns true when keyData is a shortcut key (ctrl+C etc).
+			if (processCmdKey(msg, keyData))
+			{
+				result = true;
+			}
+			// isInputKey returns true when keyData is a regular input key.
+			else if (isInputKey(keyData))
+			{
+				// TODO: Implement
+				// SetExtendedState(ExtendedStates.InputKey, true);
+				result = false; // End preprocessing and call wndProc().
+			}
+			else
+			{
+				// Process dialog keys such as TAB, RETURN, ESC, UP, DOWN, RIGHT, LEFT.
+				result = processDialogKey(keyData);
+			}
+		}
+		else if (msg.msg == WM_CHAR || msg.msg == WM_SYSCHAR)
+		{
+			if (msg.msg == WM_CHAR && isInputChar(cast(char)msg.wParam))
+			{
+				// TODO: Implement
+				// setExtendedState(ExtendedStates.InputChar, true);
+				result = false;
+			}
+			else
+			{
+				result = processDialogChar(cast(char)msg.wParam);
+			}
+		}
+		else
+		{
+			result = false;
+		}
+
+		return result;
 	}
 	
 	
@@ -3909,7 +3990,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	package static void _dlgselnext(Form dlg, HWND hwcursel, bool forward,
+	package static bool _dlgselnext(Form dlg, HWND hwcursel, bool forward,
 		bool tabStopOnly = true, bool selectableOnly = false,
 		bool nested = true, bool wrap = true,
 		HWND hwchildrenof = null)
@@ -3960,6 +4041,7 @@ class Control: DObject, IWindow // docmain
 				{
 					//DefDlgProcA(dlg.handle, WM_NEXTDLGCTL, cast(WPARAM)hwfirst, MAKELPARAM(true, 0));
 					dlg._selectChild(hwfirst);
+					return true;
 				}
 			}
 		}
@@ -3990,22 +4072,26 @@ class Control: DObject, IWindow // docmain
 				}, nested);
 			// If it falls through without finding hwcursel, let it select the last one, even if not wrapping.
 			if(HWND.init != hwprev)
+			{
 				//DefDlgProcA(dlg.handle, WM_NEXTDLGCTL, cast(WPARAM)hwprev, MAKELPARAM(true, 0));
 				dlg._selectChild(hwprev);
+				return true;
+			}
 		}
+		return false;
 	}
 	
 	
-	package final void _selectNextControl(Form ctrltoplevel,
+	package final bool _selectNextControl(Form ctrltoplevel,
 		Control ctrl, bool forward, bool tabStopOnly, bool nested, bool wrap)
 	{
 		if(!created)
-			return;
+			return false;
 		
 		assert(ctrltoplevel !is null);
 		assert(ctrltoplevel.isHandleCreated);
 		
-		_dlgselnext(ctrltoplevel,
+		return _dlgselnext(ctrltoplevel,
 			(ctrl && ctrl.isHandleCreated) ? ctrl.handle : null,
 			forward, tabStopOnly, !tabStopOnly, nested, wrap,
 			this.handle);
@@ -4019,14 +4105,16 @@ class Control: DObject, IWindow // docmain
 	
 	
 	// Only considers child controls of this control.
-	final void selectNextControl(Control ctrl, bool forward, bool tabStopOnly, bool nested, bool wrap)
+	final bool selectNextControl(Control ctrl, bool forward, bool tabStopOnly, bool nested, bool wrap)
 	{
 		if(!created)
-			return;
+			return false;
 		
 		auto ctrltoplevel = findForm();
 		if(ctrltoplevel)
 			return _selectNextControl(ctrltoplevel, ctrl, forward, tabStopOnly, nested, wrap);
+
+		return false;
 	}
 	
 	
@@ -4594,7 +4682,26 @@ class Control: DObject, IWindow // docmain
 		DWORD ldlgcode = 0;
 	}
 	
-	
+
+	///
+	protected bool processKeyPreview(ref Message m)
+	{
+		return parent && parent.processKeyPreview(m);
+	}
+
+
+	///
+	// Returns true in order to break in wndProc(), because processed.
+	protected final bool processKeyMessage(ref Message m)
+	{
+		if ( parent && parent.processKeyPreview(m))
+		{
+			return true;
+		}
+		return processKeyEventArgs(m);
+	}
+
+
 	///
 	protected void wndProc(ref Message msg)
 	{
@@ -4845,7 +4952,7 @@ class Control: DObject, IWindow // docmain
 			case WM_KEYUP:
 			case WM_CHAR:
 			case WM_SYSKEYDOWN:
-			case WM_SYSKEYUP:
+			case WM_SYSKEYUP: // TODO: Is it correct?
 			case WM_SYSCHAR:
 			//case WM_IMECHAR:
 				/+
@@ -4858,7 +4965,14 @@ class Control: DObject, IWindow // docmain
 				msg.result = 1; // The key was not processed.
 				break;
 				+/
-				msg.result = !processKeyEventArgs(msg);
+				if (processKeyMessage(msg))
+				{
+					//msg.result = 0;
+					return;
+				}
+				defWndProc(msg);
+
+				//msg.result = !processKeyEventArgs(msg);
 				return;
 			
 			case WM_MOUSEWHEEL: // Requires Windows 98 or NT4.
@@ -5449,9 +5563,6 @@ class Control: DObject, IWindow // docmain
 					+/
 					
 					defWndProc(msg);
-					
-					if(ctrlStyle & ControlStyles.WANT_ALL_KEYS)
-						msg.result |= DLGC_WANTALLKEYS;
 					
 					// Only want chars if ALT isn't down, because it would break mnemonics.
 					if(!(GetKeyState(VK_MENU) & 0x8000))
@@ -6802,7 +6913,6 @@ class Control: DObject, IWindow // docmain
 		cbits &= ~CBits.IN_LAYOUT;
 	}
 	
-	
 	/+
 	// Not sure what to do here.
 	deprecated bool isInputChar(char charCode)
@@ -6810,8 +6920,58 @@ class Control: DObject, IWindow // docmain
 		return false;
 	}
 	+/
-	
-	
+	protected bool isInputChar(char charCode)
+	{
+		int mask = 0;
+		if (charCode == Keys.TAB)
+		{
+			mask = (DLGC_WANTCHARS | DLGC_WANTALLKEYS | DLGC_WANTTAB);
+		}
+		else
+		{
+			mask = (DLGC_WANTCHARS | DLGC_WANTALLKEYS);
+		}
+
+		return (SendMessage(hwnd, WM_GETDLGCODE, 0, 0) & mask) != 0;
+	}
+
+
+	/// isInputKey returns true when keyData is a regular input key.
+	// If keyData is input key, then window message is sended to wndProc()
+	// such as WM_KEYDOWN, WM_KEYUP, WM_CHAR and so on.
+	protected bool isInputKey(Keys keyData)
+	{
+		if ((keyData & Keys.ALT) == Keys.ALT)
+		{
+			return false;
+		}
+
+		auto mask = DLGC_WANTALLKEYS;
+		switch (keyData & Keys.KEY_CODE)
+		{
+			case Keys.TAB:
+				mask = DLGC_WANTALLKEYS | DLGC_WANTTAB;
+				break;
+			case Keys.LEFT:
+			case Keys.RIGHT:
+			case Keys.UP:
+			case Keys.DOWN:
+				mask = DLGC_WANTALLKEYS | DLGC_WANTARROWS;
+				break;
+			default:
+				// Nothing
+		}
+
+		// return isHandleCreated
+		// 	&& (SendMessage(hwnd, WM_GETDLGCODE, 0, 0) & mask) != 0;
+		if (isHandleCreated)
+		{
+			LRESULT r = SendMessage(hwnd, WM_GETDLGCODE, 0, 0);
+			return (r & mask) != 0;
+		}
+		return false;
+	}	
+
 	///
 	void setVisibleCore(bool byes)
 	{
@@ -6847,9 +7007,11 @@ class Control: DObject, IWindow // docmain
 	
 	package final bool _wantTabKey()
 	{
-		if(ctrlStyle & ControlStyles.WANT_TAB_KEY)
+		// if(ctrlStyle & ControlStyles.WANT_TAB_KEY)
+		if((DLGC_WANTTAB & sendMessage(hwnd, WM_GETDLGCODE, 0, 0)) != 0)
 			return true;
-		return false;
+		else
+			return false;
 	}
 	
 	
@@ -6857,12 +7019,22 @@ class Control: DObject, IWindow // docmain
 	// Return true if processed.
 	protected bool processKeyEventArgs(ref Message msg)
 	{
+		// TODO: implement more (IME etc...)
+
 		switch(msg.msg)
 		{
+			case WM_CHAR:
+			case WM_SYSCHAR:
+				{
+					scope KeyPressEventArgs kpea = new KeyPressEventArgs(cast(dchar)msg.wParam, modifierKeys);
+					onKeyPress(kpea);
+					return kpea.handled;
+				}
+
 			case WM_KEYDOWN:
+			case WM_SYSKEYDOWN:
 				{
 					scope KeyEventArgs kea = new KeyEventArgs(cast(Keys)(msg.wParam | modifierKeys));
-					
 					ushort repeat = msg.lParam & 0xFFFF; // First 16 bits.
 					for(; repeat; repeat--)
 					{
@@ -6870,35 +7042,21 @@ class Control: DObject, IWindow // docmain
 						onKeyDown(kea);
 					}
 					
-					if(kea.handled)
-						return true;
+					return kea.handled;
 				}
-				break;
 			
 			case WM_KEYUP:
+			case WM_SYSKEYUP: // TODO: Is it correct?
 				{
 					// Repeat count is always 1 for key up.
 					scope KeyEventArgs kea = new KeyEventArgs(cast(Keys)(msg.wParam | modifierKeys));
 					onKeyUp(kea);
-					if(kea.handled)
-						return true;
+					return kea.handled;
 				}
-				break;
-			
-			case WM_CHAR:
-				{
-					scope KeyPressEventArgs kpea = new KeyPressEventArgs(cast(dchar)msg.wParam, modifierKeys);
-					onKeyPress(kpea);
-					if(kpea.handled)
-						return true;
-				}
-				break;
 			
 			default:
+				assert(0); // Does not reached here, if WM is traped in Control.wndProc() correctly.
 		}
-		
-		defWndProc(msg);
-		return !msg.result;
 	}
 	
 	
@@ -6907,25 +7065,7 @@ class Control: DObject, IWindow // docmain
 		return processKeyEventArgs(msg);
 	}
 	
-	
-	/+
-	bool processKeyPreview(ref Message m)
-	{
-		if(wparent)
-			return wparent.processKeyPreview(m);
-		return false;
-	}
-	
-	
-	protected bool processDialogChar(dchar charCode)
-	{
-		if(wparent)
-			return wparent.processDialogChar(charCode);
-		return false;
-	}
-	+/
-	
-	
+
 	///
 	protected bool processMnemonic(dchar charCode)
 	{
@@ -8197,182 +8337,24 @@ class ContainerControl: ScrollableControl, IContainerControl // docmain
 	}
 	
 	
-	protected:
-	/+
-	override bool processDialogChar(char charCode)
-	{
-		// Not sure if this is correct.
-		return false;
-	}
-	+/
-	
-	
-	/+
-	deprecated protected override bool processMnemonic(dchar charCode)
-	{
-		return false;
-	}
-	
-	
-	bool processTabKey(bool forward)
+	protected bool processTabKey(bool forward)
 	{
 		if(isHandleCreated)
 		{
-			//SendMessageA(hwnd, WM_NEXTDLGCTL, !forward, 0);
-			//return true;
-			select(true, forward);
+            return selectNextControl(activeControl, forward, tabStop, true, false);
 		}
 		return false;
 	}
-	+/
 }
 
 
-import std.traits, std.typecons;
 private template hasLocalAliasing(T...)
 {
+	import std.traits, std.typecons;
+
 	static if( !T.length )
 		enum hasLocalAliasing = false;
 	else
 		enum hasLocalAliasing = std.traits.hasLocalAliasing!(T[0]) ||
 			dfl.control.hasLocalAliasing!(T[1 .. $]);
-}
-
-///
-shared class SharedControl
-{
-private:
-	Control _ctrl;
-	
-	LPARAM makeParam(ARGS...)(void function(Control, ARGS) fn, Tuple!(ARGS)* args)
-		if (ARGS.length)
-	{
-		static assert((DflInvokeParam*).sizeof <= LPARAM.sizeof);
-		static struct InvokeParam
-		{
-			void function(Control, ARGS) fn;
-			ARGS args;
-		}
-		alias dfl.internal.clib.malloc malloc;
-		alias dfl.internal.clib.free free;
-	
-		auto param = cast(InvokeParam*)malloc(InvokeParam.sizeof);
-		param.fn = fn;
-		param.args = args.field;
-		
-		if (!param)
-			throw new OomException();
-		
-		auto p = cast(DflInvokeParam*)malloc(DflInvokeParam.sizeof);
-		
-		if (!p)
-			throw new OomException();
-		
-		
-		static void fnentry(Control c, size_t[] p)
-		{
-			auto param = cast(InvokeParam*)p[0];
-			param.fn(c, param.args);
-			free(param);
-		}
-		
-		p.fp = &fnentry;
-		p.nparams = 1;
-		p.params[0] = cast(size_t)param;
-		
-		return cast(LPARAM)p;
-	}
-	
-	
-	LPARAM makeParamNoneArgs(void function(Control) fn)
-	{
-		static assert((DflInvokeParam*).sizeof <= LPARAM.sizeof);
-		alias dfl.internal.clib.malloc malloc;
-		alias dfl.internal.clib.free free;
-		
-		auto p = cast(DflInvokeParam*)malloc(DflInvokeParam.sizeof);
-		
-		if (!p)
-			throw new OomException();
-		
-		static void fnentry(Control c, size_t[] p)
-		{
-			auto fn = cast(void function(Control))p[0];
-			fn(c);
-		}
-		
-		p.fp = &fnentry;
-		p.nparams = 1;
-		p.params[0] = cast(size_t)fn;
-		
-		return cast(LPARAM)p;
-	}
-	
-	
-	
-public:
-	///
-	this(Control ctrl)
-	{
-		assert(ctrl);
-		_ctrl = cast(shared)ctrl;
-	}
-	
-	///
-	void invoke(ARGS...)(void function(Control, ARGS) fn, ARGS args)
-		if (ARGS.length && !hasLocalAliasing!(ARGS))
-	{
-		auto ctrl = cast(Control)_ctrl;
-		auto hwnd = ctrl.handle;
-		
-		if(!hwnd)
-			Control.badInvokeHandle();
-		
-		auto t = tuple(args);
-		auto p = makeParam(fn, &t);
-		SendMessageA(hwnd, wmDfl, WPARAM_DFL_DELAY_INVOKE_PARAMS, p);
-	}
-	
-	///
-	void invoke(ARGS...)(void function(Control, ARGS) fn, ARGS args)
-		if (!ARGS.length)
-	{
-		auto ctrl = cast(Control)_ctrl;
-		auto hwnd = ctrl.handle;
-		
-		if(!hwnd)
-			Control.badInvokeHandle();
-		
-		auto p = makeParamNoneArgs(fn);
-		SendMessageA(hwnd, wmDfl, WPARAM_DFL_DELAY_INVOKE_PARAMS, p);
-	}
-	
-	///
-	void delayInvoke(ARGS...)(void function(Control, ARGS) fn, ARGS args)
-		if (ARGS.length && !hasLocalAliasing!(ARGS))
-	{
-		auto ctrl = cast(Control)_ctrl;
-		auto hwnd = ctrl.handle;
-		
-		if(!hwnd)
-			Control.badInvokeHandle();
-		
-		auto t = tuple(args);
-		auto p = makeParam(fn, &t);
-		PostMessageA(hwnd, wmDfl, WPARAM_DFL_DELAY_INVOKE_PARAMS, p);
-	}
-	
-	///
-	void delayInvoke(ARGS...)(void function(Control, ARGS) fn, ARGS args)
-		if (!ARGS.length)
-	{
-		auto ctrl = cast(Control)_ctrl;
-		auto hwnd = ctrl.handle;
-		
-		if(!hwnd)
-			Control.badInvokeHandle();
-		
-		auto p = makeParamNoneArgs(fn);
-		PostMessageA(hwnd, wmDfl, WPARAM_DFL_DELAY_INVOKE_PARAMS, p);
-	}
 }

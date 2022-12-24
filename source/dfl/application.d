@@ -2540,7 +2540,7 @@ extern(Windows)
 }
 
 
-WNDPROC _superClass(HINSTANCE hinst, Dstring className, Dstring newClassName, out WNDCLASSA getInfo) // deprecated
+deprecated WNDPROC _superClass(HINSTANCE hinst, Dstring className, Dstring newClassName, out WNDCLASSA getInfo)
 {
 	WNDPROC wndProc;
 	

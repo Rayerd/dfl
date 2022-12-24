@@ -6,10 +6,13 @@
 module dfl.form;
 
 private import dfl.internal.dlib;
+private import dfl.internal.winapi;
+private import dfl.internal.utf;
 
-private import dfl.control, dfl.internal.winapi, dfl.event, dfl.drawing;
-private import dfl.application, dfl.base, dfl.internal.utf;
+private import dfl.control, dfl.event, dfl.drawing;
+private import dfl.application, dfl.base;
 private import dfl.collections;
+
 debug(APP_PRINT)
 {
 	private import dfl.internal.clib;
@@ -129,10 +132,10 @@ class Form: ContainerControl, IDialogResult // docmain
 	///
 	final @property void acceptButton(IButtonControl btn) // setter
 	{
-		if(acceptBtn)
-			acceptBtn.notifyDefault(false);
+		if(_acceptButton)
+			_acceptButton.notifyDefault(false);
 		
-		acceptBtn = btn;
+		_acceptButton = btn;
 		
 		if(btn)
 			btn.notifyDefault(true);
@@ -141,14 +144,14 @@ class Form: ContainerControl, IDialogResult // docmain
 	/// ditto
 	final @property IButtonControl acceptButton() // getter
 	{
-		return acceptBtn;
+		return _acceptButton;
 	}
 	
 	
 	///
 	final @property void cancelButton(IButtonControl btn) // setter
 	{
-		cancelBtn = btn;
+		_cancelButton = btn;
 		
 		if(btn)
 		{
@@ -162,7 +165,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	/// ditto
 	final @property IButtonControl cancelButton() // getter
 	{
-		return cancelBtn;
+		return _cancelButton;
 	}
 	
 	
@@ -462,7 +465,8 @@ class Form: ContainerControl, IDialogResult // docmain
 				debug
 				{
 					static import std.string;
-					er = std.string.format("CreateWindowEx failed {className=%s;exStyle=0x%X;style=0x%X;parent=0x%X;menu=0x%X;inst=0x%X;}",
+					er = std.string.format(
+						"CreateWindowEx failed {className=%s;exStyle=0x%X;style=0x%X;parent=0x%X;menu=0x%X;inst=0x%X;}",
 						className, exStyle, style, cast(void*)parent, cast(void*)menu, cast(void*)inst);
 				}
 				goto create_err;
@@ -918,10 +922,29 @@ class Form: ContainerControl, IDialogResult // docmain
 		return wicon;
 	}
 	
-	
-	// TODO: implement.
-	// keyPreview
-	
+	/// keyPreview
+	final @property bool keyPreview() // getter
+	{
+		return _keyPreview;
+	}
+
+	/// ditto
+	final @property void keyPreview(bool v) // setter
+	{
+		_keyPreview = v;
+	}	
+
+	/// 
+	protected override bool processKeyPreview(ref Message m)
+	{
+		if(_keyPreview && processKeyEventArgs(m))
+		{
+			// Returns true for call onKeyPress(), onKeyDown() or onKeyUp() on this form.
+			return true;
+		}
+
+		return super.processKeyPreview(m);
+	}	
 	
 	///
 	final @property bool isMdiChild() // getter
@@ -2273,20 +2296,20 @@ class Form: ContainerControl, IDialogResult // docmain
 				switch(LOWORD(msg.wParam))
 				{
 					case IDOK:
-						if(acceptBtn)
+						if(_acceptButton)
 						{
 							if(HIWORD(msg.wParam) == BN_CLICKED)
-								acceptBtn.performClick();
+								_acceptButton.performClick();
 							return;
 						}
 						break;
 						//return;
 					
 					case IDCANCEL:
-						if(cancelBtn)
+						if(_cancelButton)
 						{
 							if(HIWORD(msg.wParam) == BN_CLICKED)
-								cancelBtn.performClick();
+								_cancelButton.performClick();
 							return;
 						}
 						break;
@@ -2742,8 +2765,139 @@ class Form: ContainerControl, IDialogResult // docmain
 		}
 	}
 	
+	/// Process shortcut key (ctrl+A etc).
+	// Returns true when processed, false when not.
+	protected override bool processCmdKey(ref Message msg, Keys keyData)
+	{
+		if (super.processCmdKey(msg, keyData))
+		{
+			return true;
+		}
+
+		// Process MDI accelerator keys.
+		bool retValue = false;
+		MSG win32Message = msg._winMsg;
+		if ((_mdiClient !is null) && (_mdiClient.handle !is/+ != +/ null) &&
+			TranslateMDISysAccel(_mdiClient.hwnd, &win32Message))
+		{
+			retValue = true;
+		}
+
+		msg.msg = win32Message.message;
+		msg.wParam = win32Message.wParam;
+		msg.lParam = win32Message.lParam;
+		msg.hWnd = win32Message.hwnd;
+
+		return retValue;
+	}
 	
-	package alias dfl.internal.utf.defDlgProc _defFormProc;
+	/// Process dialog key (TAB, RETURN, ESC, UP, DOWN, LEFT, RIGHT and so on).
+	// Returns true when processed, false when called super class.
+	protected override bool processDialogKey(Keys keyData)
+	{
+		if ((keyData & (Keys.ALT | Keys.CONTROL)) == Keys.NONE)
+		{
+			Keys keyCode = keyData & Keys.KEY_CODE;
+			IButtonControl button;
+
+			switch (keyCode)
+			{
+				case Keys.RETURN:
+					// button = cast(IButtonControl)GetObject(propDefaultButton);
+					button = _acceptButton;
+					if (button)
+					{
+						//PerformClick now checks for validationcancelled...
+						//if (button is Control)
+						{
+							button.performClick();
+						}
+
+						return true;
+					}
+
+					break;
+				case Keys.ESCAPE:
+					// button = cast(IButtonControl)GetObject(propCancelButton);
+					button = _cancelButton;
+					if (button)
+					{
+						// In order to keep the behavior in sync with native
+						// and MFC dialogs, we want to not give the cancel button
+						// the focus on Escape. If we do, we end up with giving it
+						// the focus when we reshow the dialog.
+						
+						//if (button is Control) {
+						//    ((Control)button).Focus();
+						//}
+						button.performClick();
+						return true;
+					}
+
+					break;
+				default:
+					// Fall through
+			}
+		}
+
+		return super.processDialogKey(keyData);
+	}
+	
+	/// Process mnemonic (access key) such as Alt+T.
+	// Returns true when processed, otherwise call super class.
+	protected override bool processDialogChar(char charCode)
+	{
+		// If we're the top-level form or control, we need to do the mnemonic handling
+		//
+		if (isMdiChild && charCode != ' ')
+		{
+			if (processMnemonic(charCode))
+			{
+				return true;
+			}
+
+			// ContainerControl calls ProcessMnemonic starting from the active MdiChild form (this)
+			// so let's flag it as processed.
+			_mnemonicProcessed = true;
+			try
+			{
+				return super.processDialogChar(charCode);
+			}
+			finally
+			{
+				_mnemonicProcessed = false;
+			}
+		}
+
+		// Non-MdiChild form, just pass the call to ContainerControl.
+		return super.processDialogChar(charCode);
+	}
+
+	/// Changes forcus by TAB
+	// Returns true when changed forcus, otherwise returns false.
+	protected override bool processTabKey(bool forward)
+	{
+		if (selectNextControl(activeControl, forward, true, true, true))
+		{
+			return true;
+		}
+
+		// I've added a special case for UserControls because they shouldn't cycle back to the
+		// beginning if they don't have a parent form, such as when they're on an ActiveXBridge.
+		if (isMdiChild || !parentForm)
+		{
+			bool selected = selectNextControl(null, forward, true, true, false);
+
+			if (selected)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+	
+	package alias _defFormProc = dfl.internal.utf.defDlgProc;
 	
 	protected override void defWndProc(ref Message msg)
 	{
@@ -2990,7 +3144,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	
 	
 	private:
-	IButtonControl acceptBtn, cancelBtn;
+	IButtonControl _acceptButton, _cancelButton;
 	bool autoscale = true;
 	Size autoscaleBase;
 	DialogResult fresult = DialogResult.NONE;
@@ -3018,7 +3172,10 @@ class Form: ContainerControl, IDialogResult // docmain
 	Form wowner = null, wmdiparent = null;
 	//bool _closingvisible;
 	bool nofilter = false;
-	
+	bool _keyPreview = false; // Gets or sets a value indicating whether the form will receive key events
+	                          // before the event is passed to the control that has focus.
+	bool _mnemonicProcessed = false;
+
 	version(NO_MDI) {} else
 	{
 		MdiClient _mdiClient = null; // null == not MDI container.
@@ -3027,13 +3184,15 @@ class Form: ContainerControl, IDialogResult // docmain
 	
 	package static bool wantsAllKeys(HWND hwnd)
 	{
-		return (SendMessageA(hwnd, WM_GETDLGCODE, 0, 0) &
-			DLGC_WANTALLKEYS) != 0;
+		return (SendMessageA(hwnd, WM_GETDLGCODE, 0, 0) & DLGC_WANTALLKEYS) != 0;
 	}
 	
 	
 	private static class FormMessageFilter: IMessageFilter
 	{
+		/// Filters out a message before it is dispatched.
+		// Returns: true when filter the message and stop it from being dispatched;
+		//          false when allow the message and continue to the next filter or control.
 		protected bool preFilterMessage(ref Message m)
 		{
 			version(NO_MDI)
@@ -3086,13 +3245,11 @@ class Form: ContainerControl, IDialogResult // docmain
 					case WM_CHAR:
 						switch(cast(Keys)m.wParam)
 						{
-							case Keys.ENTER:
-								if(form.acceptButton)
-								{
-									dfl.internal.utf.isDialogMessage(form.handle, &m._winMsg);
-									return true; // Prevent.
-								}
-								return false;
+							// case Keys.ENTER:
+								// This case has been moved to wndProc().
+								// If parent form does not have a default button,
+								// input RETURN to TextBox regardless of
+								// the value of TextBox.acceptsReturn.
 							
 							case Keys.ESCAPE:
 								if(form.cancelButton)
@@ -3145,22 +3302,28 @@ class Form: ContainerControl, IDialogResult // docmain
 							
 							case Keys.TAB:
 								{
-									LRESULT dlgc;
-									Control cc;
-									dlgc = SendMessageA(m.hWnd, WM_GETDLGCODE, 0, 0);
-									cc = fromHandle(m.hWnd);
+									// When window message is WM_KEYDOWN, WM_KEYUP and WM_CHAR, 
+									// wParam is not contain modifier keys such as CONTROL, SHIFT.
+									// So uses GetKeyState().
+
+									LRESULT dlgc = SendMessageA(m.hWnd, WM_GETDLGCODE, 0, 0);
+									Control cc = fromHandle(m.hWnd);
+									bool isPressingControl = (GetKeyState(VK_CONTROL) & 0x8000) != 0;
 									if(cc)
 									{
-										if(cc._wantTabKey())
+										// When CONTROL is pressing, do not input TAB but change forcus.
+										if(cc._wantTabKey() && !isPressingControl)
 											return false; // Continue.
 									}
 									else
 									{
-										if(dlgc & DLGC_WANTALLKEYS)
+										// When CONTROL is pressing, do not input TAB but change forcus.
+										if((dlgc & DLGC_WANTALLKEYS) && !isPressingControl)
 											return false; // Continue.
 									}
-									//if(dlgc & (DLGC_WANTTAB | DLGC_WANTALLKEYS))
-									if(dlgc & DLGC_WANTTAB)
+
+									// When CONTROL is pressing, do not input TAB but change forcus.
+									if((dlgc & DLGC_WANTTAB) && !isPressingControl)
 										return false; // Continue.
 									if(WM_KEYDOWN == m.msg)
 									{
@@ -3302,9 +3465,9 @@ class Form: ContainerControl, IDialogResult // docmain
 	/+
 	package final bool _dlgescape()
 	{
-		if(cancelBtn)
+		if(_cancelButton)
 		{
-			cancelBtn.performClick();
+			_cancelButton.performClick();
 			return true;
 		}
 		return false;
