@@ -1094,69 +1094,10 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	}
 	
 
-	// WinFormsに合わせて未定義とする
-	//
-	// protected override bool processKeyEventArgs(ref Message msg) // package
-	// {
-	// 	switch(msg.msg)
-	// 	{
-	// 		case WM_KEYDOWN:
-	// 		case WM_KEYUP:
-	// 		case WM_CHAR:
-	// 			if('\t' == msg.wParam)
-	// 			{
-	// 				// TODO: fix this. This case shouldn't be needed.
-	// 				if(_acceptsTab)
-	// 				{
-	// 					if(super.processKeyEventArgs(msg))
-	// 						return true; // Handled.
-	// 					if(WM_KEYDOWN == msg.msg)
-	// 					{
-	// 						if(multiline) // Only multiline textboxes can have real tabs..
-	// 						{
-	// 							//selectedText = "\t";
-	// 							//SendMessageA(handle, EM_REPLACESEL, TRUE, cast(LPARAM)"\t".ptr); // Allow undo. // Crashes DMD 0.161.
-	// 							auto str = "\t".ptr;
-	// 							SendMessageA(handle, EM_REPLACESEL, TRUE, cast(LPARAM)str); // Allow undo.
-	// 						}
-	// 					}
-	// 					return true; // Handled.
-	// 				}
-	// 			}
-	// 			break;
-			
-	// 		default:
-	// 	}
-	// 	return super.processKeyEventArgs(msg);
-	// }
-	
-
 	protected override void wndProc(ref Message msg)
 	{
 		switch(msg.msg)
 		{
-			// case WM_KEYDOWN:
-			// case WM_SYSKEYDOWN:
-			// case WM_CHAR:
-			// case WM_SYSCHAR:
-			// case WM_KEYUP:
-			// case WM_SYSKEYUP:
-			// 	Keys keyCode = cast(Keys)msg.wParam & Keys.KEY_CODE;
-		
-			// 	if (keyCode == Keys.TAB && _acceptsTab)
-			// 	{
-			// 		if ((keyCode & Keys.CONTROL) != 0)
-			// 		{
-			// 			// Changes focus because pressed ctrl+TAB in accepts-tab mode.
-			// 			return super.wndProc(msg);
-			// 		}
-			// 		else
-			// 		{
-			// 			return; // processed.
-			// 		}
-			// 	}
-			// 	break;
-
 			case WM_GETDLGCODE:
 				// DLGC_WANTARROWS = 1
 				//   Want VK_LEFT, VK_RIGHT, VK_UP and VK_DOWN in WM_KEYDOWN.
