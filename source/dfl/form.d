@@ -5,13 +5,15 @@
 ///
 module dfl.form;
 
-private import dfl.internal.dlib;
-private import dfl.internal.winapi;
-private import dfl.internal.utf;
-
 private import dfl.control, dfl.event, dfl.drawing;
 private import dfl.application, dfl.base;
 private import dfl.collections;
+
+private import dfl.internal.dlib;
+private import dfl.internal.utf;
+//private import dfl.internal.winapi;
+private import core.sys.windows.windows;
+private import core.sys.windows.commctrl;
 
 debug(APP_PRINT)
 {

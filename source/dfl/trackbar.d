@@ -320,12 +320,12 @@ class TrackBar : ControlSuperClass
 			throw new DflException("TrackBar SmallChange Failure");
 		}
 
-		if (_smallChange == value)
+		if (_smallChange == v)
 		{
 			return;
 		}
 
-		_smallChange = value;
+		_smallChange = v;
 		if (isHandleCreated)
 		{
 			// PInvoke.SendMessage(this, (User32.WM)PInvoke.TBM_SETLINESIZE, 0, value);
@@ -600,6 +600,28 @@ class TrackBar : ControlSuperClass
 		}
 	}
 	
+	/// Handling special input keys, such as PageUp, PageDown, Home, End, etc.
+	protected override bool isInputKey(Keys keyData)
+	{
+		if ((keyData & Keys.ALT) == Keys.ALT)
+		{
+			return false;
+		}
+	
+		switch (keyData & Keys.KEY_CODE)
+		{
+			case Keys.PAGE_UP:
+			case Keys.PAGE_DOWN:
+			case Keys.HOME:
+			case Keys.END:
+				return true;
+			
+			default:
+		}
+	
+		return super.isInputKey(keyData);
+	}
+
 	///
 	protected override void onHandleCreated(EventArgs ea)
 	{
@@ -679,6 +701,65 @@ class TrackBar : ControlSuperClass
 		return Size(104, _preferredDimension);
 	}
 
+	protected override void onReflectedMessage(ref Message msg)
+	{
+		switch(msg.msg)
+		{
+			case WM_HSCROLL:
+			case WM_VSCROLL:
+				switch(LOWORD(msg.wParam))
+				{
+					case TB_BOTTOM:
+					case TB_TOP:
+					case TB_ENDTRACK:
+					case TB_LINEDOWN:
+					case TB_LINEUP:
+					case TB_PAGEDOWN:
+					case TB_PAGEUP:
+					case TB_THUMBPOSITION:
+					case TB_THUMBTRACK:
+					{
+						if (_value != value) // For messages are received twice.
+						{
+							onScroll(EventArgs.empty);
+							onValueChanged(EventArgs.empty);
+							// Should return zero, if an application processes this message.
+							msg.result = 0;
+						}
+						return;
+					}
+					default:
+				}
+				return;
+
+			default:
+				// Call super.onReflectedMessage() in order to procces the below:
+				// WM_CTLCOLORSTATIC
+				// WM_CTLCOLORLISTBOX
+				// WM_CTLCOLOREDIT
+				// WM_CTLCOLORSCROLLBAR
+				// WM_CTLCOLORBTN
+				super.onReflectedMessage(msg);
+		}
+	}
+
+	///
+	protected override void wndProc(ref Message msg)
+	{
+		switch(msg.msg)
+		{
+			case WM_GETDLGCODE:
+				msg.result = DLGC_WANTALLKEYS | DLGC_WANTARROWS;
+				return;
+
+			default:
+				// Call super.wndProc() In order to call onHandleCreated() and others on WM_CREATE.
+				// Must set DLGC_WANTALLKEYS on WM_GETDLGCODE,
+				// because cannot input arrow key if call super.wndProc()
+				super.wndProc(msg);
+		}
+	}
+
 	///
 	protected override void prevWndProc(ref Message msg)
 	{
@@ -686,47 +767,8 @@ class TrackBar : ControlSuperClass
 	}
 	
 	///
-	protected override void onReflectedMessage(ref Message m)
+	final LRESULT prevwproc(UINT msg, WPARAM wparam, LPARAM lparam)
 	{
-		switch(m.msg)
-		{
-			case WM_HSCROLL:
-			case WM_VSCROLL:
-				{
-					switch(LOWORD(m.wParam))
-					{
-						case TB_BOTTOM:
-						case TB_TOP:
-						case TB_ENDTRACK:
-						case TB_LINEDOWN:
-						case TB_LINEUP:
-						case TB_PAGEDOWN:
-						case TB_PAGEUP:
-						case TB_THUMBPOSITION:
-						case TB_THUMBTRACK:
-						{
-							if (_value != value) // For messages are received twice.
-							{
-								onScroll(EventArgs.empty);
-								onValueChanged(EventArgs.empty);
-								// QUOTE: If an application processes this message, it should return zero.
-								m.result = 0; // ?
-							}
-							return;
-						}
-						default:
-					}
-					break;
-				}
-			default:
-				super.onReflectedMessage(m);
-		}
-	}
-
-	///
-	package final LRESULT prevwproc(UINT msg, WPARAM wparam, LPARAM lparam)
-	{
-		//return CallWindowProcA(trackbarPrevWndProc, hwnd, msg, wparam, lparam);
 		return dfl.internal.utf.callWindowProc(trackbarPrevWndProc, hwnd, msg, wparam, lparam);
 	}
 }

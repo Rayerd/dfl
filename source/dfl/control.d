@@ -4694,7 +4694,7 @@ class Control: DObject, IWindow // docmain
 	// Returns true in order to break in wndProc(), because processed.
 	protected final bool processKeyMessage(ref Message m)
 	{
-		if ( parent && parent.processKeyPreview(m))
+		if (parent && parent.processKeyPreview(m))
 		{
 			return true;
 		}
@@ -5654,7 +5654,7 @@ class Control: DObject, IWindow // docmain
 			
 			debug
 			{
-				assert(_handlecreated, "If overriding onHandleCreated(), be sure to call super.onHandleCreated()!");
+				assert(_handlecreated, "If overriding onHandleCreated(), be sure to call super.onHandleCreated() first!");
 			}
 			handleCreated(this, ea);
 			debug
