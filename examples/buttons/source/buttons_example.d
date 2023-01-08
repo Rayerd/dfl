@@ -45,6 +45,7 @@ class MainForm : Form
 		this.text = "Buttons example";
 		this.size = Size(400,300);
 		this.formBorderStyle = FormBorderStyle.FIXED_DIALOG;
+		this.maximizeBox = false;
 		
 		// Default button
 		_okButton = new Button();

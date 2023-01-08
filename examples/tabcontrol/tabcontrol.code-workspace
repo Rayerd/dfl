@@ -6,7 +6,7 @@
 	],
 	"settings": {
 		"d.projectImportPaths": [
-			"C:\\d\\gitproj\\dfl\\source\\"
+			"..\\..\\..\\dfl\\source"
 		]
 	}
 }

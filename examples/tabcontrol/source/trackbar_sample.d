@@ -21,6 +21,7 @@ class MainForm : Form
 		this.text = "TabControl example";
 		this.size = Size(300, 300);
 		this.formBorderStyle = FormBorderStyle.FIXED_DIALOG;
+		this.maximizeBox = false;
 
 		_tab = new TabControl();
 		_tab.dock = DockStyle.FILL;
