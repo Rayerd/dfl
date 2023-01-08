@@ -2,7 +2,7 @@
 	"authors": ["haru-s"],
 	"copyright": "Copyright (C) 2023 haru-s",
 	"description": "DFL sample code.",
-	"name": "buttons_example",
+	"name": "statusbar_sample",
 	"targetType": "executable",
 	"targetPath": "bin",
 	"dependencies": {

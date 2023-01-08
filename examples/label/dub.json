@@ -1,6 +1,6 @@
 {
 	"authors": ["haru-s"],
-	"copyright": "Copyright (C) 2022 haru-s",
+	"copyright": "Copyright (C) 2023 haru-s",
 	"description": "DFL sample code.",
 	"name": "label_sample",
 	"targetType": "executable",
