@@ -107,6 +107,7 @@ class MainForm : Form
 		_radioButton3 = new RadioButton();
 		_radioButton3.location = Point(10, 40+30*2);
 		_radioButton3.text = "Green";
+		_radioButton3.enabled = false;
 		_radioButton3.parent = _groupbox1;
 
 		// Second group
@@ -153,5 +154,6 @@ class MainForm : Form
 
 void main()
 {
+	Application.enableVisualStyles();
 	Application.run(new MainForm());
 }
