@@ -2734,7 +2734,7 @@ class ListView: ControlSuperClass // docmain
 	{
 		LV_COLUMNA lvc;
 		lvc.mask = LVCF_FMT;
-		switch(halign)
+		final switch(halign)
 		{
 			case HorizontalAlignment.RIGHT:
 				lvc.fmt = LVCFMT_RIGHT;
@@ -2744,7 +2744,7 @@ class ListView: ControlSuperClass // docmain
 				lvc.fmt = LVCFMT_CENTER;
 				break;
 			
-			default:
+			case HorizontalAlignment.LEFT:
 				lvc.fmt = LVCFMT_LEFT;
 		}
 		return prevwproc(LVM_SETCOLUMNA, cast(WPARAM)colIndex, cast(LPARAM)&lvc);
