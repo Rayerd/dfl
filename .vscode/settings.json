@@ -1,0 +1,7 @@
+{
+    "dscanner.ignoredKeys": [
+        "dscanner.style.alias_syntax",
+        "dscanner.style.alias_syntax",
+        "dscanner.style.phobos_naming_convention"
+    ]
+}
