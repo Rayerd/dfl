@@ -36,10 +36,7 @@ class MainForm : Form
 		}
 		else
 		{
-			this.load ~= (Control sender, EventArgs e) {
-				// TODO: Currently it must be set after the handle is created.
-				this.allowDrop = true;
-			};
+			this.allowDrop = true;
 			this.dragEnter ~= (Control sender, DragEventArgs e) {
 				// Do nothing
 			};
@@ -72,6 +69,7 @@ class MainForm : Form
 				{
 					_label.text = _label.text ~ fileName ~ "\n";
 				}
+				this.allowDrop = false; // Example: Accept only once.
 			};
 			this.dragLeave ~= (Control sender, EventArgs e) {
 				// Do nothing

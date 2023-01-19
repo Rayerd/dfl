@@ -1057,7 +1057,7 @@ class Control: DObject, IWindow // docmain
 	version(DFL_NO_DRAG_DROP) {} else
 	{
 		///
-		@property void allowDrop(bool byes) // setter
+		private void allowDropImplement(bool byes)
 		{
 			/+
 			if(dyes)
@@ -1070,9 +1070,9 @@ class Control: DObject, IWindow // docmain
 			{
 				if(!droptarget)
 				{
-					droptarget = new DropTarget(this);
 					if(isHandleCreated)
 					{
+						droptarget = new DropTarget(this);
 						switch(RegisterDragDrop(hwnd, droptarget))
 						{
 							case S_OK:
@@ -1090,9 +1090,30 @@ class Control: DObject, IWindow // docmain
 			}
 			else
 			{
-				destroy(droptarget); // delete is deprecated.
-				RevokeDragDrop(hwnd);
+				if(droptarget)
+				{
+					destroy(droptarget); // delete is deprecated.
+					droptarget = null;
+					switch(RevokeDragDrop(hwnd))
+					{
+						case S_OK:
+							break;
+						case DRAGDROP_E_NOTREGISTERED:
+						case DRAGDROP_E_INVALIDHWND:
+						case E_OUTOFMEMORY:
+							throw new DflException("Unable to revoke drag-drop");
+						default:
+							assert(0);
+					}
+				}
 			}
+		}
+		
+		///
+		@property void allowDrop(bool byes) // setter
+		{
+			_allowDrop = byes;
+			allowDropImplement(_allowDrop);
 		}
 		
 		/// ditto
@@ -1102,7 +1123,7 @@ class Control: DObject, IWindow // docmain
 			return (_exStyle() & WS_EX_ACCEPTFILES) != 0;
 			+/
 			
-			return droptarget !is null;
+			return _allowDrop;
 		}
 	}
 	
@@ -4575,14 +4596,11 @@ class Control: DObject, IWindow // docmain
 		
 		version(DFL_NO_DRAG_DROP) {} else
 		{
-			if(droptarget)
-			{
-				if(S_OK != RegisterDragDrop(hwnd, droptarget))
-				{
-					droptarget = null;
-					throw new DflException("Unable to register drag-drop");
-				}
-			}
+			// Need to do "allowDrop = true/false" after created handle.
+			// When do "allowDrop = true" in MyForm.this(),
+			// Now is _allowDrop == true and droptarget is null.
+			// Therefore call here allowDropImplement() without change _allowDrop value.
+			allowDropImplement(_allowDrop);
 		}
 		
 		debug
@@ -7165,6 +7183,7 @@ class Control: DObject, IWindow // docmain
 	version(DFL_NO_DRAG_DROP) {} else
 	{
 		DropTarget droptarget = null;
+		bool _allowDrop = false;
 	}
 	
 	// Note: WS_VISIBLE is not reliable.
