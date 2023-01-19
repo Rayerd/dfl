@@ -139,6 +139,19 @@ enum DragAction: HRESULT
 }
 
 
+/// Effect flags for drag/drop operations with key states.
+enum DragDropKeyStates
+{
+	NONE = 0,
+	LEFT_MOUSE_BUTTON = 1,
+	RIGHT_MOUSE_BUTTON = 2,
+	SHIFT_KEY = 4,
+	CONTROL_KEY = 8,
+	MIDDLE_MOUSE_BUTTON = 16,
+	ALT_KEY = 32
+}
+
+
 // Flags.
 deprecated enum UICues: uint
 {
@@ -583,7 +596,7 @@ version(_DFL_WINDOWS_HUNG_WORKAROUND)
 	}
 }
 
-alias BOOL delegate(HWND) EnumWindowsCallback;
+alias EnumWindowsCallback = BOOL delegate(HWND);
 package struct EnumWindowsCallbackData
 {
 	EnumWindowsCallback callback;
@@ -693,7 +706,7 @@ class Control: DObject, IWindow // docmain
 		}
 		
 		
-		deprecated alias length count;
+		deprecated alias count = length;
 		
 		///
 		@property int length() // getter
@@ -1065,10 +1078,12 @@ class Control: DObject, IWindow // docmain
 							case S_OK:
 							case DRAGDROP_E_ALREADYREGISTERED: // Hmm.
 								break;
-							
-							default:
+							case DRAGDROP_E_INVALIDHWND:
+							case E_OUTOFMEMORY:
 								droptarget = null;
 								throw new DflException("Unable to register drag-drop");
+							default:
+								assert(0);
 						}
 					}
 				}
@@ -1655,7 +1670,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	deprecated alias defaultFont controlFont;
+	deprecated alias controlFont = defaultFont;
 	
 	///
 	static @property void defaultFont(ControlFont cf) // setter
@@ -1742,7 +1757,7 @@ class Control: DObject, IWindow // docmain
 		hasLayoutChanged(this, ea);
 	}
 	
-	alias onHasLayoutChanged onDockChanged;
+	alias onDockChanged = onHasLayoutChanged;
 	
 	
 	private final void _alreadyLayout()
@@ -2853,7 +2868,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	deprecated alias bringUpOne zIndexUp;
+	deprecated alias zIndexUp = bringUpOne;
 	
 	///
 	// Move up one.
@@ -2885,7 +2900,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	deprecated alias sendBackOne zIndexDown;
+	deprecated alias zIndexDown = sendBackOne;
 	
 	///
 	// Move back one.
@@ -3642,7 +3657,7 @@ class Control: DObject, IWindow // docmain
 		PostMessageA(hwnd, wmDfl, WPARAM_DFL_DELAY_INVOKE_PARAMS, cast(LPARAM)p);
 	}
 	
-	deprecated alias delayInvoke beginInvoke;
+	deprecated alias beginInvoke = delayInvoke;
 	
 	
 	///
@@ -4254,7 +4269,7 @@ class Control: DObject, IWindow // docmain
 		locationChanged(this, ea);
 	}
 	+/
-	alias onMove onLocationChanged;
+	alias onLocationChanged = onMove;
 	
 	
 	protected void onSizing(SizingEventArgs cea)
@@ -4275,7 +4290,7 @@ class Control: DObject, IWindow // docmain
 		sizeChanged(this, ea);
 	}
 	+/
-	alias onResize onSizeChanged;
+	alias onSizeChanged = onResize;
 	
 	
 	/+
@@ -6037,7 +6052,7 @@ class Control: DObject, IWindow // docmain
 	//EventHandler dockChanged;
 	//Event!(Control, EventArgs) dockChanged; ///
 	Event!(Control, EventArgs) hasLayoutChanged; ///
-	alias hasLayoutChanged dockChanged;
+	alias dockChanged = hasLayoutChanged;
 	//EventHandler doubleClick;
 	Event!(Control, EventArgs) doubleClick; ///
 	//EventHandler enabledChanged;
@@ -6083,7 +6098,7 @@ class Control: DObject, IWindow // docmain
 	//EventHandler move;
 	Event!(Control, EventArgs) move; ///
 	//EventHandler locationChanged;
-	alias move locationChanged;
+	alias locationChanged = move;
 	//PaintEventHandler paint;
 	Event!(Control, PaintEventArgs) paint; ///
 	//EventHandler parentChanged;
@@ -6093,7 +6108,7 @@ class Control: DObject, IWindow // docmain
 	//EventHandler resize;
 	Event!(Control, EventArgs) resize; ///
 	//EventHandler sizeChanged;
-	alias resize sizeChanged;
+	alias sizeChanged = resize;
 	//EventHandler rightToLeftChanged;
 	Event!(Control, EventArgs) rightToLeftChanged; ///
 	// EventHandler styleChanged;

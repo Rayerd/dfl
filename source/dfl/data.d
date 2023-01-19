@@ -5,10 +5,14 @@
 ///
 module dfl.data;
 
-private import dfl.internal.dlib;
+private import dfl.base;
+private import dfl.application;
 
-private import dfl.base, dfl.internal.winapi, dfl.internal.wincom, dfl.application,
-	dfl.internal.utf, dfl.internal.com;
+private import dfl.internal.dlib;
+private import dfl.internal.utf;
+private import dfl.internal.com;
+private import dfl.internal.winapi;
+private import dfl.internal.wincom;
 
 
 ///
@@ -18,14 +22,14 @@ class DataFormats // docmain
 	static class Format // docmain
 	{
 		/// Data format ID number.
-		final @property int id() // getter
+		@property int id() // getter
 		{
 			return _id;
 		}
 		
 		
 		/// Data format name.
-		final @property Dstring name() // getter
+		@property Dstring name() // getter
 		{
 			return _name;
 		}
@@ -306,7 +310,7 @@ class DataFormats // docmain
 	}
 	
 	
-	private Dstring[] getHDropStrings(void[] value)
+	Dstring[] getHDropStrings(void[] value)
 	{
 		/+
 		if(value.length != HDROP.sizeof)
@@ -514,6 +518,8 @@ struct Data // docmain
 	/// The data's raw value.
 	@property void[] value() // getter
 	{
+		assert(_info != typeid(Dstring[]),
+			"Use Data._stringsValue instead because Data._value is not initialized.");
 		return _value[0 .. _info.tsize()];
 	}
 	
@@ -528,7 +534,17 @@ struct Data // docmain
 	{
 		Data result;
 		result._info = _arguments[0];
-		result._value = _argptr[0 .. result._info.tsize()].dup.ptr;
+		if (result._info != typeid(Dstring[]))
+		{
+			result._value = _argptr[0 .. result._info.tsize()].dup.ptr;
+		}
+		else
+		{
+			// For Data(Dstring[]) constructor.
+			import core.vararg;
+			string[] dropedItems = (va_arg!(Dstring[])(_argptr)).dup;
+			result._stringsValue = dropedItems;
+		}
 		return result;
 	}
 	
@@ -549,9 +565,9 @@ struct Data // docmain
 	}
 	
 	/// ditto
-	alias getString getUtf8;
+	alias getUtf8 = getString;
 	/// ditto
-	deprecated alias getString getUTF8;
+	deprecated alias getUTF8 = getString;
 	
 	/// ditto
 	// ANSI text.
@@ -584,7 +600,9 @@ struct Data // docmain
 	Dstring[] getStrings()
 	{
 		assert(_info == typeid(Dstring[]));
-		return *cast(Dstring[]*)_value;
+		// Can't cast correctly between Dstring[] and void*.
+		// return *cast(Dstring[]*)_value; // Broken
+		return _stringsValue;
 	}
 	
 	/// ditto
@@ -598,6 +616,7 @@ struct Data // docmain
 	private:
 	TypeInfo _info;
 	void* _value;
+	Dstring[] _stringsValue; // For drop files.
 }
 
 
@@ -695,7 +714,7 @@ class DataObject: dfl.data.IDataObject // docmain
 	{
 		Dstring[] result;
 		result = new Dstring[all.length];
-		foreach(int i, ref Dstring fmt; result)
+		foreach(i, ref Dstring fmt; result)
 		{
 			fmt = all[i].fmt;
 		}
@@ -920,6 +939,10 @@ class ComToDdataObject: dfl.data.IDataObject // package
 		fmte.dwAspect = DVASPECT_CONTENT; // ?
 		fmte.lindex = -1;
 		fmte.tymed = TYMED_HGLOBAL; // ?
+
+		// TODO: Don't need it?
+		// if (S_OK != dataObj.QueryGetData(&fmte))
+		// 	throw new DflException("Unable to query get data");
 		
 		if(S_OK != dataObj.GetData(&fmte, &stgm))
 			throw new DflException("Unable to get data");
