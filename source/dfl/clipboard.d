@@ -67,7 +67,7 @@ class Clipboard // docmain
 			}
 			else if(obj.info == typeid(dfl.data.IDataObject))
 			{
-				dd = obj.getValue!(dfl.data.IDataObject)();
+				dd = obj.getIDataObject();
 				objref = cast(Object)dd;
 			}
 			else if(cast(TypeInfo_Interface)obj.info)
@@ -111,14 +111,14 @@ class Clipboard // docmain
 	/// ditto
 	void setDataObject(dfl.data.IDataObject obj, bool persist = false)
 	{
-		setDataObject(Data(obj), persist);
+		setDataObject(new Data(obj), persist);
 	}
 	
 	
 	///
 	void setString(Dstring str, bool persist = false)
 	{
-		setDataObject(Data(str), persist);
+		setDataObject(new Data(str), persist);
 	}
 	
 	/// ditto
@@ -136,7 +136,7 @@ class Clipboard // docmain
 	// ANSI text.
 	void setText(ubyte[] ansiText, bool persist = false)
 	{
-		setDataObject(Data(ansiText), persist);
+		setDataObject(new Data(ansiText), persist);
 	}
 	
 	/// ditto
