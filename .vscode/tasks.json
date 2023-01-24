@@ -3,71 +3,48 @@
 	"tasks": [
 		{
 			"type": "dub",
+			"label": "dub build dfl",
 			"run": false,
-			"cwd": "c:/d/gitproj/dfl",
+			"cwd": ".",
 			"compiler": "$current",
 			"archType": "$current",
 			"buildType": "$current",
-			"configuration": "$current",
-			"problemMatcher": [
-				"$dmd"
-			],
-			"group": "build",
-			"label": "dub: Build dfl",
-			"detail": "dub build --compiler=dmd.EXE -a=x86_64 -b=debug"
-		},
-		{
-			"label": "dub: Build textbox_sample",
-			"type": "dub",
-			"run": false,
-			"cwd": "c:/d/gitproj/dfl/examples/textbox",
-			"compiler": "$current",
-			"archType": "$current",
-			"buildType": "$current",
+			"configuration": "library",
 			"problemMatcher": [
 				"$dmd"
 			],
 			"dub_args": [
-				"--parallel",
-				"--root=C:\\d\\gitproj\\dfl\\examples\\textbox"
+				"--parallel"
 			],
-			"group": "build"
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"presentation": {
+				"clear": true
+			}
 		},
 		{
-			"label": "dub: Build trackbar",
 			"type": "dub",
-			"run": false,
-			"cwd": "c:/d/gitproj/dfl/examples/trackbar",
+			"label": "dub test dfl",
+			"run": true,
+			"cwd": ".",
 			"compiler": "$current",
 			"archType": "$current",
-			"buildType": "$current",
+			"buildType": "unittest",
+			"configuration": "unittest",
 			"problemMatcher": [
 				"$dmd"
 			],
 			"dub_args": [
-				"--parallel",
-				"--root=C:\\d\\gitproj\\dfl\\examples\\trackbar"
+				"--parallel"
 			],
-			"group": "build"
-		},
-		{
-			"type": "dub",
-			"run": false,
-			"cwd": "c:/d/gitproj/dfl/examples/buttons",
-			"compiler": "$current",
-			"archType": "$current",
-			"buildType": "$current",
-			"configuration": "$current",
-			"problemMatcher": [
-				"$dmd"
-			],
-			"dub_args": [
-				"--parallel",
-				"--root=C:\\d\\gitproj\\dfl\\examples\\buttons"
-			],
-			"group": "build",
-			"label": "dub: Build buttons_example",
-			"detail": "dub build --compiler=dmd -a=x86_64 -b=debug -c=application"
+			"group": {
+				"kind": "test"
+			},
+			"presentation": {
+				"clear": true
+			}
 		}
 	]
 }

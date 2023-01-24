@@ -8,7 +8,6 @@
 	"description": "D Forms Library, or DFL, is a Win32 windowing library for the D language.",
 	"license": "in license.txt",
 	"name": "dfl",
-	"targetType": "staticLibrary",
 	"targetPath": "bin",
 	"targetName": "dfl_dub",
 	"homepage": "https://github.com/Rayerd/dfl",
@@ -48,5 +47,15 @@
 		"$DFL_PACKAGE_DIR/lib/windows-x86_64/ole32",
 		"$DFL_PACKAGE_DIR/lib/windows-x86_64/OLEAUT32",
 		"$DFL_PACKAGE_DIR/lib/windows-x86_64/ws2_32"
+	],
+	"configurations": [
+		{
+			"name" : "library",
+			"targetType": "staticLibrary"
+		},
+		{
+			"name" : "unittest",
+			"targetType": "staticLibrary"
+		}
 	]
 }
