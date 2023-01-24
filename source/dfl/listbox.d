@@ -1181,7 +1181,7 @@ class ListBox: ListControl // docmain
 		Message m;
 		m.hWnd = handle;
 		m.msg = LB_INSERTSTRING;
-		// Note: duplicate code.
+		// NOTE: duplicate code.
 		if(dfl.internal.utf.useUnicode)
 		{
 			foreach(int i, Object obj; icollection._items)

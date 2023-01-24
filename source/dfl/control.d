@@ -1951,7 +1951,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	///
+	/// Has focus.
 	@property bool focused() // getter
 	{
 		//return isHandleCreated && hwnd == GetFocus();
@@ -3424,7 +3424,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	///
+	/// Set focus.
 	final bool focus()
 	{
 		return SetFocus(hwnd) != HWND.init;
