@@ -5,3 +5,6 @@
 *.sh
 *.obj
 *.exe
+*.pdb
+*.ilk
+.dub/code/
