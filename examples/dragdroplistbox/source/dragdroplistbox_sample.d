@@ -164,11 +164,12 @@ class DragDropListBox : ListBox
 					if (moveRect.contains(x, y))
 						return; // Not started to drag yet, because mouse move distance is short.
 
-					int idx = this.indexFromPoint(x, y);
+					int idx = this.indexFromPoint(_mouseDownPoint.x, _mouseDownPoint.y);
 					if (idx == ListBox.NO_MATCHES) return;
 					assert(idx >= 0);
 					Object obj = this.items[idx];
 					assert(obj);
+					assert(selectedItems.length != 1 || (selectedItems.length == 1 && (obj is selectedItem())));
 					scope ItemDragEventArgs idea = new ItemDragEventArgs(
 							wparamMouseButtons(msg.wParam),
 							obj);
