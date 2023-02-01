@@ -6,10 +6,16 @@
 module dfl.combobox;
 
 private import dfl.internal.dlib;
+private import dfl.internal.winapi;
+private import dfl.internal.utf;
 
-private import dfl.listbox, dfl.application, dfl.base, dfl.internal.winapi;
-private import dfl.event, dfl.drawing, dfl.collections, dfl.control,
-	dfl.internal.utf;
+private import dfl.application;
+private import dfl.base;
+private import dfl.control;
+private import dfl.event;
+private import dfl.drawing;
+private import dfl.collections;
+private import dfl.listbox;
 
 
 private extern(Windows) void _initCombobox();
@@ -140,6 +146,7 @@ class ComboBox: ListControl // docmain
 	///
 	override @property void selectedIndex(int idx) // setter
 	{
+		_selectedIndex = idx;
 		if(isHandleCreated)
 		{
 			prevwproc(CB_SETCURSEL, cast(WPARAM)idx, 0);
@@ -153,10 +160,9 @@ class ComboBox: ListControl // docmain
 		{
 			LRESULT result;
 			result = prevwproc(CB_GETCURSEL, 0, 0);
-			if(CB_ERR != result) // Redundant.
-				return cast(int)result;
+			_selectedIndex = cast(int)result;
 		}
-		return -1;
+		return _selectedIndex;
 	}
 	
 	
@@ -691,7 +697,7 @@ class ComboBox: ListControl // docmain
 		// Note: duplicate code.
 		if(dfl.internal.utf.useUnicode)
 		{
-			foreach(int i, Object obj; icollection._items)
+			foreach(i, Object obj; icollection._items)
 			{
 				m.wParam = i;
 				m.lParam = cast(LPARAM)dfl.internal.utf.toUnicodez(getObjectString(obj)); // <--
@@ -706,7 +712,7 @@ class ComboBox: ListControl // docmain
 		}
 		else
 		{
-			foreach(int i, Object obj; icollection._items)
+			foreach(i, Object obj; icollection._items)
 			{
 				m.wParam = i;
 				m.lParam = cast(LPARAM)dfl.internal.utf.toAnsiz(getObjectString(obj)); // Can this be unsafeAnsiz()? // <--
@@ -720,6 +726,15 @@ class ComboBox: ListControl // docmain
 			}
 		}
 		
+		// When performed "selectedIndex = N" before created handle,
+		// Performs again it after created handle.
+		if (_selectedIndex >= 0)
+		{
+			selectedIndex = _selectedIndex;
+			updateText();
+			onSelectedIndexChanged(EventArgs.empty);
+		}
+
 		//redrawEntire();
 	}
 	
@@ -870,7 +885,7 @@ class ComboBox: ListControl // docmain
 	}
 	
 	
-	protected override void onReflectedMessage(ref Message m)
+	override void onReflectedMessage(ref Message m)
 	{
 		super.onReflectedMessage(m);
 		
@@ -900,6 +915,35 @@ class ComboBox: ListControl // docmain
 				//assert(cast(HWND)msg.lParam == handle); // Might be one of its children.
 				switch(HIWORD(m.wParam))
 				{
+					case CBN_DBLCLK:
+						break;
+					
+					case CBN_EDITUPDATE:
+						// TODO: Not implemented yet. See combobox.cs in WinForms.
+
+						// onTextUpdate(EventArgs.empty);
+						break;
+					
+					case CBN_CLOSEUP:
+						// TODO: Not implemented yet. See combobox.cs in WinForms.
+
+						// onDropDownClosed(EventArgs.empty);
+						// if (FormattingEnabled && this.text != _currentText && _dropDown)
+						// {
+						// 	onTextChanged(EventArgs.empty);
+						// }
+						// _dropDown = false;
+						break;
+					
+					case CBN_DROPDOWN:
+						// TODO: Not implemented yet. See combobox.cs in WinForms.
+
+						// _currentText = Text;
+						// _dropDown = true;
+						// onDropDown(EventArgs.empty);
+						// updateDropDownHeight();
+						break;
+					
 					case CBN_SELCHANGE:
 						/+
 						if(drawMode != DrawMode.NORMAL)
@@ -909,8 +953,12 @@ class ComboBox: ListControl // docmain
 							text = item ? getObjectString(item) : cast(Dstring)null;
 						}
 						+/
+						// For ComboBoxStyle.SIMPLE.
+						// Hold prev value because _selectedIndex is changed in selectedIndex().
+						int prev = _selectedIndex;
+						if (prev == selectedIndex) break;
+						updateText();
 						onSelectedIndexChanged(EventArgs.empty);
-						onTextChanged(EventArgs.empty); // ?
 						break;
 					
 					case CBN_SETFOCUS:
@@ -922,7 +970,13 @@ class ComboBox: ListControl // docmain
 						break;
 					
 					case CBN_EDITCHANGE:
-						onTextChanged(EventArgs.empty); // ?
+						onTextChanged(EventArgs.empty);
+						break;
+					
+					case CBN_SELENDOK:
+						// TODO: Not implemented yet. See combobox.cs in WinForms.
+
+						// onSelectionChangeCommittedInternal(EventArgs.empty);
 						break;
 					
 					default:
@@ -989,7 +1043,35 @@ class ComboBox: ListControl // docmain
 	ObjectCollection icollection;
 	package uint lim = 30_000; // Documented as default.
 	bool _sorting = false;
+	int _selectedIndex = -1;
 	
+	///
+	void updateText()
+	{
+		string s;
+		if (selectedIndex != -1)
+		{
+			Object item = items[selectedIndex];
+			if (item !is null)
+			{
+				s = getItemText(item);
+			}
+		}
+
+		this.text = s;
+
+		if (dropDownStyle == ComboBoxStyle.DROP_DOWN)
+		{
+			if (dfl.internal.utf.useUnicode)
+			{
+				prevwproc(WM_SETTEXT, 0, cast(LPARAM)dfl.internal.utf.toUnicodez(s));
+			}
+			else
+			{
+				prevwproc(WM_SETTEXT, 0, cast(LPARAM)dfl.internal.utf.unsafeAnsiz(s));
+			}
+		}
+	}
 	
 	package:
 	final:
