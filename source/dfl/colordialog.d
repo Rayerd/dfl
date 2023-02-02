@@ -5,8 +5,15 @@
 ///
 module dfl.colordialog;
 
-private import dfl.commondialog, dfl.base, dfl.internal.winapi, dfl.internal.wincom;
-private import dfl.internal.utf, dfl.application, dfl.drawing, dfl.internal.dlib;
+private import dfl.application;
+private import dfl.base;
+private import dfl.drawing;
+private import dfl.commondialog;
+
+private import dfl.internal.dlib;
+private import dfl.internal.utf;
+private import dfl.internal.winapi;
+private import dfl.internal.wincom;
 
 
 ///

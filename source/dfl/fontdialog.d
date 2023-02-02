@@ -5,14 +5,21 @@
 ///
 module dfl.fontdialog;
 
-private import dfl.base, dfl.commondialog, dfl.internal.winapi, dfl.application,
-	dfl.control, dfl.drawing, dfl.event, dfl.internal.utf,
-	dfl.internal.dlib;
+private import dfl.application;
+private import dfl.base;
+private import dfl.control;
+private import dfl.drawing;
+private import dfl.event;
+private import dfl.commondialog;
+
+private import dfl.internal.dlib;
+private import dfl.internal.utf;
+private import dfl.internal.winapi;
 
 
 private extern(Windows) nothrow
 {
-	alias BOOL function(LPCHOOSEFONTW lpcf) ChooseFontWProc;
+	alias ChooseFontWProc = BOOL function(LPCHOOSEFONTW lpcf);
 }
 
 
@@ -70,7 +77,7 @@ class FontDialog: CommonDialog
 	}
 	
 	/// ditto
-	final bool allowVectorFonts() // getter
+	final @property bool allowVectorFonts() // getter
 	{
 		if(cf.Flags & CF_NOVECTORFONTS)
 			return false;
@@ -393,7 +400,7 @@ class FontDialog: CommonDialog
 	{
 		CHOOSEFONTW cfw;
 		CHOOSEFONTA cfa;
-		alias cfw cf;
+		alias cf = cfw;
 		
 		static assert(CHOOSEFONTW.sizeof == CHOOSEFONTA.sizeof);
 		static assert(CHOOSEFONTW.Flags.offsetof == CHOOSEFONTA.Flags.offsetof);

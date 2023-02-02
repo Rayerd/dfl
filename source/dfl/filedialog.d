@@ -5,10 +5,16 @@
 ///
 module dfl.filedialog;
 
-private import dfl.internal.dlib;
+private import dfl.application;
+private import dfl.base;
+private import dfl.control;
+private import dfl.drawing;
+private import dfl.event;
+private import dfl.commondialog;
 
-private import dfl.control, dfl.internal.winapi, dfl.base, dfl.drawing;
-private import dfl.application, dfl.commondialog, dfl.event, dfl.internal.utf;
+private import dfl.internal.winapi;
+private import dfl.internal.dlib;
+private import dfl.internal.utf;
 
 
 ///
@@ -720,8 +726,8 @@ abstract class FileDialog: CommonDialog // docmain
 
 private extern(Windows) nothrow
 {
-	alias BOOL function(LPOPENFILENAMEW lpofn) GetOpenFileNameWProc;
-	alias BOOL function(LPOPENFILENAMEW lpofn) GetSaveFileNameWProc;
+	alias GetOpenFileNameWProc = BOOL function(LPOPENFILENAMEW lpofn);
+	alias GetSaveFileNameWProc = BOOL function(LPOPENFILENAMEW lpofn);
 }
 
 
@@ -790,14 +796,24 @@ class OpenFileDialog: FileDialog // docmain
 	}
 	
 	
-	private import undead.stream;
+	private static import undead.stream;
+	private import std.stdio : File;
 	
 	///
-	final Stream openFile()
+	// Old openFile() is renamed openFileStream().
+	// Should use new openFile() because openFileStream() is now deprecated.
+	deprecated final undead.stream.Stream openFileStream()
 	{
-		return new File(fileName(), FileMode.In);
+		return new undead.stream.File(fileName(), undead.stream.FileMode.In);
 	}
-	
+
+	/// ditto
+	final File openFile()
+	{
+		pragma(msg, "DFL: Old openFile() that return Stream is renamed to openFileStream()");
+		return File(fileName(), "r");
+	}
+
 	
 	protected:
 	
@@ -902,14 +918,25 @@ class SaveFileDialog: FileDialog // docmain
 	}
 	
 	
-	private import undead.stream;
-		
+	private static import undead.stream;
+	private import std.stdio : File;
+
 	///
 	// Opens and creates with read and write access.
 	// Warning: if file exists, it's truncated.
-	final Stream openFile()
+	// Old openFile() is renamed openFileStream().
+	// Should use new openFile() because openFileStream() is now deprecated.
+	deprecated final undead.stream.Stream openFileStream()
 	{
-		return new File(fileName(), FileMode.OutNew | FileMode.Out | FileMode.In);
+		return new undead.stream.File(
+			fileName(), undead.stream.FileMode.OutNew | undead.stream.FileMode.Out | undead.stream.FileMode.In);
+	}
+
+	/// ditto
+	final File openFile()
+	{
+		pragma(msg, "DFL: Old openFile() that return Stream is renamed to openFileStream()");
+		return File(fileName(), "w+");
 	}
 	
 	
@@ -957,7 +984,7 @@ class SaveFileDialog: FileDialog // docmain
 
 private extern(Windows) LRESULT ofnHookProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) nothrow
 {
-	alias dfl.internal.winapi.HANDLE HANDLE; // Otherwise, odd conflict with wine.
+	alias HANDLE = dfl.internal.winapi.HANDLE; // Otherwise, odd conflict with wine.
 	
 	enum PROP_STR = "DFL_FileDialog";
 	FileDialog fd;

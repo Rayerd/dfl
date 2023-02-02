@@ -5,11 +5,18 @@
 ///
 module dfl.commondialog;
 
-private import dfl.control, dfl.internal.winapi, dfl.base, dfl.drawing,
-	dfl.event;
 private import dfl.application;
+private import dfl.base;
+private import dfl.control;
+private import dfl.drawing;
+private import dfl.event;
 
-public import dfl.filedialog, dfl.folderdialog, dfl.colordialog, dfl.fontdialog;
+private import dfl.internal.winapi;
+
+public import dfl.filedialog;
+public import dfl.folderdialog;
+public import dfl.colordialog;
+public import dfl.fontdialog;
 
 
 ///

@@ -5,16 +5,21 @@
 ///
 module dfl.folderdialog;
 
-private import dfl.internal.dlib, dfl.internal.clib;
+private import dfl.application;
+private import dfl.base;
+private import dfl.commondialog;
 
-private import dfl.commondialog, dfl.base, dfl.internal.winapi, dfl.internal.wincom;
-private import dfl.internal.utf, dfl.application;
+private import dfl.internal.dlib;
+private import dfl.internal.clib;
+private import dfl.internal.utf;
+private import dfl.internal.winapi;
+private import dfl.internal.wincom;
 
 
 private extern(Windows) nothrow
 {
-	alias LPITEMIDLIST function(LPBROWSEINFOW lpbi) SHBrowseForFolderWProc;
-	alias BOOL function(LPCITEMIDLIST pidl, LPWSTR pszPath) SHGetPathFromIDListWProc;
+	alias SHBrowseForFolderWProc = LPITEMIDLIST function(LPBROWSEINFOW lpbi);
+	alias SHGetPathFromIDListWProc = BOOL function(LPCITEMIDLIST pidl, LPWSTR pszPath);
 }
 
 
@@ -347,7 +352,7 @@ class FolderBrowserDialog: CommonDialog // docmain
 	{
 		BROWSEINFOW biw;
 		BROWSEINFOA bia;
-		alias biw bi;
+		alias bi = biw;
 		
 		static assert(BROWSEINFOW.sizeof == BROWSEINFOA.sizeof);
 		static assert(BROWSEINFOW.ulFlags.offsetof == BROWSEINFOA.ulFlags.offsetof);
@@ -360,8 +365,6 @@ class FolderBrowserDialog: CommonDialog // docmain
 	enum UINT INIT_FLAGS = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE;
 }
 
-
-private:
 
 private extern(Windows) int fbdHookProc(HWND hwnd, UINT msg, LPARAM lparam, LPARAM lpData) nothrow
 {
