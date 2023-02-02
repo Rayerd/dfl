@@ -436,7 +436,7 @@ class DataFormats // docmain
 	}
 	unittest
 	{
-		debug import std.stdio;
+		import std.stdio;
 		Dstring[] strs;
 		strs ~= "aa";
 		strs ~= "bb";
@@ -444,16 +444,25 @@ class DataFormats // docmain
 		auto dataFormats = new DataFormats();
 		void[] voids = dataFormats.getCbFileDrop(strs);
 		wchar* wcharBinary = cast(wchar*)(voids);
-		debug writefln("a part of wcharBinary's length=%d", wcharBinary[0]);
+		debug(APP_PRINT)
+		{
+			writefln("a part of wcharBinary's length=%d", wcharBinary[0]);
+		}
 		wstring wstr = wcharBinary[0 .. wcharBinary[0]].idup;
-		debug writefln("wchar[] length=%d", wstr.length);
+		debug(APP_PRINT)
+		{
+			writefln("wchar[] length=%d", wstr.length);
+		}
 		assert(wcharBinary[0] == wstr.length);
-		for(int i; i < wcharBinary[0]; i++)
-			debug writef("'%c',", wcharBinary[i]);
-		debug writeln();
-		debug writefln("%s", cast(wchar[])voids);
-		for(int i; i < wcharBinary[0]; i++)
-			debug writefln("%d code:%d [%s]", i, wcharBinary[i], wcharBinary[i]);
+		debug(APP_PRINT)
+		{
+			for(int i; i < wcharBinary[0]; i++)
+				debug(APP_PRINT) writef("'%c',", wcharBinary[i]);
+			writeln();
+			writefln("%s", cast(wchar[])voids);
+			for(int i; i < wcharBinary[0]; i++)
+				writefln("%d code:%d [%s]", i, wcharBinary[i], wcharBinary[i]);
+		}
 		assert(wcharBinary[0] == 20); // a part of wchar binary's length
 		assert(wcharBinary[10] == 'a');
 		assert(wcharBinary[11] == 'a');
