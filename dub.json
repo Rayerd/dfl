@@ -2,9 +2,6 @@
 	"authors": [
 		"various"
 	],
-	"dependencies": {
-		"undead": "~>1.1.8"
-	},
 	"description": "D Forms Library, or DFL, is a Win32 windowing library for the D language.",
 	"license": "in license.txt",
 	"name": "dfl",
@@ -51,11 +48,18 @@
 	"configurations": [
 		{
 			"name" : "library",
-			"targetType": "staticLibrary"
+			"targetType": "staticLibrary",
+			"dependencies": {
+				"undead": "~>1.1.8"
+			}
 		},
 		{
 			"name" : "unittest",
-			"targetType": "staticLibrary"
+			"targetType": "staticLibrary",
+			"dependencies": {
+				"undead": "~>1.1.8",
+				"silly": "~>1.2.0-dev.2"
+			}
 		}
 	]
 }
