@@ -221,41 +221,14 @@ final class Environment // docmain
 				CoTaskMemFree(idlist);
 		}
 
-		if(dfl.internal.utf.useUnicode)
+		Dstring path;
+		path = shGetPathFromIDList(idlist);
+		if (!path)
 		{
-			enum PATH_NAME = "SHGetPathFromIDListW";
-			static SHGetPathFromIDListWProc pathproc = null;
-			
-			if(!pathproc)
-			{
-				HMODULE hmod;
-				hmod = GetModuleHandleA("shell32.dll");
-				
-				pathproc = cast(SHGetPathFromIDListWProc)GetProcAddress(hmod, PATH_NAME.ptr);
-				if(!pathproc)
-					throw new Exception("Unable to load procedure " ~ PATH_NAME);
-			}
-			
-			wchar[MAX_PATH] wbuf = void;
-			if(!pathproc(idlist, wbuf.ptr))
-			{
-				throw new DflException("Unable to obtain path"); // _errNoGetPath();
-				assert(0);
-			}
-			
-			return dfl.internal.utf.fromUnicodez(wbuf.ptr); // Assumes fromUnicodez() copies.
+			throw new DflException("Unable to obtain path");
+			assert(0);
 		}
-		else
-		{
-			char[MAX_PATH] abuf = void;
-			if(!SHGetPathFromIDListA(idlist, abuf.ptr))
-			{
-				throw new DflException("Unable to obtain path"); // _errNoGetPath();
-				assert(0);
-			}
-			
-			return dfl.internal.utf.fromAnsiz(abuf.ptr); // Assumes fromAnsiz() copies.
-		}
+		return path;
 	}
 	
 	

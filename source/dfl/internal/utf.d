@@ -21,16 +21,20 @@
 
 module dfl.internal.utf;
 
-private import dfl.internal.dlib, dfl.internal.clib;
+private import dfl.internal.dlib;
+private import dfl.internal.clib;
+private import dfl.internal.winapi :
+	LPCITEMIDLIST,
+	SHGetPathFromIDListA, SHGetPathFromIDListW;
 
-import core.sys.windows.windef;
-import core.sys.windows.winuser;
-import core.sys.windows.winreg;
-import core.sys.windows.wingdi;
-import core.sys.windows.winbase;
-import core.sys.windows.shellapi;
-import core.sys.windows.winnls;
-import core.sys.windows.richedit;
+private import core.sys.windows.windef;
+private import core.sys.windows.winuser;
+private import core.sys.windows.winreg;
+private import core.sys.windows.wingdi;
+private import core.sys.windows.winbase;
+private import core.sys.windows.shellapi;
+private import core.sys.windows.winnls;
+private import core.sys.windows.richedit;
 
 private import std.windows.charset;
 
@@ -2177,6 +2181,44 @@ int getLogFont(HFONT hf, ref LogFont lf)
 			return 0;
 		lf.faceName = fromAnsiz(lf.lfa.lfFaceName.ptr);
 		return LOGFONTA.sizeof;
+	}
+}
+
+
+Dstring shGetPathFromIDList(LPCITEMIDLIST pidl)
+{
+	static if(useUnicode)
+	{
+		version(STATIC_UNICODE)
+		{
+			alias SHGetPathFromIDListW proc;
+		}
+		else
+		{
+			enum PATH_NAME = "SHGetPathFromIDListW";
+			static SHGetPathFromIDListWProc pathproc = null;
+			
+			if(!pathproc)
+			{
+				HMODULE hmod;
+				hmod = GetModuleHandleA("shell32.dll");
+				
+				pathproc = cast(SHGetPathFromIDListWProc)GetProcAddress(hmod, PATH_NAME.ptr);
+				if(!pathproc)
+					throw new Exception("Unable to load procedure " ~ PATH_NAME);
+			}
+		}
+		wchar[] wbuf = new wchar[MAX_PATH];
+		if (proc(pidl, wbuf.ptr) == FALSE)
+			return null;
+		return fromUnicodez(wbuf.ptr);
+	}
+	else
+	{
+		char[] abuf = new char[MAX_PATH];
+		if (SHGetPathFromIDListA(pidl, abuf.ptr) == FALSE)
+			return null;
+		return fromAnsiz(abuf.ptr);
 	}
 }
 

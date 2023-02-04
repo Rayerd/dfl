@@ -20,7 +20,6 @@ private import dfl.internal.wincom;
 private extern(Windows) nothrow
 {
 	alias SHBrowseForFolderWProc = LPITEMIDLIST function(LPBROWSEINFOW lpbi);
-	alias SHGetPathFromIDListWProc = BOOL function(LPCITEMIDLIST pidl, LPWSTR pszPath);
 }
 
 
@@ -213,9 +212,7 @@ class FolderBrowserDialog: CommonDialog // docmain
 		if(dfl.internal.utf.useUnicode)
 		{
 			enum BROWSE_NAME = "SHBrowseForFolderW";
-			enum PATH_NAME = "SHGetPathFromIDListW";
 			static SHBrowseForFolderWProc browseproc = null;
-			static SHGetPathFromIDListWProc pathproc = null;
 			
 			if(!browseproc)
 			{
@@ -225,10 +222,6 @@ class FolderBrowserDialog: CommonDialog // docmain
 				browseproc = cast(SHBrowseForFolderWProc)GetProcAddress(hmod, BROWSE_NAME.ptr);
 				if(!browseproc)
 					throw new Exception("Unable to load procedure " ~ BROWSE_NAME);
-				
-				pathproc = cast(SHGetPathFromIDListWProc)GetProcAddress(hmod, PATH_NAME.ptr);
-				if(!pathproc)
-					throw new Exception("Unable to load procedure " ~ PATH_NAME);
 			}
 			
 			biw.lpszTitle = dfl.internal.utf.toUnicodez(_desc);
@@ -274,9 +267,9 @@ class FolderBrowserDialog: CommonDialog // docmain
 			if(NOERROR != SHGetMalloc(&shmalloc))
 				_errNoShMalloc();
 			
-			//wchar* wbuf = cast(wchar*)dfl.internal.clib.alloca(wchar.sizeof * MAX_PATH);
-			wchar[MAX_PATH] wbuf = void;
-			if(!pathproc(result, wbuf.ptr))
+			Dstring wbuf;
+			wbuf = shGetPathFromIDList(result);
+			if(!wbuf)
 			{
 				shmalloc.Free(result);
 				shmalloc.Release();
@@ -284,7 +277,7 @@ class FolderBrowserDialog: CommonDialog // docmain
 				assert(0);
 			}
 			
-			_selpath = dfl.internal.utf.fromUnicodez(wbuf.ptr); // Assumes fromUnicodez() copies.
+			_selpath = wbuf;
 			
 			shmalloc.Free(result);
 			shmalloc.Release();
@@ -336,9 +329,9 @@ class FolderBrowserDialog: CommonDialog // docmain
 			if(NOERROR != SHGetMalloc(&shmalloc))
 				_errNoShMalloc();
 			
-			//char* abuf = cast(char*)dfl.internal.clib.alloca(char.sizeof * MAX_PATH);
-			char[MAX_PATH] abuf = void;
-			if(!SHGetPathFromIDListA(result, abuf.ptr))
+			Dstring abuf;
+			abuf = shGetPathFromIDList(result);
+			if(!abuf)
 			{
 				shmalloc.Free(result);
 				shmalloc.Release();
@@ -346,7 +339,7 @@ class FolderBrowserDialog: CommonDialog // docmain
 				assert(0);
 			}
 			
-			_selpath = dfl.internal.utf.fromAnsiz(abuf.ptr); // Assumes fromAnsiz() copies.
+			_selpath = abuf;
 			
 			shmalloc.Free(result);
 			shmalloc.Release();
