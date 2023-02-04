@@ -97,7 +97,8 @@ class MainForm : Form
 		_folderDialog.showNewStyleDialog = true;
 		_folderDialog.showNewFolderButton = true;
 		_folderDialog.showTextBox = true;
-		// _folderDialog.rootFolder = ...; // TODO: Not implemented yet.
+		_folderDialog.rootFolder = Environment.SpecialFolder.MY_COMPUTER;
+		_folderDialog.selectedPath = Environment.getFolderPath(Environment.SpecialFolder.MY_DOCUMENTS);
 
 		DialogResult r = _folderDialog.showDialog();
 		if (r == DialogResult.OK)
