@@ -1578,10 +1578,23 @@ extern(Windows) nothrow:
 	
 	enum: UINT
 	{
-		BIF_RETURNONLYFSDIRS  = 0x0001,
-		BIF_EDITBOX           = 0x0010,
-		BIF_NEWDIALOGSTYLE    = 0x0040,
-		BIF_NONEWFOLDERBUTTON = 0x0200, // shell32.dll 6.0+
+		BIF_RETURNONLYFSDIRS   = 0x0001,
+		BIF_DONTGOBELOWDOMAIN  = 0x0002,
+		BIF_STATUSTEXT         = 0x0004,
+		BIF_RETURNFSANCESTORS  = 0x0008,
+		BIF_EDITBOX            = 0x0010,
+		BIF_VALIDATE           = 0x0020, // shell32.dll 4.71+ ; Need with BIF_EDITBOX
+		BIF_NEWDIALOGSTYLE     = 0x0040, // shell32.dll 5.0+
+		BIF_USENEWUI           = BIF_EDITBOX | BIF_NEWDIALOGSTYLE, // shell32.dll 5.0+
+		BIF_BROWSEINCLUDEURLS  = 0x0080, // shell32.dll 5.0+ ; Need with BIF_USENEWUI & BIF_BROWSEINCLUDEFILES
+		BIF_UAHINT             = 0x0100, // shell32.dll 6.0+ ; Need with BIF_NEWDIALOGSTYLE
+		BIF_NONEWFOLDERBUTTON  = 0x0200, // shell32.dll 6.0+ ; Need with BIF_NEWDIALOGSTYLE
+		BIF_NOTRANSLATETARGETS = 0x0400, // shell32.dll 6.0+
+		BIF_BROWSEFORCOMPUTER  = 0x1000,
+		BIF_BROWSEFORPRINTER   = 0x2000,
+		BIF_BROWSEINCLUDEFILES = 0x4000, // shell32.dll 4.71+
+		BIF_SHAREABLE          = 0x8000, // shell32.dll 5.0+ ; Need with BIF_USENEWUI
+		BIF_BROWSEFILEJUNCTIONS  = 0x00010000, // shell32.dll 6.1+
 	}
 	
 	
@@ -2833,6 +2846,8 @@ extern(Windows) nothrow:
 	HRESULT SHGetMalloc(LPMALLOC* ppMalloc);
 	BOOL SHGetPathFromIDListA(LPCITEMIDLIST pidl, LPSTR pszPath);
 	BOOL SHGetPathFromIDListW(LPCITEMIDLIST pidl, LPWSTR pszPath);
+	HRESULT SHGetSpecialFolderLocation(HWND, int, LPITEMIDLIST*);
+	void CoTaskMemFree(LPVOID ptr);
 	BOOL InitCommonControlsEx(LPINITCOMMONCONTROLSEX lpInitCtrls);
 	int GetDlgCtrlID(HWND hwndCtl);
 	HWND GetDlgItem(HWND hDlg, int nIDDlgItem);

@@ -7,9 +7,19 @@
 ///
 module dfl.environment;
 
-private import dfl.internal.dlib, dfl.internal.clib;
+private import dfl.base;
+private import dfl.event;
 
-private import dfl.internal.winapi, dfl.base, dfl.internal.utf, dfl.event;
+private import dfl.internal.dlib;
+private import dfl.internal.clib;
+private import dfl.internal.utf;
+private import dfl.internal.winapi;
+
+
+private extern(Windows) nothrow
+{
+	alias SHGetPathFromIDListWProc = BOOL function(LPCITEMIDLIST pidl, LPWSTR pszPath);
+}
 
 
 ///
@@ -196,6 +206,109 @@ final class Environment // docmain
 		}
 		
 		return result;
+	}
+	
+	
+	///
+	Dstring getFolderPath(SpecialFolder folder)
+	{
+		LPITEMIDLIST idlist;
+		if (SHGetSpecialFolderLocation(null, cast(int)folder, &idlist) != S_OK)
+			idlist = null;
+		scope(exit)
+		{
+			if (idlist)
+				CoTaskMemFree(idlist);
+		}
+
+		if(dfl.internal.utf.useUnicode)
+		{
+			enum PATH_NAME = "SHGetPathFromIDListW";
+			static SHGetPathFromIDListWProc pathproc = null;
+			
+			if(!pathproc)
+			{
+				HMODULE hmod;
+				hmod = GetModuleHandleA("shell32.dll");
+				
+				pathproc = cast(SHGetPathFromIDListWProc)GetProcAddress(hmod, PATH_NAME.ptr);
+				if(!pathproc)
+					throw new Exception("Unable to load procedure " ~ PATH_NAME);
+			}
+			
+			wchar[MAX_PATH] wbuf = void;
+			if(!pathproc(idlist, wbuf.ptr))
+			{
+				throw new DflException("Unable to obtain path"); // _errNoGetPath();
+				assert(0);
+			}
+			
+			return dfl.internal.utf.fromUnicodez(wbuf.ptr); // Assumes fromUnicodez() copies.
+		}
+		else
+		{
+			char[MAX_PATH] abuf = void;
+			if(!SHGetPathFromIDListA(idlist, abuf.ptr))
+			{
+				throw new DflException("Unable to obtain path"); // _errNoGetPath();
+				assert(0);
+			}
+			
+			return dfl.internal.utf.fromAnsiz(abuf.ptr); // Assumes fromAnsiz() copies.
+		}
+	}
+	
+	
+	///
+	enum SpecialFolder
+	{
+		DESKTOP = 0,
+		PROGRAMS = 2,
+		MY_DOCUMENTS = 5, // == Personal
+		PERSONAL = 5, // == MyDocuments
+		FAVORITES = 6,
+		STARTUP = 7,
+		RECENT = 8,
+		SEND_TO = 9,
+		START_MENU = 11,
+		MY_MUSIC = 13,
+		MY_VIDEOS = 14,
+		DESKTOP_DIRECTORY = 16,
+		MY_COMPUTER = 17, // Environment.getFolderPath() returns "" always.
+		NETWORK_SHORTCUTS = 19,
+		FONTS = 20,
+		TEMPLATES = 21,
+		COMMON_START_MENU = 22,
+		COMMON_PROGRAMS = 23,
+		COMMON_STARTUP = 24,
+		COMMON_DESKTOP_DIRECTORY = 25,
+		APPLICATION_DATA = 26,
+		PRINTER_SHORTCUTS = 27,
+		LOCAL_APPLICATION_DATA = 28,
+		INTERNET_CACHE = 32,
+		COOKIES = 33,
+		HISTORY = 34,
+		COMMON_APPLICATION_DATA = 35,
+		WINDOWS = 36, // == %windir% or $SYSTEMROOT%
+		SYSTEM = 37,
+		PROGRAM_FILES = 38,
+		MY_PICTURES = 39,
+		USERT_PROFILE = 40,
+		SYSTEM_X86 = 41,
+		PROGRAM_FILES_X86 = 42,
+		COMMON_PROGRAM_FILES = 43,
+		COMMON_PROGRAM_FILES_X86 = 44,
+		COMMON_TEMPLATES = 45,
+		COMMON_DOCUMENTS = 46,
+		COMMON_ADMIN_TOOLS = 47,
+		ADMIN_TOOLS = 48,
+		COMMON_MUSIC = 53,
+		COMMON_PICTURES = 54,
+		COMMON_VIDEOS = 55,
+		RESOURCES = 56,
+		LOCALIZED_RESOURCES = 57,
+		COMMON_OEM_LINKS = 58,
+		CD_BURNING = 59,
 	}
 }
 

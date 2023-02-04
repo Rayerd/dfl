@@ -8,6 +8,7 @@ module dfl.folderdialog;
 private import dfl.application;
 private import dfl.base;
 private import dfl.commondialog;
+private import dfl.environment;
 
 private import dfl.internal.dlib;
 private import dfl.internal.clib;
@@ -53,6 +54,7 @@ class FolderBrowserDialog: CommonDialog // docmain
 	}
 	
 	
+	/// 
 	override DialogResult showDialog(IWindow owner)
 	{
 		if(!runDialog(owner ? owner.handle : GetActiveWindow()))
@@ -61,11 +63,13 @@ class FolderBrowserDialog: CommonDialog // docmain
 	}
 	
 	
+	///
 	override void reset()
 	{
 		bi.ulFlags = INIT_FLAGS;
 		_desc = null;
 		_selpath = null;
+		_root = Environment.SpecialFolder.DESKTOP;
 	}
 	
 	
@@ -78,7 +82,7 @@ class FolderBrowserDialog: CommonDialog // docmain
 	}
 	
 	/// ditto
-	final @property Dstring description() // getter
+	final @property Dstring description() const // getter
 	{
 		return _desc;
 	}
@@ -93,13 +97,13 @@ class FolderBrowserDialog: CommonDialog // docmain
 	}
 	
 	/// ditto
-	final @property Dstring selectedPath() // getter
+	final @property Dstring selectedPath() const // getter
 	{
 		return _selpath;
 	}
 	
 	
-	// ///
+	///
 	// Currently only works for shell32.dll version 6.0+.
 	final @property void showNewFolderButton(bool byes) // setter
 	{
@@ -113,14 +117,14 @@ class FolderBrowserDialog: CommonDialog // docmain
 			bi.ulFlags |= BIF_NONEWFOLDERBUTTON;
 	}
 	
-	// /// ditto
-	final @property bool showNewFolderButton() // getter
+	/// ditto
+	final @property bool showNewFolderButton() const // getter
 	{
 		return (bi.ulFlags & BIF_NONEWFOLDERBUTTON) == 0;
 	}
 	
 	
-	// ///
+	///
 	// Currently only works for shell32.dll version 6.0+.
 	final @property void showNewStyleDialog(bool byes) // setter
 	{
@@ -134,14 +138,14 @@ class FolderBrowserDialog: CommonDialog // docmain
 			bi.ulFlags &= ~BIF_NEWDIALOGSTYLE;
 	}
 	
-	// /// ditto
-	final @property bool showNewStyleDialog() // getter
+	/// ditto
+	final @property bool showNewStyleDialog() const // getter
 	{
 		return (bi.ulFlags & BIF_NEWDIALOGSTYLE) != 0;
 	}
 	
 	
-	// ///
+	///
 	// Currently only works for shell32.dll version 6.0+.
 	final @property void showTextBox(bool byes) // setter
 	{
@@ -155,10 +159,23 @@ class FolderBrowserDialog: CommonDialog // docmain
 			bi.ulFlags &= ~BIF_EDITBOX;
 	}
 	
-	// /// ditto
-	final @property bool showTextBox() // getter
+	/// ditto
+	final @property bool showTextBox() const // getter
 	{
 		return (bi.ulFlags & BIF_EDITBOX) != 0;
+	}
+	
+	
+	///
+	final @property void rootFolder(Environment.SpecialFolder root) // setter
+	{
+		_root = root;
+	}
+
+	/// ditto
+	final @property Environment.SpecialFolder rootFolder() const // getter
+	{
+		return _root;
 	}
 	
 	
@@ -216,6 +233,19 @@ class FolderBrowserDialog: CommonDialog // docmain
 			
 			biw.lpszTitle = dfl.internal.utf.toUnicodez(_desc);
 			
+			{
+				LPITEMIDLIST idlist;
+				if (SHGetSpecialFolderLocation(owner, cast(int)_root, &idlist) == S_OK)
+					biw.pidlRoot = idlist;
+				else
+					biw.pidlRoot = null;
+			}
+			scope(exit)
+			{
+				if (biw.pidlRoot)
+					CoTaskMemFree(biw.pidlRoot);
+			}
+			
 			biw.pszDisplayName = cast(wchar*)pdescz;
 			if(_desc.length)
 			{
@@ -265,6 +295,19 @@ class FolderBrowserDialog: CommonDialog // docmain
 		{
 			bia.lpszTitle = dfl.internal.utf.toAnsiz(_desc);
 			
+			{
+				LPITEMIDLIST idlist;
+				if (SHGetSpecialFolderLocation(owner, cast(int)_root, &idlist) == S_OK)
+					bia.pidlRoot = idlist;
+				else
+					bia.pidlRoot = null;
+			}
+			scope(exit)
+			{
+				if (bia.pidlRoot)
+					CoTaskMemFree(bia.pidlRoot);
+			}
+
 			bia.pszDisplayName = cast(char*)pdescz;
 			if(_desc.length)
 			{
@@ -360,6 +403,7 @@ class FolderBrowserDialog: CommonDialog // docmain
 	
 	Dstring _desc;
 	Dstring _selpath;
+	Environment.SpecialFolder _root = Environment.SpecialFolder.DESKTOP;
 	
 	
 	enum UINT INIT_FLAGS = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE;
