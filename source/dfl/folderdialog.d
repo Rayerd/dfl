@@ -209,7 +209,7 @@ class FolderBrowserDialog: CommonDialog // docmain
 		//wchar[MAX_PATH] pdescz = void;
 		wchar[MAX_PATH] pdescz; // Initialize because SHBrowseForFolder() is modal.
 		
-		if(dfl.internal.utf.useUnicode)
+		static if(dfl.internal.utf.useUnicode)
 		{
 			enum BROWSE_NAME = "SHBrowseForFolderW";
 			static SHBrowseForFolderWProc browseproc = null;
@@ -353,46 +353,26 @@ class FolderBrowserDialog: CommonDialog // docmain
 	
 	protected:
 	
-	/+
-	override LRESULT hookProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+	override UINT_PTR hookProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
-		switch(msg)
-		{
-			case WM_NOTIFY:
-				{
-					NMHDR* nmhdr;
-					nmhdr = cast(NMHDR*)lparam;
-					switch(nmhdr.code)
-					{
-						/+
-						case CDN_FILEOK:
-							break;
-						+/
-						
-						default:
-					}
-				}
-				break;
-			
-			default:
-		}
-		
 		return super.hookProc(hwnd, msg, wparam, lparam);
 	}
-	+/
 	
 	
 	private:
 	
-	union
+	static if (dfl.internal.utf.useUnicode)
 	{
 		BROWSEINFOW biw;
-		BROWSEINFOA bia;
 		alias bi = biw;
-		
-		static assert(BROWSEINFOW.sizeof == BROWSEINFOA.sizeof);
-		static assert(BROWSEINFOW.ulFlags.offsetof == BROWSEINFOA.ulFlags.offsetof);
 	}
+	else
+	{
+		BROWSEINFOA bia;
+		alias bi = bia;
+	}
+	static assert(BROWSEINFOW.sizeof == BROWSEINFOA.sizeof);
+	static assert(BROWSEINFOW.ulFlags.offsetof == BROWSEINFOA.ulFlags.offsetof);
 	
 	Dstring _desc;
 	Dstring _selpath;
@@ -403,6 +383,8 @@ class FolderBrowserDialog: CommonDialog // docmain
 }
 
 
+// Return type is int.
+// Se  https://learn.microsoft.com/en-us/previous-versions/windows/desktop/legacy/bb762598(v=vs.85)
 private extern(Windows) int fbdHookProc(HWND hwnd, UINT msg, LPARAM lparam, LPARAM lpData) nothrow
 {
 	FolderBrowserDialog fd;
@@ -420,8 +402,8 @@ private extern(Windows) int fbdHookProc(HWND hwnd, UINT msg, LPARAM lparam, LPAR
 					s = fd.selectedPath;
 					if(s.length)
 					{
-						if(dfl.internal.utf.useUnicode)
-							SendMessageA(hwnd, BFFM_SETSELECTIONW, TRUE, cast(LPARAM)dfl.internal.utf.toUnicodez(s));
+						static if(dfl.internal.utf.useUnicode)
+							SendMessageW(hwnd, BFFM_SETSELECTIONW, TRUE, cast(LPARAM)dfl.internal.utf.toUnicodez(s));
 						else
 							SendMessageA(hwnd, BFFM_SETSELECTIONA, TRUE, cast(LPARAM)dfl.internal.utf.toAnsiz(s));
 					}

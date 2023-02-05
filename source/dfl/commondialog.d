@@ -12,6 +12,7 @@ private import dfl.drawing;
 private import dfl.event;
 
 private import dfl.internal.winapi;
+private import dfl.internal.utf;
 
 public import dfl.filedialog;
 public import dfl.folderdialog;
@@ -41,7 +42,7 @@ abstract class CommonDialog // docmain
 	
 	///
 	// See the CDN_* Windows notification messages.
-	LRESULT hookProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+	UINT_PTR hookProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
 		switch(msg)
 		{
@@ -90,38 +91,4 @@ abstract class CommonDialog // docmain
 	{
 		throw new DflException("Error running dialog");
 	}
-}
-
-package extern(Windows) UINT_PTR ccHookProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) nothrow
-{
-	import dfl.internal.dlib;
-	enum PROP_STR = "DFL_ColorDialog";
-	ColorDialog cd;
-	UINT_PTR result = 0;
-	
-	try
-	{
-		if(msg == WM_INITDIALOG)
-		{
-			CHOOSECOLORA* cc;
-			cc = cast(CHOOSECOLORA*)lparam;
-			SetPropA(hwnd, PROP_STR.ptr, cast(HANDLE)cc.lCustData);
-			cd = cast(ColorDialog)cast(void*)cc.lCustData;
-		}
-		else
-		{
-			cd = cast(ColorDialog)cast(void*)GetPropA(hwnd, PROP_STR.ptr);
-		}
-		
-		if(cd)
-		{
-			result = cd.hookProc(hwnd, msg, wparam, lparam);
-		}
-	}
-	catch(DThrowable e)
-	{
-		Application.onThreadException(e);
-	}
-	
-	return result;
 }

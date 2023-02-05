@@ -27,8 +27,7 @@ class ColorDialog: CommonDialog // docmain
 		cc.Flags = INIT_FLAGS;
 		cc.rgbResult = Color.empty.toArgb();
 		cc.lCustData = cast(typeof(cc.lCustData))cast(void*)this;
-		import dfl.commondialog;
-		cc.lpfnHook = /*cast(typeof(cc.lpfnHook))*/&ccHookProc;
+		cc.lpfnHook = &ccHookProc;
 		_initcust();
 	}
 	
@@ -97,16 +96,16 @@ class ColorDialog: CommonDialog // docmain
 	///
 	final @property void customColors(COLORREF[] colors) // setter
 	{
-		if(colors.length >= _cust.length)
-			_cust[] = colors[0 .. _cust.length];
+		if(colors.length >= _customColors.length)
+			_customColors[] = colors[0 .. _customColors.length];
 		else
-			_cust[0 .. colors.length] = colors[];
+			_customColors[0 .. colors.length] = colors[];
 	}
 	
 	/// ditto
 	final @property COLORREF[] customColors() // getter
 	{
-		return _cust;
+		return _customColors;
 	}
 	
 	
@@ -167,6 +166,13 @@ class ColorDialog: CommonDialog // docmain
 	
 	
 	///
+	protected override UINT_PTR hookProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+	{
+		return super.hookProc(hwnd, msg, wparam, lparam);
+	}
+	
+	
+	///
 	protected override bool runDialog(HWND owner)
 	{
 		if(!_runDialog(owner))
@@ -186,25 +192,88 @@ class ColorDialog: CommonDialog // docmain
 		else
 			cc.Flags |= CC_RGBINIT;
 		cc.hwndOwner = owner;
-		cc.lpCustColors = _cust.ptr;
-		return ChooseColorA(&cc);
+		cc.lpCustColors = _customColors.ptr;
+		static if (dfl.internal.utf.useUnicode)
+			return ChooseColorW(&cc);
+		else
+			return ChooseColorA(&cc);
 	}
 	
 	
 	private:
 	enum DWORD INIT_FLAGS = CC_ENABLEHOOK;
 	
-	CHOOSECOLORA cc;
-	COLORREF[16] _cust;
+	static if (dfl.internal.utf.useUnicode)
+	{
+		CHOOSECOLORW ccw;
+		alias cc = ccw;
+	}
+	else
+	{
+		CHOOSECOLORA cca;
+		alias cc = cca;
+	}
+	COLORREF[16] _customColors;
 	
 	
 	void _initcust()
 	{
 		COLORREF cdef;
 		cdef = Color(0xFF, 0xFF, 0xFF).toRgb();
-		foreach(ref COLORREF cref; _cust)
+		foreach(ref COLORREF cref; _customColors)
 		{
 			cref = cdef;
 		}
 	}
+}
+
+
+package extern(Windows) UINT_PTR ccHookProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) nothrow
+{
+	enum PROP_STR = "DFL_ColorDialog";
+	ColorDialog cd;
+	UINT_PTR result = 0;
+	
+	try
+	{
+		if(msg == WM_INITDIALOG)
+		{
+			static if (dfl.internal.utf.useUnicode)
+			{
+				CHOOSECOLORW* cc;
+				cc = cast(CHOOSECOLORW*)lparam;
+				SetPropW(hwnd, toUnicodez(PROP_STR), cast(HANDLE)cc.lCustData);
+				cd = cast(ColorDialog)cast(void*)cc.lCustData;
+			}
+			else
+			{
+				CHOOSECOLORA* cc;
+				cc = cast(CHOOSECOLORA*)lparam;
+				SetPropA(hwnd, toAnsiz(PROP_STR), cast(HANDLE)cc.lCustData);
+				cd = cast(ColorDialog)cast(void*)cc.lCustData;
+			}
+		}
+		else
+		{
+			static if(dfl.internal.utf.useUnicode)
+			{
+				cd = cast(ColorDialog)cast(void*)GetPropW(hwnd, toUnicodez(PROP_STR));
+			}
+			else
+			{
+				cd = cast(ColorDialog)cast(void*)GetPropA(hwnd, toAnsiz(PROP_STR));
+			}
+		}
+		
+		if(cd)
+		{
+			result = cd.hookProc(hwnd, msg, wparam, lparam);
+		}
+	}
+	catch(DThrowable e)
+	{
+		Application.onThreadException(e);
+	}
+	
+	return result;
 }

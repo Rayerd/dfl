@@ -32,7 +32,7 @@ class FontDialog: CommonDialog
 		
 		cf.lStructSize = cf.sizeof;
 		cf.Flags = INIT_FLAGS;
-		cf.lpLogFont = cast(typeof(cf.lpLogFont))&lfw;
+		cf.lpLogFont = cast(typeof(cf.lpLogFont))&lf;
 		cf.lCustData = cast(typeof(cf.lCustData))cast(void*)this;
 		cf.lpfnHook = &fontHookProc;
 		cf.rgbColors = 0;
@@ -301,7 +301,7 @@ class FontDialog: CommonDialog
 	EventHandler apply;
 	
 	
-	protected override LRESULT hookProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+	protected override UINT_PTR hookProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
 		switch(msg)
 		{
@@ -342,9 +342,9 @@ class FontDialog: CommonDialog
 		
 		cf.hwndOwner = owner;
 		
-		if(dfl.internal.utf.useUnicode)
+		static if(dfl.internal.utf.useUnicode)
 		{
-			font._info(&lfw); // -font- gets default font if not set.
+			font._info(&lf); // -font- gets default font if not set.
 			
 			enum NAME = "ChooseFontW";
 			static ChooseFontWProc proc = null;
@@ -356,13 +356,13 @@ class FontDialog: CommonDialog
 					throw new Exception("Unable to load procedure " ~ NAME ~ ".");
 			}
 			
-			result = proc(&cfw);
+			result = proc(&cf);
 		}
 		else
 		{
-			font._info(&lfa); // -font- gets default font if not set.
+			font._info(&lf); // -font- gets default font if not set.
 			
-			result = ChooseFontA(&cfa);
+			result = ChooseFontA(&cf);
 		}
 		
 		if(result)
@@ -376,14 +376,14 @@ class FontDialog: CommonDialog
 	
 	private void _update()
 	{
-		LogFont lf;
+		LogFont lfont;
 		
-		if(dfl.internal.utf.useUnicode)
-			Font.LOGFONTWtoLogFont(lf, &lfw);
+		static if(dfl.internal.utf.useUnicode)
+			Font.LOGFONTWtoLogFont(lfont, &lf);
 		else
-			Font.LOGFONTAtoLogFont(lf, &lfa);
+			Font.LOGFONTAtoLogFont(lfont, &lf);
 		
-		_fon = new Font(Font._create(lf), true);
+		_fon = new Font(Font._create(lfont), true);
 	}
 	
 	
@@ -396,24 +396,31 @@ class FontDialog: CommonDialog
 	
 	private:
 	
-	union
+	static if (dfl.internal.utf.useUnicode)
 	{
 		CHOOSEFONTW cfw;
+		alias cf = cfw;
+	}
+	else
+	{
 		CHOOSEFONTA cfa;
 		alias cf = cfw;
-		
-		static assert(CHOOSEFONTW.sizeof == CHOOSEFONTA.sizeof);
-		static assert(CHOOSEFONTW.Flags.offsetof == CHOOSEFONTA.Flags.offsetof);
-		static assert(CHOOSEFONTW.nSizeMax.offsetof == CHOOSEFONTA.nSizeMax.offsetof);
 	}
+	static assert(CHOOSEFONTW.sizeof == CHOOSEFONTA.sizeof);
+	static assert(CHOOSEFONTW.Flags.offsetof == CHOOSEFONTA.Flags.offsetof);
+	static assert(CHOOSEFONTW.nSizeMax.offsetof == CHOOSEFONTA.nSizeMax.offsetof);
 	
-	union
+	static if (dfl.internal.utf.useUnicode)
 	{
 		LOGFONTW lfw;
-		LOGFONTA lfa;
-		
-		static assert(LOGFONTW.lfFaceName.offsetof == LOGFONTA.lfFaceName.offsetof);
+		alias lf = lfw;
 	}
+	else
+	{
+		LOGFONTA lfa;
+		alias lf = lfa;
+	}
+	static assert(LOGFONTW.lfFaceName.offsetof == LOGFONTA.lfFaceName.offsetof);
 	
 	Font _fon;
 	
@@ -435,14 +442,31 @@ private extern(Windows) UINT_PTR fontHookProc(HWND hwnd, UINT msg, WPARAM wparam
 	{
 		if(msg == WM_INITDIALOG)
 		{
-			CHOOSEFONTA* cf;
-			cf = cast(CHOOSEFONTA*)lparam;
-			SetPropA(hwnd, PROP_STR.ptr, cast(HANDLE)cf.lCustData);
-			fd = cast(FontDialog)cast(void*)cf.lCustData;
+			static if (dfl.internal.utf.useUnicode)
+			{
+				CHOOSEFONTW* cf;
+				cf = cast(CHOOSEFONTW*)lparam;
+				SetPropW(hwnd, toUnicodez(PROP_STR), cast(HANDLE)cf.lCustData);
+				fd = cast(FontDialog)cast(void*)cf.lCustData;
+			}
+			else
+			{
+				CHOOSEFONTA* cf;
+				cf = cast(CHOOSEFONTA*)lparam;
+				SetPropA(hwnd, toAnsiz(PROP_STR), cast(HANDLE)cf.lCustData);
+				fd = cast(FontDialog)cast(void*)cf.lCustData;
+			}
 		}
 		else
 		{
-			fd = cast(FontDialog)cast(void*)GetPropA(hwnd, PROP_STR.ptr);
+			static if (dfl.internal.utf.useUnicode)
+			{
+				fd = cast(FontDialog)cast(void*)GetPropW(hwnd, toUnicodez(PROP_STR));
+			}
+			else
+			{
+				fd = cast(FontDialog)cast(void*)GetPropA(hwnd, toAnsiz(PROP_STR));
+			}
 		}
 		
 		if(fd)
