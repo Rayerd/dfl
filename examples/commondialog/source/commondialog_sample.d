@@ -18,6 +18,7 @@ class MainForm : Form
 	private Button _fontButton;
 	private Button _colorButton;
 	private Button _printButton;
+	private Button _pageSetupButton;
 
 	private OpenFileDialog _openFileDialog;
 	private SaveFileDialog _saveFileDialog;
@@ -25,30 +26,41 @@ class MainForm : Form
 	private FontDialog _fontDialog;
 	private ColorDialog _colorDialog;
 	// private PrintDialog _printDialog; // TODO: Not implemented yet.
+	// private PageSetupDialog _pageSetupDialog; // TODO: Not implemented yet.
 
 	private void doOpenFileDialog(Control sender, EventArgs e)
 	{
 		// Settings
 		_openFileDialog.title = "Select to open file";
 		_openFileDialog.initialDirectory = ".";
-		_openFileDialog.fileName = "*.md"; // Initial file name
-		_openFileDialog.filter = "All files(*.*)|*.*|MD file(*.md)|*.md";
+		_openFileDialog.fileName = "*.json"; // Initial file name
+		_openFileDialog.filter = "All files(*.*)|*.*|json file(*.json)|*.json";
 		_openFileDialog.filterIndex = 1; // 1 is *.md
 		
 		_openFileDialog.restoreDirectory = true;
 		_openFileDialog.checkFileExists = true;
 		_openFileDialog.checkPathExists = true;
 		_openFileDialog.dereferenceLinks = true;
-		_openFileDialog.multiselect = false; // single select
+		_openFileDialog.multiselect = true; // single select
+		_openFileDialog.showHelp = true; // NOTE: The help button does not respond if showPlaceBar is true.
 
-		_openFileDialog.defaultExt = "md";
+		_openFileDialog.defaultExt = "json";
 		// _openFileDialog.addExtension = true; // TODO: Not implemented yet.
+
+		_openFileDialog.showPlaceBar = true; // When false, Enable fileOk event and helpRequest event but hide place bar.
 
 		DialogResult r = _openFileDialog.showDialog();
 		if (r == DialogResult.OK)
 		{
 			version(DFL_USE_STREAM) // Stream is deprecated.
 			{
+				string filelist;
+				foreach (f; _openFileDialog.fileNames)
+				{
+					filelist ~= f ~ "\n";
+				}
+				msgBox(filelist, "Selected file list");
+
 				import undead.stream;
 				Stream st = _openFileDialog.openFileStream;
 				foreach(char[] line; st)
@@ -58,6 +70,13 @@ class MainForm : Form
 			}
 			else
 			{
+				string filelist;
+				foreach (f; _openFileDialog.fileNames)
+				{
+					filelist ~= f ~ "\n";
+				}
+				msgBox(filelist, "Selected file list");
+
 				import std.stdio;
 				File file = _openFileDialog.openFile();
 				foreach(line; file.byLine())
@@ -71,15 +90,18 @@ class MainForm : Form
 	private void doSaveFileDialog(Control sender, EventArgs e)
 	{
 		_saveFileDialog.title = "Select to write file";
-		_saveFileDialog.fileName = "newfile.txt";
+		_saveFileDialog.fileName = "newfile.json";
 		_saveFileDialog.initialDirectory = r".";
-		_saveFileDialog.filter = "TXT file|*.txt|All files(*.*)|*.*";
+		_saveFileDialog.filter = "json file|*.json|All files(*.*)|*.*";
 		_saveFileDialog.filterIndex = 0;
 		
 		_saveFileDialog.restoreDirectory = true;
 		_saveFileDialog.checkFileExists = true;
 		_saveFileDialog.checkPathExists = true;
 		_saveFileDialog.overwritePrompt = true;
+		_saveFileDialog.showHelp = true;
+
+		_saveFileDialog.showPlaceBar = false; // When false, Enable fileOk event and helpRequest event but hide place bar.
 		
 		DialogResult r = _saveFileDialog.showDialog();
 		if (r == DialogResult.OK)
@@ -87,7 +109,7 @@ class MainForm : Form
 			// import std.stdio;
 			// File file = _saveFileDialog.openFile();
 			// file.write("Hello DFL.");
-			msgBox(_saveFileDialog.fileName, "Created new file");
+			msgBox(_saveFileDialog.fileName, "Created new file (Not actually)");
 		}
 	}
 
@@ -150,13 +172,31 @@ class MainForm : Form
 		}
 	}
 
+	private void doFileOk(FileDialog sender, CancelEventArgs e)
+	{
+		// if (REJECT_CONDITON)
+		// 	e.cancel = true;
+		msgBox("Fired fileOk event");
+	}
+
+	private void doHelpRequest(CommonDialog sender, HelpEventArgs e)
+	{
+		msgBox("Fired helpRequest event");
+	}
+
 	public this()
 	{
 		this.text = "Common dialogs example";
 		this.size = Size(350, 300);
 
 		_openFileDialog = new OpenFileDialog();
+		_openFileDialog.fileOk ~= &doFileOk;
+		_openFileDialog.helpRequest ~= &doHelpRequest;
+
 		_saveFileDialog = new SaveFileDialog();
+		_saveFileDialog.fileOk ~= &doFileOk;
+		_saveFileDialog.helpRequest ~= &doHelpRequest;
+		
 		_folderDialog = new FolderBrowserDialog();
 		_fontDialog = new FontDialog();
 		_colorDialog = new ColorDialog();
@@ -207,6 +247,15 @@ class MainForm : Form
 			parent = this;
 			text = "Print";
 			location = Point(10, 160);
+			size = Size(100, 23);
+			enabled = false;
+		}
+		// TODO: PageSetupDialog is not implemented yet.
+		with(_pageSetupButton = new Button())
+		{
+			parent = this;
+			text = "Page Setup";
+			location = Point(10, 190);
 			size = Size(100, 23);
 			enabled = false;
 		}
