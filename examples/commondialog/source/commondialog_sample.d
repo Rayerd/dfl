@@ -35,7 +35,7 @@ class MainForm : Form
 		_openFileDialog.initialDirectory = ".";
 		_openFileDialog.fileName = "*.json"; // Initial file name
 		_openFileDialog.filter = "All files(*.*)|*.*|json file(*.json)|*.json";
-		_openFileDialog.filterIndex = 1; // 1 is *.md
+		_openFileDialog.filterIndex = 1; // 1 is *.json
 		
 		_openFileDialog.restoreDirectory = true;
 		_openFileDialog.checkFileExists = true;
