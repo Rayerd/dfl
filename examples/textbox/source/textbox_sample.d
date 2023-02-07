@@ -121,6 +121,11 @@ class MainForm : Form
 	}
 }
 
+static this()
+{
+	Application.enableVisualStyles();
+}
+
 void main()
 {
 	Application.run(new MainForm());

@@ -2,6 +2,7 @@
 	"fileVersion": 1,
 	"versions": {
 		"dfl": {"path":"../.."},
+		"silly": "1.2.0-dev.2",
 		"undead": "1.1.8"
 	}
 }

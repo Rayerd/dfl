@@ -57,6 +57,10 @@ class TestButton : Button {
 	}
 }
 
+static this() {
+	Application.enableVisualStyles();
+}
+
 void main() {
 	Application.run(new MainForm());
 }
