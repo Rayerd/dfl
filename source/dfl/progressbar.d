@@ -5,15 +5,27 @@
 ///
 module dfl.progressbar;
 
-private import dfl.base, dfl.control, dfl.drawing, dfl.application,
-	dfl.event;
-private import dfl.internal.winapi;
+private import dfl.application;
+private import dfl.base;
+private import dfl.control;
+private import dfl.drawing;
+private import dfl.event;
 
-static import dfl.internal.utf;
+static private import dfl.internal.utf;
 
+// private import dfl.internal.winapi; // Don't use
+private import core.sys.windows.windows;
+private import core.sys.windows.commctrl;
 
 private extern(Windows) void _initProgressbar();
 
+///
+enum ProgressBarStyle
+{
+	BLOCKS = 0, // On visual styles, same as CONTINUOUS.
+	CONTINUOUS = 1, // Classic Styles only.
+	MARQUEE = 2, // Visual styles only.
+}
 
 ///
 class ProgressBar: ControlSuperClass // docmain
@@ -30,12 +42,9 @@ class ProgressBar: ControlSuperClass // docmain
 	///
 	final @property void maximum(int max) // setter
 	{
-		if(max <= 0 /+ || max < _min +/)
+		if(max < 0)
 		{
-			//bad_max:
-			//throw new DflException("Unable to set progress bar maximum value");
-			if(max)
-				return;
+			throw new DflException("Unable to set progress bar maximum value");
 		}
 		
 		if(created)
@@ -46,7 +55,7 @@ class ProgressBar: ControlSuperClass // docmain
 		_max = max;
 		
 		if(_val > max)
-			_val = max; // ?
+			value = max;
 	}
 	
 	/// ditto
@@ -59,11 +68,9 @@ class ProgressBar: ControlSuperClass // docmain
 	///
 	final @property void minimum(int min) // setter
 	{
-		if(min < 0 /+ || min > _max +/)
+		if(min < 0)
 		{
-			//bad_min:
-			//throw new DflException("Unable to set progress bar minimum value");
-			return;
+			throw new DflException("Unable to set progress bar minimum value");
 		}
 		
 		if(created)
@@ -74,7 +81,7 @@ class ProgressBar: ControlSuperClass // docmain
 		_min = min;
 		
 		if(_val < min)
-			_val = min; // ?
+			value = min;
 	}
 	
 	/// ditto
@@ -87,14 +94,6 @@ class ProgressBar: ControlSuperClass // docmain
 	///
 	final @property void step(int stepby) // setter
 	{
-		if(stepby <= 0 /+ || stepby > _max +/)
-		{
-			//bad_max:
-			//throw new DflException("Unable to set progress bar step value");
-			if(stepby)
-				return;
-		}
-		
 		if(created)
 		{
 			prevwproc(PBM_SETSTEP, stepby, 0);
@@ -115,8 +114,6 @@ class ProgressBar: ControlSuperClass // docmain
 	{
 		if(setval < _min || setval > _max)
 		{
-			//throw new DflException("Progress bar value out of minimum/maximum range");
-			//return;
 			if(setval > _max)
 				setval = _max;
 			else
@@ -138,6 +135,60 @@ class ProgressBar: ControlSuperClass // docmain
 	}
 	
 	
+	///
+	final @property void style(ProgressBarStyle newStyle) // setter
+	{
+		LONG_PTR currentStyle = GetWindowLongPtrA(handle, GWL_STYLE);
+		final switch (newStyle)
+		{
+			case ProgressBarStyle.BLOCKS:
+				SetWindowLongPtrA(handle, GWL_STYLE, currentStyle & ~PBS_SMOOTH & ~PBS_MARQUEE);
+				prevwproc(PBM_SETMARQUEE, false, 0);
+				value = _val;
+				recreateHandle(); // Apply PBS_SMOOTH
+				break;
+			case ProgressBarStyle.CONTINUOUS:
+				SetWindowLongPtrA(handle, GWL_STYLE, currentStyle | PBS_SMOOTH & ~PBS_MARQUEE);
+				prevwproc(PBM_SETMARQUEE, false, 0);
+				value = _val;
+				recreateHandle(); // Apply PBS_SMOOTH
+				break;
+			case ProgressBarStyle.MARQUEE:
+				SetWindowLongPtrA(handle, GWL_STYLE, currentStyle | PBS_MARQUEE);
+				prevwproc(PBM_SETMARQUEE, true, _marqueeAnimationSpeed);
+		}
+	}
+
+	/// ditto
+	final @property ProgressBarStyle style() // getter
+	{
+		LONG_PTR currentStyle = GetWindowLongPtrA(handle, GWL_STYLE);
+		if (currentStyle & PBS_MARQUEE)
+			return ProgressBarStyle.MARQUEE;
+		else if (currentStyle & PBS_SMOOTH)
+			return ProgressBarStyle.CONTINUOUS;
+		else
+			return ProgressBarStyle.BLOCKS;
+	}
+
+
+	///
+	final @property void marqueeAnimationSpeed(int speed) // setter
+	{
+		_marqueeAnimationSpeed = speed;
+		if (style == ProgressBarStyle.MARQUEE)
+			prevwproc(PBM_SETMARQUEE, true, _marqueeAnimationSpeed);
+		else
+			prevwproc(PBM_SETMARQUEE, false, _marqueeAnimationSpeed);
+	}
+
+	/// ditto
+	final @property int marqueeAnimationSpeed() // getter
+	{
+		return _marqueeAnimationSpeed;
+	}
+
+
 	///
 	final void increment(int incby)
 	{
@@ -163,7 +214,8 @@ class ProgressBar: ControlSuperClass // docmain
 	}
 	
 	
-	protected override void onHandleCreated(EventArgs ea)
+protected:
+	override void onHandleCreated(EventArgs ea)
 	{
 		super.onHandleCreated(ea);
 		
@@ -184,7 +236,7 @@ class ProgressBar: ControlSuperClass // docmain
 	}
 	
 	
-	protected override @property Size defaultSize() // getter
+	override @property Size defaultSize() // getter
 	{
 		return Size(100, 23);
 	}
@@ -196,7 +248,7 @@ class ProgressBar: ControlSuperClass // docmain
 	}
 	
 	
-	protected override void createParams(ref CreateParams cp)
+	override void createParams(ref CreateParams cp)
 	{
 		super.createParams(cp);
 		
@@ -204,28 +256,28 @@ class ProgressBar: ControlSuperClass // docmain
 	}
 	
 	
-	protected override void prevWndProc(ref Message msg)
+	override void prevWndProc(ref Message msg)
 	{
-		//msg.result = CallWindowProcA(progressbarPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
 		msg.result = dfl.internal.utf.callWindowProc(progressbarPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
 	}
 	
 	
-	private:
-	
+private:
 	enum MIN_INIT = 0;
 	enum MAX_INIT = 100;
 	enum STEP_INIT = 10;
 	enum VAL_INIT = 0;
 	
-	int _min = MIN_INIT, _max = MAX_INIT, _step = STEP_INIT, _val = VAL_INIT;
+	int _min = MIN_INIT;
+	int _max = MAX_INIT;
+	int _step = STEP_INIT;
+	int _val = VAL_INIT;
+	int _marqueeAnimationSpeed = 0; // Default; 30 ms
 	
 	
-	package:
-	final:
-	LRESULT prevwproc(UINT msg, WPARAM wparam, LPARAM lparam)
+package:
+	final LRESULT prevwproc(UINT msg, WPARAM wparam, LPARAM lparam)
 	{
-		//return CallWindowProcA(progressbarPrevWndProc, hwnd, msg, wparam, lparam);
 		return dfl.internal.utf.callWindowProc(progressbarPrevWndProc, hwnd, msg, wparam, lparam);
 	}
 }
