@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "C++ Launch (Windows) imagelist",
+            "name": "C++ Launch (Windows) commondialog",
             "type": "cppvsdbg",
             "request": "launch",
             "cwd": "${workspaceRoot}",
