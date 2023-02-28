@@ -532,6 +532,7 @@ alias DWORD TYMED;
 enum
 {
 	DATADIR_GET = 1,
+	DATADIR_SET = 2
 }
 
 
@@ -545,6 +546,7 @@ WINOLEAPI RevokeDragDrop(HWND hwnd);
 WINOLEAPI OleGetClipboard(IDataObject* ppDataObj);
 WINOLEAPI OleSetClipboard(IDataObject pDataObj);
 WINOLEAPI OleFlushClipboard();
+WINOLEAPI OleIsCurrentClipboard(IDataObject pDataObj);
 WINOLEAPI CreateStreamOnHGlobal(HGLOBAL hGlobal, BOOL fDeleteOnRelease, LPSTREAM ppstm);
 WINOLEAPI OleLoadPicture(IStream pStream, LONG lSize, BOOL fRunmode, IID* riid, void** ppv);
-
+void ReleaseStgMedium(LPSTGMEDIUM pStgmedium);

@@ -953,6 +953,27 @@ class ImageFormat
 
 
 ///
+HBITMAP copyHBitmap(HBITMAP hSrcBitmap)
+{
+	BITMAP tBitmap;
+	GetObject(hSrcBitmap, tBitmap.sizeof, &tBitmap);
+	HDC hDC = GetDC(null);
+	HBITMAP hDstBitmap = dfl.internal.winapi.CreateCompatibleBitmap(hDC, tBitmap.bmWidth, tBitmap.bmHeight);
+	HDC hSrcDC = CreateCompatibleDC(hDC);
+	HDC hDstDC = CreateCompatibleDC(hDC);
+	HGDIOBJ hPrevSrcBitmap = SelectObject(hSrcDC, hSrcBitmap);
+	HGDIOBJ hPrevDstBitmap = SelectObject(hDstDC, hDstBitmap);
+	dfl.internal.winapi.BitBlt(hDstDC, 0, 0, tBitmap.bmWidth, tBitmap.bmHeight, hSrcDC, 0, 0, SRCCOPY);
+	SelectObject(hSrcDC, hPrevSrcBitmap);
+	SelectObject(hDstDC, hPrevDstBitmap);
+	DeleteDC(hSrcDC);
+	DeleteDC(hDstDC);
+	ReleaseDC(null, hDC);
+	return hDstBitmap;
+}
+
+
+///
 abstract class Image // docmain
 {
 	//flags(); // getter ???
@@ -963,9 +984,16 @@ abstract class Image // docmain
 	+/
 	
 	
-	static Bitmap fromHBitmap(HBITMAP hbm) // package
+	/// Create Bitmap class instance from HBITMAP.
+	/// When owned is false, Need to call dispose().
+	/// When owned is true, HBITMAP is copyed, and dispose() is called on Bitmap class destructor.
+	static Bitmap fromHBitmap(HBITMAP hbm, bool owned = false) // package
 	{
-		return new Bitmap(hbm, false); // Not owned. Up to caller to manage or call dispose().
+		if (owned)
+			return new Bitmap(copyHBitmap(hbm), true);
+		else
+			// Not owned. Up to caller to manage or call dispose().
+			return new Bitmap(hbm, false);
 	}
 	
 	

@@ -1573,6 +1573,17 @@ extern(Windows) nothrow:
 		CF_ENHMETAFILE = 14,
 		CF_HDROP = 15,
 		CF_LOCALE = 16,
+		CF_DIBV5 = 17,
+		CF_MAX,             // = 0x0012
+		CF_OWNERDISPLAY        = 0x0080,
+		CF_DSPTEXT,
+		CF_DSPBITMAP,
+		CF_DSPMETAFILEPICT, // = 0x0083
+		CF_DSPENHMETAFILE      = 0x008E,
+		CF_PRIVATEFIRST        = 0x0200,
+		CF_PRIVATELAST         = 0x02FF,
+		CF_GDIOBJFIRST         = 0x0300,
+		CF_GDIOBJLAST          = 0x03FF
 	}
 	
 	
