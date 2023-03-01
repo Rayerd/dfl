@@ -319,7 +319,7 @@ class MainForm : Form
 		};
 		_list.dragDrop ~= (Control sender, DragEventArgs e) {
 			// Get droped file names.
-			string[] files = e.data.getData(DataFormats.fileDrop, false).getStrings();
+			string[] files = e.data.getData(DataFormats.fileDrop, false).getFileDropList();
 			_list.beginUpdate();
 			_list.items.clear();
 			foreach (string fileName; files)
