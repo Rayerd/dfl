@@ -10,12 +10,11 @@ private import dfl.data;
 private import dfl.drawing;
 
 private import dfl.internal.dlib;
-private import dfl.internal.winapi;
 private import dfl.internal.wincom;
 
 
 ///
-class Clipboard // docmain
+class Clipboard
 {
 	private this() {}
 	
@@ -62,9 +61,9 @@ static:
 	Data getData(Dstring fmt)
 	{
 		dfl.data.IDataObject dataObj = getDataObject();
-		Dstring normalizedFormatName = DataFormats.getFormat(fmt).name;
-		if (dataObj.getDataPresent(normalizedFormatName))
-			return dataObj.getData(normalizedFormatName);
+		Dstring regsteredFormat = DataFormats.getFormat(fmt).name;
+		if (dataObj.getDataPresent(regsteredFormat))
+			return dataObj.getData(regsteredFormat);
 		return null;
 	}
 
@@ -72,8 +71,8 @@ static:
 	void setData(Dstring fmt, Data obj)
 	{
 		dfl.data.IDataObject dataObj = new DataObject;
-		Dstring normalizedFormatName = DataFormats.getFormat(fmt).name;
-		dataObj.setData(normalizedFormatName, obj);
+		Dstring regsteredFormat = DataFormats.getFormat(fmt).name;
+		dataObj.setData(regsteredFormat, obj);
 		setDataObject(dataObj, true);
 	}
 
@@ -81,8 +80,8 @@ static:
 	bool containsData(Dstring fmt)
 	{
 		dfl.data.IDataObject dataObj = getDataObject();
-		Dstring normalizedFormatName = DataFormats.getFormat(fmt).name;
-		return dataObj.getDataPresent(normalizedFormatName);
+		Dstring regsteredFormat = DataFormats.getFormat(fmt).name;
+		return dataObj.getDataPresent(regsteredFormat);
 	}
 
 	
@@ -168,7 +167,7 @@ static:
 	{
 		dfl.data.IDataObject dataObj = getDataObject();
 		if(dataObj.getDataPresent(DataFormats.fileDrop))
-			return dataObj.getData(DataFormats.fileDrop).getStrings();
+			return dataObj.getData(DataFormats.fileDrop).getFileDropList();
 		return null;
 	}
 	

@@ -17,8 +17,9 @@ class MainForm : Form
 	private Panel _rightSide;
 	private TextBox _textbox;
 	private PictureBox _picturebox;
-	private Button _copy;
+	private Button _copyText;
 	private Button _copyBitmap;
+	private Button _copyFileDrop;
 	private Button _paste;
 	private Button _clear;
 	private Button _formats;
@@ -51,11 +52,11 @@ class MainForm : Form
 		_textbox.wordWrap = false;
 		_textbox.scrollBars = ScrollBars.BOTH;
 
-		_copy = new Button();
-		_copy.parent = _leftSide;
-		_copy.text = "copy from textbox";
-		_copy.dock = DockStyle.TOP;
-		_copy.click ~= (Control c, EventArgs e)
+		_copyText = new Button();
+		_copyText.parent = _leftSide;
+		_copyText.text = "copy from textbox";
+		_copyText.dock = DockStyle.TOP;
+		_copyText.click ~= (Control c, EventArgs e)
 		{
 			_picturebox.image = null;
 			static if (1)
@@ -72,20 +73,32 @@ class MainForm : Form
 		{
 			_textbox.clear();
 			Bitmap bitmap = new Bitmap(r".\image\sample.bmp");
-			static if (1) // BUG: workaround
-			{
-				import core.sys.windows.winuser;
-				OpenClipboard(null);
-				EmptyClipboard();
-				SetClipboardData(CF_BITMAP, bitmap.handle);
-				CloseClipboard();
-			}
-			else
-			{
-				Clipboard.setImage(bitmap); // TODO: Don't work
-			}
+
+			// *** Traditional method ***
+			// import core.sys.windows.winuser;
+			// OpenClipboard(null);
+			// EmptyClipboard();
+			// SetClipboardData(CF_BITMAP, bitmap.handle);
+			// CloseClipboard();
+			Clipboard.setImage(bitmap);
+
 			_picturebox.image = bitmap;
 		};
+
+		static if (0) // BUG: Don't work. Explorer makes hungup.
+		{
+			_copyFileDrop = new Button();
+			_copyFileDrop.parent = _leftSide;
+			_copyFileDrop.text = "copy as FileDrop";
+			_copyFileDrop.dock = DockStyle.TOP;
+			_copyFileDrop.click ~= (Control c, EventArgs e)
+			{
+				_picturebox.image = null;
+				_textbox.clear();
+				string[] fileNames = [getFullPathName(r".\image\sample.bmp")];
+				Clipboard.setFileDropList(fileNames);
+			};
+		}
 
 		_paste = new Button();
 		_paste.parent = _leftSide;
@@ -114,7 +127,7 @@ class MainForm : Form
 			if (Clipboard.containsFileDropList())
 			{
 				Data data = dataObj.getData(DataFormats.fileDrop, false);
-				string[] fileDropList = data.getStrings();
+				string[] fileDropList = data.getFileDropList();
 				if (fileDropList !is null)
 				{
 					_textbox.clear();
