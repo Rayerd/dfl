@@ -16,7 +16,6 @@ private import dfl.internal.winapi;
 private import dfl.internal.wincom;
 
 private import core.sys.windows.ole2;
-import core.sys.windows.richedit;
 
 
 ///
