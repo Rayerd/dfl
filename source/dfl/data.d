@@ -39,7 +39,7 @@ class DataFormats // docmain
 		}
 		
 		
-		package:
+package:
 		int _id;
 		Dstring _name;
 		
@@ -731,7 +731,7 @@ class Data // docmain
 	}
 	
 	
-	private:
+private:
 	TypeInfo _info;
 	InnerValues _innerValues;
 
@@ -740,7 +740,7 @@ class Data // docmain
 		Data dataValue;
 		Object objectValue;
 		Dstring dstringValue;
-		Dstring[] dstringsValue; // For drop files.
+		Dstring[] dstringsValue; // For FileDrop
 		Ddstring ddstringValue;
 		Dwstring dwstringValue;
 		uint uintValue;
@@ -781,7 +781,6 @@ interface IDataObject // docmain
 	
 	///
 	Dstring[] getFormats();
-	//Dstring[] getFormats(bool onlyNative);
 	
 	///
 	void setData(Data obj);
@@ -853,13 +852,6 @@ class DataObject: dfl.data.IDataObject // docmain
 			fmt = all[i].fmt;
 		}
 		return result;
-	}
-	
-	
-	// TODO: remove...
-	deprecated final Dstring[] getFormats(bool onlyNative)
-	{
-		return getFormats();
 	}
 	
 	
@@ -1301,13 +1293,6 @@ class ComToDdataObject: dfl.data.IDataObject // package
 		fenum.Release();
 		
 		return result;
-	}
-	
-	
-	// TO-DO: remove...
-	deprecated final Dstring[] getFormats(bool onlyNative)
-	{
-		return getFormats();
 	}
 	
 	

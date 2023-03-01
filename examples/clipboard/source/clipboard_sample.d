@@ -58,15 +58,10 @@ class MainForm : Form
 		_copy.click ~= (Control c, EventArgs e)
 		{
 			_picturebox.image = null;
-			static if (1) // BUG: workaround
-			{
-				Clipboard.setString(_textbox.text, false);
-			}
-			else
-			{
-				// TODO: Don't work
+			static if (1)
+				Clipboard.setString(_textbox.text);
+			else // same as
 				Clipboard.setData(DataFormats.stringFormat, new Data(_textbox.text));
-			}
 		};
 
 		_copyBitmap = new Button();
@@ -87,7 +82,7 @@ class MainForm : Form
 			}
 			else
 			{
-				Clipboard.setImage(bitmap, false); // TODO: Don't work
+				Clipboard.setImage(bitmap); // TODO: Don't work
 			}
 			_picturebox.image = bitmap;
 		};
