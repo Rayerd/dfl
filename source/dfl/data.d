@@ -25,14 +25,14 @@ final class DataFormats
 	static class Format
 	{
 		/// Data format ID number.
-		@property int id() // getter
+		@property int id() pure // getter
 		{
 			return _id;
 		}
 		
 		
 		/// Data format name.
-		@property Dstring name() // getter
+		@property Dstring name() pure // getter
 		{
 			return _name;
 		}
@@ -60,7 +60,7 @@ static:
 	
 	/+
 	/// ditto
-	@property Dstring commaSeparatedValue() // getter
+	@property Dstring commaSeparatedValue() pure // getter
 	{
 		return getFormat(?).name;
 	}
@@ -199,7 +199,7 @@ static:
 	// -id- is not in -fmts-.
 	private Format _didntFindId(int id)
 	{
-		Format result = new Format(id, getName(id));
+		Format result = new Format(id, getRegisteredClipboardFormatName(id));
 		//synchronized // _init() would need to be synchronized with it.
 		{
 			_fmts[id] = result;
@@ -230,7 +230,8 @@ static:
 				return onfmt;
 		}
 		// Didn't find it.
-		return _didntFindId(dfl.internal.utf.registerClipboardFormat(name));
+		int newID = dfl.internal.utf.registerClipboardFormat(name); 
+		return _didntFindId(newID);
 	}
 	
 	/// ditto
@@ -263,39 +264,38 @@ private:
 		}
 		
 		// https://learn.microsoft.com/en-us/dotnet/api/system.windows.dataformats?view=netframework-4.8
-		appendFormat(CF_BITMAP, "Bitmap");
-		appendFormat(CF_DIB, "DeviceIndependentBitmap");
-		appendFormat(CF_DIF, "DataInterchangeFormat");
-		appendFormat(CF_ENHMETAFILE, "EnhancedMetafile");
-		appendFormat(CF_HDROP, "FileDrop");
-		appendFormat(CF_LOCALE, "Locale");
-		appendFormat(CF_METAFILEPICT, "MetaFilePict");
-		appendFormat(CF_OEMTEXT, "OEMText");
-		appendFormat(CF_PALETTE, "Palette");
-		appendFormat(CF_PENDATA, "PenData");
-		appendFormat(CF_RIFF, "RiffAudio");
-		appendFormat(CF_SYLK, "SymbolicLink");
-		appendFormat(CF_TEXT, "Text");
-		appendFormat(CF_TIFF, "TaggedImageFileFormat");
-		appendFormat(CF_UNICODETEXT, "UnicodeText");
-		appendFormat(CF_WAVE, "WaveAudio");
-		appendFormat(CF_DIBV5, "DeviceIndependentBitmapV5");
+		appendFormat(CF_BITMAP, "CF_BITMAP");
+		appendFormat(CF_DIB, "CF_DIB");
+		appendFormat(CF_DIF, "CF_DIF");
+		appendFormat(CF_ENHMETAFILE, "CF_ENHMETAFILE");
+		appendFormat(CF_HDROP, "CF_HDROP");
+		appendFormat(CF_LOCALE, "CF_LOCALE");
+		appendFormat(CF_METAFILEPICT, "CF_METAFILEPICT");
+		appendFormat(CF_OEMTEXT, "CF_OEMTEXT");
+		appendFormat(CF_PALETTE, "CF_PALETTE");
+		appendFormat(CF_PENDATA, "CF_PENDATA");
+		appendFormat(CF_RIFF, "CF_RIFF");
+		appendFormat(CF_SYLK, "CF_SYLK");
+		appendFormat(CF_TEXT, "CF_TEXT");
+		appendFormat(CF_TIFF, "CF_TIFF");
+		appendFormat(CF_UNICODETEXT, "CF_UNICODETEXT");
+		appendFormat(CF_WAVE, "CF_WAVE");
+		appendFormat(CF_DIBV5, "CF_DIBV5");
 		
 		_fmts.rehash;
 	}
 	
 	
+	/// Returns the name of defined format by RegisterClipboardFormat().
 	/// Does not get the name of one of the predefined constant ones.
-	Dstring getName(int id)
+	Dstring getRegisteredClipboardFormatName(int id)
 	{
-		Dstring result = dfl.internal.utf.getClipboardFormatName(id);
-		if(!result)
+		Dstring fmt = dfl.internal.utf.getClipboardFormatName(id);
+		if(!fmt)
 		{
-			// You must call appendFormat() for other Standard Clipboard Formats.
-			// https://learn.microsoft.com/en-us/windows/win32/dataxchg/standard-clipboard-formats
-			throw new DflException("Unable to get format");
+			throw new DflException("Unable to get registered clipboard format name");
 		}
-		return result;
+		return fmt;
 	}
 	
 	
@@ -318,8 +318,8 @@ private:
 	}
 	
 	
-	///
-	Dstring[] getHDropStrings(void[] value)
+	/// Converts HDROP value to Dstring[] as DragQueryFile().
+	Dstring[] getFileDropListFromClipboardValue(void[] value)
 	{
 		if(value.length <= DROPFILES.sizeof)
 			return null;
@@ -366,8 +366,8 @@ private:
 	}
 	
 	
-	// Converts clipboard -value- to Data.
-	Data getDataFromFormat(int id, void[] value)
+	/// Converts clipboard value to Data.
+	Data getDataFromClipboardValue(int id, void[] value)
 	{
 		switch (id)
 		{
@@ -378,7 +378,7 @@ private:
 			return new Data(stopAtNull!(Dwchar)(cast(Dwstring)value));
 		
 		case CF_HDROP:
-			return new Data(getHDropStrings(value));
+			return new Data(getFileDropListFromClipboardValue(value));
 		
 		default:
 			if(id == getFormat(stringFormat).id)
@@ -389,7 +389,8 @@ private:
 	}
 	
 	
-	void[] getCbFileDrop(Dstring[] fileNames)
+	/// Converts file name list to HDROP as clipboard value.
+	void[] getClipboardValueFromFileDropList(Dstring[] fileNames) pure
 	{
 		size_t sz = DROPFILES.sizeof;
 		foreach(fn; fileNames)
@@ -424,8 +425,8 @@ private:
 		strs ~= "bb";
 		strs ~= "cc";
 		auto dataFormats = new DataFormats();
-		void[] voids = dataFormats.getCbFileDrop(strs);
-		wchar* wcharBinary = cast(wchar*)(voids);
+		void[] clipboardValue = dataFormats.getClipboardValueFromFileDropList(strs);
+		wchar* wcharBinary = cast(wchar*)(clipboardValue);
 		debug(APP_PRINT)
 		{
 			writefln("a part of wcharBinary's length=%d", wcharBinary[0]);
@@ -458,7 +459,8 @@ private:
 		assert(wcharBinary[19] == '\0');
 	}
 	
-	// Value the clipboard wants.
+	
+	/// Converts the Data object to clipboard value assuming it is of the specified format id.
 	void[] getClipboardValueFromData(int id, Data data)
 	{
 		if(CF_TEXT == id)
@@ -485,7 +487,7 @@ private:
 		}
 		else if(CF_HDROP == id)
 		{
-			return getCbFileDrop(data.getFileDropList());
+			return getClipboardValueFromFileDropList(data.getFileDropList());
 		}
 		else if(data.info == typeid(byte[]))
 		{
@@ -587,7 +589,7 @@ class Data
 	
 	
 	/// Information about the data type.
-	@property TypeInfo info() // getter
+	@property TypeInfo info() pure // getter
 	{
 		return _info;
 	}
@@ -802,7 +804,7 @@ class DataObject: dfl.data.IDataObject
 	
 	
 	///
-	Dstring[] getFormats()
+	Dstring[] getFormats() pure
 	{
 		Dstring[] result = new Dstring[_all.length];
 		foreach(i, ref Dstring fmt; result)
@@ -869,13 +871,11 @@ class DataObject: dfl.data.IDataObject
 		setData(fmt, obj);
 	}
 	
-	
 	/// ditto
 	void setData(Dstring fmt, Data obj)
 	{
 		setData(fmt, /+ canConvert: +/true, obj);
 	}
-	
 	
 	/// ditto
 	void setData(TypeInfo type, Data obj)
@@ -883,7 +883,6 @@ class DataObject: dfl.data.IDataObject
 		Dstring fmt = DataFormats.getFormatFromType(type).name;
 		setData(fmt, /+ canConvert: +/true, obj);
 	}
-	
 	
 	/// ditto
 	void setData(Dstring fmt, bool canConvert, Data obj)
@@ -1102,7 +1101,7 @@ final class ComToDdataObject: dfl.data.IDataObject
 			fmte.lindex = -1;
 			fmte.tymed = TYMED_GDI;
 
-			if (S_OK != _dataObj.QueryGetData(&fmte))
+			if (S_OK != _dataObj.QueryGetData(&fmte/+ in +/))
 				throw new DflException("Unable to query get data");
 			
 			import std.format;
@@ -1150,10 +1149,10 @@ final class ComToDdataObject: dfl.data.IDataObject
 			fmte.lindex = -1;
 			fmte.tymed = TYMED_HGLOBAL;
 
-			if (S_OK != _dataObj.QueryGetData(&fmte))
+			if (S_OK != _dataObj.QueryGetData(&fmte/+ in +/))
 				throw new DflException("Unable to query get data");
 			
-			if(S_OK != _dataObj.GetData(&fmte, &stgm))
+			if(S_OK != _dataObj.GetData(&fmte/+ in +/, &stgm/+ out +/))
 				throw new DflException("Unable to get data");
 			
 			void* plock = GlobalLock(stgm.hGlobal);
@@ -1168,7 +1167,9 @@ final class ComToDdataObject: dfl.data.IDataObject
 			GlobalUnlock(stgm.hGlobal);
 			ReleaseStgMedium(&stgm);
 			
-			return DataFormats.getDataFromFormat(id, mem);
+			// Assuming the data format of the received format ID,
+			// convert the contents of the memory into a Data object.
+			return DataFormats.getDataFromClipboardValue(id, mem);
 		}
 		else
 		{
@@ -1217,7 +1218,6 @@ final class ComToDdataObject: dfl.data.IDataObject
 		}
 		return S_OK == _dataObj.QueryGetData(&fmte);
 	}
-	
 	
 	/// ditto
 	bool getDataPresent(Dstring fmt)
@@ -1348,7 +1348,7 @@ final class ComToDdataObject: dfl.data.IDataObject
 	
 	
 	///
-	final bool isSameDataObject(dfl.internal.wincom.IDataObject dataObj)
+	bool isSameDataObject(dfl.internal.wincom.IDataObject dataObj) const pure
 	{
 		return dataObj is _dataObj;
 	}
@@ -1540,6 +1540,7 @@ final class DtoComDataObject: DflComObject, dfl.internal.wincom.IDataObject
 			return cast(CLIPFORMAT)DataFormats.getFormat(fmt).id;
 		}
 
+		// FormatEtc list that can send to paste target.
 		_formatetcList ~= FORMATETC(CF_BITMAP, null, DVASPECT_CONTENT, -1, TYMED_GDI);
 
 		_formatetcList ~= FORMATETC(CF_TEXT, null, DVASPECT_CONTENT, -1, TYMED_HGLOBAL);
@@ -1587,6 +1588,16 @@ extern(Windows):
 			if (!isSupportedFormatetc(pFormatetc))
 			{
 				return DV_E_FORMATETC;
+			}
+
+			{
+				// Call DataObject.find(fmt, fix: true) to find out
+				// if the required fmt exists in DataObject._all.
+				Dstring fmt = DataFormats.getFormat(pFormatetc.cfFormat).name;
+				if(!_dataObj.getDataPresent(fmt))
+				{
+					return S_FALSE;
+				}
 			}
 
 			if (pFormatetc.cfFormat == CF_BITMAP)
@@ -1676,7 +1687,7 @@ extern(Windows):
 	// [out] STGMEDIUM* pmedium
 	HRESULT GetDataHere(FORMATETC* pFormatetc, STGMEDIUM* pmedium)
 	{
-		return DATA_E_FORMATETC; // TODO: finish.
+		return DATA_E_FORMATETC;
 	}
 	
 	
@@ -1691,6 +1702,8 @@ extern(Windows):
 				return S_FALSE;
 			}
 
+			// Call DataObject.find(fmt, fix: true) to find out
+			// if the required fmt exists in DataObject._all.
 			Dstring fmt = DataFormats.getFormat(pFormatetc.cfFormat).name;
 			if(!_dataObj.getDataPresent(fmt))
 			{
@@ -1802,7 +1815,7 @@ extern(D):
 	
 private:
 	///
-	bool isSupportedFormatetc(const FORMATETC* pFormatetc) const
+	bool isSupportedFormatetc(const FORMATETC* pFormatetc) const pure
 	{
 		foreach (ref const FORMATETC f; _formatetcList)
 		{

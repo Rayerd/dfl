@@ -148,7 +148,7 @@ public void _utfinit() // package
 
 template _getlen(T)
 {
-	size_t _getlen(T* tz)
+	size_t _getlen(T* tz) pure
 	in
 	{
 		assert(tz);
@@ -166,7 +166,7 @@ template _getlen(T)
 
 public:
 
-Dstringz unsafeStringz(Dstring s) nothrow
+Dstringz unsafeStringz(Dstring s) nothrow pure
 {
 	if(!s.length)
 		return "";
@@ -359,20 +359,20 @@ version(DFL_D2_AND_ABOVE)
 }
 
 
-Dwstringz toUnicodez(Dstring utf8)
+Dwstringz toUnicodez(Dstring utf8) pure
 {
 	//return utf8stringToUtf16stringz(utf8);
 	return cast(Dwstringz)utf8stringToUtf16stringz(utf8); // Needed in D2.
 }
 
 
-Dwstring toUnicode(Dstring utf8)
+Dwstring toUnicode(Dstring utf8) pure
 {
 	return utf8stringtoUtf16string(utf8);
 }
 
 
-size_t toUnicodeLength(Dstring utf8)
+size_t toUnicodeLength(Dstring utf8) pure
 {
 	size_t result = 0;
 	foreach(wchar wch; utf8)
