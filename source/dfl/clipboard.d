@@ -95,8 +95,8 @@ static:
 	Dstring getString()
 	{
 		dfl.data.IDataObject dataObj = getDataObject();
-		if(dataObj.getDataPresent(DataFormats.utf8))
-			return dataObj.getData(DataFormats.utf8).getString();
+		if(dataObj.getDataPresent(DataFormats.stringFormat))
+			return dataObj.getData(DataFormats.stringFormat).getStringFormat();
 		return null;
 	}
 	

@@ -21,7 +21,7 @@ private import core.sys.windows.ole2;
 ///
 final class DataFormats
 {
-	///
+	/// Pair of id and Clipboard Format Name.
 	static class Format
 	{
 		/// Data format ID number.
@@ -51,20 +51,11 @@ final class DataFormats
 	
 	
 static:
-	
-	/// Predefined data formats.
+	/// Predefined Standard Clipboard Formats.
 	@property Dstring bitmap() // getter
 	{
 		return getFormat(CF_BITMAP).name;
 	}
-	
-	/+
-	/// ditto
-	@property Dstring commaSeparatedValue() pure // getter
-	{
-		return getFormat(?).name;
-	}
-	+/
 	
 	/// ditto
 	@property Dstring dib() // getter
@@ -94,12 +85,6 @@ static:
 	@property Dstring fileDrop() // getter
 	{
 		return getFormat(CF_HDROP).name;
-	}
-	
-	/// ditto
-	@property Dstring html() // getter
-	{
-		return getFormat("HTML Format").name;
 	}
 	
 	/// ditto
@@ -139,32 +124,6 @@ static:
 	}
 	
 	/// ditto
-	@property Dstring rtf() // getter
-	{
-		return getFormat("Rich Text Format").name;
-	}
-	
-	/+
-	/// ditto
-	@property Dstring serializable() // getter
-	{
-		return getFormat(?).name;
-	}
-	+/
-	
-	/// ditto
-	@property Dstring stringFormat() // getter
-	{
-		return utf8;
-	}
-	
-	/// ditto
-	@property Dstring utf8() // getter
-	{
-		return getFormat("UTF-8").name;
-	}
-	
-	/// ditto
 	@property Dstring symbolicLink() // getter
 	{
 		return getFormat(CF_SYLK).name;
@@ -194,44 +153,79 @@ static:
 		return getFormat(CF_WAVE).name;
 	}
 	
+	/// User Defined Clipboard Formats.
+	/// - https://learn.microsoft.com/en-us/dotnet/api/system.windows.dataformats?view=netframework-4.8
+	@property Dstring rtf() // getter
+	{
+		return getFormat("Rich Text Format").name;
+	}
 	
+	/// ditto
+	@property Dstring html() // getter
+	{
+		return getFormat("HTML Format").name;
+	}
+	
+	/// ditto
+	@property Dstring stringFormat() // getter
+	{
+		return getFormat("UTF-8").name;
+	}
+	
+	/+
+	/// ditto
+	@property Dstring commaSeparatedValue() // getter
+	{
+		return getFormat(?).name;
+	}
+
+	/// ditto
+	@property Dstring serializable() // getter
+	{
+		return getFormat(?).name;
+	}
+	+/
+
+
 	// Assumes _init() was already called and
 	// -id- is not in -fmts-.
-	private Format _didntFindId(int id)
+	private Format _appendUserDefinedClipboardFormat(int id)
 	{
-		Format result = new Format(id, getRegisteredClipboardFormatName(id));
+		// Gets user defined clipboard format.
+		Format fmt = new Format(id, getRegisteredClipboardFormatName(id));
 		//synchronized // _init() would need to be synchronized with it.
 		{
-			_fmts[id] = result;
+			_fmts[id] = fmt;
 		}
-		return result;
+		return fmt;
 	}
 	
 	
 	///
 	Format getFormat(int id)
 	{
-		_init();
-		
+		_initForStandardClipboardFormat();
+		// Lookups Standard and User-defined Clipboard Format.
 		if(id in _fmts)
 			return _fmts[id];
-		
-		return _didntFindId(id);
+		// Didn't find it. So defines new User-defined clipboard format.
+		return _appendUserDefinedClipboardFormat(id);
 	}
 	
 	/// ditto
 	// Creates the format name if it doesn't exist.
 	Format getFormat(Dstring name)
 	{
-		_init();
+		_initForStandardClipboardFormat();
+		// Lookups Standard and User-defined Clipboard Format.
 		foreach(Format onfmt; _fmts)
 		{
 			if(!stringICmp(name, onfmt.name))
 				return onfmt;
 		}
-		// Didn't find it.
-		int newID = dfl.internal.utf.registerClipboardFormat(name); 
-		return _didntFindId(newID);
+		// Didn't find it. So defines new User-defined clipboard format.
+		int newID = dfl.internal.utf.registerClipboardFormat(name);
+		return _appendUserDefinedClipboardFormat(newID);
 	}
 	
 	/// ditto
@@ -243,11 +237,13 @@ static:
 	
 	
 private:
+	// _fmts is appended the Standard Clipboard Formats first.
+	// After that, _fmts is appended more User-defined Clipboard Formats.
 	Format[int] _fmts; // Indexed by identifier. Must _init() before accessing!
 	
 	
 	///
-	void _init()
+	void _initForStandardClipboardFormat()
 	{
 		if(_fmts.length)
 			return;
@@ -259,11 +255,10 @@ private:
 		}
 		do
 		{
-			Format fmt = new Format(id, name);
-			_fmts[id] = fmt;
+			_fmts[id] = new Format(id, name);
 		}
 		
-		// https://learn.microsoft.com/en-us/dotnet/api/system.windows.dataformats?view=netframework-4.8
+		// https://learn.microsoft.com/en-us/windows/win32/dataxchg/standard-clipboard-formats
 		appendFormat(CF_BITMAP, "CF_BITMAP");
 		appendFormat(CF_DIB, "CF_DIB");
 		appendFormat(CF_DIF, "CF_DIF");
@@ -299,26 +294,31 @@ private:
 	}
 	
 	
-	///
+	/// Converts TypeInfo to Format.
 	package Format getFormatFromType(TypeInfo type)
 	{
 		if(type == typeid(ubyte[]))
 			return getFormat(text);
-		if(type == typeid(Dstring))
+		
+		if(type == typeid(Dstring)) // If type is Ansi string, but also assume Dstring.
 			return getFormat(stringFormat);
+		
 		if(type == typeid(Dwstring))
 			return getFormat(unicodeText);
-		if(type == typeid(Image) || type == typeid(Bitmap)) // TODO: ?
+		
+		if(type == typeid(Image) || type == typeid(Bitmap)) // workaround for Bitmap
 			return getFormat(bitmap);
 		
-		if(cast(TypeInfo_Class)type)
-			throw new DflException("Unknown data format");
-		
-		return getFormat(getObjectString(type)); // TODO: ?
+		if(cast(TypeInfo_Class)type) // Example: Data, Object, IDataObject, ...
+			throw new DflException("Converts TypeInfo to Format failure");
+
+		// Creates format name of User-defined Clipboard Format from TypeInfo.
+		Dstring fmt = getObjectString(type); // Example: int -> "int", byte[] -> "byte[]"
+		return getFormat(fmt);
 	}
 	
 	
-	/// Converts HDROP value to Dstring[] as DragQueryFile().
+	/// Converts HDROP value to Dstring[] like DragQueryFile().
 	Dstring[] getFileDropListFromClipboardValue(void[] value)
 	{
 		if(value.length <= DROPFILES.sizeof)
@@ -367,6 +367,8 @@ private:
 	
 	
 	/// Converts clipboard value to Data.
+	/// Clipboard value is got from STGMEDIUM.hGlobal.
+	/// Therefore, it handles all format IDs obtained from hGlobal.
 	Data getDataFromClipboardValue(int id, void[] value)
 	{
 		switch (id)
@@ -384,7 +386,7 @@ private:
 			if(id == getFormat(stringFormat).id)
 				return new Data(stopAtNull!(Dchar)(cast(Dstring)value));
 			else
-				throw new DflException("Unknown data format");
+				throw new DflException("Clipboard value is unknown data format");
 		}
 	}
 	
@@ -463,7 +465,7 @@ private:
 	/// Converts the Data object to clipboard value assuming it is of the specified format id.
 	void[] getClipboardValueFromData(int id, Data data)
 	{
-		if(CF_TEXT == id)
+		if((CF_TEXT == id) || (data.info == typeid(byte[])))
 		{
 			// ANSI text.
 			enum ubyte[] UBYTE_ZERO = [0];
@@ -473,7 +475,7 @@ private:
 		{
 			// UTF-8 string.
 			Dstring str;
-			str = data.getString() ~ '\0';
+			str = data.getStringFormat() ~ '\0';
 			return cast(void[])(unsafeStringz(str)[0 .. str.length]);
 		}
 		else if((CF_UNICODETEXT == id) || (data.info == typeid(Dwstring)))
@@ -481,17 +483,9 @@ private:
 			// Unicode string.
 			return (data.getUnicodeText() ~ '\0').dup;
 		}
-		else if(data.info == typeid(Ddstring))
-		{
-			return (data.getDdstring() ~ '\0').dup;
-		}
 		else if(CF_HDROP == id)
 		{
 			return getClipboardValueFromFileDropList(data.getFileDropList());
-		}
-		else if(data.info == typeid(byte[]))
-		{
-			return data.getBytes();
 		}
 		else
 		{
@@ -523,54 +517,34 @@ class Data
 	this(T)(T arg)
 	{
 		this._info = typeid(arg);
-		static if (is(T == Object))
+		static if (is(T == Dstring))
 		{
-			this._innerValues.objectValue = arg;
-		}
-		else static if (is(T == Dstring))
-		{
-			this._innerValues.dstringValue = arg.dup;
+			this._innerValues.stringFormatValue = arg.dup;
 		}
 		else static if (is(T == Dstring[]))
 		{
 			this._innerValues.fileDropListValue = arg.dup;
 		}
-		else static if (is(T == Ddstring))
-		{
-			this._innerValues.ddstringValue = arg.dup;
-		}
 		else static if (is(T == Dwstring))
 		{
-			this._innerValues.dwstringValue = arg.dup;
-		}
-		else static if (is(T == uint))
-		{
-			this._innerValues.uintValue = arg;
-		}
-		else static if (is(T == int))
-		{
-			this._innerValues.intValue = arg;
-		}
-		else static if (is(T == byte))
-		{
-			this._innerValues.byteValue = arg;
-		}
-		else static if (is(T == byte[]))
-		{
-			this._innerValues.bytesValue = arg.dup;
+			this._innerValues.unicodeTextValue = arg.dup;
 		}
 		else static if (is(T == ubyte[]))
 		{
-			this._innerValues.ubytesValue = arg.dup;
+			this._innerValues.textValue = arg.dup;
 		}
 		else static if (is(T == Image))
 		{
 			this._innerValues.imageValue = arg;
 		}
-		else static if (is(T == dfl.data.IDataObject))
+		else static if (is(T == Object))
 		{
-			this._innerValues.iDataObjectValue = arg;
+			this._innerValues.objectValue = arg;
 		}
+		// else static if (is(T == dfl.data.IDataObject))
+		// {
+		// 	this._innerValues.iDataObjectValue = arg;
+		// }
 		else static if (is(T == Data))
 		{
 			Data data = arg;
@@ -603,76 +577,27 @@ class Data
 		return _innerValues.dataValue;
 	}
 	
-
-	/// ditto
-	// IDataObject.
-	IDataObject getIDataObject()
-	{
-		assert(_info == typeid(IDataObject));
-		return _innerValues.iDataObjectValue;
-	}
-
 	/// ditto
 	// UTF-8.
-	Dstring getString()
+	Dstring getStringFormat()
 	{
 		assert(_info == typeid(Dstring));
-		return _innerValues.dstringValue;
+		return _innerValues.stringFormatValue;
 	}
-	
-	/// ditto
-	alias getUtf8 = getString;
-	/// ditto
-	deprecated alias getUTF8 = getString;
 	
 	/// ditto
 	// ANSI text.
 	ubyte[] getText()
 	{
 		assert(_info == typeid(ubyte[]));
-		return _innerValues.ubytesValue;
+		return _innerValues.textValue;
 	}
 	
 	/// ditto
 	Dwstring getUnicodeText()
 	{
 		assert(_info == typeid(Dwstring));
-		return _innerValues.dwstringValue;
-	}
-	
-	/// ditto
-	Ddstring getDdstring()
-	{
-		assert(_info == typeid(Ddstring));
-		return _innerValues.ddstringValue;
-	}
-
-	/// ditto
-	int getInt()
-	{
-		assert(_info == typeid(int));
-		return _innerValues.intValue;
-	}
-	
-	/// ditto
-	uint getUint()
-	{
-		assert(_info == typeid(uint));
-		return _innerValues.uintValue;
-	}
-	
-	/// ditto
-	byte getByte()
-	{
-		assert(_info == typeid(byte));
-		return _innerValues.byteValue;
-	}
-
-	/// ditto
-	byte[] getBytes()
-	{
-		assert(_info == typeid(byte[]));
-		return _innerValues.bytesValue;
+		return _innerValues.unicodeTextValue;
 	}
 
 	/// ditto
@@ -696,27 +621,29 @@ class Data
 		return _innerValues.objectValue;
 	}
 	
+	/// ditto
+	// IDataObject.
+	// IDataObject getIDataObject()
+	// {
+	// 	assert(_info == typeid(IDataObject));
+	// 	return _innerValues.iDataObjectValue;
+	// }
 	
 private:
 	TypeInfo _info;
 	InnerValues _innerValues;
 
-	///
+	/// Data object entity
 	struct InnerValues
 	{
 		Data dataValue;
-		Object objectValue;
-		Dstring dstringValue;
+		Dstring stringFormatValue; // UTF-8
+		Dwstring unicodeTextValue; // Unicode
+		ubyte[] textValue; // Ansi
 		Dstring[] fileDropListValue;
-		Ddstring ddstringValue;
-		Dwstring dwstringValue;
-		uint uintValue;
-		int intValue;
-		byte byteValue;
-		byte[] bytesValue;
-		ubyte[] ubytesValue;
 		Image imageValue;
-		dfl.data.IDataObject iDataObjectValue;
+		Object objectValue;
+		// dfl.data.IDataObject iDataObjectValue;
 	}
 }
 
@@ -843,7 +770,7 @@ class DataObject: dfl.data.IDataObject
 			}
 			obj._info = typeid(Dstring);
 			obj._innerValues.fileDropListValue = null;
-			obj._innerValues.dstringValue = resultString;
+			obj._innerValues.stringFormatValue = resultString;
 		}
 
 		// 
@@ -867,7 +794,7 @@ class DataObject: dfl.data.IDataObject
 	///
 	void setData(Data obj)
 	{
-		Dstring fmt = DataFormats.getFormat(obj.info).name;
+		Dstring fmt = DataFormats.getFormat(obj.info).name; // Example: int -> Format { "int", id }
 		setData(fmt, obj);
 	}
 	
@@ -880,7 +807,7 @@ class DataObject: dfl.data.IDataObject
 	/// ditto
 	void setData(TypeInfo type, Data obj)
 	{
-		Dstring fmt = DataFormats.getFormatFromType(type).name;
+		Dstring fmt = DataFormats.getFormatFromType(type).name; // Example: int -> Format { "int", id }
 		setData(fmt, /+ canConvert: +/true, obj);
 	}
 	
@@ -973,19 +900,19 @@ private final class _DataConvert : Data
 package void _canConvertFormats(Dstring toFmt, void delegate(Dstring fromFmt) callback)
 {
 	// StringFormat(utf8)/UnicodeText/(Ansi)Text
-	if(!stringICmp(toFmt, DataFormats.utf8))
+	if(!stringICmp(toFmt, DataFormats.stringFormat))
 	{
 		callback(DataFormats.unicodeText);
 		callback(DataFormats.text);
 	}
 	else if(!stringICmp(toFmt, DataFormats.unicodeText))
 	{
-		callback(DataFormats.utf8);
+		callback(DataFormats.stringFormat);
 		callback(DataFormats.text);
 	}
 	else if(!stringICmp(toFmt, DataFormats.text))
 	{
-		callback(DataFormats.utf8);
+		callback(DataFormats.stringFormat);
 		callback(DataFormats.unicodeText);
 	}
 	// Bitmap/DIB/DIBV5
@@ -1012,7 +939,7 @@ package Data _doConvertFormat(Data dat, Dstring toFmt)
 	Data result;
 
 	// StringFormat(utf8)/UnicodeText/(Ansi)Text
-	if(!stringICmp(toFmt, DataFormats.utf8))
+	if(!stringICmp(toFmt, DataFormats.stringFormat))
 	{
 		if(typeid(Dwstring) == dat.info)
 		{
@@ -1029,7 +956,7 @@ package Data _doConvertFormat(Data dat, Dstring toFmt)
 	{
 		if(typeid(Dstring) == dat.info)
 		{
-			result = new Data(utf8stringtoUtf16string(dat.getString()));
+			result = new Data(utf8stringtoUtf16string(dat.getStringFormat()));
 		}
 		else if(typeid(ubyte[]) == dat.info)
 		{
@@ -1042,7 +969,7 @@ package Data _doConvertFormat(Data dat, Dstring toFmt)
 	{
 		if(typeid(Dstring) == dat.info)
 		{
-			result = new Data(cast(ubyte[])dfl.internal.utf.toAnsi(dat.getString()));
+			result = new Data(cast(ubyte[])dfl.internal.utf.toAnsi(dat.getStringFormat()));
 		}
 		else if(typeid(Dwstring) == dat.info)
 		{
@@ -1092,6 +1019,8 @@ final class ComToDdataObject: dfl.data.IDataObject
 	{
 		FORMATETC fmte;
 		STGMEDIUM stgm;
+
+		// TODO: Lookup all Stadard and User-defined Clipboard Formats
 
 		if (id == CF_BITMAP)
 		{
@@ -1200,22 +1129,31 @@ final class ComToDdataObject: dfl.data.IDataObject
 	private bool _getDataPresent(int id)
 	{
 		FORMATETC fmte;
+
+		// TODO: Lookup all Stadard and User-defined Clipboard Formats
+		
 		if(id == CF_BITMAP)
 		{
 			fmte.cfFormat = cast(CLIPFORMAT)id;
 			fmte.ptd = null;
-			fmte.dwAspect = DVASPECT_CONTENT; // TODO: ?
+			fmte.dwAspect = DVASPECT_CONTENT;
 			fmte.lindex = -1;
-			fmte.tymed = TYMED_GDI; // TODO: ?
+			fmte.tymed = TYMED_GDI;
 		}
-		else
+		else if (id == CF_TEXT
+			||   id == CF_UNICODETEXT
+			||   id == DataFormats.getFormat(DataFormats.stringFormat).id
+			||   id == CF_HDROP)
 		{
 			fmte.cfFormat = cast(CLIPFORMAT)id;
 			fmte.ptd = null;
-			fmte.dwAspect = DVASPECT_CONTENT; // TODO: ?
+			fmte.dwAspect = DVASPECT_CONTENT;
 			fmte.lindex = -1;
-			fmte.tymed = TYMED_HGLOBAL; // TODO: ?
+			fmte.tymed = TYMED_HGLOBAL;
 		}
+		else
+			return false;
+		
 		return S_OK == _dataObj.QueryGetData(&fmte);
 	}
 	
@@ -1228,7 +1166,8 @@ final class ComToDdataObject: dfl.data.IDataObject
 	/// ditto
 	bool getDataPresent(TypeInfo type)
 	{
-		return _getDataPresent(DataFormats.getFormatFromType(type).id);
+		DataFormats.Format fmt = DataFormats.getFormatFromType(type); // Example: int -> Format { "int", id }
+		return _getDataPresent(fmt.id);
 	}
 	
 	/// ditto
@@ -1323,7 +1262,8 @@ final class ComToDdataObject: dfl.data.IDataObject
 	/// ditto
 	void setData(Data obj)
 	{
-		_setData(DataFormats.getFormatFromType(obj.info).id, obj);
+		DataFormats.Format fmt = DataFormats.getFormatFromType(obj.info); // Example: int -> Format { "int", id }
+		_setData(fmt.id, obj);
 	}
 	
 	/// ditto
@@ -1335,7 +1275,8 @@ final class ComToDdataObject: dfl.data.IDataObject
 	/// ditto
 	void setData(TypeInfo type, Data obj)
 	{
-		_setData(DataFormats.getFormatFromType(type).id, obj);
+		DataFormats.Format fmt = DataFormats.getFormatFromType(type); // Example: int -> Format { "int", id }
+		_setData(fmt.id, obj);
 	}
 	
 	/// ditto
@@ -1433,6 +1374,9 @@ extern(Windows):
 				for(; _idx != end; _idx++)
 				{
 					int id = DataFormats.getFormat(_fmts[_idx]).id;
+
+					// TODO: Lookup all Stadard and User-defined Clipboard Formats
+
 					if (id == CF_BITMAP)
 					{
 						rgelt.cfFormat = cast(CLIPFORMAT)id;
@@ -1441,7 +1385,10 @@ extern(Windows):
 						rgelt.lindex = -1;
 						rgelt.tymed = TYMED_GDI;
 					}
-					else
+					else if (id == CF_TEXT
+						||   id == CF_UNICODETEXT
+						||   id == DataFormats.getFormat(DataFormats.stringFormat).id
+						||   id == CF_HDROP)
 					{
 						rgelt.cfFormat = cast(CLIPFORMAT)id;
 						rgelt.ptd = null;
@@ -1449,6 +1396,8 @@ extern(Windows):
 						rgelt.lindex = -1;
 						rgelt.tymed = TYMED_HGLOBAL;
 					}
+					else
+						throw new DflException("Unable to lookup clipboard format id");
 					
 					rgelt++;
 				}
@@ -1539,6 +1488,8 @@ final class DtoComDataObject: DflComObject, dfl.internal.wincom.IDataObject
 		{
 			return cast(CLIPFORMAT)DataFormats.getFormat(fmt).id;
 		}
+		
+		// TODO: Lookup all Stadard and User-defined Clipboard Formats
 
 		// FormatEtc list that can send to paste target.
 		_formatetcList ~= FORMATETC(CF_BITMAP, null, DVASPECT_CONTENT, -1, TYMED_GDI);
@@ -1600,6 +1551,8 @@ extern(Windows):
 				}
 			}
 
+			// TODO: Lookup all Stadard and User-defined Clipboard Formats
+
 			if (pFormatetc.cfFormat == CF_BITMAP)
 			{
 				if (pFormatetc.tymed & TYMED_GDI)
@@ -1621,7 +1574,6 @@ extern(Windows):
 				||   pFormatetc.cfFormat == CF_UNICODETEXT
 				||   pFormatetc.cfFormat == DataFormats.getFormat(DataFormats.stringFormat).id
 				||   pFormatetc.cfFormat == CF_HDROP)
-				// TODO: other format ...
 			{
 				if (pFormatetc.tymed & TYMED_HGLOBAL)
 				{
