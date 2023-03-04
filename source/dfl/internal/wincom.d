@@ -550,3 +550,4 @@ WINOLEAPI OleIsCurrentClipboard(IDataObject pDataObj);
 WINOLEAPI CreateStreamOnHGlobal(HGLOBAL hGlobal, BOOL fDeleteOnRelease, LPSTREAM ppstm);
 WINOLEAPI OleLoadPicture(IStream pStream, LONG lSize, BOOL fRunmode, IID* riid, void** ppv);
 void ReleaseStgMedium(LPSTGMEDIUM pStgmedium);
+WINOLEAPI CreateFormatEnumerator(UINT cfmtetc, FORMATETC* rgfmtetc, IEnumFORMATETC* ppenumfmtetc);

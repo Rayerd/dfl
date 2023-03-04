@@ -85,20 +85,26 @@ class MainForm : Form
 			_picturebox.image = bitmap;
 		};
 
-		static if (0) // BUG: Don't work. Explorer makes hungup.
+		_copyFileDrop = new Button();
+		_copyFileDrop.parent = _leftSide;
+		_copyFileDrop.text = "copy as FileDrop";
+		_copyFileDrop.dock = DockStyle.TOP;
+		_copyFileDrop.click ~= (Control c, EventArgs e)
 		{
-			_copyFileDrop = new Button();
-			_copyFileDrop.parent = _leftSide;
-			_copyFileDrop.text = "copy as FileDrop";
-			_copyFileDrop.dock = DockStyle.TOP;
-			_copyFileDrop.click ~= (Control c, EventArgs e)
-			{
-				_picturebox.image = null;
-				_textbox.clear();
-				string[] fileNames = [getFullPathName(r".\image\sample.bmp")];
-				Clipboard.setFileDropList(fileNames);
-			};
-		}
+			_picturebox.image = null;
+			_textbox.clear();
+			string file1 = "foo.txt";
+			string file2 = "bar.txt";
+
+			// import std.format;
+			// msgBox(
+			// 		format("%s [len = %d]\n", file1, file1.length) ~ 
+			// 		format("%s [len = %d]\n", file2, file2.length)
+			// );
+
+			string[] fileNames = [file1, file2];
+			Clipboard.setFileDropList(fileNames);
+		};
 
 		_paste = new Button();
 		_paste.parent = _leftSide;
@@ -112,6 +118,7 @@ class MainForm : Form
 			if (Clipboard.containsImage())
 			{
 				Data data = dataObj.getData(DataFormats.bitmap, false);
+				assert(data);
 				Image image = data.getImage();
 				if (image !is null)
 				{
@@ -127,6 +134,7 @@ class MainForm : Form
 			if (Clipboard.containsFileDropList())
 			{
 				Data data = dataObj.getData(DataFormats.fileDrop, false);
+				assert(data);
 				string[] fileDropList = data.getFileDropList();
 				if (fileDropList !is null)
 				{
@@ -163,6 +171,7 @@ class MainForm : Form
 			if (Clipboard.containsData(DataFormats.unicodeText))
 			{
 				Data data = Clipboard.getData(DataFormats.unicodeText);
+				assert(data);
 				wstring str = data.getUnicodeText();
 				if (str !is null)
 				{
@@ -224,7 +233,6 @@ class MainForm : Form
 		_flush.dock = DockStyle.TOP;
 		_flush.click ~= (Control c, EventArgs e)
 		{
-			// NOTE: Call after Clipboard.setDataObject().
 			Clipboard.flush();
 		};
 	}

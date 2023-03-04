@@ -18,8 +18,10 @@ private import dfl.internal.wincom;
 private import core.sys.windows.ole2;
 
 
+pragma(lib, "urlmon"); // CreateFormatEnumerator()
+
 ///
-final class DataFormats
+final static class DataFormats
 {
 	/// Pair of id and Clipboard Format Name.
 	static class Format
@@ -187,13 +189,13 @@ static:
 	+/
 
 
-	// Assumes _init() was already called and
+	// Assumes _initForStandardClipboardFormat() was already called and
 	// -id- is not in -fmts-.
 	private Format _appendUserDefinedClipboardFormat(int id)
 	{
 		// Gets user defined clipboard format.
 		Format fmt = new Format(id, getRegisteredClipboardFormatName(id));
-		//synchronized // _init() would need to be synchronized with it.
+		//synchronized // _initForStandardClipboardFormat() would need to be synchronized with it.
 		{
 			_fmts[id] = fmt;
 		}
@@ -239,7 +241,7 @@ static:
 private:
 	// _fmts is appended the Standard Clipboard Formats first.
 	// After that, _fmts is appended more User-defined Clipboard Formats.
-	Format[int] _fmts; // Indexed by identifier. Must _init() before accessing!
+	Format[int] _fmts; // Indexed by identifier. Must _initForStandardClipboardFormat() before accessing!
 	
 	
 	///
@@ -318,107 +320,152 @@ private:
 	}
 	
 	
-	/// Converts HDROP value to Dstring[] like DragQueryFile().
-	Dstring[] getFileDropListFromClipboardValue(void[] value)
-	{
-		if(value.length <= DROPFILES.sizeof)
-			return null;
+	/// Converts DROPFILES value to Dstring[] like DragQueryFile().
+	// Dstring[] getFileDropListFromClipboardValue(void[] value)
+	// {
+	// 	if(value.length <= DROPFILES.sizeof)
+	// 		return null;
 		
-		Dstring[] result;
-		size_t iw, startiw;
+	// 	Dstring[] result;
+	// 	size_t iw, startiw;
 		
-		DROPFILES* df = cast(DROPFILES*)value.ptr;
-		if(df.pFiles < DROPFILES.sizeof || df.pFiles >= value.length)
-			return null;
+	// 	DROPFILES* df = cast(DROPFILES*)value.ptr;
+	// 	if(df.pFiles < DROPFILES.sizeof || df.pFiles >= value.length)
+	// 		return null;
 		
-		if(df.fWide) // Unicode.
-		{
-			Dwstring uni = cast(Dwstring)((value.ptr + df.pFiles)[0 .. value.length]);
-			for(iw = startiw = 0;; iw++)
-			{
-				if(!uni[iw])
-				{
-					if(startiw == iw)
-						break;
-					result ~= fromUnicode(uni.ptr + startiw, iw - startiw);
-					assert(result[$ - 1].length);
-					startiw = iw + 1;
-				}
-			}
-		}
-		else // ANSI.
-		{
-			Dstring ansi = cast(Dstring)((value.ptr + df.pFiles)[0 .. value.length]);
-			for(iw = startiw = 0;; iw++)
-			{
-				if(!ansi[iw])
-				{
-					if(startiw == iw)
-						break;
-					result ~= fromAnsi(ansi.ptr + startiw, iw - startiw);
-					assert(result[$ - 1].length);
-					startiw = iw + 1;
-				}
-			}
-		}
+	// 	if(df.fWide) // Unicode.
+	// 	{
+	// 		Dwstring uni = cast(Dwstring)((value.ptr + df.pFiles)[0 .. value.length]);
+	// 		for(iw = startiw = 0;; iw++)
+	// 		{
+	// 			if(!uni[iw])
+	// 			{
+	// 				if(startiw == iw)
+	// 					break;
+	// 				result ~= fromUnicode(uni.ptr + startiw, iw - startiw);
+	// 				assert(result[$ - 1].length);
+	// 				startiw = iw + 1;
+	// 			}
+	// 		}
+	// 	}
+	// 	else // ANSI.
+	// 	{
+	// 		Dstring ansi = cast(Dstring)((value.ptr + df.pFiles)[0 .. value.length]);
+	// 		for(iw = startiw = 0;; iw++)
+	// 		{
+	// 			if(!ansi[iw])
+	// 			{
+	// 				if(startiw == iw)
+	// 					break;
+	// 				result ~= fromAnsi(ansi.ptr + startiw, iw - startiw);
+	// 				assert(result[$ - 1].length);
+	// 				startiw = iw + 1;
+	// 			}
+	// 		}
+	// 	}
 		
-		return result;
-	}
+	// 	return result;
+	// }
 	
 	
 	/// Converts clipboard value to Data.
 	/// Clipboard value is got from STGMEDIUM.hGlobal.
 	/// Therefore, it handles all format IDs obtained from hGlobal.
-	Data getDataFromClipboardValue(int id, void[] value)
-	{
-		switch (id)
-		{
-		case CF_TEXT:
-			return new Data(stopAtNull!(ubyte)(cast(ubyte[])value));
+	// Data getDataFromClipboardValue(int id, void[] value)
+	// {
+	// 	switch (id)
+	// 	{
+	// 	case CF_TEXT:
+	// 		return new Data(stopAtNull!(ubyte)(cast(ubyte[])value));
 		
-		case CF_UNICODETEXT:
-			return new Data(stopAtNull!(Dwchar)(cast(Dwstring)value));
+	// 	case CF_UNICODETEXT:
+	// 		return new Data(stopAtNull!(Dwchar)(cast(Dwstring)value));
 		
-		case CF_HDROP:
-			return new Data(getFileDropListFromClipboardValue(value));
+	// 	// case CF_HDROP:
+	// 	// 	// DROPFILES* df = cast(DROPFILES*)value;
+	// 	// 	// HDROP hd = cast(HDROP)df;
+	// 	// 	// int count = dragQueryFile(hd);
+	// 	// 	// Dstring[] fileDropList;
+	// 	// 	// for(int i; i < count; i++)
+	// 	// 	// {
+	// 	// 	// 	fileDropList ~= dragQueryFile(hd, i);
+	// 	// 	// }
+	// 	// 	Dstring[] fileDropList = getFileDropListFromClipboardValue(value);
+	// 	// 	return new Data(fileDropList);
 		
-		default:
-			if(id == getFormat(stringFormat).id)
-				return new Data(stopAtNull!(Dchar)(cast(Dstring)value));
-			else
-				throw new DflException("Clipboard value is unknown data format");
-		}
-	}
+	// 	default:
+	// 		if(id == getFormat(stringFormat).id)
+	// 			return new Data(stopAtNull!(Dchar)(cast(Dstring)value));
+	// 		else
+	// 			throw new DflException("Clipboard value is unknown data format");
+	// 	}
+	// }
 	
 	
 	/// Converts file name list to HDROP as clipboard value.
-	void[] getClipboardValueFromFileDropList(Dstring[] fileNames) pure
+	ubyte[] getHDropStringFromFileDropList(Dstring[] fileNames)
 	{
-		size_t sz = DROPFILES.sizeof;
+		size_t sz;
 		foreach(fn; fileNames)
 		{
-			sz += (dfl.internal.utf.toUnicodeLength(fn) + 1) << 1;
+			sz += fn.length + 1;
 		}
-		sz += 2;
-		
-		void* p = (new byte[sz]).ptr;
-		DROPFILES* df = cast(DROPFILES*)p;
-		df.pFiles = DROPFILES.sizeof;
-		df.fWide = TRUE;
-		
-		wchar* ws = cast(wchar*)(p + DROPFILES.sizeof);
-		foreach(fn; fileNames)
+		sz++;
+
+		wchar* buf = (new wchar[sz]).ptr;
+		wchar* w = buf;
+		foreach (fn; fileNames)
 		{
-			foreach(wchar wch; fn)
-			{
-				*ws++ = wch;
-			}
-			*ws++ = 0;
+			Dwstring wName = toUnicode(fn);
+			w[0 .. wName.length] = wName[];
+			w[wName.length] = 0;
+			w += wName.length + 1;
 		}
-		*ws++ = 0;
-		
-		return p[0 .. sz];
+		*w++ = 0;
+
+		return cast(ubyte[])(buf[0 .. sz]);
 	}
+	// void[] getClipboardValueFromFileDropList(Dstring[] fileNames) pure
+	// {
+	// 	// HDROP value size is HEADER + BODY.
+	// 	// - HEADER = DROPFILES struct
+	// 	// - BODY   = (filename + '0') * N + '\0'
+
+	// 	// BODY size
+	// 	size_t sz = DROPFILES.sizeof;
+	// 	foreach(fn; fileNames)
+	// 	{
+	// 		sz += (dfl.internal.utf.toUnicodeLength(fn) + 1) * 2; // A UTF-16 char is 2 bytes.
+	// 	}
+	// 	sz += 2;
+
+	// 	// + HEADER size
+	// 	sz += DROPFILES.sizeof;
+
+	// 	// Alocate memory
+	// 	DROPFILES* df = cast(DROPFILES*)(new byte[sz]).ptr;
+		
+	// 	// HEADER
+	// 	df.pFiles = DROPFILES.sizeof;
+	// 	df.fNC = FALSE;
+	// 	df.pt.x = 0;
+	// 	df.pt.y = 0;
+	// 	df.fWide = TRUE;
+		
+	// 	// BODY
+	// 	wchar* ws = cast(wchar*)(df + DROPFILES.sizeof);
+	// 	foreach(fn; fileNames)
+	// 	{
+	// 		foreach(wchar wch; fn)
+	// 		{
+	// 			*ws++ = wch;
+	// 		}
+	// 		*ws++ = 0;
+	// 	}
+	// 	*ws++ = 0;
+		
+	// 	return df[0 .. sz];
+	// }
 	unittest
 	{
 		import std.stdio;
@@ -426,8 +473,7 @@ private:
 		strs ~= "aa";
 		strs ~= "bb";
 		strs ~= "cc";
-		auto dataFormats = new DataFormats();
-		void[] clipboardValue = dataFormats.getClipboardValueFromFileDropList(strs);
+		void[] clipboardValue = DataFormats.getClipboardValueFromFileDropList(strs);
 		wchar* wcharBinary = cast(wchar*)(clipboardValue);
 		debug(APP_PRINT)
 		{
@@ -448,7 +494,7 @@ private:
 			for(int i; i < wcharBinary[0]; i++)
 				writefln("%d code:%d [%s]", i, wcharBinary[i], wcharBinary[i]);
 		}
-		assert(wcharBinary[0] == 20); // a part of wchar binary's length
+		assert(wcharBinary[0] == DROPFILES.sizeof); // The offset of the file list from the beginning of this structure, in bytes.
 		assert(wcharBinary[10] == 'a');
 		assert(wcharBinary[11] == 'a');
 		assert(wcharBinary[12] == '\0');
@@ -483,10 +529,6 @@ private:
 			// Unicode string.
 			return (data.getUnicodeText() ~ '\0').dup;
 		}
-		else if(CF_HDROP == id)
-		{
-			return getClipboardValueFromFileDropList(data.getFileDropList());
-		}
 		else
 		{
 			throw new DflException("DFL: getClipboardValueFromData failure.");
@@ -505,7 +547,7 @@ private template stopAtNull(T)
 			if(!array[i])
 				return array[0 .. i];
 		}
-		throw new DflException("Invalid data"); // TODO: ?
+		throw new DflException("Invalid data");
 	}
 }
 
@@ -692,7 +734,7 @@ class DataObject: dfl.data.IDataObject
 	Data getData(TypeInfo type)
 	{
 		Dstring fmt = DataFormats.getFormat(type).name;
-		return getData(fmt);
+		return getData(fmt, true);
 	}
 	
 	/// ditto
@@ -701,7 +743,7 @@ class DataObject: dfl.data.IDataObject
 		// TODO: doConvert ...
 		
 		//cprintf("Looking for format '%.*s'.\n", fmt);
-		int i = find(fmt);
+		int i = find(fmt, true);
 		if(i == -1)
 			throw new DflException("Data format not present");
 		return _all[i].obj;
@@ -718,7 +760,7 @@ class DataObject: dfl.data.IDataObject
 	bool getDataPresent(TypeInfo type)
 	{
 		Dstring fmt = DataFormats.getFormat(type).name;
-		return getDataPresent(fmt);
+		return getDataPresent(fmt, true);
 	}
 	
 	/// ditto
@@ -726,68 +768,19 @@ class DataObject: dfl.data.IDataObject
 	{
 		// TODO: canConvert ...
 
-		return find(fmt) != -1;
+		return find(fmt, true) != -1;
 	}
 	
 	
 	///
 	Dstring[] getFormats() pure
 	{
-		Dstring[] result = new Dstring[_all.length];
-		foreach(i, ref Dstring fmt; result)
+		Dstring[] result;
+		foreach(Pair p; _all)
 		{
-			fmt = _all[i].fmt;
+			result ~= p.fmt;
 		}
 		return result;
-	}
-	
-	
-	/// Stores pair of format and data.
-	/// When -replace- is true, stores new data with as a pair of preexist format.
-	// Concrete implementation.
-	package final void _setData(Dstring fmt, Data obj, bool replace = true)
-	{
-		if (obj._info == typeid(Dstring[]))
-		{
-			// Converts Dstring[] to Dstring ('\n' separated).
-			Dstring resultString;
-			Dstring[] sourceStrings = obj._innerValues.fileDropListValue;
-			if (sourceStrings.length == 0)
-			{
-				resultString = "";
-			}
-			else if (sourceStrings.length == 1)
-			{
-				resultString = sourceStrings[0];
-			}
-			else
-			{
-				foreach (i, Dstring iter; sourceStrings[0 .. $-1])
-				{
-					resultString ~= iter ~ '\n';
-				}
-				resultString ~= sourceStrings[$-1];
-			}
-			obj._info = typeid(Dstring);
-			obj._innerValues.fileDropListValue = null;
-			obj._innerValues.stringFormatValue = resultString;
-		}
-
-		// 
-		int i = find(fmt, false);
-		if(i != -1)
-		{
-			if(replace)
-				_all[i].obj = obj; // If found fmt in all, replace obj.
-		}
-		else
-		{
-			// If not found fmt in all, append new pair of fmt and obj.
-			Pair pair;
-			pair.fmt = fmt;
-			pair.obj = obj;
-			_all ~= pair;
-		}
 	}
 	
 	
@@ -795,7 +788,7 @@ class DataObject: dfl.data.IDataObject
 	void setData(Data obj)
 	{
 		Dstring fmt = DataFormats.getFormat(obj.info).name; // Example: int -> Format { "int", id }
-		setData(fmt, obj);
+		setData(fmt, /+ canConvert: +/true, obj);
 	}
 	
 	/// ditto
@@ -814,17 +807,7 @@ class DataObject: dfl.data.IDataObject
 	/// ditto
 	void setData(Dstring fmt, bool canConvert, Data obj)
 	{
-		/+
-		if(obj.info == typeid(Data))
-		{
-			void[] objv;
-			objv = obj.value;
-			assert(objv.length == Data.sizeof);
-			obj = *(cast(Data*)objv.ptr);
-		}
-		+/
-		
-		_setData(fmt, obj);
+		_setData(fmt, obj, true);
 		
 		if(canConvert)
 		{
@@ -837,6 +820,55 @@ class DataObject: dfl.data.IDataObject
 	}
 	
 	
+	/// Stores pair of format and data.
+	/// When -replace- is true, stores new data with as a pair of preexist format.
+	// Concrete implementation.
+	private void _setData(Dstring fmt, Data obj, bool replace)
+	{
+		// if (obj._info == typeid(Dstring[]))
+		// {
+		// 	// Converts Dstring[] to Dstring ('\n' separated).
+		// 	Dstring resultString;
+		// 	Dstring[] sourceStrings = obj._innerValues.fileDropListValue;
+		// 	if (sourceStrings.length == 0)
+		// 	{
+		// 		resultString = "";
+		// 	}
+		// 	else if (sourceStrings.length == 1)
+		// 	{
+		// 		resultString = sourceStrings[0];
+		// 	}
+		// 	else
+		// 	{
+		// 		foreach (i, Dstring iter; sourceStrings[0 .. $-1])
+		// 		{
+		// 			resultString ~= iter ~ '\n';
+		// 		}
+		// 		resultString ~= sourceStrings[$-1];
+		// 	}
+		// 	obj._info = typeid(Dstring);
+		// 	obj._innerValues.fileDropListValue = null;
+		// 	obj._innerValues.stringFormatValue = resultString;
+		// }
+
+		// 
+		int i = find(fmt, false);
+		if(i != -1)
+		{
+			if(replace)
+				_all[i].obj = obj; // If found fmt in all, replace obj.
+		}
+		else
+		{
+			// If not found fmt in all, append new pair of fmt and obj.
+			Pair pair;
+			pair.fmt = fmt;
+			pair.obj = obj;
+			_all ~= pair;
+		}
+	}
+
+
 private:
 	/// Pair has two fileds, Data that should be converted and correctly data format.
 	/// Do fix obj when obj.info is _DataConvert.
@@ -848,13 +880,13 @@ private:
 	}
 	
 	
-	Pair[] _all;
+	Pair[] _all; /// Pair list of Clipboard Format (Dstring) and Data object.
 	
 	
 	///
-	int find(Dstring fmt, bool fix = true)
+	int find(Dstring fmt, bool fix)
 	{
-		for(size_t i = 0; i != _all.length; i++)
+		for (size_t i; i < _all.length; i++)
 		{
 			if(!stringICmp(_all[i].fmt, fmt))
 			{
@@ -947,8 +979,7 @@ package Data _doConvertFormat(Data dat, Dstring toFmt)
 		}
 		else if(typeid(ubyte[]) == dat.info)
 		{
-			ubyte[] ubs;
-			ubs = dat.getText();
+			ubyte[] ubs = dat.getText();
 			result = new Data(dfl.internal.utf.fromAnsi(cast(Dstringz)ubs.ptr, ubs.length));
 		}
 	}
@@ -960,8 +991,7 @@ package Data _doConvertFormat(Data dat, Dstring toFmt)
 		}
 		else if(typeid(ubyte[]) == dat.info)
 		{
-			ubyte[] ubs;
-			ubs = dat.getText();
+			ubyte[] ubs = dat.getText();
 			result = new Data(dfl.internal.utf.ansiToUnicode(cast(Dstringz)ubs.ptr, ubs.length));
 		}
 	}
@@ -973,8 +1003,7 @@ package Data _doConvertFormat(Data dat, Dstring toFmt)
 		}
 		else if(typeid(Dwstring) == dat.info)
 		{
-			Dwstring wcs;
-			wcs = dat.getUnicodeText();
+			Dwstring wcs = dat.getUnicodeText();
 			result = new Data(cast(ubyte[])unicodeToAnsi(wcs.ptr, wcs.length));
 		}
 	}
@@ -1069,8 +1098,7 @@ final class ComToDdataObject: dfl.data.IDataObject
 		}
 		else if (id == CF_TEXT
 			||   id == CF_UNICODETEXT
-			||   id == DataFormats.getFormat(DataFormats.stringFormat).id
-			||   id == CF_HDROP)
+			||   id == DataFormats.getFormat(DataFormats.stringFormat).id)
 		{
 			fmte.cfFormat = cast(CLIPFORMAT)id;
 			fmte.ptd = null;
@@ -1095,10 +1123,48 @@ final class ComToDdataObject: dfl.data.IDataObject
 			mem[] = plock[0 .. mem.length];
 			GlobalUnlock(stgm.hGlobal);
 			ReleaseStgMedium(&stgm);
+
+			if (id == CF_TEXT)
+				return new Data(stopAtNull!(ubyte)(cast(ubyte[])mem));
+			if (id == CF_UNICODETEXT)
+				return new Data(stopAtNull!(Dwchar)(cast(Dwstring)mem));
+			if (id == DataFormats.getFormat(DataFormats.stringFormat).id)
+				return new Data(stopAtNull!(Dchar)(cast(Dstring)mem));
 			
-			// Assuming the data format of the received format ID,
-			// convert the contents of the memory into a Data object.
-			return DataFormats.getDataFromClipboardValue(id, mem);
+			assert(0);
+		}
+		else if (id == CF_HDROP)
+		{
+			fmte.cfFormat = cast(CLIPFORMAT)id;
+			fmte.ptd = null;
+			fmte.dwAspect = DVASPECT_CONTENT;
+			fmte.lindex = -1;
+			fmte.tymed = TYMED_HGLOBAL;
+
+			if (S_OK != _dataObj.QueryGetData(&fmte/+ in +/))
+				throw new DflException("Unable to query get data");
+			
+			if(S_OK != _dataObj.GetData(&fmte/+ in +/, &stgm/+ out +/))
+				throw new DflException("Unable to get data");
+			
+			void* plock = GlobalLock(stgm.hGlobal);
+			if(!plock)
+			{
+				ReleaseStgMedium(&stgm);
+				throw new DflException("Error obtaining data");
+			}
+			
+			Dstring[] fileDropList;
+			int numFiles = dragQueryFile(cast(HDROP)stgm.hGlobal);
+			for (int i = 0 ; i < numFiles; i++)
+			{
+				fileDropList ~= dragQueryFile(cast(HDROP)stgm.hGlobal, i);
+			}
+
+			GlobalUnlock(stgm.hGlobal);
+			ReleaseStgMedium(&stgm);
+
+			return new Data(fileDropList);
 		}
 		else
 		{
@@ -1121,7 +1187,9 @@ final class ComToDdataObject: dfl.data.IDataObject
 	/// ditto
 	Data getData(Dstring fmt, bool doConvert)
 	{
-		return getData(fmt); // TODO: ?
+		// TODO: doConvert ...
+
+		return _getData(DataFormats.getFormat(fmt).id);
 	}
 	
 	
@@ -1175,7 +1243,7 @@ final class ComToDdataObject: dfl.data.IDataObject
 	{
 		// TODO: canConvert ...
 
-		return getDataPresent(fmt); // TODO: ?
+		return _getDataPresent(DataFormats.getFormat(fmt).id);
 	}
 	
 	
@@ -1284,7 +1352,7 @@ final class ComToDdataObject: dfl.data.IDataObject
 	{
 		// TODO: canConvert ...
 
-		setData(fmt, obj); // TODO: ?
+		_setData(DataFormats.getFormat(fmt).id, obj);
 	}
 	
 	
@@ -1299,7 +1367,7 @@ private:
 	dfl.internal.wincom.IDataObject _dataObj;
 }
 
-
+/+
 ///
 final class EnumDataObjectFORMATETC: DflComObject, IEnumFORMATETC
 {
@@ -1474,6 +1542,7 @@ private:
 	Dstring[] _fmts;
 	ULONG _idx;
 }
++/
 
 
 ///
@@ -1482,9 +1551,10 @@ final class DtoComDataObject: DflComObject, dfl.internal.wincom.IDataObject
 	///
 	this(dfl.data.IDataObject dataObj)
 	{
+		assert(dataObj);
 		_dataObj = dataObj;
 
-		CLIPFORMAT _getIdFromFormat(Dstring fmt)
+		CLIPFORMAT getId(Dstring fmt)
 		{
 			return cast(CLIPFORMAT)DataFormats.getFormat(fmt).id;
 		}
@@ -1493,11 +1563,9 @@ final class DtoComDataObject: DflComObject, dfl.internal.wincom.IDataObject
 
 		// FormatEtc list that can send to paste target.
 		_formatetcList ~= FORMATETC(CF_BITMAP, null, DVASPECT_CONTENT, -1, TYMED_GDI);
-
 		_formatetcList ~= FORMATETC(CF_TEXT, null, DVASPECT_CONTENT, -1, TYMED_HGLOBAL);
 		_formatetcList ~= FORMATETC(CF_UNICODETEXT, null, DVASPECT_CONTENT, -1, TYMED_HGLOBAL);
-		_formatetcList ~= FORMATETC(_getIdFromFormat(DataFormats.stringFormat), null, DVASPECT_CONTENT, -1, TYMED_HGLOBAL);
-
+		_formatetcList ~= FORMATETC(getId(DataFormats.stringFormat), null, DVASPECT_CONTENT, -1, TYMED_HGLOBAL);
 		_formatetcList ~= FORMATETC(CF_HDROP, null, DVASPECT_CONTENT, -1, TYMED_HGLOBAL);
 	}
 
@@ -1536,20 +1604,21 @@ extern(Windows):
 	{
 		try
 		{
-			if (!isSupportedFormatetc(pFormatetc))
-			{
-				return DV_E_FORMATETC;
-			}
+			// if (!isSupportedFormatetc(pFormatetc))
+			// {
+			// 	return DV_E_FORMATETC;
+			// }
 
-			{
-				// Call DataObject.find(fmt, fix: true) to find out
-				// if the required fmt exists in DataObject._all.
-				Dstring fmt = DataFormats.getFormat(pFormatetc.cfFormat).name;
-				if(!_dataObj.getDataPresent(fmt))
-				{
-					return S_FALSE;
-				}
-			}
+			// {
+			// 	// Call DataObject.find(fmt, fix: true) to find out
+			// 	// if the required fmt exists in DataObject._all.
+			// 	Dstring fmt = DataFormats.getFormat(pFormatetc.cfFormat).name;
+			// 	assert(_dataObj);
+			// 	if(!_dataObj.getDataPresent(fmt))
+			// 	{
+			// 		return S_FALSE;
+			// 	}
+			// }
 
 			// TODO: Lookup all Stadard and User-defined Clipboard Formats
 
@@ -1572,16 +1641,16 @@ extern(Windows):
 			}
 			else if (pFormatetc.cfFormat == CF_TEXT
 				||   pFormatetc.cfFormat == CF_UNICODETEXT
-				||   pFormatetc.cfFormat == DataFormats.getFormat(DataFormats.stringFormat).id
-				||   pFormatetc.cfFormat == CF_HDROP)
+				||   pFormatetc.cfFormat == DataFormats.getFormat(DataFormats.stringFormat).id)
 			{
 				if (pFormatetc.tymed & TYMED_HGLOBAL)
 				{
 					DataFormats.Format fmt = DataFormats.getFormat(pFormatetc.cfFormat);
 					Data data = _dataObj.getData(fmt.name, true); // Should this be convertable?
 					
+					// ; void[] src = cast(void[])"hoge\0"; // UTF-8 text example
 					void[] src = DataFormats.getClipboardValueFromData(fmt.id, data);
-					HGLOBAL hg = GlobalAlloc(GMEM_SHARE, src.length.toI32);
+					HGLOBAL hg = GlobalAlloc(GHND, src.length.toI32);
 					if(!hg)
 					{
 						return STG_E_MEDIUMFULL;
@@ -1599,6 +1668,47 @@ extern(Windows):
 					
 					pmedium.tymed = TYMED_HGLOBAL;
 					pmedium.hGlobal = hg;
+					pmedium.pUnkForRelease = null;
+				}
+			}
+			else if (pFormatetc.cfFormat == CF_HDROP)
+			{
+				if (pFormatetc.tymed & TYMED_HGLOBAL)
+				{
+					DataFormats.Format fmt = DataFormats.getFormat(pFormatetc.cfFormat);
+					Data data = _dataObj.getData(fmt.name, true); // Should this be convertable?
+					assert(data);
+					string[] files = data.getFileDropList();
+					assert(files);
+					ubyte[] ubfileList = DataFormats.getHDropStringFromFileDropList(files);
+					// ; ubyte[] ubfileList = cast(ubyte[])"abc\0\0xyz\0"w;
+
+					HDROP hDrop = cast(HDROP)GlobalAlloc(GHND, cast(uint)(DROPFILES.sizeof + ubfileList.length));
+					if(!hDrop)
+					{
+						return STG_E_MEDIUMFULL;
+					}
+
+					DROPFILES* dp = cast(DROPFILES*)GlobalLock(hDrop);
+					if(!dp)
+					{
+						GlobalFree(hDrop);
+						return E_UNEXPECTED;
+					}
+
+					dp.pFiles = DROPFILES.sizeof;
+					dp.pt.x = 0;
+					dp.pt.y = 0;
+					dp.fNC = false;
+					dp.fWide = true;
+
+					ubyte* p = cast(ubyte*)dp + DROPFILES.sizeof;
+					p[0 .. ubfileList.length] = ubfileList[];
+					// ; wchar[] wp = cast(wchar[])p[0 .. ubfileList.length];
+					GlobalUnlock(hDrop);
+					
+					pmedium.tymed = TYMED_HGLOBAL;
+					pmedium.hGlobal = hDrop;
 					pmedium.pUnkForRelease = null;
 				}
 				else
@@ -1709,14 +1819,21 @@ extern(Windows):
 	// [out] IEnumFORMATETC* ppenumFormatetc
 	HRESULT EnumFormatEtc(DWORD dwDirection, IEnumFORMATETC* ppenumFormatetc)
 	{
-		// SHCreateStdEnumFmtEtc() requires Windows 2000 +
-		
 		try
 		{
 			if(dwDirection == DATADIR_GET)
 			{
-				*ppenumFormatetc = new EnumDataObjectFORMATETC(_dataObj);
-				return S_OK;
+				// *ppenumFormatetc = new EnumDataObjectFORMATETC(_dataObj);
+				// return S_OK;
+				FORMATETC[] feList;
+				foreach (formatetc; _formatetcList)
+				{
+					int id = formatetc.cfFormat;
+					Dstring fmt = DataFormats.getFormat(id).name;
+					if (_dataObj.getDataPresent(fmt))
+						feList ~= formatetc;
+				}
+				return CreateFormatEnumerator(cast(UINT)feList.length, &(feList[0]), ppenumFormatetc);
 			}
 			else if(dwDirection == DATADIR_SET)
 			{

@@ -27,10 +27,7 @@ static:
 		dfl.internal.wincom.IDataObject comDataObject;
 		if(S_OK != OleGetClipboard(&comDataObject))
 			throw new DflException("Unable to obtain clipboard data object");
-		if(comDataObject is _comDataObject)
-			return _dflDataObject;
-		_comDataObject = comDataObject;
-		return _dflDataObject = new ComToDdataObject(comDataObject);
+		return new ComToDdataObject(comDataObject);
 	}
 	
 	/// Places a specified data object on the system Clipboard and accepts a Boolean parameter
@@ -38,13 +35,14 @@ static:
 	/// when the application exits.
 	void setDataObject(dfl.data.IDataObject dataObj, bool persist = false)
 	{
+		assert(dataObj);
+
 		// First, clears data on clipboard.
 		if(S_OK != OleSetClipboard(null))
 			goto err_set;
 		
 		_dflDataObject = dataObj;
 		_comDataObject = new DtoComDataObject(_dflDataObject);
-
 		if(S_OK != OleSetClipboard(_comDataObject))
 			goto err_set;
 		
@@ -73,7 +71,7 @@ static:
 		dfl.data.IDataObject dataObj = new DataObject;
 		Dstring regsteredFormat = DataFormats.getFormat(fmt).name;
 		dataObj.setData(regsteredFormat, obj);
-		setDataObject(dataObj, true);
+		setDataObject(dataObj, false); // -false- is not same as WinForms.
 	}
 
 	/// Queries the Clipboard for the presence of data in a specified data format.

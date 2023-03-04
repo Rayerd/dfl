@@ -1589,9 +1589,9 @@ deprecated BOOL getTextExtentPoint32(HDC hdc, Dstring text, LPSIZE lpSize)
 }
 
 
-Dstring dragQueryFile(HDROP hDrop, UINT iFile)
+Dstring dragQueryFile(HDROP hDrop, UINT idxFile)
 {
-	if(iFile >= 0xFFFFFFFF)
+	if(idxFile >= 0xFFFFFFFF)
 		return null;
 	
 	if(useUnicode)
@@ -1615,22 +1615,22 @@ Dstring dragQueryFile(HDROP hDrop, UINT iFile)
 		
 		wchar[] str;
 		UINT len;
-		len = proc(hDrop, iFile, null, 0);
+		len = proc(hDrop, idxFile, null, 0);
 		if(!len)
 			return null;
 		str = new wchar[len + 1];
-		proc(hDrop, iFile, str.ptr, str.length.toI32);
+		proc(hDrop, idxFile, str.ptr, str.length.toI32);
 		return fromUnicode(str.ptr, len);
 	}
 	else
 	{
 		char[] str;
 		UINT len;
-		len = DragQueryFileA(hDrop, iFile, null, 0);
+		len = DragQueryFileA(hDrop, idxFile, null, 0);
 		if(!len)
 			return null;
 		str = new char[len + 1];
-		DragQueryFileA(hDrop, iFile, str.ptr, str.length.toI32);
+		DragQueryFileA(hDrop, idxFile, str.ptr, str.length.toI32);
 		return fromAnsi(str.ptr, len);
 	}
 }
