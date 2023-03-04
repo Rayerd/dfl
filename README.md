@@ -12,6 +12,7 @@ DFL is a Win32 windowing library for the D language.
 ![screen shot](./examples/commondialog/image/screenshot.png "screen shot")
 ![screen shot](./examples/tooltip/image/screenshot.png "screen shot")
 ![screen shot](./examples/progressbar/image/screenshot3.png "screen shot")
+<img src="./examples/clipboard/image/screenshot.png" width="50%">
 
 ## Recent major features
 - DUB is available for DFL.

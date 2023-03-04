@@ -108,7 +108,7 @@ class MainForm : Form
 
 		_paste = new Button();
 		_paste.parent = _leftSide;
-		_paste.text = "paste to textbox/picturebox";
+		_paste.text = "paste";
 		_paste.dock = DockStyle.TOP;
 		_paste.click ~= (Control c, EventArgs e)
 		{
