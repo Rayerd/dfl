@@ -189,20 +189,6 @@ static:
 	+/
 
 
-	// Assumes _initForStandardClipboardFormat() was already called and
-	// -id- is not in -fmts-.
-	private Format _appendUserDefinedClipboardFormat(int id)
-	{
-		// Gets user defined clipboard format.
-		Format fmt = new Format(id, getRegisteredClipboardFormatName(id));
-		//synchronized // _initForStandardClipboardFormat() would need to be synchronized with it.
-		{
-			_fmts[id] = fmt;
-		}
-		return fmt;
-	}
-	
-	
 	///
 	Format getFormat(int id)
 	{
@@ -234,7 +220,7 @@ static:
 	// Extra.
 	Format getFormat(TypeInfo type)
 	{
-		return getFormatFromType(type);
+		return _getFormatFromType(type);
 	}
 	
 	
@@ -283,9 +269,23 @@ private:
 	}
 	
 	
+	// Assumes _initForStandardClipboardFormat() was already called and
+	// -id- is not in -fmts-.
+	Format _appendUserDefinedClipboardFormat(int id)
+	{
+		// Gets user defined clipboard format.
+		Format fmt = new Format(id, _getRegisteredClipboardFormatName(id));
+		//synchronized // _initForStandardClipboardFormat() would need to be synchronized with it.
+		{
+			_fmts[id] = fmt;
+		}
+		return fmt;
+	}
+	
+	
 	/// Returns the name of defined format by RegisterClipboardFormat().
 	/// Does not get the name of one of the predefined constant ones.
-	Dstring getRegisteredClipboardFormatName(int id)
+	Dstring _getRegisteredClipboardFormatName(int id)
 	{
 		Dstring fmt = dfl.internal.utf.getClipboardFormatName(id);
 		if(!fmt)
@@ -297,7 +297,7 @@ private:
 	
 	
 	/// Converts TypeInfo to Format.
-	package Format getFormatFromType(TypeInfo type)
+	Format _getFormatFromType(TypeInfo type)
 	{
 		if(type == typeid(ubyte[]))
 			return getFormat(text);
@@ -321,7 +321,7 @@ private:
 	
 	
 	/// Converts file name list to HDROP as clipboard value.
-	ubyte[] getHDropStringFromFileDropList(Dstring[] fileNames)
+	ubyte[] _getHDropStringFromFileDropList(Dstring[] fileNames)
 	{
 		size_t sz;
 		foreach(fn; fileNames)
@@ -386,7 +386,7 @@ private:
 	
 	
 	/// Converts the Data object to clipboard value assuming it is of the specified format id.
-	void[] getClipboardValueFromData(int id, Data data)
+	void[] _getClipboardValueFromData(int id, Data data)
 	{
 		if((CF_TEXT == id) || (data.info == typeid(byte[])))
 		{
@@ -415,9 +415,9 @@ private:
 
 
 ///
-private template stopAtNull(T)
+private template _stopAtNull(T)
 {
-	T[] stopAtNull(T[] array)
+	T[] _stopAtNull(T[] array)
 	{
 		for(size_t i = 0; i != array.length; i++)
 		{
@@ -620,7 +620,7 @@ class DataObject: dfl.data.IDataObject
 		// TODO: doConvert ...
 		
 		//cprintf("Looking for format '%.*s'.\n", fmt);
-		int i = find(fmt, true);
+		int i = _find(fmt, true);
 		if(i == -1)
 			throw new DflException("Data format not present");
 		return _all[i].obj;
@@ -645,7 +645,7 @@ class DataObject: dfl.data.IDataObject
 	{
 		// TODO: canConvert ...
 
-		return find(fmt, true) != -1;
+		return _find(fmt, true) != -1;
 	}
 	
 	
@@ -677,7 +677,7 @@ class DataObject: dfl.data.IDataObject
 	/// ditto
 	void setData(TypeInfo type, Data obj)
 	{
-		Dstring fmt = DataFormats.getFormatFromType(type).name; // Example: int -> Format { "int", id }
+		Dstring fmt = DataFormats.getFormat(type).name; // Example: int -> Format { "int", id }
 		setData(fmt, /+ canConvert: +/true, obj);
 	}
 	
@@ -697,12 +697,26 @@ class DataObject: dfl.data.IDataObject
 	}
 	
 	
+private:
+	/// Pair has two fileds, Data that should be converted and correctly data format.
+	/// Do fix obj when obj.info is _DataConvert.
+	/// The obj's inner value should be fixed by fmt.
+	struct Pair
+	{
+		Dstring fmt;
+		Data obj;
+	}
+	
+	
+	Pair[] _all; /// Pair list of Clipboard Format (Dstring) and Data object.
+	
+	
 	/// Stores pair of format and data.
 	/// When -replace- is true, stores new data with as a pair of preexist format.
 	// Concrete implementation.
-	private void _setData(Dstring fmt, Data obj, bool replace)
+	void _setData(Dstring fmt, Data obj, bool replace)
 	{
-		int i = find(fmt, false);
+		int i = _find(fmt, false);
 		if(i != -1)
 		{
 			if(replace)
@@ -719,22 +733,8 @@ class DataObject: dfl.data.IDataObject
 	}
 
 
-private:
-	/// Pair has two fileds, Data that should be converted and correctly data format.
-	/// Do fix obj when obj.info is _DataConvert.
-	/// The obj's inner value should be fixed by fmt.
-	struct Pair
-	{
-		Dstring fmt;
-		Data obj;
-	}
-	
-	
-	Pair[] _all; /// Pair list of Clipboard Format (Dstring) and Data object.
-	
-	
 	///
-	int find(Dstring fmt, bool fix)
+	int _find(Dstring fmt, bool fix)
 	{
 		for (size_t i; i < _all.length; i++)
 		{
@@ -743,7 +743,7 @@ private:
 				assert(_all[i].obj);
 				assert(_all[i].obj.info);
 				if(fix && _all[i].obj.info == typeid(_DataConvert))
-					fixPairEntry(_all[i]);
+					_fixPairEntry(_all[i]);
 				return i.toI32;
 			}
 		}
@@ -752,7 +752,7 @@ private:
 	
 	
 	///
-	void fixPairEntry(ref Pair pr)
+	void _fixPairEntry(ref Pair pr)
 	{
 		assert(pr.obj.info == typeid(_DataConvert));
 		Data obj = pr.obj.getData();
@@ -779,7 +779,7 @@ private final class _DataConvert : Data
 
 
 /// 
-package void _canConvertFormats(Dstring toFmt, void delegate(Dstring fromFmt) callback)
+private void _canConvertFormats(Dstring toFmt, void delegate(Dstring fromFmt) callback)
 {
 	// StringFormat(utf8)/UnicodeText/(Ansi)Text
 	if(!stringICmp(toFmt, DataFormats.stringFormat))
@@ -816,7 +816,7 @@ package void _canConvertFormats(Dstring toFmt, void delegate(Dstring fromFmt) ca
 }
 
 /// Get new Data instance that is converted format.
-package Data _doConvertFormat(Data dat, Dstring toFmt)
+private Data _doConvertFormat(Data dat, Dstring toFmt)
 {
 	Data result;
 
@@ -975,11 +975,11 @@ final class ComToDdataObject: dfl.data.IDataObject
 			ReleaseStgMedium(&stgm);
 
 			if (id == CF_TEXT)
-				return new Data(stopAtNull!(ubyte)(cast(ubyte[])mem));
+				return new Data(_stopAtNull!(ubyte)(cast(ubyte[])mem));
 			if (id == CF_UNICODETEXT)
-				return new Data(stopAtNull!(Dwchar)(cast(Dwstring)mem));
+				return new Data(_stopAtNull!(Dwchar)(cast(Dwstring)mem));
 			if (id == DataFormats.getFormat(DataFormats.stringFormat).id)
-				return new Data(stopAtNull!(Dchar)(cast(Dstring)mem));
+				return new Data(_stopAtNull!(Dchar)(cast(Dstring)mem));
 			
 			assert(0);
 		}
@@ -1031,7 +1031,7 @@ final class ComToDdataObject: dfl.data.IDataObject
 	/// ditto
 	Data getData(TypeInfo type)
 	{
-		return _getData(DataFormats.getFormatFromType(type).id);
+		return _getData(DataFormats.getFormat(type).id);
 	}
 	
 	/// ditto
@@ -1084,7 +1084,7 @@ final class ComToDdataObject: dfl.data.IDataObject
 	/// ditto
 	bool getDataPresent(TypeInfo type)
 	{
-		DataFormats.Format fmt = DataFormats.getFormatFromType(type); // Example: int -> Format { "int", id }
+		DataFormats.Format fmt = DataFormats.getFormat(type); // Example: int -> Format { "int", id }
 		return _getDataPresent(fmt.id);
 	}
 	
@@ -1180,7 +1180,7 @@ final class ComToDdataObject: dfl.data.IDataObject
 	/// ditto
 	void setData(Data obj)
 	{
-		DataFormats.Format fmt = DataFormats.getFormatFromType(obj.info); // Example: int -> Format { "int", id }
+		DataFormats.Format fmt = DataFormats.getFormat(obj.info); // Example: int -> Format { "int", id }
 		_setData(fmt.id, obj);
 	}
 	
@@ -1193,7 +1193,7 @@ final class ComToDdataObject: dfl.data.IDataObject
 	/// ditto
 	void setData(TypeInfo type, Data obj)
 	{
-		DataFormats.Format fmt = DataFormats.getFormatFromType(type); // Example: int -> Format { "int", id }
+		DataFormats.Format fmt = DataFormats.getFormat(type); // Example: int -> Format { "int", id }
 		_setData(fmt.id, obj);
 	}
 	
@@ -1306,7 +1306,7 @@ extern(Windows):
 					Data data = _dataObj.getData(fmt.name, true); // Should this be convertable?
 					
 					// ; void[] src = cast(void[])"hoge\0"; // UTF-8 text example
-					void[] src = DataFormats.getClipboardValueFromData(fmt.id, data);
+					void[] src = DataFormats._getClipboardValueFromData(fmt.id, data);
 					HGLOBAL hg = GlobalAlloc(GHND, src.length.toI32);
 					if(!hg)
 					{
@@ -1337,7 +1337,7 @@ extern(Windows):
 					assert(data);
 					string[] files = data.getFileDropList();
 					assert(files);
-					ubyte[] ubfileList = DataFormats.getHDropStringFromFileDropList(files);
+					ubyte[] ubfileList = DataFormats._getHDropStringFromFileDropList(files);
 					// ; ubyte[] ubfileList = cast(ubyte[])"abc\0\0xyz\0"w;
 
 					HDROP hDrop = cast(HDROP)GlobalAlloc(GHND, cast(uint)(DROPFILES.sizeof + ubfileList.length));
@@ -1416,7 +1416,7 @@ extern(Windows):
 	{
 		try
 		{
-			if (!isSupportedFormatetc(pFormatetc))
+			if (!_isSupportedFormatetc(pFormatetc))
 			{
 				return S_FALSE;
 			}
@@ -1539,7 +1539,7 @@ extern(D):
 	
 private:
 	///
-	bool isSupportedFormatetc(const FORMATETC* pFormatetc) const pure
+	bool _isSupportedFormatetc(const FORMATETC* pFormatetc) const pure
 	{
 		foreach (ref const FORMATETC f; _formatetcList)
 		{
