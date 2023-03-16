@@ -221,6 +221,6 @@ static:
 	
 	
 private:
-	dfl.internal.wincom.IDataObject _comDataObject;
+	DtoComDataObject _comDataObject;
 	dfl.data.IDataObject _dflDataObject;
 }

@@ -19,8 +19,10 @@ class MainForm : Form
 	private PictureBox _picturebox;
 	private Button _copyText;
 	private Button _copyBitmap;
+	private Button _copyDIB;
 	private Button _copyFileDrop;
 	private Button _paste;
+	private Button _pasteAsDib;
 	private Button _clear;
 	private Button _formats;
 	private Button _flush;
@@ -42,7 +44,7 @@ class MainForm : Form
 		_picturebox = new PictureBox();
 		_picturebox.parent = _rightSide;
 		_picturebox.dock = DockStyle.TOP;
-		_picturebox.height = 100;
+		_picturebox.height = 150;
 		_picturebox.backColor = Color(255,255,255);
 
 		_textbox = new TextBox();
@@ -72,7 +74,7 @@ class MainForm : Form
 		_copyBitmap.click ~= (Control c, EventArgs e)
 		{
 			_textbox.clear();
-			Bitmap bitmap = new Bitmap(r".\image\sample.bmp");
+			Image bitmap = new Bitmap(r".\image\sample.bmp");
 
 			// *** Traditional method ***
 			// import core.sys.windows.winuser;
@@ -80,8 +82,21 @@ class MainForm : Form
 			// EmptyClipboard();
 			// SetClipboardData(CF_BITMAP, bitmap.handle);
 			// CloseClipboard();
+			
 			Clipboard.setImage(bitmap);
+			_picturebox.image = bitmap;
+		};
 
+		_copyDIB = new Button();
+		_copyDIB.parent = _leftSide;
+		_copyDIB.text = "copy from sample bitmap as DIB";
+		_copyDIB.dock = DockStyle.TOP;
+		_copyDIB.click ~= (Control c, EventArgs e)
+		{
+			_textbox.clear();
+			Image bitmap = new Bitmap(r".\image\sample.bmp");
+			BITMAPINFO* pBitmapInfo = createBitmapInfo(cast(Bitmap)bitmap);
+			Clipboard.setData(DataFormats.dib, new Data(pBitmapInfo));
 			_picturebox.image = bitmap;
 		};
 
@@ -108,12 +123,14 @@ class MainForm : Form
 
 		_paste = new Button();
 		_paste.parent = _leftSide;
-		_paste.text = "paste";
+		_paste.text = "paste (not DIB)";
 		_paste.dock = DockStyle.TOP;
 		_paste.click ~= (Control c, EventArgs e)
 		{
 			IDataObject dataObj = Clipboard.getDataObject();
-			
+			_textbox.clear();
+			_picturebox.image = null;
+
 			// bitmap
 			if (Clipboard.containsImage())
 			{
@@ -122,7 +139,6 @@ class MainForm : Form
 				Image image = data.getImage();
 				if (image !is null)
 				{
-					_textbox.clear();
 					_textbox.appendText = "Read as bitmap\r\n";
 					_textbox.appendText = "---\r\n";
 					_picturebox.image = image;
@@ -138,10 +154,8 @@ class MainForm : Form
 				string[] fileDropList = data.getFileDropList();
 				if (fileDropList !is null)
 				{
-					_textbox.clear();
 					_textbox.appendText = "Read as FileDrop\r\n";
 					_textbox.appendText = "---\r\n";
-					_picturebox.image = null;
 					string result;
 					foreach (string item; fileDropList)
 					{
@@ -159,7 +173,6 @@ class MainForm : Form
 				string utf8Str = Clipboard.getString();
 				if (utf8Str !is null)
 				{
-					_textbox.clear();
 					_textbox.appendText = "Read as UTF-8 string\r\n";
 					_textbox.appendText = "---\r\n";
 					_textbox.appendText = utf8Str;
@@ -175,7 +188,6 @@ class MainForm : Form
 				wstring str = data.getUnicodeText();
 				if (str !is null)
 				{
-					_textbox.clear();
 					_textbox.appendText = "Read as UnicodeText\r\n";
 					_textbox.appendText = "---\r\n";
 					_textbox.appendText = toUTF8(str);
@@ -190,7 +202,6 @@ class MainForm : Form
 				ubyte[] ansiStrz = Clipboard.getText() ~ UBYTE_ZERO; // Add \0 terminal
 				if (ansiStrz !is null)
 				{
-					_textbox.clear();
 					_textbox.appendText = "Read as AnsiText\r\n";
 					_textbox.appendText = "---\r\n";
 					_textbox.appendText = dfl.internal.utf.fromAnsiz(cast(char*)ansiStrz.ptr);
@@ -199,6 +210,32 @@ class MainForm : Form
 			}
 		};
 
+		_pasteAsDib = new Button();
+		_pasteAsDib.parent = _leftSide;
+		_pasteAsDib.text = "paste as DIB";
+		_pasteAsDib.dock = DockStyle.TOP;
+		_pasteAsDib.click ~= (Control c, EventArgs e)
+		{
+			dfl.data.IDataObject dataObj = Clipboard.getDataObject();
+			_textbox.clear();
+			_picturebox.image = null;
+
+			// dib
+			if (Clipboard.containsData(DataFormats.dib))
+			{
+				Data data = dataObj.getData(DataFormats.dib, false);
+				assert(data);
+				Image image = createBitmap(data.getDIB());
+				if (image !is null)
+				{
+					_textbox.appendText = "Read as DIB\r\n";
+					_textbox.appendText = "---\r\n";
+					_picturebox.image = image;
+					return;
+				}
+			}
+		};
+		
 		_clear = new Button();
 		_clear.parent = _leftSide;
 		_clear.text = "clear previews and clipboard";

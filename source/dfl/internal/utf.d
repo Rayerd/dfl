@@ -1001,10 +1001,8 @@ Dstring getClipboardFormatName(UINT format)
 			}
 		}
 		
-		wchar[] buf;
-		int len;
-		buf = new wchar[256]; // TODO: buffer size?
-		len = proc(format, buf.ptr, buf.length.toI32);
+		wchar[] buf = new wchar[256];
+		int len = proc(format, buf.ptr, buf.length.toI32);
 		if(!len)
 			return null;
 		Dstring result = fromUnicode(buf.ptr, len);
@@ -1012,10 +1010,8 @@ Dstring getClipboardFormatName(UINT format)
 	}
 	else
 	{
-		char[] buf;
-		int len;
-		buf = new char[256]; // TODO: buffer size?
-		len = GetClipboardFormatNameA(format, buf.ptr, buf.length.toI32);
+		char[] buf = new char[256];
+		int len = GetClipboardFormatNameA(format, buf.ptr, buf.length.toI32);
 		if(!len)
 			return null;
 		Dstring result = fromAnsi(buf.ptr, len);

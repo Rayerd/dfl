@@ -15,10 +15,13 @@ private import dfl.internal.com;
 private import dfl.internal.winapi;
 private import dfl.internal.wincom;
 
-private import core.sys.windows.ole2;
+private import core.sys.windows.ole2; // DATA_E_FORMATETC
+
+public import core.sys.windows.wingdi : BITMAPINFO;
 
 
 pragma(lib, "urlmon"); // CreateFormatEnumerator()
+
 
 ///
 final static class DataFormats
@@ -42,6 +45,10 @@ final static class DataFormats
 		
 		this(int id, Dstring name)
 		{
+			assert(_id == 0);
+			assert(_name == "");
+			assert(id != 0);
+			assert(name != "");
 			_id = id;
 			_name = name;
 		}
@@ -54,6 +61,7 @@ final static class DataFormats
 	
 static:
 	/// Predefined Standard Clipboard Formats.
+	/// - https://learn.microsoft.com/en-us/windows/win32/dataxchg/standard-clipboard-formats
 	@property Dstring bitmap() // getter
 	{
 		return getFormat(CF_BITMAP).name;
@@ -174,19 +182,17 @@ static:
 		return getFormat("UTF-8").name;
 	}
 	
-	/+
 	/// ditto
 	@property Dstring commaSeparatedValue() // getter
 	{
-		return getFormat(?).name;
+		return getFormat("CSV").name;
 	}
 
 	/// ditto
 	@property Dstring serializable() // getter
 	{
-		return getFormat(?).name;
+		return getFormat("PersistentObject").name;
 	}
-	+/
 
 
 	///
@@ -194,7 +200,7 @@ static:
 	{
 		_initForStandardClipboardFormat();
 		// Lookups Standard and User-defined Clipboard Format.
-		if(id in _fmts)
+		if (id in _fmts)
 			return _fmts[id];
 		// Didn't find it. So defines new User-defined clipboard format.
 		return _appendUserDefinedClipboardFormat(id);
@@ -206,13 +212,15 @@ static:
 	{
 		_initForStandardClipboardFormat();
 		// Lookups Standard and User-defined Clipboard Format.
-		foreach(Format onfmt; _fmts)
+		assert(_fmts.length != 0);
+		foreach(Format onfmt; _fmts.byValue())
 		{
 			if(!stringICmp(name, onfmt.name))
 				return onfmt;
 		}
 		// Didn't find it. So defines new User-defined clipboard format.
 		int newID = dfl.internal.utf.registerClipboardFormat(name);
+		assert(newID != 0);
 		return _appendUserDefinedClipboardFormat(newID);
 	}
 	
@@ -220,7 +228,26 @@ static:
 	// Extra.
 	Format getFormat(TypeInfo type)
 	{
-		return _getFormatFromType(type);
+		_initForStandardClipboardFormat();
+
+		if(type == typeid(ubyte[]))
+			return getFormat(text);
+		
+		if(type == typeid(Dstring)) // If type is Ansi string in Dstring, but also assume UTF-8 string.
+			return getFormat(stringFormat);
+		
+		if(type == typeid(Dwstring))
+			return getFormat(unicodeText);
+		
+		if(type == typeid(Image) || type == typeid(Bitmap)) // workaround for Bitmap
+			return getFormat(bitmap);
+		
+		if(cast(TypeInfo_Class)type) // Example: Data, Object, IDataObject, ...
+			throw new DflException("Converts TypeInfo to Format failure");
+
+		// Creates format name of User-defined Clipboard Format from TypeInfo.
+		Dstring fmt = getObjectString(type); // Example: int -> "int", byte[] -> "byte[]"
+		return getFormat(fmt);
 	}
 	
 	
@@ -233,17 +260,17 @@ private:
 	///
 	void _initForStandardClipboardFormat()
 	{
-		if(_fmts.length)
+		if (_fmts.length != 0)
 			return;
 		
 		void appendFormat(int id, Dstring name)
 		in
 		{
-			assert(!(id in _fmts));
+			assert(!(id in _fmts)); // Dupulicated ID is invalid.
 		}
 		do
 		{
-			_fmts[id] = new Format(id, name);
+			_fmts[id] = new DataFormats.Format(id, name);
 		}
 		
 		// https://learn.microsoft.com/en-us/windows/win32/dataxchg/standard-clipboard-formats
@@ -264,7 +291,11 @@ private:
 		appendFormat(CF_UNICODETEXT, "CF_UNICODETEXT");
 		appendFormat(CF_WAVE, "CF_WAVE");
 		appendFormat(CF_DIBV5, "CF_DIBV5");
-		
+
+		assert(_fmts[CF_BITMAP].name == "CF_BITMAP");
+		assert(_fmts[CF_DIB].name == "CF_DIB");
+		assert(_fmts[CF_DIF].name == "CF_DIF");
+
 		_fmts.rehash;
 	}
 	
@@ -274,7 +305,8 @@ private:
 	Format _appendUserDefinedClipboardFormat(int id)
 	{
 		// Gets user defined clipboard format.
-		Format fmt = new Format(id, _getRegisteredClipboardFormatName(id));
+		Dstring name = _getRegisteredClipboardFormatName(id);
+		Format fmt = new Format(id, name);
 		//synchronized // _initForStandardClipboardFormat() would need to be synchronized with it.
 		{
 			_fmts[id] = fmt;
@@ -287,36 +319,19 @@ private:
 	/// Does not get the name of one of the predefined constant ones.
 	Dstring _getRegisteredClipboardFormatName(int id)
 	{
-		Dstring fmt = dfl.internal.utf.getClipboardFormatName(id);
-		if(!fmt)
+		// TODO: Work around.
+		// buf is "UTF-8*", but length is 5.
+		// Fix "UTF-8*" to "UTF-8\0"
+		Dstring buf = dfl.internal.utf.getClipboardFormatName(id); // This is not zero terminal.
+		ulong len = buf.length;
+		Dstring fmt = buf ~ "_ALOC_MEM_";
+		char* p = cast(char*)fmt.ptr;
+		*(p + len) = 0;
+		if (!fmt)
 		{
 			throw new DflException("Unable to get registered clipboard format name");
 		}
-		return fmt;
-	}
-	
-	
-	/// Converts TypeInfo to Format.
-	Format _getFormatFromType(TypeInfo type)
-	{
-		if(type == typeid(ubyte[]))
-			return getFormat(text);
-		
-		if(type == typeid(Dstring)) // If type is Ansi string, but also assume Dstring.
-			return getFormat(stringFormat);
-		
-		if(type == typeid(Dwstring))
-			return getFormat(unicodeText);
-		
-		if(type == typeid(Image) || type == typeid(Bitmap)) // workaround for Bitmap
-			return getFormat(bitmap);
-		
-		if(cast(TypeInfo_Class)type) // Example: Data, Object, IDataObject, ...
-			throw new DflException("Converts TypeInfo to Format failure");
-
-		// Creates format name of User-defined Clipboard Format from TypeInfo.
-		Dstring fmt = getObjectString(type); // Example: int -> "int", byte[] -> "byte[]"
-		return getFormat(fmt);
+		return fmt[0..len];
 	}
 	
 	
@@ -383,33 +398,84 @@ private:
 		assert(wcharBinary[18] == '\0');
 		assert(wcharBinary[19] == '\0');
 	}
-	
-	
-	/// Converts the Data object to clipboard value assuming it is of the specified format id.
-	void[] _getClipboardValueFromData(int id, Data data)
+}
+
+
+/// Converts the Data object to clipboard value assuming it is of the specified format id.
+private void[] _getClipboardValueFromData(int id, Data data)
+{
+	if (CF_TEXT == id)
 	{
-		if((CF_TEXT == id) || (data.info == typeid(byte[])))
-		{
-			// ANSI text.
-			enum ubyte[] UBYTE_ZERO = [0];
-			return data.getText() ~ UBYTE_ZERO;
-		}
-		else if((getFormat(stringFormat).id == id) || (data.info == typeid(Dstring)))
-		{
-			// UTF-8 string.
-			Dstring str;
-			str = data.getStringFormat() ~ '\0';
-			return cast(void[])(unsafeStringz(str)[0 .. str.length]);
-		}
-		else if((CF_UNICODETEXT == id) || (data.info == typeid(Dwstring)))
-		{
-			// Unicode string.
-			return (data.getUnicodeText() ~ '\0').dup;
-		}
-		else
-		{
-			throw new DflException("DFL: getClipboardValueFromData failure.");
-		}
+		// ANSI text.
+		enum ubyte[] UBYTE_ZERO = [0];
+		return data.getText() ~ UBYTE_ZERO;
+	}
+	else if (DataFormats.getFormat(DataFormats.stringFormat).id == id)
+	{
+		// UTF-8 string.
+		Dstring str = data.getStringFormat() ~ '\0';
+		return cast(void[])(unsafeStringz(str)[0 .. str.length]);
+	}
+	else if (CF_UNICODETEXT == id)
+	{
+		// Unicode string.
+		return (data.getUnicodeText() ~ '\0').dup;
+	}
+	else if (CF_DIB == id)
+	{
+		// http://dencha.ojaru.jp/programs_07/pg_graphic_04.html
+		// http://www5d.biglobe.ne.jp/~noocyte/Programming/Windows/BmpFileFormat.html
+		// https://imagingsolution.net/imaging/imaging-programing/bitmap-file-format/
+		// https://learn.microsoft.com/ja-jp/windows/win32/api/wingdi/ns-wingdi-bitmap
+		// http://hp.vector.co.jp/authors/VA023539/tips/bitmap/001.htm
+		// https://ja.wikipedia.org/wiki/Windows_bitmap
+		// https://learn.microsoft.com/ja-jp/windows/win32/gdi/storing-an-image
+		// http://www.sm.rim.or.jp/~shishido/windows.html
+
+		const BITMAPINFO* pbi = data.getDIB();
+		assert(pbi);
+		const uint bitsPerPixel = pbi.bmiHeader.biPlanes * pbi.bmiHeader.biBitCount;
+		const uint numEntry = {
+			if (bitsPerPixel <= 8) // 1, 4, 8
+			{
+				if (pbi.bmiHeader.biClrUsed == 0)
+					return 2 ^^ bitsPerPixel;
+				else
+					return pbi.bmiHeader.biClrUsed;
+			}
+			else if (bitsPerPixel == 24)
+			{
+				return pbi.bmiHeader.biClrUsed;
+			}
+			else if (bitsPerPixel <= 32) // 16, 32
+			{
+				if (pbi.bmiHeader.biCompression == BI_RGB)
+					return 3;//pbi.bmiHeader.biClrUsed; // TODO: ?
+				else if (pbi.bmiHeader.biCompression == BI_BITFIELDS)
+					return 3;
+				else
+					assert(0);
+			}
+			else
+				assert(0);
+		}();
+
+		// if (bitsPerPixel <= 16) // TODO: 1-16 bpp is not implemented...
+		// 	throw new DflException("_getClipboardValueFromData() failure");
+		
+		const uint widthBytes = { // TODO: It is bad for 1, 4, 8 and 16 bpp...
+			if ((pbi.bmiHeader.biWidth * 4) % 4 == 0) // pbi.bmiHeader.biWidth * 4 bytes (For 24 and 32 bpp)
+				return (pbi.bmiHeader.biWidth * 4);
+			else
+				return (pbi.bmiHeader.biWidth * 4) + (4 - (pbi.bmiHeader.biWidth * 4) % 4);
+		}();
+		const uint pixelBufSize = widthBytes * pbi.bmiHeader.biHeight;
+		ubyte[] buf = (cast(ubyte*)pbi)[0 .. BITMAPINFOHEADER.sizeof + RGBQUAD.sizeof * numEntry + pixelBufSize];
+		return buf;
+	}
+	else
+	{
+		throw new DflException("DFL: getClipboardValueFromData failure.");
 	}
 }
 
@@ -456,14 +522,19 @@ class Data
 		{
 			this._innerValues.imageValue = arg;
 		}
+		else static if (is(T == Bitmap))
+		{
+			static assert(false); // Data class constructor can not get type of Bitmap.
+		}
+		else static if (is(T == BITMAPINFO*))
+		{
+			assert(arg !is null);
+			this._innerValues.dibValue = arg;
+		}
 		else static if (is(T == Object))
 		{
 			this._innerValues.objectValue = arg;
 		}
-		// else static if (is(T == dfl.data.IDataObject))
-		// {
-		// 	this._innerValues.iDataObjectValue = arg;
-		// }
 		else static if (is(T == Data))
 		{
 			Data data = arg;
@@ -492,7 +563,6 @@ class Data
 	// Data.
 	Data getData()
 	{
-		assert(_info == typeid(_DataConvert));
 		return _innerValues.dataValue;
 	}
 	
@@ -529,24 +599,16 @@ class Data
 	/// ditto
 	Image getImage()
 	{
-		assert(_info == typeid(Image) || _info == typeid(Bitmap)); // TODO
+		assert(_info == typeid(Image) || _info == typeid(Bitmap));
 		return _innerValues.imageValue;
 	}
 	
 	/// ditto
-	Object getObject()
+	BITMAPINFO* getDIB()
 	{
-		assert(!(cast(TypeInfo_Class)_info is null));
-		return _innerValues.objectValue;
+		assert(_info == typeid(BITMAPINFO*));
+		return _innerValues.dibValue;
 	}
-	
-	/// ditto
-	// IDataObject.
-	// IDataObject getIDataObject()
-	// {
-	// 	assert(_info == typeid(IDataObject));
-	// 	return _innerValues.iDataObjectValue;
-	// }
 	
 private:
 	TypeInfo _info;
@@ -555,14 +617,13 @@ private:
 	/// Data object entity
 	struct InnerValues
 	{
-		Data dataValue;
-		Dstring stringFormatValue; // UTF-8
-		Dwstring unicodeTextValue; // Unicode
-		ubyte[] textValue; // Ansi
-		Dstring[] fileDropListValue;
-		Image imageValue;
-		Object objectValue;
-		// dfl.data.IDataObject iDataObjectValue;
+		Data dataValue;              // For automatic convert between Clipboard Formats.
+		Dstring stringFormatValue;   // UTF-8
+		Dwstring unicodeTextValue;   // Unicode
+		ubyte[] textValue;           // Ansi
+		Dstring[] fileDropListValue; // HDROP
+		Image imageValue;            // Bitmap (DDB)
+		BITMAPINFO* dibValue;        // DIB
 	}
 }
 
@@ -620,8 +681,9 @@ class DataObject: dfl.data.IDataObject
 		// TODO: doConvert ...
 		
 		//cprintf("Looking for format '%.*s'.\n", fmt);
-		int i = _find(fmt, true);
-		if(i == -1)
+
+		int i = _find(fmt);
+		if (i == -1)
 			throw new DflException("Data format not present");
 		return _all[i].obj;
 	}
@@ -645,19 +707,37 @@ class DataObject: dfl.data.IDataObject
 	{
 		// TODO: canConvert ...
 
-		return _find(fmt, true) != -1;
+		return _find(fmt) != -1;
 	}
 	
 	
 	///
-	Dstring[] getFormats() pure
+	Dstring[] getFormats()
 	{
-		Dstring[] result;
-		foreach(Pair p; _all)
+		static if (1) // Enumerates all format types on Clipboard.
 		{
-			result ~= p.fmt;
+			Dstring[] clipNames;
+			if (0 != OpenClipboard(null))
+			{
+				scope(exit) CloseClipboard();
+				for (uint i = EnumClipboardFormats(0); i != 0;)
+				{
+					if (i != 0)
+						clipNames ~= DataFormats.getFormat(i).name;
+					i = EnumClipboardFormats(i);
+				}
+			}
+			return clipNames;
 		}
-		return result;
+		else // Enumerates from the format types that the DataObject has.
+		{
+			Dstring[] result;
+			foreach(Pair p; _all)
+			{
+				result ~= p.fmt;
+			}
+			return result;
+		}
 	}
 	
 	
@@ -684,16 +764,48 @@ class DataObject: dfl.data.IDataObject
 	/// ditto
 	void setData(Dstring fmt, bool canConvert, Data obj)
 	{
+		// When -fmt- exists already, -obj- is replaced as pair of -fmt-.
 		_setData(fmt, obj, true);
 		
+		static if (0)
+		{
+			import std.conv;
+			string str;
+			foreach(ref p; _all)
+			{
+				str ~= p.fmt ~ " : ";
+				assert(p.obj);
+				str ~= to!string(p.obj.info) ~ " : ";
+				if (p.obj.info == typeid(Dstring))
+					str ~= p.obj.getStringFormat();
+				else
+					str ~= "[SOME ONE]";
+				str ~= "\n";
+			}
+			_msgBox(str);
+
+		}
+
+		// When fmt is UTF-8 and you call before _canConvertFormats(), _all[] has;
+		// - fmt : UTF-8 : stringFormat
+
 		if(canConvert)
 		{
-			Data markedData = new _DataConvert(obj);
 			_canConvertFormats(
-				fmt, // toFmt
-				(Dstring fromFmt) { _setData(fromFmt, markedData, false); }
+				fmt, // fromFmt
+				(Dstring toFmt) {
+					Data markedData = new _DataConvert(obj);
+					_setData(toFmt, markedData, false);
+				}
 			);
 		}
+
+		// When fmt is UTF-8 and you call after _canConvertFormats(), _all[] has;
+		// - fmt : UTF-8 : stringFormat
+		// - fmt : CF_UNICODETEXT : _DataConvert
+		// - fmt : CF_TEXT : _DataConvert
+
+		_fixPairEntry(fmt);
 	}
 	
 	
@@ -716,34 +828,54 @@ private:
 	// Concrete implementation.
 	void _setData(Dstring fmt, Data obj, bool replace)
 	{
-		int i = _find(fmt, false);
-		if(i != -1)
+		// # Example 1
+		//
+		// Search "CF_UNICODETEXT" in _all.
+		// _all[0].fmt == "CF_TEXT"
+		// _all[1].fmt == "CF_UNICODETEXT"  <-- FOUND HERE
+		//
+		// _all[1].obj = new obj
+
+		// # Example 2
+		//
+		// Search "CF_BITMAP" in _all.
+		// _all[0].fmt == "CF_TEXT"
+		// _all[1].fmt == "CF_UNICODETEXT"
+		//                                  <-- NOT FOUND
+		// _all ~= Pair(fmt, obj);
+
+		int i = _find(fmt);
+		if (i != -1)
 		{
-			if(replace)
-				_all[i].obj = obj; // If found fmt in all, replace obj.
+			if (replace)
+				_all[i].obj = obj; // If found fmt in _all, replace obj.
 		}
 		else
 		{
-			// If not found fmt in all, append new pair of fmt and obj.
+			// If not found fmt in _all, append new pair of fmt and obj.
 			Pair pair;
 			pair.fmt = fmt;
 			pair.obj = obj;
 			_all ~= pair;
 		}
+
+		static if (1)
+		{
+			int j = _find(fmt);
+			assert(j != -1);
+			assert(_all[j].fmt == fmt);
+			assert(_all[j].obj is obj);
+		}
 	}
 
 
 	///
-	int _find(Dstring fmt, bool fix)
+	int _find(Dstring fmt) const
 	{
 		for (size_t i; i < _all.length; i++)
 		{
 			if(!stringICmp(_all[i].fmt, fmt))
 			{
-				assert(_all[i].obj);
-				assert(_all[i].obj.info);
-				if(fix && _all[i].obj.info == typeid(_DataConvert))
-					_fixPairEntry(_all[i]);
 				return i.toI32;
 			}
 		}
@@ -751,12 +883,19 @@ private:
 	}
 	
 	
-	///
-	void _fixPairEntry(ref Pair pr)
+	/// 
+	void _fixPairEntry(Dstring fmt)
 	{
-		assert(pr.obj.info == typeid(_DataConvert));
-		Data obj = pr.obj.getData();
-		pr.obj = _doConvertFormat(obj, pr.fmt);
+		for (size_t i; i < _all.length; i++)
+		{
+			if(_all[i].obj.info == typeid(_DataConvert))
+			{
+				Data fromData = _all[i].obj.getData(); // Gets original Data object.
+				assert(fromData);
+				Dstring toFmt = _all[i].fmt;
+				_all[i].obj = _doConvertFormat(fromData, toFmt);
+			}
+		}
 	}
 }
 
@@ -779,98 +918,82 @@ private final class _DataConvert : Data
 
 
 /// 
-private void _canConvertFormats(Dstring toFmt, void delegate(Dstring fromFmt) callback)
+private void _canConvertFormats(Dstring fromFmt, void delegate(Dstring toFmt) callback)
 {
 	// StringFormat(utf8)/UnicodeText/(Ansi)Text
-	if(!stringICmp(toFmt, DataFormats.stringFormat))
+	if(!stringICmp(fromFmt, DataFormats.stringFormat))
 	{
 		callback(DataFormats.unicodeText);
 		callback(DataFormats.text);
 	}
-	else if(!stringICmp(toFmt, DataFormats.unicodeText))
+	else if(!stringICmp(fromFmt, DataFormats.unicodeText))
 	{
 		callback(DataFormats.stringFormat);
 		callback(DataFormats.text);
 	}
-	else if(!stringICmp(toFmt, DataFormats.text))
+	else if(!stringICmp(fromFmt, DataFormats.text))
 	{
 		callback(DataFormats.stringFormat);
 		callback(DataFormats.unicodeText);
 	}
-	// Bitmap/DIB/DIBV5
-	// else if(!stringICmp(toFmt, DataFormats.bitmap))
-	// {
-	// 	callback(DataFormats.dib);
-	// 	callback(DataFormats.dibv5);
-	// }
-	// else if(!stringICmp(toFmt, DataFormats.dib))
-	// {
-	// 	callback(DataFormats.bitmap);
-	// 	callback(DataFormats.dibv5);
-	// }
-	// else if(!stringICmp(toFmt, DataFormats.dibv5))
-	// {
-	// 	callback(DataFormats.bitmap);
-	// 	callback(DataFormats.dib);
-	// }
+	// bitmap <-> dib <-> dibv5 are converted automatically by system.
 }
 
 /// Get new Data instance that is converted format.
-private Data _doConvertFormat(Data dat, Dstring toFmt)
+private Data _doConvertFormat(Data fromData, Dstring toFmt)
 {
+	assert(fromData !is null);
+	assert(toFmt != "");
+	assert(fromData._info != typeid(_DataConvert));
+	assert(fromData.getData() is null);
+
 	Data result;
 
 	// StringFormat(utf8)/UnicodeText/(Ansi)Text
 	if(!stringICmp(toFmt, DataFormats.stringFormat))
 	{
-		if(typeid(Dwstring) == dat.info)
+		if(typeid(Dwstring) == fromData.info)
 		{
-			result = new Data(utf16stringtoUtf8string(dat.getUnicodeText()));
+			result = new Data(utf16stringtoUtf8string(fromData.getUnicodeText()));
 		}
-		else if(typeid(ubyte[]) == dat.info)
+		else if(typeid(ubyte[]) == fromData.info)
 		{
-			ubyte[] ubs = dat.getText();
+			ubyte[] ubs = fromData.getText();
 			result = new Data(dfl.internal.utf.fromAnsi(cast(Dstringz)ubs.ptr, ubs.length));
 		}
+		else
+			assert(0);
 	}
 	else if(!stringICmp(toFmt, DataFormats.unicodeText))
 	{
-		if(typeid(Dstring) == dat.info)
+		if(typeid(Dstring) == fromData.info)
 		{
-			result = new Data(utf8stringtoUtf16string(dat.getStringFormat()));
+			result = new Data(utf8stringtoUtf16string(fromData.getStringFormat()));
 		}
-		else if(typeid(ubyte[]) == dat.info)
+		else if(typeid(ubyte[]) == fromData.info)
 		{
-			ubyte[] ubs = dat.getText();
+			ubyte[] ubs = fromData.getText();
 			result = new Data(dfl.internal.utf.ansiToUnicode(cast(Dstringz)ubs.ptr, ubs.length));
 		}
+		else
+			assert(0);
 	}
 	else if(!stringICmp(toFmt, DataFormats.text))
 	{
-		if(typeid(Dstring) == dat.info)
+		if(typeid(Dstring) == fromData.info)
 		{
-			result = new Data(cast(ubyte[])dfl.internal.utf.toAnsi(dat.getStringFormat()));
+			result = new Data(cast(ubyte[])dfl.internal.utf.toAnsi(fromData.getStringFormat()));
 		}
-		else if(typeid(Dwstring) == dat.info)
+		else if(typeid(Dwstring) == fromData.info)
 		{
-			Dwstring wcs = dat.getUnicodeText();
+			Dwstring wcs = fromData.getUnicodeText();
 			result = new Data(cast(ubyte[])unicodeToAnsi(wcs.ptr, wcs.length));
 		}
+		else
+			assert(0);
 	}
-	// Bitmap/DIB/DIBV5
-	// else if(!stringICmp(toFmt, DataFormats.bitmap))
-	// {
-	// 	throw new DflException("Not implemented"); // TODO
-	// }
-	// else if(!stringICmp(toFmt, DataFormats.dib))
-	// {
-	// 	throw new DflException("Not implemented"); // TODO
-	// }
-	// else if(!stringICmp(toFmt, DataFormats.dibv5))
-	// {
-	// 	throw new DflException("Not implemented"); // TODO
-	// }
-
+	// bitmap <-> dib <-> dibv5 are converted automatically by system.
+	assert(result);
 	return result;
 }
 
@@ -881,15 +1004,15 @@ final class ComToDdataObject: dfl.data.IDataObject
 	///
 	this(dfl.internal.wincom.IDataObject dataObj)
 	{
-		_dataObj = dataObj;
-		_dataObj.AddRef();
+		_comDataObj = dataObj;
+		_comDataObj.AddRef();
 	}
 	
 	
 	///
 	~this()
 	{
-		_dataObj.Release(); // Must get called...
+		_comDataObj.Release(); // Must get called...
 	}
 	
 	
@@ -909,46 +1032,21 @@ final class ComToDdataObject: dfl.data.IDataObject
 			fmte.lindex = -1;
 			fmte.tymed = TYMED_GDI;
 
-			if (S_OK != _dataObj.QueryGetData(&fmte/+ in +/))
-				throw new DflException("Unable to query get data");
+			if (S_OK != _comDataObj.QueryGetData(&fmte/+ in +/))
+				return null;
 			
-			import std.format;
-			HRESULT result = _dataObj.GetData(&fmte/+ in +/, &stgm/+ out +/);
-			switch (result)
-			{
-			case S_OK:
-				break;
-			case DV_E_LINDEX:
-				throw new DflException(format("Unable to get data: 0x%x", result));
-			case DV_E_FORMATETC:
-				throw new DflException(format("Unable to get data: 0x%x", result));
-			case DV_E_TYMED:
-				throw new DflException(format("Unable to get data: 0x%x", result));
-			case DV_E_DVASPECT:
-				throw new DflException(format("Unable to get data: 0x%x", result));
-			case OLE_E_NOTRUNNING:
-				throw new DflException(format("Unable to get data: 0x%x", result));
-			case STG_E_MEDIUMFULL:
-				throw new DflException(format("Unable to get data: 0x%x", result));
-			case E_UNEXPECTED:
-				throw new DflException(format("Unable to get data: 0x%x", result));
-			case E_INVALIDARG:
-				throw new DflException(format("Unable to get data: 0x%x", result));
-			case E_OUTOFMEMORY:
-				throw new DflException(format("Unable to get data: 0x%x", result));
-			case CLIPBRD_E_BAD_DATA:
-				throw new DflException(format("Unable to get data: 0x%x", result));
-			default:
-				throw new DflException(format("Unable to get data: 0x%x", result));
-			}
+			if (S_OK != _comDataObj.GetData(&fmte/+ in +/, &stgm/+ out +/))
+				return null;
 
-			Image image = Image.fromHBitmap(stgm.hBitmap, true);
+			Image image = Image.fromHBitmap(cast(HBITMAP)stgm.hBitmap, true);
 			ReleaseStgMedium(&stgm);
 			return new Data(image);
 		}
 		else if (id == CF_TEXT
 			||   id == CF_UNICODETEXT
-			||   id == DataFormats.getFormat(DataFormats.stringFormat).id)
+			||   id == DataFormats.getFormat(DataFormats.stringFormat).id
+			||   id == CF_HDROP
+			||   id == CF_DIB)
 		{
 			fmte.cfFormat = cast(CLIPFORMAT)id;
 			fmte.ptd = null;
@@ -956,11 +1054,11 @@ final class ComToDdataObject: dfl.data.IDataObject
 			fmte.lindex = -1;
 			fmte.tymed = TYMED_HGLOBAL;
 
-			if (S_OK != _dataObj.QueryGetData(&fmte/+ in +/))
-				throw new DflException("Unable to query get data");
+			if (S_OK != _comDataObj.QueryGetData(&fmte/+ in +/))
+				return null;
 			
-			if(S_OK != _dataObj.GetData(&fmte/+ in +/, &stgm/+ out +/))
-				throw new DflException("Unable to get data");
+			if (S_OK != _comDataObj.GetData(&fmte/+ in +/, &stgm/+ out +/))
+				return null;
 			
 			void* plock = GlobalLock(stgm.hGlobal);
 			if(!plock)
@@ -976,45 +1074,45 @@ final class ComToDdataObject: dfl.data.IDataObject
 
 			if (id == CF_TEXT)
 				return new Data(_stopAtNull!(ubyte)(cast(ubyte[])mem));
+
 			if (id == CF_UNICODETEXT)
 				return new Data(_stopAtNull!(Dwchar)(cast(Dwstring)mem));
+
 			if (id == DataFormats.getFormat(DataFormats.stringFormat).id)
 				return new Data(_stopAtNull!(Dchar)(cast(Dstring)mem));
 			
+			if (id == CF_HDROP)
+			{
+				Dstring[] fileDropList;
+				int numFiles = dragQueryFile(cast(HDROP)mem);
+				for (int i = 0 ; i < numFiles; i++)
+				{
+					fileDropList ~= dragQueryFile(cast(HDROP)mem, i);
+				}
+				return new Data(fileDropList);
+			}
+
+			if (id == CF_DIB)
+			{
+				BITMAPINFO* pbi = cast(BITMAPINFO*)mem;
+
+				static if (0) // Call on paste
+				{
+					HDC hdc = GetDC(null);
+					HDC hdcMem = CreateCompatibleDC(hdc);
+					Bitmap bitmap = createBitmap(pbi);
+					HGDIOBJ oldBitmap = SelectObject(hdcMem, bitmap.handle);
+					core.sys.windows.wingdi.BitBlt(hdc, 0, 500, pbi.bmiHeader.biWidth, pbi.bmiHeader.biHeight, hdcMem, 0, 0, SRCCOPY);
+					core.sys.windows.wingdi.TextOutW(hdc, 0, 500, "_getData()"w.ptr, 10);
+					SelectObject(hdcMem, oldBitmap);
+					DeleteDC(hdcMem);
+					ReleaseDC(null, hdc);
+				}
+
+				return new Data(pbi);
+			}
+			
 			assert(0);
-		}
-		else if (id == CF_HDROP)
-		{
-			fmte.cfFormat = cast(CLIPFORMAT)id;
-			fmte.ptd = null;
-			fmte.dwAspect = DVASPECT_CONTENT;
-			fmte.lindex = -1;
-			fmte.tymed = TYMED_HGLOBAL;
-
-			if (S_OK != _dataObj.QueryGetData(&fmte/+ in +/))
-				throw new DflException("Unable to query get data");
-			
-			if(S_OK != _dataObj.GetData(&fmte/+ in +/, &stgm/+ out +/))
-				throw new DflException("Unable to get data");
-			
-			void* plock = GlobalLock(stgm.hGlobal);
-			if(!plock)
-			{
-				ReleaseStgMedium(&stgm);
-				throw new DflException("Error obtaining data");
-			}
-			
-			Dstring[] fileDropList;
-			int numFiles = dragQueryFile(cast(HDROP)stgm.hGlobal);
-			for (int i = 0 ; i < numFiles; i++)
-			{
-				fileDropList ~= dragQueryFile(cast(HDROP)stgm.hGlobal, i);
-			}
-
-			GlobalUnlock(stgm.hGlobal);
-			ReleaseStgMedium(&stgm);
-
-			return new Data(fileDropList);
 		}
 		else
 		{
@@ -1046,33 +1144,84 @@ final class ComToDdataObject: dfl.data.IDataObject
 	///
 	private bool _getDataPresent(int id)
 	{
-		FORMATETC fmte;
-
-		// TODO: Lookup all Stadard and User-defined Clipboard Formats
-		
-		if(id == CF_BITMAP)
+		static if (1) // Enumerates all format types on Clipboard.
 		{
-			fmte.cfFormat = cast(CLIPFORMAT)id;
-			fmte.ptd = null;
-			fmte.dwAspect = DVASPECT_CONTENT;
-			fmte.lindex = -1;
-			fmte.tymed = TYMED_GDI;
+			static if (0)
+				_msgBox([id.intToString, DataFormats.getFormat(id).name] ~ getFormats());
+			
+			if (0 != OpenClipboard(null))
+			{
+				scope(exit) CloseClipboard();
+				for (uint i = EnumClipboardFormats(0); i != 0;)
+				{
+					if (i == id)
+						return true;
+					i = EnumClipboardFormats(i);
+				}
+			}
+			return false;
 		}
-		else if (id == CF_TEXT
-			||   id == CF_UNICODETEXT
-			||   id == DataFormats.getFormat(DataFormats.stringFormat).id
-			||   id == CF_HDROP)
+		else static if (0) // Enumerates from the format types that the DataObject has.
 		{
-			fmte.cfFormat = cast(CLIPFORMAT)id;
-			fmte.ptd = null;
-			fmte.dwAspect = DVASPECT_CONTENT;
-			fmte.lindex = -1;
-			fmte.tymed = TYMED_HGLOBAL;
+			IEnumFORMATETC fenum;
+			
+			if (S_OK != _comDataObj.EnumFormatEtc(DATADIR_GET, &fenum))
+				throw new DflException("Unable to get formats");
+
+			// https://learn.microsoft.com/en-us/windows/win32/api/objidl/nf-objidl-idataobject-enumformatetc
+			scope(exit) fenum.Release();
+			
+			for(;;)
+			{
+				FORMATETC fmte;
+				ULONG numFetched;
+				if (S_OK != fenum.Next(1, &fmte, &numFetched))
+					break;
+				if (!numFetched)
+					break;
+				if (fmte.cfFormat == id)
+					return true;
+			}
+			
+			return false;
 		}
 		else
-			return false;
-		
-		return S_OK == _dataObj.QueryGetData(&fmte);
+		{
+			FORMATETC fmte;
+
+			// TODO: Lookup all Stadard and User-defined Clipboard Formats
+			
+			if (id == CF_BITMAP)
+			{
+				fmte.cfFormat = cast(CLIPFORMAT)id;
+				fmte.ptd = null;
+				fmte.dwAspect = DVASPECT_CONTENT;
+				fmte.lindex = -1;
+				fmte.tymed = TYMED_GDI;
+			}
+			else if (id == CF_TEXT
+				||   id == CF_UNICODETEXT
+				||   id == DataFormats.getFormat(DataFormats.stringFormat).id
+				||   id == CF_HDROP
+				||   id == CF_DIB)
+			{
+				fmte.cfFormat = cast(CLIPFORMAT)id;
+				fmte.ptd = null;
+				fmte.dwAspect = DVASPECT_CONTENT;
+				fmte.lindex = -1;
+				fmte.tymed = TYMED_HGLOBAL;
+			}
+			else
+				return false;
+			
+			static if (0)
+			{
+				_msgBox(DataFormats.getFormat(id).name);
+				_msgBox(fmte);
+			}
+
+			return S_OK == _comDataObj.QueryGetData(&fmte);
+		}
 	}
 	
 	/// ditto
@@ -1100,27 +1249,52 @@ final class ComToDdataObject: dfl.data.IDataObject
 	///
 	Dstring[] getFormats()
 	{
-		IEnumFORMATETC fenum;
-		FORMATETC fmte;
-		Dstring[] result;
-		ULONG nfetched;
-		
-		if(S_OK != _dataObj.EnumFormatEtc(DATADIR_GET, &fenum))
-			throw new DflException("Unable to get formats");
-		
-		for(;;)
+		static if (1) // Enumerates all format types on Clipboard.
 		{
-			if(S_OK != fenum.Next(1, &fmte, &nfetched))
-				break;
-			if(!nfetched)
-				break;
-			//cprintf("\t\t{getFormats:%d}\n", fmte.cfFormat);
-			result ~= DataFormats.getFormat(fmte.cfFormat).name;
+			// In the case of the official DataObject, which is probably set when you screenshot it,
+			// both implementations below list all format types, including automatic conversions.
+			// In the case of DFL's own DataObject and when EnumFormatEtc() is called,
+			// only the formats held by the original DataObject itself are enumerated,
+			// but when GetData() is called, data is read even in automatically converted format formats.
+			// Therefore, in the first place, the original DataObject should also list all format types
+			// including automatic conversion.
+			string[] clipNames;
+			if (0 != OpenClipboard(null))
+			{
+				scope(exit) CloseClipboard();
+				for (uint i = EnumClipboardFormats(0); i != 0;)
+				{
+					if (i != 0)
+						clipNames ~= DataFormats.getFormat(i).name;
+					i = EnumClipboardFormats(i);
+				}
+			}
+			return clipNames;
 		}
-		// https://learn.microsoft.com/en-us/windows/win32/api/objidl/nf-objidl-idataobject-enumformatetc
-		fenum.Release();
-		
-		return result;
+		else // Enumerates from the format types that the DataObject has.
+		{
+			IEnumFORMATETC fenum;
+			FORMATETC fmte;
+			Dstring[] clipNames;
+			ULONG numFetched;
+			
+			if(S_OK != _comDataObj.EnumFormatEtc(DATADIR_GET, &fenum))
+				throw new DflException("Unable to get formats");
+			
+			for(;;)
+			{
+				if(S_OK != fenum.Next(1, &fmte, &numFetched))
+					break;
+				if(!numFetched)
+					break;
+				//cprintf("\t\t{getFormats:%d}\n", fmte.cfFormat);
+				clipNames ~= DataFormats.getFormat(fmte.cfFormat).name;
+			}
+			// https://learn.microsoft.com/en-us/windows/win32/api/objidl/nf-objidl-idataobject-enumformatetc
+			fenum.Release();
+			
+			return clipNames;
+		}
 	}
 	
 	
@@ -1207,14 +1381,14 @@ final class ComToDdataObject: dfl.data.IDataObject
 	
 	
 	///
-	bool isSameDataObject(dfl.internal.wincom.IDataObject dataObj) const pure
+	bool isSameDataObject(dfl.internal.wincom.IDataObject comDataObj) const pure
 	{
-		return dataObj is _dataObj;
+		return comDataObj is _comDataObj;
 	}
 	
 	
 private:
-	dfl.internal.wincom.IDataObject _dataObj;
+	dfl.internal.wincom.IDataObject _comDataObj;
 }
 
 
@@ -1236,6 +1410,7 @@ final class DtoComDataObject: DflComObject, dfl.internal.wincom.IDataObject
 
 		// FormatEtc list that can send to paste target.
 		_formatetcList ~= FORMATETC(CF_BITMAP, null, DVASPECT_CONTENT, -1, TYMED_GDI);
+		_formatetcList ~= FORMATETC(CF_DIB, null, DVASPECT_CONTENT, -1, TYMED_HGLOBAL);
 		_formatetcList ~= FORMATETC(CF_TEXT, null, DVASPECT_CONTENT, -1, TYMED_HGLOBAL);
 		_formatetcList ~= FORMATETC(CF_UNICODETEXT, null, DVASPECT_CONTENT, -1, TYMED_HGLOBAL);
 		_formatetcList ~= FORMATETC(getId(DataFormats.stringFormat), null, DVASPECT_CONTENT, -1, TYMED_HGLOBAL);
@@ -1285,8 +1460,10 @@ extern(Windows):
 				{
 					DataFormats.Format fmt = DataFormats.getFormat(pFormatetc.cfFormat);
 					Data data = _dataObj.getData(fmt.name, true); // Should this be convertable?
+
 					Bitmap bitmap = cast(Bitmap)data.getImage();
-				
+					assert(typeid(bitmap) == typeid(Bitmap));
+
 					pmedium.tymed = TYMED_GDI;
 					pmedium.hBitmap = bitmap.handle;
 					pmedium.pUnkForRelease = null;
@@ -1298,7 +1475,8 @@ extern(Windows):
 			}
 			else if (pFormatetc.cfFormat == CF_TEXT
 				||   pFormatetc.cfFormat == CF_UNICODETEXT
-				||   pFormatetc.cfFormat == DataFormats.getFormat(DataFormats.stringFormat).id)
+				||   pFormatetc.cfFormat == DataFormats.getFormat(DataFormats.stringFormat).id
+				||   pFormatetc.cfFormat == CF_DIB)
 			{
 				if (pFormatetc.tymed & TYMED_HGLOBAL)
 				{
@@ -1306,26 +1484,36 @@ extern(Windows):
 					Data data = _dataObj.getData(fmt.name, true); // Should this be convertable?
 					
 					// ; void[] src = cast(void[])"hoge\0"; // UTF-8 text example
-					void[] src = DataFormats._getClipboardValueFromData(fmt.id, data);
+					void[] src = _getClipboardValueFromData(fmt.id, data);
 					HGLOBAL hg = GlobalAlloc(GHND, src.length.toI32);
-					if(!hg)
+					if (!hg)
+					{
+						return STG_E_MEDIUMFULL;
+					}
+
+					const uint memSize = GlobalSize(hg);
+					if (!memSize)
 					{
 						return STG_E_MEDIUMFULL;
 					}
 
 					void* pmem = GlobalLock(hg);
-					if(!pmem)
+					if (!pmem)
 					{
 						GlobalFree(hg);
 						return E_UNEXPECTED;
 					}
 
-					pmem[0 .. src.length] = src[];
+					pmem[0 .. memSize] = src[];
 					GlobalUnlock(hg);
 					
 					pmedium.tymed = TYMED_HGLOBAL;
 					pmedium.hGlobal = hg;
 					pmedium.pUnkForRelease = null;
+				}
+				else
+				{
+					return DV_E_TYMED;
 				}
 			}
 			else if (pFormatetc.cfFormat == CF_HDROP)
@@ -1361,7 +1549,6 @@ extern(Windows):
 
 					ubyte* p = cast(ubyte*)dp + DROPFILES.sizeof;
 					p[0 .. ubfileList.length] = ubfileList[];
-					// ; wchar[] wp = cast(wchar[])p[0 .. ubfileList.length];
 					GlobalUnlock(hDrop);
 					
 					pmedium.tymed = TYMED_HGLOBAL;
@@ -1416,17 +1603,33 @@ extern(Windows):
 	{
 		try
 		{
-			if (!_isSupportedFormatetc(pFormatetc))
+			static if (1) // Enumerates all format types on Clipboard.
 			{
-				return S_FALSE;
+				if (0 != OpenClipboard(null))
+				{
+					scope(exit) CloseClipboard();
+					for (uint i = EnumClipboardFormats(0); i != 0;)
+					{
+						if (i == pFormatetc.cfFormat)
+							return S_OK;
+						i = EnumClipboardFormats(i);
+					}
+				}
 			}
-
-			// Call DataObject.find(fmt, fix: true) to find out
-			// if the required fmt exists in DataObject._all.
-			Dstring fmt = DataFormats.getFormat(pFormatetc.cfFormat).name;
-			if(!_dataObj.getDataPresent(fmt))
+			else // Enumerates from the format types that the DataObject has.
 			{
-				return S_FALSE;
+				if (!_isSupportedFormatetc(pFormatetc))
+				{
+					return S_FALSE;
+				}
+
+				// Call DataObject.find(fmt, fix: true) to find out
+				// if the required fmt exists in DataObject._all.
+				Dstring fmt = DataFormats.getFormat(pFormatetc.cfFormat).name;
+				if(!_dataObj.getDataPresent(fmt))
+				{
+					return S_FALSE;
+				}
 			}
 		}
 		catch(DflException e)
@@ -1448,7 +1651,8 @@ extern(Windows):
 			return E_UNEXPECTED;
 		}
 		
-		return S_OK;
+		// return S_OK;
+		return S_FALSE;
 	}
 	
 	///
@@ -1481,14 +1685,27 @@ extern(Windows):
 			if(dwDirection == DATADIR_GET)
 			{
 				FORMATETC[] feList;
-				foreach (formatetc; _formatetcList)
+				foreach (ref formatetc; _formatetcList)
 				{
 					int id = formatetc.cfFormat;
-					Dstring fmt = DataFormats.getFormat(id).name;
-					if (_dataObj.getDataPresent(fmt))
+					DataFormats.Format format = DataFormats.getFormat(id);
+					if (_dataObj.getDataPresent(format.name))
+					{
+						// dataObj has required type of FORMATETC.
 						feList ~= formatetc;
+					}
 				}
-				return CreateFormatEnumerator(cast(UINT)feList.length, &(feList[0]), ppenumFormatetc);
+
+				if (feList.length == 0)
+				{
+					// That is illegal that number of FORMATETC[] is zero.
+					feList ~= FORMATETC(0, null, DVASPECT_CONTENT, -1, TYMED_NULL);
+					return CreateFormatEnumerator(1, &(feList[0]), ppenumFormatetc);
+				}
+				else
+				{
+					return CreateFormatEnumerator(cast(UINT)feList.length, &(feList[0]), ppenumFormatetc);
+				}
 			}
 			else if(dwDirection == DATADIR_SET)
 			{
@@ -1539,7 +1756,7 @@ extern(D):
 	
 private:
 	///
-	bool _isSupportedFormatetc(const FORMATETC* pFormatetc) const pure
+	bool _isSupportedFormatetc(const FORMATETC* pFormatetc) const
 	{
 		foreach (ref const FORMATETC f; _formatetcList)
 		{
@@ -1556,4 +1773,154 @@ private:
 	
 	dfl.data.IDataObject _dataObj;
 	FORMATETC[] _formatetcList;
+}
+
+
+///
+/// - https://learn.microsoft.com/ja-jp/windows/win32/gdi/storing-an-image
+BITMAPINFO* createBitmapInfo(Bitmap objBitmap)
+{
+	HBITMAP hBitmap = objBitmap.handle;
+	BITMAP bitmap;
+	GetObject(hBitmap, BITMAP.sizeof, &bitmap);
+	HDC hdc = GetDC(null);
+	HDC hdcMem = CreateCompatibleDC(hdc);
+
+	// Allocate memory of BITMAPINFO
+	// - https://learn.microsoft.com/ja-jp/windows/win32/gdi/storing-an-image
+
+	const uint bitsPerPixel = bitmap.bmPlanes * bitmap.bmBitsPixel;
+	const uint numEntry = { // Assume max number.
+		if (bitsPerPixel <= 8) // 1, 4, 8 bpp
+			return 2 ^^ bitsPerPixel; // Assume max number of entries in order to allocate enough memory.
+		else if (bitsPerPixel == 24)
+			// Assume max number of entries in order to allocate enough memory.
+			return 3;
+		else if (bitsPerPixel <= 32) // 16, 32 bpp
+			// Assume max number of entries in order to allocate enough memory.
+			return 3; // biCompression == BI_BITFIELDS
+		else
+			assert(0);
+	}();
+
+	const uint widthBytesSize = { // Assume 32 bits color.
+		if (bitmap.bmWidth % 4 == 0)
+			return bitmap.bmWidth * 4;
+		else
+			return (bitmap.bmWidth * 4) + (4 - (bitmap.bmWidth * 4) % 4);
+	}();
+	const uint bitmapBodySize = widthBytesSize * bitmap.bmHeight;
+
+	BITMAPINFO* pbi = cast(BITMAPINFO*)new ubyte[BITMAPINFOHEADER.sizeof + RGBQUAD.sizeof * numEntry + bitmapBodySize];
+
+	// https://learn.microsoft.com/ja-jp/windows/win32/api/wingdi/nf-wingdi-getdibits
+	pbi.bmiHeader.biSize = BITMAPINFOHEADER.sizeof; // First 6 members
+	pbi.bmiHeader.biWidth = bitmap.bmWidth;
+	pbi.bmiHeader.biHeight = bitmap.bmHeight;
+	pbi.bmiHeader.biPlanes = bitmap.bmPlanes;
+	pbi.bmiHeader.biBitCount = 32;
+	pbi.bmiHeader.biCompression = BI_BITFIELDS; // numEntry == 3
+	// pbi.bmiHeader.biSizeImage =     // OK
+	// pbi.bmiHeader.biXPelsPerMeter = // OK
+	// pbi.bmiHeader.biYPelsPerMeter = // OK
+	// pbi.bmiHeader.biClrUsed =       // OK
+	// pbi.bmiHeader.biClrImportant =  // OK
+	if (0 == core.sys.windows.wingdi.GetDIBits(
+		hdc, hBitmap, 0, bitmap.bmHeight,
+		cast(ubyte*)pbi + BITMAPINFOHEADER.sizeof + RGBQUAD.sizeof * numEntry, pbi, DIB_RGB_COLORS))
+	{
+		throw new DflException("createBitmapInfo failure");
+	}
+
+	HGDIOBJ oldGdiObj = SelectObject(hdcMem, hBitmap);
+
+	static if (0)
+	{
+		for (uint y = 10; y < 30; y++)
+		{
+			for (uint x = 10; x < 30; x++)
+			{
+				// 32 bits color
+				// uint.sizeof == 32 bytes
+				uint* p = cast(uint*)(cast(ubyte*)pbi + BITMAPINFOHEADER.sizeof + RGBQUAD.sizeof * numEntry);
+				p[y * bitmap.bmWidth + x] = 0x000000FF;
+
+				// 24 bits color
+				// ubyte* p = cast(ubyte*)(pbi + BITMAPINFOHEADER.sizeof + RGBQUAD.sizeof * numEntry);
+				// p[y * widthBytesSize + x * 3 + 0] = 0x00000000; // B
+				// p[y * widthBytesSize + x * 3 + 1] = 0x00000000; // G
+				// p[y * widthBytesSize + x * 3 + 2] = 0x000000FF; // R
+				// p[y * widthBytesSize + x * 3 + 3] = 0x00000000; // (A)
+			}
+		}
+		core.sys.windows.wingdi.SetDIBitsToDevice(
+			hdcMem, 0, 0, pbi.bmiHeader.biWidth, pbi.bmiHeader.biHeight,
+			0, 0, 0, pbi.bmiHeader.biHeight,
+			cast(ubyte*)pbi + BITMAPINFOHEADER.sizeof + RGBQUAD.sizeof * numEntry, pbi, DIB_RGB_COLORS);
+		core.sys.windows.wingdi.Rectangle(hdcMem, 0, 0, 50, 50);
+		TextOutW(hdcMem, 0, 0, "createBitmapInfo()"w.ptr, 18);
+		core.sys.windows.wingdi.BitBlt(hdc, 200, 200, pbi.bmiHeader.biWidth, pbi.bmiHeader.biHeight, hdcMem, 0, 0, SRCCOPY);
+	}
+
+	SelectObject(hdcMem, oldGdiObj);
+	DeleteDC(hdcMem);
+	ReleaseDC(null, hdc);
+	return pbi;
+}
+
+
+///
+Bitmap createBitmap(BITMAPINFO* pbi)
+{
+	// https://learn.microsoft.com/ja-jp/windows/win32/api/wingdi/ns-wingdi-bitmapinfoheader
+	// http://www5d.biglobe.ne.jp/~noocyte/Programming/Windows/BmpFileFormat.html
+	const uint bitsPerPixel = pbi.bmiHeader.biPlanes * pbi.bmiHeader.biBitCount;
+	const uint numEntry = {
+		if (bitsPerPixel <= 8) // 1, 4, 8 bpp
+		{
+			if (pbi.bmiHeader.biClrUsed == 0)
+				return 2 ^^ bitsPerPixel;
+			else
+				return pbi.bmiHeader.biClrUsed;
+		}
+		else if (bitsPerPixel == 24)
+			return pbi.bmiHeader.biClrUsed;
+		else if (bitsPerPixel <= 32) // 16, 32 bpp
+		{
+			if (pbi.bmiHeader.biCompression == BI_RGB)
+				return 3;//pbi.bmiHeader.biClrUsed; // TODO: ?
+			else if (pbi.bmiHeader.biCompression == BI_BITFIELDS)
+				return 3;
+			else
+				assert(0);
+		}
+		else
+			assert(0);
+	}();
+
+	// if (bitsPerPixel <= 16) // TODO: 1-16 bpp is not implemented...
+	// 	throw new DflException("createBitmap() failure");
+
+	HDC hdc = GetDC(null);
+
+	// (BITMAPINFOHEADER.sizeof + RGBQUAD.sizeof) == (BITMAPINFO.sizeof)
+	HBITMAP hBitmap = CreateDIBitmap(
+		hdc, &pbi.bmiHeader, CBM_INIT,
+		cast(ubyte*)pbi + BITMAPINFOHEADER.sizeof + RGBQUAD.sizeof * numEntry, pbi, DIB_RGB_COLORS);
+
+	// If you called "HBITMAP hOldBitmap = SelectObject(hdc, hBitmap)",
+	// you must call "SelectObject(hdc, hOldBitmap)" before "Image.fromHBitmap()".
+	// The otherwise you will get all black.
+	Bitmap bitmap = Image.fromHBitmap(hBitmap, true);
+	ReleaseDC(null, hdc);
+
+	return bitmap;
+}
+
+
+///
+void _msgBox(T)(T arg)
+{
+	import dfl.messagebox, std.conv;
+	msgBox(to!string(arg));
 }
