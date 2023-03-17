@@ -18,6 +18,7 @@ private import dfl.internal.wincom;
 private import core.sys.windows.ole2; // DATA_E_FORMATETC
 
 public import core.sys.windows.wingdi : BITMAPINFO;
+import core.internal.gc.impl.conservative.gc;
 
 
 pragma(lib, "urlmon"); // CreateFormatEnumerator()
@@ -423,54 +424,40 @@ private void[] _getClipboardValueFromData(int id, Data data)
 	}
 	else if (CF_DIB == id)
 	{
+		// https://learn.microsoft.com/ja-jp/windows/win32/gdi/storing-an-image
+		// https://learn.microsoft.com/ja-jp/windows/win32/api/wingdi/ns-wingdi-bitmap
+		// https://ja.wikipedia.org/wiki/Windows_bitmap
+		// https://note.affi-sapo-sv.com/bitmap-file-format.php
 		// http://dencha.ojaru.jp/programs_07/pg_graphic_04.html
 		// http://www5d.biglobe.ne.jp/~noocyte/Programming/Windows/BmpFileFormat.html
 		// https://imagingsolution.net/imaging/imaging-programing/bitmap-file-format/
-		// https://learn.microsoft.com/ja-jp/windows/win32/api/wingdi/ns-wingdi-bitmap
 		// http://hp.vector.co.jp/authors/VA023539/tips/bitmap/001.htm
-		// https://ja.wikipedia.org/wiki/Windows_bitmap
-		// https://learn.microsoft.com/ja-jp/windows/win32/gdi/storing-an-image
 		// http://www.sm.rim.or.jp/~shishido/windows.html
-
 		const BITMAPINFO* pbi = data.getDIB();
 		assert(pbi);
 		const uint bitsPerPixel = pbi.bmiHeader.biPlanes * pbi.bmiHeader.biBitCount;
-		const uint numEntry = {
-			if (bitsPerPixel <= 8) // 1, 4, 8
+		const uint colorMaskBytes = {
+			if (pbi.bmiHeader.biCompression == BI_BITFIELDS)
+				return 4 * 3; // 4 bytes * 3 masks(R,G,B)
+			else
+				return 0;
+		}();
+		const uint numPallet = {
+			if (bitsPerPixel <= 8) // 1, 4, 8 bits color
 			{
 				if (pbi.bmiHeader.biClrUsed == 0)
-					return 2 ^^ bitsPerPixel;
+					return 2 ^^ bitsPerPixel; // Assume max.
 				else
 					return pbi.bmiHeader.biClrUsed;
 			}
-			else if (bitsPerPixel == 24)
-			{
+			else if (bitsPerPixel <= 32) // 16, 24, 32 bits color
 				return pbi.bmiHeader.biClrUsed;
-			}
-			else if (bitsPerPixel <= 32) // 16, 32
-			{
-				if (pbi.bmiHeader.biCompression == BI_RGB)
-					return 3;//pbi.bmiHeader.biClrUsed; // TODO: ?
-				else if (pbi.bmiHeader.biCompression == BI_BITFIELDS)
-					return 3;
-				else
-					assert(0);
-			}
 			else
-				assert(0);
+				throw new DflException("Illegal color bits bitmap");
 		}();
-
-		// if (bitsPerPixel <= 16) // TODO: 1-16 bpp is not implemented...
-		// 	throw new DflException("_getClipboardValueFromData() failure");
-		
-		const uint widthBytes = { // TODO: It is bad for 1, 4, 8 and 16 bpp...
-			if ((pbi.bmiHeader.biWidth * 4) % 4 == 0) // pbi.bmiHeader.biWidth * 4 bytes (For 24 and 32 bpp)
-				return (pbi.bmiHeader.biWidth * 4);
-			else
-				return (pbi.bmiHeader.biWidth * 4) + (4 - (pbi.bmiHeader.biWidth * 4) % 4);
-		}();
+		const uint widthBytes = (pbi.bmiHeader.biWidth * bitsPerPixel + 31) / 32 * 4;
 		const uint pixelBufSize = widthBytes * pbi.bmiHeader.biHeight;
-		ubyte[] buf = (cast(ubyte*)pbi)[0 .. BITMAPINFOHEADER.sizeof + RGBQUAD.sizeof * numEntry + pixelBufSize];
+		ubyte[] buf = (cast(ubyte*)pbi)[0 .. BITMAPINFOHEADER.sizeof + colorMaskBytes + RGBQUAD.sizeof * numPallet + pixelBufSize];
 		return buf;
 	}
 	else
@@ -1777,57 +1764,42 @@ private:
 
 
 ///
-/// - https://learn.microsoft.com/ja-jp/windows/win32/gdi/storing-an-image
 BITMAPINFO* createBitmapInfo(Bitmap objBitmap)
 {
 	HBITMAP hBitmap = objBitmap.handle;
 	BITMAP bitmap;
-	GetObject(hBitmap, BITMAP.sizeof, &bitmap);
+	GetObject(hBitmap, BITMAP.sizeof, &bitmap); // Gets bitmap info but color bits is not used.
 	HDC hdc = GetDC(null);
 	HDC hdcMem = CreateCompatibleDC(hdc);
 
-	// Allocate memory of BITMAPINFO
-	// - https://learn.microsoft.com/ja-jp/windows/win32/gdi/storing-an-image
-
-	const uint bitsPerPixel = bitmap.bmPlanes * bitmap.bmBitsPixel;
-	const uint numEntry = { // Assume max number.
-		if (bitsPerPixel <= 8) // 1, 4, 8 bpp
-			return 2 ^^ bitsPerPixel; // Assume max number of entries in order to allocate enough memory.
-		else if (bitsPerPixel == 24)
-			// Assume max number of entries in order to allocate enough memory.
-			return 3;
-		else if (bitsPerPixel <= 32) // 16, 32 bpp
-			// Assume max number of entries in order to allocate enough memory.
-			return 3; // biCompression == BI_BITFIELDS
-		else
-			assert(0);
+	// Allocates memory of BITMAPINFO
+	const uint bitsPerPixel = bitmap.bmPlanes * 32; // 32 bits color
+	const uint colorMaskBytes = {
+		// Contains color mask when biCompression is BI_BITFIELDS.
+		return 4 * 3; // 4 bytes * 3 masks(R,G,B)
 	}();
+	const uint numPallet = 0; // Wants that no color palette.
+	const uint widthBytes = (bitmap.bmWidth * bitsPerPixel + 31) / 32 * 4;
+	const uint bitmapBodySize = widthBytes * bitmap.bmHeight;
 
-	const uint widthBytesSize = { // Assume 32 bits color.
-		if (bitmap.bmWidth % 4 == 0)
-			return bitmap.bmWidth * 4;
-		else
-			return (bitmap.bmWidth * 4) + (4 - (bitmap.bmWidth * 4) % 4);
-	}();
-	const uint bitmapBodySize = widthBytesSize * bitmap.bmHeight;
-
-	BITMAPINFO* pbi = cast(BITMAPINFO*)new ubyte[BITMAPINFOHEADER.sizeof + RGBQUAD.sizeof * numEntry + bitmapBodySize];
+	BITMAPINFO* pbi = cast(BITMAPINFO*)new ubyte[
+		BITMAPINFOHEADER.sizeof + colorMaskBytes + RGBQUAD.sizeof * numPallet + bitmapBodySize];
 
 	// https://learn.microsoft.com/ja-jp/windows/win32/api/wingdi/nf-wingdi-getdibits
 	pbi.bmiHeader.biSize = BITMAPINFOHEADER.sizeof; // First 6 members
 	pbi.bmiHeader.biWidth = bitmap.bmWidth;
 	pbi.bmiHeader.biHeight = bitmap.bmHeight;
 	pbi.bmiHeader.biPlanes = bitmap.bmPlanes;
-	pbi.bmiHeader.biBitCount = 32;
-	pbi.bmiHeader.biCompression = BI_BITFIELDS; // numEntry == 3
-	// pbi.bmiHeader.biSizeImage =     // OK
-	// pbi.bmiHeader.biXPelsPerMeter = // OK
-	// pbi.bmiHeader.biYPelsPerMeter = // OK
-	// pbi.bmiHeader.biClrUsed =       // OK
-	// pbi.bmiHeader.biClrImportant =  // OK
+	pbi.bmiHeader.biBitCount = 32; // 32 bits color
+	pbi.bmiHeader.biCompression = BI_BITFIELDS; // Contains color mask
+	// pbi.bmiHeader.biSizeImage =     // No other members need to be initialized.
+	// pbi.bmiHeader.biXPelsPerMeter = // ditto
+	// pbi.bmiHeader.biYPelsPerMeter = // ditto
+	// pbi.bmiHeader.biClrUsed =       // ditto
+	// pbi.bmiHeader.biClrImportant =  // ditto
 	if (0 == core.sys.windows.wingdi.GetDIBits(
 		hdc, hBitmap, 0, bitmap.bmHeight,
-		cast(ubyte*)pbi + BITMAPINFOHEADER.sizeof + RGBQUAD.sizeof * numEntry, pbi, DIB_RGB_COLORS))
+		cast(ubyte*)pbi + BITMAPINFOHEADER.sizeof + colorMaskBytes + RGBQUAD.sizeof * numPallet, pbi, DIB_RGB_COLORS))
 	{
 		throw new DflException("createBitmapInfo failure");
 	}
@@ -1840,23 +1812,15 @@ BITMAPINFO* createBitmapInfo(Bitmap objBitmap)
 		{
 			for (uint x = 10; x < 30; x++)
 			{
-				// 32 bits color
 				// uint.sizeof == 32 bytes
-				uint* p = cast(uint*)(cast(ubyte*)pbi + BITMAPINFOHEADER.sizeof + RGBQUAD.sizeof * numEntry);
+				uint* p = cast(uint*)(cast(ubyte*)pbi + BITMAPINFOHEADER.sizeof + colorMaskBytes + RGBQUAD.sizeof * numPallet);
 				p[y * bitmap.bmWidth + x] = 0x000000FF;
-
-				// 24 bits color
-				// ubyte* p = cast(ubyte*)(pbi + BITMAPINFOHEADER.sizeof + RGBQUAD.sizeof * numEntry);
-				// p[y * widthBytesSize + x * 3 + 0] = 0x00000000; // B
-				// p[y * widthBytesSize + x * 3 + 1] = 0x00000000; // G
-				// p[y * widthBytesSize + x * 3 + 2] = 0x000000FF; // R
-				// p[y * widthBytesSize + x * 3 + 3] = 0x00000000; // (A)
 			}
 		}
 		core.sys.windows.wingdi.SetDIBitsToDevice(
 			hdcMem, 0, 0, pbi.bmiHeader.biWidth, pbi.bmiHeader.biHeight,
 			0, 0, 0, pbi.bmiHeader.biHeight,
-			cast(ubyte*)pbi + BITMAPINFOHEADER.sizeof + RGBQUAD.sizeof * numEntry, pbi, DIB_RGB_COLORS);
+			cast(ubyte*)pbi + BITMAPINFOHEADER.sizeof + colorMaskBytes + RGBQUAD.sizeof * numPallet, pbi, DIB_RGB_COLORS);
 		core.sys.windows.wingdi.Rectangle(hdcMem, 0, 0, 50, 50);
 		TextOutW(hdcMem, 0, 0, "createBitmapInfo()"w.ptr, 18);
 		core.sys.windows.wingdi.BitBlt(hdc, 200, 200, pbi.bmiHeader.biWidth, pbi.bmiHeader.biHeight, hdcMem, 0, 0, SRCCOPY);
@@ -1872,48 +1836,35 @@ BITMAPINFO* createBitmapInfo(Bitmap objBitmap)
 ///
 Bitmap createBitmap(BITMAPINFO* pbi)
 {
-	// https://learn.microsoft.com/ja-jp/windows/win32/api/wingdi/ns-wingdi-bitmapinfoheader
-	// http://www5d.biglobe.ne.jp/~noocyte/Programming/Windows/BmpFileFormat.html
 	const uint bitsPerPixel = pbi.bmiHeader.biPlanes * pbi.bmiHeader.biBitCount;
-	const uint numEntry = {
-		if (bitsPerPixel <= 8) // 1, 4, 8 bpp
+	const uint colorMaskBytes = {
+		if (pbi.bmiHeader.biCompression == BI_BITFIELDS)
+			return 4 * 3; // 4 bytes * 3 masks(R,G,B)
+		else
+			return 0;
+	}();
+	const uint numPallet = {
+		if (bitsPerPixel <= 8) // 1, 4, 8 bits color
 		{
 			if (pbi.bmiHeader.biClrUsed == 0)
-				return 2 ^^ bitsPerPixel;
+				return 2 ^^ bitsPerPixel; // Assume max.
 			else
 				return pbi.bmiHeader.biClrUsed;
 		}
-		else if (bitsPerPixel == 24)
+		else if (bitsPerPixel <= 32) // 16, 24, 32 bits color
 			return pbi.bmiHeader.biClrUsed;
-		else if (bitsPerPixel <= 32) // 16, 32 bpp
-		{
-			if (pbi.bmiHeader.biCompression == BI_RGB)
-				return 3;//pbi.bmiHeader.biClrUsed; // TODO: ?
-			else if (pbi.bmiHeader.biCompression == BI_BITFIELDS)
-				return 3;
-			else
-				assert(0);
-		}
 		else
-			assert(0);
+			throw new DflException("Illegal color bits bitmap");
 	}();
-
-	// if (bitsPerPixel <= 16) // TODO: 1-16 bpp is not implemented...
-	// 	throw new DflException("createBitmap() failure");
-
 	HDC hdc = GetDC(null);
-
-	// (BITMAPINFOHEADER.sizeof + RGBQUAD.sizeof) == (BITMAPINFO.sizeof)
 	HBITMAP hBitmap = CreateDIBitmap(
 		hdc, &pbi.bmiHeader, CBM_INIT,
-		cast(ubyte*)pbi + BITMAPINFOHEADER.sizeof + RGBQUAD.sizeof * numEntry, pbi, DIB_RGB_COLORS);
-
+		cast(ubyte*)pbi + BITMAPINFOHEADER.sizeof + colorMaskBytes + RGBQUAD.sizeof * numPallet, pbi, DIB_RGB_COLORS);
 	// If you called "HBITMAP hOldBitmap = SelectObject(hdc, hBitmap)",
 	// you must call "SelectObject(hdc, hOldBitmap)" before "Image.fromHBitmap()".
 	// The otherwise you will get all black.
 	Bitmap bitmap = Image.fromHBitmap(hBitmap, true);
 	ReleaseDC(null, hdc);
-
 	return bitmap;
 }
 
