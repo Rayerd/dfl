@@ -1,44 +1,9 @@
 ﻿module dfl.clippingform;
 
-private import dfl.all, dfl.internal.winapi;
+private import dfl.all;
 private import dfl.internal.dlib : toI32;
 private import core.memory;
-
-private extern (Windows)
-{
-	struct RGNDATAHEADER
-	{
-		DWORD dwSize;
-		DWORD iType;
-		DWORD nCount;
-		DWORD nRgnSize;
-		RECT rcBound;
-	}
-	
-	struct RGNDATA
-	{
-		RGNDATAHEADER rdh;
-		ubyte[1] Buffer;
-	}
-	
-	struct XFORM
-	{
-		FLOAT eM11;
-		FLOAT eM12;
-		FLOAT eM21;
-		FLOAT eM22;
-		FLOAT eDx;
-		FLOAT eDy;
-	}
-	
-	enum {RDH_RECTANGLES = 1}
-	enum {BI_RGB = 0}
-	enum {DIB_RGB_COLORS = 0}
-	
-	HRGN ExtCreateRegion(void*, DWORD, RGNDATA*);
-	int GetDIBits(HDC, HBITMAP, UINT, UINT, PVOID, LPBITMAPINFO, UINT);
-}
-
+private import core.sys.windows.windows;
 
 ///
 struct RegionRects
@@ -48,19 +13,16 @@ private:
 	size_t _capacity = 0;
 	size_t _width = 0;
 	size_t _height = 0;
+
 public:
-	
-	
-	const @property
-	size_t width()
+	@property size_t width() const
 	{
 		return _width;
 	}
 	
 	
 	///
-	const @property
-	size_t height()
+	@property size_t height() const
 	{
 		return _height;
 	}
@@ -115,8 +77,7 @@ public:
 	
 	
 	///
-	@property
-	Region region()
+	@property Region region()
 	{
 		if (_rgn is null) return null;
 		with (_rgn.rdh)
@@ -167,6 +128,7 @@ public:
 				add(sx, y-1, x-1, y);
 			}
 		}
+		DeleteDC(hDC);
 		return region;
 	}
 	
@@ -199,40 +161,40 @@ public:
 
 
 ///
-class ClippingForm: Form
+class ClippingForm : Form
 {
 private:
-	Image m_Image;
-	RegionRects m_RegionRects;
+	Image _image;
+	RegionRects _regionRects;
+
 protected:
 	override void createParams(ref CreateParams cp)
 	{
 		super.createParams(cp);
 		cp.style = WS_EX_TOPMOST | WS_EX_TOOLWINDOW;
 	}
+
 public:
-	
-	
 	///
 	@property Image clipping()
 	{
-		return m_Image;
+		return _image;
 	}
 	
 	
 	/// ditto
 	@property void clipping(Image img)
 	{
-		m_Image = img;
+		_image = img;
 	}
 	
 	
 	///
 	override void onHandleCreated(EventArgs ea)
 	{
-		if (m_Image)
+		if (_image)
 		{
-			region = m_RegionRects.create(m_Image);
+			region = _regionRects.create(_image);
 		}
 		super.onHandleCreated(ea);
 	}
@@ -241,9 +203,9 @@ public:
 	///
 	override void onPaint(PaintEventArgs pea)
 	{
-		if (m_Image)
+		if (_image)
 		{
-			m_Image.draw(pea.graphics, Point(0,0));
+			_image.draw(pea.graphics, Point(0,0));
 		}
 		else
 		{

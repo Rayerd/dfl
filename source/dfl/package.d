@@ -6,7 +6,7 @@
 module dfl;
 
 public import dfl.base, dfl.menu, dfl.control, dfl.usercontrol,
-	dfl.form, dfl.drawing, dfl.panel, dfl.event,
+	dfl.form, dfl.drawing, dfl.panel, dfl.event, dfl.clippingform,
 	dfl.application, dfl.button, dfl.socket,
 	dfl.timer, dfl.environment, dfl.label, dfl.textboxbase, dfl.textbox,
 	dfl.listbox, dfl.splitter, dfl.groupbox, dfl.messagebox,
