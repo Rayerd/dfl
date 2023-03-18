@@ -15,8 +15,8 @@ class MainForm : Form {
 	private MainMenu _menu;
 	
 	this() {
-		text = "Hello DFL";
-		resizeRedraw = true;
+		this.text = "Hello DFL";
+		this.resizeRedraw = true;
 		
 		_button = new TestButton();
 		_button.text = "ok";
@@ -48,6 +48,13 @@ class MainForm : Form {
 		item.menuItems.add(subItem);
 		_menu.menuItems.add(item);
 		this.menu = _menu;
+	}
+
+	override void onPaint(PaintEventArgs pea)
+	{
+		pea.graphics.drawLine(new Pen(Color.Blue, 5, PenStyle.SOLID), Point(50, 200), Point(150, 170));
+		pea.graphics.drawEllipse(new Pen(Color.Red), 100, 10, 50, 50);
+		pea.graphics.fillRectangle(Color.Green, 200, 10, 50, 50);
 	}
 }
 

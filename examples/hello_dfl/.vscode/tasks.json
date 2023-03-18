@@ -1,0 +1,20 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "dub",
+			"run": false,
+			"cwd": ".",
+			"compiler": "$current",
+			"archType": "$current",
+			"buildType": "$current",
+			"configuration": "$current",
+			"problemMatcher": [
+				"$dmd"
+			],
+			"group": "build",
+			"label": "dub: Build hello_dfl",
+			"detail": "dub build --compiler=dmd.EXE -a=x86_64 -b=debug -c=application"
+		}
+	]
+}
