@@ -139,7 +139,7 @@ public:
 		clear();
 		_width = g.width;
 		_height = g.height;
-		return createClippingRegionFromHDC(cast(HBITMAP)g.hbitmap);
+		return createClippingRegionFromHDC(g.hbitmap);
 	}
 	
 	
@@ -151,7 +151,7 @@ public:
 		_height = img.height;
 		if (auto bmp = cast(Bitmap)img)
 		{
-			return createClippingRegionFromHDC(cast(HBITMAP)bmp.handle);
+			return createClippingRegionFromHDC(bmp.handle);
 		}
 		auto g = new MemoryGraphics(img.width, img.height);
 		img.draw(g, Point(0,0));
@@ -171,7 +171,8 @@ protected:
 	override void createParams(ref CreateParams cp)
 	{
 		super.createParams(cp);
-		cp.style = WS_EX_TOPMOST | WS_EX_TOOLWINDOW;
+		cp.style = WS_POPUP;
+		cp.exStyle |= WS_EX_TOPMOST;
 	}
 
 public:

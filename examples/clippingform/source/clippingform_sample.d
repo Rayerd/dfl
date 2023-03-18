@@ -10,8 +10,6 @@ else
 
 class MainForm : ClippingForm
 {
-	private Image _image;
-
 	public this()
 	{
 		this.text = "Clipping Form example";
