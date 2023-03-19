@@ -52,9 +52,9 @@ class MainForm : Form {
 
 	override void onPaint(PaintEventArgs pea)
 	{
-		pea.graphics.drawLine(new Pen(Color.Blue, 5, PenStyle.SOLID), Point(50, 200), Point(150, 170));
-		pea.graphics.drawEllipse(new Pen(Color.Red), 100, 10, 50, 50);
-		pea.graphics.fillRectangle(Color.Green, 200, 10, 50, 50);
+		pea.graphics.drawLine(new Pen(Color.blue, 5, PenStyle.SOLID), Point(50, 200), Point(150, 170));
+		pea.graphics.drawEllipse(new Pen(Color.red), 100, 10, 50, 50);
+		pea.graphics.fillRectangle(Color.green, 200, 10, 50, 50);
 	}
 }
 
