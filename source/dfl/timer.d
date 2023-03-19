@@ -5,16 +5,23 @@
 ///
 module dfl.timer;
 
-private import dfl.internal.winapi, dfl.event, dfl.base, dfl.application,
-	dfl.internal.dlib;
+private import dfl.application;
+private import dfl.base;
+private import dfl.event;
+
+private import dfl.internal.dlib;
 debug(APP_PRINT)
 {
 	private import dfl.internal.clib;
 }
 
+private import core.sys.windows.windows;
+
+
 ///
 class Timer // docmain
 {
+public:
 	//EventHandler tick;
 	Event!(Timer, EventArgs) tick; ///
 	
@@ -29,7 +36,7 @@ class Timer // docmain
 	}
 	
 	/// ditto
-	@property bool enabled() // getter
+	@property bool enabled() const // getter
 	{
 		return timerId != 0;
 	}
@@ -56,7 +63,7 @@ class Timer // docmain
 	}
 	
 	/// ditto
-	final @property uint interval() // getter
+	final @property uint interval() const // getter
 	{
 		return _timeout;
 	}
@@ -130,8 +137,7 @@ class Timer // docmain
 	}
 	
 	
-	protected:
-	
+protected:
 	void dispose()
 	{
 		stop();
@@ -145,7 +151,7 @@ class Timer // docmain
 	}
 	
 	
-	private:
+private:
 	DWORD _timeout = 100;
 	UINT_PTR timerId = 0;
 	void delegate(Timer) _dg;
