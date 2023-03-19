@@ -1769,7 +1769,6 @@ BITMAPINFO* createBitmapInfo(Bitmap objBitmap)
 	BITMAP bitmap;
 	GetObject(hBitmap, BITMAP.sizeof, &bitmap); // Gets bitmap info but color bits is not used.
 	HDC hdc = GetDC(null);
-	HDC hdcMem = CreateCompatibleDC(hdc);
 
 	// Allocates memory of BITMAPINFO
 	const uint bitsPerPixel = bitmap.bmPlanes * 32; // 32 bits color
@@ -1803,10 +1802,11 @@ BITMAPINFO* createBitmapInfo(Bitmap objBitmap)
 		throw new DflException("createBitmapInfo failure");
 	}
 
-	HGDIOBJ oldGdiObj = SelectObject(hdcMem, hBitmap);
-
 	static if (0)
 	{
+		HDC hdcMem = CreateCompatibleDC(hdc);
+		HGDIOBJ oldGdiObj = SelectObject(hdcMem, hBitmap);
+
 		for (uint y = 10; y < 30; y++)
 		{
 			for (uint x = 10; x < 30; x++)
@@ -1823,10 +1823,11 @@ BITMAPINFO* createBitmapInfo(Bitmap objBitmap)
 		core.sys.windows.wingdi.Rectangle(hdcMem, 0, 0, 50, 50);
 		TextOutW(hdcMem, 0, 0, "createBitmapInfo()"w.ptr, 18);
 		core.sys.windows.wingdi.BitBlt(hdc, 200, 200, pbi.bmiHeader.biWidth, pbi.bmiHeader.biHeight, hdcMem, 0, 0, SRCCOPY);
+
+		SelectObject(hdcMem, oldGdiObj);
+		DeleteDC(hdcMem);
 	}
 
-	SelectObject(hdcMem, oldGdiObj);
-	DeleteDC(hdcMem);
 	ReleaseDC(null, hdc);
 	return pbi;
 }
