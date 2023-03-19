@@ -18,7 +18,6 @@ private import dfl.internal.wincom;
 private import core.sys.windows.ole2; // DATA_E_FORMATETC
 
 public import core.sys.windows.wingdi : BITMAPINFO;
-import core.internal.gc.impl.conservative.gc;
 
 
 pragma(lib, "urlmon"); // CreateFormatEnumerator()
