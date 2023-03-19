@@ -5,8 +5,12 @@
 ///
 module dfl.picturebox;
 
-private import dfl.control, dfl.base, dfl.drawing, dfl.event;
-private import dfl.internal.winapi;
+private import dfl.control;
+private import dfl.base;
+private import dfl.drawing;
+private import dfl.event;
+
+private import core.sys.windows.windows;
 
 
 ///
@@ -20,12 +24,15 @@ enum PictureBoxSizeMode: ubyte
 	CENTER_IMAGE, // Image at center of control.
 	/// ditto
 	STRETCH_IMAGE, // Image stretched to fit control.
+	/// ditto
+	ZOOM, // Image sizes to fit control at center of control.
 }
 
 
 ///
 class PictureBox: Control // docmain
 {
+public:
 	this()
 	{
 		//resizeRedraw = true; // Redrawn manually in onResize() when necessary.
@@ -35,20 +42,20 @@ class PictureBox: Control // docmain
 	///
 	final @property void image(Image img) // setter
 	{
-		if(this.img is img)
+		if (this._img is img)
 			return;
 		
-		if(_mode == PictureBoxSizeMode.AUTO_SIZE)
+		if (_mode == PictureBoxSizeMode.AUTO_SIZE)
 		{
-			if(img)
+			if (img)
 				clientSize = img.size;
 			else
 				clientSize = Size(0, 0);
 		}
 		
-		this.img = img;
+		this._img = img;
 		
-		if(created)
+		if (created)
 			invalidate();
 		
 		onImageChanged(EventArgs.empty);
@@ -57,21 +64,21 @@ class PictureBox: Control // docmain
 	/// ditto
 	final @property Image image() // getter
 	{
-		return img;
+		return _img;
 	}
 	
 	
 	///
 	final @property void sizeMode(PictureBoxSizeMode sm) // setter
 	{
-		if(_mode == sm)
+		if (_mode == sm)
 			return;
 		
 		final switch(sm)
 		{
 			case PictureBoxSizeMode.AUTO_SIZE:
-				if(img)
-					clientSize = img.size;
+				if (_img)
+					clientSize = _img.size;
 				else
 					clientSize = Size(0, 0);
 				break;
@@ -84,11 +91,14 @@ class PictureBox: Control // docmain
 			
 			case PictureBoxSizeMode.STRETCH_IMAGE:
 				break;
+
+			case PictureBoxSizeMode.ZOOM:
+				break;
 		}
 		
 		_mode = sm;
 		
-		if(created)
+		if (created)
 			invalidate();
 		
 		onSizeModeChanged(EventArgs.empty);
@@ -104,7 +114,7 @@ class PictureBox: Control // docmain
 	///
 	@property void borderStyle(BorderStyle bs) // setter
 	{
-		final switch(bs)
+		final switch (bs)
 		{
 			case BorderStyle.FIXED_3D:
 				_style(_style() & ~WS_BORDER);
@@ -122,7 +132,7 @@ class PictureBox: Control // docmain
 				break;
 		}
 		
-		if(created)
+		if (created)
 		{
 			redrawEntire();
 		}
@@ -145,8 +155,7 @@ class PictureBox: Control // docmain
 	Event!(PictureBox, EventArgs) imageChanged; ///
 	
 	
-	protected:
-	
+protected:
 	///
 	void onSizeModeChanged(EventArgs ea)
 	{
@@ -161,29 +170,44 @@ class PictureBox: Control // docmain
 	}
 	
 	
+	///
 	override void onPaint(PaintEventArgs ea)
 	{
-		if(img)
+		if (_img)
 		{
-			final switch(_mode)
+			final switch (_mode)
 			{
-				case PictureBoxSizeMode.NORMAL:
-				case PictureBoxSizeMode.AUTO_SIZE: // Drawn the same as normal.
-					img.draw(ea.graphics, Point(0, 0));
-					break;
-				
-				case PictureBoxSizeMode.CENTER_IMAGE:
-					{
-						Size isz;
-						isz = img.size;
-						img.draw(ea.graphics, Point((clientSize.width  - isz.width) / 2,
-							(clientSize.height - isz.height) / 2));
-					}
-					break;
-				
-				case PictureBoxSizeMode.STRETCH_IMAGE:
-					img.drawStretched(ea.graphics, Rect(0, 0, clientSize.width, clientSize.height));
-					break;
+			case PictureBoxSizeMode.NORMAL:
+			case PictureBoxSizeMode.AUTO_SIZE: // Drawn the same as normal.
+				_img.draw(ea.graphics, Point(0, 0));
+				break;
+			
+			case PictureBoxSizeMode.CENTER_IMAGE:
+				Size imageSize = _img.size;
+				_img.draw(ea.graphics, Point((clientSize.width  - imageSize.width) / 2,
+					(clientSize.height - imageSize.height) / 2));
+				break;
+			
+			case PictureBoxSizeMode.STRETCH_IMAGE:
+				_img.drawStretched(ea.graphics, Rect(0, 0, clientSize.width, clientSize.height));
+				break;
+			
+			case PictureBoxSizeMode.ZOOM:
+				Size imageSize = _img.size;
+				Point center = Point(clientSize.width / 2, clientSize.height / 2);
+				double ratio = {
+					if (clientSize.width > clientSize.height)
+						return cast(double)clientSize.height / imageSize.height;
+					else
+						return cast(double)clientSize.width / imageSize.width;
+				}();
+				Rect rect;
+				rect.width = cast(int)(imageSize.width * ratio);
+				rect.height = cast(int)(imageSize.height * ratio);
+				rect.x = center.x - rect.width / 2;
+				rect.y = center.y - rect.height / 2;
+				_img.drawStretched(ea.graphics, rect);
+				break;
 			}
 		}
 		
@@ -191,17 +215,18 @@ class PictureBox: Control // docmain
 	}
 	
 	
+	///
 	override void onResize(EventArgs ea)
 	{
-		if(PictureBoxSizeMode.CENTER_IMAGE == _mode || PictureBoxSizeMode.STRETCH_IMAGE == _mode)
+		if (PictureBoxSizeMode.CENTER_IMAGE == _mode || PictureBoxSizeMode.STRETCH_IMAGE == _mode)
 			invalidate();
 		
 		super.onResize(ea);
 	}
 	
 	
-	private:
+private:
 	PictureBoxSizeMode _mode = PictureBoxSizeMode.NORMAL;
-	Image img = null;
+	Image _img = null;
 }
 
