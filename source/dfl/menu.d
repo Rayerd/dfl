@@ -79,7 +79,7 @@ else
 		}
 		
 		
-		private:
+	private:
 		void _init()
 		{
 			Application.addContextMenu(this);
@@ -558,10 +558,16 @@ else
 			switch(m.msg)
 			{
 				case WM_COMMAND:
-					assert(LOWORD(m.wParam) == mid);
-					
-					onClick(EventArgs.empty);
+				{
+					int menuID = LOWORD(m.wParam);
+					int senderID = HIWORD(m.wParam);
+					if (senderID == 0) // 0: Menu
+					{
+						assert(menuID == mid);
+						onClick(EventArgs.empty);
+					}
 					break;
+				}
 				
 				case WM_MENUSELECT:
 					onSelect(EventArgs.empty);
@@ -589,7 +595,7 @@ else
 		Event!(MenuItem, EventArgs) select; ///
 		
 		
-		protected:
+	protected:
 		
 		///
 		final @property int menuID() // getter
@@ -625,7 +631,7 @@ else
 		}
 		
 		
-		private:
+	private:
 		
 		int mid; // Menu ID.
 		Dstring mtext;
@@ -821,7 +827,7 @@ else
 			// TODO: finish.
 			
 			
-			package:
+		package:
 			
 			Menu _owner;
 			MenuItem[] items; // Kept populated so the menu can be moved around.
@@ -851,7 +857,7 @@ else
 			}
 			
 			
-			public:
+		public:
 			
 			mixin ListWrapArray!(MenuItem, items,
 				_blankListCallback!(MenuItem), _added,
@@ -1025,7 +1031,7 @@ else
 		
 		package HMENU hmenu;
 		
-		private:
+	private:
 		bool owned = true;
 		MenuItemCollection items;
 		Object ttag;
@@ -1082,7 +1088,7 @@ else
 		}
 		
 		
-		private:
+	private:
 		
 		HWND hwnd = HWND.init;
 		
