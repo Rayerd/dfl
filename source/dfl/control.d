@@ -38,6 +38,17 @@ else
 version = DFL_NO_ZOMBIE_FORM;
 
 
+private int GET_X_LPARAM(LPARAM lparam) pure
+{
+	return cast(int)cast(short)LOWORD(lparam);
+}
+
+private int GET_Y_LPARAM(in LPARAM lparam) pure
+{
+	return cast(int)cast(short)HIWORD(lparam);
+}
+
+
 ///
 enum AnchorStyles: ubyte
 {
@@ -4947,7 +4958,7 @@ class Control: DObject, IWindow // docmain
 					}
 				}
 				
-				onMouseMove(new MouseEventArgs(wparamMouseButtons(msg.wParam), 0, cast(short)LOWORD(msg.lParam), cast(short)HIWORD(msg.lParam), 0));
+				onMouseMove(new MouseEventArgs(wparamMouseButtons(msg.wParam), 0, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam), 0));
 				break;
 			
 			case WM_SETCURSOR:
@@ -5010,14 +5021,14 @@ class Control: DObject, IWindow // docmain
 			
 			case WM_MOUSEWHEEL: // Requires Windows 98 or NT4.
 				{
-					scope MouseEventArgs mea = new MouseEventArgs(wparamMouseButtons(LOWORD(msg.wParam)), 0, cast(short)LOWORD(msg.lParam), cast(short)HIWORD(msg.lParam), cast(short)HIWORD(msg.wParam));
+					scope MouseEventArgs mea = new MouseEventArgs(wparamMouseButtons(LOWORD(msg.wParam)), 0, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.wParam), 0);
 					onMouseWheel(mea);
 				}
 				break;
 			
 			case WM_MOUSEHOVER: // Requires Windows 95 with IE 5.5, 98 or NT4.
 				{
-					scope MouseEventArgs mea = new MouseEventArgs(wparamMouseButtons(msg.wParam), 0, cast(short)LOWORD(msg.lParam), cast(short)HIWORD(msg.lParam), 0);
+					scope MouseEventArgs mea = new MouseEventArgs(wparamMouseButtons(msg.wParam), 0, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam), 0);
 					onMouseHover(mea);
 				}
 				break;
@@ -5038,7 +5049,7 @@ class Control: DObject, IWindow // docmain
 				{
 					_clicking = true;
 					
-					scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.LEFT, 1, cast(short)LOWORD(msg.lParam), cast(short)HIWORD(msg.lParam), 0);
+					scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.LEFT, 1, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam), 0);
 					onMouseDown(mea);
 					
 					//if(ctrlStyle & ControlStyles.SELECTABLE)
@@ -5048,14 +5059,14 @@ class Control: DObject, IWindow // docmain
 			
 			case WM_RBUTTONDOWN:
 				{
-					scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.RIGHT, 1, cast(short)LOWORD(msg.lParam), cast(short)HIWORD(msg.lParam), 0);
+					scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.RIGHT, 1, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam), 0);
 					onMouseDown(mea);
 				}
 				break;
 			
 			case WM_MBUTTONDOWN:
 				{
-					scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.MIDDLE, 1, cast(short)LOWORD(msg.lParam), cast(short)HIWORD(msg.lParam), 0);
+					scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.MIDDLE, 1, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam), 0);
 					onMouseDown(mea);
 				}
 				break;
@@ -5069,7 +5080,7 @@ class Control: DObject, IWindow // docmain
 					bool wasClicking = _clicking;
 					_clicking = false;
 					
-					scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.LEFT, 1, cast(short)LOWORD(msg.lParam), cast(short)HIWORD(msg.lParam), 0);
+					scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.LEFT, 1, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam), 0);
 					onMouseUp(mea);
 					
 					if(wasClicking && (ctrlStyle & ControlStyles.STANDARD_CLICK))
@@ -5132,41 +5143,16 @@ class Control: DObject, IWindow // docmain
 				
 				case WM_COMMAND:
 					{
-						/+
-						switch(LOWORD(msg.wParam))
-						{
-							case IDOK:
-							case IDCANCEL:
-								if(parent)
-								{
-									parent.wndProc(msg);
-								}
-								//break;
-								return; // ?
-							
-							default:
-						}
-						+/
-						
-						Control ctrl;
-						
-						ctrl = Control.fromChildHandle(cast(HWND)msg.lParam);
-						if(ctrl)
-						{
-							//msg.result = ctrl.customMsg(*(cast(CustomMsg*)&msg));
-							ctrl.onReflectedMessage(msg);
-							return;
-						}
-						else
+						int senderID = HIWORD(msg.wParam);
+						if(senderID == 0) // 0: Menu
 						{
 							version(DFL_NO_MENUS)
 							{
 							}
 							else
 							{
-								MenuItem m;
-								
-								m = cast(MenuItem)Application.lookupMenuID(LOWORD(msg.wParam));
+								int menuID = LOWORD(msg.wParam);
+								MenuItem m = cast(MenuItem)Application.lookupMenuID(menuID);
 								if(m)
 								{
 									//msg.result = m.customMsg(*(cast(CustomMsg*)&msg));
@@ -5174,17 +5160,30 @@ class Control: DObject, IWindow // docmain
 									//return; // ?
 								}
 							}
+							return;
+						}
+						else if(senderID == 1) // 1: Accelerator
+						{
+							assert(0); // TODO
+						}
+						else // Control
+						{
+							HWND hwnd = cast(HWND)msg.lParam;
+							Control ctrl = Control.fromChildHandle(hwnd);
+							if(ctrl)
+							{
+								//msg.result = ctrl.customMsg(*(cast(CustomMsg*)&msg));
+								ctrl.onReflectedMessage(msg);
+								return;
+							}
 						}
 					}
 					break;
 				
 				case WM_NOTIFY:
 					{
-						Control ctrl;
-						NMHDR* nmh;
-						nmh = cast(NMHDR*)msg.lParam;
-						
-						ctrl = Control.fromChildHandle(nmh.hwndFrom);
+						NMHDR* nmh = cast(NMHDR*)msg.lParam;
+						Control ctrl = Control.fromChildHandle(nmh.hwndFrom);
 						if(ctrl)
 						{
 							//msg.result = ctrl.customMsg(*(cast(CustomMsg*)&msg));
@@ -5287,21 +5286,21 @@ class Control: DObject, IWindow // docmain
 			
 			case WM_RBUTTONUP:
 				{
-					scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.RIGHT, 1, cast(short)LOWORD(msg.lParam), cast(short)HIWORD(msg.lParam), 0);
+					scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.RIGHT, 1, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam), 0);
 					onMouseUp(mea);
 				}
 				break;
 			
 			case WM_MBUTTONUP:
 				{
-					scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.MIDDLE, 1, cast(short)LOWORD(msg.lParam), cast(short)HIWORD(msg.lParam), 0);
+					scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.MIDDLE, 1, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam), 0);
 					onMouseUp(mea);
 				}
 				break;
 			
 			case WM_LBUTTONDBLCLK:
 				{
-					scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.LEFT, 2, cast(short)LOWORD(msg.lParam), cast(short)HIWORD(msg.lParam), 0);
+					scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.LEFT, 2, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam), 0);
 					onMouseDown(mea);
 					
 					if((ctrlStyle & (ControlStyles.STANDARD_CLICK | ControlStyles.STANDARD_DOUBLE_CLICK))
@@ -5314,14 +5313,14 @@ class Control: DObject, IWindow // docmain
 			
 			case WM_RBUTTONDBLCLK:
 				{
-					scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.RIGHT, 2, cast(short)LOWORD(msg.lParam), cast(short)HIWORD(msg.lParam), 0);
+					scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.RIGHT, 2, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam), 0);
 					onMouseDown(mea);
 				}
 				break;
 			
 			case WM_MBUTTONDBLCLK:
 				{
-					scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.MIDDLE, 2, cast(short)LOWORD(msg.lParam), cast(short)HIWORD(msg.lParam), 0);
+					scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.MIDDLE, 2, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam), 0);
 					onMouseDown(mea);
 				}
 				break;
@@ -5436,7 +5435,7 @@ class Control: DObject, IWindow // docmain
 							if(msg.lParam == -1)
 								point = pointToScreen(Point(0, 0));
 							else
-								point = Point(cast(short)LOWORD(msg.lParam), cast(short)HIWORD(msg.lParam));
+								point = Point(GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam));
 							
 							SetFocus(handle); // ?
 							cmenu.show(this, point);
