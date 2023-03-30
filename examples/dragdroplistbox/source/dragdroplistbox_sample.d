@@ -336,13 +336,12 @@ class MainForm : Form
 		// OLE-Drag
 		//
 		_list.itemDrag ~= (Control sender, ItemDragEventArgs e) {
-			string[] selectedAllItemText;
+			string selectedAllItemText;
 			foreach (string txt; _list.selectedItems)
 			{
 				selectedAllItemText ~= txt;
+				selectedAllItemText ~= '\n';
 			}
-			// Send string[] to target window.
-			// The string[] is converted to '\n' separated string automatically.
 			DataObject dataObj = new DataObject();
 			dataObj.setData(DataFormats.stringFormat, new Data(selectedAllItemText));
 			DragDropEffects effect = _list.doDragDrop(dataObj, DragDropEffects.COPY);
