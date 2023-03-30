@@ -9,6 +9,8 @@ else
 	pragma(lib, "dfl.lib");
 }
 
+enum USE_MOUSE_DOWN_EVENT = true;
+
 class MainForm : Form
 {
 	private ContextMenu _contextMenu;
@@ -33,26 +35,44 @@ class MainForm : Form
 		};
 		_contextMenu.menuItems.add(contextMenuItem1);
 		_contextMenu.menuItems.addRange([contextMenuItem2, contextMenuItem3]);
+
+		static if (USE_MOUSE_DOWN_EVENT)
+		{
+			this.mouseDown ~= (Control c, MouseEventArgs e) {
+				if (e.button & MouseButtons.RIGHT)
+				{
+					if (_contextMenu)
+					{
+						Point pt = Point(e.x, e.y);
+						ClientToScreen(handle, &pt.point);
+						_contextMenu.show(this, pt);
+					}
+				}
+			};
+		}
 	}
 
-	override void wndProc(ref Message msg)
+	static if (!USE_MOUSE_DOWN_EVENT)
 	{
-		switch (msg.msg)
+		override void wndProc(ref Message msg)
 		{
-			case WM_RBUTTONDOWN:
+			switch (msg.msg)
 			{
-				if (_contextMenu)
+				case WM_RBUTTONDOWN:
 				{
-					POINT pt;
-					GetCursorPos(&pt);
-					_contextMenu.show(this, Point(&pt));
+					if (_contextMenu)
+					{
+						POINT pt;
+						GetCursorPos(&pt);
+						_contextMenu.show(this, Point(&pt));
+					}
+					return;
 				}
-				return;
-			}
-			default:
-			{
-				super.wndProc(msg);
-				return;
+				default:
+				{
+					super.wndProc(msg);
+					return;
+				}
 			}
 		}
 	}
