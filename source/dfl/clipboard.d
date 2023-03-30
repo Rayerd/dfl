@@ -215,8 +215,8 @@ static:
 	/// so that it is available after the data's original application closes.
 	void flush()
 	{
-		if (S_OK != OleFlushClipboard())
-			throw new DflException("Unable to flush clipboard data");
+		// Can not flush the other application's IDataObject.
+		OleFlushClipboard();
 	}
 	
 	
