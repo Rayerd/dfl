@@ -492,7 +492,7 @@ class ToolBar: ControlSuperClass // docmain
 
 		if (isHandleCreated)
 		{
-			ulong baseStyle = GetWindowLongPtr(handle, GWL_STYLE);
+			LONG_PTR baseStyle = GetWindowLongPtr(handle, GWL_STYLE);
 			final switch (_appearance)
 			{
 				case ToolBarAppearance.NORMAL:
@@ -577,8 +577,8 @@ class ToolBar: ControlSuperClass // docmain
 
 		if (isHandleCreated)
 		{
-			ulong baseStyle = GetWindowLongPtr(handle, GWL_STYLE);
-			ulong baseExStyle = GetWindowLongPtr(handle, GWL_EXSTYLE);
+			LONG_PTR baseStyle = GetWindowLongPtr(handle, GWL_STYLE);
+			LONG_PTR baseExStyle = GetWindowLongPtr(handle, GWL_EXSTYLE);
 			final switch (border)
 			{
 				case BorderStyle.FIXED_SINGLE:

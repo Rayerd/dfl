@@ -213,7 +213,7 @@ class TabPageCollection
 		if(dfl.internal.utf.useUnicode)
 		{
 			m.msg = TCM_INSERTITEMW; // <--
-			foreach(int i, TabPage page; _pages)
+			foreach(i, TabPage page; _pages)
 			{
 				// TODO: TCIF_RTLREADING flag based on rightToLeft property.
 				tci.mask = TCIF_TEXT | TCIF_PARAM;
@@ -230,7 +230,7 @@ class TabPageCollection
 		else
 		{
 			m.msg = TCM_INSERTITEMA; // <--
-			foreach(int i, TabPage page; _pages)
+			foreach(i, TabPage page; _pages)
 			{
 				// TODO: TCIF_RTLREADING flag based on rightToLeft property.
 				tci.mask = TCIF_TEXT | TCIF_PARAM;

@@ -805,9 +805,11 @@ class ListView: ControlSuperClass // docmain
 		do
 		{
 			int ii;
-			foreach(int i, ListViewItem item; _items)
+			foreach(i, ListViewItem item; _items)
 			{
-				ii = lv._ins(i, item);
+				if(i > int.max)
+					throw new DflException("doListItems() failure");
+				ii = lv._ins(cast(int)i, item);
 				//assert(-1 != ii);
 				assert(i == ii);
 				
@@ -916,9 +918,11 @@ class ListView: ControlSuperClass // docmain
 		do
 		{
 			int ii;
-			foreach(int i, ColumnHeader header; _headers)
+			foreach(i, ColumnHeader header; _headers)
 			{
-				ii = lv._ins(i, header);
+				if(i > int.max)
+					throw new DflException("doListHeaders() failure");
+				ii = lv._ins(cast(int)i, header);
 				assert(-1 != ii);
 				//assert(i == ii);
 			}

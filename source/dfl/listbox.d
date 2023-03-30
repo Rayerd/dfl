@@ -990,9 +990,11 @@ class ListBox: ListControl // docmain
 			scope(exit)
 				endUpdate();
 			
-			foreach(int i, Object o; itemscopy)
+			foreach(i, Object o; itemscopy)
 			{
-				items.insert(i, o);
+				if (i > int.max)
+					throw new DflException("sort() failure");
+				items.insert(cast(int)i, o);
 			}
 		}
 	}
@@ -1184,7 +1186,7 @@ class ListBox: ListControl // docmain
 		// NOTE: duplicate code.
 		if(dfl.internal.utf.useUnicode)
 		{
-			foreach(int i, Object obj; icollection._items)
+			foreach(i, Object obj; icollection._items)
 			{
 				m.wParam = i;
 				m.lParam = cast(LPARAM)dfl.internal.utf.toUnicodez(getObjectString(obj)); // <--
@@ -1199,7 +1201,7 @@ class ListBox: ListControl // docmain
 		}
 		else
 		{
-			foreach(int i, Object obj; icollection._items)
+			foreach(i, Object obj; icollection._items)
 			{
 				m.wParam = i;
 				m.lParam = cast(LPARAM)dfl.internal.utf.toAnsiz(getObjectString(obj)); // Can this be unsafeAnsiz? // <--

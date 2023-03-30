@@ -331,7 +331,9 @@ private:
 		{
 			throw new DflException("Unable to get registered clipboard format name");
 		}
-		return fmt[0..len];
+		if (len > uint.max)
+			throw new DflException("_getRegisteredClipboardFormatName() failure");
+		return fmt[0..cast(uint)len];
 	}
 	
 	

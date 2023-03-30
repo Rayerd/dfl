@@ -803,10 +803,12 @@ class Control: DObject, IWindow // docmain
 			}
 			else
 			{
-				foreach(int i, Control onCtrl; children)
+				foreach(i, Control onCtrl; children)
 				{
+					if(i > int.max)
+						throw new DflException("indexof() failure");
 					if(onCtrl == ctrl)
-						return i;
+						return cast(int)i;
 				}
 				return -1;
 			}
@@ -5143,8 +5145,15 @@ class Control: DObject, IWindow // docmain
 				
 				case WM_COMMAND:
 					{
-						int senderID = HIWORD(msg.wParam);
-						if(senderID == 0) // 0: Menu
+						HWND hwnd = cast(HWND)msg.lParam;
+						Control ctrl = Control.fromChildHandle(hwnd);
+						if(ctrl)
+						{
+							//msg.result = ctrl.customMsg(*(cast(CustomMsg*)&msg));
+							ctrl.onReflectedMessage(msg);
+							return;
+						}
+						else
 						{
 							version(DFL_NO_MENUS)
 							{
@@ -5162,23 +5171,7 @@ class Control: DObject, IWindow // docmain
 							}
 							return;
 						}
-						else if(senderID == 1) // 1: Accelerator
-						{
-							assert(0); // TODO
-						}
-						else // Control
-						{
-							HWND hwnd = cast(HWND)msg.lParam;
-							Control ctrl = Control.fromChildHandle(hwnd);
-							if(ctrl)
-							{
-								//msg.result = ctrl.customMsg(*(cast(CustomMsg*)&msg));
-								ctrl.onReflectedMessage(msg);
-								return;
-							}
-						}
 					}
-					break;
 				
 				case WM_NOTIFY:
 					{
