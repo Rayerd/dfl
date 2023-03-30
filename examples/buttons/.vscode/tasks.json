@@ -3,7 +3,7 @@
 	"tasks": [
 		{
 			"type": "dub",
-			"run": true,
+			"run": false,
 			"cwd": ".",
 			"compiler": "$current",
 			"archType": "$current",
