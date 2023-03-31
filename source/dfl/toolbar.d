@@ -767,6 +767,7 @@ class ToolBar: ControlSuperClass // docmain
 							final switch (b.style)
 							{
 								case ToolBarButtonStyle.PUSH_BUTTON:
+									b.pushed = false; // Work around for trouble on show Modal Window such as msgBox().
 									onButtonClick(tbbcea);
 									break;
 								case ToolBarButtonStyle.DROP_DOWN_BUTTON:
