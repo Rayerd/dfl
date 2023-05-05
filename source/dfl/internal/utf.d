@@ -816,7 +816,7 @@ void emSetPasswordChar(HWND hwnd, dchar pwc)
 			proc = _loadSendMessageW();
 		}
 		
-		proc(hwnd, EM_SETPASSWORDCHAR, pwc, 0); // ?
+		proc(hwnd, EM_SETPASSWORDCHAR, pwc, 0); // TODO: ?
 	}
 	else
 	{
@@ -826,7 +826,7 @@ void emSetPasswordChar(HWND hwnd, dchar pwc)
 		ansichs = unsafeAnsi(chs);
 		
 		if(ansichs)
-			SendMessageA(hwnd, EM_SETPASSWORDCHAR, ansichs[0], 0); // ?
+			SendMessageA(hwnd, EM_SETPASSWORDCHAR, ansichs[0], 0); // TODO: ?
 	}
 }
 
@@ -847,7 +847,7 @@ dchar emGetPasswordChar(HWND hwnd)
 			proc = _loadSendMessageW();
 		}
 		
-		return cast(dchar)proc(hwnd, EM_GETPASSWORDCHAR, 0, 0); // ?
+		return cast(dchar)proc(hwnd, EM_GETPASSWORDCHAR, 0, 0); // TODO: ?
 	}
 	else
 	{
@@ -859,7 +859,7 @@ dchar emGetPasswordChar(HWND hwnd)
 		chs = fromAnsi(&ansich, 1);
 		dchs = utf8stringtoUtf32string(chs);
 		if(dchs.length == 1)
-			return dchs[0]; // ?
+			return dchs[0]; // TODO: ?
 		return 0;
 	}
 }
@@ -1518,7 +1518,7 @@ ATOM registerClass(ref WndClass wc)
 
 BOOL getClassInfo(HINSTANCE hinst, Dstring className, ref WndClass wc)
 {
-	wc.className = className; // ?
+	wc.className = className; // TODO: ?
 	
 	if(useUnicode)
 	{
@@ -2121,7 +2121,7 @@ HFONT createFontIndirect(ref LogFont lf)
 		
 		Dwstring ws = toUnicode(lf.faceName);
 		if(ws.length >= LF_FACESIZE)
-			ws = ws[0 .. LF_FACESIZE - 1]; // ?
+			ws = ws[0 .. LF_FACESIZE - 1]; // TODO: ?
 		foreach(idx, wch; ws)
 		{
 			lf.lfw.lfFaceName[idx] = wch;
@@ -2134,7 +2134,7 @@ HFONT createFontIndirect(ref LogFont lf)
 	{
 		Dstring as = toAnsi(lf.faceName);
 		if(as.length >= LF_FACESIZE)
-			as = as[0 .. LF_FACESIZE - 1]; // ?
+			as = as[0 .. LF_FACESIZE - 1]; // TODO: ?
 		foreach(idx, ach; as)
 		{
 			lf.lfa.lfFaceName[idx] = ach;
