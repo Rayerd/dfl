@@ -629,8 +629,8 @@ extern(Windows) nothrow:
 	}
 	
 	
-	//alias UINT CLIPFORMAT; // ?
-	alias WORD CLIPFORMAT; // ?
+	//alias UINT CLIPFORMAT; // TODO: ?
+	alias WORD CLIPFORMAT; // TODO: ?
 	
 	
 	// enum can't derive from HWND.
@@ -2225,6 +2225,7 @@ extern(Windows) nothrow:
 	// Rich edit.
 	struct EDITSTREAM
 	{
+		align(1):
 		DWORD_PTR dwCookie;
 		DWORD dwError;
 		EDITSTREAMCALLBACK pfnCallback;
@@ -2261,6 +2262,7 @@ extern(Windows) nothrow:
 	// Rich edit.
 	struct ENLINK
 	{
+		align(1):
 		NMHDR nmhdr;
 		UINT msg;
 		WPARAM wParam;
@@ -2274,7 +2276,11 @@ extern(Windows) nothrow:
 		CHARRANGE chrg;
 		LPSTR lpstrText;
 	}
-	
+	struct TEXTRANGEW
+	{
+		CHARRANGE chrg;
+		LPWSTR    lpstrText;
+	}
 	
 	alias MENUITEMINFOW* LPMENUITEMINFOW;
 	
