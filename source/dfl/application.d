@@ -243,7 +243,7 @@ final class Application // docmain
 										//ac.dwFlags = 4; // ACTCTX_FLAG_ASSEMBLY_DIRECTORY_VALID
 										ac.dwFlags = 0;
 										ac.lpSource = manifestbuf.ptr;
-										//ac.lpAssemblyDirectory = pathbuf; // ?
+										//ac.lpAssemblyDirectory = pathbuf; // TODO: ?
 										
 										hac = createActCtxW(&ac);
 										if(hac != INVALID_HANDLE_VALUE)
@@ -625,7 +625,7 @@ final class Application // docmain
 		}
 		else
 		{
-			_initInstance(); // ?
+			_initInstance(); // TODO: ?
 		}
 	}
 	
@@ -2417,16 +2417,16 @@ extern(Windows)
 		{
 			if(!hmodRichtextbox)
 			{
-				hmodRichtextbox = LoadLibraryA("riched20.dll");
+				hmodRichtextbox = LoadLibraryA("Msftedit.dll");
 				if(!hmodRichtextbox)
-					throw new DflException("Unable to load 'riched20.dll'");
+					throw new DflException("Unable to load 'Msftedit.dll'");
 			}
 			
 			Dstring classname;
 			if(dfl.internal.utf.useUnicode)
-				classname = "RichEdit20W";
+				classname = "RICHEDIT50W";
 			else
-				classname = "RichEdit20A";
+				classname = "RICHEDIT50A";
 			
 			dfl.internal.utf.WndClass info;
 			richtextboxPrevWndProc = superClass(HINSTANCE.init, classname, RICHTEXTBOX_CLASSNAME, info);

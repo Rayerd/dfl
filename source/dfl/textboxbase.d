@@ -296,7 +296,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 		if(created)
 		{
 			//dfl.internal.utf.sendMessage(handle, EM_REPLACESEL, FALSE, sel);
-			dfl.internal.utf.sendMessageUnsafe(handle, EM_REPLACESEL, FALSE, sel);
+			dfl.internal.utf.sendMessageUnsafe(handle, EM_REPLACESEL, TRUE, sel);
 		}
 	}
 	

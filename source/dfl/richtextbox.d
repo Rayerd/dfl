@@ -6,11 +6,16 @@
 module dfl.richtextbox;
 
 private import dfl.textboxbase;
-private import dfl.base, dfl.application;
-private import dfl.event, dfl.drawing, dfl.data;
+private import dfl.base;
+private import dfl.application;
+private import dfl.event;
+private import dfl.drawing;
+private import dfl.data;
 private import dfl.control;
 
 private import dfl.internal.winapi;
+private import core.sys.windows.richedit : SF_UNICODE, GETTEXTEX, GETTEXTLENGTHEX, GTL_CLOSE;
+
 private import dfl.internal.utf;
 private import dfl.internal.dlib;
 
@@ -20,6 +25,7 @@ version(DFL_NO_MENUS)
 else
 {
 	private import dfl.menu;
+	import std.utf;
 }
 
 
@@ -46,7 +52,7 @@ class LinkClickedEventArgs: EventArgs
 	}
 	
 	
-	private:
+private:
 	Dstring _linktxt;
 }
 
@@ -67,22 +73,24 @@ enum RichTextBoxScrollBars: ubyte
 ///
 class RichTextBox: TextBoxBase // docmain
 {
+	///
 	this()
 	{
 		super();
 		
 		_initRichtextbox();
 		
-		wstyle |= ES_MULTILINE | ES_WANTRETURN | ES_AUTOHSCROLL | ES_AUTOVSCROLL | WS_HSCROLL | WS_VSCROLL;
+		enum ES_SAVESEL = 0x00008000; // New edit control style.
+		wstyle |= ES_MULTILINE | ES_WANTRETURN | ES_AUTOHSCROLL | ES_AUTOVSCROLL | WS_HSCROLL | WS_VSCROLL | ES_SAVESEL;
 		wcurs = null; // So that the control can change it accordingly.
 		wclassStyle = richtextboxClassStyle;
-		
+
 		version(DFL_NO_MENUS)
 		{
 		}
 		else
 		{
-			with(miredo = new MenuItem)
+			with (miredo = new MenuItem)
 			{
 				text = "&Redo";
 				click ~= &menuRedo;
@@ -96,17 +104,19 @@ class RichTextBox: TextBoxBase // docmain
 	
 	private
 	{
-		version(DFL_NO_MENUS)
+		version (DFL_NO_MENUS)
 		{
 		}
 		else
 		{
+			///
 			void menuRedo(Object sender, EventArgs ea)
 			{
 				redo();
 			}
 			
 			
+			///
 			void menuPopup2(Object sender, EventArgs ea)
 			{
 				miredo.enabled = canRedo;
@@ -118,34 +128,29 @@ class RichTextBox: TextBoxBase // docmain
 	}
 	
 	
+	///
 	override @property Cursor cursor() // getter
 	{
 		return wcurs; // Do return null and don't inherit.
 	}
 	
+	/// ditto
 	alias cursor = TextBoxBase.cursor; // Overload.
 	
 	
+	///
 	override @property Dstring selectedText() // getter
 	{
-		if(created)
-		{
-			/+
-			uint len = selectionLength + 1;
-			Dstring result = new char[len];
-			len = SendMessageA(handle, EM_GETSELTEXT, 0, cast(LPARAM)cast(char*)result);
-			assert(!result[len]);
-			return result[0 .. len];
-			+/
-			
+		if (created)
 			return dfl.internal.utf.emGetSelText(hwnd, selectionLength + 1);
-		}
 		return null;
 	}
 	
+	/// ditto
 	alias selectedText = TextBoxBase.selectedText; // Overload.
 	
 	
+	///
 	override @property void selectionLength(uint len) // setter
 	{
 		if(created)
@@ -156,7 +161,6 @@ class RichTextBox: TextBoxBase // docmain
 			SendMessageA(handle, EM_EXSETSEL, 0, cast(LPARAM)&chrg);
 		}
 	}
-	
 	
 	// Current selection length, in characters.
 	// This does not necessarily correspond to the length of chars; some characters use multiple chars.
@@ -174,6 +178,7 @@ class RichTextBox: TextBoxBase // docmain
 	}
 	
 	
+	///
 	override @property void selectionStart(uint pos) // setter
 	{
 		if(created)
@@ -203,6 +208,7 @@ class RichTextBox: TextBoxBase // docmain
 	}
 	
 	
+	///
 	override @property void maxLength(uint len) // setter
 	{
 		_lim = len;
@@ -211,16 +217,19 @@ class RichTextBox: TextBoxBase // docmain
 			SendMessageA(handle, EM_EXLIMITTEXT, 0, cast(LPARAM)len);
 	}
 	
+	/// ditto
 	alias maxLength = TextBoxBase.maxLength; // Overload.
 	
 	
+	///
 	override @property Size defaultSize() // getter
 	{
-		return Size(120, 120); // ?
+		return Size(100, 96);
 	}
 	
 	
-	private void _setbk(Color c)
+	///
+	private void _setBackColor(Color c)
 	{
 		if(created)
 		{
@@ -232,16 +241,19 @@ class RichTextBox: TextBoxBase // docmain
 	}
 	
 	
+	///
 	override @property void backColor(Color c) // setter
 	{
-		_setbk(c);
+		_setBackColor(c);
 		super.backColor(c);
 	}
 	
+	/// ditto
 	alias backColor = TextBoxBase.backColor; // Overload.
 	
 	
-	private void _setfc(Color c)
+	///
+	private void _setForeColor(Color c)
 	{
 		if(created)
 		{
@@ -259,12 +271,14 @@ class RichTextBox: TextBoxBase // docmain
 	}
 	
 	
+	///
 	override @property void foreColor(Color c) // setter
 	{
-		_setfc(c);
+		_setForeColor(c);
 		super.foreColor(c);
 	}
 	
+	/// ditto
 	alias foreColor = TextBoxBase.foreColor; // Overload.
 	
 	
@@ -308,6 +322,7 @@ class RichTextBox: TextBoxBase // docmain
 		}
 	}
 	
+	/// ditto
 	alias paste = TextBoxBase.paste; // Overload.
 	
 	
@@ -515,6 +530,7 @@ class RichTextBox: TextBoxBase // docmain
 	}
 	
 	
+	///
 	private enum DWORD FONT_MASK = CFM_BOLD | CFM_ITALIC | CFM_STRIKEOUT |
 		CFM_UNDERLINE | CFM_CHARSET | CFM_FACE | CFM_SIZE | CFM_UNDERLINETYPE | CFM_WEIGHT;
 	
@@ -523,7 +539,7 @@ class RichTextBox: TextBoxBase // docmain
 	{
 		if(created)
 		{
-			// To-do: support Unicode font names.
+			// TODO: support Unicode font names.
 			
 			CHARFORMAT2A cf;
 			LOGFONTA lf;
@@ -570,9 +586,9 @@ class RichTextBox: TextBoxBase // docmain
 				with(lf)
 				{
 					lfHeight = -Font.getLfHeight(cast(float)cf.yHeight, GraphicsUnit.TWIP);
-					lfWidth = 0; // ?
-					lfEscapement = 0; // ?
-					lfOrientation = 0; // ?
+					lfWidth = 0; // TODO: ?
+					lfEscapement = 0; // TODO: ?
+					lfOrientation = 0; // TODO: ?
 					lfWeight = cf.wWeight;
 					if(cf.dwEffects & CFE_BOLD)
 					{
@@ -671,8 +687,7 @@ class RichTextBox: TextBoxBase // docmain
 	///
 	final @property void scrollBars(RichTextBoxScrollBars sb) // setter
 	{
-		LONG st;
-		st = _style() & ~(ES_DISABLENOSCROLL | WS_HSCROLL | WS_VSCROLL |
+		LONG st = _style() & ~(ES_DISABLENOSCROLL | WS_HSCROLL | WS_VSCROLL |
 			ES_AUTOHSCROLL | ES_AUTOVSCROLL);
 		
 		final switch(sb)
@@ -748,6 +763,7 @@ class RichTextBox: TextBoxBase // docmain
 	}
 	
 	
+	///
 	private void _getFormat(CHARFORMAT2A* cf, BOOL selection = TRUE)
 	in
 	{
@@ -761,6 +777,7 @@ class RichTextBox: TextBoxBase // docmain
 	}
 	
 	
+	///
 	private void _setFormat(CHARFORMAT2A* cf, WPARAM scf = SCF_SELECTION)
 	in
 	{
@@ -778,15 +795,14 @@ class RichTextBox: TextBoxBase // docmain
 	}
 	
 	
+	///
 	private struct _StreamStr
 	{
 		Dstring str;
 	}
 	
 	
-	// Note: RTF should only be ASCII so no conversions are necessary.
-	// TODO: verify this; I'm not certain.
-	
+	///
 	private void _streamIn(UINT fmt, Dstring str)
 	in
 	{
@@ -795,19 +811,22 @@ class RichTextBox: TextBoxBase // docmain
 	do
 	{
 		_StreamStr si;
-		EDITSTREAM es;
-		
 		si.str = str;
+
+		EDITSTREAM es;
 		es.dwCookie = cast(DWORD_PTR)&si;
+		es.dwError = 0;
 		es.pfnCallback = &_streamingInStr;
 		
-		//if(SendMessageA(handle, EM_STREAMIN, cast(WPARAM)fmt, cast(LPARAM)&es) != str.length)
+		//if(SendMessageW(handle, EM_STREAMIN, cast(WPARAM)fmt, cast(LPARAM)&es) != str.length)
 		//	throw new DflException("Unable to set RTF");
 		
-		SendMessageA(handle, EM_STREAMIN, cast(WPARAM)fmt, cast(LPARAM)&es);
+		SendMessageW(handle, EM_STREAMIN, cast(WPARAM)fmt, cast(LPARAM)&es);
+		assert(es.dwError == 0);
 	}
 	
 	
+	///
 	private Dstring _streamOut(UINT fmt)
 	in
 	{
@@ -816,47 +835,49 @@ class RichTextBox: TextBoxBase // docmain
 	do
 	{
 		_StreamStr so;
+
 		EDITSTREAM es;
-		
-		so.str = null;
 		es.dwCookie = cast(DWORD_PTR)&so;
+		es.dwError = 0;
 		es.pfnCallback = &_streamingOutStr;
-		
-		SendMessageA(handle, EM_STREAMOUT, cast(WPARAM)fmt, cast(LPARAM)&es);
+
+		SendMessageW(handle, EM_STREAMOUT, cast(WPARAM)fmt, cast(LPARAM)&es);
+		assert(es.dwError == 0);
+
 		return so.str;
 	}
 	
 	
 	///
-	final @property void selectedRtf(Dstring rtf) // setter
+	final @property void selectedRtf(Dstring newRtf) // setter
 	{
-		_streamIn(SF_RTF | SFF_SELECTION, rtf);
+		_streamIn(SF_RTF | SF_UNICODE | SFF_SELECTION, newRtf);
 	}
 	
 	/// ditto
 	final @property Dstring selectedRtf() // getter
 	{
-		return _streamOut(SF_RTF | SFF_SELECTION);
+		return _streamOut(SF_RTF | SF_UNICODE | SFF_SELECTION);
 	}
 	
 	
 	///
 	final @property void rtf(Dstring newRtf) // setter
 	{
-		_streamIn(SF_RTF, rtf);
+		_streamIn(SF_RTF | SF_UNICODE, newRtf);
 	}
 	
 	/// ditto
 	final @property Dstring rtf() // getter
 	{
-		return _streamOut(SF_RTF);
+		return _streamOut(SF_RTF | SF_UNICODE);
 	}
 	
 	
 	///
 	final @property void detectUrls(bool byes) // setter
 	{
-		autoUrl = byes;
+		_autoUrl = byes;
 		
 		if(created)
 		{
@@ -867,7 +888,7 @@ class RichTextBox: TextBoxBase // docmain
 	/// ditto
 	final @property bool detectUrls() // getter
 	{
-		return autoUrl;
+		return _autoUrl;
 	}
 	
 	
@@ -903,21 +924,22 @@ class RichTextBox: TextBoxBase // docmain
 	+/
 	
 	
-	protected override void createParams(ref CreateParams cp)
+	//LinkClickedEventHandler linkClicked;
+	Event!(RichTextBox, LinkClickedEventArgs) linkClicked; ///
+	
+	
+protected:
+	
+	///
+	override void createParams(ref CreateParams cp)
 	{
 		super.createParams(cp);
 		
 		cp.className = RICHTEXTBOX_CLASSNAME;
 		//cp.caption = null; // Set in createHandle() to allow larger buffers. // TextBoxBase.createHandle() does this.
 	}
-	
-	
-	//LinkClickedEventHandler linkClicked;
-	Event!(RichTextBox, LinkClickedEventArgs) linkClicked; ///
-	
-	
-	protected:
-	
+
+
 	///
 	void onLinkClicked(LinkClickedEventArgs ea)
 	{
@@ -925,116 +947,153 @@ class RichTextBox: TextBoxBase // docmain
 	}
 	
 	
-	private Dstring _getRange(LONG min, LONG max)
+	///
+	// min : Index of start on text, not bytes.
+	// max : Index of end on text, not bytes.
+	private Dstring _getRange(in LONG min, in LONG max)
 	in
 	{
 		assert(created);
-		assert(max >= 0);
-		assert(max >= min);
+		assert(min >= 0);
+		assert(max >= -1); // When -max- == -1, contains all text in range.
 	}
 	do
 	{
 		if(min == max)
-			return null;
+			return null; // Empty range.
+		else if (max != -1 && min > max)
+			return null; // Illigal range.
 		
-		TEXTRANGEA tr;
-		char[] s;
-		
-		tr.chrg.cpMin = min;
-		tr.chrg.cpMax = max;
-		max = max - min + 1;
-		if(dfl.internal.utf.useUnicode)
-			max = cast(uint)max << 1;
-		s = new char[max];
-		tr.lpstrText = s.ptr;
-		
-		//max = SendMessageA(handle, EM_GETTEXTRANGE, 0, cast(LPARAM)&tr);
-		max = dfl.internal.utf.sendMessage(handle, EM_GETTEXTRANGE, 0, cast(LPARAM)&tr).toI32;
-		Dstring result;
-		if(dfl.internal.utf.useUnicode)
-			result = fromUnicode(cast(wchar*)s.ptr, max);
+		const size_t textLength = {
+			if (max >= 0)
+			{
+				return max - min + 1; // 1 : null terminate.
+			}
+			else if (max == -1)
+			{
+				// When -max- == -1, contains all text in range.
+				return text.length - min + 1; // 1 : null terminate.
+			}
+			else
+			{
+				assert(0);
+			}
+		}();
+
+		static if (dfl.internal.utf.useUnicode)
+		{
+			TEXTRANGEW tr;
+			tr.chrg.cpMin = min;
+			tr.chrg.cpMax = max;
+			wchar[] s = new wchar[textLength];
+			tr.lpstrText = s.ptr;
+			const uint copiedLength = SendMessageW(handle, EM_GETTEXTRANGE, 0, cast(LPARAM)&tr).toI32;
+			Dstring result = fromUnicode(s.ptr, copiedLength);
+			return result;
+		}
 		else
-			result = fromAnsi(s.ptr, max);
-		return result;
+		{
+			TEXTRANGEA tr;
+			tr.chrg.cpMin = min;
+			tr.chrg.cpMax = max;
+			char[] s = new char[textLength];
+			tr.lpstrText = s.ptr;
+			const uint copiedLength = SendMessageA(handle, EM_GETTEXTRANGE, 0, cast(LPARAM)&tr).toI32;
+			Dstring result = fromAnsi(s.ptr, copiedLength);
+			return result;
+		}
 	}
-	
-	
-	protected override void onReflectedMessage(ref Message m)
+
+	///
+	override void onReflectedMessage(ref Message m)
 	{
 		super.onReflectedMessage(m);
 		
-		switch(m.msg)
+		switch (m.msg)
 		{
 			case WM_NOTIFY:
+			{
+				NMHDR* nmh = cast(NMHDR*)m.lParam;
+				assert(nmh.hwndFrom == handle);
+				switch (nmh.code)
 				{
-					NMHDR* nmh;
-					nmh = cast(NMHDR*)m.lParam;
-					
-					assert(nmh.hwndFrom == handle);
-					
-					switch(nmh.code)
+					case EN_LINK:
 					{
-						case EN_LINK:
-							{
-								ENLINK* enl;
-								enl = cast(ENLINK*)nmh;
-								
-								if(enl.msg == WM_LBUTTONUP)
-								{
-									if(!selectionLength)
-										onLinkClicked(new LinkClickedEventArgs(_getRange(enl.chrg.cpMin, enl.chrg.cpMax)));
-								}
-							}
-							break;
-							
-						default:
+						ENLINK* enl = cast(ENLINK*)m.lParam;
+						if (enl.msg == WM_LBUTTONUP)
+						{
+							Dstring linkText = _getRange(enl.chrg.cpMin, enl.chrg.cpMax);
+							onLinkClicked(new LinkClickedEventArgs(linkText));
+							m.result = 1;
+						}
+						break;
+					}
+					default:
+					{
+						// DO nothing.
 					}
 				}
 				break;
-			
+			}
 			default:
+			{
+				// Do nothing.
+			}
 		}
 	}
 	
 	
+	///
 	override void onHandleCreated(EventArgs ea)
 	{
 		super.onHandleCreated(ea);
 		
-		SendMessageA(handle, EM_AUTOURLDETECT, autoUrl, 0);
+		SendMessageA(handle, EM_AUTOURLDETECT, _autoUrl, 0);
+		SendMessageA(handle, EM_SETEVENTMASK, 0, ENM_LINK);
 		
-		_setbk(this.backColor);
+		_setBackColor(this.backColor);
 		
 		//Application.doEvents(); // foreColor won't work otherwise.. seems to work now
-		_setfc(this.foreColor);
-		
-		SendMessageA(handle, EM_SETEVENTMASK, 0, ENM_CHANGE | ENM_CHANGE | ENM_LINK | ENM_PROTECTED);
+		_setForeColor(this.foreColor);
 	}
 	
 	
+	///
 	override void prevWndProc(ref Message m)
 	{
-		m.result = CallWindowProcA(richtextboxPrevWndProc, m.hWnd, m.msg, m.wParam, m.lParam);
-		//m.result = dfl.internal.utf.callWindowProc(richtextboxPrevWndProc, m.hWnd, m.msg, m.wParam, m.lParam);
+		// m.result = CallWindowProcA(richtextboxPrevWndProc, m.hWnd, m.msg, m.wParam, m.lParam);
+		m.result = dfl.internal.utf.callWindowProc(richtextboxPrevWndProc, m.hWnd, m.msg, m.wParam, m.lParam);
+	}
+
+
+	///
+	final LRESULT prevwproc(UINT msg, WPARAM wparam, LPARAM lparam)
+	{
+		return dfl.internal.utf.callWindowProc(richtextboxPrevWndProc, hwnd, msg, wparam, lparam);
 	}
 	
 	
-	private:
-	bool autoUrl = true;
+private:
+	bool _autoUrl = true;
 }
 
 
+///
+// dwCookie : Value of the dwCookie member of the EDITSTREAM structure.
+// pbBuff   : Pointer to a buffer to read from or write to.
+// cb       : Number of bytes to read or write.
+// pcb      : Pointer to a variable that the callback function sets to the number of bytes actually read or written.
 private extern(Windows) DWORD _streamingInStr(DWORD_PTR dwCookie, LPBYTE pbBuff, LONG cb, LONG* pcb) nothrow
 {
-	RichTextBox._StreamStr* si;
-	si = cast(typeof(si))dwCookie;
+	RichTextBox._StreamStr* si = cast(RichTextBox._StreamStr*)dwCookie;
 	
-	if(!si.str.length)
+	if (!si || !si.str.length)
 	{
 		*pcb = 0;
-		return 1; // ?
+		return 1; // Non-zero is error code.
 	}
-	else if(cb >= si.str.length)
+	
+	if (cb >= si.str.length)
 	{
 		pbBuff[0 .. si.str.length] = (cast(BYTE[])si.str)[];
 		*pcb = si.str.length.toI32;
@@ -1051,14 +1110,29 @@ private extern(Windows) DWORD _streamingInStr(DWORD_PTR dwCookie, LPBYTE pbBuff,
 }
 
 
-private extern(Windows) DWORD _streamingOutStr(DWORD_PTR dwCookie, LPBYTE pbBuff, LONG cb, LONG* pcb) nothrow
+///
+// dwCookie : Value of the dwCookie member of the EDITSTREAM structure.
+// pbBuff   : Pointer to a buffer to read from or write to.
+// cb       : Number of bytes to read or write.
+// pcb      : Pointer to a variable that the callback function sets to the number of bytes actually read or written.
+extern(Windows) DWORD _streamingOutStr(DWORD_PTR dwCookie, LPBYTE pbBuff, LONG cb, LONG* pcb) nothrow
 {
-	RichTextBox._StreamStr* so;
-	so = cast(typeof(so))dwCookie;
-	
+	RichTextBox._StreamStr* so = cast(RichTextBox._StreamStr*)dwCookie;
 	so.str ~= cast(Dstring)pbBuff[0 .. cb];
 	*pcb = cb;
-	
 	return 0;
 }
 
+
+private DialogResult _msgBoxNothrow(Dstring msg) nothrow
+{
+	import dfl.messagebox;
+	try
+	{
+		return msgBox(msg);
+	}
+	catch (Exception e)
+	{
+		return DialogResult.NONE;
+	}
+}
