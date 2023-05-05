@@ -404,7 +404,7 @@ class FontDialog: CommonDialog
 	else
 	{
 		CHOOSEFONTA cfa;
-		alias cf = cfw;
+		alias cf = cfa;
 	}
 	static assert(CHOOSEFONTW.sizeof == CHOOSEFONTA.sizeof);
 	static assert(CHOOSEFONTW.Flags.offsetof == CHOOSEFONTA.Flags.offsetof);
