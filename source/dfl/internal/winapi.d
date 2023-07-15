@@ -2905,8 +2905,8 @@ extern(Windows) nothrow:
 	BOOL IsMenu(HMENU hMenu);
 	HMENU GetSystemMenu(HWND hWnd, BOOL bRevert);
 	DWORD GetModuleFileNameW(HMODULE hModule, LPWSTR lpFilename, DWORD nSize);
-	HDC CreateEnhMetaFileW(HDC hdcRef, LPCWSTR lpFilename, in RECT* lpRect, LPCWSTR lpDescription  );
-	BOOL PlayEnhMetaFile(HDC hdc, HENHMETAFILE hemf, in RECT* lpRect);
+	HDC CreateEnhMetaFileW(HDC hdcRef, LPCWSTR lpFilename, RECT* lpRect, LPCWSTR lpDescription  );
+	BOOL PlayEnhMetaFile(HDC hdc, HENHMETAFILE hemf, RECT* lpRect);
 	HENHMETAFILE CloseEnhMetaFile(HDC hdc);
 	BOOL DeleteEnhMetaFile(HENHMETAFILE hemf);
 	HENHMETAFILE GetEnhMetaFileW(LPCWSTR lpszMetaFile);
