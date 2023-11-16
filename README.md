@@ -96,4 +96,5 @@ See also **./examples/hello_dfl/dub.json**.
 **IMPORTANT**: DUB is building **dfl_dub.lib** that is **not** containing **undead.lib** and WINSDK libraries.
 
 ## License
-boost and/or zlib/libpng
+DFL is under the boost and/or zlib/libpng license.
+However, trackbar.d is covered by the MIT license.
