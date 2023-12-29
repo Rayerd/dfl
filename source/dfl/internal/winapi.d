@@ -39,27 +39,27 @@ else
 
 extern(Windows) nothrow:
 	
-	alias SIZE* LPSIZE;
+	alias LPSIZE = SIZE*;
 	
 	
-	alias POINTL* LPPOINTL;
+	alias LPPOINTL = POINTL*;
 	
 	
-	alias RECT* LPCRECT;
+	alias LPCRECT = RECT*;
 	
 	
-	alias WORD LANGID;
+	alias LANGID = WORD;
 	
 	
-	alias size_t ULONG_PTR;
+	alias ULONG_PTR = size_t;
 	
 	
-	alias long LONGLONG;
+	alias LONGLONG = long;
 	
-	alias ulong DWORDLONG;
+	alias DWORDLONG = ulong;
 	
 	
-	alias HRESULT THEMEAPI;
+	alias THEMEAPI = HRESULT;
 	
 	
 	enum: UINT
@@ -214,7 +214,7 @@ extern(Windows) nothrow:
 		POINT pt;
 		LPARAM dwHitInfo;
 	}
-	alias NMMOUSE* LPNMMOUSE;
+	alias LPNMMOUSE = NMMOUSE*;
 	
 	
 	enum: UINT
@@ -493,7 +493,7 @@ extern(Windows) nothrow:
 		UINT message;
 		HWND hwnd;
 	}
-	alias CWPSTRUCT* LPCWPSTRUCT;
+	alias LPCWPSTRUCT = CWPSTRUCT*;
 	
 	
 	struct CWPRETSTRUCT
@@ -504,7 +504,7 @@ extern(Windows) nothrow:
 		DWORD message;
 		HWND hwnd;
 	}
-	alias CWPRETSTRUCT* LPCWPRETSTRUCT;
+	alias LPCWPRETSTRUCT = CWPRETSTRUCT*;
 	
 	
 	enum: UINT
@@ -629,8 +629,7 @@ extern(Windows) nothrow:
 	}
 	
 	
-	//alias UINT CLIPFORMAT; // TODO: ?
-	alias WORD CLIPFORMAT; // TODO: ?
+	alias CLIPFORMAT = WORD;
 	
 	
 	// enum can't derive from HWND.
@@ -1687,7 +1686,7 @@ extern(Windows) nothrow:
 	enum DWORD LF_FACESIZE = 32;
 	
 	
-	alias HANDLE HIMAGELIST;
+	alias HIMAGELIST = HANDLE;
 	
 	
 	enum: UINT
@@ -1710,10 +1709,10 @@ extern(Windows) nothrow:
 	
 	
 	// Rich edit.
-	alias DWORD function(DWORD_PTR dwCookie, LPBYTE pbBuff, LONG cb, LONG* pcb) EDITSTREAMCALLBACK;
+	alias EDITSTREAMCALLBACK = DWORD function(DWORD_PTR dwCookie, LPBYTE pbBuff, LONG cb, LONG* pcb);
 	
 	
-	alias DWORD LCID;
+	alias LCID = DWORD;
 	
 	
 	struct WINDOWPOS
@@ -1726,8 +1725,8 @@ extern(Windows) nothrow:
 		int  cy;
 		UINT flags;                
 	}
-	alias WINDOWPOS* LPWINDOWPOS;
-	alias WINDOWPOS* PWINDOWPOS;
+	alias LPWINDOWPOS = WINDOWPOS*;
+	alias PWINDOWPOS = WINDOWPOS*;
 	
 	
 	struct WNDCLASSW
@@ -1743,7 +1742,7 @@ extern(Windows) nothrow:
 		LPCWSTR lpszMenuName;
 		LPCWSTR lpszClassName;
 	}
-	alias WNDCLASSW* LPWNDCLASSW;
+	alias LPWNDCLASSW = WNDCLASSW*;
 	
 	
 	struct OSVERSIONINFOA
@@ -1755,7 +1754,7 @@ extern(Windows) nothrow:
 		DWORD dwPlatformId;
 		CHAR[128] szCSDVersion;
 	}
-	alias OSVERSIONINFOA* LPOSVERSIONINFOA;
+	alias LPOSVERSIONINFOA = OSVERSIONINFOA*;
 	
 	
 	const HWND HWND_MESSAGE = cast(HWND)-3; // Win2000/XP only.
@@ -1771,7 +1770,7 @@ extern(Windows) nothrow:
 		 HICON hIcon; 
 		 char[64] szTip; 
 	}
-	alias NOTIFYICONDATA* PNOTIFYICONDATA;
+	alias PNOTIFYICONDATA = NOTIFYICONDATA*;
 	
 	
 	// Unaligned!
@@ -1781,21 +1780,21 @@ extern(Windows) nothrow:
 		USHORT cb; // Size including cb.
 		BYTE[1] abID;
 	}
-	alias SHITEMID* PSHITEMID;
-	alias SHITEMID* LPSHITEMID;
-	alias SHITEMID* LPCSHITEMID;
+	alias PSHITEMID = SHITEMID*;
+	alias LPSHITEMID = SHITEMID*;
+	alias LPCSHITEMID = SHITEMID*;
 	
 	
 	struct ITEMIDLIST
 	{
 		SHITEMID mkid;
 	}
-	alias ITEMIDLIST* PITEMIDLIST;
-	alias ITEMIDLIST* LPITEMIDLIST;
-	alias ITEMIDLIST* LPCITEMIDLIST;
+	alias PITEMIDLIST = ITEMIDLIST*;
+	alias LPITEMIDLIST = ITEMIDLIST*;
+	alias LPCITEMIDLIST = ITEMIDLIST*;
 	
 	
-	alias int function(HWND hwnd, UINT uMsg, LPARAM lParam, LPARAM lpData) BFFCALLBACK;
+	alias BFFCALLBACK = int function(HWND hwnd, UINT uMsg, LPARAM lParam, LPARAM lpData);
 	
 	
 	struct BROWSEINFOA
@@ -1809,8 +1808,8 @@ extern(Windows) nothrow:
 		LPARAM lParam;
 		int iImage;
 	}
-	alias BROWSEINFOA* PBROWSEINFOA;
-	alias BROWSEINFOA* LPBROWSEINFOA;
+	alias PBROWSEINFOA = BROWSEINFOA*;
+	alias LPBROWSEINFOA = BROWSEINFOA*;
 	
 	
 	struct BROWSEINFOW
@@ -1824,8 +1823,8 @@ extern(Windows) nothrow:
 		LPARAM lParam;
 		int iImage;
 	}
-	alias BROWSEINFOW* PBROWSEINFOW;
-	alias BROWSEINFOW* LPBROWSEINFOW;
+	alias PBROWSEINFOW = BROWSEINFOW*;
+	alias LPBROWSEINFOW = BROWSEINFOW*;
 	
 	
 	struct LOGBRUSH
@@ -1834,10 +1833,10 @@ extern(Windows) nothrow:
 		COLORREF lbColor;
 		LONG lbHatch;
 	}
-	alias LOGBRUSH* LPLOGBRUSH;
+	alias LPLOGBRUSH = LOGBRUSH*;
 	
 	
-	alias DRAWTEXTPARAMS* LPDRAWTEXTPARAMS;
+	alias LPDRAWTEXTPARAMS = DRAWTEXTPARAMS*;
 	
 	
 	struct NMHDR
@@ -1846,7 +1845,7 @@ extern(Windows) nothrow:
 		UINT_PTR idFrom;
 		UINT code;
 	}
-	alias NMHDR* LPNMHDR;
+	alias LPNMHDR = NMHDR*;
 	
 	
 	struct NMCUSTOMDRAW
@@ -1859,7 +1858,7 @@ extern(Windows) nothrow:
 		UINT uItemState;
 		LPARAM lItemlParam;
 	}
-	alias NMCUSTOMDRAW* LPNMCUSTOMDRAW;
+	alias LPNMCUSTOMDRAW = NMCUSTOMDRAW*;
 	
 	
 	struct NMTVCUSTOMDRAW
@@ -1869,7 +1868,7 @@ extern(Windows) nothrow:
 		COLORREF clrTextBk;
 		int iLevel; // IE4+
 	}
-	alias NMTVCUSTOMDRAW* LPNMTVCUSTOMDRAW;
+	alias LPNMTVCUSTOMDRAW = NMTVCUSTOMDRAW*;
 	
 	
 	struct NM_LISTVIEW
@@ -1897,11 +1896,11 @@ extern(Windows) nothrow:
 		int iImage;
 		LPARAM lParam;
 	}
-	alias LVITEMA* LPLVITEMA;
-	alias LVITEMA* PLVITEMA;
-	alias LVITEMA LV_ITEMA;
-	alias LVITEMA* LPLV_ITEMA;
-	alias LVITEMA* PLV_ITEMA;
+	alias LPLVITEMA = LVITEMA*;
+	alias PLVITEMA = LVITEMA*;
+	alias LV_ITEMA = LVITEMA;
+	alias LPLV_ITEMA = LVITEMA*;
+	alias PLV_ITEMA = LVITEMA*;
 	
 	
 	struct LVITEMW
@@ -1916,11 +1915,11 @@ extern(Windows) nothrow:
 		int iImage;
 		LPARAM lParam;
 	}
-	alias LVITEMW* LPLVITEMW;
-	alias LVITEMW* PLVITEMW;
-	alias LVITEMW LV_ITEMW;
-	alias LVITEMW* LPLV_ITEMW;
-	alias LVITEMW* PLV_ITEMW;
+	alias LPLVITEMW = LVITEMW*;
+	alias PLVITEMW = LVITEMW*;
+	alias LV_ITEMW = LVITEMW;
+	alias LPLV_ITEMW = LVITEMW*;
+	alias PLV_ITEMW = LVITEMW*;
 	
 	
 	struct LVDISPINFOA
@@ -1928,11 +1927,11 @@ extern(Windows) nothrow:
 		NMHDR hdr;
 		LVITEMA item;
 	}
-	alias LVDISPINFOA* LPLVDISPINFOA;
-	alias LVDISPINFOA* PLVDISPINFOA;
-	alias LVDISPINFOA LV_DISPINFOA;
-	alias LVDISPINFOA* LPLV_DISPINFOA;
-	alias LVDISPINFOA* PLV_DISPINFOA;
+	alias LPLVDISPINFOA = LVDISPINFOA*;
+	alias PLVDISPINFOA = LVDISPINFOA*;
+	alias LV_DISPINFOA = LVDISPINFOA;
+	alias LPLV_DISPINFOA = LVDISPINFOA*;
+	alias PLV_DISPINFOA = LVDISPINFOA*;
 	
 	
 	struct LVDISPINFOW
@@ -1940,11 +1939,11 @@ extern(Windows) nothrow:
 		NMHDR hdr;
 		LVITEMW item;
 	}
-	alias LVDISPINFOW* LPLVDISPINFOW;
-	alias LVDISPINFOW* PLVDISPINFOW;
-	alias LVDISPINFOW LV_DISPINFOW;
-	alias LVDISPINFOW* LPLV_DISPINFOW;
-	alias LVDISPINFOW* PLV_DISPINFOW;
+	alias LPLVDISPINFOW = LVDISPINFOW*;
+	alias PLVDISPINFOW = LVDISPINFOW*;
+	alias LV_DISPINFOW = LVDISPINFOW;
+	alias LPLV_DISPINFOW = LVDISPINFOW*;
+	alias PLV_DISPINFOW = LVDISPINFOW*;
 	
 	
 	struct LVCOLUMNA
@@ -1956,11 +1955,11 @@ extern(Windows) nothrow:
 		int cchTextMax;
 		int iSubItem;
 	}
-	alias LVCOLUMNA* LPLVCOLUMNA;
-	alias LVCOLUMNA* PLVCOLUMNA;
-	alias LVCOLUMNA LV_COLUMNA;
-	alias LVCOLUMNA* LPLV_COLUMNA;
-	alias LVCOLUMNA* PLV_COLUMNA;
+	alias LPLVCOLUMNA = LVCOLUMNA*;
+	alias PLVCOLUMNA = LVCOLUMNA*;
+	alias LV_COLUMNA = LVCOLUMNA;
+	alias LPLV_COLUMNA = LVCOLUMNA*;
+	alias PLV_COLUMNA = LVCOLUMNA*;
 	
 	
 	struct LVCOLUMNW
@@ -1972,11 +1971,11 @@ extern(Windows) nothrow:
 		int cchTextMax;
 		int iSubItem;
 	}
-	alias LVCOLUMNW* LPLVCOLUMNW;
-	alias LVCOLUMNW* PLVCOLUMNW;
-	alias LVCOLUMNW LV_COLUMNW;
-	alias LVCOLUMNW* LPLV_COLUMNW;
-	alias LVCOLUMNW* PLV_COLUMNW;
+	alias LPLVCOLUMNW = LVCOLUMNW*;
+	alias PLVCOLUMNW = LVCOLUMNW*;
+	alias LV_COLUMNW = LVCOLUMNW;
+	alias LPLV_COLUMNW = LVCOLUMNW*;
+	alias PLV_COLUMNW = LVCOLUMNW*;
 	
 	
 	struct TBBUTTON
@@ -1993,7 +1992,9 @@ extern(Windows) nothrow:
 		DWORD_PTR dwData;
 		INT_PTR iString;
 	}
-	alias TBBUTTON* PTBBUTTON, LPTBBUTTON, LPCTBBUTTON;
+	alias PTBBUTTON = TBBUTTON*;
+	alias LPTBBUTTON = TBBUTTON*;
+	alias LPCTBBUTTON = TBBUTTON*;
 	
 	
 	struct NMTOOLBARA
@@ -2005,7 +2006,7 @@ extern(Windows) nothrow:
 		LPSTR pszText;
 		RECT rcButton;
 	}
-	alias NMTOOLBARA* LPNMTOOLBARA;
+	alias LPNMTOOLBARA = NMTOOLBARA*;
 	
 	
 	struct NMTOOLBARW
@@ -2017,7 +2018,7 @@ extern(Windows) nothrow:
 		LPWSTR pszText;
 		RECT rcButton;
 	}
-	alias NMTOOLBARW* LPNMTOOLBARW;
+	alias LPNMTOOLBARW = NMTOOLBARW*;
 	
 	
 	enum: BYTE
@@ -2104,11 +2105,11 @@ extern(Windows) nothrow:
 		int cChildren;
 		LPARAM lParam;
 	}
-	alias TVITEMA* LPTVITEMA;
-	alias TVITEMA* PTVITEMA;
-	alias TVITEMA TV_ITEMA;
-	alias TVITEMA* LPTV_ITEMA;
-	alias TVITEMA* PTV_ITEMA;
+	alias LPTVITEMA = TVITEMA*;
+	alias PTVITEMA = TVITEMA*;
+	alias TV_ITEMA = TVITEMA;
+	alias LPTV_ITEMA = TVITEMA*;
+	alias PTV_ITEMA = TVITEMA*;
 	
 	
 	struct TVITEMW
@@ -2124,11 +2125,11 @@ extern(Windows) nothrow:
 		int cChildren;
 		LPARAM lParam;
 	}
-	alias TVITEMW* LPTVITEMW;
-	alias TVITEMW* PTVITEMW;
-	alias TVITEMW TV_ITEMW;
-	alias TVITEMW* LPTV_ITEMW;
-	alias TVITEMW* PTV_ITEMW;
+	alias LPTVITEMW = TVITEMW*;
+	alias PTVITEMW = TVITEMW*;
+	alias TV_ITEMW = TVITEMW;
+	alias LPTV_ITEMW = TVITEMW*;
+	alias PTV_ITEMW = TVITEMW*;
 	
 	
 	struct TVHITTESTINFO
@@ -2137,7 +2138,7 @@ extern(Windows) nothrow:
 		UINT flags;
 		HTREEITEM hItem;
 	}
-	alias TVHITTESTINFO* LPTVHITTESTINFO;
+	alias LPTVHITTESTINFO = TVHITTESTINFO*;
 	
 	
 	struct TVINSERTSTRUCTA
@@ -2146,9 +2147,9 @@ extern(Windows) nothrow:
 		HTREEITEM hInsertAfter;
 		TV_ITEMA item;
 	}
-	alias TVINSERTSTRUCTA* LPTVINSERTSTRUCTA;
-	alias TVINSERTSTRUCTA TV_INSERTSTRUCTA;
-	alias TVINSERTSTRUCTA* LPTV_INSERTSTRUCTA;
+	alias LPTVINSERTSTRUCTA = TVINSERTSTRUCTA*;
+	alias TV_INSERTSTRUCTA = TVINSERTSTRUCTA;
+	alias LPTV_INSERTSTRUCTA = TVINSERTSTRUCTA*;
 	
 	
 	struct NMTREEVIEWA
@@ -2159,9 +2160,9 @@ extern(Windows) nothrow:
 		TVITEMA itemNew;
 		POINT ptDrag;
 	}
-	alias NMTREEVIEWA* LPNMTREEVIEWA;
-	alias NMTREEVIEWA NM_TREEVIEW;
-	alias NMTREEVIEWA* LPNM_TREEVIEW;
+	alias LPNMTREEVIEWA = NMTREEVIEWA*;
+	alias NM_TREEVIEW = NMTREEVIEWA;
+	alias LPNM_TREEVIEW = NMTREEVIEWA*;
 	
 	
 	struct NMTVDISPINFOA
@@ -2169,9 +2170,9 @@ extern(Windows) nothrow:
 		NMHDR hdr;
 		TVITEMA item;
 	}
-	alias NMTVDISPINFOA* LPNMTVDISPINFOA;
-	alias NMTVDISPINFOA TV_DISPINFOA;
-	alias NMTVDISPINFOA* LPTV_DISPINFOA;
+	alias LPNMTVDISPINFOA = NMTVDISPINFOA*;
+	alias TV_DISPINFOA = NMTVDISPINFOA;
+	alias LPTV_DISPINFOA = NMTVDISPINFOA*;
 	
 	
 	struct NMTVDISPINFOW
@@ -2179,9 +2180,9 @@ extern(Windows) nothrow:
 		NMHDR hdr;
 		TVITEMW item;
 	}
-	alias NMTVDISPINFOW* LPNMTVDISPINFOW;
-	alias NMTVDISPINFOW TV_DISPINFOW;
-	alias NMTVDISPINFOW* LPTV_DISPINFOW;
+	alias LPNMTVDISPINFOW = NMTVDISPINFOW*;
+	alias TV_DISPINFOW = NMTVDISPINFOW;
+	alias LPTV_DISPINFOW = NMTVDISPINFOW*;
 	
 	
 	struct TCITEMA
@@ -2194,9 +2195,9 @@ extern(Windows) nothrow:
 		int iImage;
 		LPARAM lParam;
 	}
-	alias TCITEMA* LPTCITEMA;
-	alias TCITEMA TC_ITEMA;
-	alias TCITEMA* LPTC_ITEMA;
+	alias LPTCITEMA = TCITEMA*;
+	alias TC_ITEMA = TCITEMA;
+	alias LPTC_ITEMA = TCITEMA*;
 	
 	
 	struct TCITEMW
@@ -2209,9 +2210,9 @@ extern(Windows) nothrow:
 		int iImage;
 		LPARAM lParam;
 	}
-	alias TCITEMW* LPTCITEMW;
-	alias TCITEMW TC_ITEMW;
-	alias TCITEMW* LPTC_ITEMW;
+	alias LPTCITEMW = TCITEMW*;
+	alias TC_ITEMW = TCITEMW;
+	alias LPTC_ITEMW = TCITEMW*;
 	
 	
 	// Rich edit.
@@ -2282,7 +2283,7 @@ extern(Windows) nothrow:
 		LPWSTR    lpstrText;
 	}
 	
-	alias MENUITEMINFOW* LPMENUITEMINFOW;
+	alias LPMENUITEMINFOW = MENUITEMINFOW*;
 	
 	
 	struct SCROLLINFO
@@ -2295,7 +2296,7 @@ extern(Windows) nothrow:
 		int nPos;
 		int nTrackPos;
 	}
-	alias SCROLLINFO* LPSCROLLINFO;
+	alias LPSCROLLINFO = SCROLLINFO*;
 	
 	
 	struct OPENFILENAMEW
@@ -2321,16 +2322,16 @@ extern(Windows) nothrow:
 		LPOFNHOOKPROC lpfnHook;
 		LPCWSTR lpTemplateName;
 	}
-	alias OPENFILENAMEW* LPOPENFILENAMEW;
+	alias LPOPENFILENAMEW = OPENFILENAMEW*;
 	
 	
-	alias UINT_PTR function(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam) LPCCHOOKPROC;
+	alias LPCCHOOKPROC = UINT_PTR function(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam);
 	
 	
-	alias UINT_PTR function(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam) LPCFHOOKPROC;
+	alias LPCFHOOKPROC = UINT_PTR function(HWND hdlg, UINT uiMsg, WPARAM wParam, LPARAM lParam);
 	
 	
-	alias BOOL function(HDC hdc, LPARAM lpData, int cchData) GRAYSTRINGPROC;
+	alias GRAYSTRINGPROC = BOOL function(HDC hdc, LPARAM lpData, int cchData);
 	
 	
 	enum: DWORD
@@ -2359,12 +2360,12 @@ extern(Windows) nothrow:
 		LPCCHOOKPROC lpfnHook; 
 		LPCSTR lpTemplateName; 
 	}
-	alias CHOOSECOLORA* PCHOOSECOLORA;
-	alias CHOOSECOLORA* LPCHOOSECOLORA;
+	alias PCHOOSECOLORA = CHOOSECOLORA*;
+	alias LPCHOOSECOLORA = CHOOSECOLORA*;
 	
 	
-	alias LOGFONTW* PLOGFONTW;
-	alias LOGFONTW* LPLOGFONTW;
+	alias PLOGFONTW = LOGFONTW*;
+	alias LPLOGFONTW = LOGFONTW*;
 	
 	
 	struct NONCLIENTMETRICSA
@@ -2385,7 +2386,7 @@ extern(Windows) nothrow:
 		LOGFONTA lfStatusFont;
 		LOGFONTA lfMessageFont;
 	}
-	alias NONCLIENTMETRICSA LPNONCLIENTMETRICSA;
+	alias LPNONCLIENTMETRICSA = NONCLIENTMETRICSA;
 	
 	
 	struct CHOOSEFONTW
@@ -2408,8 +2409,8 @@ extern(Windows) nothrow:
 		INT nSizeMin;
 		INT nSizeMax;
 	}
-	alias CHOOSEFONTW* PCHOOSEFONTW;
-	alias CHOOSEFONTW* LPCHOOSEFONTW;
+	alias PCHOOSEFONTW = CHOOSEFONTW*;
+	alias LPCHOOSEFONTW = CHOOSEFONTW*;
 	
 	
 	struct CHOOSEFONTA
@@ -2432,12 +2433,12 @@ extern(Windows) nothrow:
 		INT nSizeMin;
 		INT nSizeMax;
 	}
-	alias CHOOSEFONTA* PCHOOSEFONTA;
-	alias CHOOSEFONTA* LPCHOOSEFONTA;
+	alias PCHOOSEFONTA = CHOOSEFONTA*;
+	alias LPCHOOSEFONTA = CHOOSEFONTA*;
 	
 	
-	alias ICONINFO* LPICONINFO;
-	alias ICONINFO* PICONINFO;
+	alias LPICONINFO = ICONINFO*;
+	alias PICONINFO = ICONINFO*;
 	
 	
 	struct MINMAXINFO
@@ -2448,8 +2449,8 @@ extern(Windows) nothrow:
 		POINT ptMinTrackSize;
 		POINT ptMaxTrackSize;
 	}
-	alias MINMAXINFO* LPMINMAXINFO;
-	alias MINMAXINFO* PMINMAXINFO;
+	alias LPMINMAXINFO = MINMAXINFO*;
+	alias PMINMAXINFO = MINMAXINFO*;
 	
 	
 	struct NCCALCSIZE_PARAMS
@@ -2457,7 +2458,7 @@ extern(Windows) nothrow:
 		RECT[3] rgrc; 
 		PWINDOWPOS lppos; 
 	}
-	alias NCCALCSIZE_PARAMS* LPNCCALCSIZE_PARAMS;
+	alias LPNCCALCSIZE_PARAMS = NCCALCSIZE_PARAMS*;
 	
 	
 	struct CREATESTRUCTA
@@ -2475,10 +2476,10 @@ extern(Windows) nothrow:
 		LPCSTR lpszClass;
 		DWORD dwExStyle;
 	}
-	alias CREATESTRUCTA* LPCREATESTRUCTA;
+	alias LPCREATESTRUCTA = CREATESTRUCTA*;
 	
 	
-	alias ACTCTXW* LPACTCTXW;
+	alias LPACTCTXW = ACTCTXW*;
 	
 	
 	struct HELPINFO
@@ -2490,7 +2491,7 @@ extern(Windows) nothrow:
 		DWORD dwContextId;
 		POINT MousePos;
 	}
-	alias HELPINFO* LPHELPINFO;
+	alias LPHELPINFO = HELPINFO*;
 	
 	
 	struct TOOLINFOA
@@ -2503,8 +2504,8 @@ extern(Windows) nothrow:
 		HINSTANCE hinst;
 		LPSTR lpszText;
 	}
-	alias TOOLINFOA* PTOOLINFOA;
-	alias TOOLINFOA* LPTOOLINFOA;
+	alias PTOOLINFOA = TOOLINFOA*;
+	alias LPTOOLINFOA = TOOLINFOA*;
 	
 	
 	struct TRACKMOUSEEVENT
@@ -2514,7 +2515,7 @@ extern(Windows) nothrow:
 		HWND hwndTrack;
 		DWORD dwHoverTime;
 	}
-	alias TRACKMOUSEEVENT* LPTRACKMOUSEEVENT;
+	alias LPTRACKMOUSEEVENT = TRACKMOUSEEVENT*;
 	
 	
 	struct STYLESTRUCT
@@ -2522,7 +2523,7 @@ extern(Windows) nothrow:
 		DWORD styleOld;
 		DWORD styleNew;
 	}
-	alias STYLESTRUCT* LPSTYLESTRUCT;
+	alias LPSTYLESTRUCT = STYLESTRUCT*;
 	
 	
 	//extern(C) DWORD MAKELONG(WORD wLow, WORD wHigh)
@@ -2531,9 +2532,9 @@ extern(Windows) nothrow:
 		return cast(DWORD)cast(WORD)wLow | (cast(DWORD)cast(WORD)wHigh << 16);
 	}
 	
-	alias MAKELONG MAKELPARAM;
-	alias MAKELONG MAKEWPARAM;
-	alias MAKELONG MAKELRESULT;
+	alias MAKELPARAM = MAKELONG;
+	alias MAKEWPARAM = MAKELONG;
+	alias MAKELRESULT = MAKELONG;
 	
 	
 	enum int DLGWINDOWEXTRA = 30;
@@ -2559,7 +2560,7 @@ extern(Windows) nothrow:
 		RECT rcItem;
 		DWORD itemData;
 	}
-	alias DRAWITEMSTRUCT* LPDRAWITEMSTRUCT;
+	alias LPDRAWITEMSTRUCT = DRAWITEMSTRUCT*;
 	
 	
 	struct MEASUREITEMSTRUCT
@@ -2571,7 +2572,7 @@ extern(Windows) nothrow:
 		UINT itemHeight;
 		ULONG_PTR itemData;
 	}
-	alias MEASUREITEMSTRUCT* LPMEASUREITEMSTRUCT;
+	alias LPMEASUREITEMSTRUCT = MEASUREITEMSTRUCT*;
 	
 	
 	struct ANIMATIONINFO
@@ -2590,7 +2591,7 @@ extern(Windows) nothrow:
 		RECT rc;
 		LPARAM lParam; // message specific
 	}
-	alias APPBARDATA* PAPPBARDATA;
+	alias PAPPBARDATA = APPBARDATA*;
 	
 	
 	struct CLIENTCREATESTRUCT
@@ -2598,7 +2599,7 @@ extern(Windows) nothrow:
 		HANDLE hWindowMenu;
 		UINT idFirstChild;
 	}
-	alias CLIENTCREATESTRUCT* LPCLIENTCREATESTRUCT;
+	alias LPCLIENTCREATESTRUCT = CLIENTCREATESTRUCT*;
 	
 	
 	struct MDICREATESTRUCTA
@@ -2613,7 +2614,7 @@ extern(Windows) nothrow:
 		DWORD style;
 		LPARAM lParam;
 	}
-	alias MDICREATESTRUCTA* LPMDICREATESTRUCTA;
+	alias LPMDICREATESTRUCTA = MDICREATESTRUCTA*;
 	
 	
 	struct INITCOMMONCONTROLSEX
@@ -2621,8 +2622,8 @@ extern(Windows) nothrow:
 		DWORD dwSize;
 		DWORD dwICC;
 	}
-	alias INITCOMMONCONTROLSEX* LPINITCOMMONCONTROLSEX;
-	alias INITCOMMONCONTROLSEX* PINITCOMMONCONTROLSEX;
+	alias LPINITCOMMONCONTROLSEX = INITCOMMONCONTROLSEX*;
+	alias PINITCOMMONCONTROLSEX = INITCOMMONCONTROLSEX*;
 	
 	
 	struct DROPFILES
@@ -2632,14 +2633,14 @@ extern(Windows) nothrow:
 		BOOL fNC;
 		BOOL fWide;
 	}
-	alias DROPFILES* LPDROPFILES;
+	alias LPDROPFILES = DROPFILES*;
 	
 	
-	alias HANDLE HHOOK;
-	alias HANDLE HTHEME;
-	alias HANDLE HTREEITEM;
-	alias HANDLE HDROP;
-	alias HANDLE HMONITOR;
+	alias HHOOK = HANDLE;
+	alias HTHEME = HANDLE;
+	alias HTREEITEM = HANDLE;
+	alias HDROP = HANDLE;
+	alias HMONITOR = HANDLE;
 	
 	
 	HCURSOR CopyCursor(HCURSOR pcur)
@@ -2648,7 +2649,7 @@ extern(Windows) nothrow:
 	}
 	
 	
-	alias BOOL function(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) MONITORENUMPROC;
+	alias MONITORENUMPROC = BOOL function(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData);
 	
 	
 	struct MONITORINFO
@@ -2658,7 +2659,7 @@ extern(Windows) nothrow:
 		RECT rcWork;
 		DWORD dwFlags;
 	}
-	alias MONITORINFO* LPMONITORINFO;
+	alias LPMONITORINFO = MONITORINFO*;
 	
 	
 	enum: DWORD

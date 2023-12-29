@@ -11,7 +11,7 @@ import std.functional;
 // Create an event handler; old style.
 deprecated template Event(TArgs : EventArgs = EventArgs)
 {
-	alias Event!(Object, TArgs) Event;
+	alias Event = Event!(Object, TArgs);
 }
 
 
@@ -25,7 +25,7 @@ template Event(T1, T2) // docmain
 	/// Managing event handlers.
 	struct Event // docmain
 	{
-		alias void delegate(T1, T2) Handler; /// Event handler type.
+		alias Handler = void delegate(T1, T2); /// Event handler type.
 		
 		
 		/// Add an event handler with the exact type.
@@ -104,13 +104,13 @@ template Event(T1, T2) // docmain
 					
 					if(!isHot())
 					{
-						_array[iw] = _array[_array.length - 1];
-						_array[_array.length - 1] = null;
-						_array = _array[0 .. _array.length - 1];
+						_array[iw] = _array[$ - 1];
+						_array[$ - 1] = null;
+						_array = _array[0 .. $ - 1];
 					}
 					else // Hot.
 					{
-						_array = _array[0 .. iw] ~ _array[iw + 1 .. _array.length]; // Force duplicate.
+						_array = _array[0 .. iw] ~ _array[iw + 1 .. $]; // Force duplicate.
 						unsetHot();
 					}
 					break;
@@ -226,7 +226,7 @@ template Event(T1, T2) // docmain
 		{
 			static assert(is(typeof(toDelegate(TDG.init))), "DFL: Event handler must be a callable");
 			
-			alias ParameterTypeTuple!(TDG) TDGParams;
+			alias TDGParams = ParameterTypeTuple!(TDG);
 			static assert(TDGParams.length == 2, "DFL: Event handler needs exactly 2 parameters");
 			
 			static if(is(TDGParams[0] : Object))
@@ -305,7 +305,7 @@ class EventArgs // docmain
 
 
 // Simple event handler.
-alias Event!(Object, EventArgs) EventHandler; // deprecated
+alias EventHandler = Event!(Object, EventArgs); // deprecated
 
 
 ///

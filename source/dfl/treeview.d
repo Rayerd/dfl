@@ -1072,7 +1072,7 @@ class TreeView: ControlSuperClass // docmain
 		return forec;
 	}
 	
-	alias Control.foreColor foreColor; // Overload.
+	alias foreColor = Control.foreColor; // Overload.
 	
 	
 	final @property void borderStyle(BorderStyle bs) // setter
@@ -1166,7 +1166,7 @@ class TreeView: ControlSuperClass // docmain
 	}
 	
 	
-	deprecated alias hoverSelection hotTracking;
+	deprecated alias hotTracking = hoverSelection;
 	
 	///
 	final @property void hoverSelection(bool byes) // setter

@@ -27,8 +27,8 @@ private:
 			void function(Control, ARGS) fn;
 			ARGS args;
 		}
-		alias dfl.internal.clib.malloc malloc;
-		alias dfl.internal.clib.free free;
+		alias malloc = dfl.internal.clib.malloc;
+		alias free = dfl.internal.clib.free;
 	
 		auto param = cast(InvokeParam*)malloc(InvokeParam.sizeof);
 		param.fn = fn;
@@ -61,8 +61,8 @@ private:
 	LPARAM makeParamNoneArgs(void function(Control) fn)
 	{
 		static assert((DflInvokeParam*).sizeof <= LPARAM.sizeof);
-		alias dfl.internal.clib.malloc malloc;
-		alias dfl.internal.clib.free free;
+		alias malloc = dfl.internal.clib.malloc;
+		alias free = dfl.internal.clib.free;
 		
 		auto p = cast(DflInvokeParam*)malloc(DflInvokeParam.sizeof);
 		

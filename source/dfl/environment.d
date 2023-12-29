@@ -527,7 +527,7 @@ package Dstring[] parseArgs(Dstring args)
 			if(!inQuote) //matched quotes
 			{
 				result.length = result.length + 1;
-				result[result.length - 1] = args[startIndex .. i];
+				result[$ - 1] = args[startIndex .. i];
 				findStart = true;
 			}
 			else //starting quote
@@ -535,7 +535,7 @@ package Dstring[] parseArgs(Dstring args)
 				if(startIndex != i) //must be a quote stuck to another word, separate them
 				{
 					result.length = result.length + 1;
-					result[result.length - 1] = args[startIndex .. i];
+					result[$ - 1] = args[startIndex .. i];
 					startIndex = i + 1;
 				}
 				else
@@ -549,7 +549,7 @@ package Dstring[] parseArgs(Dstring args)
 			if(args[i] == ' ' || args[i] == '\t')
 			{
 				result.length = result.length + 1;
-				result[result.length - 1] = args[startIndex .. i];
+				result[$ - 1] = args[startIndex .. i];
 				findStart = true;
 			}
 		}
@@ -558,7 +558,7 @@ package Dstring[] parseArgs(Dstring args)
 	if(startIndex != i)
 	{
 		result.length = result.length + 1;
-		result[result.length - 1] = args[startIndex .. i];
+		result[$ - 1] = args[startIndex .. i];
 	}
 	
 	return result;
@@ -668,7 +668,7 @@ class Version // docmain ?
 	
 	
 	///
-	override Dstring toString()
+	override Dstring toString() const
 	{
 		Dstring result;
 		
@@ -734,7 +734,7 @@ final class OperatingSystem // docmain
 		
 		
 		///
-		override Dstring toString()
+		override Dstring toString() const
 		{
 			Dstring result;
 			

@@ -119,11 +119,11 @@ class ApplicationContext // docmain
 
 private extern(Windows) nothrow
 {
-	alias UINT function(LPCWSTR lpPathName, LPCWSTR lpPrefixString, UINT uUnique,
-		LPWSTR lpTempFileName) GetTempFileNameWProc;
-	alias DWORD function(DWORD nBufferLength, LPWSTR lpBuffer) GetTempPathWProc;
-	alias HANDLE function(PACTCTXW pActCtx) CreateActCtxWProc;
-	alias BOOL function(HANDLE hActCtx, ULONG_PTR* lpCookie) ActivateActCtxProc;
+	alias GetTempFileNameWProc = UINT function(LPCWSTR lpPathName, LPCWSTR lpPrefixString, UINT uUnique,
+		LPWSTR lpTempFileName);
+	alias GetTempPathWProc = DWORD function(DWORD nBufferLength, LPWSTR lpBuffer);
+	alias CreateActCtxWProc = HANDLE function(PACTCTXW pActCtx);
+	alias ActivateActCtxProc = BOOL function(HANDLE hActCtx, ULONG_PTR* lpCookie);
 }
 
 
@@ -361,11 +361,11 @@ final class Application // docmain
 			if(mf is filters[i])
 			{
 				if(!i)
-					filters = filters[1 .. filters.length];
+					filters = filters[1 .. $];
 				else if(i == filters.length - 1)
 					filters = filters[0 .. i];
 				else
-					filters = filters[0 .. i] ~ filters[i + 1 .. filters.length];
+					filters = filters[0 .. i] ~ filters[i + 1 .. $];
 				break;
 			}
 		}
@@ -1020,7 +1020,7 @@ final class Application // docmain
 	{
 	static:
 		///
-		alias void delegate(Object c, KeyEventArgs e) Handler;
+		alias Handler = void delegate(Object c, KeyEventArgs e);
 		
 		
 		///
@@ -1359,7 +1359,7 @@ final class Application // docmain
 		WaitMessage();
 	}
 	
-	package deprecated alias _waitMsg waitMsg;
+	package deprecated alias waitMsg = _waitMsg;
 	
 	
 	///
@@ -1532,7 +1532,7 @@ final class Application // docmain
 	}
 	
 	
-	private struct TlsFilterValue
+	struct TlsFilterValue
 	{
 		IMessageFilter[] filters;
 	}
@@ -2008,7 +2008,7 @@ extern(Windows) LRESULT dflWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 
 version(CUSTOM_MSG_HOOK)
 {
-	alias CWPRETSTRUCT CustomMsg;
+	alias CustomMsg = CWPRETSTRUCT;
 	
 	
 	// Needs to be re-entrant.
@@ -2090,13 +2090,13 @@ else
 
 extern(Windows)
 {
-	alias BOOL function(LPTRACKMOUSEEVENT lpEventTrack) TrackMouseEventProc;
-	alias BOOL function(HWND, COLORREF, BYTE, DWORD) SetLayeredWindowAttributesProc;
+	alias TrackMouseEventProc = BOOL function(LPTRACKMOUSEEVENT lpEventTrack);
+	alias SetLayeredWindowAttributesProc = BOOL function(HWND, COLORREF, BYTE, DWORD);
 	
-	alias HTHEME function(HWND) GetWindowThemeProc;
-	alias BOOL function(HTHEME hTheme, int iPartId, int iStateId) IsThemeBackgroundPartiallyTransparentProc;
-	alias HRESULT function(HWND hwnd, HDC hdc, RECT* prc) DrawThemeParentBackgroundProc;
-	alias void function(DWORD dwFlags) SetThemeAppPropertiesProc;
+	alias GetWindowThemeProc = HTHEME function(HWND);
+	alias IsThemeBackgroundPartiallyTransparentProc = BOOL function(HTHEME hTheme, int iPartId, int iStateId);
+	alias DrawThemeParentBackgroundProc = HRESULT function(HWND hwnd, HDC hdc, RECT* prc);
+	alias SetThemeAppPropertiesProc = void function(DWORD dwFlags);
 }
 
 
@@ -2171,7 +2171,7 @@ enum UINT WNDCLASS_STYLE = 0x0008;
 
 extern(Windows)
 {
-	alias BOOL function(LPINITCOMMONCONTROLSEX lpInitCtrls) InitCommonControlsExProc;
+	alias InitCommonControlsExProc = BOOL function(LPINITCOMMONCONTROLSEX lpInitCtrls);
 }
 
 
@@ -2182,7 +2182,7 @@ void _initCommonControls(DWORD dwControls)
 	{
 		pragma(msg, "DFL: extended common controls supported at compile time");
 		
-		alias InitCommonControlsEx initProc;
+		alias initProc = InitCommonControlsEx;
 	}
 	else
 	{

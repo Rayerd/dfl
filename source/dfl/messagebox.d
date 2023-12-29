@@ -145,14 +145,14 @@ deprecated final class MessageBox
 	
 	
 	static:
-	deprecated alias msgBox show;
+	deprecated alias show = msgBox;
 }
 
 
-deprecated alias msgBox messageBox;
+deprecated alias messageBox = msgBox;
 
-deprecated alias MsgBoxOptions MessageBoxOptions;
-deprecated alias MsgBoxDefaultButton MessageBoxDefaultButton;
-deprecated alias MsgBoxButtons MessageBoxButtons;
-deprecated alias MsgBoxIcon MessageBoxIcon;
+deprecated alias MessageBoxOptions = MsgBoxOptions;
+deprecated alias MessageBoxDefaultButton = MsgBoxDefaultButton;
+deprecated alias MessageBoxButtons = MsgBoxButtons;
+deprecated alias MessageBoxIcon = MsgBoxIcon;
 

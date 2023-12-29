@@ -53,7 +53,7 @@ class TabPage: Panel
 	}
 	
 
-	alias Control.opEquals opEquals;
+	alias opEquals = Control.opEquals;
 
 	
 	override Dequ opEquals(Object o)
@@ -68,7 +68,7 @@ class TabPage: Panel
 	}
 	
 	
-	alias Control.opCmp opCmp;
+	alias opCmp = Control.opCmp;
 
 
 	override int opCmp(Object o)
@@ -102,7 +102,7 @@ class TabPage: Panel
 		}
 	}
 	
-	alias Panel.text text; // Overload with Panel.text.
+	alias text = Panel.text; // Overload with Panel.text.
 	
 	
 	/+

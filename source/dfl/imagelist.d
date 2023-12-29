@@ -335,7 +335,7 @@ else
 			return HIMAGELIST.init != _hil;
 		}
 		
-		deprecated alias isHandleCreated handleCreated;
+		deprecated alias handleCreated = isHandleCreated;
 		
 		
 		///
@@ -471,7 +471,7 @@ else
 		HIMAGELIST imageListCreate(
 			int cx, int cy, UINT flags, int cInitial, int cGrow)
 		{
-			alias typeof(&ImageList_Create) TProc;
+			alias TProc = typeof(&ImageList_Create);
 			static TProc proc = null;
 			if(!proc)
 				proc = cast(typeof(proc))GetProcAddress(GetModuleHandleA("comctl32.dll"), "ImageList_Create");
@@ -481,7 +481,7 @@ else
 		int imageListAddIcon(
 			HIMAGELIST himl, HICON hicon)
 		{
-			alias typeof(&ImageList_AddIcon) TProc;
+			alias TProc = typeof(&ImageList_AddIcon);
 			static TProc proc = null;
 			if(!proc)
 				proc = cast(typeof(proc))GetProcAddress(GetModuleHandleA("comctl32.dll"), "ImageList_AddIcon");
@@ -491,7 +491,7 @@ else
 		int imageListAddMasked(
 			HIMAGELIST himl, HBITMAP hbmImage, COLORREF crMask)
 		{
-			alias typeof(&ImageList_AddMasked) TProc;
+			alias TProc = typeof(&ImageList_AddMasked);
 			static TProc proc = null;
 			if(!proc)
 				proc = cast(typeof(proc))GetProcAddress(GetModuleHandleA("comctl32.dll"), "ImageList_AddMasked");
@@ -501,7 +501,7 @@ else
 		BOOL imageListRemove(
 			HIMAGELIST himl, int i)
 		{
-			alias typeof(&ImageList_Remove) TProc;
+			alias TProc = typeof(&ImageList_Remove);
 			static TProc proc = null;
 			if(!proc)
 				proc = cast(typeof(proc))GetProcAddress(GetModuleHandleA("comctl32.dll"), "ImageList_Remove");
@@ -511,7 +511,7 @@ else
 		BOOL imageListDestroy(
 			HIMAGELIST himl)
 		{
-			alias typeof(&ImageList_Destroy) TProc;
+			alias TProc = typeof(&ImageList_Destroy);
 			static TProc proc = null;
 			if(!proc)
 				proc = cast(typeof(proc))GetProcAddress(GetModuleHandleA("comctl32.dll"), "ImageList_Destroy");

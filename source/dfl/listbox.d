@@ -19,7 +19,7 @@ private extern(C) void* memmove(void*, void*, size_t len);
 private extern(Windows) void _initListbox();
 
 
-alias StringObject ListString;
+alias ListString = StringObject;
 
 
 ///
@@ -64,7 +64,7 @@ abstract class ListControl: ControlSuperClass // docmain
 		return backc;
 	}
 	
-	alias Control.backColor backColor; // Overload.
+	alias backColor = Control.backColor; // Overload.
 	
 	
 	static @property Color defaultForeColor() //getter
@@ -80,7 +80,7 @@ abstract class ListControl: ControlSuperClass // docmain
 		return forec;
 	}
 	
-	alias Control.foreColor foreColor; // Overload.
+	alias foreColor = Control.foreColor; // Overload.
 	
 	
 	this()
@@ -122,7 +122,7 @@ class ListBox: ListControl // docmain
 	///
 	static class SelectedIndexCollection
 	{
-		deprecated alias length count;
+		deprecated alias count = length;
 		
 		@property int length() // getter
 		{
@@ -218,7 +218,7 @@ class ListBox: ListControl // docmain
 	///
 	static class SelectedObjectCollection
 	{
-		deprecated alias length count;
+		deprecated alias count = length;
 		
 		@property int length() // getter
 		{
@@ -360,7 +360,7 @@ class ListBox: ListControl // docmain
 		
 		// Had to do it this way because: DMD 1.028: -H is broken for mixin identifiers
 		// Note that this way probably prevents opApply from being overridden.
-		alias _opApply opApply;
+		alias opApply = _opApply;
 		
 		
 		protected this(ListBox lb)

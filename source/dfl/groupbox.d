@@ -46,7 +46,7 @@ class GroupBox: ControlSuperClass // docmain
 			assert(!dyes, "Cannot drop on a group box");
 		}
 		
-		alias Control.allowDrop allowDrop; // Overload.
+		alias allowDrop = Control.allowDrop; // Overload.
 	}
 	
 	

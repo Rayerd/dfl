@@ -11,7 +11,6 @@ private import dfl.collections;
 
 private import dfl.internal.dlib;
 private import dfl.internal.utf;
-//private import dfl.internal.winapi;
 private import core.sys.windows.windows;
 private import core.sys.windows.commctrl;
 
@@ -506,7 +505,7 @@ class Form: ContainerControl, IDialogResult // docmain
 			Application.onThreadException(e);
 		}
 		
-		alayout(this, false); // ?
+		alayout(this, false); // TODO: ?
 		
 		if(!recreatingHandle) // This stuff already happened if recreating...
 		{
@@ -689,7 +688,7 @@ class Form: ContainerControl, IDialogResult // docmain
 		return backc;
 	}
 	
-	alias Control.backColor backColor; // Overload.
+	alias backColor = Control.backColor; // Overload.
 	
 	
 	///
@@ -957,7 +956,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	
 	version(NO_MDI)
 	{
-		private alias Control MdiClient; // ?
+		private alias MdiClient = Control; // TODO: ?
 	}
 	
 	///
@@ -1081,7 +1080,7 @@ class Form: ContainerControl, IDialogResult // docmain
 				{
 					if(isHandleCreated)
 					{
-						frm.createControl(); // ?
+						frm.createControl(); // TODO: ?
 						frm.mdiClient.createControl(); // Should already be done from frm.createControl().
 					}
 					
@@ -1538,7 +1537,7 @@ class Form: ContainerControl, IDialogResult // docmain
 		{
 			if(isHandleCreated)
 			{
-				frm.createControl(); // ?
+				frm.createControl(); // TODO: ?
 			}
 			
 			// Copy so that old ownedForms arrays won't get overwritten.
@@ -1669,7 +1668,7 @@ class Form: ContainerControl, IDialogResult // docmain
 		return grip;
 	}
 	
-	deprecated alias sizingGrip sizeGrip;
+	deprecated alias sizeGrip = sizingGrip;
 	
 	
 	///
@@ -1844,8 +1843,8 @@ class Form: ContainerControl, IDialogResult // docmain
 				if(wstyle & WS_MAXIMIZE)
 				{
 					ShowWindow(hwnd, SW_MAXIMIZE);
-					cbits |= CBits.VISIBLE; // ?
-					wstyle |= WS_VISIBLE; // ?
+					cbits |= CBits.VISIBLE; // TODO: ?
+					wstyle |= WS_VISIBLE; // TODO: ?
 					onVisibleChanged(EventArgs.empty);
 					return;
 				}
@@ -2948,7 +2947,7 @@ class Form: ContainerControl, IDialogResult // docmain
 				{
 					if(isMdiChild)
 					{
-						// ?
+						// TODO: ?
 						//msg.result = DefMDIChildProcA(msg.hWnd, msg.msg, msg.wParam, msg.lParam);
 						msg.result = dfl.internal.utf.defMDIChildProc(msg.hWnd, msg.msg, msg.wParam, msg.lParam);
 						return;
@@ -3099,7 +3098,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	
-	protected override void setBoundsCore(int x, int y, int width, int height, BoundsSpecified specified)
+	override void setBoundsCore(int x, int y, int width, int height, BoundsSpecified specified)
 	{
 		if(isHandleCreated)
 		{
@@ -3132,7 +3131,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	
 	
 	// Must be called before handle creation.
-	protected final void noMessageFilter() // package
+	final void noMessageFilter() // package
 	{
 		nofilter = true;
 	}
@@ -3190,7 +3189,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	
-	private static class FormMessageFilter: IMessageFilter
+	static class FormMessageFilter: IMessageFilter
 	{
 		/// Filters out a message before it is dispatched.
 		// Returns: true when filter the message and stop it from being dispatched;
@@ -3212,7 +3211,7 @@ class Form: ContainerControl, IDialogResult // docmain
 					HWND hwfocus = GetFocus();
 					// Don't need _isNonMdiChild here; mdistuff excludes MDI stuff.
 					if(hwfocus != form._lastSel && IsChild(form.handle, hwfocus))
-						form._lastSel = hwfocus; // ?
+						form._lastSel = hwfocus; // TODO: ?
 				}
 				
 				switch(m.msg)
@@ -3650,7 +3649,7 @@ version(NO_MDI) {} else
 			return backc;
 		}
 		
-		alias Control.backColor backColor; // Overload.
+		alias backColor = Control.backColor; // Overload.
 		
 		
 		/+

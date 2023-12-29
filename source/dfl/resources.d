@@ -137,7 +137,7 @@ else
 			return new Icon(hi, true); // Owned.
 		}
 		
-		deprecated alias getIcon loadIcon;
+		deprecated alias loadIcon = getIcon;
 		
 		
 		///
@@ -167,7 +167,7 @@ else
 			return new Bitmap(h, true); // Owned.
 		}
 		
-		deprecated alias getBitmap loadBitmap;
+		deprecated alias loadBitmap = getBitmap;
 		
 		
 		///
@@ -197,7 +197,7 @@ else
 			return new Cursor(h, true); // Owned.
 		}
 		
-		deprecated alias getCursor loadCursor;
+		deprecated alias loadCursor = getCursor;
 		
 		
 		///
@@ -223,7 +223,7 @@ else
 			return result;
 		}
 		
-		deprecated alias getString loadString;
+		deprecated alias loadString = getString;
 		
 		
 		// Used internally

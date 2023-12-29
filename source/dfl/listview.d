@@ -976,7 +976,7 @@ class ListView: ControlSuperClass // docmain
 	///
 	static class SelectedIndexCollection
 	{
-		deprecated alias length count;
+		deprecated alias count = length;
 		
 		@property int length() // getter
 		{
@@ -1059,12 +1059,12 @@ class ListView: ControlSuperClass // docmain
 	}
 	
 	
-	deprecated alias SelectedItemCollection SelectedListViewItemCollection;
+	deprecated alias SelectedListViewItemCollection = SelectedItemCollection;
 	
 	///
 	static class SelectedItemCollection
 	{
-		deprecated alias length count;
+		deprecated alias count = length;
 		
 		@property int length() // getter
 		{
@@ -1150,7 +1150,7 @@ class ListView: ControlSuperClass // docmain
 	///
 	static class CheckedIndexCollection
 	{
-		deprecated alias length count;
+		deprecated alias count = length;
 		
 		@property int length() // getter
 		{

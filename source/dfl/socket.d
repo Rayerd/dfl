@@ -25,8 +25,8 @@ private
 	private import std.socket, core.bitop;
 	private import core.sys.windows.winsock2;
 	
-	alias InternetHost DInternetHost;
-	alias InternetAddress DInternetAddress;
+	alias DInternetHost = InternetHost;
+	alias DInternetAddress = InternetAddress;
 	
 	socket_t getSocketHandle(Socket sock) nothrow @nogc
 	{
@@ -34,7 +34,7 @@ private
 	}
 }
 
-alias std.socket.Socket DflSocket; ///
+alias DflSocket = std.socket.Socket; ///
 
 private import dfl.internal.winapi, dfl.application, dfl.base, dfl.internal.utf;
 
@@ -79,7 +79,7 @@ enum EventType
 ///
 // -err- will be 0 if no error.
 // -type- will always contain only one flag.
-alias void delegate(DflSocket sock, EventType type, int err) RegisterEventCallback;
+alias RegisterEventCallback = void delegate(DflSocket sock, EventType type, int err);
 
 
 // Calling this twice on the same socket cancels out previously
@@ -318,7 +318,7 @@ private class _InternetHost: DInternetHost
 
 ///
 // If -err- is nonzero, it is a winsock error code and -inetHost- is null.
-alias void delegate(DInternetHost inetHost, int err) GetHostCallback;
+alias GetHostCallback = void delegate(DInternetHost inetHost, int err);
 
 
 ///
@@ -616,8 +616,8 @@ class SocketQueue // docmain
 	
 	deprecated
 	{
-		alias receiveBytes recvBytes;
-		alias receive recv;
+		alias recvBytes = receiveBytes;
+		alias recv = receive;
 	}
 	
 	

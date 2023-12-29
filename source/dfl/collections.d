@@ -49,9 +49,9 @@ template ListWrapArray(TValue, alias Array,
 		static assert(!is(TValue == Dstring));
 		
 		static if(is(TValue == Object))
-			alias StringObject TValueString;
+			alias TValueString = StringObject;
 		else
-			alias TValue TValueString;
+			alias TValueString = TValue;
 	}
 	
 	
@@ -403,16 +403,16 @@ template ListWrapArray(TValue, alias Array,
 		TValue oldval = Array[index];
 		ItemRemovingCallback(index, oldval); // Removing.
 		if(!index)
-			Array = Array[1 .. Array.length];
+			Array = Array[1 .. $];
 		else if(index == Array.length - 1)
 			Array = Array[0 .. index];
 		else if(index > 0 && index < cast(int)Array.length)
-			Array = Array[0 .. index] ~ Array[index + 1 .. Array.length];
+			Array = Array[0 .. index] ~ Array[index + 1 .. $];
 		ItemRemovedCallback(index, oldval); // Removed.
 	}
 	
 	
-	deprecated alias length count;
+	deprecated alias count = length;
 	
 	///
 	@property size_t length() // getter
@@ -421,7 +421,7 @@ template ListWrapArray(TValue, alias Array,
 	}
 	
 	
-	deprecated alias dup clone;
+	deprecated alias clone = dup;
 	
 	///
 	TValue[] dup()
@@ -541,7 +541,7 @@ template removeIndex(T) // package
 		else if(index == array.length - 1)
 			array = array[0 .. index];
 		else
-			array = array[0 .. index] ~ array[index + 1 .. array.length];
+			array = array[0 .. index] ~ array[index + 1 .. $];
 		return array;
 	}
 }

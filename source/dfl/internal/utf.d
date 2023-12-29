@@ -63,19 +63,19 @@ package:
 
 version(DFL_LOAD_INTERNAL_LIBS)
 {
-	alias LoadLibraryA initInternalLib;
+	alias initInternalLib = LoadLibraryA;
 }
 else
 {
 	version = DFL_GET_INTERNAL_LIBS;
 	
-	alias GetModuleHandleA initInternalLib;
+	alias initInternalLib = GetModuleHandleA;
 }
 
 
 HMODULE _user32, _kernel32, _advapi32, _gdi32;
 
-package @property HMODULE advapi32() nothrow // getter
+@property HMODULE advapi32() nothrow // getter
 {
 	// advapi32 generally always delay loads.
 	if(!_advapi32)
@@ -83,7 +83,7 @@ package @property HMODULE advapi32() nothrow // getter
 	return _advapi32;
 }
 
-package @property HMODULE gdi32() nothrow // getter
+@property HMODULE gdi32() nothrow // getter
 {
 	// gdi32 sometimes delay loads.
 	version(DFL_GET_INTERNAL_LIBS)
@@ -94,7 +94,7 @@ package @property HMODULE gdi32() nothrow // getter
 	return _gdi32;
 }
 
-package @property HMODULE user32() nothrow // getter
+@property HMODULE user32() nothrow // getter
 {
 	version(DFL_GET_INTERNAL_LIBS)
 	{
@@ -104,7 +104,7 @@ package @property HMODULE user32() nothrow // getter
 	return _user32;
 }
 
-package @property HMODULE kernel32() nothrow // getter
+@property HMODULE kernel32() nothrow // getter
 {
 	version(DFL_GET_INTERNAL_LIBS)
 	{
@@ -385,63 +385,62 @@ size_t toUnicodeLength(Dstring utf8) pure
 
 extern(Windows)
 {
-	alias HWND function(DWORD dwExStyle, LPCWSTR lpClassName, LPCWSTR lpWindowName, DWORD dwStyle,
+	alias CreateWindowExWProc = HWND function(DWORD dwExStyle, LPCWSTR lpClassName, LPCWSTR lpWindowName, DWORD dwStyle,
 		int x, int y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance,
-		LPVOID lpParam) CreateWindowExWProc;
-	alias int function(HWND hWnd) GetWindowTextLengthWProc;
-	alias int function(HWND hWnd, LPCWSTR lpString, int nMaxCount) GetWindowTextWProc;
-	alias BOOL function(HWND hWnd, LPCWSTR lpString) SetWindowTextWProc;
-	alias LRESULT function(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) SendMessageWProc;
-	alias LRESULT function(WNDPROC lpPrevWndFunc, HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
-		CallWindowProcWProc;
-	alias UINT function(LPCWSTR lpszFormat) RegisterClipboardFormatWProc;
-	alias int function (UINT format, LPWSTR lpszFormatName, int cchMaxCount)
-		GetClipboardFormatNameWProc;
-	alias int function(HDC hdc, LPWSTR lpchText, int cchText, LPRECT lprc, UINT dwDTFormat,
-		LPDRAWTEXTPARAMS lpDTParams) DrawTextExWProc;
-	alias BOOL function(LPCWSTR lpPathName) SetCurrentDirectoryWProc;
-	alias DWORD function(DWORD nBufferLength, LPWSTR lpBuffer) GetCurrentDirectoryWProc;
-	alias BOOL function(LPWSTR lpBuffer, LPDWORD nSize) GetComputerNameWProc;
-	alias UINT function(LPWSTR lpBuffer, UINT uSize) GetSystemDirectoryWProc;
-	alias BOOL function(LPWSTR lpBuffer, LPDWORD nSize) GetUserNameWProc;
-	alias DWORD function(LPCWSTR lpSrc, LPWSTR lpDst, DWORD nSize) ExpandEnvironmentStringsWProc;
-	alias DWORD function(LPCWSTR lpName, LPWSTR lpBuffer, DWORD nSize) GetEnvironmentVariableWProc;
-	alias LONG function(HKEY hKey, LPCWSTR lpValueName, DWORD Reserved, DWORD dwType, BYTE* lpData,
-		DWORD cbData) RegSetValueExWProc;
-	alias LONG function(HKEY hKey, LPCWSTR lpSubKey, DWORD Reserved, LPWSTR lpClass, DWORD dwOptions,
-		REGSAM samDesired, LPSECURITY_ATTRIBUTES lpSecurityAttributes, PHKEY phkResult,
-		LPDWORD lpdwDisposition) RegCreateKeyExWProc;
-	alias LONG function(HKEY hKey, LPCWSTR lpSubKey, DWORD ulOptions, REGSAM samDesired,
-		PHKEY phkResult) RegOpenKeyExWProc;
-	alias LONG function(HKEY hKey, LPCWSTR lpSubKey) RegDeleteKeyWProc;
-	alias LONG function(HKEY hKey, DWORD dwIndex, LPWSTR lpName, LPDWORD lpcbName, LPDWORD lpReserved,
-		LPWSTR lpClass, LPDWORD lpcbClass, PFILETIME lpftLastWriteTime) RegEnumKeyExWProc;
-	alias LONG function(HKEY hKey, LPCWSTR lpValueName, LPDWORD lpReserved, LPDWORD lpType, LPBYTE lpData,
-		LPDWORD lpcbData) RegQueryValueExWProc;
-	alias LONG function(HKEY hKey, DWORD dwIndex, LPTSTR lpValueName, LPDWORD lpcbValueName,
-		LPDWORD lpReserved, LPDWORD lpType, LPBYTE lpData, LPDWORD lpcbData) RegEnumValueWProc;
-	alias ATOM function(WNDCLASSW* lpWndClass) RegisterClassWProc;
-	alias BOOL function(HDC hdc, LPCWSTR lpString, int cbString, LPSIZE lpSize) GetTextExtentPoint32WProc;
-	alias HANDLE function(HINSTANCE hinst, LPCWSTR lpszName, UINT uType, int cxDesired, int cyDesired, UINT fuLoad)
-		LoadImageWProc;
-	alias UINT function(HDROP hDrop, UINT iFile, LPWSTR lpszFile, UINT cch) DragQueryFileWProc;
-	alias DWORD function(HMODULE hModule, LPWSTR lpFilename, DWORD nSize) GetModuleFileNameWProc;
-	alias LONG function(MSG* lpmsg) DispatchMessageWProc;
-	alias BOOL function(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax, UINT wRemoveMsg)
-		PeekMessageWProc;
-	alias BOOL function(HWND hDlg, LPMSG lpMsg) IsDialogMessageWProc;
-	alias LRESULT function(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) DefWindowProcWProc;
-	alias LRESULT function(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lParam) DefDlgProcWProc;
-	alias LRESULT function(HWND hWnd, HWND hWndMDIClient, UINT uMsg, WPARAM wParam, LPARAM lParam) DefFrameProcWProc;
-	alias LRESULT function(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) DefMDIChildProcWProc;
-	alias BOOL function(HINSTANCE hInstance, LPCWSTR lpClassName, LPWNDCLASSW lpWndClass) GetClassInfoWProc;
-	alias HANDLE function(LPCWSTR lpPathName, BOOL bWatchSubtree, DWORD dwNotifyFilter) FindFirstChangeNotificationWProc;
-	alias DWORD function(LPCWSTR lpFileName, DWORD nBufferLength, LPWSTR lpBuffer, LPWSTR *lpFilePart) GetFullPathNameWProc;
-	alias typeof(&LoadLibraryExW) LoadLibraryExWProc;
-	alias typeof(&SetMenuItemInfoW) SetMenuItemInfoWProc;
-	alias typeof(&InsertMenuItemW) InsertMenuItemWProc;
-	alias typeof(&CreateFontIndirectW) CreateFontIndirectWProc;
-	alias typeof(&GetObjectW) GetObjectWProc;
+		LPVOID lpParam);
+	alias GetWindowTextLengthWProc = int function(HWND hWnd);
+	alias GetWindowTextWProc = int function(HWND hWnd, LPCWSTR lpString, int nMaxCount);
+	alias SetWindowTextWProc = BOOL function(HWND hWnd, LPCWSTR lpString);
+	alias SendMessageWProc = LRESULT function(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+	alias CallWindowProcWProc = LRESULT function(WNDPROC lpPrevWndFunc, HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+	alias RegisterClipboardFormatWProc = UINT function(LPCWSTR lpszFormat);
+	alias GetClipboardFormatNameWProc = int function (UINT format, LPWSTR lpszFormatName, int cchMaxCount);
+	alias DrawTextExWProc = int function(HDC hdc, LPWSTR lpchText, int cchText, LPRECT lprc, UINT dwDTFormat,
+		LPDRAWTEXTPARAMS lpDTParams);
+	alias SetCurrentDirectoryWProc = BOOL function(LPCWSTR lpPathName);
+	alias GetCurrentDirectoryWProc = DWORD function(DWORD nBufferLength, LPWSTR lpBuffer);
+	alias GetComputerNameWProc = BOOL function(LPWSTR lpBuffer, LPDWORD nSize);
+	alias GetSystemDirectoryWProc = UINT function(LPWSTR lpBuffer, UINT uSize);
+	alias GetUserNameWProc = BOOL function(LPWSTR lpBuffer, LPDWORD nSize);
+	alias ExpandEnvironmentStringsWProc = DWORD function(LPCWSTR lpSrc, LPWSTR lpDst, DWORD nSize);
+	alias GetEnvironmentVariableWProc = DWORD function(LPCWSTR lpName, LPWSTR lpBuffer, DWORD nSize);
+	alias RegSetValueExWProc = LONG function(HKEY hKey, LPCWSTR lpValueName, DWORD Reserved,
+		DWORD dwType, BYTE* lpData, DWORD cbData);
+	alias RegCreateKeyExWProc = LONG function(HKEY hKey, LPCWSTR lpSubKey, DWORD Reserved,
+		LPWSTR lpClass, DWORD dwOptions, REGSAM samDesired, LPSECURITY_ATTRIBUTES lpSecurityAttributes,
+		PHKEY phkResult, LPDWORD lpdwDisposition);
+	alias RegOpenKeyExWProc = LONG function(HKEY hKey, LPCWSTR lpSubKey, DWORD ulOptions, REGSAM samDesired,
+		PHKEY phkResult);
+	alias RegDeleteKeyWProc = LONG function(HKEY hKey, LPCWSTR lpSubKey);
+	alias RegEnumKeyExWProc = LONG function(HKEY hKey, DWORD dwIndex, LPWSTR lpName, LPDWORD lpcbName,
+		LPDWORD lpReserved, LPWSTR lpClass, LPDWORD lpcbClass, PFILETIME lpftLastWriteTime);
+	alias RegQueryValueExWProc = LONG function(HKEY hKey, LPCWSTR lpValueName, LPDWORD lpReserved,
+		LPDWORD lpType, LPBYTE lpData, LPDWORD lpcbData);
+	alias RegEnumValueWProc = LONG function(HKEY hKey, DWORD dwIndex, LPTSTR lpValueName,
+		LPDWORD lpcbValueName, LPDWORD lpReserved, LPDWORD lpType, LPBYTE lpData, LPDWORD lpcbData);
+	alias RegisterClassWProc = ATOM function(WNDCLASSW* lpWndClass);
+	alias GetTextExtentPoint32WProc = BOOL function(HDC hdc, LPCWSTR lpString, int cbString, LPSIZE lpSize);
+	alias LoadImageWProc = HANDLE function(HINSTANCE hinst, LPCWSTR lpszName, UINT uType,
+		int cxDesired, int cyDesired, UINT fuLoad);
+	alias DragQueryFileWProc = UINT function(HDROP hDrop, UINT iFile, LPWSTR lpszFile, UINT cch);
+	alias GetModuleFileNameWProc = DWORD function(HMODULE hModule, LPWSTR lpFilename, DWORD nSize);
+	alias DispatchMessageWProc = LONG function(MSG* lpmsg);
+	alias PeekMessageWProc = BOOL function(LPMSG lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax,
+		UINT wRemoveMsg);
+	alias IsDialogMessageWProc = BOOL function(HWND hDlg, LPMSG lpMsg);
+	alias DefWindowProcWProc = LRESULT function(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+	alias DefDlgProcWProc = LRESULT function(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lParam);
+	alias DefFrameProcWProc = LRESULT function(HWND hWnd, HWND hWndMDIClient, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	alias DefMDIChildProcWProc = LRESULT function(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	alias GetClassInfoWProc = BOOL function(HINSTANCE hInstance, LPCWSTR lpClassName, LPWNDCLASSW lpWndClass);
+	alias FindFirstChangeNotificationWProc = HANDLE function(LPCWSTR lpPathName, BOOL bWatchSubtree, DWORD dwNotifyFilter);
+	alias GetFullPathNameWProc = DWORD function(LPCWSTR lpFileName, DWORD nBufferLength, LPWSTR lpBuffer,
+		LPWSTR *lpFilePart);
+	alias LoadLibraryExWProc = typeof(&LoadLibraryExW);
+	alias SetMenuItemInfoWProc = typeof(&SetMenuItemInfoW);
+	alias InsertMenuItemWProc = typeof(&InsertMenuItemW);
+	alias CreateFontIndirectWProc = typeof(&CreateFontIndirectW);
+	alias GetObjectWProc = typeof(&GetObjectW);
 }
 
 
@@ -468,7 +467,7 @@ HANDLE loadImage(HINSTANCE hinst, Dstring name, UINT uType, int cxDesired, int c
 	{
 		version(STATIC_UNICODE)
 		{
-			alias LoadImageW proc;
+			alias proc = LoadImageW;
 		}
 		else
 		{
@@ -500,7 +499,7 @@ HWND createWindowEx(DWORD dwExStyle, Dstring className, Dstring windowName, DWOR
 	{
 		version(STATIC_UNICODE)
 		{
-			alias CreateWindowExW proc;
+			alias proc = CreateWindowExW;
 		}
 		else
 		{
@@ -542,8 +541,8 @@ Dstring getWindowText(HWND hwnd)
 	{
 		version(STATIC_UNICODE)
 		{
-			alias GetWindowTextW proc;
-			alias GetWindowTextLengthW proclen;
+			alias proc = GetWindowTextW;
+			alias proclen = GetWindowTextLengthW;
 		}
 		else
 		{
@@ -603,7 +602,7 @@ BOOL setWindowText(HWND hwnd, Dstring str)
 	{
 		version(STATIC_UNICODE)
 		{
-			alias SetWindowTextW proc;
+			alias proc = SetWindowTextW;
 		}
 		else
 		{
@@ -633,7 +632,7 @@ Dstring getModuleFileName(HMODULE hmod)
 	{
 		version(STATIC_UNICODE)
 		{
-			alias GetModuleFileNameW proc;
+			alias proc = GetModuleFileNameW;
 		}
 		else
 		{
@@ -707,7 +706,7 @@ Dstring emGetSelText(HWND hwnd, size_t selTextLength)
 	{
 		version(STATIC_UNICODE_SEND_MESSAGE)
 		{
-			alias SendMessageW proc;
+			alias proc = SendMessageW;
 		}
 		else
 		{
@@ -743,7 +742,7 @@ Dstring getSelectedText(HWND hwnd)
 	{
 		version(STATIC_UNICODE_SEND_MESSAGE)
 		{
-			alias SendMessageW proc;
+			alias proc = SendMessageW;
 		}
 		else
 		{
@@ -808,7 +807,7 @@ void emSetPasswordChar(HWND hwnd, dchar pwc)
 	{
 		version(STATIC_UNICODE_SEND_MESSAGE)
 		{
-			alias SendMessageW proc;
+			alias proc = SendMessageW;
 		}
 		else
 		{
@@ -839,7 +838,7 @@ dchar emGetPasswordChar(HWND hwnd)
 	{
 		version(STATIC_UNICODE_SEND_MESSAGE)
 		{
-			alias SendMessageW proc;
+			alias proc = SendMessageW;
 		}
 		else
 		{
@@ -871,7 +870,7 @@ LRESULT sendMessage(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
 		version(STATIC_UNICODE_SEND_MESSAGE)
 		{
-			alias SendMessageW proc;
+			alias proc = SendMessageW;
 		}
 		else
 		{
@@ -894,7 +893,7 @@ LRESULT sendMessage(HWND hwnd, UINT msg, WPARAM wparam, Dstring lparam, bool saf
 	{
 		version(STATIC_UNICODE_SEND_MESSAGE)
 		{
-			alias SendMessageW proc;
+			alias proc = SendMessageW;
 		}
 		else
 		{
@@ -926,7 +925,7 @@ LRESULT callWindowProc(WNDPROC lpPrevWndFunc, HWND hwnd, UINT msg, WPARAM wparam
 	{
 		version(STATIC_UNICODE_CALL_WINDOW_PROC)
 		{
-			alias CallWindowProcW proc;
+			alias proc = CallWindowProcW;
 		}
 		else
 		{
@@ -956,7 +955,7 @@ UINT registerClipboardFormat(Dstring formatName)
 	{
 		version(STATIC_UNICODE)
 		{
-			alias RegisterClipboardFormatW proc;
+			alias proc = RegisterClipboardFormatW;
 		}
 		else
 		{
@@ -986,7 +985,7 @@ Dstring getClipboardFormatName(UINT format)
 	{
 		version(STATIC_UNICODE)
 		{
-			alias GetClipboardFormatNameW proc;
+			alias proc = GetClipboardFormatNameW;
 		}
 		else
 		{
@@ -1032,7 +1031,7 @@ int drawTextEx(HDC hdc, Dstring text, LPRECT lprc, UINT dwDTFormat, LPDRAWTEXTPA
 	{
 		version(STATIC_UNICODE)
 		{
-			alias DrawTextExW proc;
+			alias proc = DrawTextExW;
 		}
 		else
 		{
@@ -1116,7 +1115,7 @@ BOOL setCurrentDirectory(Dstring pathName)
 		{
 			version(STATIC_UNICODE)
 			{
-				alias SetCurrentDirectoryW proc;
+				alias proc = SetCurrentDirectoryW;
 			}
 			else
 			{
@@ -1149,7 +1148,7 @@ Dstring getCurrentDirectory()
 		{
 			version(STATIC_UNICODE)
 			{
-				alias GetCurrentDirectoryW proc;
+				alias proc = GetCurrentDirectoryW;
 			}
 			else
 			{
@@ -1198,7 +1197,7 @@ Dstring getFullPathName(Dstring fileName)
 		{
 			version(STATIC_UNICODE)
 			{
-				alias GetFullPathNameW proc;
+				alias proc = GetFullPathNameW;
 			}
 			else
 			{
@@ -1249,7 +1248,7 @@ Dstring getComputerName()
 	{
 		version(STATIC_UNICODE)
 		{
-			alias GetComputerNameW proc;
+			alias proc = GetComputerNameW;
 		}
 		else
 		{
@@ -1289,7 +1288,7 @@ Dstring getSystemDirectory()
 	{
 		version(STATIC_UNICODE)
 		{
-			alias GetSystemDirectoryW proc;
+			alias proc = GetSystemDirectoryW;
 		}
 		else
 		{
@@ -1331,7 +1330,7 @@ Dstring getUserName()
 	{
 		version(STATIC_UNICODE)
 		{
-			alias GetUserNameW proc;
+			alias proc = GetUserNameW;
 		}
 		else
 		{
@@ -1370,7 +1369,7 @@ DWORD expandEnvironmentStrings(Dstring src, out Dstring result)
 	{
 		version(STATIC_UNICODE)
 		{
-			alias ExpandEnvironmentStringsW proc;
+			alias proc = ExpandEnvironmentStringsW;
 		}
 		else
 		{
@@ -1424,7 +1423,7 @@ Dstring getEnvironmentVariable(Dstring name)
 	{
 		version(STATIC_UNICODE)
 		{
-			alias GetEnvironmentVariableW proc;
+			alias proc = GetEnvironmentVariableW;
 		}
 		else
 		{
@@ -1478,7 +1477,7 @@ struct WndClass
 		WNDCLASSW wcw;
 		WNDCLASSA wca;
 	}
-	alias wcw wc;
+	alias wc = wcw;
 	
 	Dstring className;
 }
@@ -1490,7 +1489,7 @@ ATOM registerClass(ref WndClass wc)
 	{
 		version(STATIC_UNICODE)
 		{
-			alias RegisterClassW proc;
+			alias proc = RegisterClassW;
 		}
 		else
 		{
@@ -1524,7 +1523,7 @@ BOOL getClassInfo(HINSTANCE hinst, Dstring className, ref WndClass wc)
 	{
 		version(STATIC_UNICODE)
 		{
-			alias GetClassInfoW proc;
+			alias proc = GetClassInfoW;
 		}
 		else
 		{
@@ -1555,7 +1554,7 @@ deprecated BOOL getTextExtentPoint32(HDC hdc, Dstring text, LPSIZE lpSize)
 	{
 		version(STATIC_UNICODE)
 		{
-			alias GetTextExtentPoint32W proc;
+			alias proc = GetTextExtentPoint32W;
 		}
 		else
 		{
@@ -1594,7 +1593,7 @@ Dstring dragQueryFile(HDROP hDrop, UINT idxFile)
 	{
 		version(STATIC_UNICODE)
 		{
-			alias DragQueryFileW proc;
+			alias proc = DragQueryFileW;
 		}
 		else
 		{
@@ -1664,7 +1663,7 @@ LRESULT defWindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
 		version(STATIC_UNICODE_DEF_WINDOW_PROC)
 		{
-			alias DefWindowProcW proc;
+			alias proc = DefWindowProcW;
 		}
 		else
 		{
@@ -1694,7 +1693,7 @@ LRESULT defDlgProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
 		version(STATIC_UNICODE_DEF_WINDOW_PROC)
 		{
-			alias DefDlgProcW proc;
+			alias proc = DefDlgProcW;
 		}
 		else
 		{
@@ -1724,7 +1723,7 @@ LRESULT defFrameProc(HWND hwnd, HWND hwndMdiClient, UINT msg, WPARAM wparam, LPA
 	{
 		version(STATIC_UNICODE_DEF_WINDOW_PROC)
 		{
-			alias DefFrameProcW proc;
+			alias proc = DefFrameProcW;
 		}
 		else
 		{
@@ -1754,7 +1753,7 @@ LRESULT defMDIChildProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
 		version(STATIC_UNICODE_DEF_WINDOW_PROC)
 		{
-			alias DefMDIChildProcW proc;
+			alias proc = DefMDIChildProcW;
 		}
 		else
 		{
@@ -1788,7 +1787,7 @@ LONG dispatchMessage(MSG* pmsg)
 	{
 		version(STATIC_UNICODE_DISPATCH_MESSAGE)
 		{
-			alias DispatchMessageW dispatchproc;
+			alias dispatchproc = DispatchMessageW;
 		}
 		else
 		{
@@ -1818,7 +1817,7 @@ BOOL peekMessage(MSG* pmsg, HWND hwnd = HWND.init, UINT wmFilterMin = 0, UINT wm
 	{
 		version(STATIC_UNICODE_PEEK_MESSAGE)
 		{
-			alias PeekMessageW peekproc;
+			alias peekproc = PeekMessageW;
 		}
 		else
 		{
@@ -1887,7 +1886,7 @@ BOOL isDialogMessage(HWND hwnd, MSG* pmsg)
 	{
 		version(STATIC_UNICODE)
 		{
-			alias IsDialogMessageW proc;
+			alias proc = IsDialogMessageW;
 		}
 		else
 		{
@@ -1917,7 +1916,7 @@ HANDLE findFirstChangeNotification(Dstring pathName, BOOL watchSubtree, DWORD no
 	{
 		version(STATIC_UNICODE)
 		{
-			alias FindFirstChangeNotificationW proc;
+			alias proc = FindFirstChangeNotificationW;
 		}
 		else
 		{
@@ -1947,7 +1946,7 @@ HINSTANCE loadLibraryEx(Dstring libFileName, DWORD flags)
 	{
 		version(STATIC_UNICODE)
 		{
-			alias LoadLibraryExW proc;
+			alias proc = LoadLibraryExW;
 		}
 		else
 		{
@@ -1977,7 +1976,7 @@ BOOL _setMenuItemInfoW(HMENU hMenu, UINT uItem, BOOL fByPosition, LPMENUITEMINFO
 	{
 		version(STATIC_UNICODE)
 		{
-			alias SetMenuItemInfoW proc;
+			alias proc = SetMenuItemInfoW;
 		}
 		else
 		{
@@ -2007,7 +2006,7 @@ BOOL _insertMenuItemW(HMENU hMenu, UINT uItem, BOOL fByPosition, LPMENUITEMINFOW
 	{
 		version(STATIC_UNICODE)
 		{
-			alias InsertMenuItemW proc;
+			alias proc = InsertMenuItemW;
 		}
 		else
 		{
@@ -2043,7 +2042,7 @@ Dstring regQueryValueString(HKEY hkey, Dstring valueName, LPDWORD lpType = null)
 	{
 		version(STATIC_UNICODE)
 		{
-			alias RegQueryValueExW proc;
+			alias proc = RegQueryValueExW;
 		}
 		else
 		{
@@ -2092,7 +2091,7 @@ struct LogFont
 		LOGFONTW lfw;
 		LOGFONTA lfa;
 	}
-	alias lfw lf;
+	alias lf = lfw;
 	
 	Dstring faceName;
 }
@@ -2104,7 +2103,7 @@ HFONT createFontIndirect(ref LogFont lf)
 	{
 		version(STATIC_UNICODE)
 		{
-			alias CreateFontIndirectW proc;
+			alias proc = CreateFontIndirectW;
 		}
 		else
 		{
@@ -2153,7 +2152,7 @@ int getLogFont(HFONT hf, ref LogFont lf)
 	{
 		version(STATIC_UNICODE)
 		{
-			alias GetObjectW proc;
+			alias proc = GetObjectW;
 		}
 		else
 		{
@@ -2189,7 +2188,7 @@ Dstring shGetPathFromIDList(LPCITEMIDLIST pidl)
 	{
 		version(STATIC_UNICODE)
 		{
-			alias SHGetPathFromIDListW proc;
+			alias proc = SHGetPathFromIDListW;
 		}
 		else
 		{

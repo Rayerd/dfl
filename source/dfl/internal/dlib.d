@@ -22,15 +22,15 @@
 module dfl.internal.dlib;
 
 
-alias typeof(""c[]) Dstring;
-alias typeof(""c.ptr) Dstringz;
-alias typeof(" "c[0]) Dchar;
-alias typeof(""w[]) Dwstring;
-alias typeof(""w.ptr) Dwstringz;
-alias typeof(" "w[0]) Dwchar;
-alias typeof(""d[]) Ddstring;
-alias typeof(""d.ptr) Ddstringz;
-alias typeof(" "d[0]) Ddchar;
+alias Dstring = typeof(""c[]);
+alias Dstringz = typeof(""c.ptr);
+alias Dchar = typeof(" "c[0]);
+alias Dwstring = typeof(""w[]);
+alias Dwstringz = typeof(""w.ptr);
+alias Dwchar = typeof(" "w[0]);
+alias Ddstring = typeof(""d[]);
+alias Ddstringz = typeof(""d.ptr);
+alias Ddchar = typeof(" "d[0]);
 
 uint toI32(size_t val) @property @safe pure nothrow
 {
@@ -134,7 +134,7 @@ version(DFL_NO_USE_CORE_MEMORY)
 public import std.traits;
 
 
-alias ReturnType!(Object.opEquals) Dequ; // Since D2 changes mid-stream.
+alias Dequ = ReturnType!(Object.opEquals); // Since D2 changes mid-stream.
 
 
 Dstring getObjectString(Object o)
@@ -150,9 +150,9 @@ version(DFL_NO_USE_CORE_MEMORY)
 	void gcPin(void* p) { }
 	void gcUnpin(void* p) { }
 	
-	deprecated alias std.gc.genCollect gcGenCollect;
+	deprecated alias gcGenCollect = std.gc.genCollect;
 	
-	alias std.gc.fullCollect gcFullCollect;
+	alias gcFullCollect = std.gc.fullCollect;
 }
 else
 {
@@ -181,11 +181,11 @@ else
 
 private import std.string;
 
-alias std.string.icmp stringICmp;
+alias stringICmp = std.string.icmp;
 
 version(DFL_NO_CONV_TO_TEMPLATE)
 {
-	alias std.string.toString stringFromStringz;
+	alias stringFromStringz = std.string.toString;
 }
 else
 {
@@ -213,11 +213,11 @@ else
 	}
 }
 
-alias std.string.split stringSplit;
+alias stringSplit = std.string.split;
 
 version(DFL_NO_CONV_TO_TEMPLATE)
 {
-	alias std.string.toString intToString;
+	alias intToString = std.string.toString;
 }
 else
 {
@@ -229,37 +229,37 @@ else
 
 private import std.algorithm.searching;
 
-alias std.algorithm.searching.find charFindInString;
+alias charFindInString = std.algorithm.searching.find;
 
-alias std.string.toStringz stringToStringz;
+alias stringToStringz = std.string.toStringz;
 
 Dstring uintToHexString(uint num)
 {
 	return std.string.format("%X", num);
 }
 
-alias std.string.splitLines stringSplitLines;
+alias stringSplitLines = std.string.splitLines;
 
 
 private import std.path;
 
-alias std.path.dirName pathGetDirName;
+alias pathGetDirName = std.path.dirName;
 
 version(D_Version2)
-	alias std.ascii.newline nativeLineSeparatorString;
+	alias nativeLineSeparatorString = std.ascii.newline;
 else
-	alias std.path.linesep nativeLineSeparatorString;
+	alias nativeLineSeparatorString = std.path.linesep;
 
-alias std.path.buildPath pathJoin;
+alias pathJoin = std.path.buildPath;
 
-alias std.path.pathSeparator nativePathSeparatorString;
+alias nativePathSeparatorString = std.path.pathSeparator;
 
 
 version(_DFL_NO_USE_CORE_EXCEPTION_OUTOFMEMORY_EXCEPTION)
 {
 	private import std.outofmemory;
 	
-	alias std.outofmemory.OutOfMemoryException OomException;
+	alias OomException = std.outofmemory.OutOfMemoryException;
 }
 else
 {
@@ -290,35 +290,35 @@ else
 
 private import std.utf;
 
-alias std.utf.decode utf8stringGetUtf32char;
+alias utf8stringGetUtf32char = std.utf.decode;
 
-alias std.utf.toUTF8 utf16stringtoUtf8string;
+alias utf16stringtoUtf8string = std.utf.toUTF8;
 
-alias std.utf.toUTF16 utf8stringtoUtf16string;
+alias utf8stringtoUtf16string = std.utf.toUTF16;
 
-alias std.utf.toUTFz!(typeof(Dwstring.init.ptr)) utf8stringToUtf16stringz;
+alias utf8stringToUtf16stringz = std.utf.toUTFz!(typeof(Dwstring.init.ptr));
 
-alias std.utf.toUTF8 utf32stringtoUtf8string;
+alias utf32stringtoUtf8string = std.utf.toUTF8;
 
-alias std.utf.toUTF32 utf8stringtoUtf32string;
+alias utf8stringtoUtf32string = std.utf.toUTF32;
 
 
 private import std.uni;
 
-alias std.uni.toLower utf32charToLower;
+alias utf32charToLower = std.uni.toLower;
 
 
 private import std.conv;
 
 version(DFL_NO_CONV_TO_TEMPLATE)
 {
-	alias std.conv.toInt stringToInt;
+	alias stringToInt = std.conv.toInt;
 }
 else
 {
 	version(DFL_DMD2029)
 	{
-		alias std.conv.to!(int, Dstring) stringToInt; // D 2.029
+		alias stringToInt = std.conv.to!(int, Dstring); // D 2.029
 	}
 	else
 	{
@@ -332,33 +332,33 @@ else
 
 private import std.ascii;
 
-alias std.ascii.isHexDigit charIsHexDigit;
+alias charIsHexDigit = std.ascii.isHexDigit;
 
 
 private import undead.stream;// dfl.internal.stream is deprecated.
 
-alias undead.stream.Stream DStream;// dfl.internal.stream.Stream is deprecated.
+alias DStream = undead.stream.Stream;// dfl.internal.stream.Stream is deprecated.
 
-alias undead.stream.OutputStream DOutputStream;//dfl.internal.stream.OutputStream is deprecated.
+alias DOutputStream = undead.stream.OutputStream;//dfl.internal.stream.OutputStream is deprecated.
 
-alias undead.stream.StreamException DStreamException;//dfl.internal.stream.StreamException is deprecated.
+alias DStreamException = undead.stream.StreamException;//dfl.internal.stream.StreamException is deprecated.
 
 
-alias Object DObject;
+alias DObject = Object;
 version(DFL_D2_AND_ABOVE)
 {
 	version(DFL_CanThrowObject)
 	{
-		alias Object DThrowable;
+		alias DThrowable = Object;
 	}
 	else
 	{
-		alias Throwable DThrowable;
+		alias DThrowable = Throwable;
 	}
 }
 else
 {
-	alias Object DThrowable;
+	alias DThrowable = Object;
 }
 
 

@@ -16,9 +16,9 @@ version(_dfl_needcom)
 	
 	// Grabbed from std.c.windows.com:
 	
-	alias WCHAR OLECHAR;
-	alias OLECHAR *LPOLESTR;
-	alias OLECHAR *LPCOLESTR;
+	alias OLECHAR = WCHAR;
+	alias LPOLESTR = OLECHAR*;
+	alias LPCOLESTR = OLECHAR*;
 	
 	enum
 	{
@@ -67,8 +67,8 @@ version(_dfl_needcom)
 		CLSCTX_SERVER = (CLSCTX_INPROC_SERVER|CLSCTX_LOCAL_SERVER),
 	}
 	
-	alias GUID IID;
-	alias GUID CLSID;
+	alias IID = GUID;
+	alias CLSID = GUID;
 	
 	extern (C)
 	{
@@ -281,14 +281,14 @@ extern(C)
 	}
 	else
 	{
-		alias IID_IUnknown _IID_IUnknown;
-		alias IID_IDataObject _IID_IDataObject;
-		alias IID_IPicture _IID_IPicture;
-		alias IID_ISequentialStream _IID_ISequentialStream;
-		alias IID_IStream _IID_IStream;
-		alias IID_IDropTarget _IID_IDropTarget;
-		alias IID_IDropSource _IID_IDropSource;
-		alias IID_IEnumFORMATETC _IID_IEnumFORMATETC;
+		alias _IID_IUnknown = IID_IUnknown;
+		alias _IID_IDataObject = IID_IDataObject;
+		alias _IID_IPicture = IID_IPicture;
+		alias _IID_ISequentialStream = IID_ISequentialStream;
+		alias _IID_IStream = IID_IStream;
+		alias _IID_IDropTarget = IID_IDropTarget;
+		alias _IID_IDropSource = IID_IDropSource;
+		alias _IID_IEnumFORMATETC = IID_IEnumFORMATETC;
 	}
 }
 
@@ -310,7 +310,7 @@ enum: DWORD
 	STREAM_SEEK_CUR = 1,
 	STREAM_SEEK_END = 2,
 }
-alias DWORD STREAM_SEEK;
+alias STREAM_SEEK = DWORD;
 
 
 // TODO: implement the enum`s used here.
@@ -343,18 +343,18 @@ interface IStream: ISequentialStream
 	HRESULT Stat(STATSTG* pstatstg, DWORD grfStatFlag);
 	HRESULT Clone(IStream* ppstm);
 }
-alias IStream* LPSTREAM;
+alias LPSTREAM = IStream*;
 
 
-alias UINT OLE_HANDLE;
+alias OLE_HANDLE = UINT;
 
-alias LONG OLE_XPOS_HIMETRIC;
+alias OLE_XPOS_HIMETRIC = LONG;
 
-alias LONG OLE_YPOS_HIMETRIC;
+alias OLE_YPOS_HIMETRIC = LONG;
 
-alias LONG OLE_XSIZE_HIMETRIC;
+alias OLE_XSIZE_HIMETRIC = LONG;
 
-alias LONG OLE_YSIZE_HIMETRIC;
+alias OLE_YSIZE_HIMETRIC = LONG;
 
 
 interface IPicture: IUnknown
@@ -395,7 +395,7 @@ struct FORMATETC
 	LONG lindex;
 	DWORD tymed;
 }
-alias FORMATETC* LPFORMATETC;
+alias LPFORMATETC = FORMATETC*;
 
 
 struct STATDATA 
@@ -422,7 +422,7 @@ struct STGMEDIUM
 	}
 	IUnknown pUnkForRelease;
 }
-alias STGMEDIUM* LPSTGMEDIUM;
+alias LPSTGMEDIUM = STGMEDIUM*;
 
 
 interface IDataObject: IUnknown
@@ -495,8 +495,8 @@ interface IMalloc: IUnknown
 	void HeapMinimize();
 }
 // Since an interface is a pointer..
-alias IMalloc PMALLOC;
-alias IMalloc LPMALLOC;
+alias PMALLOC = IMalloc;
+alias LPMALLOC = IMalloc;
 
 
 LONG MAP_LOGHIM_TO_PIX(LONG x, LONG logpixels)
@@ -512,7 +512,7 @@ enum: DWORD
 	DVASPECT_ICON = 4,
 	DVASPECT_DOCPRINT = 8,
 }
-alias DWORD DVASPECT;
+alias DVASPECT = DWORD;
 
 
 enum: DWORD
@@ -526,7 +526,7 @@ enum: DWORD
 	TYMED_ENHMF = 64,
 	TYMED_NULL = 0
 }
-alias DWORD TYMED;
+alias TYMED = DWORD;
 
 
 enum
@@ -536,7 +536,7 @@ enum
 }
 
 
-alias HRESULT WINOLEAPI;
+alias WINOLEAPI = HRESULT;
 
 
 WINOLEAPI OleInitialize(LPVOID pvReserved);

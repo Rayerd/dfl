@@ -435,7 +435,7 @@ class StatusBar: ControlSuperClass // docmain
 		}
 	}
 	
-	alias Control.dock dock; // Overload.
+	alias dock = Control.dock; // Overload.
 	
 	
 	///

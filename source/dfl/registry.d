@@ -253,7 +253,7 @@ class RegistryValueMultiSz: RegistryValue
 			result ~= str ~ "\r\n";
 		}
 		if(result.length)
-			result = result[0 .. result.length - 2]; // Exclude last \r\n.
+			result = result[0 .. $ - 2]; // Exclude last \r\n.
 		return result;
 	}
 	
@@ -404,7 +404,7 @@ class RegistryValueDword: RegistryValue
 }
 
 /// ditto
-alias RegistryValueDword RegistryValueDwordLittleEndian;
+alias RegistryValueDwordLittleEndian = RegistryValueDword;
 
 /// ditto
 class RegistryValueDwordBigEndian: RegistryValue
@@ -962,8 +962,8 @@ class RegistryKey // docmain
 			case REG_SZ:
 				with(new RegistryValueSz)
 				{
-					assert(!data[data.length - 1]);
-					value = cast(Dstring)data[0 .. data.length - 1];
+					assert(!data[$ - 1]);
+					value = cast(Dstring)data[0 .. $ - 1];
 					defaultValue = _reg;
 				}
 				break;
@@ -980,8 +980,8 @@ class RegistryKey // docmain
 			case REG_EXPAND_SZ:
 				with(new RegistryValueExpandSz)
 				{
-					assert(!data[data.length - 1]);
-					value = cast(Dstring)data[0 .. data.length - 1];
+					assert(!data[$ - 1]);
+					value = cast(Dstring)data[0 .. $ - 1];
 					defaultValue = _reg;
 				}
 				break;
@@ -996,7 +996,7 @@ class RegistryKey // docmain
 					if(s.length)
 					{
 						value ~= s;
-						data = data[s.length + 1 .. data.length];
+						data = data[s.length + 1 .. $];
 						goto next_sz;
 					}
 					

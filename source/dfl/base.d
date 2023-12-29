@@ -10,7 +10,7 @@ private import dfl.internal.dlib, dfl.internal.clib;
 private import dfl.internal.winapi, dfl.drawing, dfl.event;
 
 
-alias HWND HWindow;
+alias HWindow = HWND;
 
 
 ///
@@ -20,7 +20,7 @@ interface IWindow // docmain
 	@property HWindow handle(); // getter
 }
 
-alias IWindow IWin32Window; // deprecated
+alias IWin32Window = IWindow; // deprecated
 
 
 ///
@@ -35,7 +35,7 @@ class DflException: Exception // docmain
 
 
 ///
-alias DThrowable DflThrowable;
+alias DflThrowable = DThrowable;
 
 
 ///
@@ -52,31 +52,31 @@ class StringObject: DObject
 	}
 	
 	
-	override Dstring toString()
+	override Dstring toString() const
 	{
 		return value;
 	}
 	
 	
-	override Dequ opEquals(Object o)
+	override Dequ opEquals(Object o) const
 	{
 		return value == getObjectString(o); // ?
 	}
 	
 	
-	Dequ opEquals(StringObject s)
+	Dequ opEquals(StringObject s) const
 	{
 		return value == s.value;
 	}
 	
 	
-	override int opCmp(Object o)
+	override int opCmp(Object o) const
 	{
 		return stringICmp(value, getObjectString(o)); // ?
 	}
 	
 	
-	int opCmp(StringObject s)
+	int opCmp(StringObject s) const
 	{
 		return stringICmp(value, s.value);
 	}
@@ -1450,7 +1450,7 @@ class Cursor // docmain
 	}
 	
 	
-	override Dequ opEquals(Object o)
+	override Dequ opEquals(Object o) const
 	{
 		Cursor cur = cast(Cursor)o;
 		if(!cur)
@@ -1459,7 +1459,7 @@ class Cursor // docmain
 	}
 	
 	
-	Dequ opEquals(Cursor cur)
+	Dequ opEquals(Cursor cur) const
 	{
 		return hcur == cur.hcur;
 	}

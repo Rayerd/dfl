@@ -113,7 +113,7 @@ class Splitter: Control // docmain
 		super.dock(ds);
 	}
 	
-	alias Control.dock dock; // Overload.
+	alias dock = Control.dock; // Overload.
 	
 	
 	package void initsplit(int sx, int sy)
@@ -179,9 +179,9 @@ class Splitter: Control // docmain
 		return mgrip;
 	}
 	
-	deprecated alias movingGrip moveingGrip;
-	deprecated alias movingGrip moveGrip;
-	deprecated alias movingGrip sizingGrip;
+	deprecated alias moveingGrip = movingGrip;
+	deprecated alias moveGrip = movingGrip;
+	deprecated alias sizingGrip = movingGrip;
 	
 	
 	protected override void onPaint(PaintEventArgs ea)

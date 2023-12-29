@@ -14,7 +14,6 @@ private import dfl.internal.dlib;
 private import dfl.internal.clib;
 private import dfl.internal.utf;
 
-// private import dfl.internal.winapi; // Don't use
 private import core.sys.windows.windows;
 private import core.sys.windows.commctrl;
 

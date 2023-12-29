@@ -68,13 +68,13 @@ struct Point // docmain
 	version(DFL_D2_AND_ABOVE)
 	{
 		///
-		const Dequ opEquals(ref ConstType!(Point) pt)
+		Dequ opEquals(ref ConstType!(Point) pt) const
 		{
 			return x == pt.x && y == pt.y;
 		}
 		
 		/// ditto
-		const Dequ opEquals(Point pt)
+		Dequ opEquals(Point pt) const
 		{
 			return x == pt.x && y == pt.y;
 		}
@@ -175,13 +175,13 @@ struct Size // docmain
 	version(DFL_D2_AND_ABOVE)
 	{
 		///
-		const Dequ opEquals(ref ConstType!(Size) sz)
+		Dequ opEquals(ref ConstType!(Size) sz) const
 		{
 			return width == sz.width && height == sz.height;
 		}
 		
 		/// ditto
-		const Dequ opEquals(Size sz)
+		Dequ opEquals(Size sz) const
 		{
 			return width == sz.width && height == sz.height;
 		}
@@ -189,7 +189,7 @@ struct Size // docmain
 	else
 	{
 		///
-		Dequ opEquals(Size sz)
+		Dequ opEquals(Size sz) const
 		{
 			return width == sz.width && height == sz.height;
 		}
@@ -334,14 +334,14 @@ struct Rect // docmain
 	version(DFL_D2_AND_ABOVE)
 	{
 		///
-		const Dequ opEquals(ref ConstType!(Rect) r)
+		Dequ opEquals(ref ConstType!(Rect) r) const
 		{
 			return x == r.x && y == r.y &&
 				width == r.width && height == r.height;
 		}
 		
 		/// ditto
-		const Dequ opEquals(Rect r)
+		Dequ opEquals(Rect r) const
 		{
 			return x == r.x && y == r.y &&
 				width == r.width && height == r.height;
@@ -350,7 +350,7 @@ struct Rect // docmain
 	else
 	{
 		///
-		Dequ opEquals(Rect r)
+		Dequ opEquals(Rect r) const
 		{
 			return x == r.x && y == r.y &&
 				width == r.width && height == r.height;
@@ -600,7 +600,7 @@ struct Color // docmain
 	}
 	
 	
-	deprecated alias blendColor blend;
+	deprecated alias blend = blendColor;
 	
 	
 	/// Blend colors; alpha channels are ignored.
@@ -1811,7 +1811,7 @@ class Picture: Image // docmain
 	
 	static dfl.internal.wincom.IPicture _fromFileName(Dstring fileName)
 	{
-		alias dfl.internal.winapi.HANDLE HANDLE; // Otherwise, odd conflict with wine.
+		alias HANDLE = dfl.internal.winapi.HANDLE; // Otherwise, odd conflict with wine.
 		
 		HANDLE hf;
 		HANDLE hg;
@@ -2174,7 +2174,7 @@ class Screen
 			{
 				version(SUPPORTS_MULTIPLE_SCREENS)
 				{
-					alias MonitorFromWindow fromWindow;
+					alias fromWindow = MonitorFromWindow;
 				}
 				else
 				{
@@ -2222,7 +2222,7 @@ class Screen
 			{
 				version(SUPPORTS_MULTIPLE_SCREENS)
 				{
-					alias MonitorFromPoint fromPoint;
+					alias fromPoint = MonitorFromPoint;
 				}
 				else
 				{
@@ -2259,7 +2259,7 @@ class Screen
 			{
 				version(SUPPORTS_MULTIPLE_SCREENS)
 				{
-					alias MonitorFromRect fromRect;
+					alias fromRect = MonitorFromRect;
 				}
 				else
 				{
@@ -2355,7 +2355,7 @@ class Screen
 			{
 				pragma(msg, "DFL: multiple screens supported at compile time");
 				
-				alias EnumDisplayMonitors enumScreens;
+				alias enumScreens = EnumDisplayMonitors;
 			}
 			else
 			{
@@ -2427,7 +2427,7 @@ class Screen
 		{
 			version(SUPPORTS_MULTIPLE_SCREENS)
 			{
-				alias GetMonitorInfoA getMI;
+				alias getMI = GetMonitorInfoA;
 			}
 			else
 			{
@@ -4466,7 +4466,7 @@ class Region // docmain
 	}
 	
 	
-	override Dequ opEquals(Object o)
+	override Dequ opEquals(Object o) const
 	{
 		Region rgn = cast(Region)o;
 		if(!rgn)
@@ -4475,7 +4475,7 @@ class Region // docmain
 	}
 	
 	
-	Dequ opEquals(Region rgn)
+	Dequ opEquals(Region rgn) const
 	{
 		return hrgn == rgn.hrgn;
 	}

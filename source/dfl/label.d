@@ -114,7 +114,7 @@ class Label: Control // docmain
 		invalidate(false);
 	}
 	
-	alias Control.text text; // Overload.
+	alias text = Control.text; // Overload.
 	
 	
 	///
@@ -379,13 +379,13 @@ class Label: Control // docmain
 	bool autosz = false;
 	
 	
-	final @property void tfmt(TextFormat tf) // setter
+	@property void tfmt(TextFormat tf) // setter
 	{
 		_tfmt = tf;
 	}
 	
 	
-	final @property TextFormat tfmt() // getter
+	@property TextFormat tfmt() // getter
 	{
 		/+
 		// This causes it to invert.

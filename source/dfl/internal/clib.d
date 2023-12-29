@@ -9,4 +9,4 @@ public import core.stdc.stdlib,
 	core.stdc.stdint, // Mostly the same as the C interface.
 	core.stdc.stdio;
 	
-alias core.stdc.stdio.printf cprintf;
+alias cprintf = core.stdc.stdio.printf;

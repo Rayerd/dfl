@@ -17,7 +17,6 @@ private import dfl.event;
 private import dfl.drawing;
 private static import dfl.internal.utf;
 
-//private import dfl.internal.winapi; // Do not use
 private import core.sys.windows.commctrl;
 private import core.sys.windows.windef;
 private import core.sys.windows.winuser;

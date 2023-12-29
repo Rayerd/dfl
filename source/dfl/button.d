@@ -224,7 +224,7 @@ abstract class ButtonBase: ControlSuperClass // docmain
 	}
 	
 	
-	protected override bool processMnemonic(dchar charCode)
+	override bool processMnemonic(dchar charCode)
 	{
 		if(canSelect)
 		{
@@ -388,7 +388,7 @@ class Button: ButtonBase, IButtonControl // docmain
 		super.text = txt;
 	}
 	
-	alias Control.text text; // Overload.
+	alias text = Control.text; // Overload.
 	
 	
 	///

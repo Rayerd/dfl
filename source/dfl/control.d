@@ -840,11 +840,11 @@ class Control: DObject, IWindow // docmain
 		package void _removeNotCreated(int i)
 		{
 			if(!i)
-				children = children[1 .. children.length];
+				children = children[1 .. $];
 			else if(i == children.length - 1)
 				children = children[0 .. i];
 			else
-				children = children[0 .. i] ~ children[i + 1 .. children.length];
+				children = children[0 .. i] ~ children[i + 1 .. $];
 		}
 		
 		
@@ -952,7 +952,7 @@ class Control: DObject, IWindow // docmain
 			if(i < 0 || i >= length - 1)
 				return;
 			
-			children = children[0 .. i] ~ children[i + 1 .. i + 2] ~ children[i .. i + 1] ~ children[i + 2 .. children.length];
+			children = children[0 .. i] ~ children[i + 1 .. i + 2] ~ children[i .. i + 1] ~ children[i + 2 .. $];
 		}
 		
 		
@@ -967,7 +967,7 @@ class Control: DObject, IWindow // docmain
 			if(i <= 0 || i >= length)
 				return;
 			
-			children = children[0 .. i - 1] ~ children[i + 1 .. i + 2] ~ children[i .. i + 1] ~ children[i + 2 .. children.length];
+			children = children[0 .. i - 1] ~ children[i + 1 .. i + 2] ~ children[i .. i + 1] ~ children[i + 2 .. $];
 		}
 		
 		
@@ -982,7 +982,7 @@ class Control: DObject, IWindow // docmain
 			if(i <= 0 || i >= length)
 				return;
 			
-			children = children[i .. i + 1] ~ children[0 .. i] ~ children[i + 1 .. children.length];
+			children = children[i .. i + 1] ~ children[0 .. i] ~ children[i + 1 .. $];
 		}
 		
 		
@@ -997,7 +997,7 @@ class Control: DObject, IWindow // docmain
 			if(i < 0 || i >= length - 1)
 				return;
 			
-			children = children[0 .. i] ~ children[i + 1 .. children.length] ~ children[i .. i + 1];
+			children = children[0 .. i] ~ children[i + 1 .. $] ~ children[i .. i + 1];
 		}
 		
 		
