@@ -512,7 +512,7 @@ class StatusBar: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	override @property Dstring text() // getter
+	override @property Dstring text() const // getter
 	{
 		return this._simpletext;
 	}

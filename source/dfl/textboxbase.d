@@ -575,7 +575,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	}
 	
 	
-	override Dstring toString()
+	override Dstring toString() const
 	{
 		return text; // ?
 	}

@@ -47,7 +47,7 @@ class TabPage: Panel
 	}
 	
 	
-	override Dstring toString()
+	override Dstring toString() const
 	{
 		return text;
 	}
@@ -56,13 +56,13 @@ class TabPage: Panel
 	alias opEquals = Control.opEquals;
 
 	
-	override Dequ opEquals(Object o)
+	override Dequ opEquals(Object o) const
 	{
 		return text == getObjectString(o);
 	}
 
 	
-	Dequ opEquals(Dstring val)
+	Dequ opEquals(Dstring val) const
 	{
 		return text == val;
 	}
@@ -71,13 +71,13 @@ class TabPage: Panel
 	alias opCmp = Control.opCmp;
 
 
-	override int opCmp(Object o)
+	override int opCmp(Object o) const
 	{
 		return stringICmp(text, getObjectString(o));
 	}
 
 
-	int opCmp(Dstring val)
+	int opCmp(Dstring val) const
 	{
 		return stringICmp(text, val);
 	}

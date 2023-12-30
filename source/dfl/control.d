@@ -2107,7 +2107,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	final @property bool isHandleCreated() // getter
+	final @property bool isHandleCreated() const // getter
 	{
 		return hwnd != HWND.init;
 	}
@@ -2744,9 +2744,9 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	private final Dstring _fetchText()
+	private final Dstring _fetchText() const
 	{
-		return dfl.internal.utf.getWindowText(hwnd);
+		return dfl.internal.utf.getWindowText(cast(void*)hwnd);
 	}
 	
 	
@@ -2771,7 +2771,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	/// ditto
-	@property Dstring text() // getter
+	@property Dstring text() const // getter
 	{
 		if(isHandleCreated)
 		{
@@ -4228,7 +4228,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	override Dstring toString()
+	override Dstring toString() const
 	{
 		return text;
 	}

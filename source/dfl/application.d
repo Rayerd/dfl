@@ -817,7 +817,7 @@ final class Application // docmain
 		}
 		
 		
-		override Dstring toString()
+		override Dstring toString() const
 		{
 			return errBox.text;
 		}

@@ -447,7 +447,7 @@ class TreeNode: DObject
 	}
 	
 	/// ditto
-	final @property Dstring text() // getter
+	final @property Dstring text() const // getter
 	{
 		return ttext;
 	}
@@ -597,39 +597,39 @@ class TreeNode: DObject
 	}
 	
 	
-	override Dstring toString()
+	override Dstring toString() const
 	{
 		return ttext;
 	}
 	
 	
-	override Dequ opEquals(Object o)
+	override Dequ opEquals(Object o) const
 	{
 		return 0 == stringICmp(ttext, getObjectString(o)); // ?
 	}
 	
-	Dequ opEquals(TreeNode node)
+	Dequ opEquals(TreeNode node) const
 	{
 		return 0 == stringICmp(ttext, node.ttext);
 	}
 	
-	Dequ opEquals(Dstring val)
+	Dequ opEquals(Dstring val) const
 	{
 		return 0 == stringICmp(ttext, val);
 	}
 	
 	
-	override int opCmp(Object o)
+	override int opCmp(Object o) const
 	{
 		return stringICmp(ttext, getObjectString(o)); // ?
 	}
 	
-	int opCmp(TreeNode node)
+	int opCmp(TreeNode node) const
 	{
 		return stringICmp(ttext, node.ttext);
 	}
 	
-	int opCmp(Dstring val)
+	int opCmp(Dstring val) const
 	{
 		return stringICmp(text, val);
 	}
