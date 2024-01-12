@@ -22,6 +22,7 @@ DFL is a Win32 windowing library for the D language.
 ![screen shot](./examples/richtextbox/image/screenshot.png "screen shot")
 
 ## Recent major features
+- **PrintDialog and PrintSetupDialog is now support (Experimental).**
 - DUB is available for DFL.
 - Remove dflexe.
 - Remove GTK-based DFL.
