@@ -380,6 +380,9 @@ class PrintDocument
 	///
 	void print(HDC hDC)
 	{
+		if (this.printerSettings.printRange.empty)
+			throw new DflException("DFL: Print range error.");
+
 		PrintEventArgs printArgs = new PrintEventArgs(hDC);
 		onBeginPrint(printArgs);
 		if (printArgs.cancel)
@@ -395,23 +398,26 @@ class PrintDocument
 		{
 		SKIP:
 			pageCounter++;
+
+			if (this.printerSettings.printRange.ranges[$-1].toPage < pageCounter) // TODO: Don't work when page ranges are not sorted such as 1, 3, 2.
+				break;
+
 			Graphics g = new Graphics(printArgs.hDC, false);
 
 			PageSettings newPageSettings = this.printerSettings.defaultPageSettings.clone();
 			QueryPageSettingsEventArgs queryPageSettingsArgs = new QueryPageSettingsEventArgs(hDC, newPageSettings, pageCounter);
 			onQueryPageSettings(queryPageSettingsArgs); // Be modified pageSettings of current page by user.
 
-			if (this.printerSettings.printRange.kind != PrintRangeKind.ALL_PAGES)
+			bool contains = false;
+			foreach (ref const(PrintRange) iter; printerSettings.printRange.ranges)
 			{
-				bool contains = false;
-				assert(!printerSettings.printRange.empty());
-				foreach (ref const(PrintRange) iter; printerSettings.printRange.ranges)
+				if (iter.fromPage <= pageCounter && pageCounter <= iter.toPage)
 				{
-					if (iter.fromPage <= pageCounter && pageCounter <= iter.toPage)
-						contains = true;
+					contains = true;
+					break;
 				}
-				if (!contains) goto SKIP;
 			}
+			if (!contains) goto SKIP;
 
 			PageSettings ps = queryPageSettingsArgs.pageSettings;
 			Rect marginBounds = ps.bounds; // 1/100 inch unit.
@@ -425,9 +431,6 @@ class PrintDocument
 			
 			printController.onEndPage(this, printPageArgs); // Call EndPage() API
 			if (printPageArgs.cancel)
-				break;
-			
-			if (this.printerSettings.printRange.empty() != 0 && this.printerSettings.printRange.ranges[$-1].toPage == pageCounter)
 				break;
 		} while (printPageArgs.hasMorePage);
 
