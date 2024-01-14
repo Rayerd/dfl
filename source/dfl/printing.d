@@ -22,16 +22,122 @@ private import core.sys.windows.windows;
 
 private import std.conv;
 
-/// Convert to 1/1000 mm unit from 1/100 inch unit.
-private int _mmFromInch(int inch)// NOTE: Bad name.
+///
+enum PrinterUnit
 {
-	return cast(int)(inch * 2.54 * 10.0);
+	DISPLAY = 0, // The default unit (0.01 inch).
+	HUNDREDTHS_OF_AN_INCH = 0, // ditto.
+	THOUSANDTHS_OF_AN_INCH = 1, // One-thousandth of an inch (0.001 inch).
+	HUNDREDTHS_OF_A_MILLIMETER = 2, // One-hundredth of a millimeter (0.01 mm).
+	TENTHS_OF_A_MILLIMETER = 3, // One-tenth of a millimeter (0.1 mm).
+	THOUSANDTHS_OF_A_MILLIMETER = 4, // One-thousandth of an millimeter (0.001 mm).
 }
 
-/// Convert to 1/100 inch unit from 1/1000 mm unit.
-private int _inchFromMm(int mm)// NOTE: Bad name.
+///
+final static class PrinterUnitConvert
 {
-	return cast(int)(mm / 2.54 / 10.0);
+	///
+	static double convert(double value, PrinterUnit fromUnit, PrinterUnit toUnit)
+	{
+		double from = unitsPerDisplay(fromUnit);
+		double to = unitsPerDisplay(toUnit);
+		return value * to / from;
+	}
+
+	///
+	static int convert(int value, PrinterUnit fromUnit, PrinterUnit toUnit)
+	{
+		double from = unitsPerDisplay(fromUnit);
+		double to = unitsPerDisplay(toUnit);
+		return cast(int)(value * to / from);
+	}
+
+	///
+	static Margins convert(Margins value, PrinterUnit fromUnit, PrinterUnit toUnit)
+	{
+		return new Margins(
+			convert(value.left, fromUnit, toUnit),
+			convert(value.top, fromUnit, toUnit),
+			convert(value.right, fromUnit, toUnit),
+			convert(value.bottom, fromUnit, toUnit)
+		);
+	}
+
+	///
+	static Point convert(Point value, PrinterUnit fromUnit, PrinterUnit toUnit)
+	{
+		return Point(
+			convert(value.x, fromUnit, toUnit),
+			convert(value.y, fromUnit, toUnit)
+		);
+	}
+
+	///
+	static POINT convert(POINT value, PrinterUnit fromUnit, PrinterUnit toUnit)
+	{
+		return POINT(
+			convert(value.x, fromUnit, toUnit),
+			convert(value.y, fromUnit, toUnit)
+		);
+	}
+
+	///
+	static Rect convert(Rect value, PrinterUnit fromUnit, PrinterUnit toUnit)
+	{
+		return Rect(
+			convert(value.x, fromUnit, toUnit),
+			convert(value.y, fromUnit, toUnit),
+			convert(value.width, fromUnit, toUnit),
+			convert(value.height, fromUnit, toUnit)
+		);
+	}
+
+	///
+	static RECT convert(RECT value, PrinterUnit fromUnit, PrinterUnit toUnit)
+	{
+		return RECT(
+			convert(value.left, fromUnit, toUnit),
+			convert(value.top, fromUnit, toUnit),
+			convert(value.right, fromUnit, toUnit),
+			convert(value.bottom, fromUnit, toUnit)
+		);
+	}
+
+	///
+	static Size convert(Size value, PrinterUnit fromUnit, PrinterUnit toUnit)
+	{
+		return Size(
+			convert(value.width, fromUnit, toUnit),
+			convert(value.height, fromUnit, toUnit)
+		);
+	}
+
+	///
+	static SIZE convert(SIZE value, PrinterUnit fromUnit, PrinterUnit toUnit)
+	{
+		return SIZE(
+			convert(value.cx, fromUnit, toUnit),
+			convert(value.cy, fromUnit, toUnit)
+		);
+	}
+
+	///
+	private static double unitsPerDisplay(PrinterUnit unit)
+	{
+		final switch(unit)
+		{
+			case PrinterUnit.DISPLAY: // same as PrinterUnit.HUNDREDTHS_OF_AN_INCH.
+				return 1.0;
+			case PrinterUnit.THOUSANDTHS_OF_AN_INCH:
+				return 10.0;
+			case PrinterUnit.TENTHS_OF_A_MILLIMETER:
+				return 2.54;
+			case PrinterUnit.HUNDREDTHS_OF_A_MILLIMETER:
+				return 25.4;
+			case PrinterUnit.THOUSANDTHS_OF_A_MILLIMETER:
+				return 254.0;
+		}
+	}
 }
 
 ///
@@ -1156,24 +1262,23 @@ class PageSettings
 		if (index == -1)
 			assert(0);
 		
-		Size size = {
+		Size tmpSize = {
 			if (selectedPaperSize == 0 || selectedPaperSize >= DMPAPER_USER)
 			{
 				// User defined paper size.
-				return Size(pDevMode.dmPaperWidth, pDevMode.dmPaperLength); // 1/100 mm unit
+				return Size(pDevMode.dmPaperWidth, pDevMode.dmPaperLength); // 1/10 mm unit
 			}
 			else
 			{
 				// System defined paper size.
-				return Size(sizeBuffer[index].x, sizeBuffer[index].y); // 1/100 mm unit
+				return Size(sizeBuffer[index].x, sizeBuffer[index].y); // 1/10 mm unit
 			}
 		}();
 
 		PaperKind paperKind = cast(PaperKind)selectedPaperSize;
 		string paperName = fromUnicodez(pDevMode.dmFormName.ptr);
-		int width = cast(int)(size.width / 2.54); // Convert to 1/100 inch unit.
-		int height = cast(int)(size.height / 2.54); // Convert to 1/100 inch unit.
-		return new PaperSize(paperKind, paperName, width, height);
+		Size paperSize = PrinterUnitConvert.convert(tmpSize, PrinterUnit.TENTHS_OF_A_MILLIMETER, PrinterUnit.HUNDREDTHS_OF_AN_INCH);
+		return new PaperSize(paperKind, paperName, paperSize.width, paperSize.height);
 	}
 
 	///
@@ -1273,6 +1378,14 @@ class Margins
 		this.right = right;
 		this.bottom = bottom;
 	}
+	/// ditto
+	this(in RECT* rect)
+	{
+		this.left = rect.left;
+		this.top = rect.top;
+		this.right = rect.right;
+		this.bottom = rect.bottom;
+	}
 
 	///
 	override string toString() const
@@ -1285,6 +1398,12 @@ class Margins
 		str ~= to!string(bottom) ~ "]";
 		return str;
 	}
+}
+
+///
+private RECT _toRECT(Margins margins)
+{
+	return RECT(margins.left, margins.top, margins.right, margins.bottom);
 }
 
 ///
@@ -1614,11 +1733,10 @@ final class PageSetupDialog : CommonDialog
 		if (_minMargins)
 		{
 			_pageSetupDlg.Flags |= PSD_MINMARGINS; // Use user defined min-margins.
-			// _minMargins is 1/100 inch unit, but rtMinMargin is 1/1000 mm unit.
-			_pageSetupDlg.rtMinMargin.left = _mmFromInch(_minMargins.left);
-			_pageSetupDlg.rtMinMargin.top = _mmFromInch(_minMargins.top);
-			_pageSetupDlg.rtMinMargin.right = _mmFromInch(_minMargins.right);
-			_pageSetupDlg.rtMinMargin.bottom = _mmFromInch(_minMargins.bottom);
+			// _minMargins is 1/100 inch unit, but rtMinMargin is 1/100 mm unit.
+			enum fromUnit = PrinterUnit.HUNDREDTHS_OF_AN_INCH;
+			enum toUnit = PrinterUnit.HUNDREDTHS_OF_A_MILLIMETER;
+			_pageSetupDlg.rtMinMargin = PrinterUnitConvert.convert(_toRECT(_minMargins), fromUnit, toUnit);
 		}
 		else
 		{
@@ -1744,11 +1862,11 @@ final class PageSetupDialog : CommonDialog
 		// Set initial margins.
 		if (document.printerSettings.defaultPageSettings && document.printerSettings.defaultPageSettings.margins)
 		{
-			// margins is 1/100 dpi unit, but rtMargin is 1/1000 mm unit.
-			_pageSetupDlg.rtMargin.left = _mmFromInch(document.printerSettings.defaultPageSettings.margins.left);
-			_pageSetupDlg.rtMargin.top = _mmFromInch(document.printerSettings.defaultPageSettings.margins.top);
-			_pageSetupDlg.rtMargin.right = _mmFromInch(document.printerSettings.defaultPageSettings.margins.right);
-			_pageSetupDlg.rtMargin.bottom = _mmFromInch(document.printerSettings.defaultPageSettings.margins.bottom);
+			// margins is 1/100 inch unit, but rtMargin is 1/100 mm unit.
+			enum fromUnit = PrinterUnit.HUNDREDTHS_OF_AN_INCH;
+			enum toUnit = PrinterUnit.HUNDREDTHS_OF_A_MILLIMETER;
+			Margins margins = document.printerSettings.defaultPageSettings.margins;
+			_pageSetupDlg.rtMargin = PrinterUnitConvert.convert(_toRECT(margins), fromUnit, toUnit);
 			_pageSetupDlg.Flags |= PSD_MARGINS;
 		}
 		else
@@ -1771,19 +1889,13 @@ final class PageSetupDialog : CommonDialog
 			document.printerSettings.setHdevnames(_pageSetupDlg.hDevNames);
 			document.printerSettings.defaultPageSettings.setHdevmode(_pageSetupDlg.hDevMode);
 
-			// rtMargin is 1/1000 mm unit, but margins is 1/100 inch unit.
-			document.printerSettings.defaultPageSettings.margins = new Margins(
-				_inchFromMm(_pageSetupDlg.rtMargin.left),
-				_inchFromMm(_pageSetupDlg.rtMargin.top),
-				_inchFromMm(_pageSetupDlg.rtMargin.right),
-				_inchFromMm(_pageSetupDlg.rtMargin.bottom));
-			
-			// rtMinMargin is 1/1000 mm unit, but _minMargins is 1/100 inch unit.
-			_minMargins = new Margins(
-				_inchFromMm(_pageSetupDlg.rtMinMargin.left),
-				_inchFromMm(_pageSetupDlg.rtMinMargin.top),
-				_inchFromMm(_pageSetupDlg.rtMinMargin.right),
-				_inchFromMm(_pageSetupDlg.rtMinMargin.bottom));
+			// rtMargin is 1/100 mm unit, but margins is 1/100 inch unit.
+			// rtMinMargin is 1/100 mm unit, but _minMargins is 1/100 inch unit.
+			enum fromUnit = PrinterUnit.HUNDREDTHS_OF_A_MILLIMETER;
+			enum toUnit = PrinterUnit.HUNDREDTHS_OF_AN_INCH;
+			document.printerSettings.defaultPageSettings.margins =
+				PrinterUnitConvert.convert(new Margins(&_pageSetupDlg.rtMargin), fromUnit, toUnit);
+			_minMargins = PrinterUnitConvert.convert(new Margins(&_pageSetupDlg.rtMinMargin), fromUnit, toUnit);
 			
 			return true;
 		}
