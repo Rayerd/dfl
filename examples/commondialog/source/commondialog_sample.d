@@ -189,18 +189,22 @@ class MainForm : Form
 
 	private void doPrintDialog(Control sender, EventArgs e)
 	{
-		PrintRangeSettings printRange = _printDialog.document.printerSettings.printRange;
-		static if (0)
-		{
-			// BUG: Don't work now.
-			printRange.kind = PrintRangeKind.SELECTION; // But overriden by dialog.
-			printRange.addPrintRange(PrintRange(1, 1)); // Example as selected pages.
-		}
-		else
-		{
-			printRange.kind = PrintRangeKind.ALL_PAGES; // But overriden by dialog.
-			printRange.addPrintRange(PrintRange(1, 2)); // Example as all pages.
-		}
+		_printDialog.document.printRange ~= (PrintDocument doc, PrintRangeEventArgs e) {
+			final switch (e.printRange.kind)
+			{
+			case PrintRangeKind.ALL_PAGES:
+				e.printRange.addPrintRange(PrintRange(1, 2));
+				break;
+			case PrintRangeKind.SELECTION:
+				e.printRange.addPrintRange(PrintRange(1, 1));
+				break;
+			case PrintRangeKind.CURRENT_PAGE:
+				e.printRange.addPrintRange(PrintRange(2, 2));
+				break;
+			case PrintRangeKind.SOME_PAGES:
+				// The page range is determined by the printer dialog, so we don't do anything here.
+			}
+		};
 
 		_printDialog.document.beginPrint ~= (PrintDocument doc, PrintEventArgs e) {
 			// Do something.
@@ -208,6 +212,7 @@ class MainForm : Form
 
 		_printDialog.document.queryPageSettings ~= (PrintDocument doc, QueryPageSettingsEventArgs e) {
 			// User modify page settings here.
+			// TODO: Paper orientation cannot be changed.
 		};
 
 		_printDialog.document.printPage ~= (PrintDocument doc, PrintPageEventArgs e) {
