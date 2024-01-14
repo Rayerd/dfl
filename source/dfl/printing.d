@@ -230,6 +230,18 @@ enum PrintAction
 }
 
 ///
+class PrintRangeEventArgs : EventArgs
+{
+	PrintRangeSettings printRange;
+
+	///
+	this(PrintRangeSettings printRange)
+	{
+		this.printRange = printRange;
+	}
+}
+
+///
 class PrintEventArgs : EventArgs
 {
 	bool cancel = false;
@@ -380,6 +392,9 @@ class PrintDocument
 	///
 	void print(HDC hDC)
 	{
+		PrintRangeEventArgs printPageRangeEventArgs = new PrintRangeEventArgs(this.printerSettings.printRange);
+		onPrintRange(printPageRangeEventArgs);
+
 		if (this.printerSettings.printRange.empty)
 			throw new DflException("DFL: Print range error.");
 
@@ -402,12 +417,6 @@ class PrintDocument
 			if (this.printerSettings.printRange.ranges[$-1].toPage < pageCounter) // TODO: Don't work when page ranges are not sorted such as 1, 3, 2.
 				break;
 
-			Graphics g = new Graphics(printArgs.hDC, false);
-
-			PageSettings newPageSettings = this.printerSettings.defaultPageSettings.clone();
-			QueryPageSettingsEventArgs queryPageSettingsArgs = new QueryPageSettingsEventArgs(hDC, newPageSettings, pageCounter);
-			onQueryPageSettings(queryPageSettingsArgs); // Be modified pageSettings of current page by user.
-
 			bool contains = false;
 			foreach (ref const(PrintRange) iter; printerSettings.printRange.ranges)
 			{
@@ -418,6 +427,12 @@ class PrintDocument
 				}
 			}
 			if (!contains) goto SKIP;
+
+			Graphics g = new Graphics(printArgs.hDC, false);
+
+			PageSettings newPageSettings = this.printerSettings.defaultPageSettings.clone();
+			QueryPageSettingsEventArgs queryPageSettingsArgs = new QueryPageSettingsEventArgs(hDC, newPageSettings, pageCounter);
+			onQueryPageSettings(queryPageSettingsArgs); // Be modified pageSettings of current page by user.
 
 			PageSettings ps = queryPageSettingsArgs.pageSettings;
 			Rect marginBounds = ps.bounds; // 1/100 inch unit.
@@ -436,6 +451,12 @@ class PrintDocument
 
 		onEndPrint(printArgs);
 		printController.onEndPrint(this, printArgs); // Call EndPrint() API
+	}
+
+	///
+	void onPrintRange(PrintRangeEventArgs e)
+	{
+		printRange(this, e);
 	}
 
 	///
@@ -462,6 +483,8 @@ class PrintDocument
 		queryPageSettings(this, e);
 	}
 
+	///
+	Event!(PrintDocument, PrintRangeEventArgs) printRange;
 	///
 	Event!(PrintDocument, PrintEventArgs) beginPrint;
 	///
@@ -1460,17 +1483,20 @@ final class PrintDialog : CommonDialog
 		else if (_printDialog.Flags & PD_SELECTION)
 		{
 			printer.printRange.kind = PrintRangeKind.SELECTION;
-			// Don't override Print Range here.
+			printer.printRange.reset();
+			// Concrete print range is modified by user side.
 		}
 		else if (_printDialog.Flags & PD_CURRENTPAGE)
 		{
 			printer.printRange.kind = PrintRangeKind.CURRENT_PAGE;
-			// Don't override Print Range here.
+			printer.printRange.reset();
+			// Concrete print range is modified by user side.
 		}
 		else // PD_ALLPAGES == 0x00000000
 		{
 			printer.printRange.kind = PrintRangeKind.ALL_PAGES;
-			// Don't override Print Range here.
+			printer.printRange.reset();
+			// Concrete print range is modified by user side.
 		}
 
 		// Get printer resolution.
