@@ -698,12 +698,12 @@ class PrintRangeSettings
 //          The return value indicates the number of entries in the array.
 //          The name strings are null-terminated unless the name is 24 characters long.
 //          If pOutput is NULL, the return value is the number of bin entries required.
-// Value:   DC_ENUMRESOLUTIONS
-// Meaning: Retrieves a list of the resolutions supported by the printer.
-//          The pOutput buffer receives an array of LONG values.
-//          For each supported resolution, the array contains a pair of LONG values that specify the x and y dimensions of the resolution,
-//          in dots per inch. The return value indicates the number of supported resolutions. 
-//          If pOutput is NULL, the return value indicates the number of supported resolutions.
+// Value:   DC_PAPERNAMES
+// Meaning: The pOutput parameter points to a buffer that the function should fill with an array of string buffers,
+//          each 64 characters in length. Each string buffer in the array should contain a wide-character,
+//          NULL-terminated string specifying the name of a paper form.
+//          The function's return value should be the number of elements in the returned array.
+//          If pOutput is NULL, the function should just return the number of array elements required.
 private wstring[] _splitNamesBuffer(wchar[] namesBuffer, int nameNum, int nameMaxLength)
 {
 	wstring[] nameArray;
