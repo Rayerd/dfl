@@ -938,6 +938,9 @@ class PrinterSettings
 		// this.isPlotter =
 		// this.duplex =
 
+		pDevMode.dmFields |= DM_PAPERSIZE;
+		pDevMode.dmPaperSize = cast(short)this.defaultPageSettings.paperSize.rawKind;
+		
 		pDevMode.dmFields |= DM_ORIENTATION;
 		pDevMode.dmOrientation = this.defaultPageSettings.landscape ? DMORIENT_LANDSCAPE : DMORIENT_PORTRAIT;
 
