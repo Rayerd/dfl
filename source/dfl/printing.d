@@ -267,7 +267,7 @@ enum PaperSourceKind
 {
 	AUTOMATIC_FEED = 7,
 	CASSETTE = 14,
-	CUSTOM = 257,
+	CUSTOM = 256,
 	ENVELOPE = 5,
 	FORM_SOURCE = 15,
 	LARGE_CAPACITY = 11,
@@ -285,19 +285,20 @@ enum PaperSourceKind
 class PaperSource
 {
 	private PaperSourceKind _kind;
+	private int _rawKind;
 	private string _sourceName;
 
 	///
 	this()
 	{
-		_kind = PaperSourceKind.CUSTOM;
-		_sourceName = "";
+		rawKind = PaperSourceKind.CUSTOM;
+		sourceName = "";
 	}
 	/// ditto
-	this(PaperSourceKind kind, string sourceName)
+	this(int rawKind, string name)
 	{
-		_kind = kind;
-		_sourceName = sourceName;
+		this.rawKind = rawKind;
+		this.sourceName = name;
 	}
 
 	///
@@ -306,14 +307,27 @@ class PaperSource
 		return _kind;
 	}
 
-	// void rawKind(int k); // TODO: Not implemented.
-	// int rawKind() const; // TODO: Not implemented.
+	///
+	void rawKind(int rawKind) // setter
+	{
+		_rawKind = rawKind;
+		if (rawKind >= PaperSourceKind.CUSTOM)
+			_kind = PaperSourceKind.CUSTOM;
+		else
+			_kind = cast(PaperSourceKind)rawKind;
+	}
+	/// ditto
+	int rawKind() const // getter
+	{
+		return _rawKind;
+	}
 
 	///
 	void sourceName(string name) // setter
 	{
 		_sourceName = name;
 	}
+	/// ditto
 	string sourceName() const // getter
 	{
 		return _sourceName;
@@ -322,8 +336,11 @@ class PaperSource
 	///
 	override string toString() const
 	{
-		
-		return "[" ~ to!string(_kind) ~ ", " ~ _sourceName ~ "]";
+		string str = "[";
+		str ~= "kind: " ~ to!string(_kind) ~ ", ";
+		str ~= "rawKind: " ~ to!string(_rawKind) ~ ", ";
+		str ~= "sourceName: " ~ _sourceName ~ "]";
+		return str;
 	}
 }
 
@@ -624,6 +641,8 @@ struct PrintRange
 {
 	int fromPage;
 	int toPage;
+
+	///
 	string toString() const
 	{
 		return "(" ~ to!string(fromPage) ~ ", " ~ to!string(toPage) ~ ")";
@@ -671,6 +690,168 @@ class PrintRangeSettings
 }
 
 ///
+// Reference: https://learn.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-devicecapabilitiesw
+// Value:   DC_BINNAMES
+// Meaning: Retrieves the names of the printer's paper bins.
+//          The pOutput buffer receives an array of string buffers.
+//          Each string buffer is 24 characters long and contains the name of a paper bin.
+//          The return value indicates the number of entries in the array.
+//          The name strings are null-terminated unless the name is 24 characters long.
+//          If pOutput is NULL, the return value is the number of bin entries required.
+// Value:   DC_ENUMRESOLUTIONS
+// Meaning: Retrieves a list of the resolutions supported by the printer.
+//          The pOutput buffer receives an array of LONG values.
+//          For each supported resolution, the array contains a pair of LONG values that specify the x and y dimensions of the resolution,
+//          in dots per inch. The return value indicates the number of supported resolutions. 
+//          If pOutput is NULL, the return value indicates the number of supported resolutions.
+private wstring[] _splitNamesBuffer(wchar[] namesBuffer, int nameNum, int nameMaxLength)
+{
+	wstring[] nameArray;
+	for (int i = 0; i < nameNum; i++)
+	{
+		wchar* w = cast(wchar*)(cast(ubyte*)namesBuffer + i * nameMaxLength * wchar.sizeof);
+		int end = -1;
+		for (int j = 0; j < nameMaxLength; j++)
+		{
+			if (w[j] == '\0')
+			{
+				end = j;
+				break;
+			}
+		}
+		if (end == -1) // Null terminal is not found.
+			nameArray ~= w[0..nameMaxLength].dup; // TODO: Is it correct?
+		else
+			nameArray ~= w[0..end].dup; // Contains null terminal.
+	}
+	return nameArray;
+}
+
+///
+private PaperSource[] _createPaperSourceArray(HGLOBAL hDevMode)
+{
+	DEVMODE* pDevMode = cast(DEVMODE*)GlobalLock(hDevMode);
+	scope(exit)
+		GlobalUnlock(pDevMode);
+	
+	// Get printer name.
+	string deviceName = fromUnicodez(pDevMode.dmDeviceName.ptr);
+
+	// Get number of paper sources.
+	int sourceNum = DeviceCapabilities(toUnicodez(deviceName), "", DC_BINS, null, pDevMode);
+	WORD[] sourceKindBuffer = new WORD[sourceNum];
+	DeviceCapabilities(toUnicodez(deviceName), "", DC_BINS, cast(wchar*)sourceKindBuffer.ptr, pDevMode);
+
+	// Get name of paper sources.
+	enum BINNAME_MAX_LENGTH = 24;
+	wchar[] sourceNamesBuffer = new wchar[BINNAME_MAX_LENGTH * sourceNum];
+	DeviceCapabilities(toUnicodez(deviceName), "", DC_BINNAMES, sourceNamesBuffer.ptr, pDevMode);
+	wstring[] sourceNameArray = _splitNamesBuffer(sourceNamesBuffer, sourceNum, BINNAME_MAX_LENGTH);
+
+	// Return paper sources.
+	PaperSource[] ret;
+	for (int i; i < sourceNum; i++)
+		ret ~= new PaperSource(sourceKindBuffer[i], to!string(sourceNameArray[i]));
+	return ret;
+}
+
+///
+private PaperSize[] _createPaperSizeArray(HGLOBAL hDevMode)
+{
+	DEVMODE* pDevMode = cast(DEVMODE*)GlobalLock(hDevMode);
+	scope(exit)
+		GlobalUnlock(pDevMode);
+	
+	// Get printer name.
+	string deviceName = fromUnicodez(pDevMode.dmDeviceName.ptr);
+
+	// Get number of printer sizes.
+	int paperSizeNum = DeviceCapabilities(toUnicodez(deviceName), "", DC_PAPERSIZE, null, pDevMode);
+	POINT[] paperSizeBuffer = new POINT[paperSizeNum]; // 1/10 mm unit.
+	DeviceCapabilities(toUnicodez(deviceName), "", DC_PAPERSIZE, cast(wchar*)paperSizeBuffer.ptr, pDevMode);
+
+	// Get paper kinds.
+	WORD[] paperKindBuffer = new WORD[paperSizeNum];
+	DeviceCapabilities(toUnicodez(deviceName), "", DC_PAPERS, cast(wchar*)paperKindBuffer.ptr, pDevMode);
+	
+	// Get name of paper sizes.
+	enum PAPERNAME_MAX_LENGTH = 64;
+	wchar[] paperNamesBuffer = new wchar[PAPERNAME_MAX_LENGTH * paperSizeNum];
+	DeviceCapabilities(toUnicodez(deviceName), "", DC_PAPERNAMES, paperNamesBuffer.ptr, pDevMode);
+	wstring[] paperNameArray = _splitNamesBuffer(paperNamesBuffer, paperSizeNum, PAPERNAME_MAX_LENGTH);
+
+	// Return paper sizes.
+	PaperSize[] ret;
+	for (int i; i < paperSizeNum; i++)
+	{
+		Size tmpSize = Size(paperSizeBuffer[i].x, paperSizeBuffer[i].y); // 1/10 mm unit
+		int paperRawKind = paperKindBuffer[i];
+		string paperName = to!string(paperNameArray[i]);
+		Size paperSize = PrinterUnitConvert.convert(tmpSize, PrinterUnit.TENTHS_OF_A_MILLIMETER, PrinterUnit.HUNDREDTHS_OF_AN_INCH);
+		ret ~= new PaperSize(paperRawKind, paperName, paperSize.width, paperSize.height);
+	}
+	return ret;
+}
+
+///
+// Reference: https://learn.microsoft.com/en-us/windows-hardware/drivers/ddi/mxdc/nf-mxdc-mxdcgetpdevadjustment
+private int _tentativeDpi(int dmPrintQuality)
+{
+	if (dmPrintQuality == PrinterResolutionKind.DRAFT)
+		return 400; // NOTE
+	else if (dmPrintQuality == PrinterResolutionKind.LOW)
+		return 600; // NOTE
+	else if (dmPrintQuality == PrinterResolutionKind.MEDIUM)
+		return 1200; // NOTE
+	else if (dmPrintQuality == PrinterResolutionKind.HIGH)
+		return 2400; // NOTE
+	else if (dmPrintQuality > 0)
+		return dmPrintQuality; // dpi unit.
+	else
+		assert(0);
+}
+
+///
+private PrinterResolution[] _createPrinterResolutionArray(HGLOBAL hDevMode)
+{
+	DEVMODE* pDevMode = cast(DEVMODE*)GlobalLock(hDevMode);
+	scope(exit)
+		GlobalUnlock(pDevMode);
+	
+	// Get printer name.
+	string deviceName = fromUnicodez(pDevMode.dmDeviceName.ptr);
+
+	// Get printer resolutions.
+	int resolutionNum = DeviceCapabilities(toUnicodez(deviceName), "", DC_ENUMRESOLUTIONS, null, pDevMode);
+	if (resolutionNum < 0)
+	{
+		// Device is not support to get printer resolutions.
+		return [new PrinterResolution(cast(PrinterResolutionKind)pDevMode.dmPrintQuality, 0, 0)];
+	}
+	else
+	{
+		SIZE[] resolutionBuffer = new SIZE[resolutionNum];
+		DeviceCapabilities(toUnicodez(deviceName), "", DC_ENUMRESOLUTIONS, cast(wchar*)resolutionBuffer.ptr, pDevMode);
+
+		// Return printer resolutions.
+		PrinterResolution[] ret;
+		for (int i; i < resolutionNum; i++)
+		{
+			int dpiX = _tentativeDpi(resolutionBuffer[i].cx);
+			int dpiY = resolutionBuffer[i].cy; // dpi unit.
+			PrinterResolutionKind kind = {
+				if (resolutionBuffer[i].cx < 0)
+					return cast(PrinterResolutionKind)resolutionBuffer[i].cx;
+				else
+					return PrinterResolutionKind.CUSTOM;
+			}();
+			ret ~= new PrinterResolution(kind, dpiX, dpiY);
+		}
+		return ret;
+	}
+}
+
+///
 class PrinterSettings
 {
 	string printerName;
@@ -685,9 +866,9 @@ class PrinterSettings
 	bool supportColor;
 	int landscapeAngle;
 	bool printToFile;
-	PrinterResolution[] printerResolutions; // TODO: Implement.
-	PaperSize[] paperSizes; // TODO: Implement.
-	PaperSource[] paperSources; // TODO: Implement.
+	PrinterResolution[] printerResolutions;
+	PaperSize[] paperSizes;
+	PaperSource[] paperSources;
 	bool isPlotter;
 	Duplex duplex;
 
@@ -736,7 +917,6 @@ class PrinterSettings
 			GlobalUnlock(pDevMode);
 
 		string deviceName = fromUnicodez(pDevMode.dmDeviceName.ptr);
-		this.printerName = deviceName;
 
 		// TODO
 		// this.printFileName =
@@ -752,9 +932,9 @@ class PrinterSettings
 		this.supportColor = DeviceCapabilities(toUnicodez(deviceName), "", DC_COLORDEVICE, null, pDevMode) == 1 ? true : false;
 		this.landscapeAngle = DeviceCapabilities(toUnicodez(deviceName), "", DC_ORIENTATION, null, pDevMode);
 		// this.printToFile =
-		// this.printerResolutions =
-		// this.paperSizes =
-		// this.paperSources =
+		this.printerResolutions = _createPrinterResolutionArray(hDevMode)[0..$>=5?5:$]; // First 5 items.
+		this.paperSizes = _createPaperSizeArray(hDevMode)[0..$>=5?5:$]; // First 5 items.
+		this.paperSources = _createPaperSourceArray(hDevMode)[0..$>=5?5:$]; // First 5 items.
 		// this.isPlotter =
 		// this.duplex =
 
@@ -854,24 +1034,45 @@ class PrinterResolution
 class PaperSize
 {
 	private PaperKind _kind;
+	private int _rawKind;
 	private string _paperName;
 	private int _width; /// Paper width with 1/100 inch unit.
 	private int _height; /// Paper height with 1/100 inch unit.
-	// private int _rawKind;
 
 	///
-	this(PaperKind kind, string name, int w, int h)
+	this()
 	{
-		_kind = kind;
-		_paperName = name;
-		_width = w;
-		_height = h;
+		rawKind = PaperKind.CUSTOM;
+		paperName = "";
+	}
+	/// ditto
+	this(int rawKind, string name, int width, int height)
+	{
+		this.rawKind = rawKind;
+		this.paperName = name;
+		this.width = width;
+		this.height = height;
 	}
 
 	///
 	PaperKind kind() const // getter
 	{
 		return _kind;
+	}
+
+	///
+	void rawKind(int rawKind) // setter
+	{
+		_rawKind = rawKind;
+		if (rawKind == DMPAPER_RESERVED_48 || rawKind == DMPAPER_RESERVED_49 || rawKind > DMPAPER_LAST)
+			_kind = PaperKind.CUSTOM;
+		else
+			_kind = cast(PaperKind)rawKind;
+	}
+	/// ditto
+	int rawKind() const // getter
+	{
+		return _rawKind;
 	}
 
 	///
@@ -908,17 +1109,11 @@ class PaperSize
 	}
 
 	///
-	// void rawKind(int kind) // setter
-	// {
-	// }
-	// int rawKind() const // getter
-	// {
-	// }
-
 	override string toString() const
 	{
 		string str = "[";
 		str ~= "kind: " ~ to!string(_kind) ~ ", ";
+		str ~= "rawKind: " ~ to!string(_rawKind) ~ ", ";
 		str ~= "paperName: " ~ to!string(_paperName) ~ ", ";
 		str ~= "width: " ~ to!string(_width) ~ ", ";
 		str ~= "height: " ~ to!string(_height) ~ "]";
@@ -973,16 +1168,18 @@ class PageSettings
 	PageSettings clone()
 	{
 		PageSettings p = new PageSettings();
-		p._color = this.color;
-		p._landscape = this.landscape;
-		p._paperSize = new PaperSize(this.paperSize.kind, this.paperSize.paperName, this.paperSize.width, this.paperSize.height);
-		p._paperSource = new PaperSource(this.paperSource.kind, this.paperSource.sourceName);
-		p._printerResolution = new PrinterResolution(this.printerResolution.kind, this.printerResolution.x, this.printerResolution.y);
-		p._margins = new Margins(this.margins.left, this.margins.top, this.margins.right, this.margins.bottom);
-		p._hardMarginX = this.hardMarginX;
-		p._hardMarginY = this.hardMarginY;
-		p._printableArea = this.printableArea;
-		p._printerSettings = this.printerSettings;
+		p._color = this._color;
+		p._landscape = this._landscape;
+		if (this._paperSize)
+			p._paperSize = new PaperSize(this._paperSize.rawKind, this._paperSize.paperName, this._paperSize.width, this._paperSize.height);
+		if (this._paperSource)
+			p._paperSource = new PaperSource(this._paperSource.rawKind, this._paperSource.sourceName);
+		p._printerResolution = new PrinterResolution(this._printerResolution.kind, this._printerResolution.x, this._printerResolution.y);
+		p._margins = new Margins(this._margins.left, this._margins.top, this._margins.right, this._margins.bottom);
+		p._hardMarginX = this._hardMarginX;
+		p._hardMarginY = this._hardMarginY;
+		p._printableArea = this._printableArea;
+		p._printerSettings = this._printerSettings;
 		return p;
 	}
 
@@ -1151,86 +1348,20 @@ class PageSettings
 		// _printableArea =
 	}
 
-	///
+	/// Create PaperSource object.
 	private PaperSource _createPaperSource(HGLOBAL hDevMode)
 	{
 		DEVMODE* pDevMode = cast(DEVMODE*)GlobalLock(hDevMode);
 		scope(exit)
 			GlobalUnlock(pDevMode);
-		
-		// Get printer name.
-		string deviceName = fromUnicodez(pDevMode.dmDeviceName.ptr);
 
-		// Get default paper source kind.
-		PaperSourceKind sourceKind = {
-			if (pDevMode.dmDefaultSource <= DMBIN_LAST) // System defined paper source.
-				return cast(PaperSourceKind)pDevMode.dmDefaultSource;
-			else if (pDevMode.dmDefaultSource >= DMBIN_USER) // User defined paper source.
-				return PaperSourceKind.CUSTOM;
-			else
-				assert(0);
-		}();
-
-		// Get number of paper sources.
-		int sourceNum = DeviceCapabilities(toUnicodez(deviceName), "", DC_BINS, null, pDevMode);
-		WORD[] sourceBuffer = new WORD[sourceNum];
-		DeviceCapabilities(toUnicodez(deviceName), "", DC_BINS, cast(wchar*)sourceBuffer.ptr, pDevMode);
-		WORD[] sourceList;
-		for (int i = 0; i < sourceNum; i++)
-			sourceList ~= sourceBuffer[i];
-
-		// Get name of paper sources.
-		enum BINNAME_MAX_LENGTH = 24;
-		wchar[] sourceNamesBuffer = new wchar[BINNAME_MAX_LENGTH * sourceNum];
-		// for(int i = 0; i < BINNAME_MAX_LENGTH * sourceNum; i++) // TODO: Remove?
-		// 	sourceNamesBuffer[i] = 0;
-		DeviceCapabilities(toUnicodez(deviceName), "", DC_BINNAMES, sourceNamesBuffer.ptr, pDevMode);
-		// Reference: https://learn.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-devicecapabilitiesw
-		// Value: DC_BINNAMES
-		// Meaning: Retrieves the names of the printer's paper bins.
-		//          The pOutput buffer receives an array of string buffers.
-		//          Each string buffer is 24 characters long and contains the name of a paper bin.
-		//          The return value indicates the number of entries in the array.
-		//          The name strings are null-terminated unless the name is 24 characters long.
-		//          If pOutput is NULL, the return value is the number of bin entries required.
-		wstring[] sourceNameList;
-		for (int i = 0; i < sourceNum; i++)
+		PaperSource[] sourceArray = _createPaperSourceArray(hDevMode);
+		foreach (PaperSource iter; sourceArray)
 		{
-			wchar* w = cast(wchar*)(cast(ubyte*)sourceNamesBuffer + i * BINNAME_MAX_LENGTH * wchar.sizeof);
-			int end = -1;
-			for (int j = 0; j < BINNAME_MAX_LENGTH; j++)
-			{
-				if (w[j] == '\0')
-				{
-					end = j;
-					break;
-				}
-			}
-			if (end == -1) // Null terminal is not found.
-				sourceNameList ~= w[0..BINNAME_MAX_LENGTH].dup; // TODO: Is it correct?
-			else
-				sourceNameList ~= w[0..end].dup; // Contains null terminal.
+			if (iter.rawKind == pDevMode.dmDefaultSource)
+				return iter;
 		}
-
-		// Get paper source name.
-		// Search index of paper source.
-		wstring sourceName = {
-			int index = -1;
-			for (int i = 0; i < sourceNum; i++)
-			{
-				if (sourceList[i] == pDevMode.dmDefaultSource)
-				{
-					index = i;
-					break;
-				}
-			}
-			if (index != -1)
-				return sourceNameList[index];
-			else
-				return "no name"w;
-		}();
-		
-		return new PaperSource(sourceKind, to!string(sourceName));
+		return null;
 	}
 
 	/// Create PaperSize object.
@@ -1240,48 +1371,16 @@ class PageSettings
 		scope(exit)
 			GlobalUnlock(pDevMode);
 		
-		string deviceName = fromUnicodez(pDevMode.dmDeviceName.ptr);
-		short selectedPaperSize = pDevMode.dmPaperSize; // ex) A4 size is DMPAPER_A4 (9).
-
-		int sizeNum = DeviceCapabilities(toUnicodez(deviceName), "", DC_PAPERSIZE, null, pDevMode);
-		POINT[] sizeBuffer = new POINT[sizeNum]; // 1/10 mm unit.
-		DeviceCapabilities(toUnicodez(deviceName), "", DC_PAPERSIZE, cast(wchar*)sizeBuffer.ptr, pDevMode);
-
-		int paperNum = DeviceCapabilities(toUnicodez(deviceName), "", DC_PAPERS, null, pDevMode);
-		WORD[] paperBuffer = new WORD[paperNum];
-		DeviceCapabilities(toUnicodez(deviceName), "", DC_PAPERS, cast(wchar*)paperBuffer.ptr, pDevMode);
-		int index = -1;
-		for (int i = 0; i < paperNum; i++)
+		PaperSize[] sizeArray = _createPaperSizeArray(hDevMode);
+		foreach (PaperSize iter; sizeArray)
 		{
-			if (paperBuffer[i] == selectedPaperSize)
-			{
-				index = i;
-				break;
-			}
+			if (iter.rawKind == pDevMode.dmPaperSize)
+				return iter;
 		}
-		if (index == -1)
-			assert(0);
-		
-		Size tmpSize = {
-			if (selectedPaperSize == 0 || selectedPaperSize >= DMPAPER_USER)
-			{
-				// User defined paper size.
-				return Size(pDevMode.dmPaperWidth, pDevMode.dmPaperLength); // 1/10 mm unit
-			}
-			else
-			{
-				// System defined paper size.
-				return Size(sizeBuffer[index].x, sizeBuffer[index].y); // 1/10 mm unit
-			}
-		}();
-
-		PaperKind paperKind = cast(PaperKind)selectedPaperSize;
-		string paperName = fromUnicodez(pDevMode.dmFormName.ptr);
-		Size paperSize = PrinterUnitConvert.convert(tmpSize, PrinterUnit.TENTHS_OF_A_MILLIMETER, PrinterUnit.HUNDREDTHS_OF_AN_INCH);
-		return new PaperSize(paperKind, paperName, paperSize.width, paperSize.height);
+		return null;
 	}
 
-	///
+	/// Create PrinterResolution object.
 	private PrinterResolution _createPrinterResolution(HGLOBAL hDevMode)
 	{
 		DEVMODE* pDevMode = cast(DEVMODE*)GlobalLock(hDevMode);
@@ -1289,15 +1388,16 @@ class PageSettings
 			GlobalUnlock(pDevMode);
 		
 		string deviceName = fromUnicodez(pDevMode.dmDeviceName.ptr);
-		int printQuality = pDevMode.dmPrintQuality;
 
 		int dpiX;
 		int dpiY;
+		PrinterResolutionKind kind;
 		if (pDevMode.dmFields & DM_YRESOLUTION)
 		{
 			assert(pDevMode.dmPrintQuality > 0);
 			dpiX = pDevMode.dmPrintQuality; // dpi unit.
 			dpiY = pDevMode.dmYResolution; // dpi unit.
+			kind = PrinterResolutionKind.CUSTOM;
 		}
 		else
 		{
@@ -1305,8 +1405,9 @@ class PageSettings
 			if (resolutionNum < 0)
 			{
 				// Device is not support to get printer resolutions.
-				dpiX = 0;
-				dpiY = 0;
+				dpiX = _tentativeDpi(pDevMode.dmPrintQuality);
+				dpiY = dpiX;
+				kind = cast(PrinterResolutionKind)pDevMode.dmPrintQuality;
 			}
 			else
 			{
@@ -1326,15 +1427,9 @@ class PageSettings
 					assert(0);
 				dpiX = resolutionBuffer[index].cx; // dpi unit.
 				dpiY = resolutionBuffer[index].cy; // dpi unit.
+				kind = PrinterResolutionKind.CUSTOM;
 			}
 		}
-		
-		PrinterResolutionKind kind = {
-			if (pDevMode.dmPrintQuality < 0)
-				return cast(PrinterResolutionKind)pDevMode.dmPrintQuality;
-			else
-				return PrinterResolutionKind.CUSTOM;
-		}();
 
 		return new PrinterResolution(kind, dpiX, dpiY);
 	}
@@ -1896,7 +1991,6 @@ final class PageSetupDialog : CommonDialog
 			document.printerSettings.defaultPageSettings.margins =
 				PrinterUnitConvert.convert(new Margins(&_pageSetupDlg.rtMargin), fromUnit, toUnit);
 			_minMargins = PrinterUnitConvert.convert(new Margins(&_pageSetupDlg.rtMinMargin), fromUnit, toUnit);
-			
 			return true;
 		}
 		else
