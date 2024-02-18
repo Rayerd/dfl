@@ -14,6 +14,14 @@ private import dfl.commondialog;
 private import dfl.drawing;
 private import dfl.event;
 private import dfl.messagebox;
+private import dfl.control;
+private import dfl.form;
+private import dfl.toolbar;
+private import dfl.imagelist;
+private import dfl.panel;
+private import dfl.label;
+private import dfl.button;
+private import dfl.textbox;
 
 private import dfl.internal.utf;
 
@@ -21,6 +29,11 @@ private import core.sys.windows.commdlg;
 private import core.sys.windows.windows;
 
 private import std.conv;
+
+debug
+{
+	private import std.stdio;
+}
 
 ///
 enum PrinterUnit
@@ -368,7 +381,7 @@ class PrintRangeEventArgs : EventArgs
 class PrintEventArgs : EventArgs
 {
 	bool cancel = false;
-	HDC hDC;
+	HDC hDC; // TODO: Remove.
 
 	///
 	this(HDC hDC)
@@ -387,12 +400,13 @@ class PrintEventArgs : EventArgs
 class PrintPageEventArgs : EventArgs
 {
 	bool cancel = false;
-	Graphics graphics;
 	bool hasMorePage;
+
+	Graphics graphics;
 	Rect marginBounds;
 	Rect pageBounds;
 	PageSettings pageSettings;
-	HDC hDC;
+	HDC hDC; // TODO: Remove.
 	int currentPage;
 
 	///
@@ -402,6 +416,7 @@ class PrintPageEventArgs : EventArgs
 		this.marginBounds = marginBounds;
 		this.pageBounds = pageBounds;
 		this.pageSettings = pageSettings;
+		this.hDC = graphics.handle; // TODO: Remove.
 		this.currentPage = currentPage;
 	}
 }
@@ -423,46 +438,26 @@ class QueryPageSettingsEventArgs : PrintEventArgs
 }
 
 ///
-abstract class PrintController
+interface PrintController
 {
 	///
-	bool isPreview() const
-	{
-		return false;
-	}
+	void onStartPrint(PrintDocument document, PrintEventArgs e);
 
 	///
-	int onStartPrint(PrintDocument document, PrintEventArgs e)
-	{
-		return 0;
-	}
+	void onEndPrint(PrintDocument document, PrintEventArgs e);
 
 	///
-	void onEndPrint(PrintDocument document, PrintEventArgs e)
-	{
-	}
+	Graphics onStartPage(PrintDocument document, PrintPageEventArgs e);
 
 	///
-	void onStartPage(PrintDocument document, PrintPageEventArgs e)
-	{
-	}
-
-	///
-	void onEndPage(PrintDocument document, PrintPageEventArgs e)
-	{
-	}
+	void onEndPage(PrintDocument document, PrintPageEventArgs e);
 }
 
 ///
 class StandardPrintController : PrintController
 {
 	///
-	this()
-	{
-	}
-
-	///
-	override int onStartPrint(PrintDocument document, PrintEventArgs e)
+	override void onStartPrint(PrintDocument document, PrintEventArgs e)
 	{
 		DOCINFO info;
 		info.cbSize = info.sizeof;
@@ -473,9 +468,7 @@ class StandardPrintController : PrintController
 		info.lpszDocName = document.documentName.ptr;
 		info.lpszDatatype = null;
 		info.fwType = 0;
-		int printJobID = StartDoc(e.hDC, &info);
-		assert(printJobID > 0);
-		return printJobID;
+		StartDoc(e.hDC, &info);
 	}
 
 	///
@@ -485,9 +478,10 @@ class StandardPrintController : PrintController
 	}
 	
 	///
-	override void onStartPage(PrintDocument document, PrintPageEventArgs e)
+	override Graphics onStartPage(PrintDocument document, PrintPageEventArgs e)
 	{
 		StartPage(e.hDC);
+		return e.graphics;
 	}
 
 	///
@@ -515,6 +509,8 @@ class PrintDocument
 	///
 	void print(HDC hDC)
 	{
+		this.printerSettings.printRange.reset();
+		// Do not change printRange.kind here!
 		PrintRangeEventArgs printPageRangeEventArgs = new PrintRangeEventArgs(this.printerSettings.printRange);
 		onPrintRange(printPageRangeEventArgs);
 
@@ -526,51 +522,38 @@ class PrintDocument
 		if (printArgs.cancel)
 			return;
 
-		int printJobID = printController.onStartPrint(this, printArgs); // Call StartDoc() API
+		printController.onStartPrint(this, printArgs); // Call StartDoc() API
 		if (printArgs.cancel)
 			return;
 
-		int pageCounter;
 		PrintPageEventArgs printPageArgs;
-		do
+		auto walker = new PrintRangeWalker(this.printerSettings.printRange.ranges);
+		foreach (int pageCounter; walker)
 		{
-		SKIP:
-			pageCounter++;
-
-			if (this.printerSettings.printRange.ranges[$-1].toPage < pageCounter) // TODO: Don't work when page ranges are not sorted such as 1, 3, 2.
-				break;
-
-			bool contains = false;
-			foreach (ref const(PrintRange) iter; printerSettings.printRange.ranges)
-			{
-				if (iter.fromPage <= pageCounter && pageCounter <= iter.toPage)
-				{
-					contains = true;
-					break;
-				}
-			}
-			if (!contains) goto SKIP;
-
-			Graphics g = new Graphics(printArgs.hDC, false);
+			Graphics originGraphics = new Graphics(printArgs.hDC, false);
 
 			PageSettings newPageSettings = this.printerSettings.defaultPageSettings.clone();
-			QueryPageSettingsEventArgs queryPageSettingsArgs = new QueryPageSettingsEventArgs(hDC, newPageSettings, pageCounter);
+			QueryPageSettingsEventArgs queryPageSettingsArgs = new QueryPageSettingsEventArgs(printArgs.hDC, newPageSettings, pageCounter);
 			onQueryPageSettings(queryPageSettingsArgs); // Be modified pageSettings of current page by user.
 
 			PageSettings ps = queryPageSettingsArgs.pageSettings;
 			Rect marginBounds = ps.bounds; // 1/100 inch unit.
 			Rect pageBounds = Rect(0, 0, ps.paperSize.width, ps.paperSize.height); // 1/100 inch unit.
-			printPageArgs = new PrintPageEventArgs(g, marginBounds, pageBounds, ps, pageCounter);
-			printController.onStartPage(this, printPageArgs); // Call StartPage() API
+			printPageArgs = new PrintPageEventArgs(originGraphics, marginBounds, pageBounds, ps, pageCounter);
 
-			printPageArgs.hDC = hDC;
+			printPageArgs.graphics = printController.onStartPage(this, printPageArgs); // Call StartPage() API
+			printPageArgs.hDC = printPageArgs.graphics.handle; // TODO: Remove.
+			
 			if(!printPageArgs.cancel)
 				this.onPrintPage(printPageArgs);
 			
+			printPageArgs.hDC = hDC; // TODO: Remove.
+			printPageArgs.graphics = originGraphics;
+
 			printController.onEndPage(this, printPageArgs); // Call EndPage() API
 			if (printPageArgs.cancel)
 				break;
-		} while (printPageArgs.hasMorePage);
+		}
 
 		onEndPrint(printArgs);
 		printController.onEndPrint(this, printArgs); // Call EndPrint() API
@@ -646,6 +629,44 @@ struct PrintRange
 	string toString() const
 	{
 		return "(" ~ to!string(fromPage) ~ ", " ~ to!string(toPage) ~ ")";
+	}
+}
+
+///
+class PrintRangeWalker // Forward Range
+{
+	private int[] _pages;
+	private int _index;
+
+	///
+	this(const PrintRange[] ranges)
+	{
+		for (int i = 0; i < ranges.length; i++)
+		{
+			for (int p = ranges[i].fromPage; p <= ranges[i].toPage; p++)
+			{
+				_pages ~= p;
+			}
+		}
+		debug { writeln(_pages); stdout.flush(); }
+	}
+
+	///
+	bool empty() const
+	{
+		return _pages.length <= _index;
+	}
+
+	///
+	int front() const
+	{
+		return _pages[_index];
+	}
+
+	///
+	void popFront()
+	{
+		_index++;
 	}
 }
 
@@ -2001,4 +2022,637 @@ final class PageSetupDialog : CommonDialog
 			return false;
 		}
 	}
+}
+
+///
+class PrintPreviewControl : Control
+{
+	private PrintDocument _document; ///
+	private int _columns; ///
+	private int _rows; ///
+	private int _startPage; ///
+	private bool _autoZoom; ///
+	private MemoryGraphics _background; ///
+
+	///
+	this(PrintDocument doc)
+	in
+	{
+		assert(doc);
+	}
+	body
+	{
+		_document = doc;
+		_columns = 1;
+		_rows = 0;
+		_startPage = 0;
+		_autoZoom = true;
+	}
+
+	///
+	void document(PrintDocument doc)
+	in
+	{
+		assert(doc);
+	}
+	body
+	{
+		_document = doc;
+	}
+	/// ditto
+	PrintDocument document()
+	{
+		return _document;
+	}
+
+	///
+	void autoZoom(bool b)
+	{
+		_autoZoom = b;
+	}
+	/// ditto
+	bool autoZoom() const
+	{
+		return _autoZoom;
+	}
+
+	///
+	void columns(int col)
+	{
+		_columns = col;
+	}
+	/// ditto
+	int columns() const
+	{
+		return _columns;
+	}
+
+	///
+	void rows(int row)
+	{
+		_rows = row;
+	}
+	/// ditto
+	int rows() const
+	{
+		return _rows;
+	}
+
+	///
+	void startPage(int page)
+	{
+		_startPage = page;
+	}
+	/// ditto
+	int startPage() const
+	{
+		return _startPage;
+	}
+
+	///
+	final void invalidatePreview()
+	in
+	{
+		assert(document);
+	}
+	body
+	{
+		PAGESETUPDLG pd;
+		pd.lStructSize = pd.sizeof;
+		pd.hwndOwner = null;
+		pd.hDevMode = null;
+		pd.hDevNames = null;
+		pd.lpfnPagePaintHook = null;
+		pd.Flags = PSD_RETURNDEFAULT;
+
+		BOOL resultOK = PageSetupDlg(&pd);
+		if (resultOK)
+		{
+			DEVMODE* pDevMode = cast(DEVMODE*)GlobalLock(pd.hDevMode);
+			scope(exit)
+				GlobalUnlock(pDevMode);
+			pDevMode.dmPrintQuality = 200; // dpi
+			pDevMode.dmYResolution = 200; // dpi
+			pDevMode.dmOrientation = {
+				if (document.printerSettings.defaultPageSettings.landscape)
+					return DMORIENT_LANDSCAPE;
+				else
+					return DMORIENT_PORTRAIT;
+			}();
+			pDevMode.dmPaperSize = cast(short)document.printerSettings.defaultPageSettings.paperSize.rawKind;
+			pDevMode.dmFields |= DM_PRINTQUALITY | DM_YRESOLUTION | DM_ORIENTATION | DM_PAPERSIZE; // TODO: Need?
+			document.printerSettings.setHdevnames(pd.hDevNames);
+			document.printerSettings.defaultPageSettings.setHdevmode(pd.hDevMode);
+		}
+
+		Rect screenRect = Rect(0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN));
+		_background = new MemoryGraphics(screenRect.width, screenRect.height);
+		_background.fillRectangle(new SolidBrush(Color.gray), screenRect);
+
+		// Print range is always all pages on preview print.
+		_document.printerSettings.printRange.kind = PrintRangeKind.ALL_PAGES;
+		_document.onPrintRange(new PrintRangeEventArgs(_document.printerSettings.printRange));
+
+		PrintController oldPrintController = _document.printController;
+		_document.printController = new PreviewPrintController(this); // TODO: Cross reference.
+		_document.print(_background.handle);
+		_document.printController = oldPrintController;
+	}
+
+	protected override void onHandleCreated(EventArgs e)
+	{
+		super.onHandleCreated(e);
+		// ShowScrollBar(handle, SB_VERT, TRUE);
+		// EnableScrollBar(handle, SB_BOTH, ESB_DISABLE_BOTH);
+		invalidatePreview();
+		invalidate();
+	}
+
+	///
+	protected override void wndProc(ref Message msg)
+	{
+		super.wndProc(msg);
+	}
+
+	///
+	protected override void onGotFocus(EventArgs e)
+	{
+		super.onGotFocus(e);
+		gotFocus(this, e);
+	}
+
+	///
+	protected override void onLostFocus(EventArgs e)
+	{
+		super.onLostFocus(e);
+		lostFocus(this, e)	;
+	}
+
+	///
+	protected override void onMouseDown(MouseEventArgs e)
+	{
+		super.onMouseDown(e);
+		mouseDown(this, e);
+	}
+
+	static const uint LEFT_MARIGIN = 20; // Dots
+	static const uint RIGHT_MARGIN = 20; // Dots
+	static const uint TOP_MARGIN = 20; // Dots
+	static const uint BOTTOM_MARGIN = 20; // Dots
+	static const uint HORIZONTAL_SPAN = 20; // Dots
+	static const uint VERTICAL_SPAN = 20; // Dots
+
+	///
+	protected override void onPaint(PaintEventArgs e)
+	{
+		super.onPaint(e);
+		if (_background)
+		{
+			if (this.autoZoom)
+			{
+				const Rect screenRect = Rect(0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN)); // NOTE: Gets MemoryGraphics size as the background DC.
+				const Rect paperRect = _toRect(document.printerSettings.defaultPageSettings);
+
+				// TODO: This is incomplete.
+				uint h0 = height;
+				uint w0 = screenRect.width * height / screenRect.height;
+
+				SetStretchBltMode(_background.handle, STRETCH_DELETESCANS); // SRC
+				StretchBlt(
+					e.graphics.handle, // DST
+					0,
+					0,
+					w0,
+					h0,
+					_background.handle, // SRC
+					0,
+					0,
+					screenRect.width,
+					screenRect.height,
+					SRCCOPY
+				);
+			}
+			else
+			{
+				_background.copyTo(e.graphics.handle, 0, 0, _background.width, _background.height, 0, 0, SRCCOPY);
+			}
+		}
+	}
+
+	///
+	protected override void onPaintBackground(PaintEventArgs e)
+	{
+		super.onPaintBackground(e);
+		paintBackground(this, e);
+	}
+
+	//
+	Event!(Control, EventArgs) gotFocus; ///
+	//
+	Event!(Control, EventArgs) lostFocus; ///
+	//
+	Event!(Control, EventArgs) mouseDown; ///
+	//
+	Event!(Control, PaintEventArgs) paint; ///
+	//
+	Event!(Control, EventArgs) paintBackground; ///
+}
+
+///
+class PrintPreviewDialog : Form
+{
+	private PrintPreviewControl _previewControl;
+	private ToolBar _toolBar;
+	private ToolBarButton _button1;
+	private ToolBarButton _button2;
+	private ToolBarButton _button3;
+	private ToolBarButton _button4;
+	private ToolBarButton _button5;
+	private ImageList _imageList;
+	private Panel _pageSelectPanel;
+	private Label _fromPageLabel;
+	private TextBox _fromPage;
+	private Button _forwardButton;
+	private Button _backButton;
+
+	///
+	this(PrintDocument doc)
+	in
+	{
+		assert(doc);
+	}
+	body
+	{
+		this.text = "Print Preview";
+		this.width = 1024;
+		this.height = 960;
+
+		_toolBar = new ToolBar();
+		_toolBar.dock = DockStyle.TOP;
+		_toolBar.style = ToolBarStyle.NORMAL;
+		_toolBar.parent = this;
+
+		_imageList = new ImageList;
+		_imageList.imageSize = Size(32,32);
+		_imageList.transparentColor = Color.red;
+		import std.path;
+		string bmpPath = dirName(__FILE__) ~ r"\image\previewprintdialog_toolbar.bmp";
+		_imageList.images.addStrip(new Bitmap(bmpPath));
+		_toolBar.imageList = _imageList;
+
+		_button1 = new ToolBarButton("Print...");
+		_button1.style = ToolBarButtonStyle.PUSH_BUTTON;
+		_button1.imageIndex = 0;
+		_toolBar.buttons.add(_button1);
+
+		_button2 = new ToolBarButton("1x1");
+		_button2.style = ToolBarButtonStyle.PUSH_BUTTON;
+		_button2.imageIndex = 1;
+		_toolBar.buttons.add(_button2);
+
+		_button3 = new ToolBarButton("2x1");
+		_button3.style = ToolBarButtonStyle.PUSH_BUTTON;
+		_button3.imageIndex = 2;
+		_toolBar.buttons.add(_button3);
+
+		_button4 = new ToolBarButton("2x2");
+		_button4.style = ToolBarButtonStyle.PUSH_BUTTON;
+		_button4.imageIndex = 3;
+		_toolBar.buttons.add(_button4);
+
+		_button5 = new ToolBarButton("Fit");
+		_button5.style = ToolBarButtonStyle.TOGGLE_BUTTON;
+		_button5.pushed = true; // Initial mode is "Fit".
+		_button5.imageIndex = 4;
+		_toolBar.buttons.add(_button5);
+
+		_toolBar.buttonClick ~= (ToolBar tb, ToolBarButtonClickEventArgs e) {
+			if (e.button is _button1)
+			{
+				PrintDialog printDialog = new PrintDialog(doc);
+				DialogResult r = printDialog.showDialog();
+				if (r == dialogResult.OK)
+				{
+					// Do nothing.
+				}
+			}
+			else if (e.button is _button2)
+			{
+				_previewControl.rows = 1;
+				_previewControl.columns = 1;
+				_previewControl.invalidatePreview();
+				_previewControl.invalidate();
+			}
+			else if (e.button is _button3)
+			{
+				_previewControl.rows = 2;
+				_previewControl.columns = 1;
+				_previewControl.invalidatePreview();
+				_previewControl.invalidate();
+			}
+			else if (e.button is _button4)
+			{
+				_previewControl.rows = 2;
+				_previewControl.columns = 2;
+				_previewControl.invalidatePreview();
+				_previewControl.invalidate();
+			}
+			else if (e.button is _button5)
+			{
+				_previewControl.autoZoom = !_previewControl.autoZoom;
+				_previewControl.invalidatePreview();
+				_previewControl.invalidate();
+			}
+			else
+				assert(0);
+		};
+
+		_pageSelectPanel = new Panel();
+		_pageSelectPanel.height = 24;
+		_pageSelectPanel.dock = DockStyle.TOP;
+		_pageSelectPanel.parent = this;
+
+		_fromPageLabel = new Label();
+		_fromPageLabel.text = "Page ";
+		_fromPageLabel.width = 50;
+		_fromPageLabel.textAlign = ContentAlignment.MIDDLE_RIGHT;
+		_fromPageLabel.dock = DockStyle.LEFT;
+		_fromPageLabel.parent = _pageSelectPanel;
+		
+ 		_fromPage = new TextBox();
+		_fromPage.width = 50;
+		_fromPage.dock = DockStyle.LEFT;
+		_fromPage.keyPress ~= (Control c, KeyEventArgs e)
+		{
+			if (e.keyCode == Keys.ENTER)
+			{
+				int oldPage = _previewControl.startPage;
+				int newPage;
+				try
+				{
+					newPage = to!int(_fromPage.text) - 1;
+				}
+				catch (Exception e)
+				{
+					newPage = oldPage; // undo
+				}
+
+				if (newPage < 0)
+					newPage = oldPage; // undo
+
+				_previewControl.startPage = newPage;
+				_fromPage.text = to!string(newPage + 1);
+
+				if (oldPage != newPage)
+				{
+					_previewControl.invalidatePreview();
+					_previewControl.invalidate();
+				}
+			}
+		};
+		_fromPage.parent = _pageSelectPanel;
+
+		_backButton = new Button;
+		_backButton.text = "<";
+		_backButton.width = 32;
+		_backButton.dock = DockStyle.LEFT;
+		_backButton.click ~= (Control c, EventArgs e)
+		{
+			int oldPage = _previewControl.startPage;
+			int newPage = _previewControl.startPage - _previewControl.rows * _previewControl.columns;
+			if (newPage < 0)
+				newPage = 0;
+			_previewControl.startPage = newPage;
+			_fromPage.text = to!string(_previewControl.startPage + 1);
+			if (oldPage != newPage)
+			{
+				_previewControl.invalidatePreview();
+				_previewControl.invalidate();
+			}
+		};
+		_backButton.parent = _pageSelectPanel;
+
+		_forwardButton = new Button;
+		_forwardButton.text = ">";
+		_forwardButton.width = 32;
+		_forwardButton.dock = DockStyle.LEFT;
+		_forwardButton.click ~= (Control c, EventArgs e)
+		{
+			int oldPage = _previewControl.startPage;
+			int newPage = _previewControl.startPage + _previewControl.rows * _previewControl.columns;
+			_previewControl.startPage = newPage;
+			_fromPage.text = to!string(_previewControl.startPage + 1);
+			if (oldPage != newPage)
+			{
+				_previewControl.invalidatePreview();
+				_previewControl.invalidate();
+			}
+		};
+		_forwardButton.parent = _pageSelectPanel;
+
+		_previewControl = new PrintPreviewControl(doc);
+		_previewControl.resizeRedraw = true;
+		_previewControl.backColor = Color.gray;
+		_previewControl.dock = DockStyle.FILL;
+		_previewControl.rows = 1;    // Single page view
+		_previewControl.columns = 1; // ditto
+		_previewControl.autoZoom = true; // Initial mode is "Fit".
+		_previewControl.startPage = 0;
+		_previewControl.parent = this;
+
+		_fromPage.text = to!string(_previewControl.startPage + 1);
+	}
+
+	///
+	void document(PrintDocument doc)
+	in
+	{
+		assert(doc);
+		assert(_previewControl);
+	}
+	body
+	{
+		_previewControl.document = doc;
+	}
+	/// ditto
+	PrintDocument document()
+	in
+	{
+		assert(_previewControl);
+	}
+	body
+	{
+		return _previewControl.document;
+	}
+
+	///
+	protected override void wndProc(ref Message msg)
+	{
+		super.wndProc(msg);
+	}
+}
+
+///
+// final class PreviewPageInfo
+// {
+// 	private Image _image;
+// 	private Size _size; // 1/100 inch unit.
+	
+// 	///
+// 	this(Image image, Size size)
+// 	{
+// 		_image = image;
+// 		_size = size;
+// 	}
+
+// 	///
+// 	Image image() // getter
+// 	{
+// 		return _image;
+// 	}
+
+// 	/// Gets the size of the printed page, in 1/100 inch unit.
+// 	Size physicalSize() const // getter
+// 	{
+// 		return _size;
+// 	}
+// }
+
+///
+class PreviewPrintController : PrintController
+{
+	private PrintPreviewControl _previewControl; ///
+	private Graphics _pageGraphics; ///
+
+	///
+	this(PrintPreviewControl previewControl)
+	in
+	{
+		assert(previewControl);
+	}
+	body
+	{
+		_previewControl = previewControl;
+	}
+
+	///
+	// PreviewPageInfo[] getPreviewPageInfo()
+	// {
+	// 	assert(0);
+	// }
+
+	///
+	override void onStartPrint(PrintDocument document, PrintEventArgs e)
+	{
+		// Do nothing.
+	}
+
+	///
+	override void onEndPrint(PrintDocument document, PrintEventArgs e)
+	{
+		// Do nothing.
+	}
+	
+	///
+	override Graphics onStartPage(PrintDocument document, PrintPageEventArgs e)
+	{
+		Rect paperRect = _toRect(document.printerSettings.defaultPageSettings);
+		_pageGraphics = {
+			 // Be dispose() called in onEntPage().
+			if (e.pageBounds.width <= e.pageBounds.height)
+				return new MemoryGraphics(paperRect.width, paperRect.height, e.hDC);
+			else
+				return new MemoryGraphics(paperRect.height, paperRect.width, e.hDC); // TODO: Implement correctly.
+		}();
+		// Draw the form of paper.
+		_pageGraphics.fillRectangle(Color.white, paperRect);
+		// Draw the border of paper.
+		_pageGraphics.drawRectangle(new Pen(Color.black), paperRect);
+		return _pageGraphics;
+	}
+
+	///
+	override void onEndPage(PrintDocument document, PrintPageEventArgs e)
+	{
+		// Draw the current page number.
+		const string currentPageString = to!string(e.currentPage);
+		Font font = new Font("MS Gothic", 100/+pt+/ * e.pageSettings.printerResolution.y / 72);
+		_pageGraphics.drawText(currentPageString, font, Color.white, Rect(20, 20, 1000, 1000));
+		_pageGraphics.drawText(currentPageString, font, Color.black, Rect(0, 0, 1000, 1000));
+
+		// Draw the main image.
+		const Rect screenRect = Rect(0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN)); // NOTE: Gets MemoryGraphics size as the background DC.
+		const Rect paperRect = _toRect(document.printerSettings.defaultPageSettings);
+		const uint row = (e.currentPage - _previewControl.startPage - 1) % _previewControl.rows;
+		const uint col = (e.currentPage - _previewControl.startPage - 1) / _previewControl.rows;
+
+		// Size that fit Right side.
+		const uint w1 = (screenRect.width - PrintPreviewControl.LEFT_MARIGIN - PrintPreviewControl.RIGHT_MARGIN - (_previewControl.rows - 1) * PrintPreviewControl.HORIZONTAL_SPAN) / _previewControl.rows;
+		const uint h1 = paperRect.height * w1 / paperRect.width;
+		// Size that fit Bottom side.
+		const uint h2 = (screenRect.height - PrintPreviewControl.TOP_MARGIN - PrintPreviewControl.BOTTOM_MARGIN - (_previewControl.columns - 1) * PrintPreviewControl.VERTICAL_SPAN) / _previewControl.columns;
+		const uint w2 = paperRect.width * h2 / paperRect.height;
+
+		uint w0;
+		uint h0;
+		if (PrintPreviewControl.LEFT_MARIGIN + PrintPreviewControl.RIGHT_MARGIN + _previewControl.rows * w1 + (_previewControl.rows - 1) * PrintPreviewControl.HORIZONTAL_SPAN <= screenRect.width)
+		{
+			if (PrintPreviewControl.TOP_MARGIN + PrintPreviewControl.BOTTOM_MARGIN + _previewControl.columns * h1 + (_previewControl.columns - 1) * PrintPreviewControl.VERTICAL_SPAN <= screenRect.height)
+			{
+				w0 = w1;
+				h0 = h1;
+			}
+			else
+			{
+				// Bottom side is over size.
+				w0 = w2;
+				h0 = h2;
+			}
+		}
+		else if (PrintPreviewControl.TOP_MARGIN + PrintPreviewControl.BOTTOM_MARGIN + _previewControl.columns * h2 + (_previewControl.columns - 1) * PrintPreviewControl.VERTICAL_SPAN <= screenRect.height)
+		{
+			if (PrintPreviewControl.LEFT_MARIGIN + PrintPreviewControl.RIGHT_MARGIN + _previewControl.rows * w2 + (_previewControl.rows - 1) * PrintPreviewControl.HORIZONTAL_SPAN <= screenRect.width)
+			{
+				w0 = w2;
+				h0 = h2;
+			}
+			else
+			{
+				// Right side is over size.
+				w0 = w1;
+				h0 = h1;
+			}
+		}
+
+		SetStretchBltMode(_pageGraphics.handle, STRETCH_DELETESCANS); // SRC
+		StretchBlt(
+			e.hDC, // DST
+			PrintPreviewControl.LEFT_MARIGIN + row * (w0 + PrintPreviewControl.HORIZONTAL_SPAN),
+			PrintPreviewControl.TOP_MARGIN + col * (h0 + PrintPreviewControl.VERTICAL_SPAN),
+			w0,
+			h0,
+			_pageGraphics.handle, // SRC
+			0,
+			0,
+			paperRect.width,
+			paperRect.height,
+			SRCCOPY
+		);
+		_pageGraphics.dispose(); // Created in onStartPage().
+
+		// Preview-print is end.
+		if (row == _previewControl.rows - 1 && col == _previewControl.columns - 1)
+			e.cancel = true;
+	}
+}
+
+///
+private Rect _toRect(PageSettings page)
+{
+	return Rect(
+		(page.bounds.x - page.margins.left) * page.printerResolution.x / 100,
+		(page.bounds.y - page.margins.top) * page.printerResolution.y / 100,
+		(page.bounds.x + page.bounds.width + page.margins.right) * page.printerResolution.x / 100,
+		(page.bounds.y + page.bounds.height + page.margins.bottom) * page.printerResolution.y / 100
+	);
 }
