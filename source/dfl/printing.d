@@ -400,8 +400,6 @@ class PrintEventArgs : EventArgs
 class PrintPageEventArgs : EventArgs
 {
 	bool cancel = false;
-	bool hasMorePage;
-
 	Graphics graphics;
 	Rect marginBounds;
 	Rect pageBounds;
@@ -509,7 +507,6 @@ class PrintDocument
 	///
 	void print(HDC hDC)
 	{
-		this.printerSettings.printRange.reset();
 		// Do not change printRange.kind here!
 		PrintRangeEventArgs printPageRangeEventArgs = new PrintRangeEventArgs(this.printerSettings.printRange);
 		onPrintRange(printPageRangeEventArgs);
@@ -691,6 +688,7 @@ class PrintRangeSettings
 	///
 	void reset()
 	{
+		kind = PrintRangeKind.ALL_PAGES;
 		_ranges.length = 0;
 	}
 
@@ -1709,8 +1707,8 @@ final class PrintDialog : CommonDialog
 		// Get print page range.
 		if (_printDialog.Flags & PD_PAGENUMS)
 		{
-			printer.printRange.kind = PrintRangeKind.SOME_PAGES;
 			printer.printRange.reset();
+			printer.printRange.kind = PrintRangeKind.SOME_PAGES;
 			for (int i = 0; i < _printDialog.nPageRanges; i++)
 			{
 				int from = _printPageRange[i].nFromPage;
@@ -1720,19 +1718,18 @@ final class PrintDialog : CommonDialog
 		}
 		else if (_printDialog.Flags & PD_SELECTION)
 		{
-			printer.printRange.kind = PrintRangeKind.SELECTION;
 			printer.printRange.reset();
+			printer.printRange.kind = PrintRangeKind.SELECTION;
 			// Concrete print range is modified by user side.
 		}
 		else if (_printDialog.Flags & PD_CURRENTPAGE)
 		{
-			printer.printRange.kind = PrintRangeKind.CURRENT_PAGE;
 			printer.printRange.reset();
+			printer.printRange.kind = PrintRangeKind.CURRENT_PAGE;
 			// Concrete print range is modified by user side.
 		}
 		else // PD_ALLPAGES == 0x00000000
 		{
-			printer.printRange.kind = PrintRangeKind.ALL_PAGES;
 			printer.printRange.reset();
 			// Concrete print range is modified by user side.
 		}
@@ -2149,9 +2146,8 @@ class PrintPreviewControl : Control
 		_background = new MemoryGraphics(screenRect.width, screenRect.height);
 		_background.fillRectangle(new SolidBrush(Color.gray), screenRect);
 
-		// Print range is always all pages on preview print.
-		_document.printerSettings.printRange.kind = PrintRangeKind.ALL_PAGES;
-		_document.onPrintRange(new PrintRangeEventArgs(_document.printerSettings.printRange));
+		// Reset here, because print range is always all pages on preview print.
+		_document.printerSettings.printRange.reset();
 
 		PrintController oldPrintController = _document.printController;
 		_document.printController = new PreviewPrintController(this); // TODO: Cross reference.
