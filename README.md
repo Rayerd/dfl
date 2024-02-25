@@ -10,6 +10,7 @@ DFL is a Win32 windowing library for the D language.
 ![screen shot](./examples/splitter/image/screenshot.png "screen shot")
 ![screen shot](./examples/imagelist/image/screenshot.png "screen shot")
 ![screen shot](./examples/commondialog/image/screenshot.png "screen shot")
+![screen shot](./examples/commondialog/image/screenshot2.png "screen shot")
 ![screen shot](./examples/tooltip/image/screenshot.png "screen shot")
 ![screen shot](./examples/progressbar/image/screenshot3.png "screen shot")
 ![screen shot](./examples/clipboard/image/screenshot.png "screen shot")
@@ -22,7 +23,10 @@ DFL is a Win32 windowing library for the D language.
 ![screen shot](./examples/richtextbox/image/screenshot.png "screen shot")
 
 ## Recent major features
-- **PrintDialog and PrintSetupDialog is now support (Experimental).**
+- **Module "dfl.printing" is now comming.**
+  - **PrintDialog**
+  - **PrintSetupDialog**
+  - **PrintPreviewDialog**
 - DUB is available for DFL.
 - Remove dflexe.
 - Remove GTK-based DFL.
