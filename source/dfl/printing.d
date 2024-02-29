@@ -2209,9 +2209,13 @@ class PrintPreviewControl : Control
 				const Rect screenRect = Rect(0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN)); // NOTE: Gets MemoryGraphics size as the background DC.
 				const Rect paperRect = _toRect(document.printerSettings.defaultPageSettings);
 
-				// TODO: This is incomplete.
 				uint h0 = height;
 				uint w0 = screenRect.width * height / screenRect.height;
+				if (w0 >= width)
+				{
+					w0 = width;
+					h0 = screenRect.height * width / screenRect.width;
+				}
 
 				SetStretchBltMode(_background.handle, STRETCH_DELETESCANS); // SRC
 				StretchBlt(
