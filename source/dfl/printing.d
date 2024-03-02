@@ -1,6 +1,6 @@
 // printing.d
 //
-// Copyright (C) 2024 haru-s/Rayerd
+// Written by haru-s/Rayerd in 2024.
 
 /// 
 module dfl.printing;
@@ -404,7 +404,6 @@ class PrintPageEventArgs : EventArgs
 	Rect marginBounds;
 	Rect pageBounds;
 	PageSettings pageSettings;
-	HDC hDC; // TODO: Remove.
 	int currentPage;
 
 	///
@@ -414,7 +413,6 @@ class PrintPageEventArgs : EventArgs
 		this.marginBounds = marginBounds;
 		this.pageBounds = pageBounds;
 		this.pageSettings = pageSettings;
-		this.hDC = graphics.handle; // TODO: Remove.
 		this.currentPage = currentPage;
 	}
 }
@@ -478,14 +476,14 @@ class StandardPrintController : PrintController
 	///
 	override Graphics onStartPage(PrintDocument document, PrintPageEventArgs e)
 	{
-		StartPage(e.hDC);
+		StartPage(e.graphics.handle);
 		return e.graphics;
 	}
 
 	///
 	override void onEndPage(PrintDocument document, PrintPageEventArgs e)
 	{
-		EndPage(e.hDC);
+		EndPage(e.graphics.handle);
 	}
 }
 
@@ -539,12 +537,10 @@ class PrintDocument
 			printPageArgs = new PrintPageEventArgs(originGraphics, marginBounds, pageBounds, ps, pageCounter);
 
 			printPageArgs.graphics = printController.onStartPage(this, printPageArgs); // Call StartPage() API
-			printPageArgs.hDC = printPageArgs.graphics.handle; // TODO: Remove.
 			
 			if(!printPageArgs.cancel)
 				this.onPrintPage(printPageArgs);
 			
-			printPageArgs.hDC = hDC; // TODO: Remove.
 			printPageArgs.graphics = originGraphics;
 
 			printController.onEndPage(this, printPageArgs); // Call EndPage() API
@@ -2206,7 +2202,7 @@ class PrintPreviewControl : Control
 		{
 			if (this.autoZoom)
 			{
-				const Rect screenRect = Rect(0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN)); // NOTE: Gets MemoryGraphics size as the background DC.
+				const Rect screenRect = Rect(0, 0, _background.width, _background.height);
 				const Rect paperRect = _toRect(document.printerSettings.defaultPageSettings);
 
 				uint h0 = height;
@@ -2522,7 +2518,7 @@ class PrintPreviewDialog : Form
 class PreviewPrintController : PrintController
 {
 	private PrintPreviewControl _previewControl; ///
-	private Graphics _pageGraphics; ///
+	private MemoryGraphics _pageGraphics; ///
 
 	///
 	this(PrintPreviewControl previewControl)
@@ -2560,9 +2556,9 @@ class PreviewPrintController : PrintController
 		_pageGraphics = {
 			 // Be dispose() called in onEntPage().
 			if (e.pageBounds.width <= e.pageBounds.height)
-				return new MemoryGraphics(paperRect.width, paperRect.height, e.hDC);
+				return new MemoryGraphics(paperRect.width, paperRect.height, e.graphics.handle);
 			else
-				return new MemoryGraphics(paperRect.height, paperRect.width, e.hDC); // TODO: Implement correctly.
+				return new MemoryGraphics(paperRect.height, paperRect.width, e.graphics.handle); // TODO: Implement correctly.
 		}();
 		// Draw the form of paper.
 		_pageGraphics.fillRectangle(Color.white, paperRect);
@@ -2581,7 +2577,7 @@ class PreviewPrintController : PrintController
 		_pageGraphics.drawText(currentPageString, font, Color.black, Rect(0, 0, 1000, 1000));
 
 		// Draw the main image.
-		const Rect screenRect = Rect(0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN)); // NOTE: Gets MemoryGraphics size as the background DC.
+		const Rect screenRect = Rect(0, 0, _pageGraphics.width, _pageGraphics.height);
 		const Rect paperRect = _toRect(document.printerSettings.defaultPageSettings);
 		const uint row = (e.currentPage - _previewControl.startPage - 1) % _previewControl.rows;
 		const uint col = (e.currentPage - _previewControl.startPage - 1) / _previewControl.rows;
@@ -2626,7 +2622,7 @@ class PreviewPrintController : PrintController
 
 		SetStretchBltMode(_pageGraphics.handle, STRETCH_DELETESCANS); // SRC
 		StretchBlt(
-			e.hDC, // DST
+			e.graphics.handle, // DST
 			PrintPreviewControl.LEFT_MARIGIN + row * (w0 + PrintPreviewControl.HORIZONTAL_SPAN),
 			PrintPreviewControl.TOP_MARGIN + col * (h0 + PrintPreviewControl.VERTICAL_SPAN),
 			w0,
