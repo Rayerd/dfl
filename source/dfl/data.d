@@ -362,43 +362,21 @@ private:
 	}
 	unittest
 	{
-		import std.stdio;
 		Dstring[] strs;
 		strs ~= "aa";
 		strs ~= "bb";
 		strs ~= "cc";
-		void[] clipboardValue = DataFormats.getClipboardValueFromFileDropList(strs);
-		wchar* wcharBinary = cast(wchar*)(clipboardValue);
-		debug(APP_PRINT)
-		{
-			writefln("a part of wcharBinary's length=%d", wcharBinary[0]);
-		}
-		wstring wstr = wcharBinary[0 .. wcharBinary[0]].idup;
-		debug(APP_PRINT)
-		{
-			writefln("wchar[] length=%d", wstr.length);
-		}
-		assert(wcharBinary[0] == wstr.length);
-		debug(APP_PRINT)
-		{
-			for(int i; i < wcharBinary[0]; i++)
-				debug(APP_PRINT) writef("'%c',", wcharBinary[i]);
-			writeln();
-			writefln("%s", cast(wchar[])voids);
-			for(int i; i < wcharBinary[0]; i++)
-				writefln("%d code:%d [%s]", i, wcharBinary[i], wcharBinary[i]);
-		}
-		assert(wcharBinary[0] == DROPFILES.sizeof); // The offset of the file list from the beginning of this structure, in bytes.
-		assert(wcharBinary[10] == 'a');
-		assert(wcharBinary[11] == 'a');
-		assert(wcharBinary[12] == '\0');
-		assert(wcharBinary[13] == 'b');
-		assert(wcharBinary[14] == 'b');
-		assert(wcharBinary[15] == '\0');
-		assert(wcharBinary[16] == 'c');
-		assert(wcharBinary[17] == 'c');
-		assert(wcharBinary[18] == '\0');
-		assert(wcharBinary[19] == '\0');
+		wchar* hDropString = cast(wchar*)_getHDropStringFromFileDropList(strs);
+		assert(hDropString[0] == 'a');
+		assert(hDropString[1] == 'a');
+		assert(hDropString[2] == '\0');
+		assert(hDropString[3] == 'b');
+		assert(hDropString[4] == 'b');
+		assert(hDropString[5] == '\0');
+		assert(hDropString[6] == 'c');
+		assert(hDropString[7] == 'c');
+		assert(hDropString[8] == '\0');
+		assert(hDropString[9] == '\0');
 	}
 }
 
