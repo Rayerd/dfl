@@ -5,7 +5,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See https://opensource.org/licenses/MIT
 //
-// Translations and modifications copyright (C) 2022 haru-s
+// Translations and modifications by haru-s/Rayerd in 2022.
 
 ///
 module dfl.trackbar;
