@@ -2577,7 +2577,7 @@ class PreviewPrintController : PrintController
 		_pageGraphics.drawText(currentPageString, font, Color.black, Rect(0, 0, 1000, 1000));
 
 		// Draw the main image.
-		const Rect screenRect = Rect(0, 0, _pageGraphics.width, _pageGraphics.height);
+		const Rect screenRect = Rect(0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN)); // NOTE: Gets MemoryGraphics size as the background DC.
 		const Rect paperRect = _toRect(document.printerSettings.defaultPageSettings);
 		const uint row = (e.currentPage - _previewControl.startPage - 1) % _previewControl.rows;
 		const uint col = (e.currentPage - _previewControl.startPage - 1) / _previewControl.rows;
