@@ -21,6 +21,7 @@ DFL is a Win32 windowing library for the D language.
 ![screen shot](./examples/contextmenu/image/screenshot.png "screen shot")
 ![screen shot](./examples/toolbar/image/screenshot.png "screen shot")
 ![screen shot](./examples/richtextbox/image/screenshot.png "screen shot")
+![screen shot](./examples/dclock/image/screenshot.png "screen shot")
 
 ## Recent major features
 - **Module "dfl.printing" is now comming.**
@@ -81,7 +82,7 @@ In order to make and move *.lib to paths below:
 - **go.bat 32mscoff** (MSVC required) : ditto
 - **go64.bat** (MSVC required) : Make and move *.lib to %dmd_path%\lib64
 
-## With DUB
+## With DUB **(RECOMMENDED)**
 First, add DFL to local DUB registry:
 ```bat
 > cd dfl
@@ -102,4 +103,5 @@ See also **./examples/hello_dfl/dub.json**.
 
 ## License
 DFL is under the boost and/or zlib/libpng license.
+
 However, trackbar.d is covered by the MIT license.

@@ -1,0 +1,13 @@
+{
+    "version": "0.1.0",
+    "configurations": [
+        {
+            "name": "C++ Launch (Windows) Dclock",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "cwd": "${workspaceRoot}",
+            "program": "./bin/dclock.exe",
+            "console": "internalConsole"
+        }
+    ]
+}
