@@ -2378,23 +2378,28 @@ class PrintPreviewDialog : Form
  		_fromPage = new TextBox();
 		_fromPage.width = 50;
 		_fromPage.dock = DockStyle.LEFT;
+		_fromPage.gotFocus ~= (Control c, EventArgs e)
+		{
+			_fromPage.selectAll();
+		};
 		_fromPage.keyPress ~= (Control c, KeyEventArgs e)
 		{
 			if (e.keyCode == Keys.ENTER)
 			{
 				int oldPage = _previewControl.startPage;
 				int newPage;
+				e.handled = true; // Disallow beep.
 				try
 				{
 					newPage = to!int(_fromPage.text) - 1;
 				}
 				catch (Exception e)
 				{
-					newPage = oldPage; // undo
+					newPage = oldPage; // Undo.
 				}
 
 				if (newPage < 0)
-					newPage = oldPage; // undo
+					newPage = oldPage; // Undo.
 
 				_previewControl.startPage = newPage;
 				_fromPage.text = to!string(newPage + 1);
@@ -2404,6 +2409,8 @@ class PrintPreviewDialog : Form
 					_previewControl.invalidatePreview();
 					_previewControl.invalidate();
 				}
+				
+				_fromPage.selectAll();
 			}
 		};
 		_fromPage.parent = _pageSelectPanel;
