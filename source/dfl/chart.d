@@ -57,27 +57,31 @@ class TableRenderer(T...)
 			// Draw header.
 			if (row == 0)
 			{
-				if (_showHeader)
+				if (_hasHeader)
 				{
-					int y = margin.y + viewLine * height + _paddingY;
-					foreach (int col, value; record)
+					if (_showHeader)
 					{
-						int x = margin.x + sum(_width[0..col]) + _paddingX;
-						g.drawText(to!string(value), _headerFont, _textColor, Rect(x, y, bounds.right, bounds.bottom));
+						int y = margin.y + viewLine * height + _paddingY;
+						foreach (int col, value; record)
+						{
+							int x = margin.x + sum(_width[0..col]) + _paddingX;
+							g.drawText(to!string(value), _headerFont, _textColor, Rect(x, y, bounds.right, bounds.bottom));
+						}
+						row++;
+						viewLine++;
+						continue;
 					}
-					row++;
-					viewLine++;
-					continue;
-				}
-				else
-				{
-					row++;
-					// Do not increment -viewLine- here.
-					continue;
+					else
+					{
+						row++;
+						// Do not increment -viewLine- here.
+						continue;
+					}
 				}
 			}
 			// Draw record.
-			if (firstRecord + (_hasHeader?1:0) <= row && row <= lastRecord + (_hasHeader?1:0))
+			int rows = (_hasHeader?1:0) + lastRecord - firstRecord + 1;
+			if (firstRecord + (_hasHeader?1:0) <= row && row <= rows)
 			{
 				int y = margin.y + viewLine * height + _paddingY;
 				foreach (int col, value; record)
