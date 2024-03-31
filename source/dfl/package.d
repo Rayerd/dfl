@@ -15,4 +15,4 @@ public import dfl.base, dfl.menu, dfl.control, dfl.usercontrol,
 	dfl.combobox, dfl.treeview, dfl.picturebox, dfl.tabcontrol,
 	dfl.listview, dfl.statusbar, dfl.progressbar, dfl.resources,
 	dfl.imagelist, dfl.toolbar, dfl.trackbar, dfl.sharedcontrol,
-	dfl.printing;
+	dfl.printing, dfl.chart;

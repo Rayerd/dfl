@@ -3,6 +3,23 @@
 This unofficial project is a migration of [D Forms Library (DFL)](http://wiki.dprogramming.com/Dfl/HomePage "D Forms Library (DFL)") that is managed on SVN.
 DFL is a Win32 windowing library for the D language.
 
+## Recent major features
+- **Module "dfl.chart" is now comming.**
+  - **TableRenderer (with example)**
+  - ~LineGraphRenderer~
+  - ~TimeChartRenderer~
+- **Add simple clock "Dclock" as an example of DFL application.**
+- Module "dfl.printing" is now comming.
+  - PrintDialog
+  - PrintSetupDialog
+  - PrintPreviewDialog
+- DUB is available for DFL.
+- Remove dflexe.
+- Remove GTK-based DFL.
+- Remove some bundled libraries such as user32_dfl.lib etc... (From now on, use dmd-bundled libraries such as the MinGW platform library and so on.)
+
+## Screen shots
+
 ![screen shot](./examples/buttons/image/screenshot.png "screen shot")
 ![screen shot](./examples/tabcontrol/image/screenshot.png "screen shot")
 ![screen shot](./examples/listview/image/screenshot.png "screen shot")
@@ -22,16 +39,7 @@ DFL is a Win32 windowing library for the D language.
 ![screen shot](./examples/toolbar/image/screenshot.png "screen shot")
 ![screen shot](./examples/richtextbox/image/screenshot.png "screen shot")
 ![screen shot](./examples/dclock/image/screenshot.png "screen shot")
-
-## Recent major features
-- **Module "dfl.printing" is now comming.**
-  - **PrintDialog**
-  - **PrintSetupDialog**
-  - **PrintPreviewDialog**
-- DUB is available for DFL.
-- Remove dflexe.
-- Remove GTK-based DFL.
-- Remove some bundled libraries such as user32_dfl.lib etc... (From now on, use dmd-bundled libraries such as the MinGW platform library and so on.)
+![screen shot](./examples/tablerenderer/image/screenshot.png "screen shot")
 
 ## Build and Install (dfl.lib and dfl_debug.lib)
 ### 1. Set environment variables
