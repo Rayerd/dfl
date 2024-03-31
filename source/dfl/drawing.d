@@ -1391,7 +1391,7 @@ public:
 
 	
 	///
-	final HENHMETAFILE handle() @property // getter
+	HENHMETAFILE handle() @property // getter
 	{
 		return hemf;
 	}
@@ -1469,10 +1469,10 @@ class Picture: Image // docmain
 	
 	///
 	// Throws exception on failure.
-	this(DStream stm)
+	deprecated this(DStream stm)
 	{
-		this.ipic = _fromDStream(stm);
-		if(!this.ipic)
+		_ipicture = _fromDStream(stm);
+		if(!_ipicture)
 			throw new DflException("Unable to load picture from stream");
 	}
 	
@@ -1480,8 +1480,8 @@ class Picture: Image // docmain
 	// Throws exception on failure.
 	this(Dstring fileName)
 	{
-		this.ipic = _fromFileName(fileName);
-		if(!this.ipic)
+		_ipicture = _fromFileName(fileName);
+		if(!_ipicture)
 			throw new DflException("Unable to load picture from file '" ~ fileName ~ "'");
 	}
 	
@@ -1489,21 +1489,21 @@ class Picture: Image // docmain
 	/// ditto
 	this(void[] mem)
 	{
-		this.ipic = _fromMemory(mem);
-		if(!this.ipic)
+		_ipicture = _fromMemory(mem);
+		if(!_ipicture)
 			throw new DflException("Unable to load picture from memory");
 	}
 	
 	
 	private this(dfl.internal.wincom.IPicture ipic)
 	{
-		this.ipic = ipic;
+		_ipicture = ipic;
 	}
 	
 	
 	///
 	// Returns null on failure instead of throwing exception.
-	static Picture fromStream(DStream stm)
+	deprecated static Picture fromStream(DStream stm)
 	{
 		auto ipic = _fromDStream(stm);
 		if(!ipic)
@@ -1542,7 +1542,7 @@ class Picture: Image // docmain
 		lhy = loghimY;
 		width = MAP_LOGHIM_TO_PIX(lhx, GetDeviceCaps(hdc, LOGPIXELSX));
 		height = MAP_LOGHIM_TO_PIX(lhy, GetDeviceCaps(hdc, LOGPIXELSY));
-		ipic.Render(hdc, pt.x, pt.y + height, width, -height, 0, 0, lhx, lhy, null);
+		_ipicture.Render(hdc, pt.x, pt.y + height, width, -height, 0, 0, lhx, lhy, null);
 	}
 	
 	/// ditto
@@ -1558,7 +1558,7 @@ class Picture: Image // docmain
 		int lhx, lhy;
 		lhx = loghimX;
 		lhy = loghimY;
-		ipic.Render(hdc, r.x, r.y + r.height, r.width, -r.height, 0, 0, lhx, lhy, null);
+		_ipicture.Render(hdc, r.x, r.y + r.height, r.width, -r.height, 0, 0, lhx, lhy, null);
 	}
 	
 	/// ditto
@@ -1572,7 +1572,7 @@ class Picture: Image // docmain
 	final @property OLE_XSIZE_HIMETRIC loghimX() // getter
 	{
 		OLE_XSIZE_HIMETRIC xsz;
-		if(S_OK != ipic.get_Width(&xsz))
+		if(S_OK != _ipicture.get_Width(&xsz))
 			return 0; // ?
 		return xsz;
 	}
@@ -1581,7 +1581,7 @@ class Picture: Image // docmain
 	final @property OLE_YSIZE_HIMETRIC loghimY() // getter
 	{
 		OLE_YSIZE_HIMETRIC ysz;
-		if(S_OK != ipic.get_Height(&ysz))
+		if(S_OK != _ipicture.get_Height(&ysz))
 			return 0; // ?
 		return ysz;
 	}
@@ -1670,10 +1670,10 @@ class Picture: Image // docmain
 			_hbmimgtype = HBITMAP.init;
 		}
 		
-		if(ipic)
+		if(_ipicture)
 		{
-			ipic.Release();
-			ipic = null;
+			_ipicture.Release();
+			_ipicture = null;
 		}
 	}
 	
@@ -1761,7 +1761,7 @@ class Picture: Image // docmain
 	
 	
 	private:
-	dfl.internal.wincom.IPicture ipic = null;
+	dfl.internal.wincom.IPicture _ipicture = null;
 	
 	
 	static dfl.internal.wincom.IPicture _fromIStream(dfl.internal.wincom.IStream istm)
@@ -1797,7 +1797,7 @@ class Picture: Image // docmain
 	}
 	
 	
-	static dfl.internal.wincom.IPicture _fromDStream(DStream stm)
+	deprecated static dfl.internal.wincom.IPicture _fromDStream(DStream stm)
 	in
 	{
 		assert(stm !is null);

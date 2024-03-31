@@ -44,7 +44,7 @@ class DflComObject: ComObject // package
 }
 
 
-class DStreamToIStream: DflComObject, dfl.internal.wincom.IStream
+deprecated class DStreamToIStream: DflComObject, dfl.internal.wincom.IStream
 {
 	this(DStream sourceDStream)
 	{
