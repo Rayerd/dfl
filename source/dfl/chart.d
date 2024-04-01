@@ -36,6 +36,8 @@ class TableRenderer(T...)
 		_textColor = Color.black;
 		_backColor = Color.white;
 		_lineColor = Color.black;
+		_headerTextFormat = new TextFormat(TextFormatFlags.SINGLE_LINE);
+		_recordTextFormat = new TextFormat(TextFormatFlags.SINGLE_LINE);
 	}
 
 	/// Draw records from first record to last record.
@@ -65,7 +67,7 @@ class TableRenderer(T...)
 						foreach (int col, value; record)
 						{
 							int x = margin.x + sum(_width[0..col]) + _paddingX;
-							g.drawText(to!string(value), _headerFont, _textColor, Rect(x, y, bounds.right, bounds.bottom));
+							g.drawText(to!string(value), _headerFont, _textColor, Rect(x, y, _width[col] - _paddingX, _height - _paddingY), _headerTextFormat);
 						}
 						row++;
 						viewLine++;
@@ -87,7 +89,7 @@ class TableRenderer(T...)
 				foreach (int col, value; record)
 				{
 					int x = margin.x + sum(_width[0..col]) + _paddingX;
-					g.drawText(to!string(value), _recordFont, _textColor, Rect(x, y, bounds.right, bounds.bottom));
+					g.drawText(to!string(value), _recordFont, _textColor, Rect(x, y, _width[col] - _paddingX, _height - _paddingY), _recordTextFormat);
 				}
 				// Draw horizontal line.
 				if (_horizontalLine && viewLine < lastRecord - firstRecord + (_showHeader?1:0))
@@ -299,14 +301,28 @@ class TableRenderer(T...)
 		_lineColor = c;
 	}
 
+	///
 	void headerFont(Font f)
 	{
 		_headerFont = f;
 	}
 
+	///
 	void recordFont(Font f)
 	{
 		_recordFont = f;
+	}
+
+	///
+	void headerTextFormat(TextFormat tf)
+	{
+		_headerTextFormat = tf;
+	}
+
+	///
+	void recordTextFormat(TextFormat tf)
+	{
+		_recordTextFormat = tf;
 	}
 
 private:
@@ -333,4 +349,6 @@ private:
 	bool _horizontalLine;
 	Font _headerFont;
 	Font _recordFont;
+	TextFormat _headerTextFormat;
+	TextFormat _recordTextFormat;
 }
