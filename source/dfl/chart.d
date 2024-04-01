@@ -51,37 +51,31 @@ class TableRenderer(T...)
 		// Draw header line.
 		if (_showHeader && _hasHeader && _headerLine)
 			g.drawLine(new Pen(_lineColor), Point(margin.x, margin.y + height), Point(bounds.right, margin.y + height));
-		// Draw header and records.
+		// Draw header.
 		int row; // -row- is line number in CSV.
 		int viewLine; // -viewLine- is line number on display.
-		foreach (record; csvReader!(Tuple!T)(_csv))
+		if (_hasHeader)
 		{
-			// Draw header.
-			if (row == 0)
+			if (_showHeader)
 			{
-				if (_hasHeader)
+				int y = margin.y + viewLine * height + _paddingY;
+				foreach (col, value; csvReader!(Tuple!T)(_csv, null).header)
 				{
-					if (_showHeader)
-					{
-						int y = margin.y + viewLine * height + _paddingY;
-						foreach (int col, value; record)
-						{
-							int x = margin.x + sum(_width[0..col]) + _paddingX;
-							g.drawText(to!string(value), _headerFont, _textColor, Rect(x, y, _width[col] - _paddingX, _height - _paddingY), _headerTextFormat);
-						}
-						row++;
-						viewLine++;
-						continue;
-					}
-					else
-					{
-						row++;
-						// Do not increment -viewLine- here.
-						continue;
-					}
+					int x = margin.x + sum(_width[0..col]) + _paddingX;
+					g.drawText(to!string(value), _headerFont, _textColor, Rect(x, y, _width[col] - _paddingX, _height - _paddingY), _headerTextFormat);
 				}
+				row++;
+				viewLine++;
 			}
-			// Draw record.
+			else
+			{
+				row++;
+				// Do not increment -viewLine- here.
+			}
+		}
+		// Draw records.
+		foreach (record; (_hasHeader ? csvReader!(Tuple!T)(_csv, null) : csvReader!(Tuple!T)(_csv)))
+		{
 			int rows = (_hasHeader?1:0) + lastRecord - firstRecord + 1;
 			if (firstRecord + (_hasHeader?1:0) <= row && row <= rows)
 			{
