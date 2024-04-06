@@ -5,10 +5,10 @@ DFL is a Win32 windowing library for the D language.
 
 ## Recent major features
 - **Module "dfl.chart" is now comming.**
-  - **TableRenderer (with example)**
-  - ~LineGraphRenderer~
+  - TableRenderer (with example)
+  - **LineGraphRenderer (with example)**
   - ~TimeChartRenderer~
-- **Add simple clock "Dclock" as an example of DFL application.**
+- Add simple clock "Dclock" as an example of DFL application.
 - Module "dfl.printing" is now comming.
   - PrintDialog
   - PrintSetupDialog
@@ -40,6 +40,7 @@ DFL is a Win32 windowing library for the D language.
 ![screen shot](./examples/richtextbox/image/screenshot.png "screen shot")
 ![screen shot](./examples/dclock/image/screenshot.png "screen shot")
 ![screen shot](./examples/tablerenderer/image/screenshot.png "screen shot")
+![screen shot](./examples/linegraphrenderer/image/screenshot.png "screen shot")
 
 ## Build and Install (dfl.lib and dfl_debug.lib)
 ### 1. Set environment variables

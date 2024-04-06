@@ -10,7 +10,7 @@ else
 
 class MainForm : Form
 {
-	alias CustomTableRenderer = TableRenderer!(string, string, string);
+	alias CustomTableRenderer = TableRenderer!(string, int, int);
 	CustomTableRenderer _table;
 
 	public this()
@@ -18,19 +18,17 @@ class MainForm : Form
 		this.text = "TableRenderer example";
 		this.size = Size(450, 450);
 		string csv =
-			"ID,Name,Value\n" ~ 
-			"1,Kyoto,100\n" ~ 
-			"2,Osaka,50\n" ~ 
-			"3,Tokyo,20\n" ~ 
-			"4,Aomori,10\n";
+			"教科,大森,山田\n" ~ 
+			"国語,95,98\n" ~ 
+			"理科,75,80\n" ~ 
+			"算数,90,78\n" ~ 
+			"社会,80,76\n";
 		_table = new CustomTableRenderer(csv);
 		_table.height = 40;
-		_table.width[0] = 50;
-		_table.width[1] = 80;
-		_table.width[2] = 150;
+		_table.width[] = 80;
 		_table.paddingX = 10;
 		_table.paddingY = 12;
-		_table.margin = Point(20, 20);
+		_table.location = Point(20, 20);
 		_table.hasHeader = true; // true : 1st line is header.
 		_table.showHeader = true;
 		_table.firstRecord = 0;
