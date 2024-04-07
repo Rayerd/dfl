@@ -30,6 +30,13 @@ class TableRenderer(T...)
 		_lastRecord = numRecords - 1;
 	}
 	/// ditto
+	this(string csv, int first, int last)
+	{
+		this(csv);
+		_firstRecord = first;
+		_lastRecord = last;
+	}
+	/// ditto
 	this(string csv) // deprecated
 	{
 		_csv = csv;
@@ -386,6 +393,13 @@ class LineGraphRenderer(T...)
 		_lastRecord = numRecords - 1;
 	}
 	/// ditto
+	this(string csv, int first, int last)
+	{
+		this(csv);
+		_firstRecord = first;
+		_lastRecord = last;
+	}
+	/// ditto
 	this(string csv) // deprecated
 	{
 		_csv = csv;
@@ -430,8 +444,8 @@ class LineGraphRenderer(T...)
 		_verticalScaleLineInnerSide = 5;
 		_hasHorizontalScale = false;
 		_horizontalScaleSpan = 50;
-		_horizonScaleLineInnerSide = 5;
-		_horizonScaleLineOuterSide = 5;
+		_horizontalScaleLineInnerSide = 5;
+		_horizontalScaleLineOuterSide = 5;
 		_horizontalScaleHeight = 25;
 	}
 
@@ -519,9 +533,9 @@ class LineGraphRenderer(T...)
 				g.drawLine(
 					new Pen(_plotAreaBoundsColor),
 					x,
-					y - _horizonScaleLineInnerSide * (_vZeroPos == VerticalZeroPosition.BOTTOM ? 1 : -1),
+					y - _horizontalScaleLineInnerSide * (_vZeroPos == VerticalZeroPosition.BOTTOM ? 1 : -1),
 					x,
-					y + _horizonScaleLineOuterSide * (_vZeroPos == VerticalZeroPosition.BOTTOM ? 1 : -1)
+					y + _horizontalScaleLineOuterSide * (_vZeroPos == VerticalZeroPosition.BOTTOM ? 1 : -1)
 				);
 			}
 		}
@@ -776,15 +790,15 @@ class LineGraphRenderer(T...)
 	}
 
 	///
-	void horizonScaleLineInnerSide(int h)
+	void horizontalScaleLineInnerSide(int h)
 	{
-		_horizonScaleLineInnerSide = h;
+		_horizontalScaleLineInnerSide = h;
 	}
 
 	///
-	void horizonScaleLineOuterSide(int h)
+	void horizontalScaleLineOuterSide(int h)
 	{
-		_horizonScaleLineOuterSide = h;
+		_horizontalScaleLineOuterSide = h;
 	}
 
 	///
@@ -827,8 +841,8 @@ private:
 	bool _hasHorizontalScale;
 	int _horizontalScaleSpan;
 	int _horizontalScaleHeight;
-	int _horizonScaleLineInnerSide;
-	int _horizonScaleLineOuterSide;
+	int _horizontalScaleLineInnerSide;
+	int _horizontalScaleLineOuterSide;
 	bool _hasVerticalScale;
 	int _verticalMaxScale;
 	int _verticalScaleSpan;

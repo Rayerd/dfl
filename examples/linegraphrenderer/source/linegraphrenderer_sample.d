@@ -45,8 +45,8 @@ class MainForm : Form
 		_graph.plotAreaHeightOnDisplay = 300;
 		_graph.hasHorizontalScale = true;
 		_graph.horizontalScaleSpan = 100;
-		_graph.horizonScaleLineInnerSide = 0;
-		_graph.horizonScaleLineOuterSide = 5;
+		_graph.horizontalScaleLineInnerSide = 0;
+		_graph.horizontalScaleLineOuterSide = 5;
 		_graph.horizontalScaleHeight = 12;
 		_graph.hasVerticalScale = true;
 		_graph.verticalMaxScale = 110;
