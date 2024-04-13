@@ -3080,6 +3080,27 @@ class Graphics // docmain
 		SelectObject(hdc, prevBrush);
 	}
 	
+	///
+	final void fillEllipse(Brush brush, Rect r)
+	{
+		fillEllipse(brush, r.x, r.y, r.width, r.height);
+	}
+
+	/// ditto
+	final void fillEllipse(Brush brush, int x, int y, int width, int height)
+	{
+		HPEN prevPen;
+		HBRUSH prevBrush;
+		
+		prevPen = SelectObject(hdc, cast(HPEN)GetStockObject(NULL_PEN));
+		prevBrush = SelectObject(hdc, brush.handle);
+		
+		Ellipse(hdc, x, y, x + width, y + height);
+		
+		// Reset stuff.
+		SelectObject(hdc, prevPen);
+		SelectObject(hdc, prevBrush);
+	}
 	
 	// TODO: drawPie()
 	
