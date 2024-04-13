@@ -961,3 +961,511 @@ enum PlotPointForm
 	CROSS,
 	TRIANGLE,
 }
+
+///
+class TimeChartRenderer(T...)
+{
+	///
+	this(string csv, int numRecords)
+	{
+		this(csv);
+		_firstRecord = 0;
+		_lastRecord = numRecords - 1;
+	}
+	/// ditto
+	this(string csv, int first, int last)
+	{
+		this(csv);
+		_firstRecord = first;
+		_lastRecord = last;
+	}
+	/// ditto
+	this(string csv) // deprecated
+	{
+		_csv = csv;
+		_chartMargins = ChartMargins(50, 50, 50, 50);
+		_backColor = Color.white;
+		_plotAreaBoundsColor = Color.black;
+		_plotAreaTopPadding = 20;
+		_plotAreaBottomPadding = 20;
+		_plotAreaLeftPadding = 20;
+		_plotAreaRightPadding = 20;
+		_plotAreaAndHorizontalScaleSpanY = 10;
+		_hasVerticalScale = true;
+		_verticalScaleWidth = 40;
+		_hasHorizontalScale = true;
+		_horizontalScaleSpan = 50;
+		_horizontalScaleStep = 1;
+		_horizontalScaleLineInnerSide = 5;
+		_horizontalScaleLineOuterSide = 5;
+		_horizontalScaleHeight = 25;
+		_hasZeroLine = true;
+		for (int i; i < cast(int)T.length - 1; i++)
+			_seriesStyleList ~= TimeChartSeriesStyle(false);
+	}
+
+	/// Draw records.
+	void draw(Graphics g)
+	{
+		string hSubject = csvReader!(Tuple!T)(_csv, null).header.front;
+
+		enum HORIZONTAL_SCALE_AREA_AND_SUBJECT_SPAN_Y = 25; // TODO: fix.
+		enum HORIZONTAL_SCALE_TEXT_HEIGHT = 12; // TODO: fix.
+
+		// Draw background.
+		Rect backgroundRect = Rect(
+			plotAreaBounds.x - _chartMargins.left,
+			plotAreaBounds.y - _chartMargins.top,
+			plotAreaBounds.width + _chartMargins.left + _chartMargins.right,
+			plotAreaBounds.height + _chartMargins.top + _chartMargins.bottom
+		);
+		if (_hasVerticalScale)
+		{
+			backgroundRect.x = plotAreaBounds.x - _chartMargins.left - _verticalScaleWidth,
+			backgroundRect.width = plotAreaBounds.width + _chartMargins.left + _chartMargins.right + _verticalScaleWidth;
+		}
+		if (_hasHorizontalScale)
+		{
+			backgroundRect.height += _horizontalScaleHeight + _plotAreaAndHorizontalScaleSpanY;
+			if (hSubject != "")
+				backgroundRect.height += HORIZONTAL_SCALE_AREA_AND_SUBJECT_SPAN_Y + HORIZONTAL_SCALE_TEXT_HEIGHT;
+		}
+		g.fillRectangle(new SolidBrush(_backColor), backgroundRect);
+		// Draw bounds of plot area.
+		g.drawRectangle(new Pen(_plotAreaBoundsColor), plotAreaBounds);
+		// Draw vertical scale.
+		if (_hasVerticalScale)
+		{
+			enum LINE_HEIGHT = 12f;
+			Font f = new Font("MS Gothic", LINE_HEIGHT);
+			int x = plotAreaBounds.x - _verticalScaleWidth;
+			int seriesIndex;
+			foreach (seriesName; csvReader!(Tuple!T)(_csv, null).header.dropOne)
+			{
+				// Draw vertical scalse label.
+				enum VERTICAL_SCALE_LABEL_TWEAK = 5;
+				int y = _seriesBaseY(seriesIndex) - cast(int)LINE_HEIGHT - VERTICAL_SCALE_LABEL_TWEAK;
+				int currHeight = _seriesStyleList[cast(int)seriesIndex].height;
+				g.drawText(seriesName, f, Color.black, Rect(x, y, 100, 100));
+				// Draw analog scales.
+				if (!_seriesStyleList[seriesIndex].isDigital)
+				{
+					enum TWEAK_X = 2;
+					int maxValue = _seriesStyleList[cast(int)seriesIndex].max;
+					string maxText = to!string(maxValue);
+					g.drawText(
+						maxText,
+						f,
+						Color.black,
+						Rect(plotAreaBounds.x + TWEAK_X, _seriesBaseY(seriesIndex) - currHeight, 100, 100)
+					);
+					int minValue = _seriesStyleList[cast(int)seriesIndex].min;
+					string minText = to!string(minValue);
+					g.drawText(
+						minText,
+						f,
+						Color.black,
+						Rect(plotAreaBounds.x + TWEAK_X, y, 100, 100)
+					);
+					// Draw zero line and scale label.
+					if (_hasZeroLine && minValue < 0)
+					{
+						g.drawLine(
+							new Pen(Color.lightGray),
+							plotAreaBounds.x,
+							_seriesZeroY(seriesIndex),
+							plotAreaBounds.right - 1,
+							_seriesZeroY(seriesIndex),
+						);
+						g.drawText(
+							"0",
+							f,
+							Color.black,
+							Rect(plotAreaBounds.x + TWEAK_X, _seriesZeroY(seriesIndex) - cast(int)LINE_HEIGHT - VERTICAL_SCALE_LABEL_TWEAK, 100, 100)
+						);
+					}
+				}
+				// Draw vertical scalse line.
+				g.drawLine(
+					new Pen(Color.lightGray),
+					x,
+					_seriesBaseY(seriesIndex),
+					x + _verticalScaleWidth,
+					_seriesBaseY(seriesIndex)
+				);
+				// Draw vertical zero line in plot area.
+				if (_hasZeroLine)
+				{
+					g.drawLine(
+						new Pen(Color.lightGray),
+						x + _verticalScaleWidth,
+						_seriesBaseY(seriesIndex),
+						plotAreaBounds.right - 1,
+						_seriesBaseY(seriesIndex)
+					);
+				}
+				seriesIndex++;
+			}
+		}
+		// Draw horizontal scale.
+		if (_hasHorizontalScale)
+		{
+			// Draw horizontal scale label.
+			int index;
+			foreach (record; csvReader!(Tuple!T)(_csv, null).drop(_firstRecord).take(_lastRecord - _firstRecord + 1).stride(_horizontalScaleStep))
+			{
+				int x = plotAreaBounds.x + _plotAreaLeftPadding + index * _horizontalScaleSpan;
+				int y = plotAreaBounds.bottom + _plotAreaAndHorizontalScaleSpanY;
+				g.drawText(
+					to!string(record[0]),
+					new Font("MS Gothic", 12f),
+					_plotAreaBoundsColor,
+					Rect(x, y, _horizontalScaleSpan * _horizontalScaleStep, _horizontalScaleHeight)
+				);
+				index += _horizontalScaleStep;
+			}
+			// Draw horizontal scale line.
+			for (int i; i < _lastRecord - _firstRecord + 1; i += _horizontalScaleStep)
+			{
+				int x = plotAreaBounds.x + _plotAreaLeftPadding + i * _horizontalScaleSpan;
+				int y = plotAreaBounds.bottom;
+				g.drawLine(
+					new Pen(_plotAreaBoundsColor),
+					x,
+					y - _horizontalScaleLineInnerSide,
+					x,
+					y + _horizontalScaleLineOuterSide
+				);
+			}
+			// Draw horizontal scale subject.
+			{
+				int x = plotAreaBounds.x;
+				int y = plotAreaBounds.bottom + _horizontalScaleHeight + HORIZONTAL_SCALE_AREA_AND_SUBJECT_SPAN_Y;
+				auto fmt = new TextFormat;
+				fmt.alignment = TextAlignment.CENTER;
+				g.drawText(
+					hSubject,
+					new Font("MS Gothic", 12f),
+					_plotAreaBoundsColor,
+					Rect(x, y, plotAreaBounds.width, HORIZONTAL_SCALE_TEXT_HEIGHT * 2),
+					fmt
+				);
+			}
+		}
+
+		// Draw records.
+		Tuple!T prevRecord;
+		int x1 = plotAreaBounds.x + _plotAreaLeftPadding;
+		int x2;
+		bool isFirstRecord = true;
+		auto csvRange = csvReader!(Tuple!T)(_csv, null).drop(_firstRecord).take(_lastRecord - _firstRecord + 1);
+		foreach (currRecord; csvRange)
+		{
+			x2 = x1 + _horizontalScaleSpan;
+			bool isFirstColumn = true;
+			foreach (col, value; currRecord)
+			{
+				if (col != 0)
+				{
+					int seriesIndex = cast(int)col - 1;
+					if (!isFirstRecord)
+					{
+						bool isDigital = _seriesStyleList[seriesIndex].isDigital;
+						int currHeight = _seriesStyleList[seriesIndex].height;
+						Color lineColor = _seriesStyleList[seriesIndex].color;
+						if (isDigital)
+						{ // Digital signal
+							enum MODEST_HEIGHT_RATIO = 0.8;
+							int toDigit(int v) { return v == 0 ? 0 : 1; }
+							int y1 = cast(int)(_seriesBaseY(seriesIndex) - currHeight * toDigit(prevRecord[col]) * MODEST_HEIGHT_RATIO);
+							int y2 = cast(int)(_seriesBaseY(seriesIndex) - currHeight * toDigit(value) * MODEST_HEIGHT_RATIO);
+							g.drawLine(
+								new Pen(lineColor),
+								x1 - _horizontalScaleSpan,
+								y1,
+								x2 - _horizontalScaleSpan,
+								y1
+							);
+							g.drawLine(
+								new Pen(lineColor),
+								x2 - _horizontalScaleSpan,
+								y1,
+								x2 - _horizontalScaleSpan,
+								y2
+							);
+						}
+						else
+						{ // Analog signal
+							double vRatio = cast(double)currHeight / (_seriesStyleList[seriesIndex].max - _seriesStyleList[seriesIndex].min);
+							int y1 = cast(int)(_seriesBaseY(seriesIndex) - vRatio * prevRecord[col]);
+							int y2 = cast(int)(_seriesBaseY(seriesIndex) - vRatio * value);
+							// Offset the base line of zero point.
+							if (_seriesStyleList[seriesIndex].min < 0)
+							{
+								y1 -= _seriesBaseY(seriesIndex) - _seriesZeroY(seriesIndex);
+								y2 -= _seriesBaseY(seriesIndex) - _seriesZeroY(seriesIndex);
+							}
+							g.drawLine(
+								new Pen(lineColor),
+								x1 - _horizontalScaleSpan,
+								y1,
+								x2 - _horizontalScaleSpan,
+								y2
+							);
+						}
+					}
+				}
+				isFirstColumn = false;
+			}
+			x1 = x1 + _horizontalScaleSpan;
+			prevRecord = currRecord;
+			isFirstRecord = false;
+		}
+	}
+
+	///
+	Rect plotAreaBounds() const
+	{
+		return Rect(
+			_originPoint.x,
+			_originPoint.y,
+			cast(int)((_lastRecord - _firstRecord) * _horizontalScaleSpan + _plotAreaLeftPadding + _plotAreaRightPadding),
+			_plotAreaTopPadding + _verticalSeriesOffset(cast(int)T.length - 2) + _plotAreaBottomPadding
+		);
+	}
+
+	///
+	deprecated void originPoint(Point pt)
+	{
+		_originPoint = pt;
+	}
+	///
+	void location(Point pt)
+	{
+		_originPoint.x = pt.x + _chartMargins.top + _verticalScaleWidth;
+		_originPoint.y = pt.y + _chartMargins.left;
+	}
+
+	///
+	void chartMargins(ChartMargins m)
+	{
+		_chartMargins = m;
+	}
+
+	///
+	void plotAreaAndHorizontalScaleSpanY(int y)
+	{
+		_plotAreaAndHorizontalScaleSpanY = y;
+	}
+
+	///
+	void plotAreaTopPadding(int y)
+	{
+		_plotAreaTopPadding = y;
+	}
+
+	///
+	void plotAreaBottomPadding(int y)
+	{
+		_plotAreaBottomPadding = y;
+	}
+
+	///
+	void plotAreaRightPadding(int x)
+	{
+		_plotAreaRightPadding = x;
+	}
+
+	///
+	void plotAreaLeftPadding(int x)
+	{
+		_plotAreaLeftPadding = x;
+	}
+
+	///
+	void hasHorizontalScale(bool byes)
+	{
+		_hasHorizontalScale = byes;
+	}
+
+	///
+	void hasVerticalScale(bool byes)
+	{
+		_hasVerticalScale = byes;
+	}
+
+	///
+	void hasZeroLine(bool byes)
+	{
+		_hasZeroLine = byes;
+	}
+
+	///
+	void firstRecord(int i)
+	{
+		_firstRecord = i;
+	}
+
+	///
+	void lastRecord(int i)
+	{
+		_lastRecord = i;
+	}
+	
+	///
+	void backColor(Color c)
+	{
+		_backColor = c;
+	}
+
+	///
+	void plotAreaBoundsColor(Color c)
+	{
+		_plotAreaBoundsColor = c;
+	}
+
+	///
+	void horizontalScaleSpan(int x)
+	{
+		_horizontalScaleSpan = x;
+	}
+
+	///
+	void horizontalScaleStep(int s)
+	{
+		if (s <= 0)
+			throw new DflException("DFL: Invalid horizontal scale step.");
+		_horizontalScaleStep = s;
+	}
+
+	///
+	void verticalScaleWidth(int w)
+	{
+		_verticalScaleWidth = w;
+	}
+
+	///
+	void horizontalScaleLineInnerSide(int h)
+	{
+		_horizontalScaleLineInnerSide = h;
+	}
+
+	///
+	void horizontalScaleLineOuterSide(int h)
+	{
+		_horizontalScaleLineOuterSide = h;
+	}
+
+	///
+	void horizontalScaleHeight(int h)
+	{
+		_horizontalScaleHeight = h;
+	}
+
+	///
+	struct TimeChartSeriesStyleObject // Internal struct.
+	{
+		///
+		this(TimeChartSeriesStyle[] v)
+		{
+			_arr = v;
+		}
+
+		/// Assign operator forwarding.
+		void opIndexAssign(TimeChartSeriesStyle value)
+		{
+			_arr[] = value;
+		}
+		/// ditto
+		void opIndexAssign(TimeChartSeriesStyle value, size_t i)
+		{
+			_arr[i] = value;
+		}
+		/// ditto
+		void opSliceAssign(TimeChartSeriesStyle value, size_t i, size_t j)
+		{
+			_arr[i..j] = value;
+		}
+
+		///
+		TimeChartSeriesStyle opIndex(size_t i)
+		{
+			return _arr[i];
+		}
+	
+	private:
+		TimeChartSeriesStyle[] _arr;
+	}
+
+	///
+	TimeChartSeriesStyleObject seriesStyleList()
+	{
+		return TimeChartSeriesStyleObject(_seriesStyleList);
+	}
+
+private:
+	string _csv;
+	int _firstRecord;
+	int _lastRecord;
+	Point _originPoint;
+	ChartMargins _chartMargins;
+	Color _backColor;
+	Color _plotAreaBoundsColor;
+	int _plotAreaTopPadding;
+	int _plotAreaBottomPadding;
+	int _plotAreaLeftPadding;
+	int _plotAreaRightPadding;
+	int _plotAreaAndHorizontalScaleSpanY;
+	bool _hasHorizontalScale;
+	int _horizontalScaleSpan;
+	int _horizontalScaleStep;
+	int _horizontalScaleHeight;
+	int _horizontalScaleLineInnerSide;
+	int _horizontalScaleLineOuterSide;
+	bool _hasVerticalScale;
+	int _verticalScaleWidth;
+	bool _hasZeroLine;
+	TimeChartSeriesStyle[] _seriesStyleList;
+
+	///
+	int _verticalSeriesOffset(int seriesIndex) const
+	{
+		int y;
+		for (int i; i <= seriesIndex; i++)
+			y += _seriesStyleList[i].height;
+		return y;
+	}
+
+	///
+	int _seriesBaseY(int seriesIndex) const
+	{
+		return plotAreaBounds.y + _plotAreaTopPadding + _verticalSeriesOffset(seriesIndex);
+	}
+
+	///
+	int _seriesZeroY(int seriesIndex)
+	{
+		int currHeight = _seriesStyleList[cast(int)seriesIndex].height;
+		int maxValue = _seriesStyleList[cast(int)seriesIndex].max;
+		int minValue = _seriesStyleList[cast(int)seriesIndex].min;
+		return cast(int)(_seriesBaseY(seriesIndex) + cast(double)minValue * currHeight / (maxValue - minValue));
+	}
+}
+
+///
+struct TimeChartSeriesStyle
+{
+	this(bool inIsDigital, Color inColor = Color.blue, int inHeight = 20, int inMin = 0, int inMax = 1)
+	{
+		isDigital = inIsDigital;
+		color = inColor;
+		height = inHeight;
+		min = inMin;
+		max = inMax;
+	}
+	bool isDigital;
+	Color color;
+	int height;
+	int min;
+	int max;
+}
