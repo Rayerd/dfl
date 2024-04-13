@@ -316,11 +316,11 @@ class Splitter: Control // docmain
 				break;
 			
 			case DockStyle.FILL:
-				assert("DockStyle.FILL is not allowed in Splitter");
+				assert(0, "DockStyle.FILL is not allowed in Splitter");
 				break;
 			
 			case DockStyle.NONE:
-				assert("DockStyle.NONE is not allowed in Splitter");
+				assert(0, "DockStyle.NONE is not allowed in Splitter");
 				break;
 		}
 		return null;
