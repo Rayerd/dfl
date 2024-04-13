@@ -61,8 +61,8 @@ class MainForm : Form
 		_graph.hasZeroLine = true;
 		_graph.backColor = Color.white;
 
-		_table = new CustomTableRenderer(csv, 10);
-		_table.location = Point(50, 500);
+		_table = new CustomTableRenderer(csv, 15);
+		_table.location = Point(600, 50);
 		_table.hasHeader = true;
 		_table.showHeader = true;
 		_table.headerLine = true;
@@ -73,8 +73,8 @@ class MainForm : Form
 	{
 		if (_graph)
 			_graph.draw(e.graphics);
-		// if (_table)
-		// 	_table.draw(e.graphics);
+		if (_table)
+			_table.draw(e.graphics);
 	}
 }
 
