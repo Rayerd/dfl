@@ -25,6 +25,7 @@ DFL is a Win32 windowing library for the D language.
 ![screen shot](./examples/listview/image/screenshot.png "screen shot")
 ![screen shot](./examples/statusbar/image/screenshot.png "screen shot")
 ![screen shot](./examples/splitter/image/screenshot.png "screen shot")
+![screen shot](./examples/scrollbar/image/screenshot.png "screen shot")
 ![screen shot](./examples/imagelist/image/screenshot.png "screen shot")
 ![screen shot](./examples/commondialog/image/screenshot.png "screen shot")
 ![screen shot](./examples/commondialog/image/screenshot2.png "screen shot")
@@ -41,7 +42,7 @@ DFL is a Win32 windowing library for the D language.
 ![screen shot](./examples/dclock/image/screenshot.png "screen shot")
 ![screen shot](./examples/tablerenderer/image/screenshot.png "screen shot")
 ![screen shot](./examples/linegraphrenderer/image/screenshot.png "screen shot")
-![screen shot:w200](./examples/timechartrenderer/image/screenshot.png "screen shot")
+![screen shot](./examples/timechartrenderer/image/screenshot.png "screen shot")
 
 ## Build and Install (dfl.lib and dfl_debug.lib)
 ### 1. Set environment variables
