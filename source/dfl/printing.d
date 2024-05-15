@@ -57,7 +57,7 @@ final static class PrinterUnitConvert
 		return value * to / from;
 	}
 
-	///
+	/// ditto
 	static int convert(int value, PrinterUnit fromUnit, PrinterUnit toUnit)
 	{
 		double from = unitsPerDisplay(fromUnit);
@@ -65,7 +65,7 @@ final static class PrinterUnitConvert
 		return cast(int)(value * to / from);
 	}
 
-	///
+	/// ditto
 	static Margins convert(Margins value, PrinterUnit fromUnit, PrinterUnit toUnit)
 	{
 		return new Margins(
@@ -76,7 +76,7 @@ final static class PrinterUnitConvert
 		);
 	}
 
-	///
+	/// ditto
 	static Point convert(Point value, PrinterUnit fromUnit, PrinterUnit toUnit)
 	{
 		return Point(
@@ -85,7 +85,7 @@ final static class PrinterUnitConvert
 		);
 	}
 
-	///
+	/// ditto
 	static POINT convert(POINT value, PrinterUnit fromUnit, PrinterUnit toUnit)
 	{
 		return POINT(
@@ -94,7 +94,7 @@ final static class PrinterUnitConvert
 		);
 	}
 
-	///
+	/// ditto
 	static Rect convert(Rect value, PrinterUnit fromUnit, PrinterUnit toUnit)
 	{
 		return Rect(
@@ -105,7 +105,7 @@ final static class PrinterUnitConvert
 		);
 	}
 
-	///
+	/// ditto
 	static RECT convert(RECT value, PrinterUnit fromUnit, PrinterUnit toUnit)
 	{
 		return RECT(
@@ -116,7 +116,7 @@ final static class PrinterUnitConvert
 		);
 	}
 
-	///
+	/// ditto
 	static Size convert(Size value, PrinterUnit fromUnit, PrinterUnit toUnit)
 	{
 		return Size(
@@ -125,7 +125,7 @@ final static class PrinterUnitConvert
 		);
 	}
 
-	///
+	/// ditto
 	static SIZE convert(SIZE value, PrinterUnit fromUnit, PrinterUnit toUnit)
 	{
 		return SIZE(
@@ -866,6 +866,12 @@ private PrinterResolution[] _createPrinterResolutionArray(HGLOBAL hDevMode)
 	}
 }
 
+private
+{
+	enum DEFAULT_PRINTER_RESOLUTION_X = 200;
+	enum DEFAULT_PRINTER_RESOLUTION_Y = 200;
+}
+
 ///
 class PrinterSettings
 {
@@ -919,7 +925,7 @@ class PrinterSettings
 				false, // true is landscape (w > h).
 				new PaperSize(PaperKind.A4, "A4", 827, 1169), // 1/100 inch unit. (210 x 297 mm)
 				new PaperSource(PaperSourceKind.FORM_SOURCE, "Tray"),
-				new PrinterResolution(PrinterResolutionKind.CUSTOM, 200, 200)); // dpi unit.
+				new PrinterResolution(PrinterResolutionKind.CUSTOM, DEFAULT_PRINTER_RESOLUTION_X, DEFAULT_PRINTER_RESOLUTION_Y)); // dpi unit.
 		}
 		return _defaultPageSettings;
 	}
@@ -2124,8 +2130,8 @@ class PrintPreviewControl : Control
 			DEVMODE* pDevMode = cast(DEVMODE*)GlobalLock(pd.hDevMode);
 			scope(exit)
 				GlobalUnlock(pDevMode);
-			pDevMode.dmPrintQuality = 200; // dpi
-			pDevMode.dmYResolution = 200; // dpi
+			pDevMode.dmPrintQuality = DEFAULT_PRINTER_RESOLUTION_X; // dpi
+			pDevMode.dmYResolution = DEFAULT_PRINTER_RESOLUTION_Y; // dpi
 			pDevMode.dmOrientation = {
 				if (document.printerSettings.defaultPageSettings.landscape)
 					return DMORIENT_LANDSCAPE;
@@ -2187,12 +2193,12 @@ class PrintPreviewControl : Control
 		mouseDown(this, e);
 	}
 
-	static const uint LEFT_MARIGIN = 20; // Dots
-	static const uint RIGHT_MARGIN = 20; // Dots
-	static const uint TOP_MARGIN = 20; // Dots
-	static const uint BOTTOM_MARGIN = 20; // Dots
-	static const uint HORIZONTAL_SPAN = 20; // Dots
-	static const uint VERTICAL_SPAN = 20; // Dots
+	enum LEFT_MARIGIN = 20; // Dots
+	enum RIGHT_MARGIN = 20; // Dots
+	enum TOP_MARGIN = 20; // Dots
+	enum BOTTOM_MARGIN = 20; // Dots
+	enum HORIZONTAL_SPAN = 20; // Dots
+	enum VERTICAL_SPAN = 20; // Dots
 
 	///
 	protected override void onPaint(PaintEventArgs e)
@@ -2203,8 +2209,6 @@ class PrintPreviewControl : Control
 			if (this.autoZoom)
 			{
 				const Rect screenRect = Rect(0, 0, _background.width, _background.height);
-				const Rect paperRect = _toRect(document.printerSettings.defaultPageSettings);
-
 				uint h0 = height;
 				uint w0 = screenRect.width * height / screenRect.height;
 				if (w0 >= width)
@@ -2495,31 +2499,6 @@ class PrintPreviewDialog : Form
 	}
 }
 
-///
-// final class PreviewPageInfo
-// {
-// 	private Image _image;
-// 	private Size _size; // 1/100 inch unit.
-	
-// 	///
-// 	this(Image image, Size size)
-// 	{
-// 		_image = image;
-// 		_size = size;
-// 	}
-
-// 	///
-// 	Image image() // getter
-// 	{
-// 		return _image;
-// 	}
-
-// 	/// Gets the size of the printed page, in 1/100 inch unit.
-// 	Size physicalSize() const // getter
-// 	{
-// 		return _size;
-// 	}
-// }
 
 ///
 class PreviewPrintController : PrintController
@@ -2539,12 +2518,6 @@ class PreviewPrintController : PrintController
 	}
 
 	///
-	// PreviewPageInfo[] getPreviewPageInfo()
-	// {
-	// 	assert(0);
-	// }
-
-	///
 	override void onStartPrint(PrintDocument document, PrintEventArgs e)
 	{
 		// Do nothing.
@@ -2556,12 +2529,12 @@ class PreviewPrintController : PrintController
 		// Do nothing.
 	}
 	
-	///
+	/// Create and draw the back screen.
 	override Graphics onStartPage(PrintDocument document, PrintPageEventArgs e)
 	{
 		Rect paperRect = _toRect(document.printerSettings.defaultPageSettings);
 		_pageGraphics = {
-			 // Be dispose() called in onEntPage().
+			// Be dispose() called in onEntPage().
 			if (e.pageBounds.width <= e.pageBounds.height)
 				return new MemoryGraphics(paperRect.width, paperRect.height, e.graphics.handle);
 			else
@@ -2574,9 +2547,12 @@ class PreviewPrintController : PrintController
 		return _pageGraphics;
 	}
 
-	///
+	/// Transfer from the back screen to the front screen.
 	override void onEndPage(PrintDocument document, PrintPageEventArgs e)
 	{
+		// Initialize graphics unit that is changed in user side.
+		_pageGraphics.pageUnit = GraphicsUnit.DISPLAY;
+
 		// Draw the current page number.
 		const string currentPageString = to!string(e.currentPage);
 		Font font = new Font("MS Gothic", 100/+pt+/ * e.pageSettings.printerResolution.y / 72);
@@ -2584,7 +2560,9 @@ class PreviewPrintController : PrintController
 		_pageGraphics.drawText(currentPageString, font, Color.black, Rect(0, 0, 1000, 1000));
 
 		// Draw the main image.
-		const Rect screenRect = Rect(0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN)); // NOTE: Gets MemoryGraphics size as the background DC.
+		const int deviceWidth = GetSystemMetrics(SM_CXSCREEN); // pixel unit.
+		const int deviceHeight = GetSystemMetrics(SM_CYSCREEN); // pixel unit.
+		const Rect screenRect = Rect(0, 0, deviceWidth, deviceHeight); // NOTE: Gets MemoryGraphics size as the background DC.
 		const Rect paperRect = _toRect(document.printerSettings.defaultPageSettings);
 		const uint row = (e.currentPage - _previewControl.startPage - 1) % _previewControl.rows;
 		const uint col = (e.currentPage - _previewControl.startPage - 1) / _previewControl.rows;
@@ -2607,7 +2585,7 @@ class PreviewPrintController : PrintController
 			}
 			else
 			{
-				// Bottom side is over size.
+				// The bottom side protruded.
 				w0 = w2;
 				h0 = h2;
 			}
@@ -2621,7 +2599,7 @@ class PreviewPrintController : PrintController
 			}
 			else
 			{
-				// Right side is over size.
+				// The right side protruded.
 				w0 = w1;
 				h0 = h1;
 			}
@@ -2637,8 +2615,8 @@ class PreviewPrintController : PrintController
 			_pageGraphics.handle, // SRC
 			0,
 			0,
-			paperRect.width,
-			paperRect.height,
+			paperRect.width * 100 / DEFAULT_PRINTER_RESOLUTION_X,
+			paperRect.height * 100 / DEFAULT_PRINTER_RESOLUTION_Y,
 			SRCCOPY
 		);
 		_pageGraphics.dispose(); // Created in onStartPage().
@@ -2652,10 +2630,9 @@ class PreviewPrintController : PrintController
 ///
 private Rect _toRect(PageSettings page)
 {
-	return Rect(
-		(page.bounds.x - page.margins.left) * page.printerResolution.x / 100,
-		(page.bounds.y - page.margins.top) * page.printerResolution.y / 100,
-		(page.bounds.x + page.bounds.width + page.margins.right) * page.printerResolution.x / 100,
-		(page.bounds.y + page.bounds.height + page.margins.bottom) * page.printerResolution.y / 100
-	);
+	const int paperLeft = (page.bounds.x - page.margins.left) * page.printerResolution.x / 100;
+	const int paperTop = (page.bounds.y - page.margins.top) * page.printerResolution.y / 100;
+	const int paperWidth = (page.bounds.x + page.bounds.width + page.margins.right) * page.printerResolution.x / 100;
+	const int paperHeight = (page.bounds.y + page.bounds.height + page.margins.bottom) * page.printerResolution.y / 100;
+	return Rect(paperLeft, paperTop, paperWidth, paperHeight);
 }

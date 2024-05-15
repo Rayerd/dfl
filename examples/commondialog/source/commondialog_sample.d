@@ -345,15 +345,16 @@ class MainForm : Form
 
 		_document.printPage ~= (PrintDocument doc, PrintPageEventArgs e) {
 			Graphics g = e.graphics;
-			int dpiX = e.pageSettings.printerResolution.x; // dpi unit.
-			int dpiY = e.pageSettings.printerResolution.y; // dpi unit.
+
+			// NOTE: BREAKING CHANGE: Changed default scale unit of Graphics is now 1/100 inches from pixels.
+			assert(g.pageUnit == GraphicsUnit.DISPLAY);
 
 			// Draw margin border to all pages.
 			Rect marginRect = Rect(
-				e.marginBounds.x * dpiX / 100, // e.marginBounds is 1/100 dpi unit.
-				e.marginBounds.y * dpiY / 100,
-				e.marginBounds.width * dpiX / 100,
-				e.marginBounds.height * dpiY / 100);
+				e.marginBounds.x, // e.marginBounds is 1/100 dpi unit.
+				e.marginBounds.y,
+				e.marginBounds.width,
+				e.marginBounds.height);
 			g.drawRectangle(new Pen(Color.green, 10), marginRect);
 
 			if (e.currentPage == 1) // Draw page 1.
@@ -366,38 +367,38 @@ class MainForm : Form
 					"PrintPageEventArgs.pageBounds: " ~ to!string(e.pageBounds) ~ "\n\n" ~
 					"PrintPageEventArgs.marginBounds: " ~ to!string(e.marginBounds);
 				Rect paramPrintRect = Rect(
-					e.marginBounds.x * dpiX / 100, // e.marginBounds is 1/100 dpi unit.
-					e.marginBounds.y * dpiY / 100,
-					e.marginBounds.width * dpiX / 100,
-					e.marginBounds.height * dpiY / 100
+					e.marginBounds.x, // e.marginBounds is 1/100 dpi unit.
+					e.marginBounds.y,
+					e.marginBounds.width,
+					e.marginBounds.height
 				);
 				g.drawText(
 					str,
-					new Font("MS Gothic", 8/+pt+/ * dpiX / 72),
+					new Font("MS Gothic", 8/+pt+/ * 100 / 72),
 					Color.black,
 					paramPrintRect
 				);
 			}
 			else if (e.currentPage == 2) // Draw page 2.
 			{
-				Rect redRect = Rect(1 * dpiX, 1 * dpiY, 1 * dpiX, 1 * dpiY); // 1 x 1 inch.
+				Rect redRect = Rect(1 * 100, 1 * 100, 1 * 100, 1 * 100); // 1 x 1 inch.
 				redRect.offset(marginRect.x, marginRect.y);
 				g.fillRectangle(new SolidBrush(Color.red), redRect);
 
-				Rect blueRect = Rect(dpiX, dpiY, 3 * dpiX, 3 * dpiY); // 3 x 3 inch.
+				Rect blueRect = Rect(100, 100, 3 * 100, 3 * 100); // 3 x 3 inch.
 				blueRect.offset(marginRect.x, marginRect.y);
 				g.drawRectangle(new Pen(Color.blue, 10), blueRect);
 
-				Rect textRect = Rect(1 * dpiX, 1 * dpiY, 1 * dpiX, 1 * dpiY); // 1 x 1 inch.
+				Rect textRect = Rect(1 * 100, 1 * 100, 1 * 100, 1 * 100); // 1 x 1 inch.
 				textRect.offset(marginRect.x, marginRect.y);
 				g.drawText(
 					"ABCDEあいうえお",
-					new Font("MS Gothic", 12/+pt+/ * dpiX / 72),
+					new Font("MS Gothic", 12/+pt+/ * 100 / 72),
 					Color.black,
 					textRect
 				);
 
-				Rect purpleRect = Rect(3 * dpiX, 3 * dpiY, 1 * dpiX, 1 * dpiY); // 1 x 1 inch.
+				Rect purpleRect = Rect(3 * 100, 3 * 100, 1 * 100, 1 * 100); // 1 x 1 inch.
 				purpleRect.offset(marginRect.x, marginRect.y);
 				g.drawEllipse(new Pen(Color.purple, 10), purpleRect);
 
@@ -407,10 +408,10 @@ class MainForm : Form
 				{
 					g.drawLine(
 						pen,
-						marginRect.x + cast(int)(x / 4.0 * dpiX),
-						e.marginBounds.y * dpiY / 100,
-						marginRect.x + cast(int)((lineNum - x - 1)/4.0 * dpiX),
-						e.marginBounds.bottom * dpiY / 100);
+						marginRect.x + cast(int)(x / 4.0 * 100),
+						e.marginBounds.y,
+						marginRect.x + cast(int)((lineNum - x - 1)/4.0 * 100),
+						e.marginBounds.bottom);
 				}
 			}
 		};
