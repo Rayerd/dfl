@@ -3,7 +3,7 @@
 	"tasks": [
 		{
 			"type": "dub",
-			"run": true,
+			"run": false,
 			"cwd": ".",
 			"compiler": "$current",
 			"archType": "$current",
@@ -12,7 +12,10 @@
 			"problemMatcher": [
 				"$dmd"
 			],
-			"group": "build",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
 			"label": "dub: Build splitter_sample",
 			"detail": "dub build --compiler=dmd.EXE -a=x86_64 -b=debug -c=application"
 		}

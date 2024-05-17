@@ -12,7 +12,10 @@
 			"problemMatcher": [
 				"$dmd"
 			],
-			"group": "build",
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
 			"label": "dub: Build buttons_sample",
 			"detail": "dub build --compiler=dmd.EXE -a=x86_64 -b=debug -c=application"
 		}

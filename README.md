@@ -4,16 +4,16 @@ This unofficial project is a migration of [D Forms Library (DFL)](http://wiki.dp
 DFL is a Win32 windowing library for the D language.
 
 ## Recent major features
-- **Module "dfl.chart" is now comming.**
-  - TableRenderer (with example)
-  - LineGraphRenderer (with example)
-  - **TimeChartRenderer (with example)**
-- Add simple clock "Dclock" as an example of DFL application.
+- **Registered DFL to DUB.**
+- **Support multiple screens.**
+- Module "dfl.chart" is now comming.
+   - TableRenderer (with example)
+   - LineGraphRenderer (with example)
+   - TimeChartRenderer (with example)
 - Module "dfl.printing" is now comming.
-  - PrintDialog
-  - PrintSetupDialog
-  - PrintPreviewDialog
-- DUB is available for DFL.
+   - PrintDialog
+   - PrintSetupDialog
+   - PrintPreviewDialog
 - Remove dflexe.
 - Remove GTK-based DFL.
 - Remove some bundled libraries such as user32_dfl.lib etc... (From now on, use dmd-bundled libraries such as the MinGW platform library and so on.)
@@ -44,7 +44,29 @@ DFL is a Win32 windowing library for the D language.
 ![screen shot](./examples/linegraphrenderer/image/screenshot.png "screen shot")
 ![screen shot](./examples/timechartrenderer/image/screenshot.png "screen shot")
 
-## Build and Install (dfl.lib and dfl_debug.lib)
+## Usage
+First, you make new DUB project:
+```bat
+> cd examples\new_project
+> dub init
+```
+Add DFL to local DUB registry:
+```bat
+> dub add dfl
+> dub list
+Packages present in the system and known to dub:
+  dfl 0.10.0: c:\your\path\dfl\0.10.0\dfl\
+  silly 1.2.0-dev.2: c:\your\path\silly\1.2.0-dev.2\silly\
+  undead 1.1.8: c:\your\path\undead\1.1.8\undead\
+```
+Build and run your GUI applications with DUB as below:
+```bat
+> dub build -a=x86_64
+> dub run
+```
+**IMPORTANT**: DUB is building **dfl_dub.lib** that is **not** containing **undead.lib** and WINSDK libraries.
+
+## APPENDIX: Build and Install dfl.lib and dfl_debug.lib
 ### 1. Set environment variables
 Fix the paths below:
 ```bat
@@ -92,25 +114,6 @@ In order to make and move *.lib to paths below:
 - **go.bat** (MSVC required) : Make and move *.lib to %dmd_path%\lib32mscoff
 - **go.bat 32mscoff** (MSVC required) : ditto
 - **go64.bat** (MSVC required) : Make and move *.lib to %dmd_path%\lib64
-
-## With DUB **(RECOMMENDED)**
-First, add DFL to local DUB registry:
-```bat
-> cd dfl
-> dub add-local .
-> dub list
-Packages present in the system and known to dub:
-  dfl ~master: c:\your\path\dfl\
-```
-Build and run your GUI applications with DUB as below:
-```bat
-> cd examples\hello_dfl
-> dub build -a=x86_omf
-> dub run
-```
-See also **./examples/hello_dfl/dub.json**.
-
-**IMPORTANT**: DUB is building **dfl_dub.lib** that is **not** containing **undead.lib** and WINSDK libraries.
 
 ## License
 DFL is under the boost and/or zlib/libpng license.
