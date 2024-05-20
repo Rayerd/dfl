@@ -7,13 +7,13 @@ DFL is a Win32 windowing library for the D language.
 - **Registered DFL to DUB.**
 - **Support multiple screens.**
 - Module "dfl.chart" is now comming.
-   - TableRenderer (with example)
-   - LineGraphRenderer (with example)
-   - TimeChartRenderer (with example)
+	- TableRenderer (with example)
+	- LineGraphRenderer (with example)
+	- TimeChartRenderer (with example)
 - Module "dfl.printing" is now comming.
-   - PrintDialog
-   - PrintSetupDialog
-   - PrintPreviewDialog
+	- PrintDialog
+	- PrintSetupDialog
+	- PrintPreviewDialog
 - Remove dflexe.
 - Remove GTK-based DFL.
 - Remove some bundled libraries such as user32_dfl.lib etc... (From now on, use dmd-bundled libraries such as the MinGW platform library and so on.)
