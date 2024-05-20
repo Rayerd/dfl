@@ -6,6 +6,7 @@
 module dfl.drawing;
 
 private import dfl.base;
+private import std.stdio;
 
 private import dfl.internal.dlib;
 private import dfl.internal.winapi;
@@ -1527,6 +1528,14 @@ class Picture: Image // docmain
 		if(!ipic)
 			return null;
 		return new Picture(ipic);
+	}
+
+	/// ditto
+	static Picture fromFile(File file)
+	{
+		auto size = file.size();
+		ubyte[] buf = file.rawRead(new ubyte[size]);
+		return fromMemory(buf);
 	}
 	
 	
