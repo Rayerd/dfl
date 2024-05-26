@@ -29,10 +29,12 @@ private import core.sys.windows.commdlg;
 private import core.sys.windows.windows;
 
 private import std.conv;
+private import std.range;
+private import std.algorithm;
 
 debug
 {
-	private import std.stdio;
+	private import std.stdio : writeln, stdout;
 }
 
 ///
@@ -521,27 +523,34 @@ class PrintDocument
 		if (printArgs.cancel)
 			return;
 
+		Graphics deviceScreen = new Graphics(hDC, false);
+		
 		PrintPageEventArgs printPageArgs;
 		auto walker = new PrintRangeWalker(this.printerSettings.printRange.ranges);
 		foreach (int pageCounter; walker)
 		{
-			Graphics originGraphics = new Graphics(printArgs.hDC, false);
-
 			PageSettings newPageSettings = this.printerSettings.defaultPageSettings.clone();
-			QueryPageSettingsEventArgs queryPageSettingsArgs = new QueryPageSettingsEventArgs(printArgs.hDC, newPageSettings, pageCounter);
+			QueryPageSettingsEventArgs queryPageSettingsArgs = new QueryPageSettingsEventArgs(hDC, newPageSettings, pageCounter);
 			onQueryPageSettings(queryPageSettingsArgs); // Be modified pageSettings of current page by user.
 
-			PageSettings ps = queryPageSettingsArgs.pageSettings;
+			PageSettings ps = queryPageSettingsArgs.pageSettings; // Short name.
+
+			// Change page orientation.
+			DEVMODE devMode;
+			devMode.dmSize = DEVMODE.sizeof;
+			devMode.dmFields |= DM_ORIENTATION;
+			devMode.dmOrientation |= ps.landscape ? DMORIENT_LANDSCAPE : DMORIENT_PORTRAIT;
+			ResetDC(hDC, &devMode);
+
 			Rect marginBounds = ps.bounds; // 1/100 inch unit.
 			Rect pageBounds = Rect(0, 0, ps.paperSize.width, ps.paperSize.height); // 1/100 inch unit.
-			printPageArgs = new PrintPageEventArgs(originGraphics, marginBounds, pageBounds, ps, pageCounter);
-
+			printPageArgs = new PrintPageEventArgs(deviceScreen, marginBounds, pageBounds, ps, pageCounter);
 			printPageArgs.graphics = printController.onStartPage(this, printPageArgs); // Call StartPage() API
 			
 			if(!printPageArgs.cancel)
 				this.onPrintPage(printPageArgs);
 			
-			printPageArgs.graphics = originGraphics;
+			printPageArgs.graphics = deviceScreen;
 
 			printController.onEndPage(this, printPageArgs); // Call EndPage() API
 			if (printPageArgs.cancel)
@@ -2031,7 +2040,7 @@ class PrintPreviewControl : Control
 	private int _rows; ///
 	private int _startPage; ///
 	private bool _autoZoom; ///
-	private MemoryGraphics _background; ///
+	private MemoryGraphics _offscreen; ///
 
 	///
 	this(PrintDocument doc)
@@ -2049,7 +2058,7 @@ class PrintPreviewControl : Control
 	}
 
 	///
-	void document(PrintDocument doc)
+	void document(PrintDocument doc) // setter
 	in
 	{
 		assert(doc);
@@ -2059,51 +2068,51 @@ class PrintPreviewControl : Control
 		_document = doc;
 	}
 	/// ditto
-	PrintDocument document()
+	PrintDocument document() // getter
 	{
 		return _document;
 	}
 
 	///
-	void autoZoom(bool b)
+	void autoZoom(bool b) // setter
 	{
 		_autoZoom = b;
 	}
 	/// ditto
-	bool autoZoom() const
+	bool autoZoom() const // getter
 	{
 		return _autoZoom;
 	}
 
 	///
-	void columns(int col)
+	void columns(int col) // setter
 	{
 		_columns = col;
 	}
 	/// ditto
-	int columns() const
+	int columns() const // getter
 	{
 		return _columns;
 	}
 
 	///
-	void rows(int row)
+	void rows(int row) // setter
 	{
 		_rows = row;
 	}
 	/// ditto
-	int rows() const
+	int rows() const // getter
 	{
 		return _rows;
 	}
 
 	///
-	void startPage(int page)
+	void startPage(int page) // setter
 	{
 		_startPage = page;
 	}
 	/// ditto
-	int startPage() const
+	int startPage() const // getter
 	{
 		return _startPage;
 	}
@@ -2145,18 +2154,19 @@ class PrintPreviewControl : Control
 		}
 
 		Rect screenRect = Rect(0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN));
-		_background = new MemoryGraphics(screenRect.width, screenRect.height);
-		_background.fillRectangle(new SolidBrush(Color.gray), screenRect);
+		_offscreen = new MemoryGraphics(screenRect.width, screenRect.height);
+		_offscreen.fillRectangle(new SolidBrush(Color.gray), screenRect);
 
 		// Reset here, because print range is always all pages on preview print.
 		_document.printerSettings.printRange.reset();
 
 		PrintController oldPrintController = _document.printController;
 		_document.printController = new PreviewPrintController(this); // TODO: Cross reference.
-		_document.print(_background.handle);
+		_document.print(_offscreen.handle);
 		_document.printController = oldPrintController;
 	}
 
+	///
 	protected override void onHandleCreated(EventArgs e)
 	{
 		super.onHandleCreated(e);
@@ -2193,48 +2203,48 @@ class PrintPreviewControl : Control
 		mouseDown(this, e);
 	}
 
-	enum LEFT_MARIGIN = 20; // Dots
-	enum RIGHT_MARGIN = 20; // Dots
-	enum TOP_MARGIN = 20; // Dots
-	enum BOTTOM_MARGIN = 20; // Dots
-	enum HORIZONTAL_SPAN = 20; // Dots
-	enum VERTICAL_SPAN = 20; // Dots
+	enum LEFT_MARIGIN = 20; // pixels
+	enum RIGHT_MARGIN = 20; // pixels
+	enum TOP_MARGIN = 20; // pixels
+	enum BOTTOM_MARGIN = 20; // pixels
+	enum HORIZONTAL_SPAN = 20; // pixels
+	enum VERTICAL_SPAN = 20; // pixels
 
 	///
 	protected override void onPaint(PaintEventArgs e)
 	{
 		super.onPaint(e);
-		if (_background)
+		if (_offscreen)
 		{
 			if (this.autoZoom)
 			{
-				const Rect screenRect = Rect(0, 0, _background.width, _background.height);
-				uint h0 = height;
-				uint w0 = screenRect.width * height / screenRect.height;
-				if (w0 >= width)
+				const Rect offscreenRect = Rect(0, 0, _offscreen.width, _offscreen.height);
+				uint onScreenHeight = this.height;
+				uint onscreenWidth = offscreenRect.width * this.height / offscreenRect.height;
+				if (onscreenWidth >= this.width)
 				{
-					w0 = width;
-					h0 = screenRect.height * width / screenRect.width;
+					onscreenWidth = this.width;
+					onScreenHeight = offscreenRect.height * this.width / offscreenRect.width;
 				}
 
-				SetStretchBltMode(_background.handle, STRETCH_DELETESCANS); // SRC
+				SetStretchBltMode(_offscreen.handle, STRETCH_DELETESCANS); // SRC
 				StretchBlt(
 					e.graphics.handle, // DST
 					0,
 					0,
-					w0,
-					h0,
-					_background.handle, // SRC
+					onscreenWidth,
+					onScreenHeight,
+					_offscreen.handle, // SRC
 					0,
 					0,
-					screenRect.width,
-					screenRect.height,
+					offscreenRect.width,
+					offscreenRect.height,
 					SRCCOPY
 				);
 			}
 			else
 			{
-				_background.copyTo(e.graphics.handle, 0, 0, _background.width, _background.height, 0, 0, SRCCOPY);
+				_offscreen.copyTo(e.graphics, 0, 0, _offscreen.width, _offscreen.height);
 			}
 		}
 	}
@@ -2345,8 +2355,8 @@ class PrintPreviewDialog : Form
 			}
 			else if (e.button is _button3)
 			{
-				_previewControl.rows = 2;
-				_previewControl.columns = 1;
+				_previewControl.rows = 1;
+				_previewControl.columns = 2;
 				_previewControl.invalidatePreview();
 				_previewControl.invalidate();
 			}
@@ -2447,6 +2457,11 @@ class PrintPreviewDialog : Form
 		{
 			int oldPage = _previewControl.startPage;
 			int newPage = _previewControl.startPage + _previewControl.rows * _previewControl.columns;
+			int lastPage = cast(int)((new PrintRangeWalker(_previewControl.document.printerSettings.printRange.ranges)).count) - 1;
+			if (newPage > lastPage)
+				newPage = lastPage;
+			if (newPage < 0)
+				newPage = 0;
 			_previewControl.startPage = newPage;
 			_fromPage.text = to!string(_previewControl.startPage + 1);
 			if (oldPage != newPage)
@@ -2471,7 +2486,7 @@ class PrintPreviewDialog : Form
 	}
 
 	///
-	void document(PrintDocument doc)
+	void document(PrintDocument doc) // setter
 	in
 	{
 		assert(doc);
@@ -2482,7 +2497,7 @@ class PrintPreviewDialog : Form
 		_previewControl.document = doc;
 	}
 	/// ditto
-	PrintDocument document()
+	PrintDocument document() // getter
 	in
 	{
 		assert(_previewControl);
@@ -2503,8 +2518,20 @@ class PrintPreviewDialog : Form
 ///
 class PreviewPrintController : PrintController
 {
+	///
+	private class Page
+	{
+		this(MemoryGraphics g, PageSettings s)
+		{
+			graphics = g;
+			settings = s;
+		}
+		MemoryGraphics graphics;
+		PageSettings settings;
+	}
+
 	private PrintPreviewControl _previewControl; ///
-	private MemoryGraphics _pageGraphics; ///
+	private Page[] _pages; ///
 
 	///
 	this(PrintPreviewControl previewControl)
@@ -2520,115 +2547,165 @@ class PreviewPrintController : PrintController
 	///
 	override void onStartPrint(PrintDocument document, PrintEventArgs e)
 	{
-		// Do nothing.
+		_pages.length = 0;
+	}
+
+	/// Create screen for single page and draw the paper looks form.
+	override Graphics onStartPage(PrintDocument document, PrintPageEventArgs e)
+	{
+		Rect paperRect = _paperRectFrom(e.pageSettings);
+		auto pageGraphcis = new MemoryGraphics(paperRect.width, paperRect.height, e.graphics);
+		pageGraphcis.fillRectangle(Color.white, paperRect); // Draw the form of paper.
+		pageGraphcis.drawRectangle(new Pen(Color.black), paperRect); // Draw the border of paper.
+		_pages ~= new Page(pageGraphcis, e.pageSettings);
+		return pageGraphcis;
+	}
+
+	///
+	override void onEndPage(PrintDocument document, PrintPageEventArgs e)
+	{
+		Graphics pageGraphics = _pages[e.currentPage - 1].graphics;
+		pageGraphics.pageUnit = GraphicsUnit.DISPLAY; // Initialize graphics unit that is changed in user side.
+		Font font = new Font("MS Gothic", 100/+pt+/ * e.pageSettings.printerResolution.y / 72); // 1 point == 1/72 inches
+		_drawPageNumber(pageGraphics, e.currentPage, font); // Draw the current page number.
 	}
 
 	///
 	override void onEndPrint(PrintDocument document, PrintEventArgs e)
 	{
-		// Do nothing.
+		auto layoutHelper = new PageLayoutHelper(_previewControl.columns, _previewControl.rows);
+		
+		const Rect screenRect = {
+			const int deviceWidth = GetSystemMetrics(SM_CXSCREEN); // pixel unit.
+			const int deviceHeight = GetSystemMetrics(SM_CYSCREEN); // pixel unit.
+			return Rect(0, 0, deviceWidth, deviceHeight); // TODO: Gets MemoryGraphics size as the background DC.
+		}();
+
+		enum LEFT_AND_RIGHT_MARGIN = PrintPreviewControl.LEFT_MARIGIN + PrintPreviewControl.RIGHT_MARGIN;
+		enum TOP_AND_BOTTOM_MARGIN = PrintPreviewControl.TOP_MARGIN + PrintPreviewControl.BOTTOM_MARGIN;
+		enum HORIZONTAL_SPAN = PrintPreviewControl.HORIZONTAL_SPAN;
+		enum VERTICAL_SPAN = PrintPreviewControl.VERTICAL_SPAN;
+		
+		Page[] targetPageList = _pages;
+		if (_previewControl.startPage > 0)
+			targetPageList = targetPageList.drop(_previewControl.startPage);
+		targetPageList = targetPageList.take(_previewControl.rows * _previewControl.columns);
+		assert(targetPageList.length > 0, "targetPageList is empty.");
+		
+		int totalPageWidth = targetPageList
+			.map!(p => _paperRectFrom(p.settings).width) // [w1,w2,w3,w4]
+			.chunks(_previewControl.columns) // [w1,w2],[w3,w4]
+			.map!(elem => elem.sum) // [w1+w2],[w3+w4]
+			.maxElement; // w1+w2 if w1+w2 > w3+w4
+
+		int totalPageHeight = targetPageList
+			.map!(p => _paperRectFrom(p.settings).height) // [h1,h2,h3,h4]
+			.chunks(_previewControl.columns) // [h1,h2],[h3,h4]
+			.map!(elem => elem.maxElement) // [h1,h4] if h1 > h2 and h3 < h4
+			.sum; // h1+h4
+
+		// NOTE: TOP_AND_BOTTOM_MARGIN and the others are scales on video screen world.
+		double ratio = cast(double)(screenRect.height - TOP_AND_BOTTOM_MARGIN - VERTICAL_SPAN * (_previewControl.rows - 1)) / totalPageHeight;
+		if (screenRect.width < totalPageWidth * ratio)
+		{
+			ratio = cast(double)(screenRect.width - LEFT_AND_RIGHT_MARGIN - HORIZONTAL_SPAN * (_previewControl.columns - 1)) / totalPageWidth;
+		}
+
+		foreach (Page page; targetPageList)
+		{
+			const Point pos = layoutHelper.position();
+			const Rect paperRect = _paperRectFrom(page.settings);
+			const uint offScreenWidth = cast(uint)(paperRect.width * ratio);
+			const uint offScreenHeight = cast(uint)(paperRect.height * ratio);
+			Graphics pageGraphics = page.graphics;
+			SetStretchBltMode(pageGraphics.handle, STRETCH_DELETESCANS); // SRC
+			StretchBlt(
+				e.hDC, // DST
+				pos.x,
+				pos.y,
+				offScreenWidth,
+				offScreenHeight,
+				pageGraphics.handle, // SRC
+				0,
+				0,
+				paperRect.width * 100 / DEFAULT_PRINTER_RESOLUTION_X,
+				paperRect.height * 100 / DEFAULT_PRINTER_RESOLUTION_Y,
+				SRCCOPY
+			);
+			pageGraphics.dispose(); // Created in onStartPage().
+
+			layoutHelper.appendPageSize(offScreenWidth, offScreenHeight);
+		}
 	}
 	
-	/// Create and draw the back screen.
-	override Graphics onStartPage(PrintDocument document, PrintPageEventArgs e)
+	///
+	private static void _drawPageNumber(Graphics graphics, int currentPage, Font font)
 	{
-		Rect paperRect = _toRect(document.printerSettings.defaultPageSettings);
-		_pageGraphics = {
-			// Be dispose() called in onEntPage().
-			if (e.pageBounds.width <= e.pageBounds.height)
-				return new MemoryGraphics(paperRect.width, paperRect.height, e.graphics.handle);
-			else
-				return new MemoryGraphics(paperRect.height, paperRect.width, e.graphics.handle); // TODO: Implement correctly.
-		}();
-		// Draw the form of paper.
-		_pageGraphics.fillRectangle(Color.white, paperRect);
-		// Draw the border of paper.
-		_pageGraphics.drawRectangle(new Pen(Color.black), paperRect);
-		return _pageGraphics;
-	}
-
-	/// Transfer from the back screen to the front screen.
-	override void onEndPage(PrintDocument document, PrintPageEventArgs e)
-	{
-		// Initialize graphics unit that is changed in user side.
-		_pageGraphics.pageUnit = GraphicsUnit.DISPLAY;
-
-		// Draw the current page number.
-		const string currentPageString = to!string(e.currentPage);
-		Font font = new Font("MS Gothic", 100/+pt+/ * e.pageSettings.printerResolution.y / 72);
-		_pageGraphics.drawText(currentPageString, font, Color.white, Rect(20, 20, 1000, 1000));
-		_pageGraphics.drawText(currentPageString, font, Color.black, Rect(0, 0, 1000, 1000));
-
-		// Draw the main image.
-		const int deviceWidth = GetSystemMetrics(SM_CXSCREEN); // pixel unit.
-		const int deviceHeight = GetSystemMetrics(SM_CYSCREEN); // pixel unit.
-		const Rect screenRect = Rect(0, 0, deviceWidth, deviceHeight); // NOTE: Gets MemoryGraphics size as the background DC.
-		const Rect paperRect = _toRect(document.printerSettings.defaultPageSettings);
-		const uint row = (e.currentPage - _previewControl.startPage - 1) % _previewControl.rows;
-		const uint col = (e.currentPage - _previewControl.startPage - 1) / _previewControl.rows;
-
-		// Size that fit Right side.
-		const uint w1 = (screenRect.width - PrintPreviewControl.LEFT_MARIGIN - PrintPreviewControl.RIGHT_MARGIN - (_previewControl.rows - 1) * PrintPreviewControl.HORIZONTAL_SPAN) / _previewControl.rows;
-		const uint h1 = paperRect.height * w1 / paperRect.width;
-		// Size that fit Bottom side.
-		const uint h2 = (screenRect.height - PrintPreviewControl.TOP_MARGIN - PrintPreviewControl.BOTTOM_MARGIN - (_previewControl.columns - 1) * PrintPreviewControl.VERTICAL_SPAN) / _previewControl.columns;
-		const uint w2 = paperRect.width * h2 / paperRect.height;
-
-		uint w0;
-		uint h0;
-		if (PrintPreviewControl.LEFT_MARIGIN + PrintPreviewControl.RIGHT_MARGIN + _previewControl.rows * w1 + (_previewControl.rows - 1) * PrintPreviewControl.HORIZONTAL_SPAN <= screenRect.width)
-		{
-			if (PrintPreviewControl.TOP_MARGIN + PrintPreviewControl.BOTTOM_MARGIN + _previewControl.columns * h1 + (_previewControl.columns - 1) * PrintPreviewControl.VERTICAL_SPAN <= screenRect.height)
-			{
-				w0 = w1;
-				h0 = h1;
-			}
-			else
-			{
-				// The bottom side protruded.
-				w0 = w2;
-				h0 = h2;
-			}
-		}
-		else if (PrintPreviewControl.TOP_MARGIN + PrintPreviewControl.BOTTOM_MARGIN + _previewControl.columns * h2 + (_previewControl.columns - 1) * PrintPreviewControl.VERTICAL_SPAN <= screenRect.height)
-		{
-			if (PrintPreviewControl.LEFT_MARIGIN + PrintPreviewControl.RIGHT_MARGIN + _previewControl.rows * w2 + (_previewControl.rows - 1) * PrintPreviewControl.HORIZONTAL_SPAN <= screenRect.width)
-			{
-				w0 = w2;
-				h0 = h2;
-			}
-			else
-			{
-				// The right side protruded.
-				w0 = w1;
-				h0 = h1;
-			}
-		}
-
-		SetStretchBltMode(_pageGraphics.handle, STRETCH_DELETESCANS); // SRC
-		StretchBlt(
-			e.graphics.handle, // DST
-			PrintPreviewControl.LEFT_MARIGIN + row * (w0 + PrintPreviewControl.HORIZONTAL_SPAN),
-			PrintPreviewControl.TOP_MARGIN + col * (h0 + PrintPreviewControl.VERTICAL_SPAN),
-			w0,
-			h0,
-			_pageGraphics.handle, // SRC
-			0,
-			0,
-			paperRect.width * 100 / DEFAULT_PRINTER_RESOLUTION_X,
-			paperRect.height * 100 / DEFAULT_PRINTER_RESOLUTION_Y,
-			SRCCOPY
-		);
-		_pageGraphics.dispose(); // Created in onStartPage().
-
-		// Preview-print is end.
-		if (row == _previewControl.rows - 1 && col == _previewControl.columns - 1)
-			e.cancel = true;
+		const string currentPageString = to!string(currentPage);
+		graphics.drawText(currentPageString, font, Color.white, Rect(20, 20, 1000, 1000));
+		graphics.drawText(currentPageString, font, Color.black, Rect(0, 0, 1000, 1000));
 	}
 }
 
 ///
-private Rect _toRect(PageSettings page)
+private final class PageLayoutHelper
+{
+	private Point _nextPosition; ///
+	private const uint _columns; ///
+	private const uint _rows; ///
+	private uint _col; ///
+	private uint _row; ///
+	private uint _maxHeightInCurrentLine; ///
+
+	///
+	this(uint columns, uint rows)
+	{
+		reset();
+		_rows = rows;
+		_columns = columns;
+	}
+
+	///
+	void reset()
+	{
+		_nextPosition = Point(PrintPreviewControl.LEFT_MARIGIN, PrintPreviewControl.TOP_MARGIN);
+		_row = 0;
+		_col = 0;
+		_maxHeightInCurrentLine = 0;
+	}
+
+	///
+	Point position() const
+	{
+		return _nextPosition;
+	}
+
+	///
+	void appendPageSize(int width, int height)
+	{
+		if (_maxHeightInCurrentLine < height)
+		{
+			_maxHeightInCurrentLine = height;
+		}
+
+		if (_col + 1 >= _columns)
+		{
+			_col = 0;
+			_row++;
+			_nextPosition.x = PrintPreviewControl.LEFT_MARIGIN;
+			_nextPosition.y += _maxHeightInCurrentLine + PrintPreviewControl.VERTICAL_SPAN;
+			_maxHeightInCurrentLine = 0;
+		}
+		else
+		{
+			_col++;
+			_nextPosition.x += width + PrintPreviewControl.HORIZONTAL_SPAN;
+		}
+	}
+}
+
+///
+private Rect _paperRectFrom(PageSettings page)
 {
 	const int paperLeft = (page.bounds.x - page.margins.left) * page.printerResolution.x / 100;
 	const int paperTop = (page.bounds.y - page.margins.top) * page.printerResolution.y / 100;
