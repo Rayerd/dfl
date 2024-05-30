@@ -2219,12 +2219,12 @@ class PrintPreviewControl : Control
 			if (this.autoZoom)
 			{
 				const Rect offscreenRect = Rect(0, 0, _offscreen.width, _offscreen.height);
-				uint onScreenHeight = this.height;
+				uint onscreenHeight = this.height;
 				uint onscreenWidth = offscreenRect.width * this.height / offscreenRect.height;
 				if (onscreenWidth >= this.width)
 				{
 					onscreenWidth = this.width;
-					onScreenHeight = offscreenRect.height * this.width / offscreenRect.width;
+					onscreenHeight = offscreenRect.height * this.width / offscreenRect.width;
 				}
 
 				SetStretchBltMode(_offscreen.handle, STRETCH_DELETESCANS); // SRC
@@ -2233,7 +2233,7 @@ class PrintPreviewControl : Control
 					0,
 					0,
 					onscreenWidth,
-					onScreenHeight,
+					onscreenHeight,
 					_offscreen.handle, // SRC
 					0,
 					0,
