@@ -340,7 +340,8 @@ class MainForm : Form
 
 		_document.queryPageSettings ~= (PrintDocument doc, QueryPageSettingsEventArgs e) {
 			// User modify page settings here.
-			// TODO: Paper orientation cannot be changed.
+			if (e.currentPage == 2)
+				e.pageSettings.landscape = true;
 		};
 
 		_document.printPage ~= (PrintDocument doc, PrintPageEventArgs e) {
