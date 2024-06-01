@@ -2514,7 +2514,6 @@ class PrintPreviewDialog : Form
 	}
 }
 
-
 ///
 class PreviewPrintController : PrintController
 {
@@ -2615,16 +2614,16 @@ class PreviewPrintController : PrintController
 		{
 			const Point pos = layoutHelper.position();
 			const Rect paperRect = _paperRectFrom(page.settings);
-			const uint offScreenWidth = cast(uint)(paperRect.width * ratio);
-			const uint offScreenHeight = cast(uint)(paperRect.height * ratio);
+			const uint pageRenderWidth = cast(uint)(paperRect.width * ratio);
+			const uint pageRenderHeight = cast(uint)(paperRect.height * ratio);
 			Graphics pageGraphics = page.graphics;
 			SetStretchBltMode(pageGraphics.handle, STRETCH_DELETESCANS); // SRC
 			StretchBlt(
 				e.hDC, // DST
 				pos.x,
 				pos.y,
-				offScreenWidth,
-				offScreenHeight,
+				pageRenderWidth,
+				pageRenderHeight,
 				pageGraphics.handle, // SRC
 				0,
 				0,
@@ -2634,7 +2633,7 @@ class PreviewPrintController : PrintController
 			);
 			pageGraphics.dispose(); // Created in onStartPage().
 
-			layoutHelper.appendPageSize(offScreenWidth, offScreenHeight);
+			layoutHelper.appendPageSize(pageRenderWidth, pageRenderHeight);
 		}
 	}
 	
