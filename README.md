@@ -76,7 +76,7 @@ set dmc_path=c:\dmc\dm
 ### 2. Install the undeaD library
 DFL is required the undeaD library (**undead.lib**).
 Download a ZIP file from https://github.com/dlang/undead.
-Extract **undeaD-master.zip** and run the below with either option -a=x86_omf, x86_32mscoff or x86_64:
+Extract **undeaD-master.zip** and run the below with either option `-a=x86_omf`, `-a=x86_32mscoff` or `-a=x86_64`:
 ```bat
 > cd undeaD-master
 > dub build -a=x86_omf
@@ -85,7 +85,7 @@ Extract **undeaD-master.zip** and run the below with either option -a=x86_omf, x
 > dir bin /b
 undead.lib
 ```
-Copy the **undead.lib** to your/lib/dir.
+Copy the **undead.lib** to `your/lib/dir`.
 
 ### 3. Make dfl.lib and dfl_debug.lib
 Run **makelib.bat**:
@@ -105,15 +105,15 @@ or (MSVC required)
 ```bat
 > makelib.bat 64        # 64-bit mscoff
 ```
-Also copy **dfl.lib** and **dfl_debug.lib** to your/lib/dir.
+Also copy **dfl.lib** and **dfl_debug.lib** to `your/lib/dir`.
 
 **IMPORTANT**: Both library files are containing the **undead.lib** and WINSDK libraries such as **user32.lib**, **gdi32.lib** and so on.
 
 In order to make and move *.lib to paths below:
-- **go32omf.bat** : Make and move *.lib to %dmd_path%\lib
-- **go.bat** (MSVC required) : Make and move *.lib to %dmd_path%\lib32mscoff
+- **go32omf.bat** : Make and move *.lib to `%dmd_path%\lib`
+- **go.bat** (MSVC required) : Make and move *.lib to `%dmd_path%\lib32mscoff`
 - **go.bat 32mscoff** (MSVC required) : ditto
-- **go64.bat** (MSVC required) : Make and move *.lib to %dmd_path%\lib64
+- **go64.bat** (MSVC required) : Make and move *.lib to `%dmd_path%\lib64`
 
 ## License
 DFL is under the boost and/or zlib/libpng license.
