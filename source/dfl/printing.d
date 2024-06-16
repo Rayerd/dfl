@@ -2041,6 +2041,7 @@ class PrintPreviewControl : Control
 	private int _startPage; ///
 	private bool _autoZoom; ///
 	private MemoryGraphics _offscreen; ///
+	private Size _justDrawnSize; ///
 
 	///
 	this(PrintDocument doc)
@@ -2052,7 +2053,7 @@ class PrintPreviewControl : Control
 	{
 		_document = doc;
 		_columns = 1;
-		_rows = 0;
+		_rows = 1;
 		_startPage = 0;
 		_autoZoom = true;
 	}
@@ -2115,6 +2116,12 @@ class PrintPreviewControl : Control
 	int startPage() const // getter
 	{
 		return _startPage;
+	}
+
+	///
+	private void justDrawnSize(Size sz) // setter
+	{
+		_justDrawnSize = sz;
 	}
 
 	///
@@ -2218,7 +2225,7 @@ class PrintPreviewControl : Control
 		{
 			if (this.autoZoom)
 			{
-				const Rect offscreenRect = Rect(0, 0, _offscreen.width, _offscreen.height);
+				const Rect offscreenRect = Rect(0, 0, _justDrawnSize.width, _justDrawnSize.height);
 				uint onscreenHeight = this.height;
 				uint onscreenWidth = offscreenRect.width * this.height / offscreenRect.height;
 				if (onscreenWidth >= this.width)
@@ -2346,24 +2353,24 @@ class PrintPreviewDialog : Form
 					// Do nothing.
 				}
 			}
-			else if (e.button is _button2)
+			else if (e.button is _button2) // 1x1
 			{
-				_previewControl.rows = 1;
 				_previewControl.columns = 1;
-				_previewControl.invalidatePreview();
-				_previewControl.invalidate();
-			}
-			else if (e.button is _button3)
-			{
 				_previewControl.rows = 1;
-				_previewControl.columns = 2;
 				_previewControl.invalidatePreview();
 				_previewControl.invalidate();
 			}
-			else if (e.button is _button4)
+			else if (e.button is _button3) // 2x1
 			{
-				_previewControl.rows = 2;
 				_previewControl.columns = 2;
+				_previewControl.rows = 1;
+				_previewControl.invalidatePreview();
+				_previewControl.invalidate();
+			}
+			else if (e.button is _button4) // 2x2
+			{
+				_previewControl.columns = 2;
+				_previewControl.rows = 2;
 				_previewControl.invalidatePreview();
 				_previewControl.invalidate();
 			}
@@ -2572,8 +2579,6 @@ class PreviewPrintController : PrintController
 	///
 	override void onEndPrint(PrintDocument document, PrintEventArgs e)
 	{
-		auto layoutHelper = new PageLayoutHelper(_previewControl.columns, _previewControl.rows);
-		
 		const Rect screenRect = {
 			const int deviceWidth = GetSystemMetrics(SM_CXSCREEN); // pixel unit.
 			const int deviceHeight = GetSystemMetrics(SM_CYSCREEN); // pixel unit.
@@ -2610,6 +2615,12 @@ class PreviewPrintController : PrintController
 			ratio = cast(double)(screenRect.width - LEFT_AND_RIGHT_MARGIN - HORIZONTAL_SPAN * (_previewControl.columns - 1)) / totalPageWidth;
 		}
 
+		_previewControl.justDrawnSize = Size(
+			cast(int)(totalPageWidth * ratio) + LEFT_AND_RIGHT_MARGIN + HORIZONTAL_SPAN * (_previewControl.columns - 1),
+			cast(int)(totalPageHeight * ratio) + TOP_AND_BOTTOM_MARGIN + VERTICAL_SPAN * (_previewControl.rows - 1)
+		);
+
+		auto layoutHelper = new PageLayoutHelper(_previewControl.columns, _previewControl.rows);
 		foreach (Page page; targetPageList)
 		{
 			const Point pos = layoutHelper.position();
@@ -2632,7 +2643,6 @@ class PreviewPrintController : PrintController
 				SRCCOPY
 			);
 			pageGraphics.dispose(); // Created in onStartPage().
-
 			layoutHelper.appendPageSize(pageRenderWidth, pageRenderHeight);
 		}
 	}
