@@ -4,8 +4,9 @@ This unofficial project is a migration of [D Forms Library (DFL)](http://wiki.dp
 DFL is a Win32 windowing library for the D language.
 
 ## Recent major features
+- **Windows OMF support has been removed (for DMD v2.109.0).**
 - **Registered DFL to DUB.**
-- **Support multiple screens.**
+- Supported multiple screens.
 - Module "dfl.chart" is now comming.
 	- TableRenderer (with example)
 	- LineGraphRenderer (with example)
@@ -76,11 +77,11 @@ set dmc_path=c:\dmc\dm
 ### 2. Install the undeaD library
 DFL is required the undeaD library (**undead.lib**).
 Download a ZIP file from https://github.com/dlang/undead.
-Extract **undeaD-master.zip** and run the below with either option `-a=x86_omf`, `-a=x86_32mscoff` or `-a=x86_64`:
+Extract **undeaD-master.zip** and run the below with either option `-a=x86_mscoff` or `-a=x86_64`:
 ```bat
 > cd undeaD-master
-> dub build -a=x86_omf
-    Starting Performing "debug" build using C:\D\dmd2\windows\bin\dmd.exe for x86, x86_omf.
+> dub build -a=x86_64
+    Starting Performing "debug" build using C:\D\dmd2\windows\bin\dmd.exe for x86_64.
   Up-to-date undead ~master: target for configuration [library] is up to date.
 > dir bin /b
 undead.lib
@@ -88,13 +89,9 @@ undead.lib
 Copy the **undead.lib** to `your/lib/dir`.
 
 ### 3. Make dfl.lib and dfl_debug.lib
-Run **makelib.bat**:
+Run **makelib.bat** (MSVC required):
 ```bat
 > cd dfl/win32/dfl
-> makelib.bat 32omf     # 32-bit omf
-```
-or (MSVC required)
-```bat
 > makelib.bat           # 32-bit mscoff
 ```
 or (MSVC required)
@@ -105,12 +102,11 @@ or (MSVC required)
 ```bat
 > makelib.bat 64        # 64-bit mscoff
 ```
-Also copy **dfl.lib** and **dfl_debug.lib** to `your/lib/dir`.
+Also copy **dfl.lib** and **dfl_debug.lib** in `dfl/source` to `your/lib/dir`.
 
 **IMPORTANT**: Both library files are containing the **undead.lib** and WINSDK libraries such as **user32.lib**, **gdi32.lib** and so on.
 
 In order to make and move *.lib to paths below:
-- **go32omf.bat** : Make and move *.lib to `%dmd_path%\lib`
 - **go.bat** (MSVC required) : Make and move *.lib to `%dmd_path%\lib32mscoff`
 - **go.bat 32mscoff** (MSVC required) : ditto
 - **go64.bat** (MSVC required) : Make and move *.lib to `%dmd_path%\lib64`

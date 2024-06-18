@@ -1,7 +1,6 @@
 @rem  How to use:
 @rem    go.bat           # Same as 32mscoff
 @rem    go.bat 32mscoff  # 32-Bit COFF
-@rem    go.bat 32omf     # 32-bit OMF
 @rem    go.bat 64        # 64-Bit
 
 call makelib "%~1"

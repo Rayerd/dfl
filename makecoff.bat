@@ -1,5 +1,5 @@
 @rem   Make DFL.
-@rem   http://www.dprogramming.com/dfl.php
+@rem   https://github.com/Rayerd/dfl
 @rem   Modified for 64-bit and COFF object format
 
 @rem   How to use:

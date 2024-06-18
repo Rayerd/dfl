@@ -1,5 +1,5 @@
 @rem   Make DFL.
-@rem   http://www.dprogramming.com/dfl.php
+@rem   https://github.com/Rayerd/dfl
 
 @rem   Requires DMD and DMC's libs
 @rem   Free downloads from https://dlang.org/download.html
@@ -7,7 +7,6 @@
 @rem  How to use:
 @rem    makelib.bat           # Same as 32mscoff
 @rem    makelib.bat 32mscoff  # 32-Bit COFF
-@rem    makelib.bat 32omf     # 32-bit OMF
 @rem    makelib.bat 64        # 64-Bit
 
 @if "%~1" == "64" (
@@ -23,7 +22,9 @@
   goto done
 )
 @if "%~1" == "32omf" (
-  set dmd_omf_flag=-m32omf
+  @echo.
+  @echo '32omf' is already invalid option.
+  goto done
 ) else (
   set dmd_omf_flag=
 )
