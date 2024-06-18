@@ -1533,8 +1533,10 @@ class Picture: Image // docmain
 	/// ditto
 	static Picture fromFile(File file)
 	{
-		auto size = file.size();
-		ubyte[] buf = file.rawRead(new ubyte[size]);
+		ulong size = file.size();
+		if (size > size_t.max)
+			throw new DflException("DFL: Picture.fromFile failure by large file given.");
+		ubyte[] buf = file.rawRead(new ubyte[cast(size_t)size]);
 		return fromMemory(buf);
 	}
 	
