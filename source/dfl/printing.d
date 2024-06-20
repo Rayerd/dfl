@@ -2287,6 +2287,7 @@ class PrintPreviewDialog : Form
 	private ToolBarButton _button5;
 	private ImageList _imageList;
 	private Panel _pageSelectPanel;
+	private Panel _previewPanel;
 	private Label _fromPageLabel;
 	private TextBox _fromPage;
 	private Button _forwardButton;
@@ -2379,6 +2380,7 @@ class PrintPreviewDialog : Form
 				_previewControl.autoZoom = !_previewControl.autoZoom;
 				_previewControl.invalidatePreview();
 				_previewControl.invalidate();
+				_enableScroll = !_previewControl.autoZoom;
 			}
 			else
 				assert(0);
@@ -2479,6 +2481,10 @@ class PrintPreviewDialog : Form
 		};
 		_forwardButton.parent = _pageSelectPanel;
 
+		_previewPanel = new Panel();
+		_previewPanel.dock = DockStyle.FILL;
+		_previewPanel.parent = this;
+
 		_previewControl = new PrintPreviewControl(doc);
 		_previewControl.resizeRedraw = true;
 		_previewControl.backColor = Color.gray;
@@ -2487,7 +2493,9 @@ class PrintPreviewDialog : Form
 		_previewControl.columns = 1; // ditto
 		_previewControl.autoZoom = true; // Initial mode is "Fit".
 		_previewControl.startPage = 0;
-		_previewControl.parent = this;
+		_previewControl.parent = _previewPanel;
+
+		_enableScroll = !_previewControl.autoZoom;
 
 		_fromPage.text = to!string(_previewControl.startPage + 1);
 	}
@@ -2518,6 +2526,25 @@ class PrintPreviewDialog : Form
 	protected override void wndProc(ref Message msg)
 	{
 		super.wndProc(msg);
+	}
+
+	///
+	private void _enableScroll(bool byes) @property // setter
+	{
+		if (byes)
+		{
+			_previewPanel.hScroll = true;
+			_previewPanel.vScroll = true;
+			_previewPanel.scrollSize = Size(GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN));
+			_previewPanel.performLayout();
+		}
+		else
+		{
+			_previewPanel.hScroll = false;
+			_previewPanel.vScroll = false;
+			_previewPanel.scrollSize = Size(0, 0);
+			_previewPanel.performLayout();
+		}
 	}
 }
 
