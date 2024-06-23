@@ -420,6 +420,18 @@ class PrintPageEventArgs : EventArgs
 }
 
 ///
+class LastPageChangedEventArgs : EventArgs
+{
+	int lastPage;
+
+	///
+	this(int page)
+	{
+		lastPage = page;
+	}
+}
+
+///
 class QueryPageSettingsEventArgs : PrintEventArgs
 {
 	bool cancel = false;
@@ -2035,6 +2047,13 @@ final class PageSetupDialog : CommonDialog
 ///
 class PrintPreviewControl : Control
 {
+	enum LEFT_MARIGIN = 20; // pixels
+	enum RIGHT_MARGIN = 20; // pixels
+	enum TOP_MARGIN = 20; // pixels
+	enum BOTTOM_MARGIN = 20; // pixels
+	enum HORIZONTAL_SPAN = 20; // pixels
+	enum VERTICAL_SPAN = 20; // pixels
+
 	private PrintDocument _document; ///
 	private int _columns; ///
 	private int _rows; ///
@@ -2165,20 +2184,19 @@ class PrintPreviewControl : Control
 		_offscreen.fillRectangle(new SolidBrush(Color.gray), screenRect);
 
 		// Reset here, because print range is always all pages on preview print.
-		_document.printerSettings.printRange.reset();
+		document.printerSettings.printRange.reset();
 
-		PrintController oldPrintController = _document.printController;
-		_document.printController = new PreviewPrintController(this); // TODO: Cross reference.
-		_document.print(_offscreen.handle);
-		_document.printController = oldPrintController;
+		PrintController oldPrintController = document.printController;
+		document.printController = new PreviewPrintController(this); // TODO: Cross reference.
+		document.print(_offscreen.handle);
+		this.onLastPageChanged(new LastPageChangedEventArgs(_getLastPage(document)));
+		document.printController = oldPrintController;
 	}
 
 	///
 	protected override void onHandleCreated(EventArgs e)
 	{
 		super.onHandleCreated(e);
-		// ShowScrollBar(handle, SB_VERT, TRUE);
-		// EnableScrollBar(handle, SB_BOTH, ESB_DISABLE_BOTH);
 		invalidatePreview();
 		invalidate();
 	}
@@ -2209,13 +2227,6 @@ class PrintPreviewControl : Control
 		super.onMouseDown(e);
 		mouseDown(this, e);
 	}
-
-	enum LEFT_MARIGIN = 20; // pixels
-	enum RIGHT_MARGIN = 20; // pixels
-	enum TOP_MARGIN = 20; // pixels
-	enum BOTTOM_MARGIN = 20; // pixels
-	enum HORIZONTAL_SPAN = 20; // pixels
-	enum VERTICAL_SPAN = 20; // pixels
 
 	///
 	protected override void onPaint(PaintEventArgs e)
@@ -2263,6 +2274,12 @@ class PrintPreviewControl : Control
 		paintBackground(this, e);
 	}
 
+	///
+	protected void onLastPageChanged(LastPageChangedEventArgs e)
+	{
+		lastPageChangeed(this, e);
+	}
+
 	//
 	Event!(Control, EventArgs) gotFocus; ///
 	//
@@ -2273,6 +2290,8 @@ class PrintPreviewControl : Control
 	Event!(Control, PaintEventArgs) paint; ///
 	//
 	Event!(Control, EventArgs) paintBackground; ///
+	//
+	Event!(Control, LastPageChangedEventArgs) lastPageChangeed; ///
 }
 
 ///
@@ -2290,6 +2309,8 @@ class PrintPreviewDialog : Form
 	private Panel _previewPanel;
 	private Label _fromPageLabel;
 	private TextBox _fromPage;
+	private Label _slashLabel;
+	private TextBox _toPage;
 	private Button _forwardButton;
 	private Button _backButton;
 
@@ -2421,7 +2442,7 @@ class PrintPreviewDialog : Form
 					newPage = oldPage; // Undo.
 				}
 
-				if (newPage < 0)
+				if (newPage < 0 || newPage > _getLastPage(this.document))
 					newPage = oldPage; // Undo.
 
 				_previewControl.startPage = newPage;
@@ -2437,6 +2458,18 @@ class PrintPreviewDialog : Form
 			}
 		};
 		_fromPage.parent = _pageSelectPanel;
+
+		_slashLabel = new Label();
+		_slashLabel.text = " / ";
+		_slashLabel.autoSize = true;
+		_slashLabel.dock = DockStyle.LEFT;
+		_slashLabel.parent = _pageSelectPanel;
+
+ 		_toPage = new TextBox();
+		_toPage.width = 50;
+		_toPage.dock = DockStyle.LEFT;
+		_toPage.enabled = false;
+		_toPage.parent = _pageSelectPanel;
 
 		_backButton = new Button;
 		_backButton.text = "<";
@@ -2466,7 +2499,7 @@ class PrintPreviewDialog : Form
 		{
 			int oldPage = _previewControl.startPage;
 			int newPage = _previewControl.startPage + _previewControl.rows * _previewControl.columns;
-			int lastPage = cast(int)((new PrintRangeWalker(_previewControl.document.printerSettings.printRange.ranges)).count) - 1;
+			int lastPage = _getLastPage(doc);
 			if (newPage > lastPage)
 				newPage = lastPage;
 			if (newPage < 0)
@@ -2493,6 +2526,9 @@ class PrintPreviewDialog : Form
 		_previewControl.columns = 1; // ditto
 		_previewControl.autoZoom = true; // Initial mode is "Fit".
 		_previewControl.startPage = 0;
+		_previewControl.lastPageChangeed ~= (Control c, LastPageChangedEventArgs e) {
+			_toPage.text = to!string(e.lastPage + 1);
+		};
 		_previewControl.parent = _previewPanel;
 
 		_enableScroll = !_previewControl.autoZoom;
@@ -2546,6 +2582,12 @@ class PrintPreviewDialog : Form
 			_previewPanel.performLayout();
 		}
 	}
+}
+
+///
+private int _getLastPage(PrintDocument doc)
+{
+	return cast(int)((new PrintRangeWalker(doc.printerSettings.printRange.ranges)).count) - 1;
 }
 
 ///
