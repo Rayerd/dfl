@@ -5,8 +5,6 @@
 /// 
 module dfl.printing;
 
-pragma(msg, "DFL: dfl.printing module is an experimental version."); // NOTE
-
 pragma(lib, "WinSpool");
 
 private import dfl.base;
@@ -1992,10 +1990,18 @@ final class PageSetupDialog : CommonDialog
 	///
 	override bool runDialog(HWND owner)
 	{
+		// Get inital page settings.
+		PAGESETUPDLG pd;
+		bool isOK = _makePagesetupdlgFromPageSettings(pd, document.printerSettings);
+		if (!isOK)
+		{
+			throw new DflException("DFL: runDialog failure.");
+		}
+
 		_pageSetupDlg.lStructSize = _pageSetupDlg.sizeof;
 		_pageSetupDlg.hwndOwner = owner;
-		_pageSetupDlg.hDevMode = null;
-		_pageSetupDlg.hDevNames = null;
+		_pageSetupDlg.hDevMode = pd.hDevMode;
+		_pageSetupDlg.hDevNames = pd.hDevNames;
 		_pageSetupDlg.lpfnPagePaintHook = null;
 
 		// Set initial margins.
@@ -2010,7 +2016,7 @@ final class PageSetupDialog : CommonDialog
 		}
 		else
 			_pageSetupDlg.Flags &= ~PSD_MARGINS;
-
+		
 		scope(exit)
 		{
 			_pageSetupDlg = PAGESETUPDLG.init;
@@ -2042,6 +2048,38 @@ final class PageSetupDialog : CommonDialog
 			return false;
 		}
 	}
+}
+
+///
+private bool _makePagesetupdlgFromPageSettings(ref PAGESETUPDLG pd, PrinterSettings printerSettings)
+{
+	pd.lStructSize = pd.sizeof;
+	pd.hwndOwner = null;
+	pd.hDevMode = null;
+	pd.hDevNames = null;
+	pd.lpfnPagePaintHook = null;
+	pd.Flags = PSD_RETURNDEFAULT;
+
+	BOOL resultOK = PageSetupDlg(&pd);
+	if (resultOK)
+	{
+		DEVMODE* pDevMode = cast(DEVMODE*)GlobalLock(pd.hDevMode);
+		scope(exit)
+			GlobalUnlock(pDevMode);
+		pDevMode.dmPrintQuality = DEFAULT_PRINTER_RESOLUTION_X; // dpi
+		pDevMode.dmYResolution = DEFAULT_PRINTER_RESOLUTION_Y; // dpi
+		pDevMode.dmOrientation = {
+			if (printerSettings.defaultPageSettings.landscape)
+				return DMORIENT_LANDSCAPE;
+			else
+				return DMORIENT_PORTRAIT;
+		}();
+		pDevMode.dmPaperSize = cast(short)printerSettings.defaultPageSettings.paperSize.rawKind;
+		pDevMode.dmFields |= DM_PRINTQUALITY | DM_YRESOLUTION | DM_ORIENTATION | DM_PAPERSIZE; // TODO: Need?
+		return true;
+	}
+	else
+		return false;
 }
 
 ///
@@ -2152,32 +2190,13 @@ class PrintPreviewControl : Control
 	body
 	{
 		PAGESETUPDLG pd;
-		pd.lStructSize = pd.sizeof;
-		pd.hwndOwner = null;
-		pd.hDevMode = null;
-		pd.hDevNames = null;
-		pd.lpfnPagePaintHook = null;
-		pd.Flags = PSD_RETURNDEFAULT;
-
-		BOOL resultOK = PageSetupDlg(&pd);
-		if (resultOK)
+		bool isOK = _makePagesetupdlgFromPageSettings(pd, document.printerSettings);
+		if (!isOK)
 		{
-			DEVMODE* pDevMode = cast(DEVMODE*)GlobalLock(pd.hDevMode);
-			scope(exit)
-				GlobalUnlock(pDevMode);
-			pDevMode.dmPrintQuality = DEFAULT_PRINTER_RESOLUTION_X; // dpi
-			pDevMode.dmYResolution = DEFAULT_PRINTER_RESOLUTION_Y; // dpi
-			pDevMode.dmOrientation = {
-				if (document.printerSettings.defaultPageSettings.landscape)
-					return DMORIENT_LANDSCAPE;
-				else
-					return DMORIENT_PORTRAIT;
-			}();
-			pDevMode.dmPaperSize = cast(short)document.printerSettings.defaultPageSettings.paperSize.rawKind;
-			pDevMode.dmFields |= DM_PRINTQUALITY | DM_YRESOLUTION | DM_ORIENTATION | DM_PAPERSIZE; // TODO: Need?
-			document.printerSettings.setHdevnames(pd.hDevNames);
-			document.printerSettings.defaultPageSettings.setHdevmode(pd.hDevMode);
+			throw new DflException("DFL: invalidatePreview failure.");
 		}
+		document.printerSettings.setHdevnames(pd.hDevNames);
+		document.printerSettings.defaultPageSettings.setHdevmode(pd.hDevMode);
 
 		Rect screenRect = Rect(0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN));
 		_offscreen = new MemoryGraphics(screenRect.width, screenRect.height);
@@ -2191,41 +2210,6 @@ class PrintPreviewControl : Control
 		document.print(_offscreen.handle);
 		this.onLastPageChanged(new LastPageChangedEventArgs(_getLastPage(document)));
 		document.printController = oldPrintController;
-	}
-
-	///
-	protected override void onHandleCreated(EventArgs e)
-	{
-		super.onHandleCreated(e);
-		invalidatePreview();
-		invalidate();
-	}
-
-	///
-	protected override void wndProc(ref Message msg)
-	{
-		super.wndProc(msg);
-	}
-
-	///
-	protected override void onGotFocus(EventArgs e)
-	{
-		super.onGotFocus(e);
-		gotFocus(this, e);
-	}
-
-	///
-	protected override void onLostFocus(EventArgs e)
-	{
-		super.onLostFocus(e);
-		lostFocus(this, e)	;
-	}
-
-	///
-	protected override void onMouseDown(MouseEventArgs e)
-	{
-		super.onMouseDown(e);
-		mouseDown(this, e);
 	}
 
 	///
@@ -2268,30 +2252,13 @@ class PrintPreviewControl : Control
 	}
 
 	///
-	protected override void onPaintBackground(PaintEventArgs e)
-	{
-		super.onPaintBackground(e);
-		paintBackground(this, e);
-	}
-
-	///
 	protected void onLastPageChanged(LastPageChangedEventArgs e)
 	{
 		lastPageChangeed(this, e);
 	}
 
-	//
-	Event!(Control, EventArgs) gotFocus; ///
-	//
-	Event!(Control, EventArgs) lostFocus; ///
-	//
-	Event!(Control, EventArgs) mouseDown; ///
-	//
-	Event!(Control, PaintEventArgs) paint; ///
-	//
-	Event!(Control, EventArgs) paintBackground; ///
-	//
-	Event!(Control, LastPageChangedEventArgs) lastPageChangeed; ///
+	///
+	Event!(Control, LastPageChangedEventArgs) lastPageChangeed;
 }
 
 ///
@@ -2323,13 +2290,11 @@ class PrintPreviewDialog : Form
 	body
 	{
 		this.text = "Print Preview";
-		this.width = 1024;
-		this.height = 960;
 
 		_toolBar = new ToolBar();
+		_toolBar.parent = this;
 		_toolBar.dock = DockStyle.TOP;
 		_toolBar.style = ToolBarStyle.NORMAL;
-		_toolBar.parent = this;
 
 		_imageList = new ImageList;
 		_imageList.imageSize = Size(32,32);
@@ -2408,18 +2373,19 @@ class PrintPreviewDialog : Form
 		};
 
 		_pageSelectPanel = new Panel();
+		_pageSelectPanel.parent = this;
 		_pageSelectPanel.height = 24;
 		_pageSelectPanel.dock = DockStyle.TOP;
-		_pageSelectPanel.parent = this;
 
 		_fromPageLabel = new Label();
+		_fromPageLabel.parent = _pageSelectPanel;
 		_fromPageLabel.text = "Page ";
 		_fromPageLabel.width = 50;
 		_fromPageLabel.textAlign = ContentAlignment.MIDDLE_RIGHT;
 		_fromPageLabel.dock = DockStyle.LEFT;
-		_fromPageLabel.parent = _pageSelectPanel;
-		
+
  		_fromPage = new TextBox();
+		_fromPage.parent = _pageSelectPanel;
 		_fromPage.width = 50;
 		_fromPage.dock = DockStyle.LEFT;
 		_fromPage.gotFocus ~= (Control c, EventArgs e)
@@ -2457,21 +2423,21 @@ class PrintPreviewDialog : Form
 				_fromPage.selectAll();
 			}
 		};
-		_fromPage.parent = _pageSelectPanel;
 
 		_slashLabel = new Label();
+		_slashLabel.parent = _pageSelectPanel;
 		_slashLabel.text = " / ";
 		_slashLabel.autoSize = true;
 		_slashLabel.dock = DockStyle.LEFT;
-		_slashLabel.parent = _pageSelectPanel;
 
  		_toPage = new TextBox();
+		_toPage.parent = _pageSelectPanel;
 		_toPage.width = 50;
 		_toPage.dock = DockStyle.LEFT;
 		_toPage.enabled = false;
-		_toPage.parent = _pageSelectPanel;
 
 		_backButton = new Button;
+		_backButton.parent = _pageSelectPanel;
 		_backButton.text = "<";
 		_backButton.width = 32;
 		_backButton.dock = DockStyle.LEFT;
@@ -2489,9 +2455,9 @@ class PrintPreviewDialog : Form
 				_previewControl.invalidate();
 			}
 		};
-		_backButton.parent = _pageSelectPanel;
 
 		_forwardButton = new Button;
+		_forwardButton.parent = _pageSelectPanel;
 		_forwardButton.text = ">";
 		_forwardButton.width = 32;
 		_forwardButton.dock = DockStyle.LEFT;
@@ -2512,24 +2478,34 @@ class PrintPreviewDialog : Form
 				_previewControl.invalidate();
 			}
 		};
-		_forwardButton.parent = _pageSelectPanel;
 
 		_previewPanel = new Panel();
-		_previewPanel.dock = DockStyle.FILL;
 		_previewPanel.parent = this;
+		_previewPanel.dock = DockStyle.FILL;
 
 		_previewControl = new PrintPreviewControl(doc);
+		_previewControl.parent = _previewPanel;
 		_previewControl.resizeRedraw = true;
 		_previewControl.backColor = Color.gray;
 		_previewControl.dock = DockStyle.FILL;
+		_previewControl.lastPageChangeed ~= (Control c, LastPageChangedEventArgs e) {
+			_toPage.text = to!string(e.lastPage + 1);
+		};
+
+		_reset(doc);
+	}
+
+	///
+	private void _reset(PrintDocument doc)
+	{
+		this.width = 1024;
+		this.height = 960;
+		this.windowState = FormWindowState.NORMAL;
+
 		_previewControl.rows = 1;    // Single page view
 		_previewControl.columns = 1; // ditto
 		_previewControl.autoZoom = true; // Initial mode is "Fit".
 		_previewControl.startPage = 0;
-		_previewControl.lastPageChangeed ~= (Control c, LastPageChangedEventArgs e) {
-			_toPage.text = to!string(e.lastPage + 1);
-		};
-		_previewControl.parent = _previewPanel;
 
 		_enableScroll = !_previewControl.autoZoom;
 
@@ -2562,6 +2538,21 @@ class PrintPreviewDialog : Form
 	protected override void wndProc(ref Message msg)
 	{
 		super.wndProc(msg);
+	}
+
+	///
+	protected override void onShown(EventArgs ea)
+	{
+		super.onShown(ea);
+		_previewControl.invalidatePreview();
+		// No need to call _previewControl.invalidate();
+	}
+
+	///
+	protected override void onClosed(EventArgs ea)
+	{
+		super.onClosed(ea);
+		_reset(document);
 	}
 
 	///
