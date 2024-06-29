@@ -2118,6 +2118,7 @@ class Form: ContainerControl, IDialogResult // docmain
 			}
 			
 			show();
+			onShown(EventArgs.empty);
 			
 			wmodal = true;
 			for(;;)
@@ -2204,6 +2205,8 @@ class Form: ContainerControl, IDialogResult // docmain
 	Event!(Form, CancelEventArgs) closing; ///
 	//EventHandler load;
 	Event!(Form, EventArgs) load; ///
+	//EventHandler shown;
+	Event!(Form, EventArgs) shown; ///
 	
 	
 	///
@@ -2248,9 +2251,19 @@ class Form: ContainerControl, IDialogResult // docmain
 			if(!hwfocus || !IsChild(hwnd, hwfocus))
 				_selectNextControl(this, null, true, true, true, false);
 		}
+
+		if (isHandleCreated)
+			onShown(EventArgs.empty);
 	}
 	
 	
+	///
+	protected void onShown(EventArgs ea)
+	{
+		shown(this, ea);
+	}
+
+
 	private void _init()
 	{
 		_recalcClientSize();
