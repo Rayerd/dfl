@@ -504,7 +504,7 @@ class PrintDocument
 	PrinterSettings printerSettings;
 	PrintController printController;
 	wstring documentName;
-	bool originAtMargins = false; // TODO: Implement.
+	// bool originAtMargins = false; // TODO: Implement.
 
 	///
 	this()
@@ -832,13 +832,13 @@ private PaperSize[] _createPaperSizeArray(HGLOBAL hDevMode)
 private int _tentativeDpi(int dmPrintQuality)
 {
 	if (dmPrintQuality == PrinterResolutionKind.DRAFT)
-		return 400; // NOTE
+		return 400;
 	else if (dmPrintQuality == PrinterResolutionKind.LOW)
-		return 600; // NOTE
+		return 600;
 	else if (dmPrintQuality == PrinterResolutionKind.MEDIUM)
-		return 1200; // NOTE
+		return 1200;
 	else if (dmPrintQuality == PrinterResolutionKind.HIGH)
-		return 2400; // NOTE
+		return 2400;
 	else if (dmPrintQuality > 0)
 		return dmPrintQuality; // dpi unit.
 	else
@@ -1992,7 +1992,7 @@ final class PageSetupDialog : CommonDialog
 	{
 		// Get inital page settings.
 		PAGESETUPDLG pd;
-		bool isOK = _makePagesetupdlgFromPageSettings(pd, document.printerSettings);
+		bool isOK = _createPagesetupdlgFromPrinterSettings(pd, document.printerSettings);
 		if (!isOK)
 		{
 			throw new DflException("DFL: runDialog failure.");
@@ -2051,7 +2051,7 @@ final class PageSetupDialog : CommonDialog
 }
 
 ///
-private bool _makePagesetupdlgFromPageSettings(ref PAGESETUPDLG pd, PrinterSettings printerSettings)
+private bool _createPagesetupdlgFromPrinterSettings(ref PAGESETUPDLG pd, PrinterSettings printerSettings)
 {
 	pd.lStructSize = pd.sizeof;
 	pd.hwndOwner = null;
@@ -2190,7 +2190,7 @@ class PrintPreviewControl : Control
 	body
 	{
 		PAGESETUPDLG pd;
-		bool isOK = _makePagesetupdlgFromPageSettings(pd, document.printerSettings);
+		bool isOK = _createPagesetupdlgFromPrinterSettings(pd, document.printerSettings);
 		if (!isOK)
 		{
 			throw new DflException("DFL: invalidatePreview failure.");
@@ -2668,7 +2668,7 @@ class PreviewPrintController : PrintController
 			.map!(elem => elem.maxElement) // [h1,h4] if h1 > h2 and h3 < h4
 			.sum; // h1+h4
 
-		// NOTE: TOP_AND_BOTTOM_MARGIN and the others are scales on video screen world.
+		// TOP_AND_BOTTOM_MARGIN and the others are scales on video screen world.
 		double ratio = cast(double)(screenRect.height - TOP_AND_BOTTOM_MARGIN - VERTICAL_SPAN * (_previewControl.rows - 1)) / totalPageHeight;
 		if (screenRect.width < totalPageWidth * ratio)
 		{
