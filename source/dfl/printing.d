@@ -1233,7 +1233,7 @@ class PageSettings
 		assert(this.paperSize);
 		assert(this.margins);
 	}
-	body
+	do
 	{
 		int width = this.paperSize.width - this.margins.left - this.margins.right;
 		int height = this.paperSize.height - this.margins.top - this.margins.bottom;
@@ -2106,7 +2106,7 @@ class PrintPreviewControl : Control
 	{
 		assert(doc);
 	}
-	body
+	do
 	{
 		_document = doc;
 		_columns = 1;
@@ -2121,7 +2121,7 @@ class PrintPreviewControl : Control
 	{
 		assert(doc);
 	}
-	body
+	do
 	{
 		_document = doc;
 	}
@@ -2187,7 +2187,7 @@ class PrintPreviewControl : Control
 	{
 		assert(document);
 	}
-	body
+	do
 	{
 		PAGESETUPDLG pd;
 		bool isOK = _createPagesetupdlgFromPrinterSettings(pd, document.printerSettings);
@@ -2287,7 +2287,7 @@ class PrintPreviewDialog : Form
 	{
 		assert(doc);
 	}
-	body
+	do
 	{
 		this.text = "Print Preview";
 
@@ -2519,7 +2519,7 @@ class PrintPreviewDialog : Form
 		assert(doc);
 		assert(_previewControl);
 	}
-	body
+	do
 	{
 		_previewControl.document = doc;
 	}
@@ -2529,7 +2529,7 @@ class PrintPreviewDialog : Form
 	{
 		assert(_previewControl);
 	}
-	body
+	do
 	{
 		return _previewControl.document;
 	}
@@ -2605,7 +2605,7 @@ class PreviewPrintController : PrintController
 	{
 		assert(previewControl);
 	}
-	body
+	do
 	{
 		_previewControl = previewControl;
 	}

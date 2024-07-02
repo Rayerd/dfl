@@ -3239,7 +3239,7 @@ class Graphics // docmain
 	{
 		assert(_hdc);
 	}
-	body
+	do
 	{
 		return GetDeviceCaps(_hdc, LOGPIXELSX); // NOTE: Allways return 96 in video display (View document of SetProcessDPIAware()).
 	}
@@ -3250,7 +3250,7 @@ class Graphics // docmain
 	{
 		assert(_hdc);
 	}
-	body
+	do
 	{
 		return GetDeviceCaps(_hdc, LOGPIXELSY); // NOTE: Allways return 96 in video display (View document of SetProcessDPIAware()).
 	}
@@ -3262,7 +3262,7 @@ class Graphics // docmain
 	{
 		assert(_hdc);
 	}
-	body
+	do
 	{
 		const int dpiHor = this.dpiX; // NOTE: Allways return 96 in video display (View document of SetProcessDPIAware()).
 		const int dpiVer = this.dpiY; // NOTE: Allways return 96 in video display (View document of SetProcessDPIAware()).
