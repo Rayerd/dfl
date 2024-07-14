@@ -9,7 +9,7 @@ import dfl;
 void main()
 {
 	Form form = new Form;
-	form.text = "Welcom to DFL";
+	form.text = "Welcome to DFL";
 	form.size = Size(300, 300);
 
 	Button button = new Button;
