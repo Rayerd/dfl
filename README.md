@@ -3,6 +3,27 @@
 This unofficial project is a migration of [D Forms Library (DFL)](http://wiki.dprogramming.com/Dfl/HomePage "D Forms Library (DFL)") that is managed on SVN.
 DFL is a Win32 windowing library for the D language.
 
+```d
+import dfl;
+
+void main()
+{
+	Form form = new Form;
+	form.text = "Welcom to DFL";
+	form.size = Size(300, 300);
+
+	Button _button = new Button;
+	_button.text = "OK";
+	_button.location = Point(20, 20);
+	_button.size = Size(100, 50);
+	_button.click ~= (Control c, EventArgs e) => msgBox("OK button is clicked.");
+	_button.parent = form;
+
+	Application.run(form);
+}
+```
+![screen shot](./image/welcomtodfl.png "screen shot")
+
 ## Recent major features
 - **Windows OMF support has been removed (for DMD v2.109.0).**
 - **Registered DFL to DUB.**
