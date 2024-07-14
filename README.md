@@ -12,12 +12,12 @@ void main()
 	form.text = "Welcom to DFL";
 	form.size = Size(300, 300);
 
-	Button _button = new Button;
-	_button.text = "OK";
-	_button.location = Point(20, 20);
-	_button.size = Size(100, 50);
-	_button.click ~= (Control c, EventArgs e) => msgBox("OK button is clicked.");
-	_button.parent = form;
+	Button button = new Button;
+	button.text = "OK";
+	button.location = Point(20, 20);
+	button.size = Size(100, 50);
+	button.click ~= (Control c, EventArgs e) => msgBox("OK button is clicked.");
+	button.parent = form;
 
 	Application.run(form);
 }
