@@ -30,11 +30,6 @@ private import std.conv;
 private import std.range;
 private import std.algorithm;
 
-debug
-{
-	private import std.stdio : writeln, stdout;
-}
-
 ///
 enum PrinterUnit
 {
@@ -660,7 +655,6 @@ class PrintRangeWalker // Forward Range
 				_pages ~= p;
 			}
 		}
-		debug { writeln(_pages); stdout.flush(); }
 	}
 
 	///
@@ -1456,7 +1450,6 @@ class PageSettings
 			{
 				SIZE[] resolutionBuffer = new SIZE[resolutionNum];
 				DeviceCapabilities(toUnicodez(deviceName), "", DC_ENUMRESOLUTIONS, cast(wchar*)resolutionBuffer.ptr, pDevMode);
-				// debug msgBox(to!string(resolutionBuffer));
 				int index = -1;
 				for (int i = 0; i < resolutionNum; i++)
 				{

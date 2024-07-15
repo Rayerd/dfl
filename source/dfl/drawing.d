@@ -550,14 +550,6 @@ struct Color // docmain
 	Color Dthisval(Color t) pure nothrow { return t; }
 	
 	
-	deprecated static Color opCall(COLORREF argb)
-	{
-		Color nc;
-		nc.color.cref = argb;
-		return nc;
-	}
-	
-	
 	/// Construct a new color.
 	private this(_color c) pure nothrow
 	{
@@ -616,8 +608,6 @@ struct Color // docmain
 		return Color.fromArgb(0, 0xFF, 0xFF, 0xFF);
 	}
 	
-	
-	deprecated alias blend = blendColor;
 	
 	
 	/// Blend colors; alpha channels are ignored.

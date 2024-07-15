@@ -924,7 +924,6 @@ class RichTextBox: TextBoxBase // docmain
 	+/
 	
 	
-	//LinkClickedEventHandler linkClicked;
 	Event!(RichTextBox, LinkClickedEventArgs) linkClicked; ///
 	
 	

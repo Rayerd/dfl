@@ -390,15 +390,15 @@ final class SystemEvents // docmain
 	
 	
 	static:
-	EventHandler displaySettingsChanged;
-	EventHandler installedFontsChanged;
-	EventHandler lowMemory; // GC automatically collects before this event.
-	EventHandler paletteChanged;
-	//PowerModeChangedEventHandler powerModeChanged; // WM_POWERBROADCAST
-	SystemEndedEventHandler systemEnded;
-	SessionEndingEventHandler systemEnding;
-	SessionEndingEventHandler sessionEnding;
-	EventHandler timeChanged;
+	Event!(Object, EventArgs) displaySettingsChanged;
+	Event!(Object, EventArgs) installedFontsChanged;
+	Event!(Object, EventArgs) lowMemory; // GC automatically collects before this event.
+	Event!(Object, EventArgs) paletteChanged;
+	//Event!(Object, PowerModeChangedEventArgs) powerModeChanged; // WM_POWERBROADCAST
+	Event!(Object, SystemEndedEventArgs) systemEnded;
+	Event!(Object, SessionEndingEventArgs) systemEnding;
+	Event!(Object, SessionEndingEventArgs) sessionEnding;
+	Event!(Object, EventArgs) timeChanged;
 	// user preference changing/changed. WM_SETTINGCHANGE ?
 	
 	

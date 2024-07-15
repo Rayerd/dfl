@@ -8,13 +8,6 @@ import dfl.internal.dlib;
 import std.functional;
 
 
-// Create an event handler; old style.
-deprecated template Event(TArgs : EventArgs = EventArgs)
-{
-	alias Event = Event!(Object, TArgs);
-}
-
-
 /** Managing event handlers.
     Params:
 		T1 = the sender type.
@@ -180,22 +173,6 @@ template Event(T1, T2) // docmain
 		}
 		
 		
-		// Use opApply and hasHandlers instead.
-		deprecated @property Handler[] handlers() pure nothrow // getter
-		{
-			if(!hasHandlers)
-				return null;
-			try
-			{
-				return _array[1 .. _array.length].dup; // Because _array can be modified. Function is deprecated anyway.
-			}
-			catch (DThrowable e)
-			{
-				return null;
-			}
-		}
-		
-		
 		private:
 		Handler[] _array; // Not what it seems.
 		
@@ -302,10 +279,6 @@ class EventArgs // docmain
 		return _e;
 	}
 }
-
-
-// Simple event handler.
-alias EventHandler = Event!(Object, EventArgs); // deprecated
 
 
 ///

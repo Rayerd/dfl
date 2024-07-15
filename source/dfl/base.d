@@ -20,8 +20,6 @@ interface IWindow // docmain
 	@property HWindow handle(); // getter
 }
 
-alias IWin32Window = IWindow; // deprecated
-
 
 ///
 class DflException: Exception // docmain

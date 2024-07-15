@@ -793,9 +793,7 @@ class ComboBox: ListControl // docmain
 	}
 	
 	
-	//DrawItemEventHandler drawItem;
 	Event!(ComboBox, DrawItemEventArgs) drawItem;
-	//MeasureItemEventHandler measureItem;
 	Event!(ComboBox, MeasureItemEventArgs) measureItem;
 	
 	

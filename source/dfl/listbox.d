@@ -32,7 +32,6 @@ abstract class ListControl: ControlSuperClass // docmain
 	}
 	
 	
-	//EventHandler selectedValueChanged;
 	Event!(ListControl, EventArgs) selectedValueChanged; ///
 	
 	
@@ -122,8 +121,6 @@ class ListBox: ListControl // docmain
 	///
 	static class SelectedIndexCollection
 	{
-		deprecated alias count = length;
-		
 		@property int length() // getter
 		{
 			if(!lbox.isHandleCreated)
@@ -218,8 +215,6 @@ class ListBox: ListControl // docmain
 	///
 	static class SelectedObjectCollection
 	{
-		deprecated alias count = length;
-		
 		@property int length() // getter
 		{
 			if(!lbox.isHandleCreated)
@@ -1240,9 +1235,7 @@ class ListBox: ListControl // docmain
 	}
 	
 	
-	//DrawItemEventHandler drawItem;
 	Event!(ListBox, DrawItemEventArgs) drawItem; ///
-	//MeasureItemEventHandler measureItem;
 	Event!(ListBox, MeasureItemEventArgs) measureItem; ///
 	
 	

@@ -166,17 +166,17 @@ else
 		core.memory.GC.collect();
 	}
 	
-		void gcFullCollect() nothrow
+	void gcFullCollect() nothrow
 	{
-			try
-			{
-				core.memory.GC.collect();
-			}
-			catch (Throwable e)
-			{
-			}
+		try
+		{
+			core.memory.GC.collect();
+		}
+		catch (Throwable e)
+		{
 		}
 	}
+}
 
 
 private import std.string;

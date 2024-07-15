@@ -412,16 +412,12 @@ template ListWrapArray(TValue, alias Array,
 	}
 	
 	
-	deprecated alias count = length;
-	
 	///
 	@property size_t length() // getter
 	{
 		return Array.length;
 	}
 	
-	
-	deprecated alias clone = dup;
 	
 	///
 	TValue[] dup()

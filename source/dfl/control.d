@@ -717,8 +717,6 @@ class Control: DObject, IWindow // docmain
 		}
 		
 		
-		deprecated alias count = length;
-		
 		///
 		@property int length() // getter
 		{
@@ -6029,121 +6027,74 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	//EventHandler backColorChanged;
 	Event!(Control, EventArgs) backColorChanged; ///
-	// EventHandler backgroundImageChanged;
+	// Event!(Control, EventArgs) backgroundImageChanged;
 	/+
-	deprecated EventHandler causesValidationChanged;
-	deprecated InvalidateEventHandler invalidated;
-	deprecated EventHandler validated;
-	deprecated CancelEventHandler validating; // Once cancel is true, remaining events are suppressed (including validated).
-	deprecated EventHandler enter; // Cascades up. TODO: fix implementation.
-	deprecated EventHandler leave; // Cascades down. TODO: fix implementation.
-	deprecated UICuesEventHandler changeUICues; // TODO: properly fire.
+	deprecated Event!(Control, EventArgs) causesValidationChanged;
+	deprecated Event!(Control, InvalidateEventArgs) invalidated;
+	deprecated Event!(Control, EventArgs) validated;
+	deprecated Event!(Control, CancelEventArgs) validating; // Once cancel is true, remaining events are suppressed (including validated).
+	deprecated Event!(Control, EventArgs) enter; // Cascades up. TODO: fix implementation.
+	deprecated Event!(Control, EventArgs) leave; // Cascades down. TODO: fix implementation.
+	deprecated Event!(Control, UICuesEventArgs) changeUICues; // TODO: properly fire.
 	+/
-	//EventHandler click;
 	Event!(Control, EventArgs) click; ///
 	version(DFL_NO_MENUS)
 	{
 	}
 	else
 	{
-		//EventHandler contextMenuChanged;
 		Event!(Control, EventArgs) contextMenuChanged; ///
 	}
-	//ControlEventHandler controlAdded;
 	Event!(Control, ControlEventArgs) controlAdded; ///
-	//ControlEventHandler controlRemoved;
 	Event!(Control, ControlEventArgs) controlRemoved; ///
-	//EventHandler cursorChanged;
 	Event!(Control, EventArgs) cursorChanged; ///
-	//EventHandler disposed;
 	Event!(Control, EventArgs) disposed; ///
-	//EventHandler dockChanged;
-	//Event!(Control, EventArgs) dockChanged; ///
 	Event!(Control, EventArgs) hasLayoutChanged; ///
 	alias dockChanged = hasLayoutChanged;
-	//EventHandler doubleClick;
 	Event!(Control, EventArgs) doubleClick; ///
-	//EventHandler enabledChanged;
 	Event!(Control, EventArgs) enabledChanged; ///
-	//EventHandler fontChanged;
 	Event!(Control, EventArgs) fontChanged; ///
-	//EventHandler foreColorChanged;
 	Event!(Control, EventArgs) foreColorChanged; ///
-	//EventHandler gotFocus; // After enter.
 	Event!(Control, EventArgs) gotFocus; ///
-	//EventHandler handleCreated;
 	Event!(Control, EventArgs) handleCreated; ///
-	//EventHandler handleDestroyed;
 	Event!(Control, EventArgs) handleDestroyed; ///
-	//HelpEventHandler helpRequested;
 	Event!(Control, HelpEventArgs) helpRequested; ///
-	//KeyEventHandler keyDown;
 	Event!(Control, KeyEventArgs) keyDown; ///
-	//KeyEventHandler keyPress;
 	Event!(Control, KeyPressEventArgs) keyPress; ///
-	//KeyEventHandler keyUp;
 	Event!(Control, KeyEventArgs) keyUp; ///
-	//LayoutEventHandler layout;
 	Event!(Control, LayoutEventArgs) layout; ///
-	//EventHandler lostFocus;
 	Event!(Control, EventArgs) lostFocus; ///
-	//MouseEventHandler mouseDown;
 	Event!(Control, MouseEventArgs) mouseDown; ///
-	//MouseEventHandler mouseEnter;
 	Event!(Control, MouseEventArgs) mouseEnter; ///
-	//MouseEventHandler mouseHover;
 	Event!(Control, MouseEventArgs) mouseHover; ///
-	//MouseEventHandler mouseLeave;
 	Event!(Control, MouseEventArgs) mouseLeave; ///
-	//MouseEventHandler mouseMove;
 	Event!(Control, MouseEventArgs) mouseMove; ///
-	//MouseEventHandler mouseUp;
 	Event!(Control, MouseEventArgs) mouseUp; ///
-	//MouseEventHandler mouseWheel;
 	Event!(Control, MouseEventArgs) mouseWheel; ///
-	//EventHandler moving;
 	Event!(Control, MovingEventArgs) moving; ///
-	//EventHandler move;
 	Event!(Control, EventArgs) move; ///
-	//EventHandler locationChanged;
 	alias locationChanged = move;
-	//PaintEventHandler paint;
 	Event!(Control, PaintEventArgs) paint; ///
-	//EventHandler parentChanged;
 	Event!(Control, EventArgs) parentChanged; ///
-	//EventHandler sizing;
 	Event!(Control, SizingEventArgs) sizing; ///
-	//EventHandler resize;
 	Event!(Control, EventArgs) resize; ///
-	//EventHandler sizeChanged;
 	alias sizeChanged = resize;
-	//EventHandler rightToLeftChanged;
 	Event!(Control, EventArgs) rightToLeftChanged; ///
-	// EventHandler styleChanged;
-	//EventHandler systemColorsChanged;
+	// Event!(Control, EventArgs) styleChanged;
 	Event!(Control, EventArgs) systemColorsChanged; ///
-	// EventHandler tabIndexChanged;
-	// EventHandler tabStopChanged;
-	//EventHandler textChanged;
+	// Event!(Control, EventArgs) tabIndexChanged;
+	// Event!(Control, EventArgs) tabStopChanged;
 	Event!(Control, EventArgs) textChanged; ///
-	//EventHandler visibleChanged;
 	Event!(Control, EventArgs) visibleChanged; ///
 	
 	version(DFL_NO_DRAG_DROP) {} else
 	{
-		//DragEventHandler dragDrop;
 		Event!(Control, DragEventArgs) dragDrop; ///
-		//DragEventHandler dragEnter;
 		Event!(Control, DragEventArgs) dragEnter; ///
-		//EventHandler dragLeave;
 		Event!(Control, EventArgs) dragLeave; ///
-		//DragEventHandler dragOver;
 		Event!(Control, DragEventArgs) dragOver; ///
-		//GiveFeedbackEventHandler giveFeedback;
 		Event!(Control, GiveFeedbackEventArgs) giveFeedback; ///
-		//QueryContinueDragEventHandler queryContinueDrag;
 		Event!(Control, QueryContinueDragEventArgs) queryContinueDrag; ///
 	}
 	

@@ -1668,8 +1668,6 @@ class Form: ContainerControl, IDialogResult // docmain
 		return grip;
 	}
 	
-	deprecated alias sizeGrip = sizingGrip;
-	
 	
 	///
 	final @property void startPosition(FormStartPosition startpos) // setter
@@ -2195,17 +2193,11 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	
-	//EventHandler activated;
 	Event!(Form, EventArgs) activated; ///
-	//EventHandler deactivate;
 	Event!(Form, EventArgs) deactivate; ///
-	//EventHandler closed;
 	Event!(Form, EventArgs) closed; ///
-	//CancelEventHandler closing;
 	Event!(Form, CancelEventArgs) closing; ///
-	//EventHandler load;
 	Event!(Form, EventArgs) load; ///
-	//EventHandler shown;
 	Event!(Form, EventArgs) shown; ///
 	
 	

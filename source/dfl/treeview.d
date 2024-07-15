@@ -1688,21 +1688,13 @@ class TreeView: ControlSuperClass // docmain
 	}
 	
 	
-	//TreeViewEventHandler afterCollapse;
 	Event!(TreeView, TreeViewEventArgs) afterCollapse; ///
-	//TreeViewEventHandler afterExpand;
 	Event!(TreeView, TreeViewEventArgs) afterExpand; ///
-	//TreeViewEventHandler afterSelect;
 	Event!(TreeView, TreeViewEventArgs) afterSelect; ///
-	//NodeLabelEditEventHandler afterLabelEdit;
 	Event!(TreeView, NodeLabelEditEventArgs) afterLabelEdit; ///
-	//TreeViewCancelEventHandler beforeCollapse;
 	Event!(TreeView, TreeViewCancelEventArgs) beforeCollapse; ///
-	//TreeViewCancelEventHandler beforeExpand;
 	Event!(TreeView, TreeViewCancelEventArgs) beforeExpand; ///
-	//TreeViewCancelEventHandler beforeSelect;
 	Event!(TreeView, TreeViewCancelEventArgs) beforeSelect; ///
-	//NodeLabelEditEventHandler beforeLabelEdit;
 	Event!(TreeView, NodeLabelEditEventArgs) beforeLabelEdit; ///
 	
 	

@@ -136,15 +136,10 @@ class NotifyIcon // docmain
 	}
 	
 	
-	//EventHandler click;
 	Event!(NotifyIcon, EventArgs) click; ///
-	//EventHandler doubleClick;
 	Event!(NotifyIcon, EventArgs) doubleClick; ///
-	//MouseEventHandler mouseDown;
 	Event!(NotifyIcon, MouseEventArgs) mouseDown; ///
-	//MouseEventHandler mouseUp;
 	Event!(NotifyIcon, MouseEventArgs) mouseUp; ///
-	//MouseEventHandler mouseMove;
 	Event!(NotifyIcon, MouseEventArgs) mouseMove; ///
 	
 	

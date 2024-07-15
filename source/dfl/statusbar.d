@@ -560,7 +560,6 @@ class StatusBar: ControlSuperClass // docmain
 	+/
 	
 	
-	//StatusBarPanelClickEventHandler panelClick;
 	//Event!(StatusBar, StatusBarPanelClickEventArgs) panelClick; ///
 	
 	

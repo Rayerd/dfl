@@ -31,7 +31,6 @@ else
 		}
 		
 		
-		//EventHandler popup;
 		Event!(ContextMenu, EventArgs) popup; ///
 		
 		
@@ -587,11 +586,8 @@ else
 		}
 		
 		
-		//EventHandler click;
 		Event!(MenuItem, EventArgs) click; ///
-		//EventHandler popup;
 		Event!(MenuItem, EventArgs) popup; ///
-		//EventHandler select;
 		Event!(MenuItem, EventArgs) select; ///
 		
 		

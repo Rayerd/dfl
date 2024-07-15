@@ -507,9 +507,7 @@ class Splitter: Control // docmain
 	}
 	
 	
-	//SplitterEventHandler splitterMoved;
 	Event!(Splitter, SplitterEventArgs) splitterMoved; ///
-	//SplitterEventHandler splitterMoving;
 	Event!(Splitter, SplitterEventArgs) splitterMoving; ///
 	
 	

@@ -335,8 +335,6 @@ else
 			return HIMAGELIST.init != _hil;
 		}
 		
-		deprecated alias handleCreated = isHandleCreated;
-		
 		
 		///
 		final @property HIMAGELIST handle() // getter

@@ -976,8 +976,6 @@ class ListView: ControlSuperClass // docmain
 	///
 	static class SelectedIndexCollection
 	{
-		deprecated alias count = length;
-		
 		@property int length() // getter
 		{
 			if(!lview.created)
@@ -1059,13 +1057,9 @@ class ListView: ControlSuperClass // docmain
 	}
 	
 	
-	deprecated alias SelectedListViewItemCollection = SelectedItemCollection;
-	
 	///
 	static class SelectedItemCollection
 	{
-		deprecated alias count = length;
-		
 		@property int length() // getter
 		{
 			if(!lview.created)
@@ -1150,8 +1144,6 @@ class ListView: ControlSuperClass // docmain
 	///
 	static class CheckedIndexCollection
 	{
-		deprecated alias count = length;
-		
 		@property int length() // getter
 		{
 			if(!lview.created)
@@ -2029,8 +2021,7 @@ class ListView: ControlSuperClass // docmain
 	
 	// TODO:
 	//  itemActivate, itemDrag
-	//CancelEventHandler selectedIndexChanging; // ?
-	
+	//Event!(ListView, CancelEventArgs) selectedIndexChanging; // ?
 	Event!(ListView, ColumnClickEventArgs) columnClick; ///
 	Event!(ListView, LabelEditEventArgs) afterLabelEdit; ///
 	Event!(ListView, LabelEditEventArgs) beforeLabelEdit; ///

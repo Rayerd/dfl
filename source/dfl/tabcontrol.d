@@ -470,9 +470,7 @@ class TabControlBase: ControlSuperClass
 	
 	
 	// drawItem event.
-	//EventHandler selectedIndexChanged;
 	Event!(TabControlBase, EventArgs) selectedIndexChanged; ///
-	//CancelEventHandler selectedIndexChanging;
 	Event!(TabControlBase, CancelEventArgs) selectedIndexChanging; ///
 	
 	

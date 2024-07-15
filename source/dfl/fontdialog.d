@@ -298,7 +298,7 @@ class FontDialog: CommonDialog
 	
 	
 	///
-	EventHandler apply;
+	Event!(FontDialog, EventArgs) apply;
 	
 	
 	protected override UINT_PTR hookProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)

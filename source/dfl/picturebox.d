@@ -149,9 +149,7 @@ public:
 	}
 	
 	
-	//EventHandler sizeModeChanged;
 	Event!(PictureBox, EventArgs) sizeModeChanged; ///
-	//EventHandler imageChanged;
 	Event!(PictureBox, EventArgs) imageChanged; ///
 	
 	

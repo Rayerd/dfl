@@ -22,7 +22,6 @@ private import core.sys.windows.windows;
 class Timer // docmain
 {
 public:
-	//EventHandler tick;
 	Event!(Timer, EventArgs) tick; ///
 	
 	
