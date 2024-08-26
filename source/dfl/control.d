@@ -3614,16 +3614,37 @@ class Control: DObject, IWindow // docmain
 		if(!hwnd)
 			badInvokeHandle();
 		
-		InvokeData inv;
-		inv.dg = dg;
-		inv.args = args;
+		static assert((DflInvokeParam*).sizeof <= LPARAM.sizeof);
 		
-		if(LRESULT_DFL_INVOKE != SendMessageA(hwnd, wmDfl, WPARAM_DFL_INVOKE, cast(LRESULT)&inv))
+		static struct DelegateInvokeParam
+		{
+			Object delegate(Object[]) dg;
+			Object result;
+			Object[] args;
+		}
+
+		static void funcEntry(Control c, size_t[] p)
+		{
+			auto dip = cast(DelegateInvokeParam*)p[0];
+			dip.result = dip.dg(dip.args);
+		}
+
+		DelegateInvokeParam dip;
+		dip.dg = dg;
+		dip.args = args;
+
+		DflInvokeParam dflInvokeParam;
+		dflInvokeParam.fp = &funcEntry;
+		dflInvokeParam.exception = null;
+		dflInvokeParam.nparams = args.length;
+		dflInvokeParam.params[0] = cast(size_t)&dip;
+		
+		if(LRESULT_DFL_INVOKE != SendMessageA(hwnd, wmDfl, WPARAM_DFL_INVOKE_PARAMS, cast(LPARAM)&dflInvokeParam))
 			throw new DflException("Invoke failure");
-		if(inv.exception)
-			throw inv.exception;
+		if(dflInvokeParam.exception)
+			throw dflInvokeParam.exception;
 		
-		return inv.result;
+		return dip.result;
 	}
 	
 	/// ditto
@@ -3632,13 +3653,32 @@ class Control: DObject, IWindow // docmain
 		if(!hwnd)
 			badInvokeHandle();
 		
-		InvokeSimpleData inv;
-		inv.dg = dg;
+		static assert((DflInvokeParam*).sizeof <= LPARAM.sizeof);
+
+		static struct DelegateInvokeParam
+		{
+			void delegate() dg;
+		}
+
+		static void funcEntry(Control c, size_t[] p)
+		{
+			auto dip = cast(DelegateInvokeParam*)p[0];
+			dip.dg();
+		}
+
+		DelegateInvokeParam dip;
+		dip.dg = dg;
+
+		DflInvokeParam dflInvokeParam;
+		dflInvokeParam.fp = &funcEntry;
+		dflInvokeParam.exception = null;
+		dflInvokeParam.nparams = 0;
+		dflInvokeParam.params[0] = cast(size_t)&dip;
 		
-		if(LRESULT_DFL_INVOKE != SendMessageA(hwnd, wmDfl, WPARAM_DFL_INVOKE_SIMPLE, cast(LRESULT)&inv))
+		if(LRESULT_DFL_INVOKE != SendMessageA(hwnd, wmDfl, WPARAM_DFL_INVOKE_NOPARAMS, cast(LPARAM)&dflInvokeParam))
 			throw new DflException("Invoke failure");
-		if(inv.exception)
-			throw inv.exception;
+		if(dflInvokeParam.exception)
+			throw dflInvokeParam.exception;
 	}
 	
 	
@@ -3654,10 +3694,24 @@ class Control: DObject, IWindow // docmain
 		if(!hwnd)
 			badInvokeHandle();
 		
-		assert(!invokeRequired);
-		
-		static assert(fn.sizeof <= LPARAM.sizeof);
-		PostMessageA(hwnd, wmDfl, WPARAM_DFL_DELAY_INVOKE, cast(LPARAM)fn);
+		static assert((DflInvokeParam*).sizeof <= LPARAM.sizeof);
+
+		static void funcEntry(Control c, size_t[] p)
+		{
+			auto func = cast(void function())p[0];
+			func();
+		}
+
+		DflInvokeParam* dflInvokeParam = cast(DflInvokeParam*)malloc(DflInvokeParam.sizeof);
+		if(!dflInvokeParam)
+			throw new OomException();
+
+		dflInvokeParam.fp = &funcEntry;
+		dflInvokeParam.exception = null;
+		dflInvokeParam.nparams = 0;
+		dflInvokeParam.params[0] = cast(size_t)fn;
+
+		PostMessageA(hwnd, wmDfl, WPARAM_DFL_DELAY_INVOKE_NOPARAMS, cast(LPARAM)dflInvokeParam);
 	}
 	
 	/// ditto
@@ -3671,22 +3725,19 @@ class Control: DObject, IWindow // docmain
 		if(!hwnd)
 			badInvokeHandle();
 		
-		assert(!invokeRequired);
-		
 		static assert((DflInvokeParam*).sizeof <= LPARAM.sizeof);
 		
-		DflInvokeParam* p;
-		p = cast(DflInvokeParam*)dfl.internal.clib.malloc(
-			(DflInvokeParam.sizeof - size_t.sizeof)
-				+ params.length * size_t.sizeof);
-		if(!p)
+		DflInvokeParam* dflInvokeParams = cast(DflInvokeParam*)malloc(
+			DflInvokeParam.sizeof - size_t.sizeof + params.length * size_t.sizeof);
+		if(!dflInvokeParams)
 			throw new OomException();
 		
-		p.fp = fn;
-		p.nparams = params.length;
-		p.params.ptr[0 .. params.length] = params[];
+		dflInvokeParams.fp = fn;
+		dflInvokeParams.exception = null;
+		dflInvokeParams.nparams = params.length;
+		dflInvokeParams.params.ptr[0 .. params.length] = params[];
 		
-		PostMessageA(hwnd, wmDfl, WPARAM_DFL_DELAY_INVOKE_PARAMS, cast(LPARAM)p);
+		PostMessageA(hwnd, wmDfl, WPARAM_DFL_DELAY_INVOKE_PARAMS, cast(LPARAM)dflInvokeParams);
 	}
 	
 	deprecated alias beginInvoke = delayInvoke;
@@ -8322,16 +8373,4 @@ class ContainerControl: ScrollableControl, IContainerControl // docmain
 		}
 		return false;
 	}
-}
-
-
-private template hasLocalAliasing(T...)
-{
-	import std.traits, std.typecons;
-
-	static if( !T.length )
-		enum hasLocalAliasing = false;
-	else
-		enum hasLocalAliasing = std.traits.hasLocalAliasing!(T[0]) ||
-			dfl.control.hasLocalAliasing!(T[1 .. $]);
 }

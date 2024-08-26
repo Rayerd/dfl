@@ -1866,20 +1866,18 @@ extern(Windows) LRESULT dflWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 	{
 		switch(wparam)
 		{
-			case WPARAM_DFL_INVOKE:
+			case WPARAM_DFL_INVOKE_PARAMS:
 				{
-					InvokeData* pinv;
-					pinv = cast(InvokeData*)lparam;
+					DflInvokeParam* p = cast(DflInvokeParam*)lparam;
 					try
 					{
-						pinv.result = pinv.dg(pinv.args);
+						p.fp(Application.lookupHwnd(hwnd), p.params.ptr[0 .. p.nparams]);
 					}
 					catch(DThrowable e)
 					{
-						//Application.onThreadException(e);
 						try
 						{
-							pinv.exception = e;
+							p.exception = e;
 						}
 						catch(DThrowable e2)
 						{
@@ -1889,20 +1887,18 @@ extern(Windows) LRESULT dflWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 				}
 				return LRESULT_DFL_INVOKE;
 			
-			case WPARAM_DFL_INVOKE_SIMPLE:
+			case WPARAM_DFL_INVOKE_NOPARAMS:
 				{
-					InvokeSimpleData* pinv;
-					pinv = cast(InvokeSimpleData*)lparam;
+					DflInvokeParam* p = cast(DflInvokeParam*)lparam;
 					try
 					{
-						pinv.dg();
+						p.fp(Application.lookupHwnd(hwnd), p.params);
 					}
 					catch(DThrowable e)
 					{
-						//Application.onThreadException(e);
 						try
 						{
-							pinv.exception = e;
+							p.exception = e;
 						}
 						catch(DThrowable e2)
 						{
@@ -1912,21 +1908,24 @@ extern(Windows) LRESULT dflWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 				}
 				return LRESULT_DFL_INVOKE;
 			
-			case WPARAM_DFL_DELAY_INVOKE:
-				try
+			case WPARAM_DFL_DELAY_INVOKE_NOPARAMS:
 				{
-					(cast(void function())lparam)();
-				}
-				catch(DThrowable e)
-				{
-					Application.onThreadException(e);
+					DflInvokeParam* p = cast(DflInvokeParam*)lparam;
+					try
+					{
+						p.fp(Application.lookupHwnd(hwnd), p.params);
+					}
+					catch(DThrowable e)
+					{
+						Application.onThreadException(e);
+					}
+					dfl.internal.clib.free(p);
 				}
 				break;
 			
 			case WPARAM_DFL_DELAY_INVOKE_PARAMS:
 				{
-					DflInvokeParam* p;
-					p = cast(DflInvokeParam*)lparam;
+					DflInvokeParam* p = cast(DflInvokeParam*)lparam;
 					try
 					{
 						p.fp(Application.lookupHwnd(hwnd), p.params.ptr[0 .. p.nparams]);
@@ -2044,36 +2043,20 @@ else
 
 enum LRESULT LRESULT_DFL_INVOKE = 0x95FADF; // Magic number.
 
-
-struct InvokeData
-{
-	Object delegate(Object[]) dg;
-	Object[] args;
-	Object result;
-	DThrowable exception = null;
-}
-
-
-struct InvokeSimpleData
-{
-	void delegate() dg;
-	DThrowable exception = null;
-}
-
-
 UINT wmDfl;
 
 enum: WPARAM
 {
-	WPARAM_DFL_INVOKE = 78,
-	WPARAM_DFL_DELAY_INVOKE = 79,
+	WPARAM_DFL_INVOKE_PARAMS = 78,
+	WPARAM_DFL_DELAY_INVOKE_NOPARAMS = 79,
 	WPARAM_DFL_DELAY_INVOKE_PARAMS = 80,
-	WPARAM_DFL_INVOKE_SIMPLE = 81,
+	WPARAM_DFL_INVOKE_NOPARAMS = 81,
 }
 
 struct DflInvokeParam
 {
 	void function(Control, size_t[]) fp;
+	DThrowable exception;
 	size_t nparams;
 	size_t[1] params;
 }
