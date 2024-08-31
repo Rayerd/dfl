@@ -2043,7 +2043,7 @@ else
 
 enum LRESULT LRESULT_DFL_INVOKE = 0x95FADF; // Magic number.
 
-UINT wmDfl;
+UINT wmDfl; // TODO: shared?
 
 enum: WPARAM
 {

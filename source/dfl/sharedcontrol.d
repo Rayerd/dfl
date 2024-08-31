@@ -1,7 +1,3 @@
-// Written by Christopher E. Miller
-// See the included license.txt for copyright and license details.
-
-
 ///
 module dfl.sharedcontrol;
 
@@ -13,26 +9,31 @@ private import dfl.internal.winapi;
 private import dfl.internal.dlib;
 private import dfl.internal.clib : malloc, free;
 
+private import core.atomic;
+
 ///
-shared class SharedControl
+synchronized shared class SharedControl
 {
 private:
 	Control _ctrl;
 	
-	void makeParam(ARGS...)(void function(Control, ARGS) func, ARGS args, DflInvokeParam* dflInvokeParam)
+	void makeParam(ARGS...)(ref void function(Control, ARGS) func, ref ARGS args, ref DflInvokeParam* dflInvokeParam)
 		if (ARGS.length)
 	{
 		static struct FunctionInvokeParam
 		{
-			void function(Control, ARGS) func;
 			ARGS args;
+			void function(Control, ARGS) func; // NOTE: This function pointer must be after "args", why?
 		}
 
 		auto invokeParam = cast(FunctionInvokeParam*)malloc(FunctionInvokeParam.sizeof);
 		if (!invokeParam)
 			throw new OomException();
-		invokeParam.func = func;
-		invokeParam.args = args;
+		invokeParam.func.atomicStore(func.atomicLoad());
+		static foreach (i, e; args)
+		{
+			invokeParam.args[i].atomicStore(e.atomicLoad());
+		}
 		
 		static void funcEntry(Control c, size_t[] p)
 		{
@@ -41,13 +42,13 @@ private:
 			free(param);
 		}
 		
-		dflInvokeParam.fp = &funcEntry;
-		dflInvokeParam.exception = null;
-		dflInvokeParam.nparams = 1;
-		dflInvokeParam.params[0] = cast(size_t)invokeParam;
+		dflInvokeParam.fp.atomicStore(&funcEntry);
+		dflInvokeParam.exception.atomicStore(null);
+		dflInvokeParam.nparams.atomicStore(1);
+		dflInvokeParam.params[0].atomicStore(cast(size_t)invokeParam);
 	}
 	
-	void makeParamNoneArgs(void function(Control) func, DflInvokeParam* dflInvokeParam)
+	void makeParamNoneArgs(ref void function(Control) func, ref DflInvokeParam* dflInvokeParam)
 	{
 		static void funcEntry(Control c, size_t[] p)
 		{
@@ -74,110 +75,98 @@ public:
 	void invoke(ARGS...)(void function(Control, ARGS) func, ARGS args)
 		if (ARGS.length && !hasLocalAliasing!(ARGS))
 	{
-		synchronized
+		auto ctrl = cast(Control)_ctrl;
+		auto hwnd = ctrl.handle;
+		
+		if(!hwnd)
+			throw new DflException("Must invoke with created handle"); // Control.badInvokeHandle();
+		
+		static assert((DflInvokeParam*).sizeof <= LPARAM.sizeof);
+
+		auto dflInvokeParam = cast(DflInvokeParam*)malloc(DflInvokeParam.sizeof);
+		if (!dflInvokeParam)
+			throw new OomException();
+
+		makeParam(func, args, dflInvokeParam);
+		scope(exit)
 		{
-			auto ctrl = cast(Control)_ctrl;
-			auto hwnd = ctrl.handle;
-			
-			if(!hwnd)
-				throw new DflException("Must invoke with created handle"); // Control.badInvokeHandle();
-			
-			static assert((DflInvokeParam*).sizeof <= LPARAM.sizeof);
-
-			auto dflInvokeParam = cast(DflInvokeParam*)malloc(DflInvokeParam.sizeof);
-			if (!dflInvokeParam)
-				throw new OomException();
-
-			makeParam(func, args, dflInvokeParam);
-			scope(exit)
-			{
-				free(dflInvokeParam);
-			}
-
-			if (LRESULT_DFL_INVOKE != SendMessageA(hwnd, wmDfl, WPARAM_DFL_INVOKE_PARAMS, cast(LPARAM)dflInvokeParam))
-				throw new DflException("Invoke failure");
-
-			if (dflInvokeParam.exception)
-				throw dflInvokeParam.exception;
+			free(dflInvokeParam);
 		}
+
+		if (LRESULT_DFL_INVOKE != SendMessageA(hwnd.atomicLoad(), wmDfl.atomicLoad(), WPARAM_DFL_INVOKE_PARAMS.atomicLoad(), cast(LPARAM)dflInvokeParam))
+			throw new DflException("Invoke failure");
+
+		if (dflInvokeParam.exception)
+			throw dflInvokeParam.exception;
 	}
 	
 	///
 	void invoke(ARGS...)(void function(Control, ARGS) func, ARGS args)
 		if (!ARGS.length)
 	{
-		synchronized
+		auto ctrl = cast(Control)_ctrl;
+		auto hwnd = ctrl.handle;
+		
+		if(!hwnd)
+			throw new DflException("Must invoke with created handle"); // Control.badInvokeHandle();
+		
+		static assert((DflInvokeParam*).sizeof <= LPARAM.sizeof);
+		
+		auto dflInvokeParam = cast(DflInvokeParam*)malloc(DflInvokeParam.sizeof);
+		if (!dflInvokeParam)
+			throw new OomException();
+		
+		makeParamNoneArgs(func, dflInvokeParam);
+		scope(exit)
 		{
-			auto ctrl = cast(Control)_ctrl;
-			auto hwnd = ctrl.handle;
-			
-			if(!hwnd)
-				throw new DflException("Must invoke with created handle"); // Control.badInvokeHandle();
-			
-			static assert((DflInvokeParam*).sizeof <= LPARAM.sizeof);
-			
-			auto dflInvokeParam = cast(DflInvokeParam*)malloc(DflInvokeParam.sizeof);
-			if (!dflInvokeParam)
-				throw new OomException();
-			
-			makeParamNoneArgs(func, dflInvokeParam);
-			scope(exit)
-			{
-				free(dflInvokeParam);
-			}
-
-			if (LRESULT_DFL_INVOKE != SendMessageA(hwnd, wmDfl, WPARAM_DFL_INVOKE_NOPARAMS, cast(LPARAM)dflInvokeParam))
-				throw new DflException("Invoke failure");
-			
-			if (dflInvokeParam.exception)
-				throw dflInvokeParam.exception;
+			free(dflInvokeParam);
 		}
+
+		if (LRESULT_DFL_INVOKE != SendMessageA(hwnd.atomicLoad(), wmDfl.atomicLoad(), WPARAM_DFL_INVOKE_NOPARAMS.atomicLoad(), cast(LPARAM)dflInvokeParam))
+			throw new DflException("Invoke failure");
+		
+		if (dflInvokeParam.exception)
+			throw dflInvokeParam.exception;
 	}
 	
 	///
 	void delayInvoke(ARGS...)(void function(Control, ARGS) func, ARGS args)
 		if (ARGS.length && !hasLocalAliasing!(ARGS))
 	{
-		synchronized
-		{
-			auto ctrl = cast(Control)_ctrl;
-			auto hwnd = ctrl.handle;
-			
-			if(!hwnd)
-				throw new DflException("Must invoke with created handle"); // Control.badInvokeHandle();
-			
-			static assert((DflInvokeParam*).sizeof <= LPARAM.sizeof);
-			
-			auto dflInvokeParam = cast(DflInvokeParam*)malloc(DflInvokeParam.sizeof); // NOTE: You must free memory in window procedure.
-			if (!dflInvokeParam)
-				throw new OomException();
-			
-			makeParam(func, args, dflInvokeParam);
-			PostMessageA(hwnd, wmDfl, WPARAM_DFL_DELAY_INVOKE_PARAMS, cast(LPARAM)dflInvokeParam);
-		}
+		auto ctrl = cast(Control)_ctrl;
+		auto hwnd = ctrl.handle;
+		
+		if(!hwnd)
+			throw new DflException("Must invoke with created handle"); // Control.badInvokeHandle();
+		
+		static assert((DflInvokeParam*).sizeof <= LPARAM.sizeof);
+		
+		auto dflInvokeParam = cast(DflInvokeParam*)malloc(DflInvokeParam.sizeof); // NOTE: You must free memory in window procedure.
+		if (!dflInvokeParam)
+			throw new OomException();
+		
+		makeParam(func, args, dflInvokeParam);
+		PostMessageA(hwnd.atomicLoad(), wmDfl.atomicLoad(), WPARAM_DFL_DELAY_INVOKE_PARAMS.atomicLoad(), cast(LPARAM)dflInvokeParam);
 	}
 	
 	///
 	void delayInvoke(ARGS...)(void function(Control, ARGS) func, ARGS args)
 		if (!ARGS.length)
 	{
-		synchronized
-		{
-			auto ctrl = cast(Control)_ctrl;
-			auto hwnd = ctrl.handle;
-			
-			if(!hwnd)
-				throw new DflException("Must invoke with created handle"); // Control.badInvokeHandle();
-			
-			static assert((DflInvokeParam*).sizeof <= LPARAM.sizeof);
-			
-			auto dflInvokeParam = cast(DflInvokeParam*)malloc(DflInvokeParam.sizeof); // NOTE: You must free memory in window procedure.
-			if (!dflInvokeParam)
-				throw new OomException();
-			
-			makeParamNoneArgs(func, dflInvokeParam);
-			PostMessageA(hwnd, wmDfl, WPARAM_DFL_DELAY_INVOKE_NOPARAMS, cast(LPARAM)dflInvokeParam);
-		}
+		auto ctrl = cast(Control)_ctrl;
+		auto hwnd = ctrl.handle;
+		
+		if(!hwnd)
+			throw new DflException("Must invoke with created handle"); // Control.badInvokeHandle();
+		
+		static assert((DflInvokeParam*).sizeof <= LPARAM.sizeof);
+		
+		auto dflInvokeParam = cast(DflInvokeParam*)malloc(DflInvokeParam.sizeof); // NOTE: You must free memory in window procedure.
+		if (!dflInvokeParam)
+			throw new OomException();
+		
+		makeParamNoneArgs(func, dflInvokeParam);
+		PostMessageA(hwnd.atomicLoad(), wmDfl.atomicLoad(), WPARAM_DFL_DELAY_INVOKE_NOPARAMS.atomicLoad(), cast(LPARAM)dflInvokeParam);
 	}
 }
 
