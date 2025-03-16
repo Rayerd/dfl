@@ -5,7 +5,13 @@
 ///
 module dfl.notifyicon;
 
-private import dfl.internal.winapi, dfl.base, dfl.drawing;
+private import core.sys.windows.winbase;
+private import core.sys.windows.windef;
+private import core.sys.windows.winuser;
+private import core.sys.windows.basetyps : GUID;
+private import core.sys.windows.shellapi;
+
+private import dfl.base, dfl.drawing;
 private import dfl.control, dfl.form, dfl.application;
 private import dfl.event, dfl.internal.utf, dfl.internal.dlib;
 
@@ -15,6 +21,82 @@ version(DFL_NO_MENUS)
 else
 {
 	private import dfl.menu;
+}
+
+
+// NOTE: Workaround for shellapi.h
+enum NOTIFYICON_VERSION_4 = 4;
+enum NIF_SHOWTIP = 0x00000080;
+enum NIIF_USER = 0x00000004;
+
+struct DFL_NOTIFYICONDATAA {
+	DWORD cbSize = DFL_NOTIFYICONDATAA.sizeof;
+	HWND  hWnd;
+	UINT  uID;
+	UINT  uFlags;
+	UINT  uCallbackMessage;
+	HICON hIcon;
+	CHAR[128] szTip = 0;
+	DWORD     dwState;
+	DWORD     dwStateMask;
+	CHAR[256] szInfo = 0;
+	union {
+		UINT  uTimeout;
+		UINT  uVersion;
+	}
+	CHAR[64]  szInfoTitle = 0;
+	DWORD     dwInfoFlags;
+	GUID      guidItem;
+	HICON     hBalloonIcon;
+}
+alias DFL_PNOTIFYICONDATAA = DFL_NOTIFYICONDATAA*;
+
+struct DFL_NOTIFYICONDATAW {
+	DWORD cbSize = DFL_NOTIFYICONDATAW.sizeof;
+	HWND  hWnd;
+	UINT  uID;
+	UINT  uFlags;
+	UINT  uCallbackMessage;
+	HICON hIcon;
+	WCHAR[128] szTip = 0;
+	DWORD      dwState;
+	DWORD      dwStateMask;
+	WCHAR[256] szInfo = 0;
+	union {
+		UINT   uTimeout;
+		UINT   uVersion;
+	}
+	WCHAR[64]  szInfoTitle = 0;
+	DWORD      dwInfoFlags;
+	GUID       guidItem;
+	HICON      hBalloonIcon;
+}
+alias DFL_PNOTIFYICONDATAW = DFL_NOTIFYICONDATAW*;
+
+static if (useUnicode)
+{
+	BOOL DFL_Shell_NotifyIcon(DWORD dw, DFL_PNOTIFYICONDATAW notif)
+	{
+		return Shell_NotifyIcon(dw, cast(PNOTIFYICONDATAW)notif);
+	}
+}
+else
+{
+	BOOL DFL_Shell_NotifyIcon(DWORD dw, DFL_PNOTIFYICONDATAA notif)
+	{
+		return Shell_NotifyIcon(dw, cast(PNOTIFYICONDATAA)notif);
+	}
+}
+
+
+///
+enum BalloonTipIconStyle
+{
+	NONE,
+	INFO,
+	WARNING,
+	ERROR,
+	USER
 }
 
 
@@ -41,15 +123,15 @@ class NotifyIcon // docmain
 	
 	
 	///
-	final @property void icon(Icon ico) // setter
+	final @property void icon(Icon icon) // setter
 	{
-		_icon = ico;
-		nid.hIcon = ico ? ico.handle : null;
+		_icon = icon;
+		_nid.hIcon = icon ? icon.handle : null;
 		
 		if(visible)
 		{
-			nid.uFlags = NIF_ICON;
-			Shell_NotifyIconA(NIM_MODIFY, &nid);
+			_nid.uFlags |= NIF_ICON;
+			DFL_Shell_NotifyIcon(NIM_MODIFY, &_nid);
 		}
 	}
 	
@@ -61,34 +143,33 @@ class NotifyIcon // docmain
 	
 	
 	///
-	// Must be less than 64 chars.
-	// To-do: hold reference to setter's string, use that for getter.. ?
 	final @property void text(Dstring txt) // setter
 	{
-		if(txt.length >= nid.szTip.length)
+		if(txt.length >= _nid.szTip.length)
 			throw new DflException("Notify icon text too long");
 		
-		// To-do: support Unicode.
-		
-		txt = unsafeAnsi(txt); // ...
-		nid.szTip[txt.length] = 0;
-		nid.szTip[0 .. txt.length] = txt[];
-		tipLen = txt.length.toI32;
+		static if (useUnicode)
+			Dwstring str = toUnicode(txt);
+		else
+			Dstring str = unsafeAnsi(txt);
+		_nid.szTip[str.length] = 0;
+		_nid.szTip[0 .. str.length] = str[];
+		_tipLen = str.length.toI32;
 		
 		if(visible)
 		{
-			nid.uFlags = NIF_TIP;
-			Shell_NotifyIconA(NIM_MODIFY, &nid);
+			_nid.uFlags |= NIF_TIP;
+			DFL_Shell_NotifyIcon(NIM_MODIFY, &_nid);
 		}
 	}
 	
 	/// ditto
 	final @property Dstring text() // getter
 	{
-		//return nid.szTip[0 .. tipLen]; // Returning possibly mutated text!
-		//return nid.szTip[0 .. tipLen].dup;
-		//return nid.szTip[0 .. tipLen].idup; // Needed in D2. Doesn't work in D1.
-		return cast(Dstring)nid.szTip[0 .. tipLen].dup; // Needed in D2. Doesn't work in D1.
+		static if (useUnicode)
+			return fromUnicodez(_nid.szTip[0 .. _tipLen].ptr);
+		else
+			return cast(Dstring)_nid.szTip[0 .. _tipLen].dup;
 	}
 	
 	
@@ -97,29 +178,28 @@ class NotifyIcon // docmain
 	{
 		if(byes)
 		{
-			if(!nid.uID)
+			if(!_nid.uID)
 			{
-				nid.uID = allocNotifyIconID();
-				assert(nid.uID);
-				allNotifyIcons[nid.uID] = this;
+				_nid.uID = allocNotifyIconID();
+				assert(_nid.uID);
+				allNotifyIcons[_nid.uID] = this;
 			}
 			
 			_forceAdd();
 		}
-		else if(nid.uID)
+		else if(_nid.uID)
 		{
 			_forceDelete();
 			
-			//delete allNotifyIcons[nid.uID];
-			allNotifyIcons.remove(nid.uID);
-			nid.uID = 0;
+			allNotifyIcons.remove(_nid.uID);
+			_nid.uID = 0;
 		}
 	}
 	
 	/// ditto
 	final @property bool visible() // getter
 	{
-		return nid.uID != 0;
+		return _nid.uID != 0;
 	}
 	
 	
@@ -134,8 +214,74 @@ class NotifyIcon // docmain
 	{
 		visible = false;
 	}
+
+
+	///
+	final void showBalloonTip()
+	{
+		_nid.uFlags |= NIF_INFO;
+		DFL_Shell_NotifyIcon(NIM_MODIFY, &_nid);
+	}
+
+
+	///
+	final @property void balloonTipTitle(Dstring title) // setter
+	{
+		Dwstring str = toUnicode(title ~ '\0');
+		_nid.szInfoTitle[0 .. str.length] = str[];
+	}
+
+
+	///
+	final @property void balloonTipText(Dstring text) // setter
+	{
+		Dwstring str = toUnicode(text ~ '\0');
+		_nid.szInfo[0 .. str.length] = str[];
+	}
+
+
+	///
+	final @property void balloonTipIconStyle(BalloonTipIconStyle style) // setter
+	{
+		_nid.dwInfoFlags &= ~NIIF_ICON_MASK;
+		final switch (style)
+		{
+			case BalloonTipIconStyle.NONE:
+				_nid.dwInfoFlags |= NIIF_NONE;
+				break;
+			case BalloonTipIconStyle.INFO:
+				_nid.dwInfoFlags |= NIIF_INFO;
+				break;
+			case BalloonTipIconStyle.WARNING:
+				_nid.dwInfoFlags |= NIIF_WARNING;
+				break;
+			case BalloonTipIconStyle.ERROR:
+				_nid.dwInfoFlags |= NIIF_ERROR;
+				break;
+			case BalloonTipIconStyle.USER:
+				_nid.dwInfoFlags |= NIIF_USER;
+		}
+	}
+
 	
-	
+	///
+	final @property void balloonTipIcon(Icon icon) // setter
+	{
+		_balloonTipIcon = icon;
+		_nid.hBalloonIcon = icon ? icon.handle : null;
+	}
+
+
+	///
+	final @property void balloonTipSound(bool byes) // setter
+	{
+		if (byes)
+			_nid.dwInfoFlags &= ~NIIF_NOSOUND;
+		else
+			_nid.dwInfoFlags |= NIIF_NOSOUND;
+	}
+
+
 	Event!(NotifyIcon, EventArgs) click; ///
 	Event!(NotifyIcon, EventArgs) doubleClick; ///
 	Event!(NotifyIcon, MouseEventArgs) mouseDown; ///
@@ -148,34 +294,22 @@ class NotifyIcon // docmain
 		if(!ctrlNotifyIcon)
 			_init();
 		
-		nid.cbSize = nid.sizeof;
-		nid.hWnd = ctrlNotifyIcon.handle;
-		nid.uID = 0;
-		nid.uCallbackMessage = WM_NOTIFYICON;
-		nid.hIcon = null;
-		nid.szTip[0] = '\0';
+		_nid.cbSize = _nid.sizeof;
+		_nid.hWnd = ctrlNotifyIcon.handle;
+		_nid.uID = 0;
+		_nid.uCallbackMessage = WM_NOTIFYICON;
+		_nid.hIcon = null;
+		_nid.szTip[0] = '\0';
 	}
 	
 	
 	~this()
 	{
-		if(nid.uID)
+		if(_nid.uID)
 		{
 			_forceDelete();
-			//delete allNotifyIcons[nid.uID];
-			allNotifyIcons.remove(nid.uID);
+			allNotifyIcons.remove(_nid.uID);
 		}
-		
-		//delete allNotifyIcons[nid.uID];
-		//allNotifyIcons.remove(nid.uID);
-		
-		/+
-		if(!allNotifyIcons.length)
-		{
-			delete ctrlNotifyIcon;
-			ctrlNotifyIcon = null;
-		}
-		+/
 	}
 	
 	
@@ -183,11 +317,8 @@ class NotifyIcon // docmain
 	// Extra.
 	void minimize(IWindow win)
 	{
-		LONG style;
-		HWND hwnd;
-		
-		hwnd = win.handle;
-		style = GetWindowLongPtrA(hwnd, GWL_STYLE).toI32;
+		HWND hwnd = win.handle;
+		LONG style = GetWindowLongPtrA(hwnd, GWL_STYLE).toI32;
 		
 		if(style & WS_VISIBLE)
 		{
@@ -211,11 +342,8 @@ class NotifyIcon // docmain
 	// Extra.
 	void restore(IWindow win)
 	{
-		LONG style;
-		HWND hwnd;
-		
-		hwnd = win.handle;
-		style = GetWindowLongPtrA(hwnd, GWL_STYLE).toI32;
+		HWND hwnd = win.handle;
+		LONG style = GetWindowLongPtrA(hwnd, GWL_STYLE).toI32;
 		
 		if(!(style & WS_VISIBLE))
 		{
@@ -251,8 +379,11 @@ class NotifyIcon // docmain
 	
 	private:
 	
-	NOTIFYICONDATA nid;
-	int tipLen = 0;
+	static if (useUnicode)
+		DFL_NOTIFYICONDATAW _nid;
+	else
+		DFL_NOTIFYICONDATAA _nid;
+	int _tipLen = 0;
 	version(DFL_NO_MENUS)
 	{
 	}
@@ -260,19 +391,24 @@ class NotifyIcon // docmain
 	{
 		ContextMenu cmenu;
 	}
-	Icon _icon;
+	Icon _icon;           /// Task tray icon
+	Icon _balloonTipIcon; /// Balloon tip icon
 	
 	
 	package final void _forceAdd()
 	{
-		nid.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
-		Shell_NotifyIconA(NIM_ADD, &nid);
+		_nid.uFlags |= NIF_MESSAGE | NIF_ICON | NIF_TIP | NIF_SHOWTIP;
+		if (_nid.hIcon)
+			_nid.uFlags |= NIF_ICON;
+		else
+			_nid.uFlags &= ~NIF_ICON;
+		DFL_Shell_NotifyIcon(NIM_ADD, &_nid);
 	}
 	
 	
 	package final void _forceDelete()
 	{
-		Shell_NotifyIconA(NIM_DELETE, &nid);
+		DFL_Shell_NotifyIcon(NIM_DELETE, &_nid);
 	}
 	
 	
@@ -291,12 +427,11 @@ class NotifyIcon // docmain
 	// Gets the tray area.
 	static void _area(out RECT rect)
 	{
-		HWND hwTaskbar, hw;
+		HWND hwTaskbar = FindWindowExA(null, null, "Shell_TrayWnd", null);
 		
-		hwTaskbar = FindWindowExA(null, null, "Shell_TrayWnd", null);
 		if(hwTaskbar)
 		{
-			hw = FindWindowExA(hwTaskbar, null, "TrayNotifyWnd", null);
+			HWND hw = FindWindowExA(hwTaskbar, null, "TrayNotifyWnd", null);
 			if(hw)
 			{
 				GetWindowRect(hw, &rect);
@@ -373,8 +508,7 @@ class NotifyIconControl: Control
 		}
 		
 		Application.creatingControl(this);
-		hwnd = CreateWindowExA(wexstyle, CONTROL_CLASSNAME.ptr, "NotifyIcon", 0, 0, 0, 0, 0, null, null,
-			Application.getInstance(), null);
+		hwnd = CreateWindowExA(wexstyle, CONTROL_CLASSNAME.ptr, "NotifyIcon", 0, 0, 0, 0, 0, null, null, Application.getInstance(), null);
 		if(!hwnd)
 			goto create_err;
 	}
@@ -386,10 +520,8 @@ class NotifyIconControl: Control
 		{
 			if(cast(UINT)msg.wParam in allNotifyIcons)
 			{
-				NotifyIcon ni;
+				NotifyIcon ni = allNotifyIcons[cast(UINT)msg.wParam];
 				Point pt;
-				
-				ni = allNotifyIcons[cast(UINT)msg.wParam];
 				
 				switch(cast(UINT)msg.lParam) // msg.
 				{
@@ -468,8 +600,7 @@ static ~this()
 
 UINT allocNotifyIconID()
 {
-	UINT prev;
-	prev = lastId;
+	UINT prev = lastId;
 	for(;;)
 	{
 		lastId++;

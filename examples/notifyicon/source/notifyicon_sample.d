@@ -30,6 +30,23 @@ class MainForm : Form
 		_notifyIcon.contextMenu.menuItems.add(menuItem1);
 		_notifyIcon.contextMenu.menuItems.add(menuItem2);
 		_notifyIcon.show();
+
+		_notifyIcon.balloonTipTitle = "Balloon tip example";
+		_notifyIcon.balloonTipText = "Welcome to the D world!";
+		static if (false)
+		{
+			_notifyIcon.balloonTipIconStyle = BalloonTipIconStyle.INFO;
+			// _notifyIcon.balloonTipIconStyle = BalloonTipIconStyle.ERROR;
+			// _notifyIcon.balloonTipIconStyle = BalloonTipIconStyle.WARNING;
+			// _notifyIcon.balloonTipIconStyle = BalloonTipIconStyle.NONE;
+		}
+		else
+		{
+			_notifyIcon.balloonTipIconStyle = BalloonTipIconStyle.USER;
+			_notifyIcon.balloonTipIcon = new Icon(r".\image\icon2.ico");
+		}
+		_notifyIcon.balloonTipSound = true;
+		_notifyIcon.showBalloonTip();
 	}
 }
 
