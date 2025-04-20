@@ -5,15 +5,13 @@
 ///
 module dfl.control;
 
-private import dfl.base, dfl.form, dfl.drawing;
-private import dfl.application, dfl.event, dfl.label;
-private import dfl.collections;
-private import core.memory;
-
-private import dfl.internal.dlib, dfl.internal.clib;
-private import dfl.internal.winapi, dfl.internal.wincom;
-private import dfl.internal.utf;
-private import dfl.internal.com;
+import dfl.application;
+import dfl.base;
+import dfl.collections;
+import dfl.drawing;
+import dfl.event;
+import dfl.form;
+import dfl.label;
 
 version(NO_DRAG_DROP)
 	version = DFL_NO_DRAG_DROP;
@@ -23,7 +21,7 @@ version(DFL_NO_DRAG_DROP)
 }
 else
 {
-	private import dfl.data;
+	import dfl.data;
 }
 
 version(DFL_NO_MENUS)
@@ -31,8 +29,19 @@ version(DFL_NO_MENUS)
 }
 else
 {
-	private import dfl.menu;
+	import dfl.menu;
 }
+
+import dfl.internal.clib;
+import dfl.internal.com;
+import dfl.internal.dlib;
+import dfl.internal.utf;
+import dfl.internal.winapi;
+import dfl.internal.wincom;
+
+
+import core.memory;
+
 
 //version = RADIO_GROUP_LAYOUT;
 version = DFL_NO_ZOMBIE_FORM;
@@ -839,7 +848,7 @@ class Control: DObject, IWindow // docmain
 		{
 			if(!i)
 				children = children[1 .. $];
-			else if(i == children.length - 1)
+			else if(i + 1 == children.length)
 				children = children[0 .. i];
 			else
 				children = children[0 .. i] ~ children[i + 1 .. $];
@@ -879,7 +888,7 @@ class Control: DObject, IWindow // docmain
 		}
 		
 		
-		protected final @property Control owner() // getter
+		protected @property Control owner() // getter
 		{
 			return _owner;
 		}
@@ -945,7 +954,7 @@ class Control: DObject, IWindow // docmain
 		+/
 		
 		
-		final void _simple_front_one(int i)
+		void _simple_front_one(int i)
 		{
 			if(i < 0 || i >= length - 1)
 				return;
@@ -954,13 +963,13 @@ class Control: DObject, IWindow // docmain
 		}
 		
 		
-		final void _simple_front_one(Control c)
+		void _simple_front_one(Control c)
 		{
 			return _simple_front_one(indexOf(c));
 		}
 		
 		
-		final void _simple_back_one(int i)
+		void _simple_back_one(int i)
 		{
 			if(i <= 0 || i >= length)
 				return;
@@ -969,13 +978,13 @@ class Control: DObject, IWindow // docmain
 		}
 		
 		
-		final void _simple_back_one(Control c)
+		void _simple_back_one(Control c)
 		{
 			return _simple_back_one(indexOf(c));
 		}
 		
 		
-		final void _simple_back(int i)
+		void _simple_back(int i)
 		{
 			if(i <= 0 || i >= length)
 				return;
@@ -984,13 +993,13 @@ class Control: DObject, IWindow // docmain
 		}
 		
 		
-		final void _simple_back(Control c)
+		void _simple_back(Control c)
 		{
 			return _simple_back(indexOf(c));
 		}
 		
 		
-		final void _simple_front(int i)
+		void _simple_front(int i)
 		{
 			if(i < 0 || i >= length - 1)
 				return;
@@ -999,7 +1008,7 @@ class Control: DObject, IWindow // docmain
 		}
 		
 		
-		final void _simple_front(Control c)
+		void _simple_front(Control c)
 		{
 			return _simple_front(indexOf(c));
 		}
@@ -1792,7 +1801,7 @@ class Control: DObject, IWindow // docmain
 	alias onDockChanged = onHasLayoutChanged;
 	
 	
-	private final void _alreadyLayout()
+	private void _alreadyLayout()
 	{
 		throw new DflException("Control already has a layout");
 	}
@@ -2105,7 +2114,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	final @property bool isHandleCreated() const // getter
+	final @property bool isHandleCreated() const nothrow @safe // getter
 	{
 		return hwnd != HWND.init;
 	}
@@ -2356,7 +2365,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	private final Control _fetchParent()
+	private Control _fetchParent()
 	{
 		HWND hwParent = GetParent(hwnd);
 		return fromHandle(hwParent);
@@ -2391,7 +2400,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	private final Region _fetchRegion()
+	private Region _fetchRegion()
 	{
 		HRGN hrgn = CreateRectRgn(0, 0, 1, 1);
 		GetWindowRgn(hwnd, hrgn);
@@ -2742,7 +2751,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	private final Dstring _fetchText() const
+	private Dstring _fetchText() const
 	{
 		return dfl.internal.utf.getWindowText(cast(void*)hwnd);
 	}
@@ -3418,6 +3427,12 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
+	override size_t toHash() const nothrow @trusted
+	{
+		return hashOf(hwnd);
+	}
+	
+
 	override int opCmp(Object o)
 	{
 		Control ctrl = cast(Control)o;
@@ -6466,7 +6481,7 @@ class Control: DObject, IWindow // docmain
 	///
 	// Override to change the creation parameters.
 	// Be sure to call super.createParams() or all the create params will need to be filled.
-	protected void createParams(ref CreateParams cp)
+	void createParams(ref CreateParams cp)
 	{
 		with(cp)
 		{
@@ -6492,7 +6507,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	protected void createHandle()
+	void createHandle()
 	{
 		// Note: if modified, Form.createHandle() should be modified as well.
 		
@@ -6630,7 +6645,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	protected void recreateHandle()
+	void recreateHandle()
 	in
 	{
 		assert(!recreatingHandle);
@@ -6676,7 +6691,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	private final void fillRecreationData()
+	private void fillRecreationData()
 	{
 		//cprintf(" { fillRecreationData %.*s }\n", name);
 		
@@ -6696,20 +6711,20 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	protected void onDisposed(EventArgs ea)
+	void onDisposed(EventArgs ea)
 	{
 		disposed(this, ea);
 	}
 	
 	
 	///
-	protected final bool getStyle(ControlStyles flag)
+	final bool getStyle(ControlStyles flag)
 	{
 		return (ctrlStyle & flag) != 0;
 	}
 	
 	/// ditto
-	protected final void setStyle(ControlStyles flag, bool value)
+	final void setStyle(ControlStyles flag, bool value)
 	{
 		if(flag & ControlStyles.CACHE_TEXT)
 		{
@@ -6728,7 +6743,7 @@ class Control: DObject, IWindow // docmain
 	
 	///
 	// Only for setStyle() styles that are part of hwnd and wndclass styles.
-	protected final void updateStyles()
+	final void updateStyles()
 	{
 		LONG newClassStyles = _classStyle();
 		LONG newWndStyles = _style();
@@ -6835,7 +6850,7 @@ class Control: DObject, IWindow // docmain
 	
 	///
 	// Called after adding the control to a container.
-	protected void initLayout()
+	void initLayout()
 	{
 		assert(wparent !is null);
 		if(visible && created) // ?
@@ -6847,7 +6862,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	protected void onLayout(LayoutEventArgs lea)
+	void onLayout(LayoutEventArgs lea)
 	{
 		// Note: exception could cause failure to restore.
 		//suspendLayout();
@@ -6947,7 +6962,7 @@ class Control: DObject, IWindow // docmain
 		return false;
 	}
 	+/
-	protected bool isInputChar(char charCode)
+	bool isInputChar(char charCode)
 	{
 		int mask = 0;
 		if (charCode == Keys.TAB)
@@ -6966,7 +6981,7 @@ class Control: DObject, IWindow // docmain
 	/// isInputKey returns true when keyData is a regular input key.
 	// If keyData is input key, then window message is sended to wndProc()
 	// such as WM_KEYDOWN, WM_KEYUP, WM_CHAR and so on.
-	protected bool isInputKey(Keys keyData)
+	bool isInputKey(Keys keyData)
 	{
 		if ((keyData & Keys.ALT) == Keys.ALT)
 		{
@@ -7044,7 +7059,7 @@ class Control: DObject, IWindow // docmain
 	
 	///
 	// Return true if processed.
-	protected bool processKeyEventArgs(ref Message msg)
+	bool processKeyEventArgs(ref Message msg)
 	{
 		// TODO: implement more (IME etc...)
 
@@ -7094,7 +7109,7 @@ class Control: DObject, IWindow // docmain
 	
 
 	///
-	protected bool processMnemonic(dchar charCode)
+	bool processMnemonic(dchar charCode)
 	{
 		return false;
 	}
@@ -7380,7 +7395,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	package void _classStyle(LONG cl)
+	void _classStyle(LONG cl)
 	{
 		if(isHandleCreated)
 		{

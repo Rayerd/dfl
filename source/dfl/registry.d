@@ -7,9 +7,11 @@
 ///
 module dfl.registry;
 
-private import dfl.internal.dlib;
+import dfl.base;
 
-private import dfl.internal.winapi, dfl.base, dfl.internal.utf;
+import dfl.internal.dlib;
+import dfl.internal.utf;
+import dfl.internal.winapi;
 
 version (Win64) { /* not supported at this point */ } else:
 class DflRegistryException: DflException // package
@@ -127,7 +129,7 @@ private enum uint MAX_REG_BUFFER = 256;
 abstract class RegistryValue
 {
 	@property DWORD valueType(); // getter
-	override Dstring toString();
+	override Dstring toString() const;
 	/+ package +/ protected LONG save(HKEY hkey, Dstring name); // package
 	package final @property RegistryValue _reg() { return this; }
 }
@@ -158,7 +160,7 @@ class RegistryValueSz: RegistryValue
 	}
 	
 	
-	override Dstring toString()
+	override Dstring toString() const
 	{
 		return value;
 	}
@@ -245,7 +247,7 @@ class RegistryValueMultiSz: RegistryValue
 	}
 	
 	
-	override Dstring toString()
+	override Dstring toString() const
 	{
 		Dstring result;
 		foreach(Dstring str; value)
@@ -312,7 +314,7 @@ class RegistryValueExpandSz: RegistryValue
 	}
 	
 	
-	override Dstring toString()
+	override Dstring toString() const
 	{
 		return value;
 	}
@@ -391,7 +393,7 @@ class RegistryValueDword: RegistryValue
 	}
 	
 	
-	override Dstring toString()
+	override Dstring toString() const
 	{
 		return dwordToString(value);
 	}
@@ -431,7 +433,7 @@ class RegistryValueDwordBigEndian: RegistryValue
 	}
 	
 	
-	override Dstring toString()
+	override Dstring toString() const
 	{
 		return dwordToString(value);
 	}
@@ -469,7 +471,7 @@ class RegistryValueBinary: RegistryValue
 	}
 	
 	
-	override Dstring toString()
+	override Dstring toString() const
 	{
 		return "Binary";
 	}
@@ -507,7 +509,7 @@ class RegistryValueLink: RegistryValue
 	}
 	
 	
-	override Dstring toString()
+	override Dstring toString() const
 	{
 		return "Symbolic Link";
 	}
@@ -545,7 +547,7 @@ class RegistryValueResourceList: RegistryValue
 	}
 	
 	
-	override Dstring toString()
+	override Dstring toString() const
 	{
 		return "Resource List";
 	}
@@ -583,7 +585,7 @@ class RegistryValueNone: RegistryValue
 	}
 	
 	
-	override Dstring toString()
+	override Dstring toString() const
 	{
 		return "None";
 	}
@@ -870,7 +872,7 @@ class RegistryKey // docmain
 	}
 	
 	
-	override Dequ opEquals(Object o)
+	override Dequ opEquals(Object o) const
 	{
 		RegistryKey rk;
 		
@@ -881,9 +883,15 @@ class RegistryKey // docmain
 	}
 	
 	
-	Dequ opEquals(RegistryKey rk)
+	Dequ opEquals(RegistryKey rk) const
 	{
 		return hkey == rk.hkey;
+	}
+
+
+	override size_t toHash() const nothrow @safe
+	{
+		return hashOf(hKey);
 	}
 	
 	

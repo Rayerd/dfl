@@ -5,11 +5,16 @@
 ///
 module dfl.tabcontrol;
 
-private import dfl.internal.dlib;
+import dfl.application;
+import dfl.base;
+import dfl.collections;
+import dfl.control;
+import dfl.drawing;
+import dfl.event;
+import dfl.panel;
 
-private import dfl.control, dfl.panel, dfl.internal.winapi, dfl.drawing;
-private import dfl.application, dfl.event, dfl.base, dfl.collections;
-
+import dfl.internal.dlib;
+import dfl.internal.winapi;
 static import dfl.internal.utf;
 
 
@@ -81,6 +86,19 @@ class TabPage: Panel
 	{
 		return stringICmp(text, val);
 	}
+
+
+	override size_t toHash() const nothrow @trusted
+	{
+		try
+		{
+			return hashOf(text);
+		}
+		catch (Exception e)
+		{
+			assert(0);
+		}
+	}
 	
 	
 	// imageIndex
@@ -95,8 +113,7 @@ class TabPage: Panel
 		
 		if(created)
 		{
-			TabControl tc;
-			tc = cast(TabControl)parent;
+			TabControl tc = cast(TabControl)parent;
 			if(tc)
 				tc.updateTabText(this, newText);
 		}
@@ -257,9 +274,8 @@ class TabPageCollection
 	{
 		if(val.parent)
 		{
-			TabControl tc;
-			tc = cast(TabControl)val.parent;
-			if(tc && tc.tabPages.indexOf(val) != -1)
+			TabControl parentTC = cast(TabControl)val.parent;
+			if(parentTC && parentTC.tabPages.indexOf(val) != -1)
 				throw new DflException("TabPage already has a parent");
 		}
 		

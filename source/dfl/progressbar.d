@@ -5,16 +5,17 @@
 ///
 module dfl.progressbar;
 
-private import dfl.application;
-private import dfl.base;
-private import dfl.control;
-private import dfl.drawing;
-private import dfl.event;
+import dfl.application;
+import dfl.base;
+import dfl.control;
+import dfl.drawing;
+import dfl.event;
 
-static private import dfl.internal.utf;
+static import dfl.internal.utf;
 
-private import core.sys.windows.windows;
-private import core.sys.windows.commctrl;
+import core.sys.windows.commctrl;
+import core.sys.windows.windows;
+
 
 private extern(Windows) void _initProgressbar();
 

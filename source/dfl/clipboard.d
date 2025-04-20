@@ -5,12 +5,12 @@
 /// Interfacing with the system clipboard for copy and paste operations.
 module dfl.clipboard;
 
-private import dfl.base;
-private import dfl.data;
-private import dfl.drawing;
+import dfl.base;
+import dfl.data;
+import dfl.drawing;
 
-private import dfl.internal.dlib;
-private import dfl.internal.wincom;
+import dfl.internal.dlib;
+import dfl.internal.wincom;
 
 
 ///

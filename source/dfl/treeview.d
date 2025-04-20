@@ -5,18 +5,25 @@
 ///
 module dfl.treeview;
 
-private import dfl.internal.dlib;
 
-private import dfl.control, dfl.application, dfl.base, dfl.internal.winapi;
-private import dfl.event, dfl.drawing, dfl.collections, dfl.internal.utf;
+import dfl.application;
+import dfl.base;
+import dfl.collections;
+import dfl.control;
+import dfl.drawing;
+import dfl.event;
 
 version(DFL_NO_IMAGELIST)
 {
 }
 else
 {
-	private import dfl.imagelist;
+	import dfl.imagelist;
 }
+
+import dfl.internal.utf;
+import dfl.internal.winapi;
+import dfl.internal.dlib;
 
 
 private extern(Windows) void _initTreeview();
@@ -330,7 +337,9 @@ class TreeNode: DObject
 	final @property TreeNode lastNode() // getter
 	{
 		if(tchildren.length)
-			return tchildren._nodes[tchildren.length - 1];
+		{
+			return tchildren._nodes[tchildren.length + (-1)];
+		}
 		return null;
 	}
 	
@@ -618,7 +627,13 @@ class TreeNode: DObject
 		return 0 == stringICmp(ttext, val);
 	}
 	
-	
+
+	override size_t toHash() const nothrow @safe
+	{
+		return hashOf(ttext);
+	}
+
+
 	override int opCmp(Object o) const
 	{
 		return stringICmp(ttext, getObjectString(o)); // ?

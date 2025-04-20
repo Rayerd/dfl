@@ -5,9 +5,15 @@
 ///
 module dfl.base;
 
-private import dfl.internal.dlib, dfl.internal.clib;
+import dfl.drawing;
+import dfl.event;
 
-private import dfl.internal.winapi, dfl.drawing, dfl.event;
+import dfl.internal.clib;
+import dfl.internal.dlib;
+import dfl.internal.winapi;
+
+import core.internal.hash;
+import core.stdcpp.new_;
 
 
 alias HWindow = HWND;
@@ -67,6 +73,12 @@ class StringObject: DObject
 		return value == s.value;
 	}
 	
+	
+	override size_t toHash() const nothrow @safe
+	{
+		return hashOf(value);
+	}
+
 	
 	override int opCmp(Object o) const
 	{
@@ -395,26 +407,28 @@ abstract class WaitHandle
 	
 	private static DWORD _wait(WaitHandle[] handles, BOOL waitall, DWORD msTimeout)
 	{
-		DWORD result;
-		HANDLE* hs;
+		void fail()
+		{
+			throw new DflException("Wait failure");
+		}
+
 		// Some implementations fail with > 64 handles, but that will return WAIT_FAILED;
 		// all implementations fail with >= 128 handles due to WAIT_ABANDONED_0 being 128.
 		if(handles.length >= 128)
-			goto fail;
+			fail();
 		
-		//hs = new HANDLE[handles.length];
-		hs = cast(HANDLE*)alloca(HANDLE.sizeof * handles.length);
+		//HANDLE* hs = new HANDLE[handles.length];
+		HANDLE* hs = cast(HANDLE*)alloca(HANDLE.sizeof * handles.length);
 		
 		foreach(size_t i, WaitHandle wh; handles)
 		{
 			hs[i] = wh.handle;
 		}
 		
-		result = WaitForMultipleObjects(handles.length.toI32, hs, waitall, msTimeout);
+		DWORD result = WaitForMultipleObjects(handles.length.toI32, hs, waitall, msTimeout);
 		if(WAIT_FAILED == result)
 		{
-			fail:
-			throw new DflException("Wait failure");
+			fail();
 		}
 		return result;
 	}
@@ -440,8 +454,7 @@ abstract class WaitHandle
 	
 	static int waitAny(WaitHandle[] handles, DWORD msTimeout)
 	{
-		DWORD result;
-		result = _wait(handles, false, msTimeout);
+		DWORD result = _wait(handles, false, msTimeout);
 		return cast(int)result; // Same return info.
 	}
 	
@@ -454,8 +467,7 @@ abstract class WaitHandle
 	
 	void waitOne(DWORD msTimeout)
 	{
-		DWORD result;
-		result = WaitForSingleObject(handle, msTimeout);
+		DWORD result = WaitForSingleObject(handle, msTimeout);
 		if(WAIT_FAILED == result)
 			throw new DflException("Wait failure");
 	}
@@ -1461,6 +1473,12 @@ class Cursor // docmain
 	{
 		return hcur == cur.hcur;
 	}
+
+
+	override size_t toHash() const nothrow @safe
+	{
+		return hashOf(hcur);
+	}
 	
 	
 	/// Show/hide the current mouse cursor; reference counted.
@@ -1540,35 +1558,36 @@ class Cursors // docmain
 				hcurHand = LoadCursorA(HINSTANCE.init, IDC_HAND);
 				if(!hcurHand) // Must be Windows 95, so load the cursor from winhlp32.exe.
 				{
-					UINT len;
-					char[MAX_PATH] winhlppath = void;
-					
-					len = GetWindowsDirectoryA(winhlppath.ptr, winhlppath.length - 16);
-					if(!len || len > winhlppath.length - 16)
+					char[MAX_PATH] winhlpPath = void;
+
+					string filePath = "\\winhlp32.exe";
+					UINT len = GetWindowsDirectoryA(winhlpPath.ptr, winhlpPath.length);
+					if (len == 0 || len + filePath.length > winhlpPath.length)
 					{
-						load_failed:
 						return arrow; // Just fall back to a normal arrow.
 					}
-					strcpy(winhlppath.ptr + len, "\\winhlp32.exe");
+					winhlpPath[len .. len + filePath.length] = filePath;
+					winhlpPath[len + filePath.length] = '\0';
 					
-					HINSTANCE hinstWinhlp;
-					hinstWinhlp = LoadLibraryExA(winhlppath.ptr, HANDLE.init, LOAD_LIBRARY_AS_DATAFILE);
+					HINSTANCE hinstWinhlp = LoadLibraryExA(winhlpPath.ptr, HANDLE.init, LOAD_LIBRARY_AS_DATAFILE);
 					if(!hinstWinhlp)
-						goto load_failed;
+					{
+						return arrow; // Just fall back to a normal arrow.
+					}
 					
-					HCURSOR hcur;
-					hcur = LoadCursorA(hinstWinhlp, cast(char*)106);
+					HCURSOR hcur = LoadCursorA(hinstWinhlp, cast(char*)106);
 					if(!hcur) // No such cursor resource.
 					{
 						FreeLibrary(hinstWinhlp);
-						goto load_failed;
+						return arrow; // Just fall back to a normal arrow.
 					}
+
 					hcurHand = CopyCursor(hcur);
 					if(!hcurHand)
 					{
 						FreeLibrary(hinstWinhlp);
 						//throw new DflException("Unable to copy cursor resource");
-						goto load_failed;
+						return arrow; // Just fall back to a normal arrow.
 					}
 					
 					FreeLibrary(hinstWinhlp);
@@ -1584,8 +1603,7 @@ class Cursors // docmain
 	///
 	@property Cursor help() // getter
 	{
-		HCURSOR hcur;
-		hcur = LoadCursorA(HINSTANCE.init, IDC_HELP);
+		HCURSOR hcur = LoadCursorA(HINSTANCE.init, IDC_HELP);
 		if(!hcur) // IDC_HELP might not be supported on Windows 95, so fall back to a normal arrow.
 			return arrow;
 		return new Cursor(hcur);
@@ -1608,32 +1626,45 @@ class Cursors // docmain
 	
 	///
 	@property Cursor iBeam() // getter
-	{ return new Cursor(LoadCursorA(HINSTANCE.init, IDC_IBEAM), false); }
+	{
+		return new Cursor(LoadCursorA(HINSTANCE.init, IDC_IBEAM), false);
+	}
 	
 	///
 	@property Cursor no() // getter
-	{ return new Cursor(LoadCursorA(HINSTANCE.init, IDC_NO), false); }
-	
+	{
+		return new Cursor(LoadCursorA(HINSTANCE.init, IDC_NO), false);
+	}
 	
 	///
 	@property Cursor sizeAll() // getter
-	{ return new Cursor(LoadCursorA(HINSTANCE.init, IDC_SIZEALL), false); }
+	{
+		return new Cursor(LoadCursorA(HINSTANCE.init, IDC_SIZEALL), false);
+	}
 	
 	/// ditto
 	@property Cursor sizeNESW() // getter
-	{ return new Cursor(LoadCursorA(HINSTANCE.init, IDC_SIZENESW), false); }
+	{
+		return new Cursor(LoadCursorA(HINSTANCE.init, IDC_SIZENESW), false);
+	}
 	
 	/// ditto
 	@property Cursor sizeNS() // getter
-	{ return new Cursor(LoadCursorA(HINSTANCE.init, IDC_SIZENS), false); }
+	{
+		return new Cursor(LoadCursorA(HINSTANCE.init, IDC_SIZENS), false);
+	}
 	
 	/// ditto
 	@property Cursor sizeNWSE() // getter
-	{ return new Cursor(LoadCursorA(HINSTANCE.init, IDC_SIZENWSE), false); }
+	{
+		return new Cursor(LoadCursorA(HINSTANCE.init, IDC_SIZENWSE), false);
+	}
 	
 	/// ditto
 	@property Cursor sizeWE() // getter
-	{ return new Cursor(LoadCursorA(HINSTANCE.init, IDC_SIZEWE), false); }
+	{
+		return new Cursor(LoadCursorA(HINSTANCE.init, IDC_SIZEWE), false);
+	}
 	
 	
 	/+
@@ -1647,7 +1678,9 @@ class Cursors // docmain
 	
 	///
 	@property Cursor waitCursor() // getter
-	{ return new Cursor(LoadCursorA(HINSTANCE.init, IDC_WAIT), false); }
+	{
+		return new Cursor(LoadCursorA(HINSTANCE.init, IDC_WAIT), false);
+	}
 }
 
 ///

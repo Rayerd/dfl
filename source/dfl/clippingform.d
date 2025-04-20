@@ -1,9 +1,15 @@
 ﻿module dfl.clippingform;
 
-private import dfl.all;
-private import dfl.internal.dlib : toI32;
-private import core.memory;
-private import core.sys.windows.windows;
+import dfl.base;
+import dfl.form;
+import dfl.control;
+import dfl.event;
+import dfl.drawing;
+
+import dfl.internal.dlib : toI32;
+
+import core.memory;
+import core.sys.windows.windows;
 
 ///
 struct RegionRects

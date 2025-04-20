@@ -7,9 +7,9 @@
 ///
 module dfl.collections;
 
-private import dfl.internal.dlib;
+import dfl.base;
 
-private import dfl.base;
+import dfl.internal.dlib;
 
 
 void _blankListCallback(TValue)(size_t idx, TValue val) // package
@@ -404,7 +404,7 @@ template ListWrapArray(TValue, alias Array,
 		ItemRemovingCallback(index, oldval); // Removing.
 		if(!index)
 			Array = Array[1 .. $];
-		else if(index == Array.length - 1)
+		else if(index + 1 == Array.length)
 			Array = Array[0 .. index];
 		else if(index > 0 && index < cast(int)Array.length)
 			Array = Array[0 .. index] ~ Array[index + 1 .. $];
@@ -534,7 +534,7 @@ template removeIndex(T) // package
 	{
 		if(!index)
 			array = array[1 .. array.length];
-		else if(index == array.length - 1)
+		else if(index + 1 == array.length)
 			array = array[0 .. index];
 		else
 			array = array[0 .. index] ~ array[index + 1 .. $];

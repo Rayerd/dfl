@@ -5,12 +5,12 @@
 ///
 module dfl.picturebox;
 
-private import dfl.control;
-private import dfl.base;
-private import dfl.drawing;
-private import dfl.event;
+import dfl.base;
+import dfl.control;
+import dfl.drawing;
+import dfl.event;
 
-private import core.sys.windows.windows;
+import core.sys.windows.windows;
 
 
 ///

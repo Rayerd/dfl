@@ -4,7 +4,9 @@
 
 module dfl.internal.com;
 
-private import dfl.internal.winapi, dfl.internal.wincom, dfl.internal.dlib;
+import dfl.internal.dlib;
+import dfl.internal.winapi;
+import dfl.internal.wincom;
 
 
 version(DFL_TANGO_SEEK_COMPAT)

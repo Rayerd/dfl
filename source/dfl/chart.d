@@ -5,14 +5,14 @@
 /// 
 module dfl.chart;
 
-private import dfl.base;
-private import dfl.drawing;
+import dfl.base;
+import dfl.drawing;
 
-private import std.csv;
-private import std.typecons;
-private import std.conv;
-private import std.algorithm;
-private import std.range;
+import std.csv;
+import std.typecons;
+import std.conv;
+import std.algorithm;
+import std.range;
 
 ///
 class TableRenderer(T...)
@@ -37,7 +37,7 @@ class TableRenderer(T...)
 		_lastRecord = last;
 	}
 	/// ditto
-	this(string csv) // deprecated
+	private this(string csv)
 	{
 		_csv = csv;
 		_columns = T.length;
@@ -383,7 +383,7 @@ private:
 
 ///
 class LineGraphRenderer(T...)
-	if (is(T[0] == string) && T.length <= 17 || !is(T[0] == string) && T.length <= 16) // Supported number of colors is 16.
+	if ((is(T[0] == string) && T.length <= 17) || (!is(T[0] == string) && T.length <= 16)) // Supported number of colors is 16.
 {
 	///
 	this(string csv, int numRecords)
@@ -400,7 +400,7 @@ class LineGraphRenderer(T...)
 		_lastRecord = last;
 	}
 	/// ditto
-	this(string csv) // deprecated
+	private this(string csv)
 	{
 		_csv = csv;
 		_vZeroPos = VerticalZeroPosition.BOTTOM;
@@ -980,7 +980,7 @@ class TimeChartRenderer(T...)
 		_lastRecord = last;
 	}
 	/// ditto
-	this(string csv) // deprecated
+	private this(string csv)
 	{
 		_csv = csv;
 		_chartMargins = ChartMargins(50, 50, 50, 50);

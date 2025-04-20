@@ -1,25 +1,19 @@
 ///
 module dfl.toolbar;
 
-private import dfl.application;
-private import dfl.base;
-private import dfl.control;
-private import dfl.drawing;
-private import dfl.event;
-private import dfl.collections;
-
-private import dfl.internal.dlib;
-private static import dfl.internal.utf;
-
-private import core.sys.windows.windows;
-private import core.sys.windows.commctrl;
+import dfl.application;
+import dfl.base;
+import dfl.collections;
+import dfl.control;
+import dfl.drawing;
+import dfl.event;
 
 version (DFL_NO_IMAGELIST)
 {
 }
 else
 {
-	private import dfl.imagelist;
+	import dfl.imagelist;
 }
 
 version (DFL_NO_MENUS)
@@ -30,8 +24,14 @@ version (DFL_TOOLBAR_NO_MENU)
 }
 else
 {
-	private import dfl.menu;
+	import dfl.menu;
 }
+
+import dfl.internal.dlib;
+static import dfl.internal.utf;
+
+import core.sys.windows.commctrl;
+import core.sys.windows.windows;
 
 
 private int GET_X_LPARAM(LPARAM lparam) pure
@@ -145,31 +145,44 @@ class ToolBarButton
 	}
 	
 	
-	override Dstring toString()
+	override Dstring toString() const
 	{
 		return text;
 	}
 	
 	
-	override Dequ opEquals(Object o)
+	override Dequ opEquals(Object o) const
 	{
 		return text == getObjectString(o);
 	}
 	
 	
-	Dequ opEquals(Dstring val)
+	Dequ opEquals(Dstring val) const
 	{
 		return text == val;
 	}
+
+
+	override size_t toHash() const nothrow @trusted
+	{
+		try
+		{
+			return hashOf(text);
+		}
+		catch (Exception e)
+		{
+			assert(0);
+		}
+	}
 	
 	
-	override int opCmp(Object o)
+	override int opCmp(Object o) const
 	{
 		return stringICmp(text, getObjectString(o));
 	}
 	
 	
-	int opCmp(Dstring val)
+	int opCmp(Dstring val) const
 	{
 		return stringICmp(text, val);
 	}

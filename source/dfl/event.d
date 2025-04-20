@@ -5,6 +5,7 @@
 module dfl.event;
 
 import dfl.internal.dlib;
+
 import std.functional;
 
 
@@ -88,7 +89,7 @@ template Event(T1, T2) // docmain
 						break;
 					}
 					
-					if(iw == _array.length - 1)
+					if(iw + 1 == _array.length)
 					{
 						_array[iw] = null;
 						_array = _array[0 .. iw];
@@ -233,7 +234,7 @@ class EventArgs // docmain
 {
 	/+
 	private static byte[] buf;
-	private import std.gc; // <-- ...
+	import std.gc; // <-- ...
 	
 	
 	new(uint sz)

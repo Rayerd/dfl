@@ -5,7 +5,7 @@
 ///
 module dfl.usercontrol;
 
-private import dfl.control;
+import dfl.control;
 
 
 ///

@@ -18,25 +18,29 @@ version(DFL_NoSocket)
 else
 {
 
-private import dfl.internal.dlib, dfl.internal.clib;
+import dfl.application;
+import dfl.base;
 
-private
+import dfl.internal.clib;
+import dfl.internal.dlib;
+import dfl.internal.utf;
+import dfl.internal.winapi;
+
+import core.bitop;
+import core.sys.windows.winsock2;
+
+import std.socket;
+
+
+private alias DInternetHost = InternetHost;
+private alias DInternetAddress = InternetAddress;
+	
+private socket_t getSocketHandle(Socket sock) nothrow @nogc
 {
-	private import std.socket, core.bitop;
-	private import core.sys.windows.winsock2;
-	
-	alias DInternetHost = InternetHost;
-	alias DInternetAddress = InternetAddress;
-	
-	socket_t getSocketHandle(Socket sock) nothrow @nogc
-	{
-		return sock.handle;
-	}
+	return sock.handle;
 }
 
 alias DflSocket = std.socket.Socket; ///
-
-private import dfl.internal.winapi, dfl.application, dfl.base, dfl.internal.utf;
 
 
 private
@@ -85,7 +89,7 @@ alias RegisterEventCallback = void delegate(DflSocket sock, EventType type, int 
 // Calling this twice on the same socket cancels out previously
 // registered events for the socket.
 // Requires Application.run() or Application.doEvents() loop.
-void registerEvent(DflSocket sock, EventType events, RegisterEventCallback callback) // deprecated
+deprecated void registerEvent(DflSocket sock, EventType events, RegisterEventCallback callback)
 {
 	assert(sock !is null, "registerEvent: socket cannot be null");
 	assert(callback !is null, "registerEvent: callback cannot be null");
@@ -95,8 +99,7 @@ void registerEvent(DflSocket sock, EventType events, RegisterEventCallback callb
 	
 	sock.blocking = false; // So the getter will be correct.
 	
-	// SOCKET_ERROR
-	if(-1 == WSAAsyncSelect(getSocketHandle(sock), hwNet, WM_DFL_NETEVENT, cast(int)events))
+	if (WSAAsyncSelect(getSocketHandle(sock), hwNet, WM_DFL_NETEVENT, cast(int)events) == SOCKET_ERROR)
 		throw new DflException("Unable to register socket events");
 	
 	EventInfo ei;
@@ -107,9 +110,10 @@ void registerEvent(DflSocket sock, EventType events, RegisterEventCallback callb
 }
 
 
-void unregisterEvent(DflSocket sock) @trusted @nogc nothrow // deprecated
+deprecated void unregisterEvent(DflSocket sock) @trusted @nogc nothrow
 {
-	WSAAsyncSelect(getSocketHandle(sock), hwNet, 0, 0);
+	if (WSAAsyncSelect(getSocketHandle(sock), hwNet, 0, 0) == SOCKET_ERROR)
+		throw new DflException("Unable to register socket events");
 	
 	//delete allEvents[getSocketHandle(sock)];
 	allEvents.remove(getSocketHandle(sock));

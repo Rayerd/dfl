@@ -5,30 +5,31 @@
 /// 
 module dfl.printing;
 
+import dfl.base;
+import dfl.button;
+import dfl.commondialog;
+import dfl.control;
+import dfl.drawing;
+import dfl.event;
+import dfl.form;
+import dfl.imagelist;
+import dfl.label;
+import dfl.messagebox;
+import dfl.panel;
+import dfl.textbox;
+import dfl.toolbar;
+
+import dfl.internal.utf;
+
+import std.algorithm;
+import std.conv;
+import std.range;
+
 pragma(lib, "WinSpool");
 
-private import dfl.base;
-private import dfl.commondialog;
-private import dfl.drawing;
-private import dfl.event;
-private import dfl.messagebox;
-private import dfl.control;
-private import dfl.form;
-private import dfl.toolbar;
-private import dfl.imagelist;
-private import dfl.panel;
-private import dfl.label;
-private import dfl.button;
-private import dfl.textbox;
+import core.sys.windows.commdlg;
+import core.sys.windows.windows;
 
-private import dfl.internal.utf;
-
-private import core.sys.windows.commdlg;
-private import core.sys.windows.windows;
-
-private import std.conv;
-private import std.range;
-private import std.algorithm;
 
 ///
 enum PrinterUnit

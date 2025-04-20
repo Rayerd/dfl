@@ -145,7 +145,7 @@ Dstring getObjectString(Object o)
 
 version(DFL_NO_USE_CORE_MEMORY)
 {
-	private import std.gc; // If you get "module gc cannot read file 'core\memory.d'" then use -version=DFL_NO_USE_CORE_MEMORY <http://wiki.dprogramming.com/Dfl/CompileVersions>
+	import std.gc; // If you get "module gc cannot read file 'core\memory.d'" then use -version=DFL_NO_USE_CORE_MEMORY <http://wiki.dprogramming.com/Dfl/CompileVersions>
 	
 	void gcPin(void* p) { }
 	void gcUnpin(void* p) { }
@@ -156,7 +156,7 @@ version(DFL_NO_USE_CORE_MEMORY)
 }
 else
 {
-	private import core.memory; // If you get "module gc cannot read file 'std\gc.d'" then use -version=DFL_USE_CORE_MEMORY <http://wiki.dprogramming.com/Dfl/CompileVersions>
+	import core.memory; // If you get "module gc cannot read file 'std\gc.d'" then use -version=DFL_USE_CORE_MEMORY <http://wiki.dprogramming.com/Dfl/CompileVersions>
 	
 	void gcPin(void* p) { }
 	void gcUnpin(void* p) { }
@@ -168,18 +168,12 @@ else
 	
 	void gcFullCollect() nothrow
 	{
-		try
-		{
-			core.memory.GC.collect();
-		}
-		catch (Throwable e)
-		{
-		}
+		core.memory.GC.collect();
 	}
 }
 
 
-private import std.string;
+import std.string;
 
 alias stringICmp = std.string.icmp;
 
@@ -227,7 +221,7 @@ else
 	}
 }
 
-private import std.algorithm.searching;
+import std.algorithm.searching;
 
 alias charFindInString = std.algorithm.searching.find;
 
@@ -241,7 +235,7 @@ Dstring uintToHexString(uint num)
 alias stringSplitLines = std.string.splitLines;
 
 
-private import std.path;
+import std.path;
 
 alias pathGetDirName = std.path.dirName;
 
@@ -257,13 +251,13 @@ alias nativePathSeparatorString = std.path.pathSeparator;
 
 version(_DFL_NO_USE_CORE_EXCEPTION_OUTOFMEMORY_EXCEPTION)
 {
-	private import std.outofmemory;
+	import std.outofmemory;
 	
 	alias OomException = std.outofmemory.OutOfMemoryException;
 }
 else
 {
-	private import core.exception;
+	import core.exception;
 	
 	version(_DFL_NO_USE_CORE_EXCEPTION_OUTOFMEMORY_ERROR)
 	{
@@ -288,7 +282,7 @@ else
 }
 
 
-private import std.utf;
+import std.utf;
 
 alias utf8stringGetUtf32char = std.utf.decode;
 
@@ -303,12 +297,12 @@ alias utf32stringtoUtf8string = std.utf.toUTF8;
 alias utf8stringtoUtf32string = std.utf.toUTF32;
 
 
-private import std.uni;
+import std.uni;
 
 alias utf32charToLower = std.uni.toLower;
 
 
-private import std.conv;
+import std.conv;
 
 version(DFL_NO_CONV_TO_TEMPLATE)
 {
@@ -330,12 +324,12 @@ else
 }
 
 
-private import std.ascii;
+import std.ascii;
 
 alias charIsHexDigit = std.ascii.isHexDigit;
 
 
-private import undead.stream;// dfl.internal.stream is deprecated.
+import undead.stream;// dfl.internal.stream is deprecated.
 
 deprecated alias DStream = undead.stream.Stream;// dfl.internal.stream.Stream is deprecated.
 

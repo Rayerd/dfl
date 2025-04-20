@@ -5,17 +5,16 @@
 ///
 module dfl.tooltip;
 
+import dfl.application;
+import dfl.base;
+import dfl.control;
 
-private import dfl.application;
-private import dfl.base;
-private import dfl.control;
+import dfl.internal.clib;
+import dfl.internal.dlib;
+import dfl.internal.utf;
 
-private import dfl.internal.dlib;
-private import dfl.internal.clib;
-private import dfl.internal.utf;
-
-private import core.sys.windows.windows;
-private import core.sys.windows.commctrl;
+import core.sys.windows.commctrl;
+import core.sys.windows.windows;
 
 
 ///

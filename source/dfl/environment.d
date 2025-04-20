@@ -7,13 +7,13 @@
 ///
 module dfl.environment;
 
-private import dfl.base;
-private import dfl.event;
+import dfl.base;
+import dfl.event;
 
-private import dfl.internal.dlib;
-private import dfl.internal.clib;
-private import dfl.internal.utf;
-private import dfl.internal.winapi;
+import dfl.internal.dlib;
+import dfl.internal.clib;
+import dfl.internal.utf;
+import dfl.internal.winapi;
 
 
 private extern(Windows) nothrow

@@ -5,28 +5,28 @@
 ///
 module dfl.richtextbox;
 
-private import dfl.textboxbase;
-private import dfl.base;
-private import dfl.application;
-private import dfl.event;
-private import dfl.drawing;
-private import dfl.data;
-private import dfl.control;
-
-private import dfl.internal.winapi;
-private import core.sys.windows.richedit : SF_UNICODE, GETTEXTEX, GETTEXTLENGTHEX, GTL_CLOSE;
-
-private import dfl.internal.utf;
-private import dfl.internal.dlib;
+import dfl.application;
+import dfl.base;
+import dfl.control;
+import dfl.data;
+import dfl.drawing;
+import dfl.event;
+import dfl.textboxbase;
 
 version(DFL_NO_MENUS)
 {
 }
 else
 {
-	private import dfl.menu;
+	import dfl.menu;
 	import std.utf;
 }
+
+import dfl.internal.winapi;
+import dfl.internal.dlib;
+import dfl.internal.utf;
+
+import core.sys.windows.richedit : GETTEXTEX, GETTEXTLENGTHEX, GTL_CLOSE, SF_UNICODE;
 
 
 private extern(C) char* strcpy(char*, char*);
@@ -560,7 +560,7 @@ class RichTextBox: TextBoxBase // docmain
 				cf.dwEffects |= CFE_UNDERLINE;
 			cf.yHeight = cast(typeof(cf.yHeight))Font.getEmSize(lf.lfHeight, GraphicsUnit.TWIP);
 			cf.bCharSet = lf.lfCharSet;
-			strcpy(cf.szFaceName.ptr, lf.lfFaceName.ptr);
+			cf.szFaceName = lf.lfFaceName;
 			cf.bUnderlineType = CFU_UNDERLINE;
 			cf.wWeight = cast(WORD)lf.lfWeight;
 			
@@ -599,7 +599,7 @@ class RichTextBox: TextBoxBase // docmain
 					lfUnderline = (cf.dwEffects & CFE_UNDERLINE) != 0;
 					lfStrikeOut = (cf.dwEffects & CFE_STRIKEOUT) != 0;
 					lfCharSet = cf.bCharSet;
-					strcpy(lfFaceName.ptr, cf.szFaceName.ptr);
+					lfFaceName = cf.szFaceName;
 					lfOutPrecision = OUT_DEFAULT_PRECIS;
 					lf.lfClipPrecision = CLIP_DEFAULT_PRECIS;
 					lf.lfQuality = DEFAULT_QUALITY;

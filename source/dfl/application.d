@@ -5,19 +5,22 @@
 ///
 module dfl.application;
 
-private import dfl.internal.dlib, dfl.internal.clib;
-
-private import dfl.base, dfl.form, dfl.internal.winapi, dfl.event;
-private import dfl.control, dfl.drawing, dfl.label;
-private import dfl.button, dfl.textbox, dfl.internal.wincom, dfl.environment;
-private import dfl.internal.utf;
+import dfl.base;
+import dfl.button;
+import dfl.control;
+import dfl.drawing;
+import dfl.environment;
+import dfl.event;
+import dfl.form;
+import dfl.label;
+import dfl.textbox;
 
 version(DFL_NO_RESOURCES)
 {
 }
 else
 {
-	private import dfl.resources;
+	import dfl.resources;
 }
 
 version(DFL_NO_MENUS)
@@ -25,8 +28,14 @@ version(DFL_NO_MENUS)
 }
 else
 {
-	private import dfl.menu;
+	import dfl.menu;
 }
+
+import dfl.internal.clib;
+import dfl.internal.dlib;
+import dfl.internal.utf;
+import dfl.internal.winapi;
+import dfl.internal.wincom;
 
 
 version = DFL_NO_ZOMBIE_FORM;
@@ -362,7 +371,7 @@ final class Application // docmain
 			{
 				if(!i)
 					filters = filters[1 .. $];
-				else if(i == filters.length - 1)
+				else if(i + 1 == filters.length)
 					filters = filters[0 .. i];
 				else
 					filters = filters[0 .. i] ~ filters[i + 1 .. $];
@@ -1684,7 +1693,7 @@ extern(Windows) void _gcTimeout(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dw
 // Note: phobos-only.
 debug(SHOW_MESSAGE_INFO)
 {
-	private import std.stdio, std.string;
+	import std.stdio, std.string;
 	
 	
 	void showMessageInfo(ref Message m)

@@ -5,8 +5,12 @@
 ///
 module dfl.imagelist;
 
-import dfl.base, dfl.drawing, dfl.internal.winapi, dfl.internal.dlib;
+import dfl.base;
 import dfl.collections;
+import dfl.drawing;
+
+import dfl.internal.dlib;
+import dfl.internal.winapi;
 
 
 version(DFL_NO_IMAGELIST)

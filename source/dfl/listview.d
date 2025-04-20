@@ -5,17 +5,24 @@
 ///
 module dfl.listview;
 
-private import dfl.internal.dlib, dfl.internal.clib;
+import dfl.application;
+import dfl.base;
+import dfl.collections;
+import dfl.control;
+import dfl.drawing;
+import dfl.event;
 
-private import dfl.base, dfl.control, dfl.internal.winapi, dfl.application;
-private import dfl.event, dfl.drawing, dfl.collections, dfl.internal.utf;
+import dfl.internal.clib;
+import dfl.internal.dlib;
+import dfl.internal.utf;
+import dfl.internal.winapi;
 
 version(DFL_NO_IMAGELIST)
 {
 }
 else
 {
-	private import dfl.imagelist;
+	import dfl.imagelist;
 }
 
 
@@ -121,35 +128,48 @@ class ListViewSubItem: DObject
 	}
 	
 	
-	override Dstring toString()
+	override Dstring toString() const
 	{
 		return text;
 	}
 	
 	
-	override Dequ opEquals(Object o)
+	override Dequ opEquals(Object o) const
 	{
 		return text == getObjectString(o);
 	}
 	
 	
-	Dequ opEquals(Dstring val)
+	Dequ opEquals(Dstring val) const
 	{
 		return text == val;
 	}
 	
 	
-	override int opCmp(Object o)
+	override int opCmp(Object o) const
 	{
 		return stringICmp(text, getObjectString(o));
 	}
 	
 	
-	int opCmp(Dstring val)
+	int opCmp(Dstring val) const
 	{
 		return stringICmp(text, val);
 	}
 	
+
+	override size_t toHash() const nothrow @trusted
+	{
+		try
+		{
+			return hashOf(text);
+		}
+		catch (Exception e)
+		{
+			assert(0);
+		}
+	}
+
 	
 	///
 	final @property void text(Dstring newText) // setter
@@ -168,7 +188,7 @@ class ListViewSubItem: DObject
 	}
 	
 	/// ditto
-	final @property Dstring text() // getter
+	final @property Dstring text() const // getter
 	{
 		return _txt;
 	}
@@ -237,7 +257,7 @@ class ListViewItem: DObject
 	}
 	
 	
-	private final void _setcheckstate(int thisindex, bool bchecked)
+	private void _setcheckstate(int thisindex, bool bchecked)
 	{
 		if(lview && lview.created)
 		{
@@ -249,7 +269,7 @@ class ListViewItem: DObject
 	}
 	
 	
-	private final bool _getcheckstate(int thisindex)
+	private bool _getcheckstate(int thisindex)
 	{
 		if(lview && lview.created)
 		{
@@ -280,35 +300,48 @@ class ListViewItem: DObject
 	}
 	
 	
-	override Dstring toString()
+	override Dstring toString() const
 	{
 		return text;
 	}
 	
 	
-	override Dequ opEquals(Object o)
+	override Dequ opEquals(Object o) const
 	{
 		return text == getObjectString(o);
 	}
 	
 	
-	Dequ opEquals(Dstring val)
+	Dequ opEquals(Dstring val) const
 	{
 		return text == val;
 	}
 	
 	
-	override int opCmp(Object o)
+	override int opCmp(Object o) const
 	{
 		return stringICmp(text, getObjectString(o));
 	}
 	
 	
-	int opCmp(Dstring val)
+	int opCmp(Dstring val) const
 	{
 		return stringICmp(text, val);
 	}
 	
+
+	override size_t toHash() const nothrow @trusted
+	{
+		try
+		{
+			return hashOf(text);
+		}
+		catch (Exception e)
+		{
+			assert(0);
+		}
+	}
+
 	
 	///
 	final @property Rect bounds() // getter
@@ -342,7 +375,7 @@ class ListViewItem: DObject
 	}
 	
 	/// ditto
-	final @property Dstring text() // getter
+	final @property Dstring text() const // getter
 	{
 		return _txt;
 	}
@@ -491,42 +524,55 @@ class ColumnHeader: DObject
 	}
 	
 	/// ditto
-	final @property Dstring text() // getter
+	final @property Dstring text() const // getter
 	{
 		return _txt;
 	}
 	
 	
-	override Dstring toString()
+	override Dstring toString() const
 	{
 		return text;
 	}
 	
 	
-	override Dequ opEquals(Object o)
+	override Dequ opEquals(Object o) const
 	{
 		return text == getObjectString(o);
 	}
 	
 	
-	Dequ opEquals(Dstring val)
+	Dequ opEquals(Dstring val) const
 	{
 		return text == val;
 	}
 	
 	
-	override int opCmp(Object o)
+	override int opCmp(Object o) const
 	{
 		return stringICmp(text, getObjectString(o));
 	}
 	
 	
-	int opCmp(Dstring val)
+	int opCmp(Dstring val) const
 	{
 		return stringICmp(text, val);
 	}
 	
 	
+	override size_t toHash() const nothrow @trusted
+	{
+		try
+		{
+			return hashOf(text);
+		}
+		catch (Exception e)
+		{
+			assert(0);
+		}
+	}
+
+
 	///
 	final @property int index() // getter
 	{
@@ -791,13 +837,13 @@ class ListView: ControlSuperClass // docmain
 		package ListViewItem[] _items;
 		
 		
-		package final @property bool created() // getter
+		package @property bool created() // getter
 		{
 			return lv && lv.created();
 		}
 		
 		
-		package final void doListItems() // DMD 0.125: this member is not accessible when private.
+		package void doListItems() // DMD 0.125: this member is not accessible when private.
 		in
 		{
 			assert(created);
@@ -897,7 +943,7 @@ class ListView: ControlSuperClass // docmain
 		ColumnHeader[] _headers;
 		
 		
-		package final @property bool created() // getter
+		package @property bool created() // getter
 		{
 			return lv && lv.created();
 		}
@@ -910,7 +956,7 @@ class ListView: ControlSuperClass // docmain
 		}
 		
 		
-		package final void doListHeaders() // DMD 0.125: this member is not accessible when private.
+		package void doListHeaders() // DMD 0.125: this member is not accessible when private.
 		in
 		{
 			assert(created);
@@ -1746,7 +1792,7 @@ class ListView: ControlSuperClass // docmain
 				sitems = sitems.dup; // So exception won't damage anything.
 				// Stupid bubble sort. At least it's a "stable sort".
 				bool swp;
-				auto sortmax = sitems.length - 1;
+				auto sortmax = sitems.length + (-1);
 				size_t iw;
 				do
 				{
@@ -1803,7 +1849,7 @@ class ListView: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final int delegate(ListViewItem, ListViewItem) sorter() @property // getter
+	final int delegate(ListViewItem, ListViewItem) sorter() const @property // getter
 	{
 		return _sortproc;
 	}

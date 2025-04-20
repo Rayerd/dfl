@@ -5,17 +5,17 @@
 ///
 module dfl.combobox;
 
-private import dfl.internal.dlib;
-private import dfl.internal.winapi;
-private import dfl.internal.utf;
+import dfl.application;
+import dfl.base;
+import dfl.control;
+import dfl.event;
+import dfl.drawing;
+import dfl.collections;
+import dfl.listbox;
 
-private import dfl.application;
-private import dfl.base;
-private import dfl.control;
-private import dfl.event;
-private import dfl.drawing;
-private import dfl.collections;
-private import dfl.listbox;
+import dfl.internal.dlib;
+import dfl.internal.winapi;
+import dfl.internal.utf;
 
 
 private extern(Windows) void _initCombobox();
@@ -513,7 +513,7 @@ class ComboBox: ListControl // docmain
 	
 	
 	///
-	static class ObjectCollection
+	static final class ObjectCollection
 	{
 		protected this(ComboBox lbox)
 		{

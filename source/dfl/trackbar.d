@@ -10,18 +10,19 @@
 ///
 module dfl.trackbar;
 
-private import dfl.base;
-private import dfl.control;
-private import dfl.application;
-private import dfl.event;
-private import dfl.drawing;
-private static import dfl.internal.utf;
+import dfl.application;
+import dfl.base;
+import dfl.control;
+import dfl.drawing;
+import dfl.event;
+static import dfl.internal.utf;
 
-private import core.sys.windows.commctrl;
-private import core.sys.windows.windef;
-private import core.sys.windows.winuser;
+import core.sys.windows.commctrl;
+import core.sys.windows.windef;
+import core.sys.windows.winuser;
 
-private static import std.algorithm.comparison;
+static import std.algorithm.comparison;
+
 
 extern(Windows) void _initTrackbar();
 

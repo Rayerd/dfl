@@ -5,24 +5,27 @@
 ///
 module dfl.textboxbase;
 
-private import dfl.control, dfl.base, dfl.application;
-private import dfl.drawing, dfl.event;
-
-private import dfl.internal.dlib;
-private import dfl.internal.winapi;
-private import dfl.internal.utf;
-
-debug(APP_PRINT)
-{
-	private import dfl.internal.clib;
-}
+import dfl.application;
+import dfl.base;
+import dfl.control;
+import dfl.drawing;
+import dfl.event;
 
 version(DFL_NO_MENUS)
 {
 }
 else
 {
-	private import dfl.menu;
+	import dfl.menu;
+}
+
+import dfl.internal.dlib;
+import dfl.internal.utf;
+import dfl.internal.winapi;
+
+debug(APP_PRINT)
+{
+	import dfl.internal.clib;
 }
 
 

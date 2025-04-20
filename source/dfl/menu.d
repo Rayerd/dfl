@@ -5,13 +5,20 @@
 ///
 module dfl.menu;
 
-private import dfl.internal.dlib;
+import dfl.application;
+import dfl.base;
+import dfl.collections;
+import dfl.control;
+import dfl.drawing;
+import dfl.event;
 
-private import dfl.internal.winapi, dfl.control, dfl.base, dfl.event;
-private import dfl.internal.utf, dfl.drawing, dfl.application, dfl.collections;
+import dfl.internal.dlib;
+import dfl.internal.utf;
+import dfl.internal.winapi;
+
 debug(APP_PRINT)
 {
-	private import dfl.internal.clib;
+	import dfl.internal.clib;
 }
 
 version(DFL_NO_MENUS)
@@ -118,7 +125,7 @@ else
 		}
 		
 		/// ditto
-		final @property Dstring text() // getter
+		final @property Dstring text() const // getter
 		{
 			// if(mparent) fetch text ?
 			return mtext;
@@ -520,36 +527,49 @@ else
 		}
 		
 		
-		override Dstring toString()
+		override Dstring toString() const
 		{
 			return text;
 		}
 		
 		
-		override Dequ opEquals(Object o)
+		override Dequ opEquals(Object o) const
 		{
 			return text == getObjectString(o);
 		}
 		
 		
-		Dequ opEquals(Dstring val)
+		Dequ opEquals(Dstring val) const
 		{
 			return text == val;
 		}
 		
 		
-		override int opCmp(Object o)
+		override int opCmp(Object o) const
 		{
 			return stringICmp(text, getObjectString(o));
 		}
 		
 		
-		int opCmp(Dstring val)
+		int opCmp(Dstring val) const
 		{
 			return stringICmp(text, val);
 		}
 		
+
+		override size_t toHash() const nothrow @trusted
+		{
+			try
+			{
+				return hashOf(text);
+			}
+			catch (Exception e)
+			{
+				assert(0);
+			}
+		}
 		
+
 		protected override void onReflectedMessage(ref Message m)
 		{
 			super.onReflectedMessage(m);
@@ -738,7 +758,7 @@ else
 			}
 			
 			
-			package final void _additem(MenuItem mi)
+			package void _additem(MenuItem mi)
 			{
 				// Fix indices after this point.
 				int idx;
@@ -754,7 +774,7 @@ else
 			
 			
 			// Note: clear() doesn't call this. Update: does now.
-			package final void _delitem(int idx)
+			package void _delitem(int idx)
 			{
 				// Fix indices after this point.
 				if(idx < items.length)
@@ -864,7 +884,7 @@ else
 		
 		
 		// Extra.
-		deprecated final void opOpAssign(string op)(MenuItem mi) if (op == "~")
+		deprecated void opOpAssign(string op)(MenuItem mi) if (op == "~")
 		{
 			menuItems.insert(menuItems.length.toI32, mi);
 		}

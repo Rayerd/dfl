@@ -5,10 +5,16 @@
 ///
 module dfl.groupbox;
 
-private import dfl.control, dfl.base, dfl.button, dfl.drawing;
-private import dfl.internal.winapi, dfl.application, dfl.event;
+import dfl.application;
+import dfl.base;
+import dfl.button;
+import dfl.control;
+import dfl.drawing;
+import dfl.event;
 
+import dfl.internal.winapi;
 static import dfl.internal.utf;
+
 
 private extern(Windows) void _initButton();
 

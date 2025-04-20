@@ -5,16 +5,16 @@
 ///
 module dfl.fontdialog;
 
-private import dfl.application;
-private import dfl.base;
-private import dfl.control;
-private import dfl.drawing;
-private import dfl.event;
-private import dfl.commondialog;
+import dfl.application;
+import dfl.base;
+import dfl.control;
+import dfl.drawing;
+import dfl.event;
+import dfl.commondialog;
 
-private import dfl.internal.dlib;
-private import dfl.internal.utf;
-private import dfl.internal.winapi;
+import dfl.internal.dlib;
+import dfl.internal.utf;
+import dfl.internal.winapi;
 
 
 private extern(Windows) nothrow

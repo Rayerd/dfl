@@ -3,16 +3,16 @@
 
 module dfl.internal.wincom;
 
-import core.sys.windows.windef;
-import core.sys.windows.winbase;
 import core.sys.windows.objidl;
+import core.sys.windows.winbase;
+import core.sys.windows.windef;
 
 version(WINE)
 	version = _dfl_needcom;
 
 version(_dfl_needcom)
 {
-	private import dfl.internal.dlib;
+	import dfl.internal.dlib;
 	
 	// Grabbed from std.c.windows.com:
 	

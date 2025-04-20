@@ -5,27 +5,32 @@
 ///
 module dfl.form;
 
-private import dfl.control, dfl.event, dfl.drawing;
-private import dfl.application, dfl.base;
-private import dfl.collections;
-
-private import dfl.internal.dlib;
-private import dfl.internal.utf;
-private import core.sys.windows.windows;
-private import core.sys.windows.commctrl;
-
-debug(APP_PRINT)
-{
-	private import dfl.internal.clib;
-}
+import dfl.application;
+import dfl.base;
+import dfl.collections;
+import dfl.control;
+import dfl.drawing;
+import dfl.event;
 
 version(DFL_NO_MENUS)
 {
 }
 else
 {
-	private import dfl.menu;
+	import dfl.menu;
 }
+
+import dfl.internal.dlib;
+import dfl.internal.utf;
+
+debug(APP_PRINT)
+{
+	import dfl.internal.clib;
+}
+
+import core.sys.windows.commctrl;
+import core.sys.windows.windows;
+
 
 version(NO_DFL_PARK_WINDOW)
 {
@@ -121,7 +126,7 @@ class FormShortcutEventArgs: EventArgs
 
 
 // DMD 0.93 crashes if this is placed in Form.
-//private import dfl.button;
+//import dfl.button;
 
 
 version = OLD_MODAL_CLOSE; // New version destroys control info.
@@ -3481,7 +3486,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	+/
 	
 	
-	final void _recalcClientSize()
+	void _recalcClientSize()
 	{
 		RECT r;
 		r.left = 0;

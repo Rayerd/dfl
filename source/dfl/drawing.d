@@ -5,14 +5,15 @@
 ///
 module dfl.drawing;
 
-private import dfl.base;
-private import std.stdio;
+import dfl.base;
 
-private import dfl.internal.dlib;
-private import dfl.internal.winapi;
-private import dfl.internal.wincom;
-private import dfl.internal.utf;
-private import dfl.internal.com;
+import dfl.internal.dlib;
+import dfl.internal.winapi;
+import dfl.internal.wincom;
+import dfl.internal.utf;
+import dfl.internal.com;
+
+import std.stdio;
 
 version(D_Version2)
 {
@@ -1383,9 +1384,9 @@ final class EnhancedMetaFile: Image
 
 	
 	///
-	HENHMETAFILE handle() @property // getter
+	HENHMETAFILE handle() const @property // getter
 	{
-		return _hemf;
+		return cast(HENHMETAFILE)_hemf;
 	}
 	
 	///
@@ -2314,9 +2315,9 @@ private:
 
 	
 	///
-	HMONITOR hmonitor() @property // getter
+	HMONITOR hmonitor() const @property // getter
 	{
-		return _hmonitor;
+		return cast(HMONITOR)_hmonitor;
 	}
 
 	
@@ -3023,7 +3024,7 @@ class Graphics // docmain
 	// beziers, using the previous last point as the starting point.
 	final void drawBeziers(Pen pen, Point[] points)
 	{
-		if(points.length < 1 || (points.length - 1) % 3)
+		if(points.length < 1 || (points.length + (-1)) % 3)
 		{
 			assert(0); // Bad number of points.
 			//return; // Let PolyBezier() do what it wants with the bad number.
@@ -4633,9 +4634,9 @@ class Region // docmain
 
 
 	///
-	override size_t toHash() const pure nothrow
+	override size_t toHash() const nothrow @safe
 	{
-		return _hrgn.hashOf();
+		return hashOf(_hrgn);
 	}
 	
 	

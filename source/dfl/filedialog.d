@@ -5,16 +5,16 @@
 ///
 module dfl.filedialog;
 
-private import dfl.application;
-private import dfl.base;
-private import dfl.control;
-private import dfl.drawing;
-private import dfl.event;
-private import dfl.commondialog;
+import dfl.application;
+import dfl.base;
+import dfl.commondialog;
+import dfl.control;
+import dfl.drawing;
+import dfl.event;
 
-private import dfl.internal.winapi;
-private import dfl.internal.dlib;
-private import dfl.internal.utf;
+import dfl.internal.dlib;
+import dfl.internal.utf;
+import dfl.internal.winapi;
 
 
 ///
@@ -856,8 +856,8 @@ class OpenFileDialog: FileDialog // docmain
 	}
 	
 	
-	private static import undead.stream;
-	private import std.stdio : File;
+	static import undead.stream;
+	import std.stdio : File;
 	
 	///
 	// Old openFile() is renamed openFileStream().
@@ -978,8 +978,8 @@ class SaveFileDialog: FileDialog // docmain
 	}
 	
 	
-	private static import undead.stream;
-	private import std.stdio : File;
+	static import undead.stream;
+	import std.stdio : File;
 
 	///
 	// Opens and creates with read and write access.

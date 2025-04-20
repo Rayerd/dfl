@@ -5,18 +5,17 @@
 ///
 module dfl.data;
 
-private import dfl.base;
-private import dfl.application;
-private import dfl.drawing;
+import dfl.base;
+import dfl.application;
+import dfl.drawing;
 
-private import dfl.internal.dlib;
-private import dfl.internal.utf;
-private import dfl.internal.com;
-private import dfl.internal.winapi;
-private import dfl.internal.wincom;
+import dfl.internal.dlib;
+import dfl.internal.utf;
+import dfl.internal.com;
+import dfl.internal.winapi;
+import dfl.internal.wincom;
 
-private import core.sys.windows.ole2; // DATA_E_FORMATETC
-
+import core.sys.windows.ole2 : DATA_E_FORMATETC;
 public import core.sys.windows.wingdi : BITMAPINFO;
 
 

@@ -6,10 +6,15 @@
 module dfl.statusbar;
 
 
-private import dfl.control, dfl.base, dfl.internal.winapi, dfl.event,
-	dfl.collections, dfl.internal.utf, dfl.internal.dlib, dfl.application;
+import dfl.application;
+import dfl.base;
+import dfl.collections;
+import dfl.control;
+import dfl.event;
 
-private import dfl.internal.dlib;
+import dfl.internal.dlib;
+import dfl.internal.utf;
+import dfl.internal.winapi;
 
 
 private extern(Windows) void _initStatusbar();
@@ -56,41 +61,47 @@ class StatusBarPanel: DObject
 	}
 	
 	
-	override Dstring toString()
+	override Dstring toString() const
 	{
 		return _txt;
 	}
 	
 	
-	override Dequ opEquals(Object o)
+	override Dequ opEquals(Object o) const
 	{
 		return _txt == getObjectString(o); // ?
 	}
 	
-	Dequ opEquals(StatusBarPanel pnl)
+	Dequ opEquals(StatusBarPanel pnl) const
 	{
 		return _txt == pnl._txt;
 	}
 	
-	Dequ opEquals(Dstring val)
+	Dequ opEquals(Dstring val) const
 	{
 		return _txt == val;
 	}
 	
 	
-	override int opCmp(Object o)
+	override int opCmp(Object o) const
 	{
 		return stringICmp(_txt, getObjectString(o)); // ?
 	}
 	
-	int opCmp(StatusBarPanel pnl)
+	int opCmp(StatusBarPanel pnl) const
 	{
 		return stringICmp(_txt, pnl._txt);
 	}
 	
-	int opCmp(Dstring val)
+	int opCmp(Dstring val) const
 	{
 		return stringICmp(_txt, val);
+	}
+
+
+	override size_t toHash() const nothrow @safe
+	{
+		return hashOf(_txt);
 	}
 	
 	

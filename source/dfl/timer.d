@@ -5,17 +5,18 @@
 ///
 module dfl.timer;
 
-private import dfl.application;
-private import dfl.base;
-private import dfl.event;
+import dfl.application;
+import dfl.base;
+import dfl.event;
 
-private import dfl.internal.dlib;
+import dfl.internal.dlib;
+
 debug(APP_PRINT)
 {
-	private import dfl.internal.clib;
+	import dfl.internal.clib;
 }
 
-private import core.sys.windows.windows;
+import core.sys.windows.windows;
 
 
 ///

@@ -5,8 +5,12 @@
 ///
 module dfl.splitter;
 
-private import dfl.control, dfl.internal.winapi, dfl.base, dfl.drawing;
-private import dfl.event;
+import dfl.base;
+import dfl.control;
+import dfl.drawing;
+import dfl.event;
+
+import dfl.internal.winapi;
 
 
 ///

@@ -21,22 +21,20 @@
 
 module dfl.internal.utf;
 
-private import dfl.internal.dlib;
-private import dfl.internal.clib;
-private import dfl.internal.winapi :
-	LPCITEMIDLIST,
-	SHGetPathFromIDListA, SHGetPathFromIDListW;
+import dfl.internal.clib;
+import dfl.internal.dlib;
+import dfl.internal.winapi : LPCITEMIDLIST, SHGetPathFromIDListA, SHGetPathFromIDListW;
 
-private import core.sys.windows.windef;
-private import core.sys.windows.winuser;
-private import core.sys.windows.winreg;
-private import core.sys.windows.wingdi;
-private import core.sys.windows.winbase;
-private import core.sys.windows.shellapi;
-private import core.sys.windows.winnls;
-private import core.sys.windows.richedit;
+import core.sys.windows.richedit;
+import core.sys.windows.shellapi;
+import core.sys.windows.winbase;
+import core.sys.windows.windef;
+import core.sys.windows.wingdi;
+import core.sys.windows.winnls;
+import core.sys.windows.winreg;
+import core.sys.windows.winuser;
 
-private import std.windows.charset;
+import std.windows.charset;
 
 
 version(DFL_NO_D2_AND_ABOVE)
@@ -176,8 +174,7 @@ Dstringz unsafeStringz(Dstring s) nothrow pure
 		return s.ptr;
 	
 	// Need to duplicate with null terminator.
-	char[] result;
-	result = new char[s.length + 1];
+	char[] result = new char[s.length + 1];
 	result[0 .. s.length] = s[];
 	result[s.length] = 0;
 	//return result.ptr;
@@ -190,14 +187,10 @@ Dstring unicodeToAnsi(Dwstringz unicode, size_t ulen)
 	if(!ulen)
 		return null;
 	
-	wchar* wsz;
-	char[] result;
-	int len;
-	
-	len = WideCharToMultiByte(0, 0, unicode, ulen.toI32, null, 0, null, null);
+	int len = WideCharToMultiByte(0, 0, unicode, ulen.toI32, null, 0, null, null);
 	assert(len > 0);
 	
-	result = new char[len];
+	char[] result = new char[len];
 	len = WideCharToMultiByte(0, 0, unicode, ulen.toI32, result.ptr, len, null, null);
 	assert(len == result.length);
 	//return result[0 .. len - 1];
@@ -207,10 +200,8 @@ Dstring unicodeToAnsi(Dwstringz unicode, size_t ulen)
 
 Dwstring ansiToUnicode(Dstringz ansi, size_t len)
 {
-	wchar[] ws;
-	
 	len++;
-	ws = new wchar[len];
+	wchar[] ws = new wchar[len];
 	
 	len = MultiByteToWideChar(0, 0, ansi, len.toI32, ws.ptr, len.toI32);
 	//assert(len == ws.length);
@@ -260,12 +251,11 @@ private Dstring _toAnsiz(Dstring utf8, bool safe = true)
 	{
 		if(ch >= 0x80)
 		{
-			char[] result;
 			auto wsz = utf8stringToUtf16stringz(utf8);
 			auto len = WideCharToMultiByte(0, 0, wsz, -1, null, 0, null, null);
 			assert(len > 0);
 			
-			result = new char[len];
+			char[] result = new char[len];
 			len = WideCharToMultiByte(0, 0, wsz, -1, result.ptr, len, null, null);
 			assert(len == result.length);
 			//return result[0 .. len - 1];
@@ -567,28 +557,22 @@ Dstring getWindowText(HWND hwnd)
 			}
 		}
 		
-		wchar* buf;
-		size_t len;
-		
-		len = proclen(hwnd);
+		size_t len = proclen(hwnd);
 		if(!len)
 			return null;
 		len++;
-		buf = (new wchar[len]).ptr;
+		wchar* buf = (new wchar[len]).ptr;
 		
 		len = proc(hwnd, buf, len.toI32);
 		return fromUnicode(buf, len);
 	}
 	else
 	{
-		char* buf;
-		size_t len;
-		
-		len = GetWindowTextLengthA(hwnd);
+		size_t len = GetWindowTextLengthA(hwnd);
 		if(!len)
 			return null;
 		len++;
-		buf = (new char[len]).ptr;
+		char* buf = (new char[len]).ptr;
 		
 		len = GetWindowTextA(hwnd, buf, len.toI32);
 		return fromAnsi(buf, len);
@@ -647,18 +631,14 @@ Dstring getModuleFileName(HMODULE hmod)
 			}
 		}
 		
-		wchar[] s;
-		DWORD len;
-		s = new wchar[MAX_PATH];
-		len = proc(hmod, s.ptr, s.length.toI32);
+		wchar[] s = new wchar[MAX_PATH];
+		DWORD len = proc(hmod, s.ptr, s.length.toI32);
 		return fromUnicode(s.ptr, len);
 	}
 	else
 	{
-		char[] s;
-		DWORD len;
-		s = new char[MAX_PATH];
-		len = GetModuleFileNameA(hmod, s.ptr, s.length.toI32);
+		char[] s = new char[MAX_PATH];
+		DWORD len = GetModuleFileNameA(hmod, s.ptr, s.length.toI32);
 		return fromAnsi(s.ptr, len);
 	}
 }
@@ -714,18 +694,14 @@ Dstring emGetSelText(HWND hwnd, size_t selTextLength)
 			proc = _loadSendMessageW();
 		}
 		
-		wchar[] buf;
-		size_t len;
-		buf = new wchar[selTextLength + 1];
-		len = proc(hwnd, EM_GETSELTEXT, 0, cast(LPARAM)buf.ptr);
+		wchar[] buf = new wchar[selTextLength + 1];
+		size_t len = proc(hwnd, EM_GETSELTEXT, 0, cast(LPARAM)buf.ptr);
 		return fromUnicode(buf.ptr, len);
 	}
 	else
 	{
-		char[] buf;
-		size_t len;
-		buf = new char[selTextLength + 1];
-		len = SendMessageA(hwnd, EM_GETSELTEXT, 0, cast(LPARAM)buf.ptr);
+		char[] buf = new char[selTextLength + 1];
+		size_t len = SendMessageA(hwnd, EM_GETSELTEXT, 0, cast(LPARAM)buf.ptr);
 		return fromAnsi(buf.ptr, len);
 	}
 }
@@ -759,14 +735,12 @@ Dstring getSelectedText(HWND hwnd)
 		if(len)
 		{
 			len++;
-			wchar* buf;
-			buf = (new wchar[len]).ptr;
+			wchar* buf = (new wchar[len]).ptr;
 			
 			len = proc(hwnd, WM_GETTEXT, len, cast(LPARAM)buf).toI32;
 			if(len)
 			{
-				wchar[] s;
-				s = buf[v1 .. v2].dup;
+				wchar[] s = buf[v1 .. v2].dup;
 				return fromUnicode(s.ptr, s.length);
 			}
 		}
@@ -782,14 +756,12 @@ Dstring getSelectedText(HWND hwnd)
 		if(len)
 		{
 			len++;
-			char* buf;
-			buf = (new char[len]).ptr;
+			char* buf = (new char[len]).ptr;
 			
 			len = SendMessageA(hwnd, WM_GETTEXT, len, cast(LPARAM)buf).toI32;
 			if(len)
 			{
-				char[] s;
-				s = buf[v1 .. v2].dup;
+				char[] s = buf[v1 .. v2].dup;
 				return fromAnsi(s.ptr, s.length);
 			}
 		}
@@ -819,10 +791,8 @@ void emSetPasswordChar(HWND hwnd, dchar pwc)
 	}
 	else
 	{
-		Dstring chs;
-		Dstring ansichs;
-		chs = utf32stringtoUtf8string((&pwc)[0 .. 1]);
-		ansichs = unsafeAnsi(chs);
+		Dstring chs = utf32stringtoUtf8string((&pwc)[0 .. 1]);
+		Dstring ansichs = unsafeAnsi(chs);
 		
 		if(ansichs)
 			SendMessageA(hwnd, EM_SETPASSWORDCHAR, ansichs[0], 0); // TODO: ?
@@ -850,13 +820,10 @@ dchar emGetPasswordChar(HWND hwnd)
 	}
 	else
 	{
-		char ansich;
-		Dstring chs;
-		Ddstring dchs;
-		ansich = cast(char)SendMessageA(hwnd, EM_GETPASSWORDCHAR, 0, 0);
-		//chs = fromAnsi((&ansich)[0 .. 1], 1);
-		chs = fromAnsi(&ansich, 1);
-		dchs = utf8stringtoUtf32string(chs);
+		char ansich = cast(char)SendMessageA(hwnd, EM_GETPASSWORDCHAR, 0, 0);
+		//Dstring chs = fromAnsi((&ansich)[0 .. 1], 1);
+		Dstring chs = fromAnsi(&ansich, 1);
+		Ddstring dchs = utf8stringtoUtf32string(chs);
 		if(dchs.length == 1)
 			return dchs[0]; // TODO: ?
 		return 0;
@@ -1004,8 +971,7 @@ Dstring getClipboardFormatName(UINT format)
 		int len = proc(format, buf.ptr, buf.length.toI32);
 		if(!len)
 			return null;
-		Dstring result = fromUnicode(buf.ptr, len);
-		return result;
+		return fromUnicode(buf.ptr, len);
 	}
 	else
 	{
@@ -1013,8 +979,7 @@ Dstring getClipboardFormatName(UINT format)
 		int len = GetClipboardFormatNameA(format, buf.ptr, buf.length.toI32);
 		if(!len)
 			return null;
-		Dstring result = fromAnsi(buf.ptr, len);
-		return result;
+		return fromAnsi(buf.ptr, len);
 	}
 }
 
@@ -1051,9 +1016,8 @@ int drawTextEx(HDC hdc, Dstring text, LPRECT lprc, UINT dwDTFormat, LPDRAWTEXTPA
 		strz = toUnicodez(text);
 		return proc(hdc, strz, -1, lprc, dwDTFormat, lpDTParams);
 		+/
-		Dwstring str;
 		wchar[2] tempStr;
-		str = toUnicode(text);
+		Dwstring str = toUnicode(text);
 		if(str.length == 1)
 		{
 			tempStr[0] = str[0];
@@ -1071,9 +1035,8 @@ int drawTextEx(HDC hdc, Dstring text, LPRECT lprc, UINT dwDTFormat, LPDRAWTEXTPA
 		strz = unsafeAnsiz(text);
 		return DrawTextExA(hdc, strz, -1, lprc, dwDTFormat, lpDTParams);
 		+/
-		Dstring str;
 		char[2] tempStr;
-		str = unsafeAnsi(text);
+		Dstring str = unsafeAnsi(text);
 		if(str.length == 1)
 		{
 			tempStr[0] = str[0];
@@ -1163,10 +1126,8 @@ Dstring getCurrentDirectory()
 				}
 			}
 			
-			wchar* buf;
-			int len;
-			len = proc(0, null);
-			buf = (new wchar[len]).ptr;
+			int len = proc(0, null);
+			wchar* buf = (new wchar[len]).ptr;
 			len = proc(len, buf);
 			if(!len)
 				return null;
@@ -1174,10 +1135,8 @@ Dstring getCurrentDirectory()
 		}
 		else
 		{
-			char* buf;
-			int len;
-			len = GetCurrentDirectoryA(0, null);
-			buf = (new char[len]).ptr;
+			int len = GetCurrentDirectoryA(0, null);
+			char* buf = (new char[len]).ptr;
 			len = GetCurrentDirectoryA(len, buf);
 			if(!len)
 				return null;
@@ -1263,18 +1222,16 @@ Dstring getComputerName()
 			}
 		}
 		
-		wchar[] buf;
 		DWORD len = MAX_COMPUTERNAME_LENGTH + 1;
-		buf = new wchar[len];
+		wchar[] buf = new wchar[len];
 		if(!proc(buf.ptr, &len))
 			return null;
 		return fromUnicode(buf.ptr, len);
 	}
 	else
 	{
-		char[] buf;
 		DWORD len = MAX_COMPUTERNAME_LENGTH + 1;
-		buf = new char[len];
+		char[] buf = new char[len];
 		if(!GetComputerNameA(buf.ptr, &len))
 			return null;
 		return fromAnsi(buf.ptr, len);
@@ -1303,20 +1260,16 @@ Dstring getSystemDirectory()
 			}
 		}
 		
-		wchar[] buf;
-		UINT len;
-		buf = new wchar[MAX_PATH];
-		len = proc(buf.ptr, buf.length.toI32);
+		wchar[] buf = new wchar[MAX_PATH];
+		UINT len = proc(buf.ptr, buf.length.toI32);
 		if(!len)
 			return null;
 		return fromUnicode(buf.ptr, len);
 	}
 	else
 	{
-		char[] buf;
-		UINT len;
-		buf = new char[MAX_PATH];
-		len = GetSystemDirectoryA(buf.ptr, buf.length.toI32);
+		char[] buf = new char[MAX_PATH];
+		UINT len = GetSystemDirectoryA(buf.ptr, buf.length.toI32);
 		if(!len)
 			return null;
 		return fromAnsi(buf.ptr, len);
@@ -1384,14 +1337,11 @@ DWORD expandEnvironmentStrings(Dstring src, out Dstring result)
 			}
 		}
 		
-		wchar* dest;
-		DWORD len;
-		
 		auto strz = toUnicodez(src);
-		len = proc(strz, null, 0);
+		DWORD len = proc(strz, null, 0);
 		if(!len)
 			return 0;
-		dest = (new wchar[len]).ptr;
+		wchar* dest = (new wchar[len]).ptr;
 		len = proc(strz, dest, len);
 		if(!len)
 			return 0;
@@ -1400,14 +1350,11 @@ DWORD expandEnvironmentStrings(Dstring src, out Dstring result)
 	}
 	else
 	{
-		char* dest;
-		DWORD len;
-		
 		auto strz = unsafeAnsiz(src);
-		len = ExpandEnvironmentStringsA(strz, null, 0);
+		DWORD len = ExpandEnvironmentStringsA(strz, null, 0);
 		if(!len)
 			return 0;
-		dest = (new char[len]).ptr;
+		char* dest = (new char[len]).ptr;
 		len = ExpandEnvironmentStringsA(strz, dest, len);
 		if(!len)
 			return 0;
@@ -1438,25 +1385,21 @@ Dstring getEnvironmentVariable(Dstring name)
 			}
 		}
 		
-		wchar* buf;
-		DWORD len;
 		auto strz = toUnicodez(name);
-		len = proc(strz, null, 0);
+		DWORD len = proc(strz, null, 0);
 		if(!len)
 			return null;
-		buf = (new wchar[len]).ptr;
+		wchar* buf = (new wchar[len]).ptr;
 		len = proc(strz, buf, len);
 		return fromUnicode(buf, len);
 	}
 	else
 	{
-		char* buf;
-		DWORD len;
 		auto strz = unsafeAnsiz(name);
-		len = GetEnvironmentVariableA(strz, null, 0);
+		DWORD len = GetEnvironmentVariableA(strz, null, 0);
 		if(!len)
 			return null;
-		buf = (new char[len]).ptr;
+		char* buf = (new char[len]).ptr;
 		len = GetEnvironmentVariableA(strz, buf, len);
 		return fromAnsi(buf, len);
 	}
@@ -1569,16 +1512,14 @@ deprecated BOOL getTextExtentPoint32(HDC hdc, Dstring text, LPSIZE lpSize)
 			}
 		}
 		
-		Dwstring str;
-		str = toUnicode(text);
+		Dwstring str = toUnicode(text);
 		return proc(hdc, str.ptr, str.length.toI32, lpSize);
 	}
 	else
 	{
 		// Using GetTextExtentPoint32A here even though W is supported in order
 		// to keep the measurements accurate with DrawTextA.
-		Dstring str;
-		str = unsafeAnsi(text);
+		Dstring str = unsafeAnsi(text);
 		return GetTextExtentPoint32A(hdc, str.ptr, str.length.toI32, lpSize);
 	}
 }
@@ -1608,23 +1549,19 @@ Dstring dragQueryFile(HDROP hDrop, UINT idxFile)
 			}
 		}
 		
-		wchar[] str;
-		UINT len;
-		len = proc(hDrop, idxFile, null, 0);
+		UINT len = proc(hDrop, idxFile, null, 0);
 		if(!len)
 			return null;
-		str = new wchar[len + 1];
+		wchar[] str = new wchar[len + 1];
 		proc(hDrop, idxFile, str.ptr, str.length.toI32);
 		return fromUnicode(str.ptr, len);
 	}
 	else
 	{
-		char[] str;
-		UINT len;
-		len = DragQueryFileA(hDrop, idxFile, null, 0);
+		UINT len = DragQueryFileA(hDrop, idxFile, null, 0);
 		if(!len)
 			return null;
-		str = new char[len + 1];
+		char[] str = new char[len + 1];
 		DragQueryFileA(hDrop, idxFile, str.ptr, str.length.toI32);
 		return fromAnsi(str.ptr, len);
 	}

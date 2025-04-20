@@ -5,9 +5,14 @@
 ///
 module dfl.button;
 
-private import dfl.base, dfl.control, dfl.application, dfl.internal.winapi;
-private import dfl.event, dfl.drawing, dfl.internal.dlib;
+import dfl.application;
+import dfl.base;
+import dfl.control;
+import dfl.drawing;
+import dfl.event;
 
+import dfl.internal.dlib;
+import dfl.internal.winapi;
 static import dfl.internal.utf;
 
 
@@ -452,7 +457,7 @@ class Button: ButtonBase, IButtonControl // docmain
 				
 				default:
 					throw new DflException("Unsupported image format");
-					not_unsupported: ;
+					// not_unsupported: ;
 			}
 		}
 		

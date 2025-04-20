@@ -5,16 +5,16 @@
 ///
 module dfl.folderdialog;
 
-private import dfl.application;
-private import dfl.base;
-private import dfl.commondialog;
-private import dfl.environment;
+import dfl.application;
+import dfl.base;
+import dfl.commondialog;
+import dfl.environment;
 
-private import dfl.internal.dlib;
-private import dfl.internal.clib;
-private import dfl.internal.utf;
-private import dfl.internal.winapi;
-private import dfl.internal.wincom;
+import dfl.internal.clib;
+import dfl.internal.dlib;
+import dfl.internal.utf;
+import dfl.internal.winapi;
+import dfl.internal.wincom;
 
 
 private extern(Windows) nothrow

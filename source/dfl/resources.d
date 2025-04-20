@@ -5,10 +5,12 @@
 ///
 module dfl.resources;
 
-private import dfl.internal.dlib;
+import dfl.base;
+import dfl.drawing;
 
-private import dfl.internal.utf, dfl.internal.winapi, dfl.base, dfl.drawing;
-
+import dfl.internal.dlib;
+import dfl.internal.utf;
+import dfl.internal.winapi;
 
 version(DFL_NO_RESOURCES)
 {

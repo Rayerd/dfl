@@ -4,13 +4,14 @@
 module dfl.internal.winapi;
 
 
-public import core.sys.windows.windef;
-public import core.sys.windows.winuser;
-public import core.sys.windows.winreg;
-public import core.sys.windows.wingdi;
 public import core.sys.windows.commdlg;
 public import core.sys.windows.winbase;
-private import dfl.internal.wincom;
+public import core.sys.windows.windef;
+public import core.sys.windows.wingdi;
+public import core.sys.windows.winreg;
+public import core.sys.windows.winuser;
+
+import dfl.internal.wincom;
 
 
 version(D_Version2)

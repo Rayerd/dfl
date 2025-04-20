@@ -5,23 +5,29 @@
 ///
 module dfl.notifyicon;
 
-private import core.sys.windows.winbase;
-private import core.sys.windows.windef;
-private import core.sys.windows.winuser;
-private import core.sys.windows.basetyps : GUID;
-private import core.sys.windows.shellapi;
-
-private import dfl.base, dfl.drawing;
-private import dfl.control, dfl.form, dfl.application;
-private import dfl.event, dfl.internal.utf, dfl.internal.dlib;
+import dfl.application;
+import dfl.base;
+import dfl.control;
+import dfl.drawing;
+import dfl.event;
+import dfl.form;
 
 version(DFL_NO_MENUS)
 {
 }
 else
 {
-	private import dfl.menu;
+	import dfl.menu;
 }
+
+import dfl.internal.dlib;
+import dfl.internal.utf;
+
+import core.sys.windows.basetyps : GUID;
+import core.sys.windows.shellapi;
+import core.sys.windows.winbase;
+import core.sys.windows.windef;
+import core.sys.windows.winuser;
 
 
 // NOTE: Workaround for shellapi.h

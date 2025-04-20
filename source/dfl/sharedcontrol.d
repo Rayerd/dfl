@@ -1,15 +1,16 @@
 ///
 module dfl.sharedcontrol;
 
-private import dfl.base;
-private import dfl.control;
-private import dfl.application;
+import dfl.application;
+import dfl.base;
+import dfl.control;
 
-private import dfl.internal.winapi;
-private import dfl.internal.dlib;
-private import dfl.internal.clib : malloc, free;
+import dfl.internal.clib : free, malloc;
+import dfl.internal.dlib;
+import dfl.internal.winapi;
 
-private import core.atomic;
+import core.atomic;
+
 
 ///
 synchronized shared class SharedControl

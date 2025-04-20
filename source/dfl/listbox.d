@@ -5,14 +5,18 @@
 ///
 module dfl.listbox;
 
-private import dfl.internal.dlib;
+import dfl.application;
+import dfl.base;
+import dfl.collections;
+import dfl.control;
+import dfl.drawing;
+import dfl.event;
+import dfl.internal.winapi;
 
-private import dfl.internal.winapi, dfl.control, dfl.base, dfl.application;
-private import dfl.drawing, dfl.event, dfl.collections;
-
+import dfl.internal.dlib;
 static import dfl.internal.utf;
 
-private import std.algorithm;
+import std.algorithm;
 
 private extern(C) void* memmove(void*, void*, size_t len);
 
@@ -1323,7 +1327,7 @@ class ListBox: ListControl // docmain
 	}
 	
 	
-	protected override void onReflectedMessage(ref Message m)
+	override void onReflectedMessage(ref Message m)
 	{
 		super.onReflectedMessage(m);
 		

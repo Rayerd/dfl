@@ -5,7 +5,10 @@
 ///
 module dfl.panel;
 
-private import dfl.control, dfl.base, dfl.internal.winapi;
+import dfl.base;
+import dfl.control;
+
+import dfl.internal.winapi;
 
 
 ///
