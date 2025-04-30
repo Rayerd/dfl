@@ -22,77 +22,131 @@ else
 
 import dfl.internal.dlib;
 import dfl.internal.utf;
+import dfl.internal.dpiaware;
 
 import core.sys.windows.basetyps : GUID;
 import core.sys.windows.shellapi;
-import core.sys.windows.winbase;
 import core.sys.windows.windef;
 import core.sys.windows.winuser;
 
 
-// NOTE: Workaround for shellapi.h
-enum NOTIFYICON_VERSION_4 = 4;
-enum NIF_SHOWTIP = 0x00000080;
-enum NIIF_USER = 0x00000004;
+// NOTE: Shell_NotifyIcon workaround >>>
 
-struct DFL_NOTIFYICONDATAA {
+enum NOTIFYICON_VERSION_4 = 4;                     ///
+enum NIF_SHOWTIP          = 0x00000080;            ///
+enum NIIF_USER            = 0x00000004;            ///
+enum NINF_KEY             = 1;                     ///
+enum NIN_SELECT           = (WM_USER+0);           ///
+enum NIN_KEYSELECT        = (NIN_SELECT|NINF_KEY); /// WM_USER+1
+enum NIN_BALLOONSHOW      = (WM_USER+2);           ///
+enum NIN_BALLOONHIDE      = (WM_USER+3);           ///
+enum NIN_BALLOONTIMEOUT   = (WM_USER+4);           ///
+enum NIN_BALLOONUSERCLICK = (WM_USER+5);           ///
+enum NIN_POPUPOPEN        = (WM_USER+6);           ///
+enum NIN_POPUPCLOSE       = (WM_USER+7);           ///
+
+
+///
+struct DFL_NOTIFYICONDATAA
+{
 	DWORD cbSize = DFL_NOTIFYICONDATAA.sizeof;
-	HWND  hWnd;
-	UINT  uID;
-	UINT  uFlags;
-	UINT  uCallbackMessage;
+	HWND hWnd;
+	UINT uID;
+	UINT uFlags;
+	UINT uCallbackMessage;
 	HICON hIcon;
 	CHAR[128] szTip = 0;
-	DWORD     dwState;
-	DWORD     dwStateMask;
+	DWORD dwState;
+	DWORD dwStateMask;
 	CHAR[256] szInfo = 0;
-	union {
-		UINT  uTimeout;
-		UINT  uVersion;
+	union
+	{
+		UINT uTimeout;
+		UINT uVersion;
 	}
-	CHAR[64]  szInfoTitle = 0;
-	DWORD     dwInfoFlags;
-	GUID      guidItem;
-	HICON     hBalloonIcon;
+	CHAR[64] szInfoTitle = 0;
+	DWORD dwInfoFlags;
+	GUID guidItem;
+	HICON hBalloonIcon;
 }
+///
 alias DFL_PNOTIFYICONDATAA = DFL_NOTIFYICONDATAA*;
 
-struct DFL_NOTIFYICONDATAW {
+
+///
+struct DFL_NOTIFYICONDATAW
+{
 	DWORD cbSize = DFL_NOTIFYICONDATAW.sizeof;
-	HWND  hWnd;
-	UINT  uID;
-	UINT  uFlags;
-	UINT  uCallbackMessage;
+	HWND hWnd;
+	UINT uID;
+	UINT uFlags;
+	UINT uCallbackMessage;
 	HICON hIcon;
 	WCHAR[128] szTip = 0;
-	DWORD      dwState;
-	DWORD      dwStateMask;
+	DWORD dwState;
+	DWORD dwStateMask;
 	WCHAR[256] szInfo = 0;
-	union {
-		UINT   uTimeout;
-		UINT   uVersion;
+	union
+	{
+		UINT uTimeout;
+		UINT uVersion;
 	}
-	WCHAR[64]  szInfoTitle = 0;
-	DWORD      dwInfoFlags;
-	GUID       guidItem;
-	HICON      hBalloonIcon;
+	WCHAR[64] szInfoTitle = 0;
+	DWORD dwInfoFlags;
+	GUID guidItem;
+	HICON hBalloonIcon;
 }
+///
 alias DFL_PNOTIFYICONDATAW = DFL_NOTIFYICONDATAW*;
+
+
+///
+struct NOTIFYICONIDENTIFIER
+{
+	DWORD cbSize;
+	HWND hWnd;
+	UINT uID;
+	GUID guidItem;
+}
+///
+alias PNOTIFYICONIDENTIFIER = NOTIFYICONIDENTIFIER*;
+
+
+extern(Windows) @nogc nothrow
+{
+	///
+	HRESULT Shell_NotifyIconGetRect(const NOTIFYICONIDENTIFIER* nii, RECT* rect);
+}
+
 
 static if (useUnicode)
 {
-	BOOL DFL_Shell_NotifyIcon(DWORD dw, DFL_PNOTIFYICONDATAW notif)
+	///
+	alias DFL_NOTIFYICONDATA = DFL_NOTIFYICONDATAW;
+	///
+	alias DFL_PNOTIFYICONDATA = DFL_PNOTIFYICONDATAW;
+
+	///
+	BOOL DFL_Shell_NotifyIcon(DWORD dw, DFL_PNOTIFYICONDATA notif)
 	{
 		return Shell_NotifyIcon(dw, cast(PNOTIFYICONDATAW)notif);
 	}
 }
 else
 {
-	BOOL DFL_Shell_NotifyIcon(DWORD dw, DFL_PNOTIFYICONDATAA notif)
+	///
+	alias DFL_NOTIFYICONDATA = DFL_NOTIFYICONDATAA;
+	///
+	alias DFL_PNOTIFYICONDATA = DFL_PNOTIFYICONDATAA;
+
+	///
+	BOOL DFL_Shell_NotifyIcon(DWORD dw, DFL_PNOTIFYICONDATA notif)
 	{
 		return Shell_NotifyIcon(dw, cast(PNOTIFYICONDATAA)notif);
 	}
 }
+
+// Shell_NotifyIcon workaround <<<
 
 
 ///
@@ -117,13 +171,13 @@ class NotifyIcon // docmain
 		///
 		final @property void contextMenu(ContextMenu menu) // setter
 		{
-			this.cmenu = menu;
+			this._cmenu = menu;
 		}
 		
 		/// ditto
 		final @property ContextMenu contextMenu() // getter
 		{
-			return cmenu;
+			return _cmenu;
 		}
 	}
 	
@@ -293,8 +347,17 @@ class NotifyIcon // docmain
 	Event!(NotifyIcon, MouseEventArgs) mouseDown; ///
 	Event!(NotifyIcon, MouseEventArgs) mouseUp; ///
 	Event!(NotifyIcon, MouseEventArgs) mouseMove; ///
+	Event!(NotifyIcon, EventArgs) balloonTipShown; ///
+	Event!(NotifyIcon, EventArgs) balloonTipClosed; ///
+	Event!(NotifyIcon, EventArgs) balloonTipClicked; ///
+	Event!(NotifyIcon, EventArgs) balloonTipTimeout; ///
+	Event!(NotifyIcon, MouseEventArgs) select; ///
+	Event!(NotifyIcon, MouseEventArgs) keySelect; ///
+	Event!(NotifyIcon, MouseEventArgs) popupShown; ///
+	Event!(NotifyIcon, EventArgs) popupClosed; ///
 	
 	
+	///
 	this()
 	{
 		if(!ctrlNotifyIcon)
@@ -306,9 +369,13 @@ class NotifyIcon // docmain
 		_nid.uCallbackMessage = WM_NOTIFYICON;
 		_nid.hIcon = null;
 		_nid.szTip[0] = '\0';
+		_nid.szInfo[0] = '\0';
+		_nid.szInfoTitle[0] = '\0';
+		_nid.uVersion = NOTIFYICON_VERSION_4;
 	}
 	
 	
+	///
 	~this()
 	{
 		if(_nid.uID)
@@ -385,22 +452,20 @@ class NotifyIcon // docmain
 	
 	private:
 	
-	static if (useUnicode)
-		DFL_NOTIFYICONDATAW _nid;
-	else
-		DFL_NOTIFYICONDATAA _nid;
-	int _tipLen = 0;
+	DFL_NOTIFYICONDATA _nid; ///
+	int _tipLen = 0;         ///
 	version(DFL_NO_MENUS)
 	{
 	}
 	else
 	{
-		ContextMenu cmenu;
+		ContextMenu _cmenu; ///
 	}
 	Icon _icon;           /// Task tray icon
 	Icon _balloonTipIcon; /// Balloon tip icon
 	
 	
+	///
 	package final void _forceAdd()
 	{
 		_nid.uFlags |= NIF_MESSAGE | NIF_ICON | NIF_TIP | NIF_SHOWTIP;
@@ -409,16 +474,18 @@ class NotifyIcon // docmain
 		else
 			_nid.uFlags &= ~NIF_ICON;
 		DFL_Shell_NotifyIcon(NIM_ADD, &_nid);
+		DFL_Shell_NotifyIcon(NIM_SETVERSION, &_nid);
 	}
 	
 	
+	///
 	package final void _forceDelete()
 	{
 		DFL_Shell_NotifyIcon(NIM_DELETE, &_nid);
 	}
 	
 	
-	// Returns true if min/restore animation is on.
+	/// Returns true if min/restore animation is on.
 	static bool _animation()
 	{
 		ANIMATIONINFO ai;
@@ -430,7 +497,7 @@ class NotifyIcon // docmain
 	}
 	
 	
-	// Gets the tray area.
+	/// Gets the tray area.
 	static void _area(out RECT rect)
 	{
 		HWND hwTaskbar = FindWindowExA(null, null, "Shell_TrayWnd", null);
@@ -492,15 +559,17 @@ class NotifyIcon // docmain
 package:
 
 
-enum UINT WM_NOTIFYICON = WM_USER + 34; // -wparam- is id, -lparam- is the mouse message such as WM_LBUTTONDBLCLK.
-UINT wmTaskbarCreated;
-NotifyIcon[UINT] allNotifyIcons; // Indexed by ID.
-UINT lastId = 1;
-NotifyIconControl ctrlNotifyIcon;
+enum UINT WM_NOTIFYICON = WM_USER + 34; /// -wparam- is id, -lparam- is the mouse message such as WM_LBUTTONDBLCLK.
+UINT wmTaskbarCreated; ///
+NotifyIcon[UINT] allNotifyIcons; /// Indexed by ID.
+UINT lastId = 1; ///
+NotifyIconControl ctrlNotifyIcon; ///
 
 
+///
 class NotifyIconControl: Control
 {
+	///
 	override void createHandle()
 	{
 		//if(created)
@@ -520,62 +589,98 @@ class NotifyIconControl: Control
 	}
 	
 	
+	///
 	protected override void wndProc(ref Message msg)
 	{
 		if(msg.msg == WM_NOTIFYICON)
 		{
-			if(cast(UINT)msg.wParam in allNotifyIcons)
+			ushort nid = HIWORD(msg.lParam);
+			NotifyIcon ni = allNotifyIcons[nid];
+			ushort notifyMessage = LOWORD(msg.lParam);
+			Point pt;
+
+			switch (notifyMessage)
 			{
-				NotifyIcon ni = allNotifyIcons[cast(UINT)msg.wParam];
-				Point pt;
-				
-				switch(cast(UINT)msg.lParam) // msg.
+				case NIN_BALLOONSHOW:
+					ni.balloonTipShown(ni, EventArgs.empty);
+					break;
+
+				case NIN_BALLOONHIDE:
+					ni.balloonTipClosed(ni, EventArgs.empty);
+					break;
+
+				case NIN_BALLOONTIMEOUT:
+					ni.balloonTipTimeout(ni, EventArgs.empty);
+					break;
+
+				case NIN_BALLOONUSERCLICK:
+					ni.balloonTipClicked(ni, EventArgs.empty);
+					break;
+
+				case NIN_KEYSELECT:
 				{
-					case WM_MOUSEMOVE:
-						pt = Cursor.position;
-						ni.mouseMove(ni, new MouseEventArgs(Control.mouseButtons(), 0, pt.x, pt.y, 0));
-						break;
+					pt = Point(GET_X_LPARAM(msg.wParam), GET_Y_LPARAM(msg.wParam));
+					ni.keySelect(ni, new MouseEventArgs(Control.mouseButtons(), 0, pt.x, pt.y, 0));
+					Point contextMenuPoint = getNotifyIconRect(ctrlNotifyIcon.handle, nid).location;
+					if (ni.contextMenu)
+						ni.contextMenu.show(ctrlNotifyIcon, contextMenuPoint);
 					
-					case WM_LBUTTONUP:
-						pt = Cursor.position;
-						ni.mouseUp(ni, new MouseEventArgs(MouseButtons.LEFT, 1, pt.x, pt.y, 0));
-						
-						ni.click(ni, EventArgs.empty);
-						break;
-					
-					case WM_RBUTTONUP:
-						pt = Cursor.position;
-						ni.mouseUp(ni, new MouseEventArgs(MouseButtons.RIGHT, 1, pt.x, pt.y, 0));
-						
-						version(DFL_NO_MENUS)
-						{
-						}
-						else
-						{
-							if(ni.cmenu)
-								ni.cmenu.show(ctrlNotifyIcon, pt);
-						}
-						break;
-					
-					case WM_LBUTTONDOWN:
-						pt = Cursor.position;
-						ni.mouseDown(ni, new MouseEventArgs(MouseButtons.LEFT, 0, pt.x, pt.y, 0));
-						break;
-					
-					case WM_RBUTTONDOWN:
-						pt = Cursor.position;
-						ni.mouseDown(ni, new MouseEventArgs(MouseButtons.RIGHT, 0, pt.x, pt.y, 0));
-						break;
-					
-					case WM_LBUTTONDBLCLK:
-						ni.doubleClick(ni, EventArgs.empty);
-						break;
-					
-					default:
+					break;
 				}
+
+				case NIN_POPUPCLOSE:
+					ni.popupClosed(ni, EventArgs.empty);
+					break;
+
+				case NIN_POPUPOPEN:
+					pt = Point(GET_X_LPARAM(msg.wParam), GET_Y_LPARAM(msg.wParam));
+					ni.popupShown(ni, new MouseEventArgs(Control.mouseButtons(), 0, pt.x, pt.y, 0));
+					break;
+
+				case NIN_SELECT:
+					pt = Point(GET_X_LPARAM(msg.wParam), GET_Y_LPARAM(msg.wParam));
+					ni.select(ni, new MouseEventArgs(Control.mouseButtons(), 0, pt.x, pt.y, 0));
+					break;
+
+				case WM_CONTEXTMENU:
+					pt = Cursor.position;
+					if (ni.contextMenu)
+						ni.contextMenu.show(ctrlNotifyIcon, pt);
+					break;
+
+				case WM_MOUSEMOVE:
+					pt = Cursor.position;
+					ni.mouseMove(ni, new MouseEventArgs(Control.mouseButtons(), 0, pt.x, pt.y, 0));
+					break;
+
+				case WM_LBUTTONUP:
+					pt = Cursor.position;
+					ni.mouseUp(ni, new MouseEventArgs(MouseButtons.LEFT, 1, pt.x, pt.y, 0));
+					break;
+
+				case WM_RBUTTONUP:
+					pt = Cursor.position;
+					ni.mouseUp(ni, new MouseEventArgs(MouseButtons.RIGHT, 1, pt.x, pt.y, 0));
+					break;
+				
+				case WM_LBUTTONDOWN:
+					pt = Cursor.position;
+					ni.mouseDown(ni, new MouseEventArgs(MouseButtons.LEFT, 0, pt.x, pt.y, 0));
+					break;
+				
+				case WM_RBUTTONDOWN:
+					pt = Cursor.position;
+					ni.mouseDown(ni, new MouseEventArgs(MouseButtons.RIGHT, 0, pt.x, pt.y, 0));
+					break;
+				
+				case WM_LBUTTONDBLCLK:
+					ni.doubleClick(ni, EventArgs.empty);
+					break;
+				
+				default:
 			}
 		}
-		else if(msg.msg == wmTaskbarCreated)
+		else if (msg.msg == wmTaskbarCreated)
 		{
 			// Show all visible NotifyIcon's.
 			foreach(NotifyIcon ni; allNotifyIcons)
@@ -590,6 +695,7 @@ class NotifyIconControl: Control
 }
 
 
+///
 static ~this()
 {
 	// Due to all items not being destructed at program exit,
@@ -604,6 +710,7 @@ static ~this()
 }
 
 
+///
 UINT allocNotifyIconID()
 {
 	UINT prev = lastId;
@@ -622,6 +729,7 @@ UINT allocNotifyIconID()
 }
 
 
+///
 void _init()
 {
 	wmTaskbarCreated = RegisterWindowMessageA("TaskbarCreated");
@@ -630,3 +738,30 @@ void _init()
 	ctrlNotifyIcon.visible = false;
 }
 
+
+///
+Rect getNotifyIconRect(HWND notifyIconControlHandle, ushort notifyIconID)
+{
+	import dfl.drawing;
+
+	NOTIFYICONIDENTIFIER nii;
+	nii.cbSize = nii.sizeof;
+	nii.guidItem = GUID(); // GUID_NULL
+	nii.hWnd = notifyIconControlHandle;
+	nii.uID = notifyIconID;
+
+	RECT iconRect;
+	Shell_NotifyIconGetRect(&nii, &iconRect);
+
+	// Graphics g = Graphics.getScreen();
+	// g.drawRectangle(new Pen(Color.red, 3), Rect(&iconRect));
+
+	POINT topLeft = POINT(iconRect.left, iconRect.top);
+	POINT bottomRight = POINT(iconRect.right, iconRect.bottom);
+	PhysicalToLogicalPointForPerMonitorDPI(null, &topLeft);
+	PhysicalToLogicalPointForPerMonitorDPI(null, &bottomRight);
+	ClientToScreen(notifyIconControlHandle, &topLeft);
+	ClientToScreen(notifyIconControlHandle, &bottomRight);
+
+	return Rect(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y);
+}

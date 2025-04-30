@@ -110,13 +110,15 @@ deprecated void registerEvent(DflSocket sock, EventType events, RegisterEventCal
 }
 
 
-deprecated void unregisterEvent(DflSocket sock) @trusted @nogc nothrow
+deprecated int unregisterEvent(DflSocket sock) @trusted @nogc nothrow
 {
-	if (WSAAsyncSelect(getSocketHandle(sock), hwNet, 0, 0) == SOCKET_ERROR)
-		throw new DflException("Unable to register socket events");
+	if (WSAAsyncSelect(getSocketHandle(sock), hwNet, 0, 0) != 0)
+		return SOCKET_ERROR; //Unable to register socket events
 	
 	//delete allEvents[getSocketHandle(sock)];
 	allEvents.remove(getSocketHandle(sock));
+
+	return 0;
 }
 
 
@@ -166,7 +168,8 @@ class AsyncSocket: DflSocket // docmain
 	
 	override void close() @nogc scope @trusted
 	{
-		unregisterEvent(this);
+		if (unregisterEvent(this) != 0)
+			assert(0);
 		super.close();
 	}
 	

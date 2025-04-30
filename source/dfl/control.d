@@ -47,12 +47,12 @@ import core.memory;
 version = DFL_NO_ZOMBIE_FORM;
 
 
-private int GET_X_LPARAM(LPARAM lparam) pure
+int GET_X_LPARAM(LPARAM lparam) pure
 {
 	return cast(int)cast(short)LOWORD(lparam);
 }
 
-private int GET_Y_LPARAM(in LPARAM lparam) pure
+int GET_Y_LPARAM(in LPARAM lparam) pure
 {
 	return cast(int)cast(short)HIWORD(lparam);
 }

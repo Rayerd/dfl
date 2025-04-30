@@ -891,7 +891,7 @@ class RegistryKey // docmain
 
 	override size_t toHash() const nothrow @safe
 	{
-		return hashOf(hKey);
+		return hashOf(hkey);
 	}
 	
 	
