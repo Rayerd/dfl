@@ -12,16 +12,6 @@ else
 }
 
 
-int GET_X_LPARAM(LPARAM lparam) pure
-{
-	return cast(int)cast(short)LOWORD(lparam);
-}
-
-int GET_Y_LPARAM(in LPARAM lparam) pure
-{
-	return cast(int)cast(short)HIWORD(lparam);
-}
-
 ///
 class ItemDragEventArgs : EventArgs
 {

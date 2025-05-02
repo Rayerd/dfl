@@ -34,17 +34,6 @@ import core.sys.windows.commctrl;
 import core.sys.windows.windows;
 
 
-private int GET_X_LPARAM(LPARAM lparam) pure
-{
-	return cast(int)cast(short)LOWORD(lparam);
-}
-
-private int GET_Y_LPARAM(in LPARAM lparam) pure
-{
-	return cast(int)cast(short)HIWORD(lparam);
-}
-
-
 ///
 enum ToolBarButtonStyle: ubyte
 {
