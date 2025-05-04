@@ -329,15 +329,6 @@ import std.ascii;
 alias charIsHexDigit = std.ascii.isHexDigit;
 
 
-import undead.stream;// dfl.internal.stream is deprecated.
-
-deprecated alias DStream = undead.stream.Stream;// dfl.internal.stream.Stream is deprecated.
-
-deprecated alias DOutputStream = undead.stream.OutputStream;//dfl.internal.stream.OutputStream is deprecated.
-
-deprecated alias DStreamException = undead.stream.StreamException;//dfl.internal.stream.StreamException is deprecated.
-
-
 alias DObject = Object;
 version(DFL_D2_AND_ABOVE)
 {

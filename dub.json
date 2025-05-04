@@ -50,14 +50,12 @@
 			"name" : "library",
 			"targetType": "staticLibrary",
 			"dependencies": {
-				"undead": "~>1.1.8"
 			}
 		},
 		{
 			"name" : "unittest",
 			"targetType": "staticLibrary",
 			"dependencies": {
-				"undead": "~>1.1.8",
 				"silly": "~>1.2.0-dev.2"
 			}
 		}

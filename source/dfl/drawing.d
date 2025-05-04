@@ -1468,15 +1468,6 @@ class Picture: Image // docmain
 	
 	///
 	// Throws exception on failure.
-	deprecated this(DStream stm)
-	{
-		_ipicture = _fromDStream(stm);
-		if(!_ipicture)
-			throw new DflException("Unable to load picture from stream");
-	}
-	
-	/// ditto
-	// Throws exception on failure.
 	this(Dstring fileName)
 	{
 		_ipicture = _fromFileName(fileName);
@@ -1497,17 +1488,6 @@ class Picture: Image // docmain
 	private this(dfl.internal.wincom.IPicture ipic)
 	{
 		_ipicture = ipic;
-	}
-	
-	
-	///
-	// Returns null on failure instead of throwing exception.
-	deprecated static Picture fromStream(DStream stm)
-	{
-		auto ipic = _fromDStream(stm);
-		if(!ipic)
-			return null;
-		return new Picture(ipic);
 	}
 	
 	
@@ -1795,19 +1775,6 @@ private:
 			default:
 		}
 		return null;
-	}
-	
-	
-	///
-	deprecated static dfl.internal.wincom.IPicture _fromDStream(DStream stm)
-	in
-	{
-		assert(stm !is null);
-	}
-	do
-	{
-		scope DStreamToIStream istm = new DStreamToIStream(stm);
-		return _fromIStream(istm);
 	}
 	
 	

@@ -856,21 +856,11 @@ class OpenFileDialog: FileDialog // docmain
 	}
 	
 	
-	static import undead.stream;
 	import std.stdio : File;
 	
 	///
-	// Old openFile() is renamed openFileStream().
-	// Should use new openFile() because openFileStream() is now deprecated.
-	deprecated final undead.stream.Stream openFileStream()
-	{
-		return new undead.stream.File(fileName(), undead.stream.FileMode.In);
-	}
-
-	/// ditto
 	final File openFile()
 	{
-		pragma(msg, "DFL: Stream based old openFile() is renamed to openFileStream()");
 		return File(fileName(), "r");
 	}
 
@@ -978,24 +968,12 @@ class SaveFileDialog: FileDialog // docmain
 	}
 	
 	
-	static import undead.stream;
 	import std.stdio : File;
+	
 
 	///
-	// Opens and creates with read and write access.
-	// Warning: if file exists, it's truncated.
-	// Old openFile() is renamed openFileStream().
-	// Should use new openFile() because openFileStream() is now deprecated.
-	deprecated final undead.stream.Stream openFileStream()
-	{
-		return new undead.stream.File(
-			fileName(), undead.stream.FileMode.OutNew | undead.stream.FileMode.Out | undead.stream.FileMode.In);
-	}
-
-	/// ditto
 	final File openFile()
 	{
-		pragma(msg, "DFL: Stream based old openFile() is renamed to openFileStream()");
 		return File(fileName(), "w+");
 	}
 	

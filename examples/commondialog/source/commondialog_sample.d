@@ -1,8 +1,6 @@
 import dfl;
 import std.conv;
 
-// version = DFL_USE_STREAM; // Stream is deprecated.
-
 version(Have_dfl) // For DUB.
 {
 }
@@ -57,37 +55,18 @@ class MainForm : Form
 		DialogResult r = _openFileDialog.showDialog();
 		if (r == DialogResult.OK)
 		{
-			version(DFL_USE_STREAM) // Stream is deprecated.
+			string filelist;
+			foreach (f; _openFileDialog.fileNames)
 			{
-				string filelist;
-				foreach (f; _openFileDialog.fileNames)
-				{
-					filelist ~= f ~ "\n";
-				}
-				msgBox(filelist, "Selected file list");
-
-				import undead.stream;
-				Stream st = _openFileDialog.openFileStream;
-				foreach(char[] line; st)
-				{
-					msgBox(cast(string)line, _openFileDialog.fileName); break; // Read first line only.
-				}
+				filelist ~= f ~ "\n";
 			}
-			else
-			{
-				string filelist;
-				foreach (f; _openFileDialog.fileNames)
-				{
-					filelist ~= f ~ "\n";
-				}
-				msgBox(filelist, "Selected file list");
+			msgBox(filelist, "Selected file list");
 
-				import std.stdio;
-				File file = _openFileDialog.openFile();
-				foreach(line; file.byLine())
-				{
-					msgBox(cast(string)line, _openFileDialog.fileName); break; // Read first line only.
-				}
+			import std.stdio;
+			File file = _openFileDialog.openFile();
+			foreach(line; file.byLine())
+			{
+				msgBox(cast(string)line, _openFileDialog.fileName); break; // Read first line only.
 			}
 		}
 	}
