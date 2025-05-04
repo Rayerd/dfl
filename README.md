@@ -26,7 +26,7 @@ void main()
 ![screen shot](./image/welcomtodfl.png "screen shot")
 
 ## Recent major features
-- **Removed dependency on unDead library.**
+- **Removed dependency on undeaD library.**
 - Windows OMF support has been removed (for DMD v2.109.0).
 - Registered DFL to DUB.
 - Supported multiple screens.
