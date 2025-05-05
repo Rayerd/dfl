@@ -10,7 +10,6 @@
 			"path": "../../../dfl"
 		}
 	},
-	"lflags-windows-x86_omf-dmd":    ["/exet:nt/su:windows:6.0"],
 	"lflags-windows-x86_mscoff-dmd": ["/SUBSYSTEM:WINDOWS", "/ENTRY:mainCRTStartup"],
 	"lflags-windows-x86_64-dmd":     ["/SUBSYSTEM:WINDOWS", "/ENTRY:mainCRTStartup"]
 }

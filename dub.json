@@ -12,17 +12,6 @@
 		"DFL_UNICODE",
 		"REDEFINE_UUIDS"
 	],
-	"libs-windows-x86_omf-dmd": [
-		"$DFL_PACKAGE_DIR/lib/windows-x86_omf/user32",
-		"$DFL_PACKAGE_DIR/lib/windows-x86_omf/shell32",
-		"$DFL_PACKAGE_DIR/lib/windows-x86_omf/gdi32",
-		"$DFL_PACKAGE_DIR/lib/windows-x86_omf/comctl32",
-		"$DFL_PACKAGE_DIR/lib/windows-x86_omf/advapi32",
-		"$DFL_PACKAGE_DIR/lib/windows-x86_omf/comdlg32",
-		"$DFL_PACKAGE_DIR/lib/windows-x86_omf/ole32",
-		"$DFL_PACKAGE_DIR/lib/windows-x86_omf/OLEAUT32",
-		"$DFL_PACKAGE_DIR/lib/windows-x86_omf/ws2_32"
-	],
 	"libs-windows-x86_mscoff-dmd": [
 		"$DFL_PACKAGE_DIR/lib/windows-x86_mscoff/user32",
 		"$DFL_PACKAGE_DIR/lib/windows-x86_mscoff/shell32",
