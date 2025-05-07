@@ -7,25 +7,8 @@ import dfl.collections;
 import dfl.control;
 import dfl.drawing;
 import dfl.event;
-
-version (DFL_NO_IMAGELIST)
-{
-}
-else
-{
-	import dfl.imagelist;
-}
-
-version (DFL_NO_MENUS)
-	version = DFL_TOOLBAR_NO_MENU;
-
-version (DFL_TOOLBAR_NO_MENU)
-{
-}
-else
-{
-	import dfl.menu;
-}
+import dfl.imagelist;
+import dfl.menu;
 
 import dfl.internal.dlib;
 static import dfl.internal.utf;
@@ -77,28 +60,23 @@ class ToolBarButton
 		this();
 		
 		this.text = text;
+		this.enabled = true;
 	}
 	
 	
-	version (DFL_NO_IMAGELIST)
+	///
+	final @property void imageIndex(int index) // setter
 	{
-	}
-	else
-	{
-		///
-		final @property void imageIndex(int index) // setter
-		{
-			this._imageIndex = index;
-			
-			//if(tbar && tbar.created)
-			//	tbar.updateItem(this);
-		}
+		this._imageIndex = index;
 		
-		/// ditto
-		final @property int imageIndex() const // getter
-		{
-			return _imageIndex;
-		}
+		//if(tbar && tbar.created)
+		//	tbar.updateItem(this);
+	}
+	
+	/// ditto
+	final @property int imageIndex() const // getter
+	{
+		return _imageIndex;
 	}
 	
 	
@@ -190,22 +168,16 @@ class ToolBarButton
 	}
 	
 	
-	version (DFL_TOOLBAR_NO_MENU)
+	///
+	final @property void dropDownMenu(ContextMenu cmenu) // setter
 	{
+		_contextMenu = cmenu;
 	}
-	else
+	
+	/// ditto
+	final @property ContextMenu dropDownMenu() // getter
 	{
-		///
-		final @property void dropDownMenu(ContextMenu cmenu) // setter
-		{
-			_contextMenu = cmenu;
-		}
-		
-		/// ditto
-		final @property ContextMenu dropDownMenu() // getter
-		{
-			return _contextMenu;
-		}
+		return _contextMenu;
 	}
 	
 	
@@ -281,7 +253,7 @@ class ToolBarButton
 			else
 				_state &= ~TBSTATE_ENABLED;
 		}
-		return (_state & TBSTATE_ENABLED) == 1;
+		return (_state & TBSTATE_ENABLED) != 0;
 	}
 	
 	
@@ -291,7 +263,7 @@ class ToolBarButton
 		if (byes)
 			_state = (_state & ~TBSTATE_INDETERMINATE) | TBSTATE_CHECKED;
 		else
-			_state &= ~TBSTATE_CHECKED;
+			_state &= ~(TBSTATE_CHECKED | TBSTATE_INDETERMINATE);
 		
 		if (_toolBar && _toolBar.created)
 			_toolBar.prevwproc(TB_SETSTATE, _id, MAKELPARAM(_state, 0));
@@ -308,7 +280,7 @@ class ToolBarButton
 			else
 				_state &= ~TBSTATE_CHECKED;
 		}
-		return (_state & TBSTATE_CHECKED) == 1;
+		return (_state & TBSTATE_CHECKED) != 0;
 	}
 	
 	
@@ -318,7 +290,7 @@ class ToolBarButton
 		if (byes)
 			_state = (_state & ~TBSTATE_CHECKED) | TBSTATE_INDETERMINATE;
 		else
-			_state &= ~TBSTATE_INDETERMINATE;
+			_state &= ~(TBSTATE_INDETERMINATE | TBSTATE_CHECKED);
 		
 		if (_toolBar && _toolBar.created)
 			_toolBar.prevwproc(TB_SETSTATE, _id, MAKELPARAM(_state, 0));
@@ -335,7 +307,7 @@ class ToolBarButton
 			else
 				_state &= ~TBSTATE_INDETERMINATE;
 		}
-		return (_state & TBSTATE_INDETERMINATE) == 1;
+		return (_state & TBSTATE_INDETERMINATE) != 0;
 	}
 	
 	
@@ -345,21 +317,9 @@ private:
 	Dstring _text;
 	Object _tag;
 	ToolBarButtonStyle _style = ToolBarButtonStyle.PUSH_BUTTON;
-	BYTE _state = TBSTATE_ENABLED;
-	version (DFL_TOOLBAR_NO_MENU)
-	{
-	}
-	else
-	{
-		ContextMenu _contextMenu;
-	}
-	version (DFL_NO_IMAGELIST)
-	{
-	}
-	else
-	{
-		int _imageIndex = -1;
-	}
+	BYTE _state;
+	ContextMenu _contextMenu;
+	int _imageIndex = -1;
 }
 
 
@@ -607,39 +567,27 @@ class ToolBar: ControlSuperClass // docmain
 	///
 	final @property Size imageSize() // getter
 	{
-		version (DFL_NO_IMAGELIST)
-		{
-		}
-		else
-		{
-			if (_imageList)
-				return _imageList.imageSize;
-		}
+		if (_imageList)
+			return _imageList.imageSize;
 		return Size(16, 16); // TODO: ?
 	}
 	
 	
-	version (DFL_NO_IMAGELIST)
+	///
+	final @property void imageList(ImageList imglist) // setter
 	{
-	}
-	else
-	{
-		///
-		final @property void imageList(ImageList imglist) // setter
+		if (isHandleCreated)
 		{
-			if (isHandleCreated)
-			{
-				prevwproc(TB_SETIMAGELIST, 0, cast(WPARAM)imglist.handle);
-			}
-			
-			_imageList = imglist;
+			prevwproc(TB_SETIMAGELIST, 0, cast(WPARAM)imglist.handle);
 		}
 		
-		/// ditto
-		final @property ImageList imageList() // getter
-		{
-			return _imageList;
-		}
+		_imageList = imglist;
+	}
+	
+	/// ditto
+	final @property ImageList imageList() // getter
+	{
+		return _imageList;
 	}
 	
 	
@@ -667,38 +615,24 @@ class ToolBar: ControlSuperClass // docmain
 					// case NM_CLICK: // I don't use it because it behaves strangely.
 					case TBN_DROPDOWN:
 					{
-						version (DFL_TOOLBAR_NO_MENU) // This condition might be removed later.
+						LPNMTOOLBARA nmtb = cast(LPNMTOOLBARA)nmh; // NMTOOLBARA/NMTOOLBARW doesn't matter here; string fields not used.
+						ToolBarButton tbb = buttomFromID(nmtb.iItem);
+						if (tbb)
 						{
-						}
-						else // Ditto.
-						{
-							LPNMTOOLBARA nmtb = cast(LPNMTOOLBARA)nmh; // NMTOOLBARA/NMTOOLBARW doesn't matter here; string fields not used.
-							ToolBarButton tbb = buttomFromID(nmtb.iItem);
-							if (tbb)
+							if (tbb._contextMenu)
 							{
-								version (DFL_TOOLBAR_NO_MENU) // Keep this here in case the other condition is removed.
-								{
-								}
-								else // Ditto.
-								{
-									if (tbb._contextMenu)
-									{
-										Rect brect = tbb.rectangle;
+								Rect brect = tbb.rectangle;
 
-										// NOTE: When arrow symbol is pressed twice, disable to call click event.
-										SendMessage(handle, WM_LBUTTONUP, 0, 0); // Work around
+								// NOTE: When arrow symbol is pressed twice, disable to call click event.
+								SendMessage(handle, WM_LBUTTONUP, 0, 0); // Work around
 
-										tbb._contextMenu.show(this, pointToScreen(Point(brect.x, brect.bottom)));
-									}
-								}
+								tbb._contextMenu.show(this, pointToScreen(Point(brect.x, brect.bottom)));
 							}
-							return;
 						}
-					}
-					default:
-					{
 						return;
 					}
+					default:
+						return;
 				}
 			}
 			default:
@@ -741,7 +675,7 @@ class ToolBar: ControlSuperClass // docmain
 						for (size_t i; i < this.buttons.length; i++)
 						{
 							ToolBarButton b = this.buttons[i];
-							if (b && b.rectangle.contains(pt.x, pt.y))
+							if (b && b.rectangle.contains(pt.x, pt.y) && b.enabled)
 							{
 								clickedHwnd = this.handle;
 								clickedButton = b;
@@ -918,14 +852,8 @@ class ToolBar: ControlSuperClass // docmain
 		
 		//prevwproc(TB_SETPADDING, 0, MAKELPARAM(0, 0));
 		
-		version (DFL_NO_IMAGELIST)
-		{
-		}
-		else
-		{
-			if (_imageList)
-				prevwproc(TB_SETIMAGELIST, 0, cast(WPARAM)_imageList.handle);
-		}
+		if (_imageList)
+			prevwproc(TB_SETIMAGELIST, 0, cast(WPARAM)_imageList.handle);
 		
 		foreach (idx, tbb; _tbuttons._buttons)
 		{
@@ -952,14 +880,7 @@ private:
 	ToolBarAppearance _appearance = ToolBarAppearance.NORMAL;
 	ToolBarStyle _toolBarStyle = ToolBarStyle.NORMAL;
 	BorderStyle _borderStyle = BorderStyle.NONE;
-	
-	version (DFL_NO_IMAGELIST)
-	{
-	}
-	else
-	{
-		ImageList _imageList;
-	}
+	ImageList _imageList;
 	
 
 	///
@@ -968,14 +889,7 @@ private:
 		// TODO: To change: TB_SETBUTTONINFO
 		
 		TBBUTTON xtb;
-		version (DFL_NO_IMAGELIST)
-		{
-			xtb.iBitmap = -1;
-		}
-		else
-		{
-			xtb.iBitmap = tbb._imageIndex;
-		}
+		xtb.iBitmap = tbb._imageIndex;
 		xtb.idCommand = tbb._id;
 		xtb.dwData = cast(DWORD)cast(void*)tbb;
 		xtb.fsState = tbb._state;

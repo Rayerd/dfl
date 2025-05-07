@@ -12,6 +12,7 @@ import dfl.drawing;
 import dfl.event;
 import dfl.form;
 import dfl.label;
+import dfl.menu;
 
 version(NO_DRAG_DROP)
 	version = DFL_NO_DRAG_DROP;
@@ -22,14 +23,6 @@ version(DFL_NO_DRAG_DROP)
 else
 {
 	import dfl.data;
-}
-
-version(DFL_NO_MENUS)
-{
-}
-else
-{
-	import dfl.menu;
 }
 
 import dfl.internal.clib;
@@ -1482,37 +1475,31 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	version(DFL_NO_MENUS)
+	///
+	protected void onContextMenuChanged(EventArgs ea)
 	{
+		contextMenuChanged(this, ea);
 	}
-	else
+	
+	
+	///
+	@property void contextMenu(ContextMenu menu) // setter
 	{
-		///
-		protected void onContextMenuChanged(EventArgs ea)
-		{
-			contextMenuChanged(this, ea);
-		}
+		if(cmenu is menu)
+			return;
 		
+		cmenu = menu;
 		
-		///
-		@property void contextMenu(ContextMenu menu) // setter
+		if(isHandleCreated)
 		{
-			if(cmenu is menu)
-				return;
-			
-			cmenu = menu;
-			
-			if(isHandleCreated)
-			{
-				onContextMenuChanged(EventArgs.empty);
-			}
+			onContextMenuChanged(EventArgs.empty);
 		}
-		
-		/// ditto
-		@property ContextMenu contextMenu() // getter
-		{
-			return cmenu;
-		}
+	}
+	
+	/// ditto
+	@property ContextMenu contextMenu() // getter
+	{
+		return cmenu;
 	}
 	
 	
@@ -5219,19 +5206,13 @@ class Control: DObject, IWindow // docmain
 						}
 						else
 						{
-							version(DFL_NO_MENUS)
+							int menuID = LOWORD(msg.wParam);
+							MenuItem m = cast(MenuItem)Application.lookupMenuID(menuID);
+							if(m)
 							{
-							}
-							else
-							{
-								int menuID = LOWORD(msg.wParam);
-								MenuItem m = cast(MenuItem)Application.lookupMenuID(menuID);
-								if(m)
-								{
-									//msg.result = m.customMsg(*(cast(CustomMsg*)&msg));
-									m._reflectMenu(msg);
-									//return; // ?
-								}
+								//msg.result = m.customMsg(*(cast(CustomMsg*)&msg));
+								m._reflectMenu(msg);
+								//return; // ?
 							}
 							return;
 						}
@@ -5266,79 +5247,73 @@ class Control: DObject, IWindow // docmain
 					}
 					break;
 
-				version(DFL_NO_MENUS)
-				{
-				}
-				else
-				{
-					case WM_MENUSELECT:
+				case WM_MENUSELECT:
+					{
+						UINT mflags;
+						UINT uitem;
+						int mid;
+						MenuItem m;
+						
+						mflags = HIWORD(msg.wParam);
+						uitem = LOWORD(msg.wParam); // Depends on the flags.
+						
+						if(mflags & MF_SYSMENU)
+							break;
+						
+						if(mflags & MF_POPUP)
 						{
-							UINT mflags;
-							UINT uitem;
-							int mid;
-							MenuItem m;
-							
-							mflags = HIWORD(msg.wParam);
-							uitem = LOWORD(msg.wParam); // Depends on the flags.
-							
-							if(mflags & MF_SYSMENU)
-								break;
-							
-							if(mflags & MF_POPUP)
-							{
-								// -uitem- is an index.
-								mid = GetMenuItemID(cast(HMENU)msg.lParam, uitem);
-							}
-							else
-							{
-								// -uitem- is the item identifier.
-								mid = uitem;
-							}
-							
-							m = cast(MenuItem)Application.lookupMenuID(mid);
-							if(m)
-							{
-								//msg.result = m.customMsg(*(cast(CustomMsg*)&msg));
-								m._reflectMenu(msg);
-								//return;
-							}
-						}
-						break;
-					
-					case WM_INITMENUPOPUP:
-						if(HIWORD(msg.lParam))
-						{
-							// System menu.
+							// -uitem- is an index.
+							mid = GetMenuItemID(cast(HMENU)msg.lParam, uitem);
 						}
 						else
 						{
-							MenuItem m;
-							
-							//m = cast(MenuItem)Application.lookupMenuID(GetMenuItemID(cast(HMENU)msg.wParam, LOWORD(msg.lParam)));
-							m = cast(MenuItem)Application.lookupMenu(cast(HMENU)msg.wParam);
-							if(m)
-							{
-								//msg.result = m.customMsg(*(cast(CustomMsg*)&msg));
-								m._reflectMenu(msg);
-								//return;
-							}
+							// -uitem- is the item identifier.
+							mid = uitem;
 						}
-						break;
-					
-					case WM_INITMENU:
+						
+						m = cast(MenuItem)Application.lookupMenuID(mid);
+						if(m)
 						{
-							ContextMenu m;
-							
-							m = cast(ContextMenu)Application.lookupMenu(cast(HMENU)msg.wParam);
-							if(m)
-							{
-								//msg.result = m.customMsg(*(cast(CustomMsg*)&msg));
-								m._reflectMenu(msg);
-								//return;
-							}
+							//msg.result = m.customMsg(*(cast(CustomMsg*)&msg));
+							m._reflectMenu(msg);
+							//return;
 						}
-						break;
-				}
+					}
+					break;
+				
+				case WM_INITMENUPOPUP:
+					if(HIWORD(msg.lParam))
+					{
+						// System menu.
+					}
+					else
+					{
+						MenuItem m;
+						
+						//m = cast(MenuItem)Application.lookupMenuID(GetMenuItemID(cast(HMENU)msg.wParam, LOWORD(msg.lParam)));
+						m = cast(MenuItem)Application.lookupMenu(cast(HMENU)msg.wParam);
+						if(m)
+						{
+							//msg.result = m.customMsg(*(cast(CustomMsg*)&msg));
+							m._reflectMenu(msg);
+							//return;
+						}
+					}
+					break;
+				
+				case WM_INITMENU:
+					{
+						ContextMenu m;
+						
+						m = cast(ContextMenu)Application.lookupMenu(cast(HMENU)msg.wParam);
+						if(m)
+						{
+							//msg.result = m.customMsg(*(cast(CustomMsg*)&msg));
+							m._reflectMenu(msg);
+							//return;
+						}
+					}
+					break;
 			}
 			
 			case WM_RBUTTONUP:
@@ -5475,33 +5450,27 @@ class Control: DObject, IWindow // docmain
 				}
 				break;
 			
-			version(DFL_NO_MENUS)
-			{
-			}
-			else
-			{
-				case WM_CONTEXTMENU:
-					if(hwnd == cast(HWND)msg.wParam)
+			case WM_CONTEXTMENU:
+				if(hwnd == cast(HWND)msg.wParam)
+				{
+					if(cmenu)
 					{
-						if(cmenu)
-						{
-							// Shift+F10 causes xPos and yPos to be -1.
-							
-							Point point;
-							
-							if(msg.lParam == -1)
-								point = pointToScreen(Point(0, 0));
-							else
-								point = Point(GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam));
-							
-							SetFocus(handle); // ?
-							cmenu.show(this, point);
-							
-							return;
-						}
+						// Shift+F10 causes xPos and yPos to be -1.
+						
+						Point point;
+						
+						if(msg.lParam == -1)
+							point = pointToScreen(Point(0, 0));
+						else
+							point = Point(GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam));
+						
+						SetFocus(handle); // ?
+						cmenu.show(this, point);
+						
+						return;
 					}
-					break;
-			}
+				}
+				break;
 			
 			case WM_HELP:
 				{
@@ -6105,13 +6074,7 @@ class Control: DObject, IWindow // docmain
 	deprecated Event!(Control, UICuesEventArgs) changeUICues; // TODO: properly fire.
 	+/
 	Event!(Control, EventArgs) click; ///
-	version(DFL_NO_MENUS)
-	{
-	}
-	else
-	{
-		Event!(Control, EventArgs) contextMenuChanged; ///
-	}
+	Event!(Control, EventArgs) contextMenuChanged; ///
 	Event!(Control, ControlEventArgs) controlAdded; ///
 	Event!(Control, ControlEventArgs) controlRemoved; ///
 	Event!(Control, EventArgs) cursorChanged; ///
@@ -6283,13 +6246,7 @@ class Control: DObject, IWindow // docmain
 		{
 			killing = true;
 			
-			version(DFL_NO_MENUS)
-			{
-			}
-			else
-			{
-				cmenu = cmenu.init;
-			}
+			cmenu = cmenu.init;
 			_ctrlname = _ctrlname.init;
 			otag = otag.init;
 			wcurs = wcurs.init;
@@ -7164,13 +7121,7 @@ class Control: DObject, IWindow // docmain
 	HWND hwnd;
 	//AnchorStyles anch = cast(AnchorStyles)(AnchorStyles.TOP | AnchorStyles.LEFT);
 	//bool cvalidation = true;
-	version(DFL_NO_MENUS)
-	{
-	}
-	else
-	{
-		ContextMenu cmenu;
-	}
+	ContextMenu cmenu;
 	DockStyle sdock = DockStyle.NONE;
 	Dstring _ctrlname;
 	Object otag;

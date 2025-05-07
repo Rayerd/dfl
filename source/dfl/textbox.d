@@ -11,14 +11,7 @@ import dfl.control;
 import dfl.drawing;
 import dfl.event;
 import dfl.textboxbase;
-
-version(DFL_NO_MENUS)
-{
-}
-else
-{
-	import dfl.menu;
-}
+import dfl.menu;
 
 import dfl.internal.dlib;
 import dfl.internal.utf;

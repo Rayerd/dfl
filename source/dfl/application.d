@@ -14,22 +14,8 @@ import dfl.event;
 import dfl.form;
 import dfl.label;
 import dfl.textbox;
-
-version(DFL_NO_RESOURCES)
-{
-}
-else
-{
-	import dfl.resources;
-}
-
-version(DFL_NO_MENUS)
-{
-}
-else
-{
-	import dfl.menu;
-}
+import dfl.resources;
+import dfl.menu;
 
 import dfl.internal.clib;
 import dfl.internal.dlib;
@@ -1160,139 +1146,133 @@ final class Application // docmain
 	}
 	
 	
-	version(DFL_NO_MENUS)
+	// Returns its new unique menu ID.
+	package int addMenuItem(MenuItem menu)
 	{
-	}
-	else
-	{
-		// Returns its new unique menu ID.
-		package int addMenuItem(MenuItem menu)
+		if(nmenus == END_MENU_ID - FIRST_MENU_ID)
+			throw new DflException("Out of menus");
+		
+		typeof(menus) tempmenus;
+		
+		// TODO: sort menu IDs in 'menus' so that looking for free ID is much faster.
+		
+		prevMenuID++;
+		if(prevMenuID >= END_MENU_ID || prevMenuID <= FIRST_MENU_ID)
 		{
-			if(nmenus == END_MENU_ID - FIRST_MENU_ID)
-				throw new DflException("Out of menus");
-			
-			typeof(menus) tempmenus;
-			
-			// TODO: sort menu IDs in 'menus' so that looking for free ID is much faster.
-			
-			prevMenuID++;
-			if(prevMenuID >= END_MENU_ID || prevMenuID <= FIRST_MENU_ID)
+			prevMenuID = FIRST_MENU_ID;
+			previdloop:
+			for(;;)
 			{
-				prevMenuID = FIRST_MENU_ID;
-				previdloop:
-				for(;;)
+				for(size_t iw; iw != nmenus; iw++)
 				{
-					for(size_t iw; iw != nmenus; iw++)
+					MenuItem mi;
+					mi = cast(MenuItem)menus[iw];
+					if(mi)
 					{
-						MenuItem mi;
-						mi = cast(MenuItem)menus[iw];
-						if(mi)
+						if(prevMenuID == mi._menuID)
 						{
-							if(prevMenuID == mi._menuID)
-							{
-								prevMenuID++;
-								continue previdloop;
-							}
+							prevMenuID++;
+							continue previdloop;
 						}
 					}
-					break;
 				}
+				break;
 			}
-			tempmenus = cast(Menu*)dfl.internal.clib.realloc(menus, Menu.sizeof * (nmenus + 1));
-			if(!tempmenus)
-			{
-				//throw new OutOfMemory;
-				throw new DflException("Out of memory");
-			}
-			menus = tempmenus;
-			
-			menus[nmenus++] = menu;
-			
-			return prevMenuID;
 		}
-		
-		
-		package void addContextMenu(ContextMenu menu)
+		tempmenus = cast(Menu*)dfl.internal.clib.realloc(menus, Menu.sizeof * (nmenus + 1));
+		if(!tempmenus)
 		{
-			if(nmenus == END_MENU_ID - FIRST_MENU_ID)
-				throw new DflException("Out of menus");
-			
-			typeof(menus) tempmenus;
-			int idx;
-			
-			idx = nmenus;
-			nmenus++;
-			tempmenus = cast(Menu*)dfl.internal.clib.realloc(menus, Menu.sizeof * nmenus);
-			if(!tempmenus)
-			{
-				nmenus--;
-				//throw new OutOfMemory;
-				throw new DflException("Out of memory");
-			}
-			menus = tempmenus;
-			
-			menus[idx] = menu;
+			//throw new OutOfMemory;
+			throw new DflException("Out of memory");
 		}
+		menus = tempmenus;
 		
+		menus[nmenus++] = menu;
 		
-		package void removeMenu(Menu menu)
+		return prevMenuID;
+	}
+	
+	
+	package void addContextMenu(ContextMenu menu)
+	{
+		if(nmenus == END_MENU_ID - FIRST_MENU_ID)
+			throw new DflException("Out of menus");
+		
+		typeof(menus) tempmenus;
+		int idx;
+		
+		idx = nmenus;
+		nmenus++;
+		tempmenus = cast(Menu*)dfl.internal.clib.realloc(menus, Menu.sizeof * nmenus);
+		if(!tempmenus)
 		{
-			uint idx;
-			
-			for(idx = 0; idx != nmenus; idx++)
-			{
-				if(menus[idx] is menu)
-				{
-					goto found;
-				}
-			}
-			return;
-			
-			found:
-			if(nmenus == 1)
-			{
-				dfl.internal.clib.free(menus);
-				menus = null;
-				nmenus--;
-			}
-			else
-			{
-				if(idx != nmenus - 1)
-					menus[idx] = menus[nmenus - 1]; // Move last one in its place
-				
-				nmenus--;
-				menus = cast(Menu*)dfl.internal.clib.realloc(menus, Menu.sizeof * nmenus);
-				assert(menus != null); // Memory shrink shouldn't be a problem.
-			}
+			nmenus--;
+			//throw new OutOfMemory;
+			throw new DflException("Out of memory");
 		}
+		menus = tempmenus;
 		
+		menus[idx] = menu;
+	}
+	
+	
+	package void removeMenu(Menu menu)
+	{
+		uint idx;
 		
-		package MenuItem lookupMenuID(int menuID)
+		for(idx = 0; idx != nmenus; idx++)
 		{
-			uint idx;
-			MenuItem mi;
-			
-			for(idx = 0; idx != nmenus; idx++)
+			if(menus[idx] is menu)
 			{
-				mi = cast(MenuItem)menus[idx];
-				if(mi && mi._menuID == menuID)
-					return mi;
+				goto found;
 			}
-			return null;
 		}
+		return;
 		
-		
-		package Menu lookupMenu(HMENU hmenu)
+		found:
+		if(nmenus == 1)
 		{
-			uint idx;
-			
-			for(idx = 0; idx != nmenus; idx++)
-			{
-				if(menus[idx].handle == hmenu)
-					return menus[idx];
-			}
-			return null;
+			dfl.internal.clib.free(menus);
+			menus = null;
+			nmenus--;
 		}
+		else
+		{
+			if(idx != nmenus - 1)
+				menus[idx] = menus[nmenus - 1]; // Move last one in its place
+			
+			nmenus--;
+			menus = cast(Menu*)dfl.internal.clib.realloc(menus, Menu.sizeof * nmenus);
+			assert(menus != null); // Memory shrink shouldn't be a problem.
+		}
+	}
+	
+	
+	package MenuItem lookupMenuID(int menuID)
+	{
+		uint idx;
+		MenuItem mi;
+		
+		for(idx = 0; idx != nmenus; idx++)
+		{
+			mi = cast(MenuItem)menus[idx];
+			if(mi && mi._menuID == menuID)
+				return mi;
+		}
+		return null;
+	}
+	
+	
+	package Menu lookupMenu(HMENU hmenu)
+	{
+		uint idx;
+		
+		for(idx = 0; idx != nmenus; idx++)
+		{
+			if(menus[idx].handle == hmenu)
+				return menus[idx];
+		}
+		return null;
 	}
 	
 	
@@ -1302,28 +1282,22 @@ final class Application // docmain
 	}
 	
 	
-	version(DFL_NO_RESOURCES)
+	///
+	@property Resources resources() // getter
 	{
-	}
-	else
-	{
-		///
-		@property Resources resources() // getter
+		static Resources rc = null;
+		
+		if(!rc)
 		{
-			static Resources rc = null;
-			
-			if(!rc)
+			synchronized
 			{
-				synchronized
+				if(!rc)
 				{
-					if(!rc)
-					{
-						rc = new Resources(getInstance());
-					}
+					rc = new Resources(getInstance());
 				}
 			}
-			return rc;
 		}
+		return rc;
 	}
 	
 	
@@ -1490,8 +1464,8 @@ final class Application // docmain
 	}
 	
 	
-	private:
-	static:
+private:
+static:
 	size_t[void*] _refs;
 	IMessageFilter[] filters;
 	DWORD tlsThreadFlags;
@@ -1505,39 +1479,33 @@ final class Application // docmain
 	int[Keys] hotkeyId;
 	Event!(Object, KeyEventArgs)[int] hotkeyHandler;
 	
-	version(DFL_NO_MENUS)
+	// Menus.
+	enum short FIRST_MENU_ID = 200;
+	enum short END_MENU_ID = 10000;
+	
+	// Controls.
+	enum ushort FIRST_CTRL_ID = END_MENU_ID + 1;
+	enum ushort LAST_CTRL_ID = 65500;
+	
+	
+	ushort prevMenuID = FIRST_MENU_ID;
+	// malloc() is needed so the menus can be garbage collected.
+	uint nmenus = 0; // Number of -menus-.
+	Menu* menus = null; // WARNING: malloc()'d memory!
+	
+	
+	// Destroy all menu handles at program exit because Windows will not
+	// unless it is assigned to a window.
+	// Note that this is probably just a 16bit issue, but it still appeared in the 32bit docs.
+	void sdtorFreeAllMenus()
 	{
-	}
-	else
-	{
-		// Menus.
-		enum short FIRST_MENU_ID = 200;
-		enum short END_MENU_ID = 10000;
-		
-		// Controls.
-		enum ushort FIRST_CTRL_ID = END_MENU_ID + 1;
-		enum ushort LAST_CTRL_ID = 65500;
-		
-		
-		ushort prevMenuID = FIRST_MENU_ID;
-		// malloc() is needed so the menus can be garbage collected.
-		uint nmenus = 0; // Number of -menus-.
-		Menu* menus = null; // WARNING: malloc()'d memory!
-		
-		
-		// Destroy all menu handles at program exit because Windows will not
-		// unless it is assigned to a window.
-		// Note that this is probably just a 16bit issue, but it still appeared in the 32bit docs.
-		private void sdtorFreeAllMenus()
+		foreach(Menu m; menus[0 .. nmenus])
 		{
-			foreach(Menu m; menus[0 .. nmenus])
-			{
-				DestroyMenu(m.handle);
-			}
-			nmenus = 0;
-			dfl.internal.clib.free(menus);
-			menus = null;
+			DestroyMenu(m.handle);
 		}
+		nmenus = 0;
+		dfl.internal.clib.free(menus);
+		menus = null;
 	}
 	
 	
@@ -2277,13 +2245,7 @@ static this()
 
 static ~this()
 {
-	version(DFL_NO_MENUS)
-	{
-	}
-	else
-	{
-		Application.sdtorFreeAllMenus();
-	}
+	Application.sdtorFreeAllMenus();
 	
 	if(hmodRichtextbox)
 		FreeLibrary(hmodRichtextbox);

@@ -10,14 +10,7 @@ import dfl.base;
 import dfl.control;
 import dfl.drawing;
 import dfl.event;
-
-version(DFL_NO_MENUS)
-{
-}
-else
-{
-	import dfl.menu;
-}
+import dfl.menu;
 
 import dfl.internal.dlib;
 import dfl.internal.utf;
@@ -640,82 +633,76 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	
 	private
 	{
-		version(DFL_NO_MENUS)
+		void menuUndo(Object sender, EventArgs ea)
 		{
+			undo();
 		}
-		else
+		
+		
+		void menuCut(Object sender, EventArgs ea)
 		{
-			void menuUndo(Object sender, EventArgs ea)
-			{
-				undo();
-			}
-			
-			
-			void menuCut(Object sender, EventArgs ea)
-			{
-				cut();
-			}
-			
-			
-			void menuCopy(Object sender, EventArgs ea)
-			{
-				copy();
-			}
-			
-			
-			void menuPaste(Object sender, EventArgs ea)
-			{
-				paste();
-			}
-			
-			
-			void menuDelete(Object sender, EventArgs ea)
-			{
-				// Only clear selection.
-				SendMessageA(handle, WM_CLEAR, 0, 0);
-			}
-			
-			
-			void menuSelectAll(Object sender, EventArgs ea)
-			{
-				selectAll();
-			}
-			
-			
-			bool isClipboardText()
-			{
-				if(!OpenClipboard(handle))
-					return false;
-				
-				bool result;
-				result = GetClipboardData(CF_TEXT) != null;
-				
-				CloseClipboard();
-				
-				return result;
-			}
-			
-			
-			void menuPopup(Object sender, EventArgs ea)
-			{
-				int slen, tlen;
-				bool issel;
-				
-				slen = selectionLength;
-				tlen = textLength;
-				issel = slen != 0;
-				
-				_miundo.enabled = canUndo;
-				_micut.enabled = !readOnly() && issel;
-				_micopy.enabled = issel;
-				_mipaste.enabled = !readOnly() && isClipboardText();
-				_midel.enabled = !readOnly() && issel;
-				_misel.enabled = tlen != 0 && tlen != slen;
-			}
-			
-			
-			MenuItem _miundo, _micut, _micopy, _mipaste, _midel, _misel;
+			cut();
 		}
+		
+		
+		void menuCopy(Object sender, EventArgs ea)
+		{
+			copy();
+		}
+		
+		
+		void menuPaste(Object sender, EventArgs ea)
+		{
+			paste();
+		}
+		
+		
+		void menuDelete(Object sender, EventArgs ea)
+		{
+			// Only clear selection.
+			SendMessageA(handle, WM_CLEAR, 0, 0);
+		}
+		
+		
+		void menuSelectAll(Object sender, EventArgs ea)
+		{
+			selectAll();
+		}
+		
+		
+		bool isClipboardText()
+		{
+			if(!OpenClipboard(handle))
+				return false;
+			
+			bool result;
+			result = GetClipboardData(CF_TEXT) != null;
+			
+			CloseClipboard();
+			
+			return result;
+		}
+		
+		
+		void menuPopup(Object sender, EventArgs ea)
+		{
+			int slen, tlen;
+			bool issel;
+			
+			slen = selectionLength;
+			tlen = textLength;
+			issel = slen != 0;
+			
+			_miundo.enabled = canUndo;
+			_micut.enabled = !readOnly() && issel;
+			_micopy.enabled = issel;
+			_mipaste.enabled = !readOnly() && isClipboardText();
+			_midel.enabled = !readOnly() && issel;
+			_misel.enabled = tlen != 0 && tlen != slen;
+		}
+		
+		
+		MenuItem _miundo, _micut, _micopy, _mipaste, _midel, _misel;
 	}
 	
 	
@@ -728,62 +715,56 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 		ctrlStyle |= ControlStyles.SELECTABLE;
 		wclassStyle = textBoxClassStyle;
 		
-		version(DFL_NO_MENUS)
-		{
-		}
-		else
-		{
-			MenuItem mi;
-			
-			cmenu = new ContextMenu;
-			cmenu.popup ~= &menuPopup;
-			
-			_miundo = new MenuItem;
-			_miundo.text = "&Undo";
-			_miundo.click ~= &menuUndo;
-			_miundo.index = 0;
-			cmenu.menuItems.add(_miundo);
-			
-			mi = new MenuItem;
-			mi.text = "-";
-			mi.index = 1;
-			cmenu.menuItems.add(mi);
-			
-			_micut = new MenuItem;
-			_micut.text = "Cu&t";
-			_micut.click ~= &menuCut;
-			_micut.index = 2;
-			cmenu.menuItems.add(_micut);
-			
-			_micopy = new MenuItem;
-			_micopy.text = "&Copy";
-			_micopy.click ~= &menuCopy;
-			_micopy.index = 3;
-			cmenu.menuItems.add(_micopy);
-			
-			_mipaste = new MenuItem;
-			_mipaste.text = "&Paste";
-			_mipaste.click ~= &menuPaste;
-			_mipaste.index = 4;
-			cmenu.menuItems.add(_mipaste);
-			
-			_midel = new MenuItem;
-			_midel.text = "&Delete";
-			_midel.click ~= &menuDelete;
-			_midel.index = 5;
-			cmenu.menuItems.add(_midel);
-			
-			mi = new MenuItem;
-			mi.text = "-";
-			mi.index = 6;
-			cmenu.menuItems.add(mi);
-			
-			_misel = new MenuItem;
-			_misel.text = "Select &All";
-			_misel.click ~= &menuSelectAll;
-			_misel.index = 7;
-			cmenu.menuItems.add(_misel);
-		}
+		MenuItem mi;
+		
+		cmenu = new ContextMenu;
+		cmenu.popup ~= &menuPopup;
+		
+		_miundo = new MenuItem;
+		_miundo.text = "&Undo";
+		_miundo.click ~= &menuUndo;
+		_miundo.index = 0;
+		cmenu.menuItems.add(_miundo);
+		
+		mi = new MenuItem;
+		mi.text = "-";
+		mi.index = 1;
+		cmenu.menuItems.add(mi);
+		
+		_micut = new MenuItem;
+		_micut.text = "Cu&t";
+		_micut.click ~= &menuCut;
+		_micut.index = 2;
+		cmenu.menuItems.add(_micut);
+		
+		_micopy = new MenuItem;
+		_micopy.text = "&Copy";
+		_micopy.click ~= &menuCopy;
+		_micopy.index = 3;
+		cmenu.menuItems.add(_micopy);
+		
+		_mipaste = new MenuItem;
+		_mipaste.text = "&Paste";
+		_mipaste.click ~= &menuPaste;
+		_mipaste.index = 4;
+		cmenu.menuItems.add(_mipaste);
+		
+		_midel = new MenuItem;
+		_midel.text = "&Delete";
+		_midel.click ~= &menuDelete;
+		_midel.index = 5;
+		cmenu.menuItems.add(_midel);
+		
+		mi = new MenuItem;
+		mi.text = "-";
+		mi.index = 6;
+		cmenu.menuItems.add(mi);
+		
+		_misel = new MenuItem;
+		_misel.text = "Select &All";
+		_misel.click ~= &menuSelectAll;
+		_misel.index = 7;
+		cmenu.menuItems.add(_misel);
 	}
 	
 	
@@ -1082,15 +1063,8 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 
 	protected override void prevWndProc(ref Message msg)
 	{
-		version(DFL_NO_MENUS)
-		{
-			// Don't prevent WM_CONTEXTMENU so at least it'll have a default menu.
-		}
-		else
-		{
-			if(msg.msg == WM_CONTEXTMENU) // Ignore the default context menu.
-				return;
-		}
+		if(msg.msg == WM_CONTEXTMENU) // Ignore the default context menu.
+			return;
 		
 		//msg.result = CallWindowProcA(textBoxPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
 		msg.result = dfl.internal.utf.callWindowProc(textBoxPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);

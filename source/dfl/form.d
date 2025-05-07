@@ -11,14 +11,7 @@ import dfl.collections;
 import dfl.control;
 import dfl.drawing;
 import dfl.event;
-
-version(DFL_NO_MENUS)
-{
-}
-else
-{
-	import dfl.menu;
-}
+import dfl.menu;
 
 import dfl.internal.dlib;
 import dfl.internal.utf;
@@ -306,14 +299,7 @@ class Form: ContainerControl, IDialogResult // docmain
 			cwparent = wowner;
 		
 		cp.className = FORM_CLASSNAME;
-		version(DFL_NO_MENUS)
-		{
-			cp.menu = HMENU.init;
-		}
-		else
-		{
-			cp.menu = wmenu ? wmenu.handle : HMENU.init;
-		}
+		cp.menu = wmenu ? wmenu.handle : HMENU.init;
 		
 		//cp.parent = wparent ? wparent.handle : HWND.init;
 		//if(!(cp.style & WS_CHILD))
@@ -1189,14 +1175,8 @@ class Form: ContainerControl, IDialogResult // docmain
 	{
 		super.onHandleCreated(ea);
 		
-		version(DFL_NO_MENUS)
-		{
-		}
-		else
-		{
-			if(wmenu)
-				wmenu._setHwnd(handle);
-		}
+		if(wmenu)
+			wmenu._setHwnd(handle);
 		
 		_setIcon();
 		
@@ -1257,40 +1237,34 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	
-	version(DFL_NO_MENUS)
+	///
+	final @property void menu(MainMenu inMenu) // setter
 	{
-	}
-	else
-	{
-		///
-		final @property void menu(MainMenu menu) // setter
+		if(isHandleCreated)
 		{
-			if(isHandleCreated)
+			HWND hwnd;
+			hwnd = handle;
+			
+			if(inMenu)
 			{
-				HWND hwnd;
-				hwnd = handle;
-				
-				if(menu)
-				{
-					SetMenu(hwnd, menu.handle);
-					menu._setHwnd(hwnd);
-				}
-				else
-				{
-					SetMenu(hwnd, HMENU.init);
-				}
-				
-				if(wmenu)
-					wmenu._setHwnd(HWND.init);
-				wmenu = menu;
-				
-				DrawMenuBar(hwnd);
+				SetMenu(hwnd, inMenu.handle);
+				inMenu._setHwnd(hwnd);
 			}
 			else
 			{
-				wmenu = menu;
-				_recalcClientSize();
+				SetMenu(hwnd, HMENU.init);
 			}
+			
+			if(wmenu)
+				wmenu._setHwnd(HWND.init);
+			wmenu = inMenu;
+			
+			DrawMenuBar(hwnd);
+		}
+		else
+		{
+			wmenu = inMenu;
+			_recalcClientSize();
 		}
 		
 		/// ditto
@@ -2600,14 +2574,8 @@ class Form: ContainerControl, IDialogResult // docmain
 		Application.removeMessageFilter(mfilter);
 		//mfilter = null;
 		
-		version(DFL_NO_MENUS)
-		{
-		}
-		else
-		{
-			if(wmenu)
-				wmenu._setHwnd(HWND.init);
-		}
+		if(wmenu)
+			wmenu._setHwnd(HWND.init);
 		
 		super._destroying();
 	}
@@ -3094,14 +3062,7 @@ class Form: ContainerControl, IDialogResult // docmain
 		r.bottom = height;
 		
 		LONG wl = _style();
-		version(DFL_NO_MENUS)
-		{
-			enum hasmenu = null;
-		}
-		else
-		{
-			auto hasmenu = wmenu;
-		}
+		auto hasmenu = wmenu;
 		AdjustWindowRectEx(&r, wl, !(wl & WS_CHILD) && hasmenu !is null, _exStyle());
 		
 		setBoundsCore(0, 0, r.right - r.left, r.bottom - r.top, BoundsSpecified.SIZE);
@@ -3160,13 +3121,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	Size autoscaleBase;
 	DialogResult fresult = DialogResult.NONE;
 	Icon wicon, wiconSm;
-	version(DFL_NO_MENUS)
-	{
-	}
-	else
-	{
-		MainMenu wmenu;
-	}
+	MainMenu wmenu;
 	Size minsz, maxsz; // {0, 0} means none.
 	bool wmodal = false;
 	bool sownerEnabled;
@@ -3495,14 +3450,7 @@ class Form: ContainerControl, IDialogResult // docmain
 		r.bottom = wrect.height;
 		
 		LONG wl = _style();
-		version(DFL_NO_MENUS)
-		{
-			enum hasmenu = null;
-		}
-		else
-		{
-			auto hasmenu = wmenu;
-		}
+		auto hasmenu = wmenu;
 		AdjustWindowRectEx(&r, wl, hasmenu !is null && !(wl & WS_CHILD), _exStyle());
 		
 		// Subtract the difference.

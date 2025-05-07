@@ -11,19 +11,12 @@ import dfl.collections;
 import dfl.control;
 import dfl.drawing;
 import dfl.event;
+import dfl.imagelist;
 
 import dfl.internal.clib;
 import dfl.internal.dlib;
 import dfl.internal.utf;
 import dfl.internal.winapi;
-
-version(DFL_NO_IMAGELIST)
-{
-}
-else
-{
-	import dfl.imagelist;
-}
 
 
 private extern(Windows) void _initListview();
@@ -449,25 +442,19 @@ class ListViewItem: DObject
 	}
 	
 	
-	version(DFL_NO_IMAGELIST)
+	///
+	final @property void imageIndex(int index) // setter
 	{
-	}
-	else
-	{
-		///
-		final @property void imageIndex(int index) // setter
-		{
-			this._imgidx = index;
-			
-			if(lview && lview.created)
-				lview.updateItem(this);
-		}
+		this._imgidx = index;
 		
-		/// ditto
-		final @property int imageIndex() // getter
-		{
-			return _imgidx;
-		}
+		if(lview && lview.created)
+			lview.updateItem(this);
+	}
+	
+	/// ditto
+	final @property int imageIndex() // getter
+	{
+		return _imgidx;
 	}
 	
 	
@@ -475,13 +462,7 @@ class ListViewItem: DObject
 	package ListView lview = null;
 	Object _tag = null;
 	package ListViewSubItemCollection isubs = null;
-	version(DFL_NO_IMAGELIST)
-	{
-	}
-	else
-	{
-		int _imgidx = -1;
-	}
+	int _imgidx = -1;
 	Dstring _txt;
 	package CallText calltxt;
 }
@@ -2000,69 +1981,63 @@ class ListView: ControlSuperClass // docmain
 	}
 	
 	
-	version(DFL_NO_IMAGELIST)
+	///
+	final @property void largeImageList(ImageList imglist) // setter
 	{
+		if(isHandleCreated)
+		{
+			prevwproc(LVM_SETIMAGELIST, LVSIL_NORMAL,
+				cast(LPARAM)(imglist ? imglist.handle : cast(HIMAGELIST)null));
+		}
+		
+		_lgimglist = imglist;
 	}
-	else
+	
+	/// ditto
+	final @property ImageList largeImageList() // getter
 	{
-		///
-		final @property void largeImageList(ImageList imglist) // setter
-		{
-			if(isHandleCreated)
-			{
-				prevwproc(LVM_SETIMAGELIST, LVSIL_NORMAL,
-					cast(LPARAM)(imglist ? imglist.handle : cast(HIMAGELIST)null));
-			}
-			
-			_lgimglist = imglist;
-		}
-		
-		/// ditto
-		final @property ImageList largeImageList() // getter
-		{
-			return _lgimglist;
-		}
-		
-		
-		///
-		final @property void smallImageList(ImageList imglist) // setter
-		{
-			if(isHandleCreated)
-			{
-				prevwproc(LVM_SETIMAGELIST, LVSIL_SMALL,
-					cast(LPARAM)(imglist ? imglist.handle : cast(HIMAGELIST)null));
-			}
-			
-			_smimglist = imglist;
-		}
-		
-		/// ditto
-		final @property ImageList smallImageList() // getter
-		{
-			return _smimglist;
-		}
-		
-		
-		/+
-		///
-		final @property void stateImageList(ImageList imglist) // setter
-		{
-			if(isHandleCreated)
-			{
-				prevwproc(LVM_SETIMAGELIST, LVSIL_STATE,
-					cast(LPARAM)(imglist ? imglist.handle : cast(HIMAGELIST)null));
-			}
-			
-			_stimglist = imglist;
-		}
-		
-		/// ditto
-		final @property ImageList stateImageList() // getter
-		{
-			return _stimglist;
-		}
-		+/
+		return _lgimglist;
 	}
+	
+	
+	///
+	final @property void smallImageList(ImageList imglist) // setter
+	{
+		if(isHandleCreated)
+		{
+			prevwproc(LVM_SETIMAGELIST, LVSIL_SMALL,
+				cast(LPARAM)(imglist ? imglist.handle : cast(HIMAGELIST)null));
+		}
+		
+		_smimglist = imglist;
+	}
+	
+	/// ditto
+	final @property ImageList smallImageList() // getter
+	{
+		return _smimglist;
+	}
+	
+	
+	/+
+	///
+	final @property void stateImageList(ImageList imglist) // setter
+	{
+		if(isHandleCreated)
+		{
+			prevwproc(LVM_SETIMAGELIST, LVSIL_STATE,
+				cast(LPARAM)(imglist ? imglist.handle : cast(HIMAGELIST)null));
+		}
+		
+		_stimglist = imglist;
+	}
+	
+	/// ditto
+	final @property ImageList stateImageList() // getter
+	{
+		return _stimglist;
+	}
+	+/
 	
 	
 	// TODO:
@@ -2277,18 +2252,12 @@ class ListView: ControlSuperClass // docmain
 		color = foreColor;
 		prevwproc(LVM_SETTEXTCOLOR, 0, cast(LPARAM)color.toRgb());
 		
-		version(DFL_NO_IMAGELIST)
-		{
-		}
-		else
-		{
-			if(_lgimglist)
-				prevwproc(LVM_SETIMAGELIST, LVSIL_NORMAL, cast(LPARAM)_lgimglist.handle);
-			if(_smimglist)
-				prevwproc(LVM_SETIMAGELIST, LVSIL_SMALL, cast(LPARAM)_smimglist.handle);
-			//if(_stimglist)
-			//	prevwproc(LVM_SETIMAGELIST, LVSIL_STATE, cast(LPARAM)_stimglist.handle);
-		}
+		if(_lgimglist)
+			prevwproc(LVM_SETIMAGELIST, LVSIL_NORMAL, cast(LPARAM)_lgimglist.handle);
+		if(_smimglist)
+			prevwproc(LVM_SETIMAGELIST, LVSIL_SMALL, cast(LPARAM)_smimglist.handle);
+		//if(_stimglist)
+		//	prevwproc(LVM_SETIMAGELIST, LVSIL_STATE, cast(LPARAM)_stimglist.handle);
 		
 		cols.doListHeaders();
 		litems.doListItems();
@@ -2326,14 +2295,8 @@ class ListView: ControlSuperClass // docmain
 								
 								if(!lvdi.item.iSubItem) // Item.
 								{
-									version(DFL_NO_IMAGELIST)
-									{
-									}
-									else
-									{
-										if(lvdi.item.mask & LVIF_IMAGE)
-											lvdi.item.iImage = item._imgidx;
-									}
+									if(lvdi.item.mask & LVIF_IMAGE)
+										lvdi.item.iImage = item._imgidx;
 									
 									if(lvdi.item.mask & LVIF_TEXT)
 										lvdi.item.pszText = cast(typeof(lvdi.item.pszText))item.calltxt.ansi;
@@ -2362,14 +2325,8 @@ class ListView: ControlSuperClass // docmain
 								
 								if(!lvdi.item.iSubItem) // Item.
 								{
-									version(DFL_NO_IMAGELIST)
-									{
-									}
-									else
-									{
-										if(lvdi.item.mask & LVIF_IMAGE)
-											lvdi.item.iImage = item._imgidx;
-									}
+									if(lvdi.item.mask & LVIF_IMAGE)
+										lvdi.item.iImage = item._imgidx;
 									
 									if(lvdi.item.mask & LVIF_TEXT)
 										lvdi.item.pszText = cast(typeof(lvdi.item.pszText))item.calltxt.unicode;
@@ -2555,14 +2512,8 @@ class ListView: ControlSuperClass // docmain
 	SortOrder _sortorder = SortOrder.NONE;
 	CheckedIndexCollection checkedis;
 	int delegate(ListViewItem, ListViewItem) _sortproc;
-	version(DFL_NO_IMAGELIST)
-	{
-	}
-	else
-	{
-		ImageList _lgimglist, _smimglist;
-		//ImageList _stimglist;
-	}
+	ImageList _lgimglist, _smimglist;
+	//ImageList _stimglist;
 	
 	
 	int _defsortproc(ListViewItem a, ListViewItem b)
@@ -2630,17 +2581,11 @@ class ListView: ControlSuperClass // docmain
 		
 		LV_ITEMA lvi;
 		lvi.mask = LVIF_TEXT | LVIF_PARAM;
-		version(DFL_NO_IMAGELIST)
-		{
-		}
-		else
-		{
-			//if(-1 != imageIndex)
-			if(!subItemIndex)
-				lvi.mask |= LVIF_IMAGE;
-			//lvi.iImage = imageIndex;
-			lvi.iImage = I_IMAGECALLBACK;
-		}
+		//if(-1 != imageIndex)
+		if(!subItemIndex)
+			lvi.mask |= LVIF_IMAGE;
+		//lvi.iImage = imageIndex;
+		lvi.iImage = I_IMAGECALLBACK;
 		lvi.iItem = index;
 		lvi.iSubItem = subItemIndex;
 		//lvi.pszText = toStringz(itemText);
@@ -2652,15 +2597,7 @@ class ListView: ControlSuperClass // docmain
 	
 	package final int _ins(int index, ListViewItem item)
 	{
-		//return _ins(index, cast(LPARAM)cast(void*)item, item.text, 0);
-		version(DFL_NO_IMAGELIST)
-		{
-			return _ins(index, cast(LPARAM)cast(void*)item, item.text, 0, -1).toI32;
-		}
-		else
-		{
-			return _ins(index, cast(LPARAM)cast(void*)item, item.text, 0, item._imgidx).toI32;
-		}
+		return _ins(index, cast(LPARAM)cast(void*)item, item.text, 0, item._imgidx).toI32;
 	}
 	
 	

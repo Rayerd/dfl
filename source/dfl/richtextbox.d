@@ -12,21 +12,15 @@ import dfl.data;
 import dfl.drawing;
 import dfl.event;
 import dfl.textboxbase;
-
-version(DFL_NO_MENUS)
-{
-}
-else
-{
-	import dfl.menu;
-	import std.utf;
-}
+import dfl.menu;
 
 import dfl.internal.winapi;
 import dfl.internal.dlib;
 import dfl.internal.utf;
 
 import core.sys.windows.richedit : GETTEXTEX, GETTEXTLENGTHEX, GTL_CLOSE, SF_UNICODE;
+
+import std.utf;
 
 
 private extern(C) char* strcpy(char*, char*);
@@ -85,46 +79,34 @@ class RichTextBox: TextBoxBase // docmain
 		wcurs = null; // So that the control can change it accordingly.
 		wclassStyle = richtextboxClassStyle;
 
-		version(DFL_NO_MENUS)
+		with (miredo = new MenuItem)
 		{
+			text = "&Redo";
+			click ~= &menuRedo;
+			contextMenu.menuItems.insert(1, miredo);
 		}
-		else
-		{
-			with (miredo = new MenuItem)
-			{
-				text = "&Redo";
-				click ~= &menuRedo;
-				contextMenu.menuItems.insert(1, miredo);
-			}
-			
-			contextMenu.popup ~= &menuPopup2;
-		}
+		
+		contextMenu.popup ~= &menuPopup2;
 	}
 	
 	
 	private
 	{
-		version (DFL_NO_MENUS)
+		///
+		void menuRedo(Object sender, EventArgs ea)
 		{
+			redo();
 		}
-		else
+		
+		
+		///
+		void menuPopup2(Object sender, EventArgs ea)
 		{
-			///
-			void menuRedo(Object sender, EventArgs ea)
-			{
-				redo();
-			}
-			
-			
-			///
-			void menuPopup2(Object sender, EventArgs ea)
-			{
-				miredo.enabled = canRedo;
-			}
-			
-			
-			MenuItem miredo;
+			miredo.enabled = canRedo;
 		}
+		
+		
+		MenuItem miredo;
 	}
 	
 	

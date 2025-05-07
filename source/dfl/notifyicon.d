@@ -11,14 +11,7 @@ import dfl.control;
 import dfl.drawing;
 import dfl.event;
 import dfl.form;
-
-version(DFL_NO_MENUS)
-{
-}
-else
-{
-	import dfl.menu;
-}
+import dfl.menu;
 
 import dfl.internal.dlib;
 import dfl.internal.utf;
@@ -163,22 +156,16 @@ enum BalloonTipIconStyle
 ///
 class NotifyIcon // docmain
 {
-	version(DFL_NO_MENUS)
+	///
+	final @property void contextMenu(ContextMenu menu) // setter
 	{
+		this._cmenu = menu;
 	}
-	else
+	
+	/// ditto
+	final @property ContextMenu contextMenu() // getter
 	{
-		///
-		final @property void contextMenu(ContextMenu menu) // setter
-		{
-			this._cmenu = menu;
-		}
-		
-		/// ditto
-		final @property ContextMenu contextMenu() // getter
-		{
-			return _cmenu;
-		}
+		return _cmenu;
 	}
 	
 	
@@ -454,13 +441,7 @@ class NotifyIcon // docmain
 	
 	DFL_NOTIFYICONDATA _nid; ///
 	int _tipLen = 0;         ///
-	version(DFL_NO_MENUS)
-	{
-	}
-	else
-	{
-		ContextMenu _cmenu; ///
-	}
+	ContextMenu _cmenu; ///
 	Icon _icon;           /// Task tray icon
 	Icon _balloonTipIcon; /// Balloon tip icon
 	
