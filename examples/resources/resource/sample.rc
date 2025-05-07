@@ -1,0 +1,17 @@
+256   ICON  "image/icon.ico"
+257   BITMAP "image/dman-error.bmp"
+258   RCDATA
+{
+    "Here is an ANSI string\0",    // explicitly null-terminated 
+    L"Here is a Unicode string\0", // explicitly null-terminated 
+    1024,                          // integer, stored as WORD 
+    7L,                            // integer, stored as DWORD 
+    0x0010,                        // hex integer as WORD
+    0o010,                         // octal integerr as WORD
+}
+259 CURSOR  "image/d-cursor.cur"
+STRINGTABLE
+{
+    260, "Hoge\0"
+    261, "Fuga\0"
+}

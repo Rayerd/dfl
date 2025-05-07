@@ -1,0 +1,16 @@
+{
+	"authors": ["haru-s"],
+	"copyright": "Copyright (C) 2025 haru-s",
+	"description": "DFL sample code.",
+	"name": "resources_sample",
+	"targetType": "executable",
+	"targetPath": "bin",
+	"dependencies": {
+		"dfl": {
+			"path": "../../../dfl"
+		}
+	},
+	"lflags-windows": ["resource/sample.res"],
+	"lflags-windows-x86_mscoff-dmd": ["/SUBSYSTEM:WINDOWS", "/ENTRY:mainCRTStartup"],
+	"lflags-windows-x86_64-dmd":     ["/SUBSYSTEM:WINDOWS", "/ENTRY:mainCRTStartup"]
+}
