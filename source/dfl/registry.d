@@ -274,24 +274,25 @@ class RegistryValueMultiSz: RegistryValue
 	///
 	/+ package +/ protected override LONG save(HKEY hkey, Dstring name) // package
 	{
-		size_t i = value.length + 1; // Each NUL and the extra terminating NUL.
+		size_t total = value.length + 1; // Each NUL and the extra terminating NUL.
 		foreach(Dstring s; value)
 		{
-			i += s.length;
+			total += s.length;
 		}
 		
-		char[] multi = new char[i];
+		char[] multi = new char[total];
+		size_t offset;
 		foreach(Dstring s; value)
 		{
 			if(!s.length)
 				throw new DflRegistryException("Empty strings are not allowed in multi_sz registry values");
 			
-			multi[i .. i + s.length] = s[];
-			i += s.length;
-			multi[i++] = 0;
+			multi[offset .. offset + s.length] = s[];
+			offset += s.length;
+			multi[offset++] = 0;
 		}
-		multi[i++] = 0;
-		assert(i == multi.length);
+		multi[offset++] = 0;
+		assert(offset == multi.length);
 		
 		return RegSetValueExA(hkey, unsafeStringz(name), 0, REG_MULTI_SZ, cast(BYTE*)multi, cast(uint)(multi.length));
 	}
