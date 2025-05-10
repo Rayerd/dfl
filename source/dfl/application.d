@@ -1658,7 +1658,7 @@ extern(Windows) void _gcTimeout(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dw
 }
 
 
-// Note: phobos-only.
+// NOTE: phobos-only.
 debug(SHOW_MESSAGE_INFO)
 {
 	import std.stdio, std.string;
@@ -1931,7 +1931,7 @@ extern(Windows) LRESULT dflWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 		if(!ctrl)
 		{
 			debug(APP_PRINT)
-				cprintf("Unable to add window 0x%X.\n", hwnd);
+				cprintf("Unable to add window 0x%X.\n", cast(uint)hwnd);
 			return dm.result;
 		}
 		Application.creatingControl(null); // Reset.
@@ -1939,7 +1939,7 @@ extern(Windows) LRESULT dflWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 		Application.controls[hwnd] = ctrl;
 		ctrl.hwnd = hwnd;
 		debug(APP_PRINT)
-			cprintf("Added window 0x%X.\n", hwnd);
+			cprintf("Added window 0x%X.\n", cast(uint)hwnd);
 		
 		//ctrl.finishCreating(hwnd);
 		goto do_msg;
