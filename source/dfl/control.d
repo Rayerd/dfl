@@ -1005,7 +1005,7 @@ class Control: DObject, IWindow // docmain
 		{
 			return _simple_front(indexOf(c));
 		}
-	}
+	} // static class ControlCollection
 	
 	
 	private void _ctrladded(ControlEventArgs cea)
@@ -1172,7 +1172,7 @@ class Control: DObject, IWindow // docmain
 		
 		void pa(Control pc)
 		{
-			foreach(Control ctrl; pc.ccollection)
+			foreach(Control ctrl; pc.controls)
 			{
 				if(Color.empty == ctrl.backc) // If default.
 				{
@@ -1422,7 +1422,7 @@ class Control: DObject, IWindow // docmain
 	///
 	final bool contains(Control ctrl)
 	{
-		//return ccollection.contains(ctrl);
+		//return controls.contains(ctrl);
 		return ctrl && ctrl.parent is this;
 	}
 	
@@ -1506,7 +1506,8 @@ class Control: DObject, IWindow // docmain
 	///
 	final @property ControlCollection controls() // getter
 	{
-		//return new ControlCollection(this);
+		if (!ccollection)
+			ccollection = new ControlCollection(this);
 		return ccollection;
 	}
 	
@@ -1530,7 +1531,7 @@ class Control: DObject, IWindow // docmain
 		
 		void pa(Control pc)
 		{
-			foreach(Control ctrl; pc.ccollection)
+			foreach(Control ctrl; pc.controls)
 			{
 				if(ctrl.wcurs is null) // If default.
 				{
@@ -1929,7 +1930,7 @@ class Control: DObject, IWindow // docmain
 		
 		void pa(Control pc)
 		{
-			foreach(Control ctrl; pc.ccollection)
+			foreach(Control ctrl; pc.controls)
 			{
 				if(ctrl.cbits & CBits.ENABLED)
 				{
@@ -2003,7 +2004,7 @@ class Control: DObject, IWindow // docmain
 		
 		void pa(Control pc)
 		{
-			foreach(Control ctrl; pc.ccollection)
+			foreach(Control ctrl; pc.controls)
 			{
 				if(Color.empty == ctrl.forec) // If default.
 				{
@@ -2076,7 +2077,7 @@ class Control: DObject, IWindow // docmain
 		}
 		else
 		{
-			return ccollection.children.length != 0;
+			return controls.children.length != 0;
 		}
 	}
 	
@@ -2318,7 +2319,7 @@ class Control: DObject, IWindow // docmain
 			{
 				// If the parent exists and isn't created, need to add
 				// -this- to its children array.
-				c.ccollection.children ~= this;
+				c.controls.children ~= this;
 				
 				onParentChanged(EventArgs.empty);
 				if(oldparent)
@@ -2468,7 +2469,7 @@ class Control: DObject, IWindow // docmain
 				//pc._fixRtol(rtol);
 				pc._fixRtol(rl); // Set the specific parent value so it doesn't have to look up the chain.
 				
-				foreach(Control ctrl; pc.ccollection)
+				foreach(Control ctrl; pc.controls)
 				{
 					ctrl.onRightToLeftChanged(EventArgs.empty);
 					
@@ -2614,7 +2615,7 @@ class Control: DObject, IWindow // docmain
 	/+
 	package final void _fixAmbientChildren()
 	{
-		foreach(Control ctrl; ccollection.children)
+		foreach(Control ctrl; controls.children)
 		{
 			ctrl._fixAmbient();
 		}
@@ -2873,7 +2874,7 @@ class Control: DObject, IWindow // docmain
 		if(!isHandleCreated)
 		{
 			if(parent)
-				parent.ccollection._simple_front(this);
+				parent.controls._simple_front(this);
 			return;
 		}
 		
@@ -2887,7 +2888,7 @@ class Control: DObject, IWindow // docmain
 		if(!isHandleCreated)
 		{
 			if(parent)
-				parent.ccollection._simple_back(this);
+				parent.controls._simple_back(this);
 			return;
 		}
 		
@@ -2905,7 +2906,7 @@ class Control: DObject, IWindow // docmain
 		if(!isHandleCreated)
 		{
 			if(parent)
-				parent.ccollection._simple_front_one(this);
+				parent.controls._simple_front_one(this);
 			return;
 		}
 		
@@ -2937,7 +2938,7 @@ class Control: DObject, IWindow // docmain
 		if(!isHandleCreated)
 		{
 			if(parent)
-				parent.ccollection._simple_back_one(this);
+				parent.controls._simple_back_one(this);
 			return;
 		}
 		
@@ -2954,7 +2955,7 @@ class Control: DObject, IWindow // docmain
 	// NOTE: true if no children, even if this not created.
 	package final @property bool areChildrenCreated() // getter
 	{
-		return !ccollection.children.length;
+		return !controls.children.length;
 	}
 	
 	
@@ -2963,8 +2964,8 @@ class Control: DObject, IWindow // docmain
 		assert(isHandleCreated);
 		
 		Control[] ctrls;
-		ctrls = ccollection.children;
-		ccollection.children = null;
+		ctrls = controls.children;
+		controls.children = null;
 		
 		foreach(Control ctrl; ctrls)
 		{
@@ -4543,7 +4544,7 @@ class Control: DObject, IWindow // docmain
 		
 		void pa(Control pc)
 		{
-			foreach(Control ctrl; pc.ccollection)
+			foreach(Control ctrl; pc.controls)
 			{
 				if(!ctrl.wfont) // If default.
 				{
@@ -4761,7 +4762,7 @@ class Control: DObject, IWindow // docmain
 		
 		// NOTE: doesn't include non-DFL windows...
 		// TODO: fix.
-		foreach(Control ctrl; ccollection)
+		foreach(Control ctrl; controls)
 		{
 			if(!ctrl.visible)
 				continue;
@@ -5491,7 +5492,7 @@ class Control: DObject, IWindow // docmain
 				onSystemColorsChanged(EventArgs.empty);
 				
 				// Need to send the message to children for some common controls to update properly.
-				foreach(Control ctrl; ccollection)
+				foreach(Control ctrl; controls)
 				{
 					SendMessageA(ctrl.handle, WM_SYSCOLORCHANGE, msg.wParam, msg.lParam);
 				}
@@ -5499,7 +5500,7 @@ class Control: DObject, IWindow // docmain
 			
 			case WM_SETTINGCHANGE:
 				// Send the message to children.
-				foreach(Control ctrl; ccollection)
+				foreach(Control ctrl; controls)
 				{
 					SendMessageA(ctrl.handle, WM_SETTINGCHANGE, msg.wParam, msg.lParam);
 				}
@@ -5514,7 +5515,7 @@ class Control: DObject, IWindow // docmain
 				+/
 				
 				// Send the message to children.
-				foreach(Control ctrl; ccollection)
+				foreach(Control ctrl; controls)
 				{
 					SendMessageA(ctrl.handle, WM_PALETTECHANGED, msg.wParam, msg.lParam);
 				}
@@ -6147,8 +6148,6 @@ class Control: DObject, IWindow // docmain
 		forec = Color.empty;
 		wfont = null;
 		wcurs = null;
-		
-		ccollection = createControlsInstance();
 	}
 	
 	/// ditto
@@ -6156,8 +6155,6 @@ class Control: DObject, IWindow // docmain
 	{
 		this();
 		wtext = text;
-		
-		ccollection = createControlsInstance();
 	}
 	
 	/// ditto
@@ -6166,8 +6163,6 @@ class Control: DObject, IWindow // docmain
 		this();
 		wtext = text;
 		parent = cparent;
-		
-		ccollection = createControlsInstance();
 	}
 	
 	/// ditto
@@ -6176,8 +6171,6 @@ class Control: DObject, IWindow // docmain
 		this();
 		wtext = text;
 		wrect = Rect(left, top, width, height);
-		
-		ccollection = createControlsInstance();
 	}
 	
 	/// ditto
@@ -6187,8 +6180,6 @@ class Control: DObject, IWindow // docmain
 		wtext = text;
 		wrect = Rect(left, top, width, height);
 		parent = cparent;
-		
-		ccollection = createControlsInstance();
 	}
 	
 	
@@ -6256,8 +6247,8 @@ class Control: DObject, IWindow // docmain
 			wregion = wregion.init;
 			wtext = wtext.init;
 			deleteThisBackgroundBrush();
-			//ccollection.children = null; // Not GC-safe in dtor.
-			//ccollection = null; // TODO: ? Causes bad things. Leaving it will do just fine.
+			//controls.children = null; // Not GC-safe in dtor.
+			//controls = null; // Causes bad things. Leaving it will do just fine.
 		}
 		
 		if(!isHandleCreated)
@@ -6661,7 +6652,7 @@ class Control: DObject, IWindow // docmain
 		{
 			ccs ~= cc;
 		}
-		ccollection.children = ccs;
+		controls.children = ccs;
 	}
 	
 	
@@ -6766,7 +6757,7 @@ class Control: DObject, IWindow // docmain
 			
 			bool foundRadio = false;
 			
-			foreach(Control ctrl; ccollection)
+			foreach(Control ctrl; controls)
 			{
 				if(!ctrl.visible)
 					continue;
@@ -6831,7 +6822,7 @@ class Control: DObject, IWindow // docmain
 		Rect area;
 		area = displayRectangle;
 		
-		foreach(Control ctrl; ccollection)
+		foreach(Control ctrl; controls)
 		{
 			if(!ctrl.visible || !ctrl.created)
 				continue;
