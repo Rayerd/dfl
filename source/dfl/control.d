@@ -833,7 +833,7 @@ class Control: DObject, IWindow // docmain
 		
 		private void _removeCreated(HWND hwnd)
 		{
-			DestroyWindow(hwnd); // ?
+			DestroyWindow(hwnd); // TODO: ?
 		}
 		
 		
@@ -1514,7 +1514,7 @@ class Control: DObject, IWindow // docmain
 	///
 	final @property bool created() // getter
 	{
-		// To-do: only return true when createHandle finishes.
+		// TODO: only return true when createHandle finishes.
 		// Will also need to update uses of created/isHandleCreated.
 		// Return false again when disposing/killing.
 		//return isHandleCreated;
@@ -2545,7 +2545,7 @@ class Control: DObject, IWindow // docmain
 	// This is called when the inherited ambience changes.
 	package final void _fixAmbient(_FixAmbientOld* oldinfo)
 	{
-		// Note: exception will screw things up.
+		// NOTE: exception will screw things up.
 		
 		_FixAmbientOld newinfo;
 		if(parent)
@@ -2951,7 +2951,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	// Note: true if no children, even if this not created.
+	// NOTE: true if no children, even if this not created.
 	package final @property bool areChildrenCreated() // getter
 	{
 		return !ccollection.children.length;
@@ -3047,7 +3047,7 @@ class Control: DObject, IWindow // docmain
 					ensureDataObj(pDataObject);
 					
 					scope DragEventArgs ea = new DragEventArgs(dataObj, cast(int)grfKeyState, pt.x, pt.y, 
-						cast(DragDropEffects)*pdwEffect, DragDropEffects.NONE); // ?
+						cast(DragDropEffects)*pdwEffect, DragDropEffects.NONE); // TODO: ?
 					ctrl.onDragEnter(ea);
 					*pdwEffect = ea.effect;
 					
@@ -3073,7 +3073,7 @@ class Control: DObject, IWindow // docmain
 					assert(dataObj !is null);
 					
 					scope DragEventArgs ea = new DragEventArgs(dataObj, cast(int)grfKeyState, pt.x, pt.y, 
-						cast(DragDropEffects)*pdwEffect, DragDropEffects.NONE); // ?
+						cast(DragDropEffects)*pdwEffect, DragDropEffects.NONE); // TODO: ?
 					ctrl.onDragOver(ea);
 					*pdwEffect = ea.effect;
 					
@@ -3123,7 +3123,7 @@ class Control: DObject, IWindow // docmain
 					ensureDataObj(pDataObject);
 					
 					scope DragEventArgs ea = new DragEventArgs(dataObj, cast(int)grfKeyState, pt.x, pt.y, 
-						cast(DragDropEffects)*pdwEffect, DragDropEffects.NONE); // ?
+						cast(DragDropEffects)*pdwEffect, DragDropEffects.NONE); // TODO: ?
 					ctrl.onDragDrop(ea);
 					*pdwEffect = ea.effect;
 					
@@ -3300,7 +3300,7 @@ class Control: DObject, IWindow // docmain
 					
 					qdoit:
 					scope QueryContinueDragEventArgs ea = new QueryContinueDragEventArgs(cast(int)grfKeyState,
-						fEscapePressed != FALSE, act); // ?
+						fEscapePressed != FALSE, act); // TODO: ?
 					ctrl.onQueryContinueDrag(ea);
 					
 					result = cast(HRESULT)ea.action;
@@ -3377,7 +3377,7 @@ class Control: DObject, IWindow // docmain
 					break;
 				
 				case DRAGDROP_S_CANCEL:
-					return DragDropEffects.NONE; // ?
+					return DragDropEffects.NONE; // TODO: ?
 				
 				default:
 					throw new DflException("Unable to complete drag-drop operation");
@@ -4594,7 +4594,7 @@ class Control: DObject, IWindow // docmain
 		if(wparent)
 		{
 			wparent.vchanged();
-			suspendLayout(); // Note: exception could cause failure to restore.
+			suspendLayout(); // NOTE: exception could cause failure to restore.
 			wparent.alayout(this);
 			resumeLayout(false);
 		}
@@ -4705,8 +4705,8 @@ class Control: DObject, IWindow // docmain
 	
 	package final void prepareDc(HDC hdc)
 	{
-		//SetBkMode(hdc, TRANSPARENT); // ?
-		//SetBkMode(hdc, OPAQUE); // ?
+		//SetBkMode(hdc, TRANSPARENT); // TODO: ?
+		//SetBkMode(hdc, OPAQUE); // TODO: ?
 		SetBkColor(hdc, backColor.toRgb());
 		SetTextColor(hdc, foreColor.toRgb());
 	}
@@ -4736,7 +4736,7 @@ class Control: DObject, IWindow // docmain
 			case WM_CTLCOLOREDIT:
 			case WM_CTLCOLORSCROLLBAR:
 			case WM_CTLCOLORBTN:
-			//case WM_CTLCOLORDLG: // ?
+			//case WM_CTLCOLORDLG: // TODO: ?
 			//case 0x0019: //WM_CTLCOLOR; obsolete.
 				prepareDc(cast(HDC)m.wParam);
 				//assert(GetObjectA(hbrBg, 0, null));
@@ -4759,7 +4759,8 @@ class Control: DObject, IWindow // docmain
 		if(pt.x > wclientsz.width || pt.y > wclientsz.height)
 			return HWND.init;
 		
-		// Note: doesn't include non-DFL windows... TO-DO: fix.
+		// NOTE: doesn't include non-DFL windows...
+		// TODO: fix.
 		foreach(Control ctrl; ccollection)
 		{
 			if(!ctrl.visible)
@@ -4874,7 +4875,7 @@ class Control: DObject, IWindow // docmain
 			case WM_CTLCOLOREDIT:
 			case WM_CTLCOLORSCROLLBAR:
 			case WM_CTLCOLORBTN:
-			//case WM_CTLCOLORDLG: // ?
+			//case WM_CTLCOLORDLG: // TODO: ?
 			//case 0x0019: //WM_CTLCOLOR; obsolete.
 				{
 					Control ctrl = fromChildHandle(cast(HWND)msg.lParam);
@@ -4894,13 +4895,13 @@ class Control: DObject, IWindow // docmain
 					bool needLayout = false;
 					
 					//if(!wp.hwndInsertAfter)
-					//	wp.flags |= SWP_NOZORDER; // ?
+					//	wp.flags |= SWP_NOZORDER; // TODO: ?
 					
 					bool didvis = false;
 					if(wp.flags & (SWP_HIDEWINDOW | SWP_SHOWWINDOW))
 					{
 						needLayout = true; // Only if not didvis / if not recreating.
-						if(!recreatingHandle) // Note: suppresses onVisibleChanged
+						if(!recreatingHandle) // NOTE: suppresses onVisibleChanged
 						{
 							if(wp.flags & SWP_HIDEWINDOW) // Hiding.
 								_clicking = false;
@@ -4945,7 +4946,7 @@ class Control: DObject, IWindow // docmain
 						if(/+ (wp.flags & SWP_SHOWWINDOW) || +/ !(wp.flags & SWP_NOSIZE) ||
 							!(wp.flags & SWP_NOZORDER)) // z-order determines what is positioned first.
 						{
-							suspendLayout(); // Note: exception could cause failure to restore.
+							suspendLayout(); // NOTE: exception could cause failure to restore.
 							if(wparent)
 								wparent.alayout(this);
 							resumeLayout(false);
@@ -5212,7 +5213,7 @@ class Control: DObject, IWindow // docmain
 							{
 								//msg.result = m.customMsg(*(cast(CustomMsg*)&msg));
 								m._reflectMenu(msg);
-								//return; // ?
+								//return; // TODO: ?
 							}
 							return;
 						}
@@ -5464,7 +5465,7 @@ class Control: DObject, IWindow // docmain
 						else
 							point = Point(GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam));
 						
-						SetFocus(handle); // ?
+						SetFocus(handle); // TODO: ?
 						cmenu.show(this, point);
 						
 						return;
@@ -5532,7 +5533,7 @@ class Control: DObject, IWindow // docmain
 						{
 							_ctrlremoved(new ControlEventArgs(ctrl));
 							
-							// ?
+							// TODO: ?
 							vchanged();
 							//alayout(ctrl); // This is already being called from somewhere else..
 						}
@@ -5552,7 +5553,7 @@ class Control: DObject, IWindow // docmain
 			case WM_CREATE:
 				/+
 				if(wparent)
-					initLayout(); // ?
+					initLayout(); // TODO: ?
 				+/
 				if(cbits & CBits.NEED_INIT_LAYOUT)
 				{
@@ -5561,7 +5562,7 @@ class Control: DObject, IWindow // docmain
 						if(wparent)
 						{
 							wparent.vchanged();
-							suspendLayout(); // Note: exception could cause failure to restore.
+							suspendLayout(); // NOTE: exception could cause failure to restore.
 							wparent.alayout(this);
 							resumeLayout(false);
 						}
@@ -5758,7 +5759,7 @@ class Control: DObject, IWindow // docmain
 	// hwnd is cleared after this step.
 	void _destroying() // package
 	{
-		//wparent = null; // ?
+		//wparent = null; // TODO: ?
 	}
 	
 	
@@ -5980,7 +5981,7 @@ class Control: DObject, IWindow // docmain
 					+/
 					
 					/+
-					// ?
+					// TODO: ?
 					wstyle = cs.style;
 					wexstyle = cs.dwExStyle;
 					+/
@@ -6131,7 +6132,7 @@ class Control: DObject, IWindow // docmain
 	/// Construct a new Control instance.
 	this()
 	{
-		//name = DObject.toString(); // ?
+		//name = DObject.toString(); // TODO: ?
 		
 		wrect.size = defaultSize;
 		//oldwrect = wrect;
@@ -6256,7 +6257,7 @@ class Control: DObject, IWindow // docmain
 			wtext = wtext.init;
 			deleteThisBackgroundBrush();
 			//ccollection.children = null; // Not GC-safe in dtor.
-			//ccollection = null; // ? Causes bad things. Leaving it will do just fine.
+			//ccollection = null; // TODO: ? Causes bad things. Leaving it will do just fine.
 		}
 		
 		if(!isHandleCreated)
@@ -6466,7 +6467,7 @@ class Control: DObject, IWindow // docmain
 	///
 	void createHandle()
 	{
-		// Note: if modified, Form.createHandle() should be modified as well.
+		// NOTE: if modified, Form.createHandle() should be modified as well.
 		
 		if(isHandleCreated)
 			return;
@@ -6478,7 +6479,7 @@ class Control: DObject, IWindow // docmain
 		{
 			create_err:
 			//throw new DflException("Control creation failure");
-			throw new DflException(Object.toString() ~ " creation failure"); // ?
+			throw new DflException(Object.toString() ~ " creation failure"); // TODO: ?
 		}
 		+/
 		
@@ -6508,7 +6509,7 @@ class Control: DObject, IWindow // docmain
 					kmsg ~= " - " ~ er;
 			}
 			throw new DflException(kmsg);
-			//throw new DflException(Object.toString() ~ " creation failure"); // ?
+			//throw new DflException(Object.toString() ~ " creation failure"); // TODO: ?
 		}
 		
 		// Need the parent's handle to exist.
@@ -6529,48 +6530,45 @@ class Control: DObject, IWindow // docmain
 		createParams(cp);
 		assert(!isHandleCreated); // Make sure the handle wasn't created in createParams().
 		
-		with(cp)
+		wtext = cp.caption;
+		//wrect = Rect(cp.x, cp.y, cp.width, cp.height); // This gets updated in WM_CREATE.
+		wclassStyle = cp.classStyle;
+		wexstyle = cp.exStyle;
+		wstyle = cp.style;
+		
+		//if(cp.style & WS_CHILD) // Breaks context-help.
+		if((ctrlStyle & ControlStyles.CONTAINER_CONTROL) && (cp.style & WS_CHILD))
 		{
-			wtext = caption;
-			//wrect = Rect(x, y, width, height); // This gets updated in WM_CREATE.
-			wclassStyle = classStyle;
-			wexstyle = exStyle;
-			wstyle = style;
-			
-			//if(style & WS_CHILD) // Breaks context-help.
-			if((ctrlStyle & ControlStyles.CONTAINER_CONTROL) && (style & WS_CHILD))
-			{
-				exStyle |= WS_EX_CONTROLPARENT;
-			}
-			
-			bool vis = (style & WS_VISIBLE) != 0;
-			
-			Application.creatingControl(this);
-			hwnd = dfl.internal.utf.createWindowEx(exStyle, className, caption, (style & ~WS_VISIBLE), x, y,
-				width, height, parent, menu, inst, param);
-			if(!hwnd)
-			{
-				debug(APP_PRINT)
-				{
-					cprintf("CreateWindowEx failed."
-						~" (exStyle=0x%X, className=`%.*s`, caption=`%.*s`, style=0x%X, x=%d, y=%d, width=%d, height=%d,"
-						~" parent=0x%X, menu=0x%X, inst=0x%X, param=0x%X)\n",
-						exStyle, className.ptr, caption.ptr, style, x, y, width, height,
-						parent, menu, inst, param);
-				}
-				
-				debug
-				{
-					er = std.string.format("CreateWindowEx failed {className=%s;exStyle=0x%X;style=0x%X;parent=0x%X;menu=0x%X;inst=0x%X;}",
-						className, exStyle, style, cast(void*)parent, cast(void*)menu, cast(void*)inst);
-				}
-				
-				goto create_err;
-			}
-			
-			if(vis)
-				doShow(); // Properly fires onVisibleChanged.
+			cp.exStyle |= WS_EX_CONTROLPARENT;
 		}
+		
+		bool vis = (cp.style & WS_VISIBLE) != 0;
+		
+		Application.creatingControl(this);
+		hwnd = dfl.internal.utf.createWindowEx(cp.exStyle, cp.className, cp.caption, (cp.style & ~WS_VISIBLE), cp.x, cp.y,
+			cp.width, cp.height, cp.parent, cp.menu, cp.inst, cp.param);
+		if(!hwnd)
+		{
+			debug(APP_PRINT)
+			{
+				cprintf("CreateWindowEx failed." ~
+						" (exStyle=0x%X, className=`%.*s`, caption=`%.*s`, style=0x%X, x=%d, y=%d, width=%d, height=%d," ~
+						" parent=0x%X, menu=0x%X, inst=0x%X, param=0x%X)\n",
+						cp.exStyle, cp.className.length.toI32, cp.className.ptr, cp.caption.length.toI32, cp.caption.ptr, cp.style, cp.x, cp.y, cp.width, cp.height,
+						cast(uint)cp.parent, cast(uint)cp.menu, cast(uint)cp.inst, cast(uint)cp.param);
+			}
+			
+			debug
+			{
+				er = std.string.format("CreateWindowEx failed {className=%s;exStyle=0x%X;style=0x%X;parent=0x%X;menu=0x%X;inst=0x%X;}",
+					cp.className, cp.exStyle, cp.style, cast(void*)cp.parent, cast(void*)cp.menu, cast(void*)cp.inst);
+			}
+			
+			goto create_err;
+		}
+		
+		if(vis)
+			doShow(); // Properly fires onVisibleChanged.
 		
 		//onHandleCreated(EventArgs.empty); // Called in WM_CREATE now.
 	}
@@ -6655,7 +6653,7 @@ class Control: DObject, IWindow // docmain
 		if(!(ctrlStyle & ControlStyles.CACHE_TEXT))
 			wtext = _fetchText();
 		
-		//wclassStyle = _fetchClassLongPtr(); // ?
+		//wclassStyle = _fetchClassLongPtr(); // TODO: ?
 		
 		// Fetch children.
 		Control[] ccs;
@@ -6810,7 +6808,7 @@ class Control: DObject, IWindow // docmain
 	void initLayout()
 	{
 		assert(wparent !is null);
-		if(visible && created) // ?
+		if(visible && created) // TODO: ?
 		{
 			wparent.vchanged();
 			wparent.alayout(this);
@@ -6821,7 +6819,7 @@ class Control: DObject, IWindow // docmain
 	///
 	void onLayout(LayoutEventArgs lea)
 	{
-		// Note: exception could cause failure to restore.
+		// NOTE: exception could cause failure to restore.
 		//suspendLayout();
 		cbits |= CBits.IN_LAYOUT;
 		
@@ -6842,7 +6840,7 @@ class Control: DObject, IWindow // docmain
 			
 			//Rect prevctrlbounds;
 			//prevctrlbounds = ctrl.bounds;
-			//ctrl.suspendLayout(); // Note: exception could cause failure to restore.
+			//ctrl.suspendLayout(); // NOTE: exception could cause failure to restore.
 			switch(ctrl.sdock)
 			{
 				case DockStyle.NONE:
@@ -7146,7 +7144,7 @@ class Control: DObject, IWindow // docmain
 		bool _allowDrop = false;
 	}
 	
-	// Note: WS_VISIBLE is not reliable.
+	// NOTE: WS_VISIBLE is not reliable.
 	LONG wstyle = WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS; // Child, visible and enabled by default.
 	LONG wexstyle;
 	LONG wclassStyle = WNDCLASS_STYLE;
@@ -7458,7 +7456,7 @@ package abstract class ControlSuperClass: Control // dapi.d
 			case WM_SYSKEYDOWN:
 			case WM_SYSKEYUP:
 			case WM_SYSCHAR:
-			//case WM_IMECHAR: // ?
+			//case WM_IMECHAR: // TODO: ?
 				prevWndProc(m);
 				break;
 			
@@ -7640,7 +7638,7 @@ class ScrollableControl: Control // docmain
 					scc = cast(ScrollableControl)cc;
 					if(scc)
 					{
-						if(scc.autoScale) // ?
+						if(scc.autoScale) // TODO: ?
 						{
 							xscale(scc, scc.autoScaleBaseSize);
 							scc.autoScaleBaseSize = toScale;
@@ -7673,7 +7671,7 @@ class ScrollableControl: Control // docmain
 	{
 		super.onControlAdded(ea);
 		
-		if(created) // ?
+		if(created) // TODO: ?
 		if(isHandleCreated)
 		{
 			auto sc = cast(ScrollableControl)ea.control;

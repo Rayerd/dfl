@@ -219,7 +219,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	
-	// Note: the following 2 functions aren't completely accurate;
+	// NOTE: the following 2 functions aren't completely accurate;
 	// it sounds like it should return the center point, but it
 	// returns the point that would center the current form.
 	
@@ -292,14 +292,14 @@ class Form: ContainerControl, IDialogResult // docmain
 	{
 		super.createParams(cp);
 		
+		cp.className = FORM_CLASSNAME;
+		cp.menu = wmenu ? wmenu.handle : HMENU.init;
+		
 		Control cwparent;
 		if(cp.style & WS_CHILD)
 			cwparent = wparent;
 		else
 			cwparent = wowner;
-		
-		cp.className = FORM_CLASSNAME;
-		cp.menu = wmenu ? wmenu.handle : HMENU.init;
 		
 		//cp.parent = wparent ? wparent.handle : HWND.init;
 		//if(!(cp.style & WS_CHILD))
@@ -312,7 +312,14 @@ class Form: ContainerControl, IDialogResult // docmain
 			if(!cp.parent && !showInTaskbar)
 				cp.parent = getParkHwnd();
 		}
-		
+		debug(APP_PRINT)
+		{
+			if (cp.parent && !IsWindow(cp.parent))
+				cprintf("cp.parent is set but not a valid window!\n");
+			if (!cp.parent)
+				cprintf("cp.parent is null!\n");
+		}
+
 		if(!recreatingHandle)
 		{
 			switch(startpos)
@@ -386,7 +393,7 @@ class Form: ContainerControl, IDialogResult // docmain
 			/+
 			create_err:
 			throw new DflException("Form creation failure");
-			//throw new DflException(Object.toString() ~ " creation failure"); // ?
+			//throw new DflException(Object.toString() ~ " creation failure"); // TODO: ?
 			+/
 			debug
 			{
@@ -408,7 +415,7 @@ class Form: ContainerControl, IDialogResult // docmain
 					kmsg ~= " - " ~ er;
 			}
 			throw new DflException(kmsg);
-			//throw new DflException(Object.toString() ~ " creation failure"); // ?
+			//throw new DflException(Object.toString() ~ " creation failure"); // TODO: ?
 		}
 		
 		// Need the owner's handle to exist.
@@ -428,41 +435,49 @@ class Form: ContainerControl, IDialogResult // docmain
 		createParams(cp);
 		assert(!isHandleCreated); // Make sure the handle wasn't created in createParams().
 		
-		with(cp)
+		wtext = cp.caption;
+		wrect = Rect(cp.x, cp.y, cp.width, cp.height); // Avoid CW_USEDEFAULT problems. This gets updated in WM_CREATE.
+		wclassStyle = cp.classStyle;
+		wexstyle = cp.exStyle;
+		wstyle = cp.style;
+		
+		// Use local var to avoid changing -cp- at this point.
+		int ly = cp.y;
+		
+		// Delay setting visible.
+		//vis = wstyle;
+		vis = cbits;
+		vis |= CBits.FVISIBLE;
+		if(!(vis & CBits.VISIBLE))
+			vis &= ~CBits.FVISIBLE;
+		if(cp.x == CW_USEDEFAULT)
+			ly = SW_HIDE;
+		
+		Application.creatingControl(this);
+		debug(APP_PRINT)
 		{
-			wtext = caption;
-			//wrect = Rect(x, y, width, height); // Avoid CW_USEDEFAULT problems. This gets updated in WM_CREATE.
-			wclassStyle = classStyle;
-			wexstyle = exStyle;
-			wstyle = style;
-			
-			// Use local var to avoid changing -cp- at this point.
-			int ly;
-			ly = y;
-			
-			// Delay setting visible.
-			//vis = wstyle;
-			vis = cbits;
-			vis |= CBits.FVISIBLE;
-			if(!(vis & CBits.VISIBLE))
-				vis &= ~CBits.FVISIBLE;
-			if(x == CW_USEDEFAULT)
-				ly = SW_HIDE;
-			
-			Application.creatingControl(this);
-			hwnd = dfl.internal.utf.createWindowEx(exStyle, className, caption, wstyle & ~WS_VISIBLE,
-				x, ly, width, height, parent, menu, inst, param);
-			if(!hwnd)
+			cprintf("form classname: %.*s\n", cp.className.length.toI32, cp.className.ptr);
+		}
+		hwnd = dfl.internal.utf.createWindowEx(cp.exStyle, cp.className, cp.caption, wstyle & ~WS_VISIBLE,
+			cp.x, ly, cp.width, cp.height, cp.parent, cp.menu, cp.inst, cp.param);
+		assert(hwnd);
+		assert(IsWindow(hwnd));
+		debug (APP_PRINT)
+		{
+			char[256] classBuf;
+			GetClassNameA(GetAncestor(hwnd, GA_ROOT), classBuf.ptr, classBuf.length);
+			cprintf("root className: %.*s\n", classBuf.length.toI32, classBuf.ptr);
+		}
+		if(!hwnd)
+		{
+			debug
 			{
-				debug
-				{
-					static import std.string;
-					er = std.string.format(
-						"CreateWindowEx failed {className=%s;exStyle=0x%X;style=0x%X;parent=0x%X;menu=0x%X;inst=0x%X;}",
-						className, exStyle, style, cast(void*)parent, cast(void*)menu, cast(void*)inst);
-				}
-				goto create_err;
+				static import std.string;
+				er = std.string.format(
+					"CreateWindowEx failed {className=%s;exStyle=0x%X;style=0x%X;parent=0x%X;menu=0x%X;inst=0x%X;}",
+					cp.className, cp.exStyle, cp.style, cast(void*)cp.parent, cast(void*)cp.menu, cast(void*)cp.inst);
 			}
+			goto create_err;
 		}
 		
 		if(setLayeredWindowAttributes)
@@ -502,7 +517,7 @@ class Form: ContainerControl, IDialogResult // docmain
 		{
 			if(autoScale)
 			{
-				//Application.doEvents(); // ?
+				//Application.doEvents(); // TODO: ?
 				
 				_scale();
 				
@@ -527,6 +542,17 @@ class Form: ContainerControl, IDialogResult // docmain
 			}
 		}
 		
+		debug(APP_PRINT)
+		{
+			if (!hwnd)
+				cprintf("Invalid hwnd!\n");
+			if (!IsWindow(hwnd))
+				cprintf("Invalid Window!\n");
+			auto proc = GetWindowLongPtr(hwnd, GWLP_WNDPROC);
+			if (!proc)
+				cprintf("Invalid WNDPROC for hwnd!\n");
+		}
+
 		//assert(!visible);
 		//if(vis & WS_VISIBLE)
 		//if(vis & CBits.VISIBLE)
@@ -541,7 +567,7 @@ class Form: ContainerControl, IDialogResult // docmain
 			{
 				case FormWindowState.NORMAL: show_normal:
 					ShowWindow(hwnd, SW_SHOW);
-					// Possible to-do: see if non-MDI is "main form" and use SHOWNORMAL or doShow.
+					// TODO: Possible To-Do: see if non-MDI is "main form" and use SHOWNORMAL or doShow.
 					break;
 				case FormWindowState.MAXIMIZED:
 					ShowWindow(hwnd, SW_SHOWMAXIMIZED);
@@ -951,7 +977,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	///
-	// Note: keeping this here for NO_MDI to keep the vtable.
+	// NOTE: keeping this here for NO_MDI to keep the vtable.
 	protected MdiClient createMdiClient()
 	{
 		version(NO_MDI)
@@ -1266,22 +1292,22 @@ class Form: ContainerControl, IDialogResult // docmain
 			wmenu = inMenu;
 			_recalcClientSize();
 		}
-		
-		/// ditto
-		final @property MainMenu menu() // getter
-		{
-			return wmenu;
-		}
-		
-		
-		/+
-		///
-		final @property MainMenu mergedMenu() // getter
-		{
-			// Return menu belonging to active MDI child if maximized ?
-		}
-		+/
 	}
+		
+	/// ditto
+	final @property MainMenu menu() // getter
+	{
+		return wmenu;
+	}
+	
+	
+	/+
+	///
+	final @property MainMenu mergedMenu() // getter
+	{
+		// Return menu belonging to active MDI child if maximized ?
+	}
+	+/
 	
 	
 	///
@@ -1829,8 +1855,8 @@ class Form: ContainerControl, IDialogResult // docmain
 				{
 					ShowWindow(handle, SW_MINIMIZE);
 					onVisibleChanged(EventArgs.empty);
-					cbits |= CBits.VISIBLE; // ?
-					wstyle |= WS_VISIBLE; // ?
+					cbits |= CBits.VISIBLE; // TODO: ?
+					wstyle |= WS_VISIBLE; // TODO: ?
 					return;
 				}+/
 			}
@@ -1877,7 +1903,7 @@ class Form: ContainerControl, IDialogResult // docmain
 			return;
 		
 		//if(!visible)
-		//	show(); // ?
+		//	show(); // TODO: ?
 		
 		version(NO_MDI)
 		{
@@ -2103,7 +2129,7 @@ class Form: ContainerControl, IDialogResult // docmain
 				if(!Application.doEvents())
 				{
 					wmodal = false;
-					//dialogResult = DialogResult.ABORT; // ?
+					//dialogResult = DialogResult.ABORT; // TODO: ?
 					// Leave it at DialogResult.NONE ?
 					break;
 				}
@@ -3002,7 +3028,7 @@ class Form: ContainerControl, IDialogResult // docmain
 				}
 				return;
 			
-			// Note: WM_MDIACTIVATE here is to the MDI child forms.
+			// NOTE: WM_MDIACTIVATE here is to the MDI child forms.
 			case WM_MDIACTIVATE:
 				if(cast(HWND)msg.lParam == hwnd)
 				{
@@ -3330,7 +3356,7 @@ class Form: ContainerControl, IDialogResult // docmain
 								//cprintf("mnemonic for ");
 								if(!cc)
 								{
-									// To-do: check dlgcode for static/button and process.
+									// TODO: check dlgcode for static/button and process.
 									return false;
 								}
 								//cprintf("'%.*s' ", cc.name);
