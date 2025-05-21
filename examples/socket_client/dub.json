@@ -1,0 +1,13 @@
+{
+	"authors": ["haru-s"],
+	"copyright": "Copyright (C) 2025 haru-s",
+	"description": "DFL sample code.",
+	"name": "socket_client_sample",
+	"targetType": "executable",
+	"targetPath": "bin",
+	"dependencies": {
+		"dfl": {
+			"path": "../../../dfl"
+		}
+	}
+}
