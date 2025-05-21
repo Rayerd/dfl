@@ -149,7 +149,7 @@ if not "%dfl_release_flags%" == "" goto dfl_release_flags_set
 
 
 @rem   @del %dfl_objs%
-@del *.obj
+@del source\dfl\*.obj
 
 @rem   For DUB.
 @popd
