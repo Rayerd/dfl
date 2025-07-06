@@ -17,41 +17,43 @@ void main()
 	auto socket = new AsyncTcpSocket(address.addressFamily());
 
 	// Register socket event for client.
-	socket.event(
-		SocketEventType.CONNECT | SocketEventType.READ | SocketEventType.CLOSE,
-		(Socket sock, SocketEventType event, int err) {
-			if (err != 0)
-			{
-				writeln("Socket error: ", err);
-				return;
-			}
-
-			switch (event)
-			{
-			case SocketEventType.CONNECT:
-				writeln("Connected!");
-				// Send text after connected.
-				sock.send("Hello from D client!".dup);
-				break;
-
-			case SocketEventType.READ:
-				ubyte[1024] buf;
-				auto len = sock.receive(buf[]);
-				if (len > 0)
-				{
-					writeln("Received: ", cast(string)buf[0 .. len]);
-				}
-				break;
-
-			case SocketEventType.CLOSE:
-				writeln("Connection closed by server.");
-				break;
-
-			default:
-				break;
-			}
+	socket.connected ~= (AsyncSocket sock, AsyncSocketEventArgs ea) {
+		if (ea.error != 0)
+		{
+			writeln("Socket error: ", ea.error);
+			return;
 		}
-	);
+		writeln("Connected!");
+		// Send text after connected.
+		sock.send("Hello from D client!".dup);
+		sock.send(" / Send messages from Client.".dup);
+		sock.send(" / This is last message.".dup);
+	};
+
+	socket.read ~= (AsyncSocket sock, AsyncSocketEventArgs ea) {
+		if (ea.error != 0)
+		{
+			writeln("Socket error: ", ea.error);
+			return;
+		}
+		ubyte[1024] buf;
+		ptrdiff_t len = sock.receive(buf[]);
+		if (len > 0)
+		{
+			writeln("Received: ", cast(string)buf[0 .. len]);
+		}
+	};
+
+	socket.closed ~= (AsyncSocket sock, AsyncSocketEventArgs ea) {
+		if (ea.error != 0)
+		{
+			writeln("Socket error: ", ea.error);
+			return;
+		}
+		writeln("Connection closed by server.");
+	};
+
+	socket.asyncSelect();
 
 	// Start connect.
 	socket.connect(address);

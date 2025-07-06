@@ -10,10 +10,32 @@ else
 	pragma(lib, "dfl.lib");
 }
 
-// version = DONT_USE_SOCKET_QUEUE;
-
 void main()
 {
+	// Sample 1.
+	GetHost host1 = asyncGetHostByName("localhost", (InternetHost inetHost, int err){
+		if (err != 0)
+		{
+			writeln("GetHostByName error: ", err);
+			return;
+		}
+		else
+			writeln(inetHost.name);
+	});
+	
+	// Sample 2.
+	// 0x7F_00_00_01 is 127.0.0.1
+	GetHost host2 = asyncGetHostByAddr(0x7F_00_00_01, (InternetHost inetHost, int err){
+		if (err != 0)
+		{
+			writeln("GetHostByAddr error: ", err);
+			return;
+		}
+		else
+			writeln(inetHost.name);
+	});
+
+	// Sample 3.
 	// Create server socket.
 	auto server = new AsyncTcpSocket(AddressFamily.INET);
 	auto bindAddr = new InternetAddress("0.0.0.0", 12345);
@@ -23,10 +45,8 @@ void main()
 	writeln("Server listening on port 12345...");
 
 	// Register socket event for server.
-	version (DONT_USE_SOCKET_QUEUE)
-		registerSocketEvent1(server);
-	else
-		registerSocketEvent2(server);
+	// registerSocketEvent1(server);
+	registerSocketEvent2(server);
 
 	// Event loop.
 	Application.run();
@@ -34,93 +54,116 @@ void main()
 
 void registerSocketEvent1(AsyncSocket server)
 {
-	server.event(
-		SocketEventType.ACCEPT,
-		(Socket sock, SocketEventType event, int err) {
-			if (err != 0)
+	server.accepted ~= (AsyncSocket socket, AsyncSocketEventArgs sea) {
+		if (sea.error != 0)
+		{
+			writeln("Accept error: ", sea.error);
+			return;
+		}
+
+		// Get connected socket.
+		AsyncSocket client = socket.accept();
+		writeln("Client connected: ", client.remoteAddress());
+
+		// Register event for client.
+		client.read ~= (AsyncSocket socket, AsyncSocketEventArgs ea) {
+			if (ea.error != 0)
 			{
-				writeln("Accept error: ", err);
+				writeln("Client socket error: ", ea.error);
 				return;
 			}
+			enum BufferSize = 1024;
+			ubyte[BufferSize] buf;
+			ptrdiff_t len = socket.receive(buf[]);
+			if (len > 0)
+			{
+				auto msg = cast(string)buf[0 .. len];
+				writeln("Received from client: ", msg);
 
-			// Get connected socket.
-			AsyncTcpSocket client = cast(AsyncTcpSocket)sock.accept();
-			writeln("Client connected: ", client.remoteAddress());
+				// Echo.
+				socket.send(buf[0 .. len]);
+			}
+		};
+		
+		client.written ~= (AsyncSocket sock, AsyncSocketEventArgs ea) {
+			if (ea.error != 0)
+			{
+				writeln("Client socket error: ", ea.error);
+				return;
+			}
+			writeln("Client done wrote.");
+		};
 
-			// Register event for client.
-			client.event(
-				SocketEventType.READ | SocketEventType.CLOSE,
-				(s, ev, e) {
-					if (e != 0)
-					{
-						writeln("Client socket error: ", e);
-						return;
-					}
+		client.closed ~= (AsyncSocket socket, AsyncSocketEventArgs ea) {
+			if (ea.error != 0)
+			{
+				writeln("Client socket error: ", ea.error);
+				return;
+			}
+			writeln("Client disconnected.");
+		};
 
-					switch (ev)
-					{
-					case SocketEventType.READ:
-						ubyte[1024] buf;
-						auto len = s.receive(buf[]);
-						if (len > 0)
-						{
-							auto msg = cast(string)buf[0 .. len];
-							writeln("Received from client: ", msg);
+		client.asyncSelect();
+	};
 
-							// Echo
-							s.send(buf[0 .. len]);
-						}
-						break;
-
-					case SocketEventType.CLOSE:
-						writeln("Client disconnected.");
-						break;
-					
-					default:
-						break;
-					}
-				}
-			);
-		}
-	);
+	server.asyncSelect();
 }
 
 void registerSocketEvent2(AsyncSocket server)
 {
-	server.event(
-		SocketEventType.ACCEPT,
-		(Socket sock, SocketEventType event, int err) {
-			if (err != 0)
+	server.accepted ~= (AsyncSocket sock, AsyncSocketEventArgs sea) {
+		if (sea.error != 0)
+		{
+			writeln("Accept error: ", sea.error);
+			return;
+		}
+
+		// Get connected socket.
+		AsyncTcpSocket client = cast(AsyncTcpSocket)sock.accept();
+		writeln("Client connected: ", client.remoteAddress());
+
+		// Register event for client.
+		SocketQueue queue = new SocketQueue(client);
+
+		client.read ~= (AsyncSocket sock, AsyncSocketEventArgs ea) {
+			if (ea.error != 0)
 			{
-				writeln("Accept error: ", err);
+				writeln("Client socket error: ", ea.error);
 				return;
 			}
+			queue.readEvent();
+			if (queue.receiveBytes > 0)
+			{
+				auto msg = cast(string)queue.receive();
+				writeln("Received from client: ", msg);
 
-			// Get connected socket.
-			AsyncTcpSocket client = cast(AsyncTcpSocket)sock.accept();
-			writeln("Client connected: ", client.remoteAddress());
+				// Echo.
+				queue.send(msg.dup);
+				// Forced write.
+				queue.writeEvent();
+			}
+		};
 
-			// Register event for client.
-			SocketQueue queue = new SocketQueue(client);
-			client.event(
-				SocketEventType.READ | SocketEventType.CLOSE,
-				(Socket socket, SocketEventType event, int err) {
-					queue.event(socket, event, err);
+		client.written ~= (AsyncSocket sock, AsyncSocketEventArgs ea) {
+			if (ea.error != 0)
+			{
+				writeln("Client socket error: ", ea.error);
+				return;
+			}
+			writeln("Client done wrote.");
+		};
 
-					if (event == SocketEventType.READ && queue.receiveBytes > 0)
-					{
-						auto msg = cast(string)queue.receive();
-						writeln("Received from client: ", msg);
+		client.closed ~= (AsyncSocket sock, AsyncSocketEventArgs ea) {
+			if (ea.error != 0)
+			{
+				writeln("Client socket error: ", ea.error);
+				return;
+			}
+			writeln("Client disconnected.");
+		};
 
-						// Echo
-						queue.send(msg.dup);
-					}
-					else if (event == SocketEventType.CLOSE)
-					{
-						writeln("Client disconnected.");
-					}
-				}
-			);
-		}
-	);
+		client.asyncSelect();
+	};
+
+	server.asyncSelect();
 }

@@ -7,6 +7,7 @@ module dfl.socket;
 
 import dfl.application;
 import dfl.base;
+import dfl.event;
 
 import dfl.internal.clib;
 import dfl.internal.dlib;
@@ -51,29 +52,29 @@ enum SocketEventType
 {
 	NONE = 0, ///
 	
-	READ =       FD_READ, /// ditto
-	WRITE =      FD_WRITE, /// ditto
-	OOB =        FD_OOB, /// ditto
-	ACCEPT =     FD_ACCEPT, /// ditto
-	CONNECT =    FD_CONNECT, /// ditto
-	CLOSE =      FD_CLOSE, /// ditto
+	READ             = FD_READ, /// ditto
+	WRITE            = FD_WRITE, /// ditto
+	OUT_OF_BAND_DATA = FD_OOB, /// ditto
+	ACCEPT           = FD_ACCEPT, /// ditto
+	CONNECT          = FD_CONNECT, /// ditto
+	CLOSE            = FD_CLOSE, /// ditto
 	
-	QOS =        FD_QOS,
-	GROUP_QOS =  FD_GROUP_QOS,
+	QUALITY_OF_SERVICE       = FD_QOS,
+	GROUP_QUALITY_OF_SERVICE = FD_GROUP_QOS,
 }
 deprecated alias EventType = SocketEventType;
-
 
 ///
 // -err- will be 0 if no error.
 // -type- will always contain only one flag.
-alias RegisterEventCallback = void delegate(Socket sock, SocketEventType type, int err);
+deprecated alias RegisterEventCallback = void delegate(Socket sock, SocketEventType type, int err);
 
 
+///
 // Calling this twice on the same socket cancels out previously
 // registered events for the socket.
 // Requires Application.run() or Application.doEvents() loop.
-void registerEvent(Socket sock, SocketEventType events, RegisterEventCallback callback)
+deprecated void registerEvent(AsyncSocket sock, SocketEventType events, RegisterEventCallback callback)
 {
 	assert(sock !is null, "registerEvent: socket cannot be null");
 	assert(callback !is null, "registerEvent: callback cannot be null");
@@ -85,16 +86,58 @@ void registerEvent(Socket sock, SocketEventType events, RegisterEventCallback ca
 	
 	if (WSAAsyncSelect(getSocketHandle(sock), g_hwNet, WM_DFL_NETEVENT, cast(int)events) == SOCKET_ERROR)
 		throw new DflException("Unable to register socket events");
-	
+
 	EventInfo ei;
 	ei.sock = sock;
 	ei.callback = callback;
+	ei.exception = null;
 
 	g_allEvents[getSocketHandle(sock)] = ei;
 }
 
 
-int unregisterEvent(Socket sock) @trusted @nogc nothrow
+///
+// Calling this twice on the same socket cancels out previously
+// registered events for the socket.
+// Requires Application.run() or Application.doEvents() loop.
+void asyncSelect(AsyncSocket sock)
+{
+	assert(sock !is null, "registerEvent: socket cannot be null");
+	
+	if (!g_hwNet)
+		_init();
+	
+	sock.blocking = false; // So the getter will be correct.
+
+	SocketEventType events;
+	if (sock.read.hasHandlers)
+		events |= SocketEventType.READ;
+	if (sock.written.hasHandlers)
+		events |= SocketEventType.WRITE;
+	if (sock.outOfBandData.hasHandlers)
+		events |= SocketEventType.OUT_OF_BAND_DATA;
+	if (sock.accepted.hasHandlers)
+		events |= SocketEventType.ACCEPT;
+	if (sock.connected.hasHandlers)
+		events |= SocketEventType.CONNECT;
+	if (sock.closed.hasHandlers)
+		events |= SocketEventType.CLOSE;
+	if (sock.qualityOfService.hasHandlers)
+		events |= SocketEventType.QUALITY_OF_SERVICE;
+
+	if (WSAAsyncSelect(getSocketHandle(sock), g_hwNet, WM_DFL_NETEVENT, cast(int)events) == SOCKET_ERROR)
+		throw new DflException("Unable to register socket events");
+
+	EventInfo ei;
+	ei.sock = sock;
+	ei.callback = null; // TODO: Remove this.
+	ei.exception = null;
+
+	g_allEvents[getSocketHandle(sock)] = ei;
+}
+
+///
+int unregisterEvent(AsyncSocket sock) @trusted @nogc nothrow
 {
 	if (WSAAsyncSelect(getSocketHandle(sock), g_hwNet, 0, 0) != 0)
 		return SOCKET_ERROR; // Unable to register socket events
@@ -113,6 +156,7 @@ class AsyncSocket: Socket // docmain
 	{
 		super(af, type, protocol);
 		super.blocking = false;
+		registerEvent(this, SocketEventType.NONE, (Socket sock, SocketEventType type, int err){});
 	}
 	
 	/// ditto
@@ -120,6 +164,7 @@ class AsyncSocket: Socket // docmain
 	{
 		super(af, type);
 		super.blocking = false;
+		registerEvent(this, SocketEventType.NONE, (Socket sock, SocketEventType type, int err){});
 	}
 	
 	/// ditto
@@ -127,6 +172,7 @@ class AsyncSocket: Socket // docmain
 	{
 		super(af, type, protocolName);
 		super.blocking = false;
+		registerEvent(this, SocketEventType.NONE, (Socket sock, SocketEventType type, int err){});
 	}
 	
 	/// ditto
@@ -137,12 +183,26 @@ class AsyncSocket: Socket // docmain
 	
 	
 	///
-	void event(SocketEventType events, RegisterEventCallback callback)
+	override AsyncSocket accept() @trusted
+	{
+		return cast(AsyncSocket)super.accept();
+	}
+
+
+	///
+	deprecated void event(SocketEventType events, RegisterEventCallback callback)
 	{
 		registerEvent(this, events, callback);
 	}
+
+
+	///
+	void asyncSelect()
+	{
+		.asyncSelect(this);
+	}
 	
-	
+
 	///
 	// See std.socket.Socket.accepting().
 	protected override AsyncSocket accepting()
@@ -174,6 +234,78 @@ class AsyncSocket: Socket // docmain
 			assert(0);
 	}
 	
+
+	Event!(AsyncSocket, AsyncSocketEventArgs) read; /// FD_READ
+	Event!(AsyncSocket, AsyncSocketEventArgs) written; /// FD_WRITE
+	Event!(AsyncSocket, AsyncSocketEventArgs) outOfBandData; /// FD_OOB
+	Event!(AsyncSocket, AsyncSocketEventArgs) accepted; /// FD_ACCEPT
+	Event!(AsyncSocket, AsyncSocketEventArgs) connected; /// FD_CONNECT
+	Event!(AsyncSocket, AsyncSocketEventArgs) closed; /// FD_CLOSE
+	Event!(AsyncSocket, AsyncSocketEventArgs) qualityOfService; /// FD_QOS
+
+	
+	///
+	void onRead(AsyncSocket as, AsyncSocketEventArgs ea)
+	{
+		read(as, ea);
+	}
+
+
+	///
+	void onWritten(AsyncSocket as, AsyncSocketEventArgs ea)
+	{
+		written(as, ea);
+	}
+
+
+	///
+	void onOutOfBandData(AsyncSocket as, AsyncSocketEventArgs ea)
+	{
+		outOfBandData(as, ea);
+	}
+
+
+	///
+	void onAccepted(AsyncSocket as, AsyncSocketEventArgs ea)
+	{
+		accepted(as, ea);
+	}
+
+
+	///
+	void onConnected(AsyncSocket as, AsyncSocketEventArgs ea)
+	{
+		connected(as, ea);
+	}
+
+
+	///
+	void onClosed(AsyncSocket as, AsyncSocketEventArgs ea)
+	{
+		closed(as, ea);
+	}
+
+
+	///
+	void onQualityOfService(AsyncSocket as, AsyncSocketEventArgs ea)
+	{
+		qualityOfService(as, ea);
+	}
+}
+
+
+/// 
+class AsyncSocketEventArgs : EventArgs
+{
+	///
+	this(SocketEventType eventType, int error)
+	{
+		this.eventType = eventType;
+		this.error = error;
+	}
+
+	SocketEventType eventType; ///
+	int error; ///
 }
 
 
@@ -338,28 +470,28 @@ class GetHost // docmain
 	///
 	void cancel()
 	{
-		WSACancelAsyncRequest(h);
-		h = null;
+		WSACancelAsyncRequest(_handle);
+		_handle = null;
 	}
 	
 	
 private:
-	HANDLE h;
-	GetHostCallback callback;
-	DThrowable exception;
-	ubyte[/+MAXGETHOSTSTRUCT+/ 1024] hostentBytes;
+	HANDLE _handle;
+	GetHostCallback _callback;
+	DThrowable _exception;
+	ubyte[/+MAXGETHOSTSTRUCT+/ 1024] _hostentBytes;
 	
 	
 	///
 	void _gotEvent(LPARAM lparam)
 	{
-		h = null;
+		_handle = null;
 		
 		int err = HIWORD(lparam);
 		if (err)
-			callback(null, err);
+			_callback(null, err);
 		else
-			callback(new _InternetHost(hostentBytes.ptr), 0);
+			_callback(new _InternetHost(_hostentBytes.ptr), 0);
 	}
 	
 	
@@ -377,13 +509,13 @@ GetHost asyncGetHostByName(Dstring name, GetHostCallback callback) // docmain
 		_init();
 	
 	GetHost result = new GetHost;
-	HANDLE h = WSAAsyncGetHostByName(g_hwNet, WM_DFL_HOSTEVENT, unsafeStringz(name), cast(char*)result.hostentBytes, result.hostentBytes.length);
-	if (!h)
+	HANDLE handle = WSAAsyncGetHostByName(g_hwNet, WM_DFL_HOSTEVENT, unsafeStringz(name), cast(char*)result._hostentBytes, result._hostentBytes.length);
+	if (!handle)
 		_getHostErr();
 	
-	result.h = h;
-	result.callback = callback;
-	g_allGetHosts[h] = result;
+	result._handle = handle;
+	result._callback = callback;
+	g_allGetHosts[handle] = result;
 	
 	return result;
 }
@@ -398,13 +530,13 @@ GetHost asyncGetHostByAddr(uint32_t addr, GetHostCallback callback) // docmain
 	GetHost result = new GetHost;
 	version(LittleEndian)
 		addr = bswap(addr);
-	HANDLE h = WSAAsyncGetHostByAddr(g_hwNet, WM_DFL_HOSTEVENT, cast(char*)&addr, addr.sizeof, AddressFamily.INET, cast(char*)result.hostentBytes, result.hostentBytes.length);
-	if (!h)
+	HANDLE handle = WSAAsyncGetHostByAddr(g_hwNet, WM_DFL_HOSTEVENT, cast(char*)&addr, addr.sizeof, AddressFamily.INET, cast(char*)result._hostentBytes, result._hostentBytes.length);
+	if (!handle)
 		_getHostErr();
 	
-	result.h = h;
-	result.callback = callback;
-	g_allGetHosts[h] = result;
+	result._handle = handle;
+	result._callback = callback;
+	g_allGetHosts[handle] = result;
 	
 	return result;
 }
@@ -423,6 +555,10 @@ GetHost asyncGetHostByAddr(Dstring addr, GetHostCallback callback) // docmain
 ///
 class SocketQueue // docmain
 {
+	enum MAX_SEND_CHUNK_SIZE = 4096; //
+	enum MIN_READ_BUFFER_FREE_SPACE = 1024; //
+	enum READ_BUFFER_GROW_SIZE = 2048; //
+
 	///
 	this(Socket sock)
 	in
@@ -431,56 +567,47 @@ class SocketQueue // docmain
 	}
 	do
 	{
-		this.sock = sock;
+		this._sock = sock;
 	}
 	
 	
 	///
 	final @property Socket socket() // getter
 	{
-		return sock;
+		return _sock;
 	}
 	
 	
 	///
 	void reset()
 	{
-		writebuf = null;
-		readbuf = null;
+		_writebuf = null;
+		_readbuf = null;
 	}
-	
-	
-	/+
-	// DMD 0.92 says error: function toString overrides but is not covariant with toString
-	override Dstring toString()
-	{
-		return cast(Dstring)peek();
-	}
-	+/
 	
 	
 	///
 	void[] peek()
 	{
-		return readbuf[0 .. rpos];
+		return _readbuf[0 .. _readPosition];
 	}
 	
 	/// ditto
 	void[] peek(uint len)
 	{
-		if (len >= rpos)
+		if (len >= _readPosition)
 			return peek();
 		
-		return readbuf[0 .. len];
+		return _readbuf[0 .. len];
 	}
 	
 	
 	///
 	void[] receive()
 	{
-		ubyte[] result = readbuf[0 .. rpos];
-		readbuf = null;
-		rpos = 0;
+		ubyte[] result = _readbuf[0 .. _readPosition];
+		_readbuf = null;
+		_readPosition = 0;
 		
 		return result;
 	}
@@ -488,12 +615,12 @@ class SocketQueue // docmain
 	/// ditto
 	void[] receive(uint len)
 	{
-		if (len >= rpos)
+		if (len >= _readPosition)
 			return receive();
 		
-		ubyte[] result = readbuf[0 .. len];
-		readbuf = readbuf[len .. readbuf.length];
-		rpos -= len;
+		ubyte[] result = _readbuf[0 .. len];
+		_readbuf = _readbuf[len .. _readbuf.length];
+		_readPosition -= len;
 		
 		return result;
 	}
@@ -504,32 +631,33 @@ class SocketQueue // docmain
 	{
 		if (canwrite)
 		{
-			assert(!writebuf.length);
+			assert(!_writebuf.length);
 			
-			size_t st;
-			if (buf.length > 4096)
-				st = 4096;
-			else
-				st = buf.length;
+			const size_t sendChunkSize = {
+				if (buf.length > MAX_SEND_CHUNK_SIZE)
+					return MAX_SEND_CHUNK_SIZE;
+				else
+					return buf.length;
+			}();
 			
-			st = sock.send(buf[0 .. st]);
-			if (st > 0)
+			const size_t actuallySentBytes = _sock.send(buf[0 .. sendChunkSize]);
+			if (actuallySentBytes > 0)
 			{
-				if (buf.length - st)
+				if (actuallySentBytes < buf.length)
 				{
 					// dup so it can be appended to.
-					writebuf = (cast(ubyte[])buf)[st .. buf.length].dup;
+					_writebuf = (cast(ubyte[])buf)[actuallySentBytes .. buf.length].dup;
 				}
 			}
 			else
 			{
 				// dup so it can be appended to.
-				writebuf = (cast(ubyte[])buf).dup;
+				_writebuf = (cast(ubyte[])buf).dup;
 			}
 		}
 		else
 		{
-			writebuf ~= cast(ubyte[])buf;
+			_writebuf ~= cast(ubyte[])buf;
 		}
 	}
 	
@@ -538,7 +666,7 @@ class SocketQueue // docmain
 	// Number of bytes in send queue.
 	@property size_t sendBytes() // getter
 	{
-		return writebuf.length;
+		return _writebuf.length;
 	}
 	
 	
@@ -546,13 +674,13 @@ class SocketQueue // docmain
 	// Number of bytes in recv queue.
 	@property uint receiveBytes() // getter
 	{
-		return rpos;
+		return _readPosition;
 	}
 	
 	
 	///
 	// Same signature as RegisterEventCallback for simplicity.
-	void event(Socket _sock, SocketEventType type, int err)
+	deprecated void event(Socket sock, SocketEventType type, int err)
 	in
 	{
 		assert(_sock is sock);
@@ -578,12 +706,12 @@ class SocketQueue // docmain
 	// Call on a read event so that incoming data may be buffered.
 	void readEvent()
 	{
-		if (readbuf.length - rpos < 1024)
-			readbuf.length = readbuf.length + 2048;
+		if (_readbuf.length - _readPosition < MIN_READ_BUFFER_FREE_SPACE)
+			_readbuf.length = _readbuf.length + READ_BUFFER_GROW_SIZE;
 		
-		ptrdiff_t rd = sock.receive(readbuf[rpos .. readbuf.length]);
-		if (rd > 0)
-			rpos += cast(uint)rd;
+		const ptrdiff_t actuallyReceivedBytes = _sock.receive(_readbuf[_readPosition .. _readbuf.length]);
+		if (actuallyReceivedBytes > 0)
+			_readPosition += cast(uint)actuallyReceivedBytes;
 	}
 	
 	
@@ -591,32 +719,32 @@ class SocketQueue // docmain
 	// Call on a write event so that buffered outgoing data may be sent.
 	void writeEvent()
 	{
-		if (writebuf.length)
+		if (_writebuf.length > 0)
 		{
-			ubyte[] buf;
-			
-			if (writebuf.length > 4096)
-				buf = writebuf[0 .. 4096];
-			else
-				buf = writebuf;
-			
-			ptrdiff_t st = sock.send(buf);
-			if (st > 0)
-				writebuf = writebuf[st .. writebuf.length];
+			const ubyte[] buf = {
+				if (_writebuf.length > MAX_SEND_CHUNK_SIZE)
+					return _writebuf[0 .. MAX_SEND_CHUNK_SIZE];
+				else
+					return _writebuf;
+			}();
+
+			const ptrdiff_t actuallySentBytes = _sock.send(buf);
+			if (actuallySentBytes > 0)
+				_writebuf = _writebuf[actuallySentBytes .. _writebuf.length];
 		}
 	}
 	
 private:
-	ubyte[] writebuf; ///
-	ubyte[] readbuf; ///
-	uint rpos; ///
-	Socket sock; ///
+	ubyte[] _writebuf; ///
+	ubyte[] _readbuf; ///
+	uint _readPosition; ///
+	Socket _sock; ///
 	
 	
 	///
 	@property bool canwrite() // getter
 	{
-		return writebuf.length == 0;
+		return _writebuf.length == 0;
 	}
 }
 
@@ -626,7 +754,7 @@ private:
 ///
 struct EventInfo
 {
-	Socket sock;
+	AsyncSocket sock;
 	RegisterEventCallback callback;
 	DThrowable exception;
 }
@@ -652,7 +780,42 @@ extern(Windows) LRESULT netWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 				EventInfo ei = g_allEvents[cast(socket_t)wparam];
 				try
 				{
-					ei.callback(ei.sock, cast(SocketEventType)LOWORD(lparam), HIWORD(lparam));
+					// ei.callback(ei.sock, cast(SocketEventType)LOWORD(lparam), HIWORD(lparam));
+
+					AsyncSocket socket = ei.sock;
+					auto type = cast(SocketEventType)LOWORD(lparam);
+					int error = HIWORD(lparam);
+					auto ea = new AsyncSocketEventArgs(type, error);
+
+					final switch (type)
+					{
+						case SocketEventType.READ:
+							socket.onRead(socket, ea);
+							break;
+						case SocketEventType.WRITE:
+							socket.onWritten(socket, ea);
+							break;
+						case SocketEventType.OUT_OF_BAND_DATA:
+							socket.onOutOfBandData(socket, ea);
+							break;
+						case SocketEventType.ACCEPT:
+							socket.onAccepted(socket, ea);
+							break;
+						case SocketEventType.CONNECT:
+							socket.onConnected(socket, ea);
+							break;
+						case SocketEventType.CLOSE:
+							socket.onClosed(socket, ea);
+							break;
+						case SocketEventType.QUALITY_OF_SERVICE:
+							socket.onQualityOfService(socket, ea);
+							break;
+						case SocketEventType.NONE:
+							// TODO: Do nothing?
+							break;
+						case SocketEventType.GROUP_QUALITY_OF_SERVICE:
+							// TODO: Do nothing?
+					}
 				}
 				catch (DThrowable e)
 				{
@@ -673,7 +836,7 @@ extern(Windows) LRESULT netWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 				}
 				catch (DThrowable e)
 				{
-					gh.exception = e;
+					gh._exception = e;
 				}
 			}
 			break;
