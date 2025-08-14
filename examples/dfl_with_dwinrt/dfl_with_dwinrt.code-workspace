@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"d.projectImportPaths": [
+			"..\\..\\..\\dfl\\source"
+		],
+		"editor.folding": false
+	}
+}

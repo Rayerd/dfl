@@ -1,0 +1,18 @@
+{
+	"authors": ["haru-s"],
+	"copyright": "Copyright (C) 2025 haru-s",
+	"description": "dfl_with_dwinrt example code.",
+	"name": "dfl_with_dwinrt",
+	"targetType": "executable",
+	"targetPath": "bin",
+	"dependencies": {
+		"dfl": {
+			"path": "../../../dfl"
+		},
+		"dwinrt": {
+			"path": "../../../dwinrt"
+		}
+	},
+	"lflags-windows-x86_mscoff-dmd": ["/SUBSYSTEM:WINDOWS", "/ENTRY:mainCRTStartup"],
+	"lflags-windows-x86_64-dmd":     ["/SUBSYSTEM:WINDOWS", "/ENTRY:mainCRTStartup"]
+}
