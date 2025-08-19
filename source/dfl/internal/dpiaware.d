@@ -4,6 +4,9 @@ module dfl.internal.dpiaware;
 import core.sys.windows.windef;
 
 
+pragma(lib, "Shcore");
+
+
 ///
 enum USER_DEFAULT_SCREEN_DPI = 96;
 
