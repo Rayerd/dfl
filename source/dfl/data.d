@@ -1109,7 +1109,7 @@ final class ComToDdataObject: dfl.data.IDataObject
 	///
 	private bool _getDataPresent(int id)
 	{
-		static if (1) // Enumerates all format types on Clipboard.
+		static if (0) // Enumerates all format types on Clipboard.
 		{
 			static if (0)
 				_msgBox([id.intToString, DataFormats.getFormat(id).name] ~ getFormats());

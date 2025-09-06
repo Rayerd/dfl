@@ -83,7 +83,7 @@ class DragDropListBox : ListBox
 					if (this.selectedItems.contains(obj))
 					{
 						// On selected item.
-						if ((modifierKeys & Keys.CONTROL) == Keys.CONTROL)
+						if ((modifierKeys & Keys.CONTROL) != 0)
 						{
 							if (this.selectionMode == SelectionMode.ONE)
 							{
@@ -113,7 +113,7 @@ class DragDropListBox : ListBox
 						}
 						else if (this.selectionMode == SelectionMode.MULTI_SIMPLE || this.selectionMode == SelectionMode.MULTI_EXTENDED)
 						{
-							if ((modifierKeys & Keys.CONTROL) == Keys.CONTROL)
+							if ((modifierKeys & Keys.CONTROL) != 0)
 							{
 								// Selected within CONTROL key.
 								this.setSelected(idx, true);
@@ -284,15 +284,15 @@ class MainForm : Form
 			if (e.data.getDataPresent(DataFormats.fileDrop))
 			{
 				// Mouse cursor view setting on dragging.
-				if ((e.keyState & DragDropKeyStates.CONTROL_KEY) == DragDropKeyStates.CONTROL_KEY)
+				if ((e.keyState & DragDropKeyStates.CONTROL_KEY) != 0)
 				{
 					e.effect = DragDropEffects.COPY;
 				}
-				else if ((e.keyState & DragDropKeyStates.SHIFT_KEY) == DragDropKeyStates.SHIFT_KEY)
+				else if ((e.keyState & DragDropKeyStates.SHIFT_KEY) != 0)
 				{
 					e.effect = DragDropEffects.MOVE;
 				}
-				else if ((e.keyState & DragDropKeyStates.ALT_KEY) == DragDropKeyStates.ALT_KEY)
+				else if ((e.keyState & DragDropKeyStates.ALT_KEY) != 0)
 				{
 					e.effect = DragDropEffects.LINK;
 				}
@@ -351,7 +351,7 @@ class MainForm : Form
 			{
 				e.action = DragAction.CANCEL; // Cancel by ESC key.
 			}
-			else if ((e.keyState & DragDropKeyStates.RIGHT_MOUSE_BUTTON) == DragDropKeyStates.RIGHT_MOUSE_BUTTON)
+			else if ((e.keyState & DragDropKeyStates.RIGHT_MOUSE_BUTTON) != 0)
 			{
 				e.action = DragAction.CANCEL; // Cancel by right mouse button.
 			}
