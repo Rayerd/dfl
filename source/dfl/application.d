@@ -2213,7 +2213,7 @@ static this()
 	}
 	
 	//InitCommonControls(); // Done later. Needs to be linked with comctl32.lib.
-	OleInitialize(null); // Needs to be linked with ole32.lib.
+	Ole.initialize(); // Needs to be linked with ole32.lib.
 	
 	HMODULE user32 = GetModuleHandleA("user32.dll");
 	
@@ -2249,6 +2249,8 @@ static ~this()
 	
 	if(hmodRichtextbox)
 		FreeLibrary(hmodRichtextbox);
+	
+	Ole.unintialize();
 }
 
 
