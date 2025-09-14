@@ -7,7 +7,7 @@
             "request": "launch",
             "cwd": "${workspaceRoot}",
             "program": "./bin/notifyicon_sample.exe",
-            "console": "internalConsole"
+            "console": "integratedTerminal"
         }
     ]
 }

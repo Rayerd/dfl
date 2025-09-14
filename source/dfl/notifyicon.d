@@ -10,7 +10,6 @@ import dfl.base;
 import dfl.control;
 import dfl.drawing;
 import dfl.event;
-import dfl.form;
 import dfl.menu;
 
 import dfl.internal.dlib;
@@ -440,9 +439,9 @@ class NotifyIcon // docmain
 	private:
 	
 	DFL_NOTIFYICONDATA _nid; ///
-	int _tipLen = 0;         ///
+	int _tipLen = 0; ///
 	ContextMenu _cmenu; ///
-	Icon _icon;           /// Task tray icon
+	Icon _icon; /// Task tray icon
 	Icon _balloonTipIcon; /// Balloon tip icon
 	
 	
@@ -723,8 +722,6 @@ void _init()
 ///
 Rect getNotifyIconRect(HWND notifyIconControlHandle, ushort notifyIconID)
 {
-	import dfl.drawing;
-
 	NOTIFYICONIDENTIFIER nii;
 	nii.cbSize = nii.sizeof;
 	nii.guidItem = GUID(); // GUID_NULL
