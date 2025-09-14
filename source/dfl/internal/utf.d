@@ -55,7 +55,11 @@ else
 
 // Do not support Win9x.
 version = DFL_UNICODE;
-enum useUnicode = true;
+
+version(DFL_UNICODE)
+	enum useUnicode = true;
+else
+	enum useUnicode = false;
 
 package:
 
