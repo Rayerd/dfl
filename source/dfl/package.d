@@ -43,6 +43,7 @@ public import dfl.tabcontrol;
 public import dfl.textbox;
 public import dfl.textboxbase;
 public import dfl.timer;
+public import dfl.toastnotifier;
 public import dfl.toolbar;
 public import dfl.tooltip;
 public import dfl.trackbar;

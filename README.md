@@ -26,7 +26,10 @@ void main()
 ![screen shot](./image/welcomtodfl.png "screen shot")
 
 ## Recent major features
-- **Removed dependency on undeaD library.**
+- **Module "dfl.toastnotifier" is now comming.**
+	- ToastNotifier (with example)
+	- ToastNotifierLegacy (with example)
+- Removed dependency on undeaD library.
 - Windows OMF support has been removed (for DMD v2.109.0).
 - Registered DFL to DUB.
 - Supported multiple screens.
@@ -67,6 +70,7 @@ void main()
 ![screen shot](./examples/tablerenderer/image/screenshot.png "screen shot")
 ![screen shot](./examples/linegraphrenderer/image/screenshot.png "screen shot")
 ![screen shot](./examples/timechartrenderer/image/screenshot.png "screen shot")
+![screen shot](./examples/toastnotifier/image/screenshot.png "screen shot")
 
 ## Usage
 First, you make new DUB project:

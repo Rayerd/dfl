@@ -67,15 +67,15 @@ set VCCOMMON="%VCINSTALLDIR%\bin"
 
 @set PATH=%VCCOMMON%;%PATH%
 
-set dfl_files=package.d all.d base.d application.d internal/dlib.d internal/clib.d internal/utf.d internal/com.d internal/dpiaware.d control.d clippingform.d form.d registry.d drawing.d menu.d notifyicon.d commondialog.d filedialog.d folderdialog.d panel.d textboxbase.d textbox.d richtextbox.d picturebox.d listbox.d groupbox.d splitter.d usercontrol.d button.d label.d collections.d internal/winapi.d internal/wincom.d event.d socket.d timer.d environment.d messagebox.d tooltip.d combobox.d treeview.d tabcontrol.d colordialog.d listview.d data.d clipboard.d fontdialog.d progressbar.d resources.d statusbar.d imagelist.d toolbar.d trackbar.d sharedcontrol.d printing.d chart.d %_stdcwindowsd%
+set dfl_files=package.d all.d base.d application.d internal/dlib.d internal/clib.d internal/utf.d internal/com.d internal/dpiaware.d control.d clippingform.d form.d registry.d drawing.d menu.d notifyicon.d commondialog.d filedialog.d folderdialog.d panel.d textboxbase.d textbox.d richtextbox.d picturebox.d listbox.d groupbox.d splitter.d usercontrol.d button.d label.d collections.d internal/winapi.d internal/wincom.d event.d socket.d timer.d environment.d messagebox.d tooltip.d combobox.d treeview.d tabcontrol.d colordialog.d listview.d data.d clipboard.d fontdialog.d progressbar.d resources.d statusbar.d imagelist.d toolbar.d trackbar.d sharedcontrol.d printing.d chart.d toastnotifier.d %_stdcwindowsd%
 
-set dfl_objs=package.obj all.obj base.obj application.obj dlib.obj clib.obj utf.obj com.obj dpiaware.obj control.obj clippingform.obj form.obj registry.obj drawing.obj menu.obj notifyicon.obj commondialog.obj filedialog.obj folderdialog.obj panel.obj textboxbase.obj textbox.obj richtextbox.obj picturebox.obj listbox.obj groupbox.obj splitter.obj usercontrol.obj button.obj label.obj collections.obj winapi.obj wincom.obj event.obj socket.obj timer.obj environment.obj messagebox.obj tooltip.obj combobox.obj treeview.obj tabcontrol.obj colordialog.obj listview.obj data.obj clipboard.obj fontdialog.obj progressbar.obj resources.obj statusbar.obj imagelist.obj toolbar.obj trackbar.obj sharedcontrol.obj printing.obj chart.obj %_stdcwindowsobj%
+set dfl_objs=package.obj all.obj base.obj application.obj dlib.obj clib.obj utf.obj com.obj dpiaware.obj control.obj clippingform.obj form.obj registry.obj drawing.obj menu.obj notifyicon.obj commondialog.obj filedialog.obj folderdialog.obj panel.obj textboxbase.obj textbox.obj richtextbox.obj picturebox.obj listbox.obj groupbox.obj splitter.obj usercontrol.obj button.obj label.obj collections.obj winapi.obj wincom.obj event.obj socket.obj timer.obj environment.obj messagebox.obj tooltip.obj combobox.obj treeview.obj tabcontrol.obj colordialog.obj listview.obj data.obj clipboard.obj fontdialog.obj progressbar.obj resources.obj statusbar.obj imagelist.obj toolbar.obj trackbar.obj sharedcontrol.obj printing.obj chart.obj toastnotifier.obj %_stdcwindowsobj%
 
 @rem   Also update link pragmas for build.
 if  "%MODEL%" == "64" (
-  set dfl_libs_dfl=%dmd_path%\lib64\undead.lib
+  set dfl_libs_dfl=
 ) else (
-  set dfl_libs_dfl=%dmd_path%\lib32mscoff\undead.lib
+  set dfl_libs_dfl=
 )
 set dfl_libs_dfl=%WINSDKLIB%\user32.lib %WINSDKLIB%\shell32.lib %WINSDKLIB%\oleaut32.lib %dfl_libs_dfl%
 set dfl_libs=%WINSDKLIB%\gdi32.lib %WINSDKLIB%\comctl32.lib %WINSDKLIB%\advapi32.lib %WINSDKLIB%\comdlg32.lib %WINSDKLIB%\ole32.lib %WINSDKLIB%\uuid.lib %WINSDKLIB%\ws2_32.lib %dfl_libs_dfl%

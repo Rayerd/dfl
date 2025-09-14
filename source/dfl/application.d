@@ -22,6 +22,7 @@ import dfl.internal.dlib;
 import dfl.internal.utf;
 import dfl.internal.winapi;
 import dfl.internal.wincom;
+import dfl.internal.winrt;
 
 
 version = DFL_NO_ZOMBIE_FORM;
@@ -90,7 +91,7 @@ class ApplicationContext // docmain
 	}
 	
 	
-	protected:
+protected:
 	
 	///
 	void exitThreadCore()
@@ -107,7 +108,7 @@ class ApplicationContext // docmain
 	}
 	
 	
-	private:
+private:
 	Form mform; // The context form.
 }
 
@@ -163,7 +164,7 @@ final class Application // docmain
 	private this() {}
 	
 	
-	static:
+static:
 	
 	///
 	// Should be called before creating any controls.
@@ -818,7 +819,7 @@ final class Application // docmain
 		}
 		
 		
-		private:
+	private:
 		bool errdone = false;
 		bool ctnu = false;
 		Button okBtn;
@@ -1074,6 +1075,7 @@ final class Application // docmain
 		hotkeyId = null;
 	}
 	
+
 	// Returns null if not found.
 	package Control lookupHwnd(HWND hwnd) nothrow
 	{
@@ -1229,7 +1231,7 @@ final class Application // docmain
 		}
 		return;
 		
-		found:
+	found:
 		if(nmenus == 1)
 		{
 			dfl.internal.clib.free(menus);
@@ -1587,9 +1589,9 @@ static:
 		//	showMessageInfo(msg);
 		void handleHotkey()
 		{
-			immutable kid = cast(int)msg.wParam,
-			          mod = cast(uint) (msg.lParam&0x0000ffff),
-			          keycode = cast(uint)((msg.lParam&0xffff0000)>>16);
+			immutable kid = cast(int)msg.wParam;
+			immutable mod = cast(uint)(msg.lParam&0x0000ffff);
+			immutable keycode = cast(uint)((msg.lParam&0xffff0000)>>16);
 			assert(kid < hotkeyHandler.length);
 			hotkeyHandler[kid](
 				typeid(Application),
@@ -1609,8 +1611,7 @@ static:
 					// Returning true prevents dispatching.
 					if(mf.preFilterMessage(msg))
 					{
-						Control ctrl;
-						ctrl = lookupHwnd(msg.hWnd);
+						Control ctrl = lookupHwnd(msg.hWnd);
 						if(ctrl)
 						{
 							ctrl.mustWndProc(msg);
@@ -1625,8 +1626,7 @@ static:
 			}
 			catch(DThrowable o)
 			{
-				Control ctrl;
-				ctrl = lookupHwnd(msg.hWnd);
+				Control ctrl = lookupHwnd(msg.hWnd);
 				if(ctrl)
 					ctrl.mustWndProc(msg);
 				throw o;
@@ -1674,153 +1674,152 @@ debug(SHOW_MESSAGE_INFO)
 		
 		switch(m.msg)
 		{
-			case WM_NULL: writeWm("WM_NULL"); break;
-			case WM_CREATE: writeWm("WM_CREATE"); break;
-			case WM_DESTROY: writeWm("WM_DESTROY"); break;
-			case WM_MOVE: writeWm("WM_MOVE"); break;
-			case WM_SIZE: writeWm("WM_SIZE"); break;
-			case WM_ACTIVATE: writeWm("WM_ACTIVATE"); break;
-			case WM_SETFOCUS: writeWm("WM_SETFOCUS"); break;
-			case WM_KILLFOCUS: writeWm("WM_KILLFOCUS"); break;
-			case WM_ENABLE: writeWm("WM_ENABLE"); break;
-			case WM_SETREDRAW: writeWm("WM_SETREDRAW"); break;
-			case WM_SETTEXT: writeWm("WM_SETTEXT"); break;
-			case WM_GETTEXT: writeWm("WM_GETTEXT"); break;
-			case WM_GETTEXTLENGTH: writeWm("WM_GETTEXTLENGTH"); break;
-			case WM_PAINT: writeWm("WM_PAINT"); break;
-			case WM_CLOSE: writeWm("WM_CLOSE"); break;
-			case WM_QUERYENDSESSION: writeWm("WM_QUERYENDSESSION"); break;
-			case WM_QUIT: writeWm("WM_QUIT"); break;
-			case WM_QUERYOPEN: writeWm("WM_QUERYOPEN"); break;
-			case WM_ERASEBKGND: writeWm("WM_ERASEBKGND"); break;
-			case WM_SYSCOLORCHANGE: writeWm("WM_SYSCOLORCHANGE"); break;
-			case WM_ENDSESSION: writeWm("WM_ENDSESSION"); break;
-			case WM_SHOWWINDOW: writeWm("WM_SHOWWINDOW"); break;
-			//case WM_WININICHANGE: writeWm("WM_WININICHANGE"); break;
-			case WM_SETTINGCHANGE: writeWm("WM_SETTINGCHANGE"); break;
-			case WM_DEVMODECHANGE: writeWm("WM_DEVMODECHANGE"); break;
-			case WM_ACTIVATEAPP: writeWm("WM_ACTIVATEAPP"); break;
-			case WM_FONTCHANGE: writeWm("WM_FONTCHANGE"); break;
-			case WM_TIMECHANGE: writeWm("WM_TIMECHANGE"); break;
-			case WM_CANCELMODE: writeWm("WM_CANCELMODE"); break;
-			case WM_SETCURSOR: writeWm("WM_SETCURSOR"); break;
-			case WM_MOUSEACTIVATE: writeWm("WM_MOUSEACTIVATE"); break;
-			case WM_CHILDACTIVATE: writeWm("WM_CHILDACTIVATE"); break;
-			case WM_QUEUESYNC: writeWm("WM_QUEUESYNC"); break;
-			case WM_GETMINMAXINFO: writeWm("WM_GETMINMAXINFO"); break;
-			case WM_NOTIFY: writeWm("WM_NOTIFY"); break;
-			case WM_INPUTLANGCHANGEREQUEST: writeWm("WM_INPUTLANGCHANGEREQUEST"); break;
-			case WM_INPUTLANGCHANGE: writeWm("WM_INPUTLANGCHANGE"); break;
-			case WM_TCARD: writeWm("WM_TCARD"); break;
-			case WM_HELP: writeWm("WM_HELP"); break;
-			case WM_USERCHANGED: writeWm("WM_USERCHANGED"); break;
-			case WM_NOTIFYFORMAT: writeWm("WM_NOTIFYFORMAT"); break;
-			case WM_CONTEXTMENU: writeWm("WM_CONTEXTMENU"); break;
-			case WM_STYLECHANGING: writeWm("WM_STYLECHANGING"); break;
-			case WM_STYLECHANGED: writeWm("WM_STYLECHANGED"); break;
-			case WM_DISPLAYCHANGE: writeWm("WM_DISPLAYCHANGE"); break;
-			case WM_GETICON: writeWm("WM_GETICON"); break;
-			case WM_SETICON: writeWm("WM_SETICON"); break;
-			case WM_NCCREATE: writeWm("WM_NCCREATE"); break;
-			case WM_NCDESTROY: writeWm("WM_NCDESTROY"); break;
-			case WM_NCCALCSIZE: writeWm("WM_NCCALCSIZE"); break;
-			case WM_NCHITTEST: writeWm("WM_NCHITTEST"); break;
-			case WM_NCPAINT: writeWm("WM_NCPAINT"); break;
-			case WM_NCACTIVATE: writeWm("WM_NCACTIVATE"); break;
-			case WM_GETDLGCODE: writeWm("WM_GETDLGCODE"); break;
-			case WM_NCMOUSEMOVE: writeWm("WM_NCMOUSEMOVE"); break;
-			case WM_NCLBUTTONDOWN: writeWm("WM_NCLBUTTONDOWN"); break;
-			case WM_NCLBUTTONUP: writeWm("WM_NCLBUTTONUP"); break;
-			case WM_NCLBUTTONDBLCLK: writeWm("WM_NCLBUTTONDBLCLK"); break;
-			case WM_NCRBUTTONDOWN: writeWm("WM_NCRBUTTONDOWN"); break;
-			case WM_NCRBUTTONUP: writeWm("WM_NCRBUTTONUP"); break;
-			case WM_NCRBUTTONDBLCLK: writeWm("WM_NCRBUTTONDBLCLK"); break;
-			case WM_NCMBUTTONDOWN: writeWm("WM_NCMBUTTONDOWN"); break;
-			case WM_NCMBUTTONUP: writeWm("WM_NCMBUTTONUP"); break;
-			case WM_NCMBUTTONDBLCLK: writeWm("WM_NCMBUTTONDBLCLK"); break;
-			case WM_KEYDOWN: writeWm("WM_KEYDOWN"); break;
-			case WM_KEYUP: writeWm("WM_KEYUP"); break;
-			case WM_CHAR: writeWm("WM_CHAR"); break;
-			case WM_DEADCHAR: writeWm("WM_DEADCHAR"); break;
-			case WM_SYSKEYDOWN: writeWm("WM_SYSKEYDOWN"); break;
-			case WM_SYSKEYUP: writeWm("WM_SYSKEYUP"); break;
-			case WM_SYSCHAR: writeWm("WM_SYSCHAR"); break;
-			case WM_SYSDEADCHAR: writeWm("WM_SYSDEADCHAR"); break;
-			case WM_IME_STARTCOMPOSITION: writeWm("WM_IME_STARTCOMPOSITION"); break;
-			case WM_IME_ENDCOMPOSITION: writeWm("WM_IME_ENDCOMPOSITION"); break;
-			case WM_IME_COMPOSITION: writeWm("WM_IME_COMPOSITION"); break;
-			case WM_INITDIALOG: writeWm("WM_INITDIALOG"); break;
-			case WM_COMMAND: writeWm("WM_COMMAND"); break;
-			case WM_SYSCOMMAND: writeWm("WM_SYSCOMMAND"); break;
-			case WM_TIMER: writeWm("WM_TIMER"); break;
-			case WM_HSCROLL: writeWm("WM_HSCROLL"); break;
-			case WM_VSCROLL: writeWm("WM_VSCROLL"); break;
-			case WM_INITMENU: writeWm("WM_INITMENU"); break;
-			case WM_INITMENUPOPUP: writeWm("WM_INITMENUPOPUP"); break;
-			case WM_MENUSELECT: writeWm("WM_MENUSELECT"); break;
-			case WM_MENUCHAR: writeWm("WM_MENUCHAR"); break;
-			case WM_ENTERIDLE: writeWm("WM_ENTERIDLE"); break;
-			case WM_CTLCOLORMSGBOX: writeWm("WM_CTLCOLORMSGBOX"); break;
-			case WM_CTLCOLOREDIT: writeWm("WM_CTLCOLOREDIT"); break;
-			case WM_CTLCOLORLISTBOX: writeWm("WM_CTLCOLORLISTBOX"); break;
-			case WM_CTLCOLORBTN: writeWm("WM_CTLCOLORBTN"); break;
-			case WM_CTLCOLORDLG: writeWm("WM_CTLCOLORDLG"); break;
-			case WM_CTLCOLORSCROLLBAR: writeWm("WM_CTLCOLORSCROLLBAR"); break;
-			case WM_CTLCOLORSTATIC: writeWm("WM_CTLCOLORSTATIC"); break;
-			case WM_MOUSEMOVE: writeWm("WM_MOUSEMOVE"); break;
-			case WM_LBUTTONDOWN: writeWm("WM_LBUTTONDOWN"); break;
-			case WM_LBUTTONUP: writeWm("WM_LBUTTONUP"); break;
-			case WM_LBUTTONDBLCLK: writeWm("WM_LBUTTONDBLCLK"); break;
-			case WM_RBUTTONDOWN: writeWm("WM_RBUTTONDOWN"); break;
-			case WM_RBUTTONUP: writeWm("WM_RBUTTONUP"); break;
-			case WM_RBUTTONDBLCLK: writeWm("WM_RBUTTONDBLCLK"); break;
-			case WM_MBUTTONDOWN: writeWm("WM_MBUTTONDOWN"); break;
-			case WM_MBUTTONUP: writeWm("WM_MBUTTONUP"); break;
-			case WM_MBUTTONDBLCLK: writeWm("WM_MBUTTONDBLCLK"); break;
-			case WM_PARENTNOTIFY: writeWm("WM_PARENTNOTIFY"); break;
-			case WM_ENTERMENULOOP: writeWm("WM_ENTERMENULOOP"); break;
-			case WM_EXITMENULOOP: writeWm("WM_EXITMENULOOP"); break;
-			case WM_NEXTMENU: writeWm("WM_NEXTMENU"); break;
-			case WM_SETFONT: writeWm("WM_SETFONT"); break;
-			case WM_GETFONT: writeWm("WM_GETFONT"); break;
-			case WM_USER: writeWm("WM_USER"); break;
-			case WM_NEXTDLGCTL: writeWm("WM_NEXTDLGCTL"); break;
-			case WM_CAPTURECHANGED: writeWm("WM_CAPTURECHANGED"); break;
-			case WM_WINDOWPOSCHANGING: writeWm("WM_WINDOWPOSCHANGING"); break;
-			case WM_WINDOWPOSCHANGED: writeWm("WM_WINDOWPOSCHANGED"); break;
-			case WM_DRAWITEM: writeWm("WM_DRAWITEM"); break;
-			case WM_CLEAR: writeWm("WM_CLEAR"); break;
-			case WM_CUT: writeWm("WM_CUT"); break;
-			case WM_COPY: writeWm("WM_COPY"); break;
-			case WM_PASTE: writeWm("WM_PASTE"); break;
-			case WM_MDITILE: writeWm("WM_MDITILE"); break;
-			case WM_MDICASCADE: writeWm("WM_MDICASCADE"); break;
-			case WM_MDIICONARRANGE: writeWm("WM_MDIICONARRANGE"); break;
-			case WM_MDIGETACTIVE: writeWm("WM_MDIGETACTIVE"); break;
-			case WM_MOUSEWHEEL: writeWm("WM_MOUSEWHEEL"); break;
-			case WM_MOUSEHOVER: writeWm("WM_MOUSEHOVER"); break;
-			case WM_MOUSELEAVE: writeWm("WM_MOUSELEAVE"); break;
-			case WM_PRINT: writeWm("WM_PRINT"); break;
-			case WM_PRINTCLIENT: writeWm("WM_PRINTCLIENT"); break;
-			case WM_MEASUREITEM: writeWm("WM_MEASUREITEM"); break;
-			
-			default:
-				if(m.msg >= WM_USER && m.msg <= 0x7FFF)
-				{
-					writeWm("WM_USER+" ~ std.string.toString(m.msg - WM_USER));
-				}
-				else if(m.msg >=0xC000 && m.msg <= 0xFFFF)
-				{
-					writeWm("RegisterWindowMessage");
-				}
-				else
-				{
-					writeWm("?");
-				}
+		case WM_NULL: writeWm("WM_NULL"); break;
+		case WM_CREATE: writeWm("WM_CREATE"); break;
+		case WM_DESTROY: writeWm("WM_DESTROY"); break;
+		case WM_MOVE: writeWm("WM_MOVE"); break;
+		case WM_SIZE: writeWm("WM_SIZE"); break;
+		case WM_ACTIVATE: writeWm("WM_ACTIVATE"); break;
+		case WM_SETFOCUS: writeWm("WM_SETFOCUS"); break;
+		case WM_KILLFOCUS: writeWm("WM_KILLFOCUS"); break;
+		case WM_ENABLE: writeWm("WM_ENABLE"); break;
+		case WM_SETREDRAW: writeWm("WM_SETREDRAW"); break;
+		case WM_SETTEXT: writeWm("WM_SETTEXT"); break;
+		case WM_GETTEXT: writeWm("WM_GETTEXT"); break;
+		case WM_GETTEXTLENGTH: writeWm("WM_GETTEXTLENGTH"); break;
+		case WM_PAINT: writeWm("WM_PAINT"); break;
+		case WM_CLOSE: writeWm("WM_CLOSE"); break;
+		case WM_QUERYENDSESSION: writeWm("WM_QUERYENDSESSION"); break;
+		case WM_QUIT: writeWm("WM_QUIT"); break;
+		case WM_QUERYOPEN: writeWm("WM_QUERYOPEN"); break;
+		case WM_ERASEBKGND: writeWm("WM_ERASEBKGND"); break;
+		case WM_SYSCOLORCHANGE: writeWm("WM_SYSCOLORCHANGE"); break;
+		case WM_ENDSESSION: writeWm("WM_ENDSESSION"); break;
+		case WM_SHOWWINDOW: writeWm("WM_SHOWWINDOW"); break;
+		//case WM_WININICHANGE: writeWm("WM_WININICHANGE"); break;
+		case WM_SETTINGCHANGE: writeWm("WM_SETTINGCHANGE"); break;
+		case WM_DEVMODECHANGE: writeWm("WM_DEVMODECHANGE"); break;
+		case WM_ACTIVATEAPP: writeWm("WM_ACTIVATEAPP"); break;
+		case WM_FONTCHANGE: writeWm("WM_FONTCHANGE"); break;
+		case WM_TIMECHANGE: writeWm("WM_TIMECHANGE"); break;
+		case WM_CANCELMODE: writeWm("WM_CANCELMODE"); break;
+		case WM_SETCURSOR: writeWm("WM_SETCURSOR"); break;
+		case WM_MOUSEACTIVATE: writeWm("WM_MOUSEACTIVATE"); break;
+		case WM_CHILDACTIVATE: writeWm("WM_CHILDACTIVATE"); break;
+		case WM_QUEUESYNC: writeWm("WM_QUEUESYNC"); break;
+		case WM_GETMINMAXINFO: writeWm("WM_GETMINMAXINFO"); break;
+		case WM_NOTIFY: writeWm("WM_NOTIFY"); break;
+		case WM_INPUTLANGCHANGEREQUEST: writeWm("WM_INPUTLANGCHANGEREQUEST"); break;
+		case WM_INPUTLANGCHANGE: writeWm("WM_INPUTLANGCHANGE"); break;
+		case WM_TCARD: writeWm("WM_TCARD"); break;
+		case WM_HELP: writeWm("WM_HELP"); break;
+		case WM_USERCHANGED: writeWm("WM_USERCHANGED"); break;
+		case WM_NOTIFYFORMAT: writeWm("WM_NOTIFYFORMAT"); break;
+		case WM_CONTEXTMENU: writeWm("WM_CONTEXTMENU"); break;
+		case WM_STYLECHANGING: writeWm("WM_STYLECHANGING"); break;
+		case WM_STYLECHANGED: writeWm("WM_STYLECHANGED"); break;
+		case WM_DISPLAYCHANGE: writeWm("WM_DISPLAYCHANGE"); break;
+		case WM_GETICON: writeWm("WM_GETICON"); break;
+		case WM_SETICON: writeWm("WM_SETICON"); break;
+		case WM_NCCREATE: writeWm("WM_NCCREATE"); break;
+		case WM_NCDESTROY: writeWm("WM_NCDESTROY"); break;
+		case WM_NCCALCSIZE: writeWm("WM_NCCALCSIZE"); break;
+		case WM_NCHITTEST: writeWm("WM_NCHITTEST"); break;
+		case WM_NCPAINT: writeWm("WM_NCPAINT"); break;
+		case WM_NCACTIVATE: writeWm("WM_NCACTIVATE"); break;
+		case WM_GETDLGCODE: writeWm("WM_GETDLGCODE"); break;
+		case WM_NCMOUSEMOVE: writeWm("WM_NCMOUSEMOVE"); break;
+		case WM_NCLBUTTONDOWN: writeWm("WM_NCLBUTTONDOWN"); break;
+		case WM_NCLBUTTONUP: writeWm("WM_NCLBUTTONUP"); break;
+		case WM_NCLBUTTONDBLCLK: writeWm("WM_NCLBUTTONDBLCLK"); break;
+		case WM_NCRBUTTONDOWN: writeWm("WM_NCRBUTTONDOWN"); break;
+		case WM_NCRBUTTONUP: writeWm("WM_NCRBUTTONUP"); break;
+		case WM_NCRBUTTONDBLCLK: writeWm("WM_NCRBUTTONDBLCLK"); break;
+		case WM_NCMBUTTONDOWN: writeWm("WM_NCMBUTTONDOWN"); break;
+		case WM_NCMBUTTONUP: writeWm("WM_NCMBUTTONUP"); break;
+		case WM_NCMBUTTONDBLCLK: writeWm("WM_NCMBUTTONDBLCLK"); break;
+		case WM_KEYDOWN: writeWm("WM_KEYDOWN"); break;
+		case WM_KEYUP: writeWm("WM_KEYUP"); break;
+		case WM_CHAR: writeWm("WM_CHAR"); break;
+		case WM_DEADCHAR: writeWm("WM_DEADCHAR"); break;
+		case WM_SYSKEYDOWN: writeWm("WM_SYSKEYDOWN"); break;
+		case WM_SYSKEYUP: writeWm("WM_SYSKEYUP"); break;
+		case WM_SYSCHAR: writeWm("WM_SYSCHAR"); break;
+		case WM_SYSDEADCHAR: writeWm("WM_SYSDEADCHAR"); break;
+		case WM_IME_STARTCOMPOSITION: writeWm("WM_IME_STARTCOMPOSITION"); break;
+		case WM_IME_ENDCOMPOSITION: writeWm("WM_IME_ENDCOMPOSITION"); break;
+		case WM_IME_COMPOSITION: writeWm("WM_IME_COMPOSITION"); break;
+		case WM_INITDIALOG: writeWm("WM_INITDIALOG"); break;
+		case WM_COMMAND: writeWm("WM_COMMAND"); break;
+		case WM_SYSCOMMAND: writeWm("WM_SYSCOMMAND"); break;
+		case WM_TIMER: writeWm("WM_TIMER"); break;
+		case WM_HSCROLL: writeWm("WM_HSCROLL"); break;
+		case WM_VSCROLL: writeWm("WM_VSCROLL"); break;
+		case WM_INITMENU: writeWm("WM_INITMENU"); break;
+		case WM_INITMENUPOPUP: writeWm("WM_INITMENUPOPUP"); break;
+		case WM_MENUSELECT: writeWm("WM_MENUSELECT"); break;
+		case WM_MENUCHAR: writeWm("WM_MENUCHAR"); break;
+		case WM_ENTERIDLE: writeWm("WM_ENTERIDLE"); break;
+		case WM_CTLCOLORMSGBOX: writeWm("WM_CTLCOLORMSGBOX"); break;
+		case WM_CTLCOLOREDIT: writeWm("WM_CTLCOLOREDIT"); break;
+		case WM_CTLCOLORLISTBOX: writeWm("WM_CTLCOLORLISTBOX"); break;
+		case WM_CTLCOLORBTN: writeWm("WM_CTLCOLORBTN"); break;
+		case WM_CTLCOLORDLG: writeWm("WM_CTLCOLORDLG"); break;
+		case WM_CTLCOLORSCROLLBAR: writeWm("WM_CTLCOLORSCROLLBAR"); break;
+		case WM_CTLCOLORSTATIC: writeWm("WM_CTLCOLORSTATIC"); break;
+		case WM_MOUSEMOVE: writeWm("WM_MOUSEMOVE"); break;
+		case WM_LBUTTONDOWN: writeWm("WM_LBUTTONDOWN"); break;
+		case WM_LBUTTONUP: writeWm("WM_LBUTTONUP"); break;
+		case WM_LBUTTONDBLCLK: writeWm("WM_LBUTTONDBLCLK"); break;
+		case WM_RBUTTONDOWN: writeWm("WM_RBUTTONDOWN"); break;
+		case WM_RBUTTONUP: writeWm("WM_RBUTTONUP"); break;
+		case WM_RBUTTONDBLCLK: writeWm("WM_RBUTTONDBLCLK"); break;
+		case WM_MBUTTONDOWN: writeWm("WM_MBUTTONDOWN"); break;
+		case WM_MBUTTONUP: writeWm("WM_MBUTTONUP"); break;
+		case WM_MBUTTONDBLCLK: writeWm("WM_MBUTTONDBLCLK"); break;
+		case WM_PARENTNOTIFY: writeWm("WM_PARENTNOTIFY"); break;
+		case WM_ENTERMENULOOP: writeWm("WM_ENTERMENULOOP"); break;
+		case WM_EXITMENULOOP: writeWm("WM_EXITMENULOOP"); break;
+		case WM_NEXTMENU: writeWm("WM_NEXTMENU"); break;
+		case WM_SETFONT: writeWm("WM_SETFONT"); break;
+		case WM_GETFONT: writeWm("WM_GETFONT"); break;
+		case WM_USER: writeWm("WM_USER"); break;
+		case WM_NEXTDLGCTL: writeWm("WM_NEXTDLGCTL"); break;
+		case WM_CAPTURECHANGED: writeWm("WM_CAPTURECHANGED"); break;
+		case WM_WINDOWPOSCHANGING: writeWm("WM_WINDOWPOSCHANGING"); break;
+		case WM_WINDOWPOSCHANGED: writeWm("WM_WINDOWPOSCHANGED"); break;
+		case WM_DRAWITEM: writeWm("WM_DRAWITEM"); break;
+		case WM_CLEAR: writeWm("WM_CLEAR"); break;
+		case WM_CUT: writeWm("WM_CUT"); break;
+		case WM_COPY: writeWm("WM_COPY"); break;
+		case WM_PASTE: writeWm("WM_PASTE"); break;
+		case WM_MDITILE: writeWm("WM_MDITILE"); break;
+		case WM_MDICASCADE: writeWm("WM_MDICASCADE"); break;
+		case WM_MDIICONARRANGE: writeWm("WM_MDIICONARRANGE"); break;
+		case WM_MDIGETACTIVE: writeWm("WM_MDIGETACTIVE"); break;
+		case WM_MOUSEWHEEL: writeWm("WM_MOUSEWHEEL"); break;
+		case WM_MOUSEHOVER: writeWm("WM_MOUSEHOVER"); break;
+		case WM_MOUSELEAVE: writeWm("WM_MOUSELEAVE"); break;
+		case WM_PRINT: writeWm("WM_PRINT"); break;
+		case WM_PRINTCLIENT: writeWm("WM_PRINTCLIENT"); break;
+		case WM_MEASUREITEM: writeWm("WM_MEASUREITEM"); break;
+		
+		default:
+			if(m.msg >= WM_USER && m.msg <= 0x7FFF)
+			{
+				writeWm("WM_USER+" ~ std.string.toString(m.msg - WM_USER));
+			}
+			else if(m.msg >=0xC000 && m.msg <= 0xFFFF)
+			{
+				writeWm("RegisterWindowMessage");
+			}
+			else
+			{
+				writeWm("?");
+			}
 		}
 		
-		Control ctrl;
-		ctrl = Application.lookupHwnd(m.hWnd);
+		Control ctrl = Application.lookupHwnd(m.hWnd);
 		writef("HWND=%d(0x%X) %s WPARAM=%d(0x%X) LPARAM=%d(0x%X)\n\n",
 			cast(size_t)m.hWnd, cast(size_t)m.hWnd,
 			ctrl ? ("DFLname='" ~ ctrl.name ~ "'") : "<nonDFL>",
@@ -1843,79 +1842,79 @@ extern(Windows) LRESULT dflWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 	{
 		switch(wparam)
 		{
-			case WPARAM_DFL_INVOKE_PARAMS:
+		case WPARAM_DFL_INVOKE_PARAMS:
+			{
+				DflInvokeParam* p = cast(DflInvokeParam*)lparam;
+				try
 				{
-					DflInvokeParam* p = cast(DflInvokeParam*)lparam;
+					p.fp(Application.lookupHwnd(hwnd), p.params.ptr[0 .. p.nparams]);
+				}
+				catch(DThrowable e)
+				{
 					try
 					{
-						p.fp(Application.lookupHwnd(hwnd), p.params.ptr[0 .. p.nparams]);
+						p.exception = e;
 					}
-					catch(DThrowable e)
+					catch(DThrowable e2)
 					{
-						try
-						{
-							p.exception = e;
-						}
-						catch(DThrowable e2)
-						{
-							Application.onThreadException(e2);
-						}
+						Application.onThreadException(e2);
 					}
 				}
-				return LRESULT_DFL_INVOKE;
-			
-			case WPARAM_DFL_INVOKE_NOPARAMS:
+			}
+			return LRESULT_DFL_INVOKE;
+		
+		case WPARAM_DFL_INVOKE_NOPARAMS:
+			{
+				DflInvokeParam* p = cast(DflInvokeParam*)lparam;
+				try
 				{
-					DflInvokeParam* p = cast(DflInvokeParam*)lparam;
+					p.fp(Application.lookupHwnd(hwnd), p.params);
+				}
+				catch(DThrowable e)
+				{
 					try
 					{
-						p.fp(Application.lookupHwnd(hwnd), p.params);
+						p.exception = e;
 					}
-					catch(DThrowable e)
+					catch(DThrowable e2)
 					{
-						try
-						{
-							p.exception = e;
-						}
-						catch(DThrowable e2)
-						{
-							Application.onThreadException(e2);
-						}
+						Application.onThreadException(e2);
 					}
 				}
-				return LRESULT_DFL_INVOKE;
-			
-			case WPARAM_DFL_DELAY_INVOKE_NOPARAMS:
+			}
+			return LRESULT_DFL_INVOKE;
+		
+		case WPARAM_DFL_DELAY_INVOKE_NOPARAMS:
+			{
+				DflInvokeParam* p = cast(DflInvokeParam*)lparam;
+				try
 				{
-					DflInvokeParam* p = cast(DflInvokeParam*)lparam;
-					try
-					{
-						p.fp(Application.lookupHwnd(hwnd), p.params);
-					}
-					catch(DThrowable e)
-					{
-						Application.onThreadException(e);
-					}
-					dfl.internal.clib.free(p);
+					p.fp(Application.lookupHwnd(hwnd), p.params);
 				}
-				break;
-			
-			case WPARAM_DFL_DELAY_INVOKE_PARAMS:
+				catch(DThrowable e)
 				{
-					DflInvokeParam* p = cast(DflInvokeParam*)lparam;
-					try
-					{
-						p.fp(Application.lookupHwnd(hwnd), p.params.ptr[0 .. p.nparams]);
-					}
-					catch(DThrowable e)
-					{
-						Application.onThreadException(e);
-					}
-					dfl.internal.clib.free(p);
+					Application.onThreadException(e);
 				}
-				break;
-			
-			default:
+				dfl.internal.clib.free(p);
+			}
+			break;
+		
+		case WPARAM_DFL_DELAY_INVOKE_PARAMS:
+			{
+				DflInvokeParam* p = cast(DflInvokeParam*)lparam;
+				try
+				{
+					p.fp(Application.lookupHwnd(hwnd), p.params.ptr[0 .. p.nparams]);
+				}
+				catch(DThrowable e)
+				{
+					Application.onThreadException(e);
+				}
+				dfl.internal.clib.free(p);
+			}
+			break;
+		
+		default:
 		}
 	}
 	
@@ -2029,6 +2028,7 @@ enum: WPARAM
 	WPARAM_DFL_DELAY_INVOKE_PARAMS = 80,
 	WPARAM_DFL_INVOKE_NOPARAMS = 81,
 }
+
 
 struct DflInvokeParam
 {
@@ -2149,21 +2149,20 @@ void _initCommonControls(DWORD dwControls)
 		// Make sure InitCommonControlsEx() is in comctl32.dll,
 		// otherwise use the old InitCommonControls().
 		
-		HMODULE hmodCommonControls;
-		InitCommonControlsExProc initProc;
-		
-		hmodCommonControls = LoadLibraryA("comctl32.dll");
+		HMODULE hmodCommonControls = LoadLibraryA("comctl32.dll");
 		if(!hmodCommonControls)
-		//	throw new DflException("Unable to load 'comctl32.dll'");
-			goto no_comctl32;
+		{
+			// throw new DflException("Unable to load 'comctl32.dll'");
+		no_comctl32:
+			InitCommonControls();
+			return;
+		}
 		
-		initProc = cast(InitCommonControlsExProc)GetProcAddress(hmodCommonControls, "InitCommonControlsEx");
+		InitCommonControlsExProc initProc = cast(InitCommonControlsExProc)GetProcAddress(hmodCommonControls, "InitCommonControlsEx");
 		if(!initProc)
 		{
 			//FreeLibrary(hmodCommonControls);
-			no_comctl32:
-			InitCommonControls();
-			return;
+			goto no_comctl32;
 		}
 	}
 	
@@ -2213,6 +2212,7 @@ static this()
 	}
 	
 	//InitCommonControls(); // Done later. Needs to be linked with comctl32.lib.
+	WinRuntime.initApartment(RO_INIT_TYPE.RO_INIT_SINGLETHREADED);
 	Ole.initialize(); // Needs to be linked with ole32.lib.
 	
 	HMODULE user32 = GetModuleHandleA("user32.dll");
@@ -2251,6 +2251,7 @@ static ~this()
 		FreeLibrary(hmodRichtextbox);
 	
 	Ole.unintialize();
+	WinRuntime.uninitApartment();
 }
 
 
