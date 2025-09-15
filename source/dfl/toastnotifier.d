@@ -13,6 +13,7 @@ import core.sys.windows.objidl;
 import core.sys.windows.shlobj;
 import core.sys.windows.shlwapi;
 pragma(lib, "Shlwapi");
+import core.sys.windows.uuid;
 import core.sys.windows.winbase;
 import core.sys.windows.windef;
 import core.sys.windows.wtypes;
@@ -327,7 +328,6 @@ extern (Windows)
 {
 __gshared:
 	const IID IID_IPropertyStore = { 0x886d8eeb, 0x8cf2, 0x4446, [0x8d, 0x02, 0xcd, 0xba, 0x1d, 0xbd, 0xcf, 0x99] };
-	const IID IID_IPersistFile = { 0x0000010b, 0x0000, 0x0000, [0xc0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x46] };
 }
 
 
@@ -350,106 +350,6 @@ struct VERSIONEDSTREAM
 }
 
 
-struct CAC
-{
-	uint cElems;
-	byte* pElems;
-}
-
-
-struct PROPVARIANT
-{
-	union
-	{
-		struct
-		{
-			VARTYPE vt;
-			ushort /+PROPVAR_PAD1+/ wReserved1;
-			ushort /+PROPVAR_PAD2+/ wReserved2;
-			ushort /+PROPVAR_PAD3+/ wReserved3;
-			union
-			{
-				CHAR cVal;
-				UCHAR bVal;
-				SHORT iVal;
-				USHORT uiVal;
-				LONG lVal;
-				ULONG ulVal;
-				INT intVal;
-				UINT uintVal;
-				LARGE_INTEGER hVal;
-				ULARGE_INTEGER uhVal;
-				FLOAT fltVal;
-				DOUBLE dblVal;
-				VARIANT_BOOL boolVal;
-				VARIANT_BOOL __OBSOLETE__VARIANT_BOOL;
-				SCODE scode;
-				CY cyVal;
-				DATE date;
-				FILETIME filetime;
-				CLSID* puuid;
-				CLIPDATA* pclipdata;
-				BSTR bstrVal;
-				BSTRBLOB bstrblobVal;
-				BLOB blob;
-				LPSTR pszVal;
-				LPWSTR pwszVal;
-				IUnknown* punkVal;
-				IDispatch* pdispVal;
-				IStream* pStream;
-				IStorage* pStorage;
-				VERSIONEDSTREAM* pVersionedStream;
-				LPSAFEARRAY parray;
-				CAC cac;
-				CAUB caub;
-				CAI cai;
-				CAUI caui;
-				CAL cal;
-				CAUL caul;
-				CAH cah;
-				CAUH cauh;
-				CAFLT caflt;
-				CADBL cadbl;
-				CABOOL cabool;
-				CASCODE cascode;
-				CACY cacy;
-				CADATE cadate;
-				CAFILETIME cafiletime;
-				CACLSID cauuid;
-				CACLIPDATA caclipdata;
-				CABSTR cabstr;
-				CABSTRBLOB cabstrblob;
-				CALPSTR calpstr;
-				CALPWSTR calpwstr;
-				CAPROPVARIANT capropvar;
-				CHAR* pcVal;
-				UCHAR* pbVal;
-				SHORT* piVal;
-				USHORT* puiVal;
-				LONG* plVal;
-				ULONG* pulVal;
-				INT* pintVal;
-				UINT* puintVal;
-				FLOAT* pfltVal;
-				DOUBLE* pdblVal;
-				VARIANT_BOOL* pboolVal;
-				DECIMAL* pdecVal;
-				SCODE* pscode;
-				CY* pcyVal;
-				DATE* pdate;
-				BSTR* pbstrVal;
-				IUnknown** ppunkVal;
-				IDispatch** ppdispVal;
-				LPSAFEARRAY* pparray;
-				PROPVARIANT* pvarVal;
-			}
-		}
-		DECIMAL decVal;
-	}
-}
-alias LPPROPVARIANT = PROPVARIANT*;
-
-
 interface IPropertyStore : IUnknown
 {
 extern (Windows):
@@ -458,17 +358,6 @@ extern (Windows):
 	HRESULT GetValue(PROPERTYKEY* key, PROPVARIANT* pv);
 	HRESULT SetValue(const(PROPERTYKEY*) key, PROPVARIANT* propvar);
 	HRESULT Commit();
-}
-
-
-interface IPersistFile : IPersist
-{
-extern (Windows):
-	HRESULT IsDirty();
-	HRESULT Load(LPCOLESTR pszFileName, DWORD dwMode);
-	HRESULT Save(LPCOLESTR pszFileName, BOOL fRemember);
-	HRESULT SaveCompleted(LPCOLESTR pszFileName);
-	HRESULT GetCurFile(out LPOLESTR* ppszFileName);
 }
 
 
