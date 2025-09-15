@@ -28,7 +28,7 @@ final class Environment // docmain
 	private this() {}
 	
 	
-	static:
+static:
 	
 	///
 	@property Dstring commandLine() // getter
@@ -54,8 +54,7 @@ final class Environment // docmain
 	///
 	@property Dstring machineName() // getter
 	{
-		Dstring result;
-		result = dfl.internal.utf.getComputerName();
+		Dstring result = dfl.internal.utf.getComputerName();
 		if(!result.length)
 			throw new DflException("Unable to obtain machine name");
 		return result;
@@ -79,8 +78,6 @@ final class Environment // docmain
 		if(!GetVersionExA(&osi))
 			throw new DflException("Unable to obtain operating system version information");
 		
-		int build;
-		
 		switch(osi.dwPlatformId)
 		{
 			case VER_PLATFORM_WIN32_NT:
@@ -102,8 +99,7 @@ final class Environment // docmain
 	///
 	@property Dstring systemDirectory() // getter
 	{
-		Dstring result;
-		result = dfl.internal.utf.getSystemDirectory();
+		Dstring result = dfl.internal.utf.getSystemDirectory();
 		if(!result.length)
 			throw new DflException("Unable to obtain system directory");
 		return result;
@@ -120,8 +116,7 @@ final class Environment // docmain
 	///
 	@property Dstring userName() // getter
 	{
-		Dstring result;
-		result = dfl.internal.utf.getUserName();
+		Dstring result = dfl.internal.utf.getUserName();
 		if(!result.length)
 			throw new DflException("Unable to obtain user name");
 		return result;
@@ -144,7 +139,7 @@ final class Environment // docmain
 			return str;
 		}
 		Dstring result;
-		if(!dfl.internal.utf.expandEnvironmentStrings(str, result))
+		if(!dfl.internal.utf.expandEnvironmentStrings(str, /+ out +/ result))
 			throw new DflException("Unable to expand environment variables");
 		return result;
 	}
@@ -160,8 +155,7 @@ final class Environment // docmain
 	///
 	Dstring getEnvironmentVariable(Dstring name, bool throwIfMissing)
 	{
-		Dstring result;
-		result = dfl.internal.utf.getEnvironmentVariable(name);
+		Dstring result = dfl.internal.utf.getEnvironmentVariable(name);
 		if(!result.length)
 		{
 			if(!throwIfMissing)
@@ -190,10 +184,9 @@ final class Environment // docmain
 	{
 		DWORD dr = GetLogicalDrives();
 		Dstring[] result;
-		int i;
 		char[4] tmp = " :\\\0";
 		
-		for(i = 0; dr; i++)
+		for(int i = 0; dr; i++)
 		{
 			if(dr & 1)
 			{
@@ -221,12 +214,10 @@ final class Environment // docmain
 				CoTaskMemFree(idlist);
 		}
 
-		Dstring path;
-		path = shGetPathFromIDList(idlist);
+		Dstring path = shGetPathFromIDList(idlist);
 		if (!path)
 		{
 			throw new DflException("Unable to obtain path");
-			assert(0);
 		}
 		return path;
 	}
@@ -592,12 +583,12 @@ unittest
 // Any version, not just the operating system.
 class Version // docmain ?
 {
-	private:
+private:
 	int _major = 0, _minor = 0;
 	int _build = -1, _revision = -1;
 	
 	
-	public:
+public:
 	
 	///
 	this()
@@ -605,7 +596,7 @@ class Version // docmain ?
 	}
 	
 	
-	final:
+final:
 	
 	/// ditto
 	// A string containing "major.minor.build.revision".
@@ -670,9 +661,7 @@ class Version // docmain ?
 	///
 	override Dstring toString() const
 	{
-		Dstring result;
-		
-		result = intToString(_major) ~ "." ~ intToString(_minor);
+		Dstring result = intToString(_major) ~ "." ~ intToString(_minor);
 		if(_build != -1)
 			result ~= "." ~ intToString(_build);
 		if(_revision != -1)
@@ -782,8 +771,7 @@ final class OperatingSystem // docmain
 	}
 	
 	
-	private:
+private:
 	PlatformId platId;
 	Version vers;
 }
-

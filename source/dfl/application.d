@@ -56,7 +56,7 @@ class ApplicationContext // docmain
 	// loop terminates when the main form is destroyed.
 	this(Form mainForm)
 	{
-		mform = mainForm;
+		_form = mainForm;
 		mainForm.closed ~= &onMainFormClosed;
 	}
 	
@@ -64,10 +64,10 @@ class ApplicationContext // docmain
 	///
 	final @property void mainForm(Form mainForm) // setter
 	{
-		if(mform)
-			mform.closed.removeHandler(&onMainFormClosed);
+		if(_form)
+			_form.closed.removeHandler(&onMainFormClosed);
 		
-		mform = mainForm;
+		_form = mainForm;
 		
 		if(mainForm)
 			mainForm.closed ~= &onMainFormClosed;
@@ -76,7 +76,7 @@ class ApplicationContext // docmain
 	/// ditto
 	final @property Form mainForm() nothrow // getter
 	{
-		return mform;
+		return _form;
 	}
 	
 	
@@ -109,7 +109,7 @@ protected:
 	
 	
 private:
-	Form mform; // The context form.
+	Form _form; // The context form.
 }
 
 
@@ -189,29 +189,23 @@ static:
 				~`</dependency>`~"\r\n"
 			~`</assembly>`~"\r\n";
 		
-		HMODULE kernel32;
-		kernel32 = GetModuleHandle("kernel32.dll");
-		//if(kernel32)
+		HMODULE kernel32 = GetModuleHandle("kernel32.dll");
 		assert(kernel32);
 		{
-			CreateActCtxWProc createActCtxW;
-			createActCtxW = cast(CreateActCtxWProc)GetProcAddress(kernel32, "CreateActCtxW");
+			CreateActCtxWProc createActCtxW = cast(CreateActCtxWProc)GetProcAddress(kernel32, "CreateActCtxW");
 			if(createActCtxW)
 			{
-				GetTempPathWProc getTempPathW;
-				GetTempFileNameWProc getTempFileNameW;
-				ActivateActCtxProc activateActCtx;
-				
-				getTempPathW = cast(GetTempPathWProc)GetProcAddress(kernel32, "GetTempPathW");
+				GetTempPathWProc getTempPathW = cast(GetTempPathWProc)GetProcAddress(kernel32, "GetTempPathW");
 				assert(getTempPathW !is null);
-				getTempFileNameW = cast(GetTempFileNameWProc)GetProcAddress(kernel32, "GetTempFileNameW");
+
+				GetTempFileNameWProc getTempFileNameW = cast(GetTempFileNameWProc)GetProcAddress(kernel32, "GetTempFileNameW");
 				assert(getTempFileNameW !is null);
-				activateActCtx = cast(ActivateActCtxProc)GetProcAddress(kernel32, "ActivateActCtx");
+
+				ActivateActCtxProc activateActCtx = cast(ActivateActCtxProc)GetProcAddress(kernel32, "ActivateActCtx");
 				assert(activateActCtx !is null);
 				
 				DWORD pathlen;
 				wchar[MAX_PATH] pathbuf = void;
-				//if(pathbuf)
 				{
 					pathlen = getTempPathW(pathbuf.length, pathbuf.ptr);
 					if(pathlen)
@@ -223,8 +217,7 @@ static:
 							manifestlen = getTempFileNameW(pathbuf.ptr, "dmf", 0, manifestbuf.ptr);
 							if(manifestlen)
 							{
-								HANDLE hf;
-								hf = CreateFileW(manifestbuf.ptr, GENERIC_WRITE, 0, null, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, HANDLE.init);
+								HANDLE hf = CreateFileW(manifestbuf.ptr, GENERIC_WRITE, 0, null, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, HANDLE.init);
 								if(hf != INVALID_HANDLE_VALUE)
 								{
 									DWORD written;
@@ -233,15 +226,13 @@ static:
 										CloseHandle(hf);
 										
 										ACTCTXW ac;
-										HANDLE hac;
-										
 										ac.cbSize = ACTCTXW.sizeof;
 										//ac.dwFlags = 4; // ACTCTX_FLAG_ASSEMBLY_DIRECTORY_VALID
 										ac.dwFlags = 0;
 										ac.lpSource = manifestbuf.ptr;
 										//ac.lpAssemblyDirectory = pathbuf; // TODO: ?
 										
-										hac = createActCtxW(&ac);
+										HANDLE hac = createActCtxW(&ac);
 										if(hac != INVALID_HANDLE_VALUE)
 										{
 											ULONG_PTR ul;
@@ -311,13 +302,12 @@ static:
 		if(ERROR_SUCCESS != RegOpenKeyA(HKEY_CURRENT_USER,
 			r"Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders".ptr, &hk))
 		{
-			bad_path:
+		bad_path:
 			throw new DflException("Unable to obtain " ~ name ~ " directory information");
 		}
 		scope(exit)
 			RegCloseKey(hk);
-		Dstring result;
-		result = regQueryValueString(hk, name);
+		Dstring result = regQueryValueString(hk, name);
 		if(!result.length)
 			goto bad_path;
 		return result;
@@ -351,8 +341,7 @@ static:
 	/// ditto
 	void removeMessageFilter(IMessageFilter mf)
 	{
-		size_t i;
-		for(i = 0; i != filters.length; i++)
+		for(size_t i = 0; i != filters.length; i++)
 		{
 			if(mf is filters[i])
 			{
@@ -377,7 +366,6 @@ static:
 		{
 			Message msg;
 			
-			//while(PeekMessageA(&msg._winMsg, HWND.init, 0, 0, PM_REMOVE))
 			while(dfl.internal.utf.peekMessage(&msg._winMsg, HWND.init, 0, 0, PM_REMOVE))
 			{
 				gotMessage(msg);
@@ -508,12 +496,11 @@ static:
 			{
 				try
 				{
-					still_running:
+				still_running:
 					while(!(threadFlags & (TF.QUIT | TF.STOP_RUNNING)))
 					{
 						Message msg;
 						
-						//while(PeekMessageA(&msg._winMsg, HWND.init, 0, 0, PM_REMOVE))
 						while(dfl.internal.utf.peekMessage(&msg._winMsg, HWND.init, 0, 0, PM_REMOVE))
 						{
 							gotMessage(msg);
@@ -889,7 +876,6 @@ static:
 			}
 			
 			except = true;
-			//if(threadException.handlers.length)
 			if(threadException.hasHandlers)
 			{
 				threadException(typeid(Application), new ThreadExceptionEventArgs(e));
@@ -946,8 +932,8 @@ static:
 				}
 				++kid;
 			}
-			immutable mod = (k&Keys.MODIFIERS)>>16,
-			          keycode = k&Keys.KEY_CODE;
+			immutable mod = (k & Keys.MODIFIERS) >> 16;
+			immutable keycode = k & Keys.KEY_CODE;
 			if (RegisterHotKey(null, kid, mod, keycode))
 			{
 				hotkeyId[k] = kid;
@@ -1079,8 +1065,6 @@ static:
 	// Returns null if not found.
 	package Control lookupHwnd(HWND hwnd) nothrow
 	{
-		//if(hwnd in controls)
-		//	return controls[hwnd];
 		auto pc = hwnd in controls;
 		if(pc)
 			return *pc;
@@ -1091,7 +1075,6 @@ static:
 	// Also makes a great zombie.
 	package void removeHwnd(HWND hwnd)
 	{
-		//delete controls[hwnd];
 		controls.remove(hwnd);
 	}
 	
@@ -1154,21 +1137,18 @@ static:
 		if(nmenus == END_MENU_ID - FIRST_MENU_ID)
 			throw new DflException("Out of menus");
 		
-		typeof(menus) tempmenus;
-		
 		// TODO: sort menu IDs in 'menus' so that looking for free ID is much faster.
 		
 		prevMenuID++;
 		if(prevMenuID >= END_MENU_ID || prevMenuID <= FIRST_MENU_ID)
 		{
 			prevMenuID = FIRST_MENU_ID;
-			previdloop:
+		previdloop:
 			for(;;)
 			{
 				for(size_t iw; iw != nmenus; iw++)
 				{
-					MenuItem mi;
-					mi = cast(MenuItem)menus[iw];
+					MenuItem mi = cast(MenuItem)menus[iw];
 					if(mi)
 					{
 						if(prevMenuID == mi._menuID)
@@ -1181,10 +1161,9 @@ static:
 				break;
 			}
 		}
-		tempmenus = cast(Menu*)dfl.internal.clib.realloc(menus, Menu.sizeof * (nmenus + 1));
+		typeof(menus) tempmenus = cast(Menu*)dfl.internal.clib.realloc(menus, Menu.sizeof * (nmenus + 1));
 		if(!tempmenus)
 		{
-			//throw new OutOfMemory;
 			throw new DflException("Out of memory");
 		}
 		menus = tempmenus;
@@ -1200,16 +1179,13 @@ static:
 		if(nmenus == END_MENU_ID - FIRST_MENU_ID)
 			throw new DflException("Out of menus");
 		
-		typeof(menus) tempmenus;
-		int idx;
+		int idx = nmenus;
 		
-		idx = nmenus;
 		nmenus++;
-		tempmenus = cast(Menu*)dfl.internal.clib.realloc(menus, Menu.sizeof * nmenus);
+		typeof(menus) tempmenus = cast(Menu*)dfl.internal.clib.realloc(menus, Menu.sizeof * nmenus);
 		if(!tempmenus)
 		{
 			nmenus--;
-			//throw new OutOfMemory;
 			throw new DflException("Out of memory");
 		}
 		menus = tempmenus;
@@ -1252,12 +1228,9 @@ static:
 	
 	package MenuItem lookupMenuID(int menuID)
 	{
-		uint idx;
-		MenuItem mi;
-		
-		for(idx = 0; idx != nmenus; idx++)
+		for(uint idx = 0; idx != nmenus; idx++)
 		{
-			mi = cast(MenuItem)menus[idx];
+			MenuItem mi = cast(MenuItem)menus[idx];
 			if(mi && mi._menuID == menuID)
 				return mi;
 		}
@@ -1267,9 +1240,7 @@ static:
 	
 	package Menu lookupMenu(HMENU hmenu)
 	{
-		uint idx;
-		
-		for(idx = 0; idx != nmenus; idx++)
+		for(uint idx = 0; idx != nmenus; idx++)
 		{
 			if(menus[idx].handle == hmenu)
 				return menus[idx];
@@ -1590,8 +1561,8 @@ static:
 		void handleHotkey()
 		{
 			immutable kid = cast(int)msg.wParam;
-			immutable mod = cast(uint)(msg.lParam&0x0000ffff);
-			immutable keycode = cast(uint)((msg.lParam&0xffff0000)>>16);
+			immutable mod = cast(uint)(msg.lParam & 0x0000ffff);
+			immutable keycode = cast(uint)((msg.lParam & 0xffff0000) >> 16);
 			assert(kid < hotkeyHandler.length);
 			hotkeyHandler[kid](
 				typeid(Application),
@@ -1637,7 +1608,6 @@ static:
 			handleHotkey();
 		}
 		TranslateMessage(&msg._winMsg);
-		//DispatchMessageA(&msg._winMsg);
 		dfl.internal.utf.dispatchMessage(&msg._winMsg);
 	}
 }
