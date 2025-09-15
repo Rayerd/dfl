@@ -34,9 +34,13 @@ class MainForm : Form
 
 		version (ToastNotifier)
 		{
-			wstring appName = "toastnotifier_sample";
-			wstring exePath = r"C:\d\gitproj\dfl\examples\toastnotifier\bin\" ~ appName ~ r".exe";
-			wstring shortcutPath = Application.userAppDataBasePath.to!wstring ~ r"\Microsoft\Windows\Start Menu\Programs\" ~ appName ~ r".lnk";
+			import std.path;
+
+			const(wstring) exePath = Application.executablePath.to!wstring;
+			const(wstring) exeName = exePath.baseName;
+			const(wstring) appName = exeName.stripExtension;
+			const(wstring) programPath = Environment.getFolderPath(Environment.SpecialFolder.PROGRAMS).to!wstring;
+			const(wstring) shortcutPath = buildNormalizedPath(programPath, appName.setExtension("lnk"w));
 
 			_notifier = new ToastNotifier(appName, exePath, shortcutPath, appId);
 			_notifier.heroImage = HeroImagePath;
@@ -49,7 +53,14 @@ class MainForm : Form
 		else
 		{
 			_notifier = new ToastNotifierLegacy(appId);
+			// _notifier.toastTemplate = ToastTemplateType.ToastImageAndText01;
+			// _notifier.toastTemplate = ToastTemplateType.ToastImageAndText02;
+			// _notifier.toastTemplate = ToastTemplateType.ToastImageAndText03;
 			_notifier.toastTemplate = ToastTemplateType.ToastImageAndText04;
+			// _notifier.toastTemplate = ToastTemplateType.ToastText01;
+			// _notifier.toastTemplate = ToastTemplateType.ToastText02;
+			// _notifier.toastTemplate = ToastTemplateType.ToastText03;
+			// _notifier.toastTemplate = ToastTemplateType.ToastText04;
 		}
 		_notifier.headline = "Hello ToastNotifier with DFL!";
 		_notifier.text = "ToastNotifierのサンプルコードです。";
