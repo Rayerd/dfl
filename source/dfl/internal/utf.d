@@ -616,6 +616,9 @@ BOOL setWindowText(HWND hwnd, Dstring str)
 
 Dstring getModuleFileName(HMODULE hmod)
 {
+	import std.path;
+	import std.array;
+
 	if(useUnicode)
 	{
 		version(STATIC_UNICODE)
@@ -637,13 +640,13 @@ Dstring getModuleFileName(HMODULE hmod)
 		
 		wchar[] s = new wchar[MAX_PATH];
 		DWORD len = proc(hmod, s.ptr, s.length.toI32);
-		return fromUnicode(s.ptr, len);
+		return asNormalizedPath(fromUnicode(s.ptr, len)).array;
 	}
 	else
 	{
 		char[] s = new char[MAX_PATH];
 		DWORD len = GetModuleFileNameA(hmod, s.ptr, s.length.toI32);
-		return fromAnsi(s.ptr, len);
+		return asNormalizedPath(fromAnsi(s.ptr, len)).array;
 	}
 }
 
