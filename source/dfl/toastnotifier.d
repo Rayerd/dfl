@@ -1,78 +1,78 @@
 ///
 module dfl.toastnotifier;
 
+import dfl.application;
 import dfl.base;
 import dfl.drawing;
+import dfl.environment;
+import dfl.event;
+import dfl.registry;
 
+import dfl.internal.com : DflComObject;
 import dfl.internal.dlib;
 import dfl.internal.winrt;
 
+import core.sys.windows.basetyps : REFIID, REFCLSID;
 import core.sys.windows.com;
-import core.sys.windows.oaidl;
-import core.sys.windows.objidl;
-import core.sys.windows.shlobj;
-import core.sys.windows.shlwapi;
-pragma(lib, "Shlwapi");
-import core.sys.windows.uuid;
-import core.sys.windows.winbase;
+import core.sys.windows.objbase : CoRevokeClassObject, CoRegisterClassObject, REGCLS;
+import core.sys.windows.objidl : PROPVARIANT, IPersistFile;
+import core.sys.windows.shlobj : IShellLinkW;
+import core.sys.windows.shlwapi : SHStrDupW;
+import core.sys.windows.winbase : Sleep, DeleteFile;
 import core.sys.windows.windef;
-import core.sys.windows.wtypes;
+import core.sys.windows.wtypes : VARENUM;
 
-import std.conv;
+import std.conv : to;
+
+
+pragma(lib, "Shlwapi"); // SHStrDupW
+pragma(lib, "Propsys"); // InitPropVariantFromCLSID, PropVariantClear
 
 
 ///
 class ToastNotifier // docmain
 {
 	///
-	this(Dwstring appName, Dwstring exePath, Dwstring shortcutPath, Dwstring appId)
+	this(Dwstring aumid)
 	{
-		if (appName.length > 0 && exePath.length > 0 && shortcutPath.length > 0 && appId.length > 0)
-		{
-			_shell = new ShellLinkWithAppId(exePath, shortcutPath, appId);
-			_shell.install();
-			Sleep(3000); // Wait for the shell to recognize the AUMID.
-		}
-		_appName = appName;
-		_exePath = exePath;
-		_shortbutPath = shortcutPath;
-		_appId = appId;
+		_aumid = aumid;
 	}
+	
 
-	
-	///
-	void dispose()
-	{
-		_shell.uninstall();
-	}
-	
-	
 	///
 	void show()
 	{
 		import std.format;
 		Dwstring xml = format(r"
-			<toast>
+			<toast launch='%s' useButtonStyle='%s'>
 				<visual>
 					<binding template='ToastGeneric'>
 						<text>%s</text>
 						<text>%s</text>
 						<text>%s</text>
-						<image placement='appLogoOverride' src='%s' %s/>
-						<image placement='hero' src='%s'/>
+						<image %s %s/>
+						<image %s/>
 					</binding>
-				</visual>"
+				</visual>" ~
 				// <actions>
-				// 	<action activetionType='foreground' content='Ok' arguments='Ok'/>
-				// 	<action activetionType='background' content='Cancel' arguments='Cancel'/>
+				// 	<input id='message' type='text' placeHolderContent='Input message here' title='Message'/>
+				// 	<input id='mode' type='selection' title='Mode' defaultInput='fast'>
+				// 		<selection id='fast' content='Fast'/>
+				// 		<selection id='slow' content='Slow'/>
+				// 	</input>
+				// 	<action activationType='foreground' content='Ok' arguments='action=OkButton&amp;userId=49183' type='one' hint-buttonStyle='Success'/>
+				// 	<action activationType='background' content='Cancel' arguments='action=CancelButton&amp;userId=49183' type='two' hint-buttonStyle='Success'/>
+				// 	<action activationType='protocol' content='Open Google' arguments='https://www.google.com/' type='three' hint-buttonStyle='Critical'/>
 				// </actions>
-			~ "</toast>",
+			"</toast>",
+			_launch,
+			_useButtonStyle ? "true" : "false",
 			_headline,
 			_text,
 			_subtext,
-			_appLogoImage,
+			_appLogoImage.length ? format("placement='appLogoOverride' src='%s'", _appLogoImage) : "",
 			_hintCrop ? "hint-crop='circle'" : "",
-			_heroImage
+			_heroImage.length ? format("placement='hero' src='%s'", _heroImage) : ""
 		).to!Dwstring;
 		showCore(xml);
 	}
@@ -90,16 +90,24 @@ class ToastNotifier // docmain
 		assert(toastStatics);
 		assert(hr == S_OK, "Failed to get ToastNotificationManager statics");
 		freeHSTRING(hClass);
-		scope(exit) toastStatics.Release();
+		scope(exit)
+		{
+			toastStatics.Release();
+			toastStatics = null;
+		}
 
 		// 2. Create Notifier.
 		IToastNotifier notifier;
-		HSTRING hAppId = toHSTRING(_appId.to!Dwstring);
+		HSTRING hAppId = toHSTRING(_aumid.to!Dwstring);
 		hr = toastStatics.CreateToastNotifierWithId(hAppId, &notifier);
 		assert(notifier);
 		assert(hr == S_OK, "Failed to create ToastNotifier");
 		freeHSTRING(hAppId);
-		scope(exit) notifier.Release();
+		scope(exit)
+		{
+			notifier.Release();
+			notifier = null;
+		}
 
 		// 3. Create XmlDocument.
 		XmlDocument xmlDoc;
@@ -107,14 +115,22 @@ class ToastNotifier // docmain
 		hr = RoActivateInstance(hXmlDocClass, cast(IInspectable*)&xmlDoc);
 		assert(xmlDoc);
 		assert(hr == S_OK, "Failed to activate XmlDocument");
-		scope(exit) xmlDoc.Release;
+		scope(exit)
+		{
+			xmlDoc.Release();
+			xmlDoc = null;
+		}
 		
 		IXmlDocumentIO xmlDocIO;
 		hr = xmlDoc.QueryInterface(&IID_IXmlDocumentIO, cast(void**)&xmlDocIO);
 		assert(xmlDocIO);
 		assert(hr == S_OK, "Failed to activate XmlDocumentIO");
 		freeHSTRING(hXmlDocClass);
-		scope(exit) xmlDocIO.Release();
+		scope(exit)
+		{
+			xmlDocIO.Release();
+			xmlDocIO = null;
+		}
 
 		// 4. Load XML.
 		HSTRING hXml = toHSTRING(xml);
@@ -129,17 +145,50 @@ class ToastNotifier // docmain
 		assert(toastFactory);
 		assert(hr == S_OK, "Failed to get ToastNotificationFactory");
 		freeHSTRING(hToastClass);
-		scope(exit) toastFactory.Release();
+		scope(exit)
+		{
+			toastFactory.Release();
+			toastFactory = null;
+		}
 
 		IToastNotification toast;
 		hr = toastFactory.CreateToastNotification(xmlDoc, &toast);
 		assert(toast);
 		assert(hr == S_OK, "Failed to create ToastNotification");
-		scope(exit) toast.Release();
+		scope(exit)
+		{
+			toast.Release();
+			toast = null;
+		}
 
 		// 6. Show toast.
 		hr = notifier.Show(toast);
 		assert(hr == S_OK, "Failed to show toast");
+	}
+
+
+	///
+	@property void launch(Dwstring txt) // setter
+	{
+		_launch = txt;
+	}
+
+	/// ditto
+	@property Dwstring launch() // gettitle
+	{
+		return _launch;
+	}
+	
+	///
+	@property void useButtonStyle(bool byes) // setter
+	{
+		_useButtonStyle = byes;
+	}
+
+	/// ditto
+	@property bool useButtonStyle() // gettitle
+	{
+		return _useButtonStyle;
 	}
 
 
@@ -221,14 +270,10 @@ class ToastNotifier // docmain
 	}
 
 
-
 private:
-	
-	ShellLinkWithAppId _shell; ///
-	Dwstring _appName; ///
-	Dwstring _exePath; ///
-	Dwstring _shortbutPath; ///
-	Dwstring _appId; ///
+	Dwstring _aumid; ///
+	Dwstring _launch; ///
+	bool _useButtonStyle; ///
 	Dwstring _headline; ///
 	Dwstring _text; ///
 	Dwstring _subtext; ///
@@ -256,9 +301,9 @@ class ToastNotifierLegacy // docmain
 
 
 	///
-	this(Dwstring appId)
+	this(Dwstring aumid)
 	{
-		_notifier = new ToastNotifier("", "", "", appId);
+		_notifier = new ToastNotifier(aumid);
 	}
 
 
@@ -324,13 +369,7 @@ enum ToastTemplateType
 }
 
 
-extern (Windows)
-{
-__gshared:
-	const IID IID_IPropertyStore = { 0x886d8eeb, 0x8cf2, 0x4446, [0x8d, 0x02, 0xcd, 0xba, 0x1d, 0xbd, 0xcf, 0x99] };
-}
-
-
+///
 struct PROPERTYKEY
 {
 	GUID fmtid;
@@ -338,18 +377,195 @@ struct PROPERTYKEY
 }
 
 
-extern (Windows) __gshared const PROPERTYKEY PKEY_AppUserModel_ID = {
-	{0x9F4C2855, 0x9F79, 0x4B39, [0xA8, 0xD0, 0xE1, 0xD4, 0x2D, 0xE1, 0xD5, 0xF3]}, 5
-};
-
-
-struct VERSIONEDSTREAM
+extern (Windows)
 {
-	GUID guidVersion;
-	IStream pStream;
+__gshared:
+	///
+	const IID IID_IPropertyStore = { 0x886d8eeb, 0x8cf2, 0x4446, [0x8d, 0x02, 0xcd, 0xba, 0x1d, 0xbd, 0xcf, 0x99] };
+	///
+	const IID IID_INotificationActivationCallback = { 0x53E31837, 0x6600, 0x4A81, [0x93, 0x95, 0x75, 0xCF, 0xFE, 0x74, 0x6F, 0x94] };
+	///
+	const PROPERTYKEY PKEY_AppUserModel_ID = {
+		{0x9F4C2855, 0x9F79, 0x4B39, [0xA8, 0xD0, 0xE1, 0xD4, 0x2D, 0xE1, 0xD5, 0xF3]}, 5
+	};
+	///
+	const PROPERTYKEY PKEY_AppUserModel_ToastActivatorCLSID = {
+		{0x9F4C2855, 0x9F79, 0x4B39, [0xA8, 0xD0, 0xE1, 0xD4, 0x2D, 0xE1, 0xD5, 0xF3]}, 26
+	};
+	///
+	enum UUID_NOTIFICATION_ACTIVATOR = "{64539c9a-c2da-4349-b9af-c5126944f6fc}";
+	CLSID CLSID_NOTIFICATION_ACTIVATOR = guidFromUUID(UUID_NOTIFICATION_ACTIVATOR[1..$-1]);
 }
 
 
+interface INotificationActivationCallBack : IUnknown
+{
+extern (Windows):
+	HRESULT Activate(LPCWSTR appUserModelId, LPCWSTR invokedArgs, const NOTIFICATION_USER_INPUT_DATA* data, ULONG count);
+}
+
+
+///
+// uuid("64539c9a-c2da-4349-b9af-c5126944f6fc")
+private class NotificationActivatorBase : DflComObject, INotificationActivationCallBack
+{
+extern (Windows):
+	///
+	override HRESULT QueryInterface(IID* riid, void** ppv)
+	{
+		if (*riid == IID_INotificationActivationCallback)
+		{
+			*ppv = cast(void*)cast(INotificationActivationCallBack)this;
+			AddRef();
+			return S_OK;
+		}
+		return super.QueryInterface(riid, ppv);
+	}
+
+
+	///
+	HRESULT Activate(LPCWSTR appUserModelId, LPCWSTR invokedArgs, const NOTIFICATION_USER_INPUT_DATA* data, ULONG count)
+	{
+		auto args = new ToastActivatedEventArgs(appUserModelId, invokedArgs, data, count);
+		_cumtomActivator.onActivated(_cumtomActivator, args);
+		return S_OK;
+	}
+
+extern(D):
+	///
+	void Attach(NotificationActivator activator)
+	in
+	{
+		assert(activator);
+	}
+	do
+	{
+		_cumtomActivator = activator;
+	}
+
+private:
+	NotificationActivator _cumtomActivator; ///
+}
+
+///
+class NotificationActivator
+{
+	///
+	void onActivated(NotificationActivator activator, ToastActivatedEventArgs args)
+	{
+		activated(activator, args);
+	}
+
+	///
+	Event!(NotificationActivator, ToastActivatedEventArgs) activated;
+}
+
+
+///
+class ToastActivatedEventArgs : EventArgs
+{
+	///
+	this(LPCWSTR appUserModelId, LPCWSTR invokedArgs, const NOTIFICATION_USER_INPUT_DATA* data, ULONG count)
+	{
+		_appId = appUserModelId;
+		_args = invokedArgs;
+		_data = data;
+		_count = count;
+	}
+
+
+	///
+	@property Dwstring arguments() const
+	{
+		import dfl.internal.utf : fromUnicodez;
+		return fromUnicodez(cast(wchar*)_args).to!Dwstring;
+	}
+
+
+	///
+	@property Dwstring[Dwstring] userInputs() const
+	{
+		import core.stdc.wchar_ : wcslen;
+		Dwstring[Dwstring] result;
+		foreach (i; 0 .. _count)
+		{
+			Dwstring key = _data[i].Key[0 .. wcslen(_data[i].Key)].to!Dwstring;
+			Dwstring value = _data[i].Value[0 .. wcslen(_data[i].Value)].to!Dwstring;
+			result[key] = value;
+		}
+		return result;
+	}
+
+
+private:
+	LPCWSTR _appId; ///
+	LPCWSTR _args; ///
+	const NOTIFICATION_USER_INPUT_DATA* _data; ///
+	ULONG _count; ///
+
+}
+
+
+///
+class NotificationActivatorFactory : DflComObject, IClassFactory
+{
+extern (Windows):
+	///
+	override HRESULT QueryInterface(IID* riid, void** ppv)
+	{
+		if (*riid == IID_IClassFactory)
+		{
+			*ppv = cast(void*)cast(IClassFactory)this;
+			AddRef();
+			return S_OK;
+		}
+		return super.QueryInterface(riid, ppv);
+	}
+
+	///
+	HRESULT CreateInstance(IUnknown pUnkOuter, REFIID riid, void** ppvObject)
+	{
+		if (pUnkOuter)
+			return CLASS_E_NOAGGREGATION;
+		
+		auto activator = new NotificationActivatorBase(); // Create COM Activator.
+		scope(exit)
+		{
+			activator.Release();
+			activator = null;
+		}
+		activator.Attach(_cumtomActivator);
+
+		return activator.QueryInterface(riid, ppvObject);
+	}
+
+	///
+	HRESULT LockServer(BOOL fLock)
+	{
+		return S_OK;
+	}
+
+extern(D):
+	///
+	this(NotificationActivator activator)
+	{
+		_cumtomActivator = activator;
+	}
+
+private:
+	NotificationActivator _cumtomActivator; ///
+}
+
+
+///
+struct NOTIFICATION_USER_INPUT_DATA
+{
+	LPCWSTR Key;
+	LPCWSTR Value;
+}
+
+
+///
 interface IPropertyStore : IUnknown
 {
 extern (Windows):
@@ -361,19 +577,15 @@ extern (Windows):
 }
 
 
-extern (Windows)
+extern(Windows)
 {
+	// Propsys.lib
+	HRESULT InitPropVariantFromCLSID(REFCLSID clsid, PROPVARIANT* ppropvar);
 	HRESULT PropVariantClear(PROPVARIANT* pvar);
 }
 
 
-void PropVariantInit(PROPVARIANT* pvar)
-{
-	import core.stdc.string : memset;
-	memset(pvar, 0, PROPVARIANT.sizeof);
-}
-
-
+///
 HRESULT InitPropVariantFromString(PCWSTR psz, PROPVARIANT* ppropvar)
 {
 	HRESULT hr = SHStrDupW(psz, &ppropvar.pwszVal);
@@ -385,14 +597,24 @@ HRESULT InitPropVariantFromString(PCWSTR psz, PROPVARIANT* ppropvar)
 }
 
 
-class ShellLinkWithAppId
+///
+void PropVariantInit(PROPVARIANT* pvar)
+{
+	import core.stdc.string : memset;
+	memset(pvar, 0, PROPVARIANT.sizeof);
+}
+
+
+///
+class ShellLinkWithAppIdAndClsId
 {
 	///
-	this(in Dwstring exePath, in Dwstring shortcutPath, in Dwstring appId)
+	this(in Dwstring exePath, in Dwstring shortcutPath, in Dwstring aumid, in CLSID clsId)
 	{
 		_exePath = exePath;
 		_shortcutPath = shortcutPath;
-		_appId = appId;
+		_aumid = aumid;
+		_clsId = clsId;
 	}
 
 
@@ -402,7 +624,8 @@ class ShellLinkWithAppId
 	{
 		assert(_exePath.length > 0);
 		assert(_shortcutPath.length > 0);
-		assert(_appId.length > 0);
+		assert(_aumid.length > 0);
+		assert(_clsId != GUID.init);
 	}
 	do
 	{
@@ -413,7 +636,11 @@ class ShellLinkWithAppId
 		assert(shellLink);
 		assert(hr == S_OK, "CoCreateInstance(CLSID_ShellLink) failed");
 		scope (exit)
+		{
 			shellLink.Release();
+			shellLink = null;
+		}
+
 		hr = shellLink.SetPath(_exePath.ptr);
 		assert(hr == S_OK, "IShellLinkW.SetPath() failed");
 
@@ -422,15 +649,31 @@ class ShellLinkWithAppId
 		assert(propertyStore);
 		assert(hr == S_OK, "IPropertyStore.QueryInterface(IID_IPropertyStore) failed");
 		scope (exit)
+		{
 			propertyStore.Release();
-		PROPVARIANT pv;
-		hr = InitPropVariantFromString(_appId.ptr, &pv);
-		assert(hr == S_OK, "InitPropVariantFromString() failed");
-		hr = propertyStore.SetValue(&PKEY_AppUserModel_ID, &pv);
+			propertyStore = null;
+		}
+		
+		PROPVARIANT propAppId;
+		PropVariantInit(&propAppId);
+		hr = InitPropVariantFromString(_aumid.ptr, &propAppId);
+		assert(hr == S_OK, "InitPropropAppIdariantFromString() failed");
+		hr = propertyStore.SetValue(&PKEY_AppUserModel_ID, &propAppId);
 		assert(hr == S_OK, "IPropertyStore.SetValue() failed");
+		// 
+		PROPVARIANT propClsId;
+		PropVariantInit(&propClsId);
+		hr = InitPropVariantFromCLSID(&_clsId, &propClsId);
+		assert(hr == S_OK, "InitPropVariantFromCLSID() failed");
+		hr = propertyStore.SetValue(&PKEY_AppUserModel_ToastActivatorCLSID, &propClsId);
+		assert(hr == S_OK, "IPropertyStore.SetValue() failed");
+		
 		hr = propertyStore.Commit();
 		assert(hr == S_OK, "IPropertyStore.Commit() failed");
-		hr = PropVariantClear(&pv);
+
+		hr = PropVariantClear(&propAppId);
+		assert(hr == S_OK, "PropVariantClear() failed");
+		hr = PropVariantClear(&propClsId);
 		assert(hr == S_OK, "PropVariantClear() failed");
 
 		IPersistFile persistFile;
@@ -438,11 +681,15 @@ class ShellLinkWithAppId
 		assert(persistFile);
 		assert(hr == S_OK, "QueryInterface(IID_IPersistFile) failed");
 		scope (exit)
+		{
 			persistFile.Release();
+			persistFile = null;
+		}
+		
 		hr = persistFile.Save(_shortcutPath.ptr, TRUE);
 		assert(hr == S_OK, "IPersistFile.Save() failed");
 
-		isInstalled = true;
+		_isInstalled = true;
 	}
 
 
@@ -454,17 +701,174 @@ class ShellLinkWithAppId
 	}
 	do
 	{
-		if (isInstalled)
+		if (_isInstalled)
 		{
 			DeleteFile(_shortcutPath.ptr);
-			isInstalled = false;
+			_isInstalled = false;
 		}
 	}
 
 private:
 
-	static bool isInstalled; ///
+	bool _isInstalled; ///
 	Dwstring _exePath; ///
 	Dwstring _shortcutPath; ///
-	Dwstring _appId; ///
+	Dwstring _aumid; ///
+	CLSID _clsId; ///
+}
+
+
+///
+scope class DesktopNotificationManager
+{
+	/// Constructor.
+	this(Dstring[] launchArgs, Dwstring aumid)
+	{
+		_aumid = aumid;
+
+		import std.path;
+		_exePath = Application.executablePath.to!Dwstring;
+		_exeName = _exePath.baseName;
+		_appName = _exeName.stripExtension;
+		_programPath = Environment.getFolderPath(Environment.SpecialFolder.PROGRAMS).to!Dwstring;
+		_shortcutPath = buildNormalizedPath(_programPath, _appName.setExtension("lnk"w));
+		
+		_shell = new ShellLinkWithAppIdAndClsId(_exePath, _shortcutPath, aumid, CLSID_NOTIFICATION_ACTIVATOR);
+
+		import std.algorithm : canFind;
+		if (launchArgs.canFind("-Embedding"))
+		{
+			// COM server launched this App.
+			// You can do something for launched App.
+			_mode = DesktopNotificationMode.LAUNCH;
+		}
+		else
+		{
+			_mode = DesktopNotificationMode.NORMAL;
+		}
+	}
+
+
+	/// Install ShellLink with AUMID and CLSID to StartMenu.
+	void installShellLink()
+	{
+		import core.sys.windows.winbase : Sleep;
+		_shell.install();
+		Sleep(3000); // NOTE: Wait for the shell to recognize the AUMID.
+	}
+
+
+	/// Uninstall ShellLink from StartMenu.
+	void uninstallShellLink()
+	{
+		if (!_shell)
+			throw new DflException("DFL: DesktopNotificationManager.uninstallShellLink failure.");
+		_shell.uninstall();
+	}
+
+
+	/// Register Toast Activator.
+	void registerActivator(NotificationActivator customActivator = new NotificationActivator)
+	{
+		if (_activatorFactory)
+		{
+			_activatorFactory.Release();
+			_activatorFactory = null;
+
+			HRESULT hr = CoRevokeClassObject(_registerClassToken);
+			assert(hr == S_OK);
+		}
+		
+		assert(!_activatorFactory);
+		_activatorFactory = new NotificationActivatorFactory(customActivator);
+
+		HRESULT hr = CoRegisterClassObject(&CLSID_NOTIFICATION_ACTIVATOR, _activatorFactory, CLSCTX_LOCAL_SERVER, REGCLS.REGCLS_MULTIPLEUSE, &_registerClassToken);
+		assert(hr == S_OK);
+
+		assert(!_activator);
+		_activator = customActivator;
+	}
+
+
+	/// Unregister Toast Activator.
+	void unregisterActivator()
+	{
+		if (!_activatorFactory)
+			throw new DflException("DFL: unregisterActivator failue.");
+
+		_activatorFactory.Release();
+		_activatorFactory = null;
+
+		HRESULT hr = CoRevokeClassObject(_registerClassToken);
+		assert(hr == S_OK);
+	}
+	
+
+	/// Register AUMID and Toast Activator CLSID.
+	void registerAumidAndComServer()
+	{
+		// Install Toast Activator CLSID.
+		//   \HKEY_CURRENT_USER\SOFTWARE\Classes\CLSID\{Toast Activator CLSID}\LocalServer32
+		//
+		scope RegistryKey clsid = Registry.currentUser().openSubKey("SOFTWARE").openSubKey("Classes").openSubKey("CLSID");
+		// Create CLSID for COM Activator.
+		clsid.createSubKey(UUID_NOTIFICATION_ACTIVATOR).createSubKey("LocalServer32")
+			.setValue("", "\"" ~ _exePath.to!Dstring ~ "\""); // Need "double quotation"
+		clsid.flush();
+
+		// Install AUMID.
+		//   \HKEY_CURRENT_USER\SOFTWARE\Classes\AppUserModelId\{Your AUMID}
+		//
+		// Create AUMID for GenericToast in Toast XML.
+		scope RegistryKey aumid = Registry.currentUser().openSubKey("SOFTWARE").openSubKey("Classes").openSubKey("AppUserModelId");
+		// Create AUMID for COM Activator.
+		aumid.createSubKey(_aumid.to!Dstring).setValue("ToastActivatorCLSID", UUID_NOTIFICATION_ACTIVATOR);
+		aumid.flush();
+	}
+
+
+	/// Unregister AUMID and Toast Activator CLSID.
+	void unregisterAumidAndComServer()
+	{
+		// Uninstall Toast Activator CLSID.
+		scope RegistryKey clsidKey = Registry.currentUser().openSubKey("SOFTWARE").openSubKey("Classes").openSubKey("CLSID");
+		clsidKey.openSubKey(UUID_NOTIFICATION_ACTIVATOR).deleteSubKey("LocalServer32");
+		clsidKey.deleteSubKey(UUID_NOTIFICATION_ACTIVATOR);
+		clsidKey.flush();
+
+		// Uninstall AUMID.
+		scope RegistryKey aumidKey = Registry.currentUser().openSubKey("SOFTWARE").openSubKey("Classes").openSubKey("AppUserModelId");
+		aumidKey.deleteSubKey(_aumid.to!Dstring);
+		aumidKey.flush();
+	}
+
+
+	///
+	@property DesktopNotificationMode mode() // getter
+	{
+		return _mode;
+	}
+
+private:
+	ShellLinkWithAppIdAndClsId _shell; ///
+	const DesktopNotificationMode _mode; ///
+
+	const Dwstring _aumid; ///
+	const Dwstring _exePath; ///
+	const Dwstring _exeName; ///
+	const Dwstring _appName; ///
+	const Dwstring _programPath; ///
+	const Dwstring _shortcutPath; ///
+
+	NotificationActivator _activator; ///
+	NotificationActivatorFactory _activatorFactory; ///
+	DWORD _registerClassToken; ///
+}
+
+
+///
+enum DesktopNotificationMode
+{
+	NORMAL, ///
+	LAUNCH ///
 }
