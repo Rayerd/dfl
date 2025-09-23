@@ -87,6 +87,14 @@ class ToastNotifier // docmain
 			}
 		}
 
+		static Dwstring createInputXmlElement(ToastNotifier n)
+		{
+			Dwstring ret;
+			foreach (input; n.inputs)
+				ret ~= input.toXmlElement ~ "\n"w;
+			return ret;
+		}
+
 		static Dwstring createButtonXmlElement(ToastNotifier n)
 		{
 			Dwstring ret;
@@ -106,13 +114,9 @@ class ToastNotifier // docmain
 						%s
 					</binding>
 				</visual>
-				<actions>" ~
-					// <input id='message' type='text' placeHolderContent='Input message here' title='Message'/>
-					// <input id='mode' type='selection' title='Mode' defaultInput='fast'>
-					// 	<selection id='fast' content='Fast'/>
-					// 	<selection id='slow' content='Slow'/>
-					// </input>
-					"%s ~
+				<actions>
+					%s
+					%s
 				</actions>
 			</toast>"w,
 			_launch,
@@ -122,6 +126,7 @@ class ToastNotifier // docmain
 			_subtext,
 			createAppLogoXmlElement(this),
 			createImageXmlElement(this),
+			createInputXmlElement(this),
 			createButtonXmlElement(this)
 		);
 		showCore(xml);
@@ -357,6 +362,13 @@ class ToastNotifier // docmain
 	}
 
 
+	///
+	@property ToastTextBoxCollection inputs() // getter
+	{
+		return _inputs;
+	}
+
+
 private:
 	Dwstring _aumid; ///
 	Dwstring _launch; ///
@@ -369,39 +381,40 @@ private:
 	ToastNotifierImageStyle _imageStyle; ///
 	bool _hintCrop; ///
 	ToastButtonCollection _buttons = new ToastButtonCollection; ///
+	ToastTextBoxCollection _inputs = new ToastTextBoxCollection; ///
 }
 
 
 ///
-class ToastButtonCollection
+class ToastCollectionBase(ItemType)
 {
 	///
-	void add(ToastButton button)
+	void add(ItemType item)
 	{
-		_buttons ~= button;
-		assert(_buttons.length <= 5, "Toast buttons length must be 0 to 5.");
+		_items ~= item;
+		assert(_items.length <= 5, "Toast buttons/TextBox length must be 0 to 5.");
 	}
 
 	
 	///
 	@property size_t length() const
 	{
-		return _buttons.length;
+		return _items.length;
 	}
 
 	
 	///
-	@property ToastButton opIndex(size_t index)
+	@property ItemType opIndex(size_t index)
 	{
-		return _buttons[index];
+		return _items[index];
 	}
 
 	
 	///
-	int opApply(scope int delegate(ToastButton) dg)
+	int opApply(scope int delegate(ItemType) dg)
 	{
 		int result = 0;
-		foreach (item; _buttons)
+		foreach (item; _items)
 		{
 			result = dg(item);
 			if (result)
@@ -411,7 +424,244 @@ class ToastButtonCollection
 	}
 	
 private:
-	ToastButton[] _buttons; ///
+	ItemType[] _items; ///
+}
+
+
+///
+alias ToastTextBoxCollection = ToastCollectionBase!IToastTextBox;
+
+///
+alias ToastSelectionBoxItemCollection = ToastCollectionBase!ToastSelectionBoxItem;
+
+///
+alias ToastButtonCollection = ToastCollectionBase!ToastButton;
+
+
+/// 
+interface IToastTextBox
+{
+	///
+	@property Dwstring id() const; // getter
+	///
+	@property Dwstring toXmlElement() const; // getter
+}
+
+
+///
+class ToastTextBox : IToastTextBox
+{
+	///
+	this(Dwstring id)
+	{
+		_id = id;
+	}
+
+	/// ditto (extra.)
+	this(Dwstring id, Dwstring title, Dwstring placeHolderContent)
+	{
+		_id = id;
+		_title = title;
+		_placeHolderContent = placeHolderContent;
+	}
+
+
+	///
+	@property Dwstring id() const // getter
+	{
+		return _id;
+	}
+
+
+	///
+	@property void title(Dwstring title) // setter
+	{
+		_title = title;
+	}
+
+	/// ditto
+	@property Dwstring title() const // getter
+	{
+		return _title;
+	}
+
+
+	///
+	@property void placeHolderContent(Dwstring placeHolderContent) // setter
+	{
+		_placeHolderContent = placeHolderContent;
+	}
+
+	/// ditto
+	@property Dwstring placeHolderContent() const // getter
+	{
+		return _placeHolderContent;	
+	}
+
+
+	///
+	@property Dwstring toXmlElement() const // getter
+	{
+		return format(
+			"<input id='%s' type='text' title='%s' placeHolderContent='%s'/>"w,
+			_id,
+			_title,
+			_placeHolderContent
+		);
+	}
+
+private:
+	const Dwstring _id; ///
+	Dwstring _title; ///
+	Dwstring _placeHolderContent; ///
+}
+
+
+///
+class ToastSelectionBox : IToastTextBox
+{
+	///
+	this(Dwstring id)
+	{
+		_id = id;
+	}
+
+	/// ditto (extra.)
+	this(Dwstring id, Dwstring title, Dwstring placeHolderContent, Dwstring defaultInput)
+	{
+		_id = id;
+		_title = title;
+		_placeHolderContent = placeHolderContent;
+		_defaultInput = defaultInput;
+	}
+
+
+	///
+	@property Dwstring id() const // getter
+	{
+		return _id;
+	}
+
+
+	///
+	@property void title(Dwstring title) // setter
+	{
+		_title = title;
+	}
+
+	/// ditto
+	@property Dwstring title() const // getter
+	{
+		return _title;
+	}
+
+
+	///
+	@property void placeHolderContent(Dwstring placeHolderContent) // setter
+	{
+		_placeHolderContent = placeHolderContent;
+	}
+
+	/// ditto
+	@property Dwstring placeHolderContent() const // getter
+	{
+		return _placeHolderContent;	
+	}
+
+	
+	///
+	@property void defaultInput(Dwstring defaultInput) // setter
+	{
+		_defaultInput = defaultInput;
+	}
+
+	/// ditto
+	@property Dwstring defaultInput() const // getter
+	{
+		return _defaultInput;	
+	}
+
+
+	///
+	@property Dwstring toXmlElement() const // getter
+	{
+		static Dwstring createSelectionBoxXmlElement(ToastSelectionBox box)
+		{
+			Dwstring ret;
+			foreach (item; box.items)
+				ret ~= item.toXmlElement ~ "\n"w;
+			return ret;
+		}
+				
+		return format(
+			"<input id='%s' type='selection' title='%s' placeHolderContent='%s' defaultInput='%s'>"w ~
+			"%s"w ~
+			"</input>"w,
+			_id,
+			_title,
+			_placeHolderContent,
+			_defaultInput,
+			createSelectionBoxXmlElement(cast(ToastSelectionBox)this)
+		);
+	}
+
+
+	///
+	@property ToastSelectionBoxItemCollection items() // getter
+	{
+		return _items;
+	}
+
+
+private:
+	const Dwstring _id; ///
+	Dwstring _title; ///
+	Dwstring _placeHolderContent; ///
+	Dwstring _defaultInput; ///
+
+	ToastSelectionBoxItemCollection _items = new ToastSelectionBoxItemCollection; ///
+}
+
+
+///
+class ToastSelectionBoxItem
+{
+	///
+	this(Dwstring id, Dwstring content)
+	{
+		_id = id;
+		_content = content;
+	}
+
+
+	///
+	@property Dwstring id() const // getter
+	{
+		return _id;
+	}
+
+
+	///
+	@property Dwstring content() const // getter
+	{
+		return _content;
+	}
+
+
+	///
+	@property Dwstring toXmlElement() const
+	{
+		return format(
+			"<selection id='%s' content='%s'/>"w,
+			_id,
+			_content
+		);
+	}
+
+
+private:
+	const Dwstring _id; ///
+	const Dwstring _content; ///
 }
 
 
@@ -506,6 +756,7 @@ private:
 	}
 }
 
+
 ///
 enum ToastButtonStyle
 {
@@ -513,6 +764,7 @@ enum ToastButtonStyle
 	SUCCESS, ///
 	CRITICAL ///
 }
+
 
 ///
 enum ToastActivationType
@@ -719,6 +971,7 @@ private:
 	NotificationActivator _cumtomActivator; ///
 }
 
+
 ///
 class NotificationActivator
 {
@@ -792,6 +1045,7 @@ extern (Windows):
 		return super.QueryInterface(riid, ppv);
 	}
 
+
 	///
 	HRESULT CreateInstance(IUnknown pUnkOuter, REFIID riid, void** ppvObject)
 	{
@@ -808,6 +1062,7 @@ extern (Windows):
 
 		return activator.QueryInterface(riid, ppvObject);
 	}
+
 
 	///
 	HRESULT LockServer(BOOL fLock)

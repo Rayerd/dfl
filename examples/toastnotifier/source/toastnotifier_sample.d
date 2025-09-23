@@ -37,12 +37,34 @@ class MainForm : Form
 		version (ToastNotifier)
 		{
 			_notifier = new ToastNotifier(AUMID);
+
 			// _notifier.launch = "action=Test&amp;userId=49183";
 			_notifier.setLaunch("action=Test&userId=49183"); // setLaunch() converts text to escaped XML.
+
 			_notifier.imagePath = IMAGE_PATH;
+			
+			// _notifier.hintCrop = true;
+
 			_notifier.imageStyle = ToastNotifierImageStyle.HERO;
 			// _notifier.imageStyle = ToastNotifierImageStyle.INLINE;
-			// _notifier.hintCrop = true;
+			
+
+			// Input1
+			_notifier.inputs.add(new ToastTextBox("input1"w, "Message"w, "Place holder content"w));
+			// Input2
+			ToastSelectionBox input2 = new ToastSelectionBox("input2"w, "Fruits"w, "Place holder content"w, "select3"w);
+			input2.items.add(new ToastSelectionBoxItem("select1"w, "Apple"w));
+			input2.items.add(new ToastSelectionBoxItem("select2"w, "Orange"w));
+			input2.items.add(new ToastSelectionBoxItem("select3"w, "Pine"w));
+			_notifier.inputs.add(input2);
+			// Input3
+			_notifier.inputs.add(new ToastTextBox("input3"w, "to"w, "Place holder content"w));
+			// Input4
+			_notifier.inputs.add(new ToastTextBox("input4"w, "cc"w, "Place holder content"w));
+			// Input5
+			_notifier.inputs.add(new ToastTextBox("input5"w, "bcc"w, "Place holder content"w));
+			//
+			assert(_notifier.inputs.length <= 5, "Toast textboxes length must be 0 to 5.");
 
 			_notifier.useButtonStyle = true;
 			// Button1
@@ -60,6 +82,7 @@ class MainForm : Form
 			_notifier.buttons.add(new ToastButton("Option"w, "action=Option"w));
 			// Button5
 			_notifier.buttons.add(new ToastButton("Close"w, "action=Close"w));
+			//
 			assert(_notifier.buttons.length <= 5, "Toast buttons length must be 0 to 5.");
 		}
 		else
