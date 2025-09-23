@@ -23,8 +23,8 @@ extern(Windows) nothrow @nogc
 	void RoUninitialize();
 	HRESULT RoActivateInstance(HSTRING activatableClassId, IInspectable* thisInstance);
 	HRESULT RoGetActivationFactory(HSTRING activatableClassId, REFIID iid, void** factory);
-	HRESULT SetCurrentProcessExplicitAppUserModelID(PCWSTR AppID);
-	HRESULT GetCurrentProcessExplicitAppUserModelID(PWSTR* AppId);
+	HRESULT SetCurrentProcessExplicitAppUserModelID(PCWSTR aumid);
+	HRESULT GetCurrentProcessExplicitAppUserModelID(PWSTR* aumid);
 
 
 	///

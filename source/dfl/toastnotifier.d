@@ -1,3 +1,14 @@
+// Refference:
+//
+// Send a local app notification from other types of unpackaged apps
+// https://learn.microsoft.com/en-us/windows/apps/develop/notifications/app-notifications/send-local-toast-other-apps
+//
+// Send a local app notification from a C# app
+// https://learn.microsoft.com/en-us/windows/apps/develop/notifications/app-notifications/send-local-toast?tabs=desktop#step-6-handling-activation
+//
+// Toast schema
+// https://learn.microsoft.com/en-us/uwp/schemas/tiles/toastschema/schema-root
+
 ///
 module dfl.toastnotifier;
 
@@ -11,6 +22,10 @@ import dfl.registry;
 import dfl.internal.com : DflComObject;
 import dfl.internal.dlib;
 import dfl.internal.winrt;
+import dfl.internal.utf : fromUnicodez;
+
+import core.stdc.string : memset;
+import core.stdc.wchar_ : wcslen;
 
 import core.sys.windows.basetyps : REFIID, REFCLSID;
 import core.sys.windows.com;
@@ -22,7 +37,10 @@ import core.sys.windows.winbase : Sleep, DeleteFile;
 import core.sys.windows.windef;
 import core.sys.windows.wtypes : VARENUM;
 
+import std.algorithm : canFind;
 import std.conv : to;
+import std.format : format;
+import std.path : baseName, stripExtension, buildNormalizedPath, setExtension;
 
 
 pragma(lib, "Shlwapi"); // SHStrDupW
@@ -42,7 +60,31 @@ class ToastNotifier // docmain
 	///
 	void show()
 	{
-		import std.format;
+		static Dwstring createAppLogoXmlElement(ToastNotifier n)
+		{
+			if (n._appLogoImagePath.length == 0)
+				return ""w;
+			
+			if (n._hintCrop)
+				return format("<image placement='appLogoOverride' src='%s' hint-crop='circle' />"w, n._appLogoImagePath);
+			else
+				return format("<image placement='appLogoOverride' src='%s' />"w, n._appLogoImagePath);
+		}
+
+		static Dwstring createImageXmlElement(ToastNotifier n)
+		{
+			if (n._imagePath.length == 0)
+				return ""w;
+			
+			final switch (n._imageStyle)
+			{
+			case ToastNotifierImageStyle.INLINE:
+				return format("<image src='%s' />"w, n._imagePath);
+			case ToastNotifierImageStyle.HERO:
+				return format("<image placement='hero' src='%s' />"w, n._imagePath);
+			}
+		}
+
 		Dwstring xml = format(r"
 			<toast launch='%s' useButtonStyle='%s'>
 				<visual>
@@ -50,8 +92,8 @@ class ToastNotifier // docmain
 						<text>%s</text>
 						<text>%s</text>
 						<text>%s</text>
-						<image %s %s/>
-						<image %s/>
+						%s
+						%s
 					</binding>
 				</visual>" ~
 				// <actions>
@@ -64,16 +106,15 @@ class ToastNotifier // docmain
 				// 	<action activationType='background' content='Cancel' arguments='action=CancelButton&amp;userId=49183' type='two' hint-buttonStyle='Success'/>
 				// 	<action activationType='protocol' content='Open Google' arguments='https://www.google.com/' type='three' hint-buttonStyle='Critical'/>
 				// </actions>
-			"</toast>",
+			"</toast>"w,
 			_launch,
 			_useButtonStyle ? "true" : "false",
 			_headline,
 			_text,
 			_subtext,
-			_appLogoImage.length ? format("placement='appLogoOverride' src='%s'", _appLogoImage) : "",
-			_hintCrop ? "hint-crop='circle'" : "",
-			_heroImage.length ? format("placement='hero' src='%s'", _heroImage) : ""
-		).to!Dwstring;
+			createAppLogoXmlElement(this),
+			createImageXmlElement(this)
+		);
 		showCore(xml);
 	}
 	
@@ -98,11 +139,11 @@ class ToastNotifier // docmain
 
 		// 2. Create Notifier.
 		IToastNotifier notifier;
-		HSTRING hAppId = toHSTRING(_aumid.to!Dwstring);
-		hr = toastStatics.CreateToastNotifierWithId(hAppId, &notifier);
+		HSTRING hAumid = toHSTRING(_aumid);
+		hr = toastStatics.CreateToastNotifierWithId(hAumid, &notifier);
 		assert(notifier);
 		assert(hr == S_OK, "Failed to create ToastNotifier");
-		freeHSTRING(hAppId);
+		freeHSTRING(hAumid);
 		scope(exit)
 		{
 			notifier.Release();
@@ -174,7 +215,7 @@ class ToastNotifier // docmain
 	}
 
 	/// ditto
-	@property Dwstring launch() // gettitle
+	@property Dwstring launch() const // getter
 	{
 		return _launch;
 	}
@@ -186,7 +227,7 @@ class ToastNotifier // docmain
 	}
 
 	/// ditto
-	@property bool useButtonStyle() // gettitle
+	@property bool useButtonStyle() const // getter
 	{
 		return _useButtonStyle;
 	}
@@ -199,7 +240,7 @@ class ToastNotifier // docmain
 	}
 
 	/// ditto
-	@property Dwstring headline() // gettitle
+	@property Dwstring headline() const // getter
 	{
 		return _headline;
 	}
@@ -212,7 +253,7 @@ class ToastNotifier // docmain
 	}
 	
 	/// ditto
-	@property Dwstring text() // getter
+	@property Dwstring text() const // getter
 	{
 		return _text;
 	}
@@ -225,38 +266,51 @@ class ToastNotifier // docmain
 	}
 	
 	/// ditto
-	@property Dwstring subtext() // getter
+	@property Dwstring subtext() const // getter
 	{
 		return _subtext;
 	}
 	
 
 	///
-	@property void appLogoImage(Dwstring path) // setter
+	@property void appLogoImagePath(Dwstring path) // setter
 	{
-		_appLogoImage = path;
+		_appLogoImagePath = path;
 	}
 
 	/// ditto
-	@property Dwstring appLogoImage() // getter
+	@property Dwstring appLogoImagePath() const // getter
 	{
-		return _appLogoImage;
+		return _appLogoImagePath;
 	}
 
 	
 	///
-	@property void heroImage(Dwstring path) // setter
+	@property void imagePath(Dwstring path) // setter
 	{
-		_heroImage = path;
+		_imagePath = path;
 	}
 
 	/// ditto
-	@property Dwstring heroImage() // getter
+	@property Dwstring imagePath() const // getter
 	{
-		return _heroImage;
+		return _imagePath;
 	}
 
 	
+	///
+	@property void imageStyle(ToastNotifierImageStyle style) // setter
+	{
+		_imageStyle = style;
+	}
+
+	/// ditto
+	@property ToastNotifierImageStyle imageStyle() const // getter
+	{
+		return _imageStyle;
+	}
+
+
 	///
 	@property void hintCrop(bool byes) // setter
 	{
@@ -264,7 +318,7 @@ class ToastNotifier // docmain
 	}
 
 	/// ditto
-	@property bool hintCrop() // getter
+	@property bool hintCrop() const // getter
 	{
 		return _hintCrop;
 	}
@@ -277,8 +331,9 @@ private:
 	Dwstring _headline; ///
 	Dwstring _text; ///
 	Dwstring _subtext; ///
-	Dwstring _appLogoImage; ///
-	Dwstring _heroImage; ///
+	Dwstring _appLogoImagePath; ///
+	Dwstring _imagePath; ///
+	ToastNotifierImageStyle _imageStyle; ///
 	bool _hintCrop; ///
 }
 
@@ -289,14 +344,14 @@ class ToastNotifierLegacy // docmain
 	///
 	static this()
 	{
-		templates[ToastTemplateType.ToastImageAndText01] = "ToastImageAndText01";
-		templates[ToastTemplateType.ToastImageAndText02] = "ToastImageAndText02";
-		templates[ToastTemplateType.ToastImageAndText03] = "ToastImageAndText03";
-		templates[ToastTemplateType.ToastImageAndText04] = "ToastImageAndText04";
-		templates[ToastTemplateType.ToastText01] = "ToastText01";
-		templates[ToastTemplateType.ToastText02] = "ToastText02";
-		templates[ToastTemplateType.ToastText03] = "ToastText03";
-		templates[ToastTemplateType.ToastText04] = "ToastText04";
+		templates[ToastTemplateType.TOAST_IMAGE_AND_TEXT_01] = "ToastImageAndText01";
+		templates[ToastTemplateType.TOAST_IMAGE_AND_TEXT_02] = "ToastImageAndText02";
+		templates[ToastTemplateType.TOAST_IMAGE_AND_TEXT_03] = "ToastImageAndText03";
+		templates[ToastTemplateType.TOAST_IMAGE_AND_TEXT_04] = "ToastImageAndText04";
+		templates[ToastTemplateType.TOAST_TEXT_01] = "ToastText01";
+		templates[ToastTemplateType.TOAST_TEXT_02] = "ToastText02";
+		templates[ToastTemplateType.TOAST_TEXT_03] = "ToastText03";
+		templates[ToastTemplateType.TOAST_TEXT_04] = "ToastText04";
 	}
 
 
@@ -310,7 +365,6 @@ class ToastNotifierLegacy // docmain
 	///
 	void show()
 	{
-		import std.format;
 		Dwstring xml = format(r"
 			<toast>
 				<visual>
@@ -321,13 +375,13 @@ class ToastNotifierLegacy // docmain
 						<image id='1' src='%s'/>
 					</binding>
 				</visual>
-			</toast>",
+			</toast>"w,
 			templates[_toastTemplateType],
 			_headline,
 			_text,
 			_subtext,
-			_appLogoImage
-		).to!Dwstring;
+			_appLogoImagePath
+		);
 		showCore(xml);
 	}
 
@@ -339,7 +393,7 @@ class ToastNotifierLegacy // docmain
 	}
 
 	/// ditto
-	@property ToastTemplateType toastTemplate() // getter
+	@property ToastTemplateType toastTemplate() const // getter
 	{
 		return _toastTemplateType;
 	}
@@ -358,14 +412,22 @@ private:
 ///
 enum ToastTemplateType
 {
-	ToastImageAndText01 = 0,
-	ToastImageAndText02 = 1,
-	ToastImageAndText03 = 2,
-	ToastImageAndText04 = 3,
-	ToastText01 = 4,
-	ToastText02 = 5,
-	ToastText03 = 6,
-	ToastText04 = 7,
+	TOAST_IMAGE_AND_TEXT_01 = 0,
+	TOAST_IMAGE_AND_TEXT_02 = 1,
+	TOAST_IMAGE_AND_TEXT_03 = 2,
+	TOAST_IMAGE_AND_TEXT_04 = 3,
+	TOAST_TEXT_01 = 4,
+	TOAST_TEXT_02 = 5,
+	TOAST_TEXT_03 = 6,
+	TOAST_TEXT_04 = 7,
+}
+
+
+///
+enum ToastNotifierImageStyle
+{
+	INLINE,
+	HERO
 }
 
 
@@ -392,6 +454,12 @@ __gshared:
 	const PROPERTYKEY PKEY_AppUserModel_ToastActivatorCLSID = {
 		{0x9F4C2855, 0x9F79, 0x4B39, [0xA8, 0xD0, 0xE1, 0xD4, 0x2D, 0xE1, 0xD5, 0xF3]}, 26
 	};
+}
+
+// DFL-defined CLSID.
+extern (Windows)
+{
+__gshared:
 	///
 	enum UUID_NOTIFICATION_ACTIVATOR = "{64539c9a-c2da-4349-b9af-c5126944f6fc}";
 	CLSID CLSID_NOTIFICATION_ACTIVATOR = guidFromUUID(UUID_NOTIFICATION_ACTIVATOR[1..$-1]);
@@ -467,7 +535,7 @@ class ToastActivatedEventArgs : EventArgs
 	///
 	this(LPCWSTR appUserModelId, LPCWSTR invokedArgs, const NOTIFICATION_USER_INPUT_DATA* data, ULONG count)
 	{
-		_appId = appUserModelId;
+		_aumid = appUserModelId;
 		_args = invokedArgs;
 		_data = data;
 		_count = count;
@@ -475,17 +543,15 @@ class ToastActivatedEventArgs : EventArgs
 
 
 	///
-	@property Dwstring arguments() const
+	@property Dwstring arguments() const // getter
 	{
-		import dfl.internal.utf : fromUnicodez;
 		return fromUnicodez(cast(wchar*)_args).to!Dwstring;
 	}
 
 
 	///
-	@property Dwstring[Dwstring] userInputs() const
+	@property Dwstring[Dwstring] userInputs() const // getter
 	{
-		import core.stdc.wchar_ : wcslen;
 		Dwstring[Dwstring] result;
 		foreach (i; 0 .. _count)
 		{
@@ -498,10 +564,10 @@ class ToastActivatedEventArgs : EventArgs
 
 
 private:
-	LPCWSTR _appId; ///
-	LPCWSTR _args; ///
+	const LPCWSTR _aumid; ///
+	const LPCWSTR _args; ///
 	const NOTIFICATION_USER_INPUT_DATA* _data; ///
-	ULONG _count; ///
+	const ULONG _count; ///
 
 }
 
@@ -586,6 +652,7 @@ extern(Windows)
 
 
 ///
+// propvarutil.h
 HRESULT InitPropVariantFromString(PCWSTR psz, PROPVARIANT* ppropvar)
 {
 	HRESULT hr = SHStrDupW(psz, &ppropvar.pwszVal);
@@ -598,15 +665,15 @@ HRESULT InitPropVariantFromString(PCWSTR psz, PROPVARIANT* ppropvar)
 
 
 ///
+// propvarutil.h
 void PropVariantInit(PROPVARIANT* pvar)
 {
-	import core.stdc.string : memset;
 	memset(pvar, 0, PROPVARIANT.sizeof);
 }
 
 
 ///
-class ShellLinkWithAppIdAndClsId
+class ShellLinkWithAumidAndClsId
 {
 	///
 	this(in Dwstring exePath, in Dwstring shortcutPath, in Dwstring aumid, in CLSID clsId)
@@ -654,11 +721,11 @@ class ShellLinkWithAppIdAndClsId
 			propertyStore = null;
 		}
 		
-		PROPVARIANT propAppId;
-		PropVariantInit(&propAppId);
-		hr = InitPropVariantFromString(_aumid.ptr, &propAppId);
-		assert(hr == S_OK, "InitPropropAppIdariantFromString() failed");
-		hr = propertyStore.SetValue(&PKEY_AppUserModel_ID, &propAppId);
+		PROPVARIANT propAumid;
+		PropVariantInit(&propAumid);
+		hr = InitPropVariantFromString(_aumid.ptr, &propAumid);
+		assert(hr == S_OK, "InitPropVariantFromString() failed");
+		hr = propertyStore.SetValue(&PKEY_AppUserModel_ID, &propAumid);
 		assert(hr == S_OK, "IPropertyStore.SetValue() failed");
 		// 
 		PROPVARIANT propClsId;
@@ -671,7 +738,7 @@ class ShellLinkWithAppIdAndClsId
 		hr = propertyStore.Commit();
 		assert(hr == S_OK, "IPropertyStore.Commit() failed");
 
-		hr = PropVariantClear(&propAppId);
+		hr = PropVariantClear(&propAumid);
 		assert(hr == S_OK, "PropVariantClear() failed");
 		hr = PropVariantClear(&propClsId);
 		assert(hr == S_OK, "PropVariantClear() failed");
@@ -711,10 +778,10 @@ class ShellLinkWithAppIdAndClsId
 private:
 
 	bool _isInstalled; ///
-	Dwstring _exePath; ///
-	Dwstring _shortcutPath; ///
-	Dwstring _aumid; ///
-	CLSID _clsId; ///
+	const Dwstring _exePath; ///
+	const Dwstring _shortcutPath; ///
+	const Dwstring _aumid; ///
+	const CLSID _clsId; ///
 }
 
 
@@ -726,16 +793,14 @@ scope class DesktopNotificationManager
 	{
 		_aumid = aumid;
 
-		import std.path;
 		_exePath = Application.executablePath.to!Dwstring;
 		_exeName = _exePath.baseName;
 		_appName = _exeName.stripExtension;
 		_programPath = Environment.getFolderPath(Environment.SpecialFolder.PROGRAMS).to!Dwstring;
 		_shortcutPath = buildNormalizedPath(_programPath, _appName.setExtension("lnk"w));
 		
-		_shell = new ShellLinkWithAppIdAndClsId(_exePath, _shortcutPath, aumid, CLSID_NOTIFICATION_ACTIVATOR);
+		_shell = new ShellLinkWithAumidAndClsId(_exePath, _shortcutPath, aumid, CLSID_NOTIFICATION_ACTIVATOR);
 
-		import std.algorithm : canFind;
 		if (launchArgs.canFind("-Embedding"))
 		{
 			// COM server launched this App.
@@ -752,7 +817,6 @@ scope class DesktopNotificationManager
 	/// Install ShellLink with AUMID and CLSID to StartMenu.
 	void installShellLink()
 	{
-		import core.sys.windows.winbase : Sleep;
 		_shell.install();
 		Sleep(3000); // NOTE: Wait for the shell to recognize the AUMID.
 	}
@@ -794,7 +858,7 @@ scope class DesktopNotificationManager
 	void unregisterActivator()
 	{
 		if (!_activatorFactory)
-			throw new DflException("DFL: unregisterActivator failue.");
+			throw new DflException("DFL: unregisterActivator failure.");
 
 		_activatorFactory.Release();
 		_activatorFactory = null;
@@ -844,13 +908,13 @@ scope class DesktopNotificationManager
 
 
 	///
-	@property DesktopNotificationMode mode() // getter
+	@property DesktopNotificationMode mode() const // getter
 	{
 		return _mode;
 	}
 
 private:
-	ShellLinkWithAppIdAndClsId _shell; ///
+	ShellLinkWithAumidAndClsId _shell; ///
 	const DesktopNotificationMode _mode; ///
 
 	const Dwstring _aumid; ///
