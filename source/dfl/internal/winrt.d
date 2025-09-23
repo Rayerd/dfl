@@ -184,6 +184,32 @@ GUID guidFromUUID(string uuidString)
 
 
 ///
+string uuidFromGUID(in GUID* guid)
+{
+	import std.format : format;
+	import std.array : array;
+	ubyte[16] data;
+	data[0] = cast(ubyte)((guid.Data1 >> 24) & 0xFF);
+	data[1] = cast(ubyte)((guid.Data1 >> 16) & 0xFF);
+	data[2] = cast(ubyte)((guid.Data1 >> 8) & 0xFF);
+	data[3] = cast(ubyte)(guid.Data1 & 0xFF);
+	data[4] = cast(ubyte)((guid.Data2 >> 8) & 0xFF);
+	data[5] = cast(ubyte)(guid.Data2 & 0xFF);
+	data[6] = cast(ubyte)((guid.Data3 >> 8) & 0xFF);
+	data[7] = cast(ubyte)(guid.Data3 & 0xFF);
+	foreach (i; 0 .. 8)
+		data[8 + i] = guid.Data4[i];
+	return format(
+		"{%02X%02X%02X%02X-%02X%02X-%02X%02X-%02X%02X-%02X%02X%02X%02X%02X%02X}",
+		data[0], data[1], data[2], data[3],
+		data[4], data[5],
+		data[6], data[7],
+		data[8], data[9],
+		data[10], data[11], data[12], data[13], data[14], data[15]);
+}
+
+
+///
 final class WinRuntime
 {
 	///

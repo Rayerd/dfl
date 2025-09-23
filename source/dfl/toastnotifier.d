@@ -27,7 +27,8 @@ import dfl.internal.utf : fromUnicodez;
 import core.stdc.string : memset;
 import core.stdc.wchar_ : wcslen;
 
-import core.sys.windows.basetyps : REFIID, REFCLSID;
+import core.sys.windows.basetyps : REFIID;
+public import core.sys.windows.basetyps : CLSID, REFCLSID;
 import core.sys.windows.com;
 import core.sys.windows.objbase : CoRevokeClassObject, CoRegisterClassObject, REGCLS;
 import core.sys.windows.objidl : PROPVARIANT, IPersistFile;
@@ -41,6 +42,7 @@ import std.algorithm : canFind;
 import std.conv : to;
 import std.format : format;
 import std.path : baseName, stripExtension, buildNormalizedPath, setExtension;
+import std.string : replace;
 
 
 pragma(lib, "Shlwapi"); // SHStrDupW
@@ -208,13 +210,30 @@ class ToastNotifier // docmain
 	}
 
 
-	///
+	/// Set launch arguments within XML escape.
+	void setLaunch(Dwstring txt, bool enableEscape = true)
+	{
+		if (enableEscape)
+		{
+			wstring escaped = txt;
+			escaped = escaped.replace("&", "&amp;");
+			escaped = escaped.replace("<", "&lt;");
+			escaped = escaped.replace(">", "&gt;");
+			escaped = escaped.replace("\"", "&quot;");
+			escaped = escaped.replace("'", "&apos;");
+			launch = escaped;
+		}
+		else
+			launch = txt;
+	}
+
+	/// Set launch arguments without XML escape.
 	@property void launch(Dwstring txt) // setter
 	{
 		_launch = txt;
 	}
 
-	/// ditto
+	/// Get launch arguments.
 	@property Dwstring launch() const // getter
 	{
 		return _launch;
@@ -442,30 +461,39 @@ struct PROPERTYKEY
 extern (Windows)
 {
 __gshared:
-	///
 	const IID IID_IPropertyStore = { 0x886d8eeb, 0x8cf2, 0x4446, [0x8d, 0x02, 0xcd, 0xba, 0x1d, 0xbd, 0xcf, 0x99] };
-	///
 	const IID IID_INotificationActivationCallback = { 0x53E31837, 0x6600, 0x4A81, [0x93, 0x95, 0x75, 0xCF, 0xFE, 0x74, 0x6F, 0x94] };
-	///
 	const PROPERTYKEY PKEY_AppUserModel_ID = {
 		{0x9F4C2855, 0x9F79, 0x4B39, [0xA8, 0xD0, 0xE1, 0xD4, 0x2D, 0xE1, 0xD5, 0xF3]}, 5
 	};
-	///
 	const PROPERTYKEY PKEY_AppUserModel_ToastActivatorCLSID = {
 		{0x9F4C2855, 0x9F79, 0x4B39, [0xA8, 0xD0, 0xE1, 0xD4, 0x2D, 0xE1, 0xD5, 0xF3]}, 26
 	};
 }
 
-// DFL-defined CLSID.
 extern (Windows)
 {
 __gshared:
-	///
-	enum UUID_NOTIFICATION_ACTIVATOR = "{64539c9a-c2da-4349-b9af-c5126944f6fc}";
-	CLSID CLSID_NOTIFICATION_ACTIVATOR = guidFromUUID(UUID_NOTIFICATION_ACTIVATOR[1..$-1]);
+	/// Predefined Notification Activator CLSID by DFL.
+	CLSID DFL_CLSID_NOTIFICATION_ACTIVATOR = clsidFromUUID("{64539c9a-c2da-4349-b9af-c5126944f6fc}");
 }
 
 
+///
+CLSID clsidFromUUID(string uuidString)
+{
+	return guidFromUUID(uuidString[1..$-1]);
+}
+
+
+///
+string uuidFromClsid(REFCLSID clsid)
+{
+	return uuidFromGUID(clsid);
+}
+
+
+///
 interface INotificationActivationCallBack : IUnknown
 {
 extern (Windows):
@@ -474,7 +502,6 @@ extern (Windows):
 
 
 ///
-// uuid("64539c9a-c2da-4349-b9af-c5126944f6fc")
 private class NotificationActivatorBase : DflComObject, INotificationActivationCallBack
 {
 extern (Windows):
@@ -673,15 +700,15 @@ void PropVariantInit(PROPVARIANT* pvar)
 
 
 ///
-class ShellLinkWithAumidAndClsId
+class ShellLinkWithAumidAndClsid
 {
 	///
-	this(in Dwstring exePath, in Dwstring shortcutPath, in Dwstring aumid, in CLSID clsId)
+	this(in Dwstring exePath, in Dwstring shortcutPath, in Dwstring aumid, in REFCLSID clsid)
 	{
 		_exePath = exePath;
 		_shortcutPath = shortcutPath;
 		_aumid = aumid;
-		_clsId = clsId;
+		_clsid = clsid;
 	}
 
 
@@ -692,7 +719,7 @@ class ShellLinkWithAumidAndClsId
 		assert(_exePath.length > 0);
 		assert(_shortcutPath.length > 0);
 		assert(_aumid.length > 0);
-		assert(_clsId != GUID.init);
+		assert(_clsid && (*_clsid != GUID_NULL));
 	}
 	do
 	{
@@ -730,7 +757,7 @@ class ShellLinkWithAumidAndClsId
 		// 
 		PROPVARIANT propClsId;
 		PropVariantInit(&propClsId);
-		hr = InitPropVariantFromCLSID(&_clsId, &propClsId);
+		hr = InitPropVariantFromCLSID(_clsid, &propClsId);
 		assert(hr == S_OK, "InitPropVariantFromCLSID() failed");
 		hr = propertyStore.SetValue(&PKEY_AppUserModel_ToastActivatorCLSID, &propClsId);
 		assert(hr == S_OK, "IPropertyStore.SetValue() failed");
@@ -781,7 +808,7 @@ private:
 	const Dwstring _exePath; ///
 	const Dwstring _shortcutPath; ///
 	const Dwstring _aumid; ///
-	const CLSID _clsId; ///
+	const REFCLSID _clsid; ///
 }
 
 
@@ -789,9 +816,10 @@ private:
 scope class DesktopNotificationManager
 {
 	/// Constructor.
-	this(Dstring[] launchArgs, Dwstring aumid)
+	this(Dstring[] launchArgs, Dwstring aumid, REFCLSID clsid)
 	{
 		_aumid = aumid;
+		_clsid = clsid;
 
 		_exePath = Application.executablePath.to!Dwstring;
 		_exeName = _exePath.baseName;
@@ -799,7 +827,7 @@ scope class DesktopNotificationManager
 		_programPath = Environment.getFolderPath(Environment.SpecialFolder.PROGRAMS).to!Dwstring;
 		_shortcutPath = buildNormalizedPath(_programPath, _appName.setExtension("lnk"w));
 		
-		_shell = new ShellLinkWithAumidAndClsId(_exePath, _shortcutPath, aumid, CLSID_NOTIFICATION_ACTIVATOR);
+		_shell = new ShellLinkWithAumidAndClsid(_exePath, _shortcutPath, _aumid, _clsid);
 
 		if (launchArgs.canFind("-Embedding"))
 		{
@@ -846,7 +874,7 @@ scope class DesktopNotificationManager
 		assert(!_activatorFactory);
 		_activatorFactory = new NotificationActivatorFactory(customActivator);
 
-		HRESULT hr = CoRegisterClassObject(&CLSID_NOTIFICATION_ACTIVATOR, _activatorFactory, CLSCTX_LOCAL_SERVER, REGCLS.REGCLS_MULTIPLEUSE, &_registerClassToken);
+		HRESULT hr = CoRegisterClassObject(_clsid, _activatorFactory, CLSCTX_LOCAL_SERVER, REGCLS.REGCLS_MULTIPLEUSE, &_registerClassToken);
 		assert(hr == S_OK);
 
 		assert(!_activator);
@@ -871,12 +899,14 @@ scope class DesktopNotificationManager
 	/// Register AUMID and Toast Activator CLSID.
 	void registerAumidAndComServer()
 	{
+		string uuid = uuidFromGUID(_clsid);
+
 		// Install Toast Activator CLSID.
 		//   \HKEY_CURRENT_USER\SOFTWARE\Classes\CLSID\{Toast Activator CLSID}\LocalServer32
 		//
 		scope RegistryKey clsid = Registry.currentUser().openSubKey("SOFTWARE").openSubKey("Classes").openSubKey("CLSID");
 		// Create CLSID for COM Activator.
-		clsid.createSubKey(UUID_NOTIFICATION_ACTIVATOR).createSubKey("LocalServer32")
+		clsid.createSubKey(uuid).createSubKey("LocalServer32")
 			.setValue("", "\"" ~ _exePath.to!Dstring ~ "\""); // Need "double quotation"
 		clsid.flush();
 
@@ -886,7 +916,7 @@ scope class DesktopNotificationManager
 		// Create AUMID for GenericToast in Toast XML.
 		scope RegistryKey aumid = Registry.currentUser().openSubKey("SOFTWARE").openSubKey("Classes").openSubKey("AppUserModelId");
 		// Create AUMID for COM Activator.
-		aumid.createSubKey(_aumid.to!Dstring).setValue("ToastActivatorCLSID", UUID_NOTIFICATION_ACTIVATOR);
+		aumid.createSubKey(_aumid.to!Dstring).setValue("ToastActivatorCLSID", uuid);
 		aumid.flush();
 	}
 
@@ -894,10 +924,12 @@ scope class DesktopNotificationManager
 	/// Unregister AUMID and Toast Activator CLSID.
 	void unregisterAumidAndComServer()
 	{
+		string uuid = uuidFromGUID(_clsid);
+
 		// Uninstall Toast Activator CLSID.
 		scope RegistryKey clsidKey = Registry.currentUser().openSubKey("SOFTWARE").openSubKey("Classes").openSubKey("CLSID");
-		clsidKey.openSubKey(UUID_NOTIFICATION_ACTIVATOR).deleteSubKey("LocalServer32");
-		clsidKey.deleteSubKey(UUID_NOTIFICATION_ACTIVATOR);
+		clsidKey.openSubKey(uuid).deleteSubKey("LocalServer32");
+		clsidKey.deleteSubKey(uuid);
 		clsidKey.flush();
 
 		// Uninstall AUMID.
@@ -914,10 +946,11 @@ scope class DesktopNotificationManager
 	}
 
 private:
-	ShellLinkWithAumidAndClsId _shell; ///
+	ShellLinkWithAumidAndClsid _shell; ///
 	const DesktopNotificationMode _mode; ///
 
 	const Dwstring _aumid; ///
+	const REFCLSID _clsid; ///
 	const Dwstring _exePath; ///
 	const Dwstring _exeName; ///
 	const Dwstring _appName; ///
