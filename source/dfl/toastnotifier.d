@@ -87,6 +87,14 @@ class ToastNotifier // docmain
 			}
 		}
 
+		static Dwstring createButtonXmlElement(ToastNotifier n)
+		{
+			Dwstring ret;
+			foreach (button; n.buttons)
+				ret ~= button.toXmlElement ~ "\n"w;
+			return ret;
+		}
+
 		Dwstring xml = format(r"
 			<toast launch='%s' useButtonStyle='%s'>
 				<visual>
@@ -97,29 +105,28 @@ class ToastNotifier // docmain
 						%s
 						%s
 					</binding>
-				</visual>" ~
-				// <actions>
-				// 	<input id='message' type='text' placeHolderContent='Input message here' title='Message'/>
-				// 	<input id='mode' type='selection' title='Mode' defaultInput='fast'>
-				// 		<selection id='fast' content='Fast'/>
-				// 		<selection id='slow' content='Slow'/>
-				// 	</input>
-				// 	<action activationType='foreground' content='Ok' arguments='action=OkButton&amp;userId=49183' type='one' hint-buttonStyle='Success'/>
-				// 	<action activationType='background' content='Cancel' arguments='action=CancelButton&amp;userId=49183' type='two' hint-buttonStyle='Success'/>
-				// 	<action activationType='protocol' content='Open Google' arguments='https://www.google.com/' type='three' hint-buttonStyle='Critical'/>
-				// </actions>
-			"</toast>"w,
+				</visual>
+				<actions>" ~
+					// <input id='message' type='text' placeHolderContent='Input message here' title='Message'/>
+					// <input id='mode' type='selection' title='Mode' defaultInput='fast'>
+					// 	<selection id='fast' content='Fast'/>
+					// 	<selection id='slow' content='Slow'/>
+					// </input>
+					"%s ~
+				</actions>
+			</toast>"w,
 			_launch,
 			_useButtonStyle ? "true" : "false",
 			_headline,
 			_text,
 			_subtext,
 			createAppLogoXmlElement(this),
-			createImageXmlElement(this)
+			createImageXmlElement(this),
+			createButtonXmlElement(this)
 		);
 		showCore(xml);
 	}
-	
+
 
 	///
 	private void showCore(Dwstring xml)
@@ -343,6 +350,13 @@ class ToastNotifier // docmain
 	}
 
 
+	///
+	@property ToastButtonCollection buttons() // getter
+	{
+		return _buttons;
+	}
+
+
 private:
 	Dwstring _aumid; ///
 	Dwstring _launch; ///
@@ -354,6 +368,158 @@ private:
 	Dwstring _imagePath; ///
 	ToastNotifierImageStyle _imageStyle; ///
 	bool _hintCrop; ///
+	ToastButtonCollection _buttons = new ToastButtonCollection; ///
+}
+
+
+///
+class ToastButtonCollection
+{
+	///
+	void add(ToastButton button)
+	{
+		_buttons ~= button;
+		assert(_buttons.length <= 5, "Toast buttons length must be 0 to 5.");
+	}
+
+	
+	///
+	@property size_t length() const
+	{
+		return _buttons.length;
+	}
+
+	
+	///
+	@property ToastButton opIndex(size_t index)
+	{
+		return _buttons[index];
+	}
+
+	
+	///
+	int opApply(scope int delegate(ToastButton) dg)
+	{
+		int result = 0;
+		foreach (item; _buttons)
+		{
+			result = dg(item);
+			if (result)
+				break;
+		}
+		return result;
+	}
+	
+private:
+	ToastButton[] _buttons; ///
+}
+
+
+///
+class ToastButton
+{
+	///
+	this(Dwstring content, Dwstring arguments)
+	{
+		_content = content;
+		_arguments = arguments;
+	}
+
+
+	///
+	@property Dwstring toXmlElement() const
+	{
+		return format(
+			"<action "w ~
+			"activationType='%s' "w ~ 
+			"content='%s' "w ~
+			"arguments='%s' "w ~
+			"hint-buttonStyle='%s' "w ~
+			"/>"w,
+			_activationType == ToastActivationType.PROTOCOL ? "protocol"w : "foreground"w,
+			_content,
+			_arguments,
+			toString(_buttonStyle)
+		);
+	}
+
+
+	///
+	@property Dwstring content() const // getter
+	{
+		return _content;
+	}
+
+
+	///
+	@property Dwstring arguments() const // getter
+	{
+		return _arguments;
+	}
+
+
+	///
+	@property void buttonStyle(ToastButtonStyle buttonStyle) // setter
+	{
+		_buttonStyle = buttonStyle;
+	}
+
+	/// ditto
+	@property ToastButtonStyle buttonStyle() const // getter
+	{
+		return _buttonStyle;
+	}
+
+
+	///
+	@property void activationType(ToastActivationType type) // setter
+	{
+		_activationType = type;
+	}
+
+	/// ditto
+	@property ToastActivationType activationType() const // getter
+	{
+		return _activationType;
+	}
+
+
+private:
+	const Dwstring _content; ///
+	const Dwstring _arguments; ///
+	ToastButtonStyle _buttonStyle; ///
+	ToastActivationType _activationType; ///
+
+
+	///
+	Dwstring toString(ToastButtonStyle buttonStyle) const
+	{
+		final switch (buttonStyle)
+		{
+		case ToastButtonStyle.DEFAULT:
+			return ""w; // Empty.
+		case ToastButtonStyle.SUCCESS:
+			return "Success"w;
+		case ToastButtonStyle.CRITICAL:
+			return "Critical"w;
+		}
+	}
+}
+
+///
+enum ToastButtonStyle
+{
+	DEFAULT, ///
+	SUCCESS, ///
+	CRITICAL ///
+}
+
+///
+enum ToastActivationType
+{
+	FOREGROUND, ///
+	BACKGROUND, /// Same as FOREGROUND. Desktop apps do not support Background activation.
+	PROTOCOL ///
 }
 
 
@@ -431,22 +597,22 @@ private:
 ///
 enum ToastTemplateType
 {
-	TOAST_IMAGE_AND_TEXT_01 = 0,
-	TOAST_IMAGE_AND_TEXT_02 = 1,
-	TOAST_IMAGE_AND_TEXT_03 = 2,
-	TOAST_IMAGE_AND_TEXT_04 = 3,
-	TOAST_TEXT_01 = 4,
-	TOAST_TEXT_02 = 5,
-	TOAST_TEXT_03 = 6,
-	TOAST_TEXT_04 = 7,
+	TOAST_IMAGE_AND_TEXT_01 = 0, ///
+	TOAST_IMAGE_AND_TEXT_02 = 1, ///
+	TOAST_IMAGE_AND_TEXT_03 = 2, ///
+	TOAST_IMAGE_AND_TEXT_04 = 3, ///
+	TOAST_TEXT_01 = 4, ///
+	TOAST_TEXT_02 = 5, ///
+	TOAST_TEXT_03 = 6, ///
+	TOAST_TEXT_04 = 7 ///
 }
 
 
 ///
 enum ToastNotifierImageStyle
 {
-	INLINE,
-	HERO
+	INLINE, ///
+	HERO ///
 }
 
 
@@ -461,11 +627,22 @@ struct PROPERTYKEY
 extern (Windows)
 {
 __gshared:
+	// propsys.h
+	// https://learn.microsoft.com/en-us/windows/win32/api/propsys/nn-propsys-ipropertystore
 	const IID IID_IPropertyStore = { 0x886d8eeb, 0x8cf2, 0x4446, [0x8d, 0x02, 0xcd, 0xba, 0x1d, 0xbd, 0xcf, 0x99] };
+	
+	// notificationactivationcallback.h
+	// https://learn.microsoft.com/en-us/windows/win32/api/notificationactivationcallback/nn-notificationactivationcallback-inotificationactivationcallback
 	const IID IID_INotificationActivationCallback = { 0x53E31837, 0x6600, 0x4A81, [0x93, 0x95, 0x75, 0xCF, 0xFE, 0x74, 0x6F, 0x94] };
+	
+	// Propkey.h
+	// https://learn.microsoft.com/en-us/windows/win32/properties/props-system-appusermodel-id?source=recommendations
 	const PROPERTYKEY PKEY_AppUserModel_ID = {
 		{0x9F4C2855, 0x9F79, 0x4B39, [0xA8, 0xD0, 0xE1, 0xD4, 0x2D, 0xE1, 0xD5, 0xF3]}, 5
 	};
+	
+	// Propkey.h
+	// https://learn.microsoft.com/en-us/windows/win32/properties/props-system-appusermodel-toastactivatorclsid
 	const PROPERTYKEY PKEY_AppUserModel_ToastActivatorCLSID = {
 		{0x9F4C2855, 0x9F79, 0x4B39, [0xA8, 0xD0, 0xE1, 0xD4, 0x2D, 0xE1, 0xD5, 0xF3]}, 26
 	};

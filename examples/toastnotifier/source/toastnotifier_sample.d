@@ -39,11 +39,28 @@ class MainForm : Form
 			_notifier = new ToastNotifier(AUMID);
 			// _notifier.launch = "action=Test&amp;userId=49183";
 			_notifier.setLaunch("action=Test&userId=49183"); // setLaunch() converts text to escaped XML.
-			_notifier.useButtonStyle = true;
 			_notifier.imagePath = IMAGE_PATH;
 			_notifier.imageStyle = ToastNotifierImageStyle.HERO;
 			// _notifier.imageStyle = ToastNotifierImageStyle.INLINE;
 			// _notifier.hintCrop = true;
+
+			_notifier.useButtonStyle = true;
+			// Button1
+			ToastButton button1 = new ToastButton("Ok"w, "action=OkButton&amp;userId=49183"w);
+			button1.buttonStyle = ToastButtonStyle.SUCCESS; // buttonStyle property is enabled if useButtonStyle is true.
+			_notifier.buttons.add(button1);
+			// Button2
+			_notifier.buttons.add(new ToastButton("Cancel"w, "action=CancelButton&amp;userId=49183"w));
+			// Button3
+			ToastButton button3 = new ToastButton("Open Google"w, "https://www.google.com/"w);
+			button3.activationType = ToastActivationType.PROTOCOL;
+			button3.buttonStyle = ToastButtonStyle.CRITICAL;
+			_notifier.buttons.add(button3);
+			// Button4
+			_notifier.buttons.add(new ToastButton("Option"w, "action=Option"w));
+			// Button5
+			_notifier.buttons.add(new ToastButton("Close"w, "action=Close"w));
+			assert(_notifier.buttons.length <= 5, "Toast buttons length must be 0 to 5.");
 		}
 		else
 		{
