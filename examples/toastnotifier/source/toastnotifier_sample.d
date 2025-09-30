@@ -22,7 +22,8 @@ enum IMAGE_PATH = r"file:///C:/d/gitproj/dfl/examples/picturebox/image/dman-erro
 
 class MainForm : Form
 {
-	private Button _button;
+	private Button _showButton;
+	private Button _updateButton;
 
 	version (ToastNotifier)
 		private ToastNotifier _notifier;
@@ -32,7 +33,7 @@ class MainForm : Form
 	this()
 	{
 		this.text = "ToastNotifier example";
-		this.size = Size(300, 250);
+		this.size = Size(300, 350);
 
 		version (ToastNotifier)
 		{
@@ -43,25 +44,29 @@ class MainForm : Form
 
 			_notifier.imagePath = IMAGE_PATH;
 			
-			// _notifier.hintCrop = true;
+			_notifier.hintCrop = true;
 
 			_notifier.imageStyle = ToastNotifierImageStyle.HERO;
 			// _notifier.imageStyle = ToastNotifierImageStyle.INLINE;
 			
+			auto progressBar = new ToastProgressBar("Processing..."w, 0.6);
+			progressBar.title = "Download"w;
+			progressBar.valueStringOverride = "60/100 files"w;
+			_notifier.progressBar = progressBar;
 
-			// Input1
+			// Input1 (TextBox)
 			_notifier.inputs.add(new ToastTextBox("input1"w, "Message"w, "Place holder content"w));
-			// Input2
+			// Input2 (SelectionBox)
 			ToastSelectionBox input2 = new ToastSelectionBox("input2"w, "Fruits"w, "Place holder content"w, "select3"w);
 			input2.items.add(new ToastSelectionBoxItem("select1"w, "Apple"w));
 			input2.items.add(new ToastSelectionBoxItem("select2"w, "Orange"w));
 			input2.items.add(new ToastSelectionBoxItem("select3"w, "Pine"w));
 			_notifier.inputs.add(input2);
-			// Input3
+			// Input3 (TextBox)
 			_notifier.inputs.add(new ToastTextBox("input3"w, "to"w, "Place holder content"w));
-			// Input4
+			// Input4 (TextBox)
 			_notifier.inputs.add(new ToastTextBox("input4"w, "cc"w, "Place holder content"w));
-			// Input5
+			// Input5 (TextBox)
 			_notifier.inputs.add(new ToastTextBox("input5"w, "bcc"w, "Place holder content"w));
 			//
 			assert(_notifier.inputs.length <= 5, "Toast textboxes length must be 0 to 5.");
@@ -102,14 +107,45 @@ class MainForm : Form
 		_notifier.subtext = "2025-09-22";
 		_notifier.appLogoImagePath = APP_LOGO_IMAGE_PATH;
 
-		_button = new Button;
-		_button.text = "Show toast";
-		_button.location = Point(50, 50);
-		_button.size = Size(150,60);
-		_button.parent = this;
-		_button.click ~= (Control c, EventArgs e) {
-			_notifier.show();
+		_showButton = new Button;
+		_showButton.text = "Show toast";
+		_showButton.location = Point(50, 50);
+		_showButton.size = Size(150,60);
+		_showButton.parent = this;
+		_showButton.click ~= (Control c, EventArgs e) {
+			version (ToastNotifier)
+			{
+				_notifier.sequenceNumber = 1; // Initial value is 1 defaultly.
+				_notifier.show("tag", "group");
+			}
+			else
+			{
+				_notifier.show();
+			}
 		};
+
+		version (ToastNotifier)
+		{
+			_updateButton = new Button;
+			_updateButton.text = "Update toast";
+			_updateButton.location = Point(50, 150);
+			_updateButton.size = Size(150,60);
+			_updateButton.parent = this;
+			_updateButton.click ~= (Control c, EventArgs e) {
+				_notifier.headline = "Updated headline!";
+				_notifier.text = "Updated text!";
+				_notifier.subtext = "2025-09-23";
+				//
+				_notifier.progressBar.value = 1.0;
+				_notifier.progressBar.status = "Completed!"w;
+				_notifier.progressBar.title = "Downloaded"w;
+				_notifier.progressBar.valueStringOverride = "100/100 files"w;
+				//
+				_notifier.sequenceNumber = 2;
+				//
+				auto result = _notifier.update("tag", "group");
+			};
+		}
 	}
 }
 

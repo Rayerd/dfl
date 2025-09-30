@@ -30,7 +30,7 @@ private extern(C)
 // Won't be killed by GC if not referenced in D and the refcount is > 0.
 class DflComObject: ComObject // package
 {
-	extern(Windows):
+extern(Windows):
 	
 	override ULONG AddRef()
 	{
@@ -54,7 +54,7 @@ class MemoryIStream: DflComObject, dfl.internal.wincom.IStream
 	}
 	
 	
-	extern(Windows):
+extern(Windows):
 	
 	override HRESULT QueryInterface(IID* riid, void** ppv)
 	{
@@ -196,9 +196,9 @@ class MemoryIStream: DflComObject, dfl.internal.wincom.IStream
 	}
 	
 	
-	extern(D):
+extern(D):
 	
-	private:
+private:
 	void[] mem;
 	size_t seekpos = 0;
 	
@@ -211,4 +211,3 @@ class MemoryIStream: DflComObject, dfl.internal.wincom.IStream
 		return cast(size_t)pos <= mem.length;
 	}
 }
-

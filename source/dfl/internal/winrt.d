@@ -91,8 +91,20 @@ void freeHSTRING(HSTRING h)
 }
 
 
+///
+wstring fromHSTRING(HSTRING text)
+{
+	if (text is null)
+		return ""w;
+	UINT32 len = 0;
+	auto ptr = WindowsGetStringRawBuffer(text, &len);
+	return ptr[0 .. len].idup;
+}
+
+
 extern(Windows) nothrow @nogc
 {
+	///
 	struct EventRegistrationToken
 	{
 		long value;
@@ -117,12 +129,12 @@ extern(Windows) nothrow @nogc
 	///
 	interface IToastNotification : IInspectable
 	{
-		HRESULT Content(XmlDocument return_value);//HRESULT get_Content(Windows.Data.Xml.Dom.XmlDocument* return_value);
-		HRESULT _Dummy1();//HRESULT Expset_ExpirationTimeirationTime(Windows.Foundation.IReference!(Windows.Foundation.DateTime) value);
+		HRESULT get_Content(XmlDocument return_value);
+		HRESULT _Dummy1();//HRESULT set_ExpirationTimeirationTime(Windows.Foundation.IReference!(Windows.Foundation.DateTime) value);
 		HRESULT _Dummy2();//HRESULT get_ExpirationTime(Windows.Foundation.IReference!(Windows.Foundation.DateTime)* return_value);
 		HRESULT _Dummy3();//HRESULT add_Dismissed(Windows.Foundation.TypedEventHandler!(Windows.UI.Notifications.ToastNotification, Windows.UI.Notifications.ToastDismissedEventArgs) handler, EventRegistrationToken* return_cookie);
 		HRESULT _Dummy4();//HRESULT remove_Dismissed(EventRegistrationToken cookie);
-		HRESULT _Dummy5();//HRESULT Activated(ITypedEventHandler!(IToastNotification, IInspectable) handler, EventRegistrationToken* return_cookie);//HRESULT add_Activated(Windows.Foundation.TypedEventHandler!(Windows.UI.Notifications.ToastNotification, IInspectable) handler, EventRegistrationToken* return_cookie);
+		HRESULT _Dummy5();//HRESULT add_Activated(Windows.Foundation.TypedEventHandler!(Windows.UI.Notifications.ToastNotification, IInspectable) handler, EventRegistrationToken* return_cookie);
 		HRESULT _Dummy6();//HRESULT RemoveActivated(EventRegistrationToken cookie);//HRESULT remove_Activated(EventRegistrationToken cookie);
 		HRESULT _Dummy7();//HRESULT add_Failed(Windows.Foundation.TypedEventHandler!(Windows.UI.Notifications.ToastNotification, Windows.UI.Notifications.ToastFailedEventArgs) handler, EventRegistrationToken* return_token);
 		HRESULT _Dummy8();//HRESULT remove_Failed(EventRegistrationToken token);
@@ -130,9 +142,44 @@ extern(Windows) nothrow @nogc
 
 
 	///
+	interface IToastNotification2 : IInspectable
+	{
+	extern(Windows):
+		HRESULT set_Tag(HSTRING value);
+		HRESULT get_Tag(HSTRING* return_value);
+		HRESULT set_Group(HSTRING value);
+		HRESULT get_Group(HSTRING* return_value);
+		HRESULT _Dummy5();// HRESULT set_SuppressPopup(bool value);
+		HRESULT _Dummy6();// HRESULT get_SuppressPopup(bool* return_value);
+	}
+
+
+	///
+	interface IToastNotification3 : IInspectable
+	{
+	extern(Windows):
+		HRESULT _Dummy1();// HRESULT get_NotificationMirroring(Windows.UI.Notifications.NotificationMirroring* return_value);
+		HRESULT _Dummy2();// HRESULT set_NotificationMirroring(Windows.UI.Notifications.NotificationMirroring value);
+		HRESULT _Dummy3();// HRESULT get_RemoteId(HSTRING* return_value);
+		HRESULT _Dummy4();// HRESULT set_RemoteId(HSTRING value);
+	}
+
+
+	///
+	interface IToastNotification4 : IInspectable
+	{
+	extern(Windows):
+		HRESULT get_Data(INotificationData* return_value);
+		HRESULT set_Data(INotificationData value);
+		HRESULT _Dummy3();// HRESULT get_Priority(Windows.UI.Notifications.ToastNotificationPriority* return_value);
+		HRESULT _Dummy4();// HRESULT set_Priority(Windows.UI.Notifications.ToastNotificationPriority value);
+	}
+
+
+	///
 	interface IToastNotificationFactory : IInspectable
 	{
-		HRESULT CreateToastNotification(XmlDocument doc, IToastNotification* return_toast);
+		HRESULT abi_CreateToastNotification(XmlDocument doc, IToastNotification* return_toast);
 	}
 
 
@@ -148,28 +195,154 @@ extern(Windows) nothrow @nogc
 
 
 	///
+	enum NotificationUpdateResult
+	{
+		Succeeded = 0,
+		Failed = 1,
+		NotificationNotFound = 2
+	}
+
+
+	///
 	interface IToastNotifier : IInspectable
 	{
-		HRESULT Show(IToastNotification toast);
-		HRESULT Hide(IToastNotification toast);
-		HRESULT Setting(NotificationSetting* return_setting);
+		HRESULT abi_Show(IToastNotification toast);
+		HRESULT abi_Hide(IToastNotification toast);
+		HRESULT get_Setting(NotificationSetting* return_setting);
+		HRESULT _Dummy4();//HRESULT abi_AddToSchedule(Windows.UI.Notifications.ScheduledToastNotification scheduledToast);
+		HRESULT _Dummy5();//HRESULT abi_RemoveFromSchedule(Windows.UI.Notifications.ScheduledToastNotification scheduledToast);
+		HRESULT _Dummy6();//HRESULT abi_GetScheduledToastNotifications(Windows.Foundation.Collections.IVectorView!(Windows.UI.Notifications.ScheduledToastNotification)* return_scheduledToasts);
 	}
+
+
+	///
+	interface IToastNotifier2 : IInspectable
+	{
+	extern(Windows):
+		HRESULT abi_UpdateWithTagAndGroup(INotificationData data, HSTRING tag, HSTRING group, NotificationUpdateResult* return_result);
+		HRESULT abi_UpdateWithTag(INotificationData data, HSTRING tag, NotificationUpdateResult* return_result);
+	}
+
+
+	///
+	interface INotificationData : IInspectable
+	{
+	extern(Windows):
+		HRESULT get_Values(IMap!(HSTRING, HSTRING)* return_value);
+		HRESULT get_SequenceNumber(UINT32* return_value);
+		HRESULT set_SequenceNumber(UINT32 value);
+	}
+
+
+	///
+	interface INotificationDataFactory : IInspectable
+	{
+	extern(Windows):
+		HRESULT abi_CreateNotificationDataWithValuesAndSequenceNumber(IIterable!(IKeyValuePair!(HSTRING, HSTRING)) initialValues, UINT32 sequenceNumber, INotificationData* return_result);
+		HRESULT abi_CreateNotificationDataWithValues(IIterable!(IKeyValuePair!(HSTRING, HSTRING)) initialValues, INotificationData* return_result);
+	}
+
 
 	///
 	interface IToastNotificationManagerStatics : IInspectable
 	{
-		HRESULT CreateToastNotifier(IToastNotifier* return_notifier);
-		HRESULT CreateToastNotifierWithId(HSTRING applicationId, IToastNotifier* return_notifier);
+		HRESULT abi_CreateToastNotifier(IToastNotifier* return_notifier);
+		HRESULT abi_CreateToastNotifierWithId(HSTRING applicationId, IToastNotifier* return_notifier);
+		HRESULT abi_GetTemplateContent(ToastTemplateType type, XmlDocument* return_content);
 	}
+
+
+	///
+	enum ToastTemplateType
+	{
+		ToastImageAndText01 = 0,
+		ToastImageAndText02 = 1,
+		ToastImageAndText03 = 2,
+		ToastImageAndText04 = 3,
+		ToastText01 = 4,
+		ToastText02 = 5,
+		ToastText03 = 6,
+		ToastText04 = 7
+	}	
+
+
+	///
+	interface IIterator(Type) : IInspectable
+	{
+	extern(Windows):
+		HRESULT abi_Current(Type* return_current);
+		HRESULT abi_HasCurrent(bool* return_hasCurrent);
+		HRESULT abi_MoveNext(bool* out_hasCurrent);
+		HRESULT abi_GetMany(uint capacity, Type* value, uint* actual);
+	}
+	
+	
+	///
+	interface IIterable(Type) : IInspectable
+	{
+	extern(Windows):
+		HRESULT abi_First(IIterator!(Type)* out_first);
+	}
+
+
+	///
+	interface IKeyValuePair(TKey, TValue) : IInspectable
+	{
+	extern(Windows):
+		HRESULT get_Key(TKey* return_key);
+		HRESULT get_Value(TValue* return_value);
+	}
+
+
+	///
+	interface IMapView(TKey, TValue) : IInspectable
+	{
+	extern(Windows):
+		HRESULT abi_Lookup(TKey key, TValue* return_value);
+		HRESULT get_Size(uint* return_size);
+		HRESULT abi_HasKey(TKey key, bool* return_found);
+		HRESULT abi_Split(IMapView!(TKey, TValue) out_firstPartition, IMapView!(TKey, TValue) out_secondPartition);
+	}
+
+
+	///
+	interface IMap(TKey, TValue) : IInspectable
+	{
+	extern(Windows):
+		HRESULT abi_Lookup(TKey key, TValue* return_value);
+		HRESULT get_Size(uint* return_size);
+		HRESULT abi_HasKey(TKey key, bool* return_found);
+		HRESULT abi_GetView(IMapView!(TKey, TValue)* return_view);
+		HRESULT abi_Insert(TKey key, TValue value, bool* return_replaced);
+		HRESULT abi_Remove(TKey key);
+		HRESULT abi_Clear();
+	}
+
+
+	///
+	interface IObservableMap(TKey, TValue) : IInspectable
+	{
+	extern(Windows):
+		HRESULT _Dummy1();// HRESULT add_MapChanged(MapChangedEventHandler!(TKey, TValue) handler, EventRegistrationToken* return_token);
+		HRESULT _Dummy2();// HRESULT remove_MapChanged(EventRegistrationToken token);
+	}
+	
+
+	///
+	interface IStringMap : IMap!(HSTRING, HSTRING), IIterable!(IKeyValuePair!(HSTRING, HSTRING)), IObservableMap!(HSTRING, HSTRING) {}
 }
 
 
-__gshared
+extern(Windows) __gshared
 {
-	GUID IID_IToastNotification = guidFromUUID("997e2675-059e-4e60-8b06-1760917c8b80");
-	GUID IID_IToastNotificationManagerStatics = guidFromUUID("50ac103f-d235-4598-bbef-98fe4d1a3ad4");
-	GUID IID_IToastNotificationFactory = guidFromUUID("04124b20-82c6-4229-b109-fd9ed4662b53");
-	GUID IID_IXmlDocumentIO = guidFromUUID("6cd0e74e-ee65-4489-9ebf-ca43e87ba637");
+	IID IID_IToastNotifier2 = guidFromUUID("354389c6-7c01-4bd5-9c20-604340cd2b74");
+	IID IID_IToastNotification = guidFromUUID("997e2675-059e-4e60-8b06-1760917c8b80");
+	IID IID_IToastNotification2 = guidFromUUID("9dfb9fd1-143a-490e-90bf-b9fba7132de7");
+	IID IID_IToastNotification4 = guidFromUUID("15154935-28ea-4727-88e9-c58680e2d118");
+	IID IID_IToastNotificationManagerStatics = guidFromUUID("50ac103f-d235-4598-bbef-98fe4d1a3ad4");
+	IID IID_IToastNotificationFactory = guidFromUUID("04124b20-82c6-4229-b109-fd9ed4662b53");
+	IID IID_INotificationDataFactory = guidFromUUID("23c1e33a-1c10-46fb-8040-dec384621cf8");
+	IID IID_IXmlDocumentIO = guidFromUUID("6cd0e74e-ee65-4489-9ebf-ca43e87ba637");
 }
 
 
