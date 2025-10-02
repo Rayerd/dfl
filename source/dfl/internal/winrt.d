@@ -102,6 +102,77 @@ wstring fromHSTRING(HSTRING text)
 }
 
 
+/// Simple HSTRING wrapper
+struct hstring
+{
+	@disable this();
+
+	/// Constructor
+	this(hstring str)
+	{
+		WindowsDuplicateString(str._str, &_str);
+	}
+
+	/// ditto
+	this(ref hstring str)
+	{
+		WindowsDuplicateString(str._str, &_str);
+	}
+
+	/// ditto
+	this(wstring str)
+	{
+		_str = toHSTRING(str);
+	}
+
+	/// ditto
+	this(this)
+	{
+		WindowsDuplicateString(this._str, &_str);
+	}
+
+	/// ditto
+	this(HSTRING str)
+	{
+		WindowsDuplicateString(str, &_str);
+	}
+
+	/// ditto
+	ref hstring opAssign(ref hstring str)
+	{
+		freeHSTRING(_str);
+		WindowsDuplicateString(str._str, &_str);
+		return this;
+	}
+
+
+	/// Destructor
+	~this()
+	{
+		freeHSTRING(_str);
+		_str = null;
+	}
+
+
+	/// Raw HSTRING
+	HSTRING handle()
+	{
+		return _str;
+	}
+
+
+	/// Pointer to raw HSTRING
+	HSTRING* ptr()
+	{
+		return &_str;
+	}
+
+
+private:
+	HSTRING _str;
+}
+
+
 extern(Windows) nothrow @nogc
 {
 	///

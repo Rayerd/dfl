@@ -246,11 +246,10 @@ class ToastNotifier // docmain
 
 		// Get ActivationFactory of ToastNotificationManager class.
 		IToastNotificationManagerStatics toastStatics;
-		HSTRING hClass = toHSTRING("Windows.UI.Notifications.ToastNotificationManager"w);
-		hr = RoGetActivationFactory(hClass, &IID_IToastNotificationManagerStatics, cast(void**)&toastStatics);
+		hstring hClass = hstring("Windows.UI.Notifications.ToastNotificationManager"w);
+		hr = RoGetActivationFactory(hClass.handle, &IID_IToastNotificationManagerStatics, cast(void**)&toastStatics);
 		assert(toastStatics);
 		assert(hr == S_OK, "Failed to get ToastNotificationManager statics");
-		freeHSTRING(hClass);
 		scope(exit)
 		{
 			toastStatics.Release();
@@ -259,11 +258,9 @@ class ToastNotifier // docmain
 
 		// Create Notifier.
 		IToastNotifier notifier;
-		HSTRING hAumid = toHSTRING(aumid);
-		hr = toastStatics.abi_CreateToastNotifierWithId(hAumid, &notifier);
+		hr = toastStatics.abi_CreateToastNotifierWithId(hstring(aumid).handle, &notifier);
 		assert(notifier);
 		assert(hr == S_OK, "Failed to create ToastNotifier");
-		freeHSTRING(hAumid);
 		// NOTE: User has to Release() notifier.
 		
 		return notifier;
@@ -277,8 +274,8 @@ class ToastNotifier // docmain
 
 		// Create XmlDocument.
 		XmlDocument xmlDoc;
-		HSTRING hXmlDocClass = toHSTRING("Windows.Data.Xml.Dom.XmlDocument"w);
-		hr = RoActivateInstance(hXmlDocClass, cast(IInspectable*)&xmlDoc);
+		hstring hXmlDocClass = hstring("Windows.Data.Xml.Dom.XmlDocument"w);
+		hr = RoActivateInstance(hXmlDocClass.handle, cast(IInspectable*)&xmlDoc);
 		assert(xmlDoc);
 		assert(hr == S_OK, "Failed to activate XmlDocument");
 		scope(exit)
@@ -292,25 +289,21 @@ class ToastNotifier // docmain
 		hr = xmlDoc.QueryInterface(&IID_IXmlDocumentIO, cast(void**)&xmlDocIO);
 		assert(xmlDocIO);
 		assert(hr == S_OK, "Failed to activate XmlDocumentIO");
-		freeHSTRING(hXmlDocClass);
 		scope(exit)
 		{
 			xmlDocIO.Release();
 			xmlDocIO = null;
 		}
 
-		HSTRING hXml = toHSTRING(xml);
-		hr = xmlDocIO.LoadXml(hXml);
+		hr = xmlDocIO.LoadXml(hstring(xml).handle);
 		assert(hr == S_OK, "Failed to load XML");
-		freeHSTRING(hXml);
 
 		// Create ToastNotification.
 		IToastNotificationFactory toastFactory;
-		HSTRING hToastClass = toHSTRING("Windows.UI.Notifications.ToastNotification"w);
-		hr = RoGetActivationFactory(hToastClass, &IID_IToastNotificationFactory, cast(void**)&toastFactory);
+		hstring hToastClass = hstring("Windows.UI.Notifications.ToastNotification"w);
+		hr = RoGetActivationFactory(hToastClass.handle, &IID_IToastNotificationFactory, cast(void**)&toastFactory);
 		assert(toastFactory);
 		assert(hr == S_OK, "Failed to get ToastNotificationFactory");
-		freeHSTRING(hToastClass);
 		scope(exit)
 		{
 			toastFactory.Release();
@@ -331,19 +324,14 @@ class ToastNotifier // docmain
 			toast2.Release();
 			toast2 = null;
 		}
-		HSTRING hTag = toHSTRING(tag);
-		HSTRING hGroup = toHSTRING(group);
-		hr = toast2.set_Tag(hTag);
-		hr = toast2.set_Group(hGroup);
-		freeHSTRING(hTag);
-		freeHSTRING(hGroup);
+		hr = toast2.set_Tag(hstring(tag).handle);
+		hr = toast2.set_Group(hstring(group).handle);
 
 		INotificationDataFactory dataFacotry;
-		HSTRING hDataClass = toHSTRING("Windows.UI.Notifications.NotificationData"w);
-		hr = RoGetActivationFactory(hDataClass, &IID_INotificationDataFactory, cast(void**)&dataFacotry);
+		hstring hDataClass = hstring("Windows.UI.Notifications.NotificationData"w);
+		hr = RoGetActivationFactory(hDataClass.handle, &IID_INotificationDataFactory, cast(void**)&dataFacotry);
 		assert(dataFacotry);
 		assert(hr == S_OK, "Failed to get ToastNotificationDataFactory");
-		freeHSTRING(hDataClass);
 		scope(exit)
 		{
 			dataFacotry.Release();
@@ -351,11 +339,10 @@ class ToastNotifier // docmain
 		}
 
 		IStringMap values;
-		HSTRING hStringMapClass = toHSTRING("Windows.Foundation.Collections.StringMap"w);
-		hr = RoActivateInstance(hStringMapClass, cast(IInspectable*)&values);
+		hstring hStringMapClass = hstring("Windows.Foundation.Collections.StringMap"w);
+		hr = RoActivateInstance(hStringMapClass.handle, cast(IInspectable*)&values);
 		assert(values);
 		assert(hr == S_OK, "Failed to activate StringMap");
-		freeHSTRING(hStringMapClass);
 		scope(exit)
 		{
 			values.Release();
@@ -415,12 +402,8 @@ class ToastNotifier // docmain
 	///
 	private HRESULT _insert(IStringMap stringMap, Dwstring key, Dwstring value)
 	{
-		HSTRING hKey = toHSTRING(key);
-		HSTRING hValue = toHSTRING(value);
 		bool outReplaced1;
-		scope(exit) freeHSTRING(hKey);
-		scope(exit) freeHSTRING(hValue);
-		return stringMap.abi_Insert(hKey, hValue, &outReplaced1);
+		return stringMap.abi_Insert(hstring(key).handle, hstring(value).handle, &outReplaced1);
 	}
 
 
@@ -455,11 +438,10 @@ class ToastNotifier // docmain
 		}
 
 		INotificationDataFactory dataFacotry;
-		HSTRING hDataClass = toHSTRING("Windows.UI.Notifications.NotificationData"w);
-		hr = RoGetActivationFactory(hDataClass, &IID_INotificationDataFactory, cast(void**)&dataFacotry);
+		hstring hDataClass = hstring("Windows.UI.Notifications.NotificationData"w);
+		hr = RoGetActivationFactory(hDataClass.handle, &IID_INotificationDataFactory, cast(void**)&dataFacotry);
 		assert(dataFacotry);
 		assert(hr == S_OK, "Failed to get ToastNotificationDataFactory");
-		freeHSTRING(hDataClass);
 		scope(exit)
 		{
 			dataFacotry.Release();
@@ -467,11 +449,10 @@ class ToastNotifier // docmain
 		}
 
 		IStringMap values;
-		HSTRING hStringMapClass = toHSTRING("Windows.Foundation.Collections.StringMap"w);
-		hr = RoActivateInstance(hStringMapClass, cast(IInspectable*)&values);
+		hstring hStringMapClass = hstring("Windows.Foundation.Collections.StringMap"w);
+		hr = RoActivateInstance(hStringMapClass.handle, cast(IInspectable*)&values);
 		assert(values);
 		assert(hr == S_OK, "Failed to activate StringMap");
-		freeHSTRING(hStringMapClass);
 		scope(exit)
 		{
 			values.Release();
@@ -486,15 +467,11 @@ class ToastNotifier // docmain
 		assert(hr == S_OK, "Failed to create NotificationData");
 
 		dfl.internal.winrt.NotificationUpdateResult result;
-		HSTRING hTag = toHSTRING(tag);
-		HSTRING hGroup = toHSTRING(group);
 		if (group.length == 0)
-			hr = notifier2.abi_UpdateWithTag(data, hTag, &result);
+			hr = notifier2.abi_UpdateWithTag(data, hstring(tag).handle, &result);
 		else
-			hr = notifier2.abi_UpdateWithTagAndGroup(data, hTag, hGroup, &result);
+			hr = notifier2.abi_UpdateWithTagAndGroup(data, hstring(tag).handle, hstring(group).handle, &result);
 		assert(hr == S_OK, "Failed to update toast");
-		freeHSTRING(hTag);
-		freeHSTRING(hGroup);
 
 		return cast(NotificationUpdateResult)result;
 	}
