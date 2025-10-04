@@ -4,6 +4,8 @@
 
 module dfl.internal.com;
 
+import dfl.base : DflException;
+
 import dfl.internal.dlib;
 import dfl.internal.winapi;
 import dfl.internal.wincom;
@@ -43,6 +45,82 @@ extern(Windows):
 		//cprintf("Release `%.*s`\n", cast(int)toString().length, toString().ptr);
 		return C_refCountDec(cast(void*)this).toI32;
 	}
+}
+
+
+///
+struct ComPtr(BaseType : IUnknown)
+{
+	///
+	this(BaseType comObj)
+	{
+		_comObj = comObj;
+	}
+
+	///
+	this(ref ComPtr!BaseType comPtr)
+	{
+		this(comPtr._comObj);
+	}
+
+
+	///
+	this(this)
+	{
+		_comObj = this._comObj;
+		_comObj.AddRef();
+	}
+
+
+	/// Returns ComPtr of TargetType COM interface using QueryInterface() and IID.
+	ComPtr!TargetType as(TargetType)(IID* riid)
+	{
+		TargetType target;
+		HRESULT hr = _comObj.QueryInterface(riid, cast(void**)&target);
+		if (hr < 0)
+			throw new DflException("ComPtr.as() is failed.");
+		return ComPtr!TargetType(target);
+	}
+
+
+	///
+	ref ComPtr!BaseType opAssign(ref ComPtr!BaseType comPtr)
+	{
+		if (_comObj)
+			_comObj.Release();
+		_comObj = comPtr._comObj;
+		_comObj.AddRef();
+		return this;
+	}
+
+
+	///
+	~this()
+	{
+		_comObj.Release();
+		_comObj = null;
+	}
+
+
+	///
+	@property BaseType handle()
+	{
+		return _comObj;
+	}
+
+
+	///
+	@property BaseType* ptr()
+	{
+		return &_comObj;
+	}
+	
+
+	///
+	alias handle this;
+
+private:
+	BaseType _comObj; ///
 }
 
 

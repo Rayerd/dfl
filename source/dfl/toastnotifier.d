@@ -19,7 +19,7 @@ import dfl.environment;
 import dfl.event;
 import dfl.registry;
 
-import dfl.internal.com : DflComObject;
+import dfl.internal.com : DflComObject, ComPtr;
 import dfl.internal.dlib;
 import dfl.internal.winrt;
 import dfl.internal.utf : fromUnicodez;
@@ -54,7 +54,7 @@ pragma(lib, "Propsys"); // InitPropVariantFromCLSID, PropVariantClear
 class ToastNotification // docmain
 {
 	///
-	this(Dwstring xml)
+	this(in Dwstring xml)
 	{
 		_xml = xml;
 	}
@@ -81,7 +81,7 @@ class ToastNotification // docmain
 	}
 
 	///
-	@property void tag(Dwstring tag) // setter
+	@property void tag(in Dwstring tag) // setter
 	{
 		_tag = tag;
 	}
@@ -93,7 +93,7 @@ class ToastNotification // docmain
 	}
 
 	///
-	@property void group(Dwstring group) // setter
+	@property void group(in Dwstring group) // setter
 	{
 		_group = group;
 	}
@@ -106,7 +106,7 @@ class ToastNotification // docmain
 
 
 private:
-	Dwstring _xml; ///
+	const Dwstring _xml; ///
 	INotificationData _data; ///
 	Dwstring _tag; ///
 	Dwstring _group; ///
@@ -117,16 +117,16 @@ private:
 class ToastNotifier // docmain
 {
 	///
-	this(Dwstring aumid)
+	this(in Dwstring aumid)
 	{
 		_aumid = aumid;
 	}
 	
 
 	///
-	private static Dwstring _buildXml(ToastNotifier notifier)
+	private static Dwstring _buildXml(in ToastNotifier notifier)
 	{
-		static Dwstring createAppLogoXmlElement(ToastNotifier n)
+		static Dwstring createAppLogoXmlElement(in ToastNotifier n)
 		{
 			if (n._appLogoImagePath.length == 0)
 				return ""w;
@@ -137,7 +137,7 @@ class ToastNotifier // docmain
 				return format("<image placement='appLogoOverride' src='%s' />"w, n._appLogoImagePath);
 		}
 
-		static Dwstring createImageXmlElement(ToastNotifier n)
+		static Dwstring createImageXmlElement(in ToastNotifier n)
 		{
 			if (n._imagePath.length == 0)
 				return ""w;
@@ -151,7 +151,7 @@ class ToastNotifier // docmain
 			}
 		}
 
-		static Dwstring createInputXmlElement(ToastNotifier n)
+		static Dwstring createInputXmlElement(in ToastNotifier n)
 		{
 			Dwstring ret;
 			foreach (input; n.inputs)
@@ -159,7 +159,7 @@ class ToastNotifier // docmain
 			return ret;
 		}
 
-		static Dwstring createButtonXmlElement(ToastNotifier n)
+		static Dwstring createButtonXmlElement(in ToastNotifier n)
 		{
 			Dwstring ret;
 			foreach (button; n.buttons)
@@ -196,14 +196,14 @@ class ToastNotifier // docmain
 	}
 
 	///
-	void show(Dwstring tag, Dwstring group)
+	void show(in Dwstring tag, in Dwstring group)
 	{
 		Dwstring xml = _buildXml(this);
 		_showCore(xml, tag, group);
 	}
 
 	/// ditto
-	void show(Dwstring tag)
+	void show(in Dwstring tag)
 	{
 		show(tag, ""w);
 	}
@@ -216,155 +216,98 @@ class ToastNotifier // docmain
 
 
 	///
-	private void _showCore(Dwstring xml, Dwstring tag, Dwstring group)
+	private void _showCore(in Dwstring xml, in Dwstring tag, in Dwstring group)
 	{
 		HRESULT hr;
-
-		IToastNotification toast = _createToastNotification(xml, tag, group);
-		scope(exit)
-		{
-			toast.Release();
-			toast = null;
-		}
-
-		IToastNotifier notifier = _createToastNotifier(_aumid);
-		scope(exit)
-		{
-			notifier.Release();
-			notifier = null;
-		}
-
+		
+		ComPtr!IToastNotification toast = _createToastNotification(xml, tag, group);
+		ComPtr!IToastNotifier notifier = _createToastNotifier(_aumid);
 		hr = notifier.abi_Show(toast);
 		assert(hr == S_OK, "Failed to show toast");
 	}
 
 
 	///
-	private static IToastNotifier _createToastNotifier(Dwstring aumid)
+	private static ComPtr!IToastNotifier _createToastNotifier(in Dwstring aumid)
 	{
 		HRESULT hr;
 
 		// Get ActivationFactory of ToastNotificationManager class.
-		IToastNotificationManagerStatics toastStatics;
+		ComPtr!IToastNotificationManagerStatics toastStatics;
 		hstring hClass = hstring("Windows.UI.Notifications.ToastNotificationManager"w);
-		hr = RoGetActivationFactory(hClass.handle, &IID_IToastNotificationManagerStatics, cast(void**)&toastStatics);
-		assert(toastStatics);
+		hr = RoGetActivationFactory(hClass.handle, &IID_IToastNotificationManagerStatics, cast(void**)toastStatics.ptr);
+		assert(toastStatics.ptr);
 		assert(hr == S_OK, "Failed to get ToastNotificationManager statics");
-		scope(exit)
-		{
-			toastStatics.Release();
-			toastStatics = null;
-		}
 
 		// Create Notifier.
-		IToastNotifier notifier;
-		hr = toastStatics.abi_CreateToastNotifierWithId(hstring(aumid).handle, &notifier);
-		assert(notifier);
+		ComPtr!IToastNotifier notifier;
+		hr = toastStatics.abi_CreateToastNotifierWithId(hstring(aumid).handle, notifier.ptr);
+		assert(notifier.ptr);
 		assert(hr == S_OK, "Failed to create ToastNotifier");
-		// NOTE: User has to Release() notifier.
 		
 		return notifier;
 	}
 
 
 	///
-	private IToastNotification _createToastNotification(Dwstring xml, Dwstring tag, Dwstring group)
+	private ComPtr!IToastNotification _createToastNotification(in Dwstring xml, in Dwstring tag, in Dwstring group)
 	{
 		HRESULT hr;
 
 		// Create XmlDocument.
-		XmlDocument xmlDoc;
+		ComPtr!XmlDocument xmlDoc;
 		hstring hXmlDocClass = hstring("Windows.Data.Xml.Dom.XmlDocument"w);
-		hr = RoActivateInstance(hXmlDocClass.handle, cast(IInspectable*)&xmlDoc);
-		assert(xmlDoc);
+		hr = RoActivateInstance(hXmlDocClass.handle, cast(IInspectable*)xmlDoc.ptr);
+		assert(xmlDoc.ptr);
 		assert(hr == S_OK, "Failed to activate XmlDocument");
-		scope(exit)
-		{
-			xmlDoc.Release();
-			xmlDoc = null;
-		}
 		
 		// Load XML.
-		IXmlDocumentIO xmlDocIO;
-		hr = xmlDoc.QueryInterface(&IID_IXmlDocumentIO, cast(void**)&xmlDocIO);
-		assert(xmlDocIO);
+		ComPtr!IXmlDocumentIO xmlDocIO = xmlDoc.as!IXmlDocumentIO(&IID_IXmlDocumentIO);
+		assert(xmlDocIO.ptr);
 		assert(hr == S_OK, "Failed to activate XmlDocumentIO");
-		scope(exit)
-		{
-			xmlDocIO.Release();
-			xmlDocIO = null;
-		}
 
 		hr = xmlDocIO.LoadXml(hstring(xml).handle);
 		assert(hr == S_OK, "Failed to load XML");
 
 		// Create ToastNotification.
-		IToastNotificationFactory toastFactory;
+		ComPtr!IToastNotificationFactory toastFactory;
 		hstring hToastClass = hstring("Windows.UI.Notifications.ToastNotification"w);
-		hr = RoGetActivationFactory(hToastClass.handle, &IID_IToastNotificationFactory, cast(void**)&toastFactory);
-		assert(toastFactory);
+		hr = RoGetActivationFactory(hToastClass.handle, &IID_IToastNotificationFactory, cast(void**)toastFactory.ptr);
+		assert(toastFactory.ptr);
 		assert(hr == S_OK, "Failed to get ToastNotificationFactory");
-		scope(exit)
-		{
-			toastFactory.Release();
-			toastFactory = null;
-		}
 
-		IToastNotification toast;
-		hr = toastFactory.abi_CreateToastNotification(xmlDoc, &toast);
-		assert(toast);
+		ComPtr!IToastNotification toast;
+		hr = toastFactory.abi_CreateToastNotification(xmlDoc.handle, toast.ptr);
+		assert(toast.ptr);
 		assert(hr == S_OK, "Failed to create ToastNotification");
-		// NOTE: User has to Release() toast.
 
-		IToastNotification2 toast2;
-		hr = toast.QueryInterface(&IID_IToastNotification2, cast(void**)&toast2);
-		assert(hr == S_OK, "Failed to query IToastNotification2");
-		scope(exit)
-		{
-			toast2.Release();
-			toast2 = null;
-		}
+		ComPtr!IToastNotification2 toast2 = toast.as!IToastNotification2(&IID_IToastNotification2);
 		hr = toast2.set_Tag(hstring(tag).handle);
+		assert(hr == S_OK, "set_Tag is failed");
 		hr = toast2.set_Group(hstring(group).handle);
+		assert(hr == S_OK, "set_Group is failed");
 
-		INotificationDataFactory dataFacotry;
+		ComPtr!INotificationDataFactory dataFacotry;
 		hstring hDataClass = hstring("Windows.UI.Notifications.NotificationData"w);
-		hr = RoGetActivationFactory(hDataClass.handle, &IID_INotificationDataFactory, cast(void**)&dataFacotry);
-		assert(dataFacotry);
+		hr = RoGetActivationFactory(hDataClass.handle, &IID_INotificationDataFactory, cast(void**)dataFacotry.ptr);
+		assert(dataFacotry.ptr);
 		assert(hr == S_OK, "Failed to get ToastNotificationDataFactory");
-		scope(exit)
-		{
-			dataFacotry.Release();
-			dataFacotry = null;
-		}
 
-		IStringMap values;
+		ComPtr!IStringMap values;
 		hstring hStringMapClass = hstring("Windows.Foundation.Collections.StringMap"w);
-		hr = RoActivateInstance(hStringMapClass.handle, cast(IInspectable*)&values);
-		assert(values);
+		hr = RoActivateInstance(hStringMapClass.handle, cast(IInspectable*)values.ptr);
+		assert(values.ptr);
 		assert(hr == S_OK, "Failed to activate StringMap");
-		scope(exit)
-		{
-			values.Release();
-			values = null;
-		}
 
 		hr = _bindTextAndProgressBar(values);
 
-		INotificationData data;
-		hr = dataFacotry.abi_CreateNotificationDataWithValuesAndSequenceNumber(values, _sequenceNumber, &data); // NOTE
-		assert(data);
+		ComPtr!INotificationData data;
+		hr = dataFacotry.abi_CreateNotificationDataWithValuesAndSequenceNumber(values, _sequenceNumber, data.ptr);
+		assert(data.ptr);
 		assert(hr == S_OK, "Failed to create NotificationData");
 
-		IToastNotification4 toast4;
-		hr = toast.QueryInterface(&IID_IToastNotification4, cast(void**)&toast4);
-		assert(toast4);
-		assert(hr == S_OK, "Failed to query IToastNotification4");
-		scope(exit)
-		{
-			toast4.Release();
-			toast4 = null;
-		}
+		ComPtr!IToastNotification4 toast4 = toast.as!IToastNotification4(&IID_IToastNotification4);
+		assert(toast4.ptr);
 		hr = toast4.set_Data(data);
 		assert(hr == S_OK, "Failed to set data");
 
@@ -373,7 +316,7 @@ class ToastNotifier // docmain
 
 
 	///
-	private HRESULT _bindTextAndProgressBar(IStringMap values)
+	private HRESULT _bindTextAndProgressBar(IStringMap values) const
 	{
 		HRESULT hr;
 
@@ -400,7 +343,7 @@ class ToastNotifier // docmain
 
 	
 	///
-	private HRESULT _insert(IStringMap stringMap, Dwstring key, Dwstring value)
+	private static HRESULT _insert(IStringMap stringMap, in Dwstring key, in Dwstring value)
 	{
 		bool outReplaced1;
 		return stringMap.abi_Insert(hstring(key).handle, hstring(value).handle, &outReplaced1);
@@ -408,62 +351,32 @@ class ToastNotifier // docmain
 
 
 	///
-	NotificationUpdateResult update(Dwstring tag, Dwstring group)
+	NotificationUpdateResult update(in Dwstring tag, in Dwstring group)
 	{
 		HRESULT hr;
 
 		Dwstring xml = _buildXml(this);
 
-		IToastNotification toast = _createToastNotification(xml, tag, group);
-		scope(exit)
-		{
-			toast.Release();
-			toast = null;
-		}
+		ComPtr!IToastNotifier notifier = _createToastNotifier(_aumid);
+		ComPtr!IToastNotifier2 notifier2 = notifier.as!IToastNotifier2(&IID_IToastNotifier2);
 
-		IToastNotifier notifier = _createToastNotifier(_aumid);
-		scope(exit)
-		{
-			notifier.Release();
-			notifier = null;
-		}
-		
-		IToastNotifier2 notifier2;
-		hr = notifier.QueryInterface(&IID_IToastNotifier2, cast(void**)&notifier2);
-		assert(hr == S_OK, "Failed to query IToastNotifier2");
-		scope(exit)
-		{
-			notifier2.Release();
-			notifier2 = null;
-		}
-
-		INotificationDataFactory dataFacotry;
+		ComPtr!INotificationDataFactory dataFacotry;
 		hstring hDataClass = hstring("Windows.UI.Notifications.NotificationData"w);
-		hr = RoGetActivationFactory(hDataClass.handle, &IID_INotificationDataFactory, cast(void**)&dataFacotry);
-		assert(dataFacotry);
+		hr = RoGetActivationFactory(hDataClass.handle, &IID_INotificationDataFactory, cast(void**)dataFacotry.ptr);
+		assert(dataFacotry.ptr);
 		assert(hr == S_OK, "Failed to get ToastNotificationDataFactory");
-		scope(exit)
-		{
-			dataFacotry.Release();
-			dataFacotry = null;
-		}
 
-		IStringMap values;
+		ComPtr!IStringMap values;
 		hstring hStringMapClass = hstring("Windows.Foundation.Collections.StringMap"w);
-		hr = RoActivateInstance(hStringMapClass.handle, cast(IInspectable*)&values);
-		assert(values);
+		hr = RoActivateInstance(hStringMapClass.handle, cast(IInspectable*)values.ptr);
+		assert(values.ptr);
 		assert(hr == S_OK, "Failed to activate StringMap");
-		scope(exit)
-		{
-			values.Release();
-			values = null;
-		}
 
 		hr = _bindTextAndProgressBar(values);
 
-		INotificationData data;
-		hr = dataFacotry.abi_CreateNotificationDataWithValuesAndSequenceNumber(values, 2, &data);
-		assert(data);
+		ComPtr!INotificationData data;
+		hr = dataFacotry.abi_CreateNotificationDataWithValuesAndSequenceNumber(values, _sequenceNumber, data.ptr);
+		assert(data.ptr);
 		assert(hr == S_OK, "Failed to create NotificationData");
 
 		dfl.internal.winrt.NotificationUpdateResult result;
@@ -477,14 +390,14 @@ class ToastNotifier // docmain
 	}
 
 	/// ditto
-	NotificationUpdateResult update(Dwstring tag)
+	NotificationUpdateResult update(in Dwstring tag)
 	{
 		return update(tag, "");
 	}
 
 
 	/// Experimentally: Set launch arguments within XML escape.
-	void setLaunch(Dwstring txt, bool enableEscape = true)
+	void setLaunch(in Dwstring txt, in bool enableEscape = true)
 	{
 		if (enableEscape)
 		{
@@ -501,7 +414,7 @@ class ToastNotifier // docmain
 	}
 
 	/// Set launch arguments without XML escape.
-	@property void launch(Dwstring txt) // setter
+	@property void launch(in Dwstring txt) // setter
 	{
 		_launch = txt;
 	}
@@ -513,7 +426,7 @@ class ToastNotifier // docmain
 	}
 	
 	///
-	@property void useButtonStyle(bool byes) // setter
+	@property void useButtonStyle(in bool byes) // setter
 	{
 		_useButtonStyle = byes;
 	}
@@ -526,7 +439,7 @@ class ToastNotifier // docmain
 
 
 	///
-	@property void headline(Dwstring txt) // setter
+	@property void headline(in Dwstring txt) // setter
 	{
 		_headline = txt;
 	}
@@ -539,7 +452,7 @@ class ToastNotifier // docmain
 
 
 	///
-	@property void text(Dwstring txt) // setter
+	@property void text(in Dwstring txt) // setter
 	{
 		_text = txt;
 	}
@@ -552,7 +465,7 @@ class ToastNotifier // docmain
 	
 
 	///
-	@property void subtext(Dwstring txt) // setter
+	@property void subtext(in Dwstring txt) // setter
 	{
 		_subtext = txt;
 	}
@@ -565,7 +478,7 @@ class ToastNotifier // docmain
 	
 
 	///
-	@property void appLogoImagePath(Dwstring path) // setter
+	@property void appLogoImagePath(in Dwstring path) // setter
 	{
 		_appLogoImagePath = path;
 	}
@@ -578,7 +491,7 @@ class ToastNotifier // docmain
 
 	
 	///
-	@property void imagePath(Dwstring path) // setter
+	@property void imagePath(in Dwstring path) // setter
 	{
 		_imagePath = path;
 	}
@@ -591,7 +504,7 @@ class ToastNotifier // docmain
 
 	
 	///
-	@property void imageStyle(ToastNotifierImageStyle style) // setter
+	@property void imageStyle(in ToastNotifierImageStyle style) // setter
 	{
 		_imageStyle = style;
 	}
@@ -604,7 +517,7 @@ class ToastNotifier // docmain
 
 
 	///
-	@property void hintCrop(bool byes) // setter
+	@property void hintCrop(in bool byes) // setter
 	{
 		_hintCrop = byes;
 	}
@@ -622,9 +535,21 @@ class ToastNotifier // docmain
 		return _buttons;
 	}
 
+	/// ditto
+	@property const(ToastButtonCollection) buttons() const // getter
+	{
+		return _buttons;
+	}
+
 
 	///
 	@property ToastTextBoxCollection inputs() // getter
+	{
+		return _inputs;
+	}
+
+	/// ditto
+	@property const(ToastTextBoxCollection) inputs() const // getter
 	{
 		return _inputs;
 	}
@@ -644,7 +569,7 @@ class ToastNotifier // docmain
 
 
 	///
-	@property void sequenceNumber(uint sequenceNumber) // setter
+	@property void sequenceNumber(in uint sequenceNumber) // setter
 	{
 		_sequenceNumber = sequenceNumber;
 	}
@@ -657,7 +582,7 @@ class ToastNotifier // docmain
 
 
 private:
-	Dwstring _aumid; ///
+	const Dwstring _aumid; ///
 	Dwstring _launch; ///
 	bool _useButtonStyle; ///
 	Dwstring _headline; ///
@@ -709,18 +634,29 @@ class ToastCollectionBase(ItemType)
 
 	
 	///
-	int opApply(scope int delegate(ItemType) dg)
+	int opApply(int delegate(ref ItemType) dg)
 	{
-		int result = 0;
-		foreach (item; _items)
+		foreach (ref ItemType item; _items)
 		{
-			result = dg(item);
+			auto result = dg(item);
 			if (result)
-				break;
+				return result;
 		}
-		return result;
+		return 0;
 	}
-	
+
+	/// ditto
+	int opApply(int delegate(ref const(ItemType)) dg) const
+	{
+		foreach (ref const(ItemType) item; _items)
+		{
+			auto result = dg(item);
+			if (result)
+				return result;
+		}
+		return 0;
+	}
+
 private:
 	ItemType[] _items; ///
 }
@@ -756,7 +692,7 @@ class ToastTextBox : IToastTextBox
 	}
 
 	/// ditto (extra.)
-	this(Dwstring id, Dwstring title, Dwstring placeHolderContent)
+	this(in Dwstring id, in Dwstring title, in Dwstring placeHolderContent)
 	{
 		_id = id;
 		_title = title;
@@ -772,7 +708,7 @@ class ToastTextBox : IToastTextBox
 
 
 	///
-	@property void title(Dwstring title) // setter
+	@property void title(in Dwstring title) // setter
 	{
 		_title = title;
 	}
@@ -785,7 +721,7 @@ class ToastTextBox : IToastTextBox
 
 
 	///
-	@property void placeHolderContent(Dwstring placeHolderContent) // setter
+	@property void placeHolderContent(in Dwstring placeHolderContent) // setter
 	{
 		_placeHolderContent = placeHolderContent;
 	}
@@ -825,7 +761,7 @@ class ToastSelectionBox : IToastTextBox
 	}
 
 	/// ditto (extra.)
-	this(Dwstring id, Dwstring title, Dwstring placeHolderContent, Dwstring defaultInput)
+	this(in Dwstring id, in Dwstring title, in Dwstring placeHolderContent, in Dwstring defaultInput)
 	{
 		_id = id;
 		_title = title;
@@ -842,7 +778,7 @@ class ToastSelectionBox : IToastTextBox
 
 
 	///
-	@property void title(Dwstring title) // setter
+	@property void title(in Dwstring title) // setter
 	{
 		_title = title;
 	}
@@ -855,7 +791,7 @@ class ToastSelectionBox : IToastTextBox
 
 
 	///
-	@property void placeHolderContent(Dwstring placeHolderContent) // setter
+	@property void placeHolderContent(in Dwstring placeHolderContent) // setter
 	{
 		_placeHolderContent = placeHolderContent;
 	}
@@ -868,7 +804,7 @@ class ToastSelectionBox : IToastTextBox
 
 	
 	///
-	@property void defaultInput(Dwstring defaultInput) // setter
+	@property void defaultInput(in Dwstring defaultInput) // setter
 	{
 		_defaultInput = defaultInput;
 	}
@@ -925,7 +861,7 @@ private:
 class ToastSelectionBoxItem
 {
 	///
-	this(Dwstring id, Dwstring content)
+	this(in Dwstring id, in Dwstring content)
 	{
 		_id = id;
 		_content = content;
@@ -967,7 +903,7 @@ private:
 class ToastButton
 {
 	///
-	this(Dwstring content, Dwstring arguments)
+	this(in Dwstring content, in Dwstring arguments)
 	{
 		_content = content;
 		_arguments = arguments;
@@ -1007,7 +943,7 @@ class ToastButton
 
 
 	///
-	@property void buttonStyle(ToastButtonStyle buttonStyle) // setter
+	@property void buttonStyle(in ToastButtonStyle buttonStyle) // setter
 	{
 		_buttonStyle = buttonStyle;
 	}
@@ -1020,7 +956,7 @@ class ToastButton
 
 
 	///
-	@property void activationType(ToastActivationType type) // setter
+	@property void activationType(in ToastActivationType type) // setter
 	{
 		_activationType = type;
 	}
@@ -1040,7 +976,7 @@ private:
 
 
 	///
-	Dwstring toString(ToastButtonStyle buttonStyle) const
+	Dwstring toString(in ToastButtonStyle buttonStyle) const
 	{
 		final switch (buttonStyle)
 		{
@@ -1076,7 +1012,7 @@ enum ToastActivationType
 class ToastProgressBar
 {
 	///
-	this(Dwstring status, double value)
+	this(in Dwstring status, in double value)
 	{
 		_status = status;
 		_value = value;
@@ -1085,7 +1021,7 @@ class ToastProgressBar
 
 
 	///
-	@property void status(Dwstring status) // setter
+	@property void status(in Dwstring status) // setter
 	{
 		_status = status;
 	}
@@ -1098,7 +1034,7 @@ class ToastProgressBar
 
 
 	///
-	@property void value(double v) // setter
+	@property void value(in double v) // setter
 	{
 		_value = v;
 	}
@@ -1111,7 +1047,7 @@ class ToastProgressBar
 
 
 	///
-	@property void title(Dwstring text) // setter
+	@property void title(in Dwstring text) // setter
 	{
 		_title = text;
 	}
@@ -1124,7 +1060,7 @@ class ToastProgressBar
 
 
 	///
-	@property void valueStringOverride(Dwstring text) // setter
+	@property void valueStringOverride(in Dwstring text) // setter
 	{
 		_valueStringOverride = text;
 	}
@@ -1173,7 +1109,7 @@ class ToastNotifierLegacy // docmain
 
 
 	///
-	this(Dwstring aumid)
+	this(in Dwstring aumid)
 	{
 		_notifier = new ToastNotifier(aumid);
 	}
@@ -1204,7 +1140,7 @@ class ToastNotifierLegacy // docmain
 
 
 	///
-	@property void toastTemplate(ToastTemplateType type) // setter
+	@property void toastTemplate(in ToastTemplateType type) // setter
 	{
 		_toastTemplateType = type;
 	}
@@ -1296,7 +1232,7 @@ CLSID clsidFromUUID(string uuidString)
 
 
 ///
-string uuidFromClsid(REFCLSID clsid)
+string uuidFromClsid(in REFCLSID clsid)
 {
 	return uuidFromGUID(clsid);
 }
@@ -1370,7 +1306,7 @@ class NotificationActivator
 class ToastActivatedEventArgs : EventArgs
 {
 	///
-	this(LPCWSTR appUserModelId, LPCWSTR invokedArgs, const NOTIFICATION_USER_INPUT_DATA* data, ULONG count)
+	this(in LPCWSTR appUserModelId, in LPCWSTR invokedArgs, const NOTIFICATION_USER_INPUT_DATA* data, in ULONG count)
 	{
 		_aumid = appUserModelId;
 		_args = invokedArgs;
@@ -1492,7 +1428,7 @@ extern(Windows)
 
 ///
 // propvarutil.h
-HRESULT InitPropVariantFromString(PCWSTR psz, PROPVARIANT* ppropvar)
+HRESULT InitPropVariantFromString(in PCWSTR psz, PROPVARIANT* ppropvar)
 {
 	HRESULT hr = SHStrDupW(psz, &ppropvar.pwszVal);
 	if (hr == S_OK)
@@ -1628,7 +1564,7 @@ private:
 scope class DesktopNotificationManager
 {
 	/// Constructor.
-	this(Dstring[] launchArgs, Dwstring aumid, REFCLSID clsid)
+	this(in Dstring[] launchArgs, in Dwstring aumid, in REFCLSID clsid)
 	{
 		_aumid = aumid;
 		_clsid = clsid;
