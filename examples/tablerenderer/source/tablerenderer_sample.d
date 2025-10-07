@@ -23,7 +23,7 @@ class MainForm : Form
 			"理科,75,80\n" ~ 
 			"算数,90,78\n" ~ 
 			"社会,80,76\n";
-		_table = new CustomTableRenderer(csv);
+		_table = new CustomTableRenderer(csv, 5);
 		_table.height = 40;
 		_table.width[] = 80;
 		_table.paddingX = 10;
