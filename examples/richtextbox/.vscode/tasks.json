@@ -6,7 +6,7 @@
 			"run": false,
 			"cwd": ".",
 			"compiler": "$current",
-			"archType": "$current",
+			"archType": "x86_64",
 			"buildType": "$current",
 			"configuration": "$current",
 			"problemMatcher": [

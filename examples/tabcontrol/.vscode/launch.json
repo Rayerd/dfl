@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "C++ Launch (Windows) tabcontrol_sample",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "cwd": "${workspaceRoot}",
+            "program": "./bin/tabcontrol_sample.exe",
+            "console": "integratedTerminal"
+        }
+    ]
+}
