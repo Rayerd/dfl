@@ -93,7 +93,7 @@ Build and run your GUI applications with DUB as below:
 ```
 **IMPORTANT**: DUB is building **dfl_dub.lib** that is **not** containing WINSDK libraries.
 
-## APPENDIX: Build and Install dfl.lib and dfl_debug.lib
+## APPENDIX I: Build and Install dfl.lib and dfl_debug.lib
 ### 1. Set environment variables
 Fix the paths below:
 ```bat
@@ -124,7 +124,10 @@ In order to make and move *.lib to paths below:
 - **go.bat 32mscoff** (MSVC required) : ditto
 - **go64.bat** (MSVC required) : Make and move *.lib to `%dmd_path%\lib64`
 
+## APPENDIX II: DFL With WinRT
+
+1. If you use dfl.internal.winrt, install **Visual Studio 2022** and Windows 10 SDK (10.0.19041.0) or newer.
+1. You must link **WindowsApp.lib** contained the SDK to your application.
+
 ## License
 DFL is under the boost and/or zlib/libpng license.
-
-However, trackbar.d is covered by the MIT license.
