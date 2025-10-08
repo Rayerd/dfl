@@ -7,7 +7,6 @@
 			"run": false,
 			"cwd": ".",
 			"compiler": "$current",
-			"archType": "$current",
 			"buildType": "$current",
 			"configuration": "library",
 			"problemMatcher": [
@@ -30,7 +29,6 @@
 			"run": true,
 			"cwd": ".",
 			"compiler": "$current",
-			"archType": "$current",
 			"buildType": "unittest",
 			"configuration": "unittest",
 			"problemMatcher": [
