@@ -1,8 +1,7 @@
 
 # DFL
 
-This unofficial project is a migration of [D Forms Library (DFL)](http://wiki.dprogramming.com/Dfl/HomePage "D Forms Library (DFL)") that is managed on SVN.
-DFL is a Win32 windowing library for the D language.
+[DFL (D Forms Library)](http://wiki.dprogramming.com/Dfl/HomePage "DFL (D Forms Library)") is a Win32 GUI library for the D language.
 
 ```d
 import dfl;
