@@ -62,38 +62,6 @@ enum SocketEventType
 	QUALITY_OF_SERVICE       = FD_QOS,
 	GROUP_QUALITY_OF_SERVICE = FD_GROUP_QOS,
 }
-deprecated alias EventType = SocketEventType;
-
-///
-// -err- will be 0 if no error.
-// -type- will always contain only one flag.
-deprecated alias RegisterEventCallback = void delegate(Socket sock, SocketEventType type, int err);
-
-
-///
-// Calling this twice on the same socket cancels out previously
-// registered events for the socket.
-// Requires Application.run() or Application.doEvents() loop.
-deprecated void registerEvent(AsyncSocket sock, SocketEventType events, RegisterEventCallback callback)
-{
-	assert(sock !is null, "registerEvent: socket cannot be null");
-	assert(callback !is null, "registerEvent: callback cannot be null");
-	
-	if (!g_hwNet)
-		_init();
-	
-	sock.blocking = false; // So the getter will be correct.
-	
-	if (WSAAsyncSelect(getSocketHandle(sock), g_hwNet, WM_DFL_NETEVENT, cast(int)events) == SOCKET_ERROR)
-		throw new DflException("Unable to register socket events");
-
-	EventInfo ei;
-	ei.sock = sock;
-	ei.callback = callback;
-	ei.exception = null;
-
-	g_allEvents[getSocketHandle(sock)] = ei;
-}
 
 
 ///
@@ -130,7 +98,6 @@ void asyncSelect(AsyncSocket sock)
 
 	EventInfo ei;
 	ei.sock = sock;
-	ei.callback = null; // TODO: Remove this.
 	ei.exception = null;
 
 	g_allEvents[getSocketHandle(sock)] = ei;
@@ -156,7 +123,6 @@ class AsyncSocket: Socket // docmain
 	{
 		super(af, type, protocol);
 		super.blocking = false;
-		registerEvent(this, SocketEventType.NONE, (Socket sock, SocketEventType type, int err){});
 	}
 	
 	/// ditto
@@ -164,7 +130,6 @@ class AsyncSocket: Socket // docmain
 	{
 		super(af, type);
 		super.blocking = false;
-		registerEvent(this, SocketEventType.NONE, (Socket sock, SocketEventType type, int err){});
 	}
 	
 	/// ditto
@@ -172,7 +137,6 @@ class AsyncSocket: Socket // docmain
 	{
 		super(af, type, protocolName);
 		super.blocking = false;
-		registerEvent(this, SocketEventType.NONE, (Socket sock, SocketEventType type, int err){});
 	}
 	
 	/// ditto
@@ -186,13 +150,6 @@ class AsyncSocket: Socket // docmain
 	override AsyncSocket accept() @trusted
 	{
 		return cast(AsyncSocket)super.accept();
-	}
-
-
-	///
-	deprecated void event(SocketEventType events, RegisterEventCallback callback)
-	{
-		registerEvent(this, events, callback);
 	}
 
 
@@ -316,15 +273,6 @@ class AsyncTcpSocket: AsyncSocket // docmain
 	this(AddressFamily family)
 	{
 		super(family, SocketType.STREAM, ProtocolType.TCP);
-	}
-	
-	/// ditto
-	// Shortcut.
-	this(Address connectTo, SocketEventType events, RegisterEventCallback eventCallback)
-	{
-		this(connectTo.addressFamily());
-		event(events, eventCallback);
-		connect(connectTo);
 	}
 
 	///
@@ -679,30 +627,6 @@ class SocketQueue // docmain
 	
 	
 	///
-	// Same signature as RegisterEventCallback for simplicity.
-	deprecated void event(Socket sock, SocketEventType type, int err)
-	in
-	{
-		assert(_sock is sock);
-	}
-	do
-	{
-		switch(type)
-		{
-			case SocketEventType.READ:
-				readEvent();
-				break;
-			
-			case SocketEventType.WRITE:
-				writeEvent();
-				break;
-			
-			default:
-		}
-	}
-	
-	
-	///
 	// Call on a read event so that incoming data may be buffered.
 	void readEvent()
 	{
@@ -755,7 +679,6 @@ private:
 struct EventInfo
 {
 	AsyncSocket sock;
-	RegisterEventCallback callback;
 	DThrowable exception;
 }
 
