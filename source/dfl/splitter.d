@@ -66,8 +66,11 @@ class SplitterEventArgs: EventArgs
 	}
 	
 	
-	private:
-	int _x, _y, _splitX, _splitY;
+private:
+	int _x;
+	int _y;
+	int _splitX;
+	int _splitY;
 }
 
 
@@ -76,11 +79,10 @@ class Splitter: Control // docmain
 {
 	this()
 	{
-		// DMD 0.95: need 'this' to access member dock
 		this.dock = DockStyle.LEFT;
 		
-		if(HBRUSH.init == hbrxor)
-			inithbrxor();
+		if(HBRUSH.init == _hbrxor)
+			_inithbrxor();
 	}
 	
 	
@@ -100,13 +102,11 @@ class Splitter: Control // docmain
 		{
 			case DockStyle.LEFT:
 			case DockStyle.RIGHT:
-				//cursor = new Cursor(LoadCursorA(null, IDC_SIZEWE), false);
 				cursor = Cursors.vSplit;
 				break;
 			
 			case DockStyle.TOP:
 			case DockStyle.BOTTOM:
-				//cursor = new Cursor(LoadCursorA(null, IDC_SIZENS), false);
 				cursor = Cursors.hSplit;
 				break;
 			
@@ -123,23 +123,21 @@ class Splitter: Control // docmain
 	package void initsplit(int sx, int sy)
 	{
 		capture = true;
-		
-		downing = true;
-		//downpos = Point(mea.x, mea.y);
+		_downing = true;
 		
 		switch(dock)
 		{
 			case DockStyle.TOP:
 			case DockStyle.BOTTOM:
-				downpos = sy;
-				lastpos = 0;
-				drawxorClient(0, lastpos);
+				_downpos = sy;
+				_lastpos = 0;
+				_drawxorClient(0, _lastpos);
 				break;
 			
 			default: // LEFT / RIGHT.
-				downpos = sx;
-				lastpos = 0;
-				drawxorClient(lastpos, 0);
+				_downpos = sx;
+				_lastpos = 0;
+				_drawxorClient(_lastpos, 0);
 		}
 	}
 	
@@ -166,10 +164,10 @@ class Splitter: Control // docmain
 	///
 	@property void movingGrip(bool byes) // setter
 	{
-		if(mgrip == byes)
+		if(_mgrip == byes)
 			return;
 		
-		this.mgrip = byes;
+		this._mgrip = byes;
 		
 		if(created)
 		{
@@ -180,19 +178,15 @@ class Splitter: Control // docmain
 	/// ditto
 	@property bool movingGrip() // getter
 	{
-		return mgrip;
+		return _mgrip;
 	}
-	
-	deprecated alias moveingGrip = movingGrip;
-	deprecated alias moveGrip = movingGrip;
-	deprecated alias sizingGrip = movingGrip;
 	
 	
 	protected override void onPaint(PaintEventArgs ea)
 	{
 		super.onPaint(ea);
 		
-		if(mgrip)
+		if(_mgrip)
 		{
 			ea.graphics.drawMoveGrip(displayRectangle, DockStyle.LEFT == dock || DockStyle.RIGHT == dock);
 		}
@@ -201,7 +195,7 @@ class Splitter: Control // docmain
 	
 	protected override void onResize(EventArgs ea)
 	{
-		if(mgrip)
+		if(_mgrip)
 		{
 			invalidate();
 		}
@@ -225,19 +219,19 @@ class Splitter: Control // docmain
 	{
 		super.onMouseMove(mea);
 		
-		if(downing)
+		if(_downing)
 		{
 			switch(dock)
 			{
 				case DockStyle.TOP:
 				case DockStyle.BOTTOM:
-					drawxorClient(0, mea.y - downpos, 0, lastpos);
-					lastpos = mea.y - downpos;
+					_drawxorClient(0, mea.y - _downpos, 0, _lastpos);
+					_lastpos = mea.y - _downpos;
 					break;
 				
 				default: // LEFT / RIGHT.
-					drawxorClient(mea.x - downpos, 0, lastpos, 0);
-					lastpos = mea.x - downpos;
+					_drawxorClient(mea.x - _downpos, 0, _lastpos, 0);
+					_lastpos = mea.x - _downpos;
 			}
 			
 			scope sea = new SplitterEventArgs(mea.x, mea.y, left, top);
@@ -250,10 +244,9 @@ class Splitter: Control // docmain
 	{
 		super.onMove(ea);
 		
-		if(downing) // ?
+		if(_downing)
 		{
-			Point curpos = Cursor.position;
-			curpos = pointToClient(curpos);
+			Point curpos = pointToClient(Cursor.position);
 			scope sea = new SplitterEventArgs(curpos.x, curpos.y, left, top);
 			onSplitterMoved(sea);
 		}
@@ -263,17 +256,13 @@ class Splitter: Control // docmain
 	final Control getSplitControl() // package
 	{
 		Control splat; // Splitted.
-		// DMD 0.95: need 'this' to access member dock
-		//switch(dock())
 		final switch(this.dock())
 		{
 			case DockStyle.LEFT:
 				foreach(Control ctrl; parent.controls())
 				{
-					if(DockStyle.LEFT != ctrl.dock) //if(this.dock != ctrl.dock)
+					if(DockStyle.LEFT != ctrl.dock)
 						continue;
-					// DMD 0.95: overloads int(Object o) and int(Control ctrl) both match argument list for opEquals
-					//if(ctrl == this)
 					if(ctrl == cast(Control)this)
 						return splat;
 					splat = ctrl;
@@ -283,10 +272,8 @@ class Splitter: Control // docmain
 			case DockStyle.RIGHT:
 				foreach(Control ctrl; parent.controls())
 				{
-					if(DockStyle.RIGHT != ctrl.dock) //if(this.dock != ctrl.dock)
+					if(DockStyle.RIGHT != ctrl.dock)
 						continue;
-					// DMD 0.95: overloads int(Object o) and int(Control ctrl) both match argument list for opEquals
-					//if(ctrl == this)
 					if(ctrl == cast(Control)this)
 						return splat;
 					splat = ctrl;
@@ -296,10 +283,8 @@ class Splitter: Control // docmain
 			case DockStyle.TOP:
 				foreach(Control ctrl; parent.controls())
 				{
-					if(DockStyle.TOP != ctrl.dock) //if(this.dock != ctrl.dock)
+					if(DockStyle.TOP != ctrl.dock)
 						continue;
-					// DMD 0.95: overloads int(Object o) and int(Control ctrl) both match argument list for opEquals
-					//if(ctrl == this)
 					if(ctrl == cast(Control)this)
 						return splat;
 					splat = ctrl;
@@ -309,10 +294,8 @@ class Splitter: Control // docmain
 			case DockStyle.BOTTOM:
 				foreach(Control ctrl; parent.controls())
 				{
-					if(DockStyle.BOTTOM != ctrl.dock) //if(this.dock != ctrl.dock)
+					if(DockStyle.BOTTOM != ctrl.dock)
 						continue;
-					// DMD 0.95: overloads int(Object o) and int(Control ctrl) both match argument list for opEquals
-					//if(ctrl == this)
 					if(ctrl == cast(Control)this)
 						return splat;
 					splat = ctrl;
@@ -333,11 +316,10 @@ class Splitter: Control // docmain
 	
 	protected override void onMouseUp(MouseEventArgs mea)
 	{
-		if(downing)
+		if(_downing)
 		{
 			capture = false;
-			
-			downing = false;
+			_downing = false;
 			
 			if(mea.button != MouseButtons.LEFT)
 			{
@@ -346,11 +328,11 @@ class Splitter: Control // docmain
 				{
 					case DockStyle.TOP:
 					case DockStyle.BOTTOM:
-						drawxorClient(0, lastpos);
+						_drawxorClient(0, _lastpos);
 						break;
 					
 					default: // LEFT / RIGHT.
-						drawxorClient(lastpos, 0);
+						_drawxorClient(_lastpos, 0);
 				}
 				super.onMouseUp(mea);
 				return;
@@ -360,52 +342,46 @@ class Splitter: Control // docmain
 			auto splat = getSplitControl(); // Splitted.
 			if(splat)
 			{
-				// DMD 0.95: need 'this' to access member dock
-				//switch(dock())
 				switch(this.dock())
 				{
 					case DockStyle.LEFT:
-						drawxorClient(lastpos, 0);
-						//val = left - splat.left + mea.x - downpos.x;
-						val = left - splat.left + mea.x - downpos;
-						if(val < msize)
-							val = msize;
+						_drawxorClient(_lastpos, 0);
+						val = left - splat.left + mea.x - _downpos;
+						if(val < _msize)
+							val = _msize;
 						splat.width = val;
 						break;
 					
 					case DockStyle.RIGHT:
-						drawxorClient(lastpos, 0);
-						//adj = right - splat.left + mea.x - downpos.x;
-						adj = right - splat.left + mea.x - downpos;
+						_drawxorClient(_lastpos, 0);
+						adj = right - splat.left + mea.x - _downpos;
 						val = splat.width - adj;
 						vx = splat.left + adj;
-						if(val < msize)
+						if(val < _msize)
 						{
-							vx -= msize - val;
-							val = msize;
+							vx -= _msize - val;
+							val = _msize;
 						}
 						splat.bounds = Rect(vx, splat.top, val, splat.height);
 						break;
 					
 					case DockStyle.TOP:
-						drawxorClient(0, lastpos);
-						//val = top - splat.top + mea.y - downpos.y;
-						val = top - splat.top + mea.y - downpos;
-						if(val < msize)
-							val = msize;
+						_drawxorClient(0, _lastpos);
+						val = top - splat.top + mea.y - _downpos;
+						if(val < _msize)
+							val = _msize;
 						splat.height = val;
 						break;
 					
 					case DockStyle.BOTTOM:
-						drawxorClient(0, lastpos);
-						//adj = bottom - splat.top + mea.y - downpos.y;
-						adj = bottom - splat.top + mea.y - downpos;
+						_drawxorClient(0, _lastpos);
+						adj = bottom - splat.top + mea.y - _downpos;
 						val = splat.height - adj;
 						vx = splat.top + adj;
-						if(val < msize)
+						if(val < _msize)
 						{
-							vx -= msize - val;
-							val = msize;
+							vx -= _msize - val;
+							val = _msize;
 						}
 						splat.bounds = Rect(splat.left, vx, splat.width, val);
 						break;
@@ -450,13 +426,13 @@ class Splitter: Control // docmain
 	///
 	final @property void minSize(int min) // setter
 	{
-		msize = min;
+		_msize = min;
 	}
 	
 	/// ditto
 	final @property int minSize() // getter
 	{
-		return msize;
+		return _msize;
 	}
 	
 	
@@ -466,8 +442,6 @@ class Splitter: Control // docmain
 		auto splat = getSplitControl(); // Splitted.
 		if(splat)
 		{
-			// DMD 0.95: need 'this' to access member dock
-			//switch(dock())
 			switch(this.dock())
 			{
 				case DockStyle.LEFT:
@@ -492,8 +466,6 @@ class Splitter: Control // docmain
 		auto splat = getSplitControl(); // Splitted.
 		if(splat)
 		{
-			// DMD 0.95: need 'this' to access member dock
-			//switch(dock())
 			switch(this.dock())
 			{
 				case DockStyle.LEFT:
@@ -515,11 +487,10 @@ class Splitter: Control // docmain
 	Event!(Splitter, SplitterEventArgs) splitterMoving; ///
 	
 	
-	protected:
+protected:
 	
 	override @property Size defaultSize() // getter
 	{
-		//return Size(GetSystemMetrics(SM_CXSIZEFRAME), GetSystemMetrics(SM_CYSIZEFRAME));
 		int sx = GetSystemMetrics(SM_CXSIZEFRAME);
 		int sy = GetSystemMetrics(SM_CYSIZEFRAME);
 		// Need a bit extra room for the move-grips.
@@ -545,64 +516,56 @@ class Splitter: Control // docmain
 	}
 	
 	
-	private:
+private:
 	
-	bool downing = false;
-	bool mgrip = true;
-	//Point downpos;
-	int downpos;
-	int lastpos;
-	int msize = 25; // Min size of control that's being sized from the splitter.
-	int mextra = 25; // Min size of the control on the opposite side.
+	bool _downing = false;
+	bool _mgrip = true;
+	int _downpos;
+	int _lastpos;
+	int _msize = 25; // Min size of control that's being sized from the splitter.
+	int _mextra = 25; // Min size of the control on the opposite side.
 	
-	static HBRUSH hbrxor;
+	static HBRUSH _hbrxor;
 	
 	
-	static void inithbrxor()
+	static void _inithbrxor()
 	{
 		static ubyte[] bmbits = [0xAA, 0, 0x55, 0, 0xAA, 0, 0x55, 0,
 			0xAA, 0, 0x55, 0, 0xAA, 0, 0x55, 0, ];
 		
-		HBITMAP hbm;
-		hbm = CreateBitmap(8, 8, 1, 1, bmbits.ptr);
-		hbrxor = CreatePatternBrush(hbm);
+		HBITMAP hbm = CreateBitmap(8, 8, 1, 1, bmbits.ptr);
+		_hbrxor = CreatePatternBrush(hbm);
 		DeleteObject(hbm);
 	}
 	
 	
-	static void drawxor(HDC hdc, Rect r)
+	static void _drawxor(HDC hdc, Rect r)
 	{
 		SetBrushOrgEx(hdc, r.x, r.y, null);
-		HGDIOBJ hbrold = SelectObject(hdc, hbrxor);
+		HGDIOBJ hbrold = SelectObject(hdc, _hbrxor);
 		PatBlt(hdc, r.x, r.y, r.width, r.height, PATINVERT);
 		SelectObject(hdc, hbrold);
 	}
 	
 	
-	void drawxorClient(HDC hdc, int x, int y)
+	void _drawxorClient(HDC hdc, int x, int y)
 	{
-		POINT pt;
-		pt.x = x;
-		pt.y = y;
-		//ClientToScreen(handle, &pt);
+		POINT pt = POINT(x, y);
 		MapWindowPoints(handle, parent.handle, &pt, 1);
 		
-		drawxor(hdc, Rect(pt.x, pt.y, width, height));
+		_drawxor(hdc, Rect(pt.x, pt.y, width, height));
 	}
 	
 	
-	void drawxorClient(int x, int y, int xold = int.min, int yold = int.min)
+	void _drawxorClient(int x, int y, int xold = int.min, int yold = int.min)
 	{
-		HDC hdc;
-		//hdc = GetWindowDC(null);
-		hdc = GetDCEx(parent.handle, null, DCX_CACHE);
+		HDC hdc = GetDCEx(parent.handle, null, DCX_CACHE);
 		
 		if(xold != int.min)
-			drawxorClient(hdc, xold, yold);
+			_drawxorClient(hdc, xold, yold);
 		
-		drawxorClient(hdc, x, y);
+		_drawxorClient(hdc, x, y);
 		
 		ReleaseDC(null, hdc);
 	}
 }
-
