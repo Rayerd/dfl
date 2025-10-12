@@ -2467,44 +2467,7 @@ extern(Windows)
 }
 
 
-deprecated WNDPROC _superClass(HINSTANCE hinst, Dstring className, Dstring newClassName, out WNDCLASSA getInfo)
-{
-	WNDPROC wndProc;
-	
-	if(!GetClassInfoA(hinst, unsafeStringz(className), &getInfo)) // TODO: unicode.
-		throw new DflException("Unable to obtain information for window class '" ~ className ~ "'");
-	
-	wndProc = getInfo.lpfnWndProc;
-	getInfo.lpfnWndProc = &dflWndProc;
-	
-	getInfo.style &= ~CS_GLOBALCLASS;
-	getInfo.hCursor = HCURSOR.init;
-	getInfo.lpszClassName = unsafeStringz(newClassName);
-	getInfo.hInstance = Application.getInstance();
-	
-	if(!RegisterClassA(&getInfo)) // TODO: unicode.
-		//throw new DflException("Unable to register window class '" ~ newClassName ~ "'");
-		return null;
-	return wndProc;
-}
-
-
 public:
-
-// Returns the old wndProc.
-// This is the old, unsafe, unicode-unfriendly function for superclassing.
-deprecated WNDPROC superClass(HINSTANCE hinst, Dstring className, Dstring newClassName, out WNDCLASSA getInfo) // package
-{
-	return _superClass(hinst, className, newClassName, getInfo);
-}
-
-
-deprecated WNDPROC superClass(HINSTANCE hinst, Dstring className, Dstring newClassName) // package
-{
-	WNDCLASSA info;
-	return _superClass(hinst, className, newClassName, info);
-}
-
 
 // Returns the old wndProc.
 WNDPROC superClass(HINSTANCE hinst, Dstring className, Dstring newClassName, out dfl.internal.utf.WndClass getInfo) // package
