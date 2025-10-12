@@ -11,15 +11,6 @@ import dfl.internal.winapi;
 import dfl.internal.wincom;
 
 
-version(DFL_TANGO_SEEK_COMPAT)
-{
-}
-else
-{
-	version = DFL_TANGO_NO_SEEK_COMPAT;
-}
-
-
 // Importing dfl.application here causes the compiler to crash.
 //import dfl.application;
 private extern(C)
