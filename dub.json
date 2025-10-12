@@ -2,7 +2,7 @@
 	"authors": [
 		"various"
 	],
-	"description": "D Forms Library, or DFL, is a Win32 windowing library for the D language.",
+	"description": "DFL (D Forms Library) is a Win32 GUI library for the D language.",
 	"license": "in license.txt",
 	"name": "dfl",
 	"targetPath": "bin",
