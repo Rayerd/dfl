@@ -1,0 +1,30 @@
+{
+	"authors": ["haru-s"],
+	"copyright": "Copyright (C) 2025 haru-s",
+	"description": "DFL sample code.",
+	"name": "toggleswitch_sample",
+	"targetPath": "bin",
+	"configurations": [
+		{
+			"name": "application",
+			"targetType": "executable",
+			"dependencies": {
+				"dfl": {
+					"path": "../../../dfl"
+				}
+			},
+			"lflags-windows-x86_mscoff-dmd": ["/SUBSYSTEM:WINDOWS", "/ENTRY:mainCRTStartup"],
+			"lflags-windows-x86_64-dmd":     ["/SUBSYSTEM:WINDOWS", "/ENTRY:mainCRTStartup"]
+		},
+		{
+			"name": "unittest",
+			"targetType": "executable",
+			"dependencies": {
+				"dfl": {
+					"path": "../../../dfl"
+				},
+				"silly": "~>1.2.0-dev.2"
+			}
+		}
+	]
+}
