@@ -1,4 +1,4 @@
-import dfl; import std.concurrency;
+import dfl;
 
 version(Have_dfl) // For DUB.
 {
