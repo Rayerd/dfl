@@ -63,7 +63,14 @@ struct Point // docmain
 		this.y = y;
 	}
 	
-	
+	/// ditto
+	this(double x, double y) pure nothrow
+	{
+		this.x = cast(int)x;
+		this.y = cast(int)y;
+	}
+
+	/// ditto
 	this(in POINT* pt) pure nothrow
 	{
 		this.x = pt.x;
@@ -96,17 +103,26 @@ struct Point // docmain
 	
 	
 	///
-	Point opAdd(Size sz) const pure nothrow
+	Point opBinary(string op : "+")(Size sz) const pure nothrow
 	{
 		Point result;
 		result.x = x + sz.width;
 		result.y = y + sz.height;
 		return result;
 	}
-	
+
+	/// ditto
+	Point opBinary(string op : "+")(Point p) const pure nothrow
+	{
+		Point result;
+		result.x = x + p.x;
+		result.y = y + p.y;
+		return result;
+	}
+
 	
 	///
-	Point opSub(Size sz) const pure nothrow
+	Point opBinary(string op : "-")(Size sz) const pure nothrow
 	{
 		Point result;
 		result.x = x - sz.width;
@@ -114,27 +130,70 @@ struct Point // docmain
 		return result;
 	}
 	
+	/// ditto
+	Point opBinary(string op : "-")(Point p) const pure nothrow
+	{
+		Point result;
+		result.x = x - p.x;
+		result.y = y - p.y;
+		return result;
+	}
+
 	
 	///
-	void opAddAssign(Size sz) pure nothrow
+	void opOpAssign(string op : "+")(Size sz) pure nothrow
 	{
 		x += sz.width;
 		y += sz.height;
 	}
-	
-	
+
+	/// ditto
+	void opOpAssign(string op : "+")(Point p) pure nothrow
+	{
+		x += p.x;
+		y += p.y;
+	}
+
+
 	///
-	void opSubAssign(Size sz) pure nothrow
+	void opOpAssign(string op : "-")(Size sz) pure nothrow
 	{
 		x -= sz.width;
 		y -= sz.height;
 	}
+
+	/// ditto
+	void opOpAssign(string op : "-")(Point p) pure nothrow
+	{
+		x -= p.x;
+		y -= p.y;
+	}
 	
-	
+
 	///
-	Point opNeg() const pure nothrow
+	Point opUnary(string op : "-")() const pure nothrow
 	{
 		return Point(-x, -y);
+	}
+
+
+	unittest
+	{
+		Point p = Point(3, 4);
+		assert(Point(3, 4) == p);
+		assert(Point(4, 5) == p + Point(1, 1));
+		assert(Point(4, 5) == p + Size(1, 1));
+		assert(Point(2, 3) == p - Point(1, 1));
+		assert(Point(2, 3) == p - Size(1, 1));
+		assert(Point(-3, -4) == -p);
+		p += Point(1, 1);
+		assert(Point(4, 5) == p);
+		p += Size(1, 1);
+		assert(Point(5, 6) == p);
+		p -= Point(1, 1);
+		assert(Point(4, 5) == p);
+		p -= Size(1, 1);
+		assert(Point(3, 4) == p);
 	}
 }
 
@@ -168,9 +227,15 @@ struct Size // docmain
 		this.width = width;
 		this.height = height;
 	}
-	
-	
-	/// Construct a new Size.
+
+	/// ditto
+	this(double width, double height) pure nothrow
+	{
+		this.width = cast(int)width;
+		this.height = cast(int)height;
+	}
+
+	/// ditto
 	this(in SIZE* size) pure nothrow
 	{
 		this.width  = size.cx;
@@ -203,7 +268,7 @@ struct Size // docmain
 	
 	
 	///
-	Size opAdd(Size sz) const pure nothrow
+	Size opBinary(string op : "+")(Size sz) const pure nothrow
 	{
 		Size result;
 		result.width = width + sz.width;
@@ -213,7 +278,7 @@ struct Size // docmain
 	
 	
 	///
-	Size opSub(Size sz) const pure nothrow
+	Size opBinary(string op : "-")(Size sz) const pure nothrow
 	{
 		Size result;
 		result.width = width - sz.width;
@@ -223,7 +288,7 @@ struct Size // docmain
 	
 	
 	///
-	void opAddAssign(Size sz) pure nothrow
+	void opOpAssign(string op : "+")(Size sz) pure nothrow
 	{
 		width += sz.width;
 		height += sz.height;
@@ -231,10 +296,23 @@ struct Size // docmain
 	
 	
 	///
-	void opSubAssign(Size sz) pure nothrow
+	void opOpAssign(string op : "-")(Size sz) pure nothrow
 	{
 		width -= sz.width;
 		height -= sz.height;
+	}
+
+
+	unittest
+	{
+		Size s = Size(3, 4);
+		assert(Size(3, 4) == s);
+		assert(Size(4, 5) == s + Size(1, 1));
+		assert(Size(2, 3) == s - Size(1, 1));
+		s += Size(1, 1);
+		assert(Size(4, 5) == s);
+		s -= Size(1, 1);
+		assert(Size(3, 4) == s);
 	}
 }
 
@@ -304,7 +382,16 @@ struct Rect // docmain
 		this.width = width;
 		this.height = height;
 	}
-	
+
+	/// ditto
+	this(double x, double y, double width, double height) pure nothrow
+	{
+		this.x = cast(int)x;
+		this.y = cast(int)y;
+		this.width = cast(int)width;
+		this.height = cast(int)height;
+	}
+
 	/// ditto
 	this(Point location, Size size) pure nothrow
 	{
@@ -407,6 +494,30 @@ struct Rect // docmain
 	void inflate(Size insz) pure nothrow
 	{
 		inflate(insz.width, insz.height);
+	}
+	
+
+	///
+	void scale(double scaleX, double scaleY)
+	{
+		width = cast(int)(width * scaleX);
+		height = cast(int)(height * scaleY);
+	}
+
+
+	///
+	void scaleFromCenter(double scaleX, double scaleY)
+	{
+		double centerX = x + 0.5 * width;
+		double centerY = y + 0.5 * height;
+		double x2 = centerX - 0.5 * width * scaleX;
+		double y2 = centerY - 0.5 * height * scaleY;
+		double w2 = width * scaleX;
+		double h2 = height * scaleY;
+		x = cast(int)x2;
+		y = cast(int)y2;
+		width = cast(int)w2;
+		height = cast(int)h2;
 	}
 	
 	
