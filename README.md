@@ -29,14 +29,13 @@ void main()
 	- dfl.lib and dfl_debug.lib are created in \dfl\bin, just like DUB.
 - **Module "dfl.toggleswitch" and example code are now comming.**
 
-<img src="./examples/toggleswitch/image/screenshot.png" width="50%">
+![screen shot](./examples/toggleswitch/image/screenshot.png "screen shot")
 
 - Module "dfl.toastnotifier" is now comming.
 	- ToastNotifier (with example)
 	- ToastNotifierLegacy (with example)
 
-<img src="./examples/toastnotifier/image/screenshot.png" width="30%">
-
+![screen shot](./examples/toastnotifier/image/screenshot.png "screen shot")
 
 - Removed dependency on undeaD library.
 - Windows OMF support has been removed (for DMD v2.109.0).
