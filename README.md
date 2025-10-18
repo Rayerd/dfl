@@ -25,9 +25,19 @@ void main()
 ![screen shot](./image/welcomtodfl.png "screen shot")
 
 ## Recent major features
-- **Module "dfl.toastnotifier" is now comming.**
+- **Reworked build-scripts (makelib.bat, makecoff.bar and go.bat) to better work with DUB and MSVC 2022.**
+	- dfl.lib and dfl_debug.lib are created in \dfl\bin, just like DUB.
+- **Module "dfl.toggleswitch" and example code are now comming.**
+
+<img src="./examples/toggleswitch/image/screenshot.png" width="50%">
+
+- Module "dfl.toastnotifier" is now comming.
 	- ToastNotifier (with example)
 	- ToastNotifierLegacy (with example)
+
+<img src="./examples/toastnotifier/image/screenshot.png" width="30%">
+
+
 - Removed dependency on undeaD library.
 - Windows OMF support has been removed (for DMD v2.109.0).
 - Registered DFL to DUB.
@@ -69,7 +79,6 @@ void main()
 ![screen shot](./examples/tablerenderer/image/screenshot.png "screen shot")
 ![screen shot](./examples/linegraphrenderer/image/screenshot.png "screen shot")
 ![screen shot](./examples/timechartrenderer/image/screenshot.png "screen shot")
-![screen shot](./examples/toastnotifier/image/screenshot.png "screen shot")
 
 ## Usage
 First, you make new DUB project:
@@ -101,16 +110,16 @@ set dmc_path=c:\dmc\dm
 ```
 
 ### 2. Make dfl.lib and dfl_debug.lib
-Run **makelib.bat** (MSVC required):
+Run **makelib.bat** (MSVC 2022 required):
 ```bat
 > cd dfl
 > makelib.bat           # 32-bit mscoff
 ```
-or (MSVC required)
+or (MSVC 2022 required)
 ```bat
 > makelib.bat 32mscoff  # ditto
 ```
-or (MSVC required)
+or (MSVC 2022 required)
 ```bat
 > makelib.bat 64        # 64-bit mscoff
 ```
@@ -119,9 +128,9 @@ Also copy **dfl.lib** and **dfl_debug.lib** in `dfl/source` to `your/lib/dir`.
 **IMPORTANT**: These library files are containing WINSDK libraries such as **user32.lib**, **gdi32.lib** and so on.
 
 In order to make and move *.lib to paths below:
-- **go.bat** (MSVC required) : Make and move *.lib to `%dmd_path%\lib32mscoff`
-- **go.bat 32mscoff** (MSVC required) : ditto
-- **go64.bat** (MSVC required) : Make and move *.lib to `%dmd_path%\lib64`
+- **go.bat** (MSVC 2022 required) : Make and move *.lib to `%dmd_path%\lib32mscoff`
+- **go.bat 32mscoff** (MSVC 2022 required) : ditto
+- **go64.bat** (MSVC 2022 required) : Make and move *.lib to `%dmd_path%\lib64`
 
 ## APPENDIX II: DFL With WinRT
 
