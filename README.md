@@ -90,7 +90,7 @@ Add DFL to local DUB registry:
 > dub add dfl
 > dub list
 Packages present in the system and known to dub:
-  dfl 0.10.11: c:\your\path\dfl\0.10.11\dfl\
+  dfl 0.11.3: c:\your\path\dfl\0.11.3\dfl\
   silly 1.2.0-dev.2: c:\your\path\silly\1.2.0-dev.2\silly\
 ```
 Build and run your GUI applications with DUB as below:
@@ -103,7 +103,7 @@ Build and run your GUI applications with DUB as below:
 ## APPENDIX I: Build and Install dfl.lib and dfl_debug.lib
 
 ### 1. Install Visual Studio 2022 Community Edition
-Free downloads MSVC build tools from https://visualstudio.microsoft.com/vs/community/.
+Free downloads MSVC build tools from [https://visualstudio.microsoft.com/vs/community/](https://visualstudio.microsoft.com/vs/community/).
 
 
 ### 2. Set environment variables
