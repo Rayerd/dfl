@@ -65,8 +65,8 @@ class ToggleSwitch : Control
 		Rect bodyRect = Rect(x0 + h0 * 0.5, y0, w0 - h0 - 1, h0 - 1); // ==
 		Rect leftCircle = Rect(x0, y0, h0, h0); // (
 		Rect rightCircle = Rect(x0 + w0 - h0, y0, h0, h0); // )
-		const double ratio = { // o
-			if (_isMouseHover && !_isMouseDown)
+		const double thumbCircleRatio = { // o
+			if (_isMouseHover)
 				return 0.6;
 			else
 				return 0.7;
@@ -75,13 +75,17 @@ class ToggleSwitch : Control
 			if(isOn)
 			{
 				Rect ret = rightCircle;
-				ret.scaleFromCenter(ratio, ratio);
+				if (_isClicking && _isMouseHover)
+					ret.x -= cast(int)(ret.width * 0.25);
+				ret.scaleFromCenter(thumbCircleRatio, thumbCircleRatio);
 				return ret;
 			}
 			else
 			{
 				Rect ret = leftCircle;
-				ret.scaleFromCenter(ratio, ratio);
+				if (_isClicking && _isMouseHover)
+					ret.x += cast(int)(ret.width * 0.25);
+				ret.scaleFromCenter(thumbCircleRatio, thumbCircleRatio);
 				return ret;
 			}
 		}();
@@ -127,16 +131,41 @@ class ToggleSwitch : Control
 	///
 	protected override void onMouseDown(MouseEventArgs mea)
 	{
-		_isMouseDown = true;
+		capture = true;
+		_isClicking = true;
 		redraw();
+	}
+
+
+	///
+	protected override void onMouseMove(MouseEventArgs mea)
+	{
+		if (clientRectangle().contains(mea.x, mea.y))
+		{
+			if (!_isMouseHover)
+			{
+				_isMouseHover = true;
+				redraw();
+			}
+		}
+		else
+		{
+			if (_isMouseHover)
+			{
+				_isMouseHover = false;
+				redraw();
+			}
+		}
 	}
 
 
 	///
 	protected override void onMouseUp(MouseEventArgs mea)
 	{
-		_isMouseDown = false;
-		redraw();
+		if (clientRectangle().contains(mea.x, mea.y) && _isClicking)
+			isOn = !isOn; // Called redraw() in isOn() already.
+		_isClicking = false;
+		capture = false;
 	}
 
 
@@ -152,22 +181,7 @@ class ToggleSwitch : Control
 	protected override void onMouseLeave(MouseEventArgs mea)
 	{
 		_isMouseHover = false;
-		_isMouseDown = false;
 		redraw();
-	}
-
-
-	///
-	protected override void onClick(EventArgs mea)
-	{
-		isOn = !isOn;
-	}
-
-
-	///
-	protected override void onDoubleClick(EventArgs ea)
-	{
-		// Do nothig.
 	}
 
 
@@ -207,8 +221,8 @@ class ToggleSwitch : Control
 
 private:
 	bool _isOn = true; ///
-	bool _isMouseDown; ///
 	bool _isMouseHover; ///
+	bool _isClicking; ///
 }
 
 
