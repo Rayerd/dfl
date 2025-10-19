@@ -101,35 +101,51 @@ Build and run your GUI applications with DUB as below:
 **IMPORTANT**: DUB is building **dfl_dub.lib** that is **not** containing WINSDK libraries.
 
 ## APPENDIX I: Build and Install dfl.lib and dfl_debug.lib
-### 1. Set environment variables
+
+### 1. Install Visual Studio 2022 Community Edition
+Free downloads MSVC build tools from https://visualstudio.microsoft.com/vs/community/.
+
+
+### 2. Set environment variables
 Fix the paths below:
 ```bat
 set dmd_path=c:\d\dmd2\windows
-set dmc_path=c:\dmc\dm
 ```
 
-### 2. Make dfl.lib and dfl_debug.lib
-Run **makelib.bat** (MSVC 2022 required):
+### 3. Open the MSVC build tools command prompt
+Open **x64 Native Tools Command Prompt for VS 2022** from start menu.
+
+![MSVC Build Tools Command Prompt](./image/MSVC_build_tools_command_prompt.png)
+
+### 4. Make dfl.lib and dfl_debug.lib
+Run **makelib.bat** (MSVC required):
 ```bat
 > cd dfl
+
+> dir *.bat /B
+go.bat
+makecoff.bat
+makelib.bat
+_cmd.bat
+
 > makelib.bat           # 32-bit mscoff
 ```
-or (MSVC 2022 required)
+or (MSVC required)
 ```bat
 > makelib.bat 32mscoff  # ditto
 ```
-or (MSVC 2022 required)
+or (MSVC required)
 ```bat
 > makelib.bat 64        # 64-bit mscoff
 ```
-Also copy **dfl.lib** and **dfl_debug.lib** in `dfl/source` to `your/lib/dir`.
+Also copy **dfl.lib** and **dfl_debug.lib** in `\dfl\bin` to `\your\lib\dir`.
 
 **IMPORTANT**: These library files are containing WINSDK libraries such as **user32.lib**, **gdi32.lib** and so on.
 
 In order to make and move *.lib to paths below:
-- **go.bat** (MSVC 2022 required) : Make and move *.lib to `%dmd_path%\lib32mscoff`
-- **go.bat 32mscoff** (MSVC 2022 required) : ditto
-- **go64.bat** (MSVC 2022 required) : Make and move *.lib to `%dmd_path%\lib64`
+- **go.bat** (MSVC required) : Make and move *.lib to `%dmd_path%\lib32mscoff`
+- **go.bat 32mscoff** (MSVC required) : ditto
+- **go64.bat** (MSVC required) : Make and move *.lib to `%dmd_path%\lib64`
 
 ## APPENDIX II: DFL With WinRT
 

@@ -1,4 +1,5 @@
-echo off
+@echo off
+setlocal
 
 rem  How to use:
 rem    go.bat           # Same as 32mscoff
@@ -7,7 +8,7 @@ rem    go.bat 64        # 64-Bit
 
 for /f %%a in ('echo prompt $e ^| cmd') do set ESC=%%a
 
-rem   You can change the default object model here
+rem   You can change the default object model here.
 if "%~1" == "64" (
   set MODEL=64
 ) else (

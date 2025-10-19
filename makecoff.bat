@@ -1,19 +1,20 @@
-echo off
+@echo off
+setlocal
 
 rem   Make DFL.
 rem   https://github.com/Rayerd/dfl
-rem   Modified for 64-bit and COFF object format
 
 rem   How to use:
 rem     makecoff.bat          # Same as 32mscoff
 rem     makecoff.bat 32mscoff # 32-bit COFF
 rem     makecoff.bat 64       # 64-bit
 
-rem   Requires DMD and DMC's libs
-rem   Free downloads from https://dlang.org/download.html
+rem   Requires libs of DMD and MSVC build tools.
+rem   Free downloads DMD from https://dlang.org/download.html.
+rem   Free downloads MSVC build tools from https://visualstudio.microsoft.com/vs/community/.
 
 rem   If you prefer to make DFL64 or 32-bit COFF library format,
-rem   This requies DMD tools _and_ MSVC build tools (tested with MSVC 2022 Community Ed.),
+rem   This requies DMD tools _and_ MSVC build tools (tested with Visual Studio 2022 Community Ed.)
 
 cls
 
@@ -21,16 +22,14 @@ for /f %%a in ('echo prompt $e ^| cmd') do set ESC=%%a
 
 pushd source\dfl
 
-rem   You can change the default object model here
+rem   You can change the default object model here.
 if "%~1" == "64" (
   set MODEL=64
 ) else (
   set MODEL=32mscoff
 )
 
-rem   Either set the environment variables dmd_path and dmc_path
-rem   or fix the paths below.
-
+rem   Either set the environment variables dmd_path or fix the paths below.
 if not "%dmd_path%" == "" goto dmd_set
 set dmd_path=c:\d\dmd2\windows
 :dmd_set
@@ -120,13 +119,13 @@ rem   if errorlevel 1 goto oops
 
 
 echo.
-echo %ESC%[32mCompiling debug DFL...%ESC%[0m
+echo %ESC%[32mCompiling debug DFL (%MODEL%) ...%ESC%[0m
 
 %DMDCMD% -m%MODEL% -c %dfl_debug_flags% %_dfl_flags% %dfl_options% -I.. %dfl_files%
 if errorlevel 1 goto oops
 
 echo.
-echo %ESC%[32mMaking debug lib...%ESC%[0m
+echo %ESC%[32mMaking debug lib (%MODEL%) ...%ESC%[0m
 
 %LIBCMD% /out:dfl_debug.lib /libpath:%WINSDKLIB% %dfl_libs% %dfl_objs%
 if errorlevel 1 goto oops
@@ -134,13 +133,13 @@ echo We may ignore warnings of 4006,4221...
 
 
 echo.
-echo %ESC%[32mCompiling release DFL...%ESC%[0m
+echo %ESC%[32mCompiling release DFL (%MODEL%) ...%ESC%[0m
 
 %DMDCMD% -m%MODEL% -c %dfl_release_flags% %_dfl_flags% %dfl_options% -I.. %dfl_files%
 if errorlevel 1 goto oops
 
 echo.
-echo %ESC%[32mMaking release lib...%ESC%[0m
+echo %ESC%[32mMaking release lib... (%MODEL%) %ESC%[0m
 
 %LIBCMD% /out:dfl.lib /libpath:%WINSDKLIB% %dfl_libs% %dfl_objs%
 if errorlevel 1 goto oops
@@ -152,7 +151,7 @@ echo.
 move "dfl*.lib" "..\..\bin"
 
 
-rem this flag used when called from go.bat
+rem This flag used when called from go.bat.
 set dfl_failed=
 goto done
 :oops
