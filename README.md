@@ -8,6 +8,8 @@ import dfl;
 
 void main()
 {
+	Application.enableVisualStyles();
+	
 	Form form = new Form;
 	form.text = "Welcome to DFL";
 	form.size = Size(300, 300);
@@ -58,10 +60,12 @@ void main()
 ![screen shot](./examples/buttons/image/screenshot.png "screen shot")
 ![screen shot](./examples/tabcontrol/image/screenshot.png "screen shot")
 ![screen shot](./examples/listview/image/screenshot.png "screen shot")
+![screen shot](./examples/imagelist/image/screenshot.png "screen shot")
 ![screen shot](./examples/statusbar/image/screenshot.png "screen shot")
 ![screen shot](./examples/splitter/image/screenshot.png "screen shot")
 ![screen shot](./examples/scrollbar/image/screenshot.png "screen shot")
-![screen shot](./examples/imagelist/image/screenshot.png "screen shot")
+![screen shot](./examples/contextmenu/image/screenshot.png "screen shot")
+![screen shot](./examples/trackbar/image/screenshot.png "screen shot")
 ![screen shot](./examples/commondialog/image/screenshot.png "screen shot")
 ![screen shot](./examples/commondialog/image/screenshot2.png "screen shot")
 ![screen shot](./examples/tooltip/image/screenshot.png "screen shot")
@@ -69,9 +73,8 @@ void main()
 ![screen shot](./examples/clipboard/image/screenshot.png "screen shot")
 ![screen shot](./examples/clippingform/image/screenshot.png "screen shot")
 ![screen shot](./examples/picturebox/image/screenshot.png "screen shot")
-![screen shot](./examples/notifyicon/image/screenshot.png "screen shot")
 ![screen shot](./examples/timer/image/screenshot.png "screen shot")
-![screen shot](./examples/contextmenu/image/screenshot.png "screen shot")
+![screen shot](./examples/notifyicon/image/screenshot.png "screen shot")
 ![screen shot](./examples/toolbar/image/screenshot4.png "screen shot")
 ![screen shot](./examples/richtextbox/image/screenshot.png "screen shot")
 ![screen shot](./examples/dclock/image/screenshot.png "screen shot")
