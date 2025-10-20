@@ -2293,9 +2293,9 @@ class PrintPreviewDialog : Form
 		_imageList = new ImageList;
 		_imageList.imageSize = Size(32,32);
 		_imageList.transparentColor = Color.red;
-		import std.path;
-		string bmpPath = dirName(__FILE__) ~ r"\image\previewprintdialog_toolbar.bmp";
-		_imageList.images.addStrip(new Bitmap(bmpPath));
+		ubyte[] bmpData = cast(ubyte[])import(r"image\previewprintdialog_toolbar.bmp");
+		auto pic = new Picture(bmpData);
+		_imageList.images.addStrip(pic.toBitmap());
 		_toolBar.imageList = _imageList;
 
 		_button1 = new ToolBarButton("Print...");

@@ -48,5 +48,8 @@
 				"silly": "~>1.2.0-dev.2"
 			}
 		}
+	],
+	"stringImportPaths": [
+		"source/dfl"
 	]
 }
