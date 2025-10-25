@@ -249,7 +249,7 @@ class TextBox: TextBoxBase // docmain
 	
 	this()
 	{
-		wstyle |= ES_LEFT;
+		_windowStyle |= ES_LEFT;
 	}
 	
 	/// 
@@ -259,7 +259,7 @@ class TextBox: TextBoxBase // docmain
 		
 		if(_passchar)
 		{
-			SendMessageA(hwnd, EM_SETPASSWORDCHAR, _passchar, 0);
+			SendMessageA(_hwnd, EM_SETPASSWORDCHAR, _passchar, 0);
 		}
 	}
 	

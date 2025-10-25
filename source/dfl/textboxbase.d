@@ -388,10 +388,10 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	// This is a lot faster than retrieving the text, but retrieving the text is completely accurate.
 	@property uint textLength() // getter
 	{
-		if(!(ctrlStyle & ControlStyles.CACHE_TEXT) && created())
+		if(!(_controlStyle & ControlStyles.CACHE_TEXT) && created())
 			//return cast(uint)SendMessageA(handle, WM_GETTEXTLENGTH, 0, 0);
 			return cast(uint)dfl.internal.utf.sendMessage(handle, WM_GETTEXTLENGTH, 0, 0);
-		return wtext.length.toI32;
+		return _windowText.length.toI32;
 	}
 	
 	
@@ -602,8 +602,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	{
 		if(!isHandleCreated)
 		{
-			Dstring txt;
-			txt = wtext;
+			Dstring txt = _windowText;
 			
 			super.createHandle();
 			
@@ -710,69 +709,69 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	{
 		_initTextBox();
 		
-		wstyle |= WS_TABSTOP | ES_AUTOHSCROLL;
-		wexstyle |= WS_EX_CLIENTEDGE;
-		ctrlStyle |= ControlStyles.SELECTABLE;
-		wclassStyle = textBoxClassStyle;
+		_windowStyle |= WS_TABSTOP | ES_AUTOHSCROLL;
+		_windowStyleEx |= WS_EX_CLIENTEDGE;
+		_controlStyle |= ControlStyles.SELECTABLE;
+		_windowClassStyle = textBoxClassStyle;
 		
 		MenuItem mi;
 		
-		cmenu = new ContextMenu;
-		cmenu.popup ~= &menuPopup;
+		_contextMenu = new ContextMenu;
+		_contextMenu.popup ~= &menuPopup;
 		
 		_miundo = new MenuItem;
 		_miundo.text = "&Undo";
 		_miundo.click ~= &menuUndo;
 		_miundo.index = 0;
-		cmenu.menuItems.add(_miundo);
+		_contextMenu.menuItems.add(_miundo);
 		
 		mi = new MenuItem;
 		mi.text = "-";
 		mi.index = 1;
-		cmenu.menuItems.add(mi);
+		_contextMenu.menuItems.add(mi);
 		
 		_micut = new MenuItem;
 		_micut.text = "Cu&t";
 		_micut.click ~= &menuCut;
 		_micut.index = 2;
-		cmenu.menuItems.add(_micut);
+		_contextMenu.menuItems.add(_micut);
 		
 		_micopy = new MenuItem;
 		_micopy.text = "&Copy";
 		_micopy.click ~= &menuCopy;
 		_micopy.index = 3;
-		cmenu.menuItems.add(_micopy);
+		_contextMenu.menuItems.add(_micopy);
 		
 		_mipaste = new MenuItem;
 		_mipaste.text = "&Paste";
 		_mipaste.click ~= &menuPaste;
 		_mipaste.index = 4;
-		cmenu.menuItems.add(_mipaste);
+		_contextMenu.menuItems.add(_mipaste);
 		
 		_midel = new MenuItem;
 		_midel.text = "&Delete";
 		_midel.click ~= &menuDelete;
 		_midel.index = 5;
-		cmenu.menuItems.add(_midel);
+		_contextMenu.menuItems.add(_midel);
 		
 		mi = new MenuItem;
 		mi.text = "-";
 		mi.index = 6;
-		cmenu.menuItems.add(mi);
+		_contextMenu.menuItems.add(mi);
 		
 		_misel = new MenuItem;
 		_misel.text = "Select &All";
 		_misel.click ~= &menuSelectAll;
 		_misel.index = 7;
-		cmenu.menuItems.add(_misel);
+		_contextMenu.menuItems.add(_misel);
 	}
 	
 	
-	override @property Color backColor() // getter
+	override @property Color backColor() const // getter
 	{
-		if(Color.empty == backc)
+		if(Color.empty == _backColor)
 			return defaultBackColor;
-		return backc;
+		return _backColor;
 	}
 	
 	alias backColor = Control.backColor; // Overload.
@@ -784,11 +783,11 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	}
 	
 	
-	override @property Color foreColor() // getter
+	override @property Color foreColor() const // getter
 	{
-		if(Color.empty == forec)
+		if(Color.empty == _foreColor)
 			return defaultForeColor;
-		return forec;
+		return _foreColor;
 	}
 	
 	alias foreColor = Control.foreColor; // Overload.
@@ -802,9 +801,9 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	
 	override @property Cursor cursor() // getter
 	{
-		if(!wcurs)
+		if(!_windowCursor)
 			return _defaultCursor;
-		return wcurs;
+		return _windowCursor;
 	}
 	
 	alias cursor = Control.cursor; // Overload.
@@ -817,7 +816,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 			return -1; // ...
 		if(line < 0)
 			return -1;
-		return SendMessageA(hwnd, EM_LINEINDEX, line, 0).toI32;
+		return SendMessageA(_hwnd, EM_LINEINDEX, line, 0).toI32;
 	}
 	
 	/// ditto
@@ -825,7 +824,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	{
 		if(!isHandleCreated)
 			return -1; // ...
-		return SendMessageA(hwnd, EM_LINEINDEX, -1, 0).toI32;
+		return SendMessageA(_hwnd, EM_LINEINDEX, -1, 0).toI32;
 	}
 	
 	
@@ -836,7 +835,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 			return -1; // ...
 		if(charIndex < 0)
 			return -1;
-		return SendMessageA(hwnd, EM_LINEFROMCHAR, charIndex, 0).toI32;
+		return SendMessageA(_hwnd, EM_LINEFROMCHAR, charIndex, 0).toI32;
 	}
 	
 	
@@ -848,7 +847,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 		if(charIndex < 0)
 			return Point(0, 0);
 		POINT point;
-		SendMessageA(hwnd, EM_POSFROMCHAR, cast(WPARAM)&point, charIndex);
+		SendMessageA(_hwnd, EM_POSFROMCHAR, cast(WPARAM)&point, charIndex);
 		return Point(point.x, point.y);
 	}
 	
@@ -859,7 +858,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 			return -1; // ...
 		if(!multiline)
 			return 0;
-		auto lresult = SendMessageA(hwnd, EM_CHARFROMPOS, 0, MAKELPARAM(pt.x, pt.y));
+		auto lresult = SendMessageA(_hwnd, EM_CHARFROMPOS, 0, MAKELPARAM(pt.x, pt.y));
 		if(-1 == lresult)
 			return -1;
 		return cast(int)cast(short)(lresult & 0xFFFF);

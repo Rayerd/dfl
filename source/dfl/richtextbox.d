@@ -75,9 +75,9 @@ class RichTextBox: TextBoxBase // docmain
 		_initRichtextbox();
 		
 		enum ES_SAVESEL = 0x00008000; // New edit control style.
-		wstyle |= ES_MULTILINE | ES_WANTRETURN | ES_AUTOHSCROLL | ES_AUTOVSCROLL | WS_HSCROLL | WS_VSCROLL | ES_SAVESEL;
-		wcurs = null; // So that the control can change it accordingly.
-		wclassStyle = richtextboxClassStyle;
+		_windowStyle |= ES_MULTILINE | ES_WANTRETURN | ES_AUTOHSCROLL | ES_AUTOVSCROLL | WS_HSCROLL | WS_VSCROLL | ES_SAVESEL;
+		_windowCursor = null; // So that the control can change it accordingly.
+		_windowClassStyle = richtextboxClassStyle;
 
 		with (miredo = new MenuItem)
 		{
@@ -113,7 +113,7 @@ class RichTextBox: TextBoxBase // docmain
 	///
 	override @property Cursor cursor() // getter
 	{
-		return wcurs; // Do return null and don't inherit.
+		return _windowCursor; // Do return null and don't inherit.
 	}
 	
 	/// ditto
@@ -124,7 +124,7 @@ class RichTextBox: TextBoxBase // docmain
 	override @property Dstring selectedText() // getter
 	{
 		if (created)
-			return dfl.internal.utf.emGetSelText(hwnd, selectionLength + 1);
+			return dfl.internal.utf.emGetSelText(_hwnd, selectionLength + 1);
 		return null;
 	}
 	
@@ -741,7 +741,7 @@ class RichTextBox: TextBoxBase // docmain
 			return -1; // ...
 		if(charIndex < 0)
 			return -1;
-		return SendMessageA(hwnd, EM_EXLINEFROMCHAR, 0, charIndex).toI32;
+		return SendMessageA(_hwnd, EM_EXLINEFROMCHAR, 0, charIndex).toI32;
 	}
 	
 	
@@ -755,7 +755,7 @@ class RichTextBox: TextBoxBase // docmain
 	{
 		//SendMessageA(handle, EM_GETCHARFORMAT, selection, cast(LPARAM)cf);
 		//CallWindowProcA(richtextboxPrevWndProc, hwnd, EM_GETCHARFORMAT, selection, cast(LPARAM)cf);
-		dfl.internal.utf.callWindowProc(richtextboxPrevWndProc, hwnd, EM_GETCHARFORMAT, selection, cast(LPARAM)cf);
+		dfl.internal.utf.callWindowProc(richtextboxPrevWndProc, _hwnd, EM_GETCHARFORMAT, selection, cast(LPARAM)cf);
 	}
 	
 	
@@ -773,7 +773,7 @@ class RichTextBox: TextBoxBase // docmain
 		if(!dfl.internal.utf.callWindowProc(richtextboxPrevWndProc, hwnd, EM_SETCHARFORMAT, scf, cast(LPARAM)cf))
 			throw new DflException("Unable to set text formatting");
 		+/
-		dfl.internal.utf.callWindowProc(richtextboxPrevWndProc, hwnd, EM_SETCHARFORMAT, scf, cast(LPARAM)cf);
+		dfl.internal.utf.callWindowProc(richtextboxPrevWndProc, _hwnd, EM_SETCHARFORMAT, scf, cast(LPARAM)cf);
 	}
 	
 	
@@ -1050,7 +1050,7 @@ protected:
 	///
 	final LRESULT prevwproc(UINT msg, WPARAM wparam, LPARAM lparam)
 	{
-		return dfl.internal.utf.callWindowProc(richtextboxPrevWndProc, hwnd, msg, wparam, lparam);
+		return dfl.internal.utf.callWindowProc(richtextboxPrevWndProc, _hwnd, msg, wparam, lparam);
 	}
 	
 	

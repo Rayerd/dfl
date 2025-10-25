@@ -26,6 +26,7 @@ static import std.algorithm.comparison;
 
 extern(Windows) void _initTrackbar();
 
+
 ///
 enum TickStyle : ubyte
 {
@@ -35,12 +36,6 @@ enum TickStyle : ubyte
 	BOTH         = 3, /// ditto
 }
 
-///
-enum Orientation : ubyte
-{
-	HORIZONTAL = 0, ///
-	VERTICAL   = 1, /// ditto
-}
 
 ///
 class TrackBar : ControlSuperClass
@@ -71,6 +66,7 @@ class TrackBar : ControlSuperClass
 
 	private bool _rightToLeftLayout;
 
+
 	///
 	this()
 	{
@@ -80,20 +76,21 @@ class TrackBar : ControlSuperClass
 		setStyle(ControlStyles.USE_TEXT_FOR_ACCESSIBILITY, false);
 		_requestedDim = _preferredDimension;
 
-		wstyle |= WS_CHILD | WS_VISIBLE | WS_TABSTOP | TBS_AUTOTICKS;
-		ctrlStyle |= ControlStyles.SELECTABLE;
-		wclassStyle = trackbarClassStyle;
+		_windowStyle |= WS_CHILD | WS_VISIBLE | WS_TABSTOP | TBS_AUTOTICKS;
+		_controlStyle |= ControlStyles.SELECTABLE;
+		_windowClassStyle = trackbarClassStyle;
 
 		super(); // call for defaultSize()
 	}
 
+
 	///
-	@property bool autoSize() // getter
+	@property bool autoSize() const // getter
 	{
 		return _autoSize;
 	}
 
-	///
+	/// ditto
 	@property void autoSize(bool v) // setter
 	{
 		// Intentionally do not call super.autoSize.
@@ -117,11 +114,13 @@ class TrackBar : ControlSuperClass
 		}
 	}
 	
+
 	///
 	protected void onScroll(EventArgs ea)
 	{
 		scroll(this, ea);
 	}
+
 
 	///
 	protected override void onMouseWheel(MouseEventArgs e)
@@ -193,20 +192,22 @@ class TrackBar : ControlSuperClass
 			onValueChanged(EventArgs.empty);
 		}
 	}
-		
+	
+
 	///
 	protected void onValueChanged(EventArgs ea)
 	{
 		valueChanged(this, ea);
 	}
 
+
 	///
-	@property TickStyle tickStyle() // getter
+	@property TickStyle tickStyle() const // getter
 	{
 		return _tickStyle;
 	}
 	
-	///
+	/// ditto
 	@property void tickStyle(TickStyle v) // setter
 	{
 		if (v < TickStyle.NONE || v > TickStyle.BOTH)
@@ -224,13 +225,14 @@ class TrackBar : ControlSuperClass
 		recreateHandle();
 	}
 
+
 	///
-	@property int tickFrequency() // getter
+	@property int tickFrequency() const // getter
 	{
 		return _tickFrequency;
 	}
 	
-	///
+	/// ditto
 	@property void tickFrequency(int v) // setter
 	{
 		if (_tickFrequency == v)
@@ -247,6 +249,7 @@ class TrackBar : ControlSuperClass
 		}
 	}
 	
+
 	///
 	@property int value() // getter
 	{
@@ -254,7 +257,7 @@ class TrackBar : ControlSuperClass
 		return _value;
 	}
 
-	///
+	/// ditto
 	@property void value(int v) // setter
 	{
 		if (v == _value)
@@ -277,13 +280,14 @@ class TrackBar : ControlSuperClass
 		onValueChanged(EventArgs.empty);
 	}
 
+
 	///
-	@property int largeChange() // getter
+	@property int largeChange() const // getter
 	{
 		return _largeChange;
 	}
 
-	///
+	/// ditto
 	@property void largeChange(int v) // setter
 	{
 		if (v < 0)
@@ -305,13 +309,14 @@ class TrackBar : ControlSuperClass
 		}
 	}
 	
+
 	///
 	@property int smallChange() // setter
 	{
 		return _smallChange;
 	}
 
-	///
+	/// ditto
 	@property void smallChange(int v) // getter
 	{
 		if (v < 0)
@@ -333,13 +338,14 @@ class TrackBar : ControlSuperClass
 		}
 	}
 
+
 	///
-	@property int maximum() // getter
+	@property int maximum() const // getter
 	{
 		return _maximum;
 	}
 
-	///
+	/// ditto
 	@property void maximum(int v) // setter
 	{
 		if (_maximum == v)
@@ -355,13 +361,14 @@ class TrackBar : ControlSuperClass
 		setRange(_minimum, v);
 	}
 
+
 	///
-	@property int minimum() // getter
+	@property int minimum() const // getter
 	{
 		return _minimum;
 	}
 
-	///
+	/// ditto
 	@property void minimum(int v) // setter
 	{
 		if (_minimum == v)
@@ -377,13 +384,14 @@ class TrackBar : ControlSuperClass
 		setRange(v, _maximum);
 	}
 	
+
 	///
-	@property Orientation orientation() // getter
+	@property Orientation orientation() const // getter
 	{
 		return _orientation;
 	}
 
-	///
+	/// ditto
 	@property void orientation(Orientation v) // setter
 	{
 		if (v < Orientation.HORIZONTAL || v > Orientation.VERTICAL)
@@ -420,6 +428,7 @@ class TrackBar : ControlSuperClass
 			_adjustSize();
 		}
 	}
+
 	
 	///
 	void setRange(int minValue, int maxValue)
@@ -459,6 +468,7 @@ class TrackBar : ControlSuperClass
 		}
 	}
 
+
 	///
 	protected override void setBoundsCore(int x, int y, int width, int height, BoundsSpecified specified)
 	{
@@ -485,20 +495,22 @@ class TrackBar : ControlSuperClass
 		super.setBoundsCore(x, y, width, height, specified);
 	}
 	
+
 	///
-	private static @property int _preferredDimension() // getter
+	private static @property int _preferredDimension()
 	{
 		int cyhscroll = GetSystemMetrics(SM_CYHSCROLL);
 		return ((cyhscroll * 8) / 3);
 	}
 
+
 	///
-	@property bool rightToLeftLayout() // getter
+	@property bool rightToLeftLayout() const // getter
 	{
 		return _rightToLeftLayout;
 	}
 
-	///
+	/// ditto
 	@property void rightToLeftLayout(bool v) // setter
 	{
 		if (v == _rightToLeftLayout)
@@ -516,6 +528,7 @@ class TrackBar : ControlSuperClass
 			// }
 		}
 	}
+
 
 	///
 	private void _adjustSize()
@@ -543,6 +556,7 @@ class TrackBar : ControlSuperClass
 		}
 	}
 
+
 	///
 	private void _getTrackBarValue()
 	{
@@ -568,6 +582,7 @@ class TrackBar : ControlSuperClass
 			// }
 		}
 	}
+
 
 	///
 	private void _setTrackBarPosition()
@@ -600,6 +615,7 @@ class TrackBar : ControlSuperClass
 		}
 	}
 	
+
 	/// Handling special input keys, such as PageUp, PageDown, Home, End, etc.
 	protected override bool isInputKey(Keys keyData)
 	{
@@ -622,6 +638,7 @@ class TrackBar : ControlSuperClass
 		return super.isInputKey(keyData);
 	}
 
+
 	///
 	protected override void onHandleCreated(EventArgs ea)
 	{
@@ -641,6 +658,7 @@ class TrackBar : ControlSuperClass
 		_adjustSize();
 	}
 	
+
 	///
 	protected override void createParams(ref CreateParams cp)
 	{
@@ -695,11 +713,13 @@ class TrackBar : ControlSuperClass
 		// }
 	}
 
+
 	///
 	protected override @property Size defaultSize() // getter
 	{
 		return Size(104, _preferredDimension);
 	}
+
 
 	protected override void onReflectedMessage(ref Message msg)
 	{
@@ -743,6 +763,7 @@ class TrackBar : ControlSuperClass
 		}
 	}
 
+
 	///
 	protected override void wndProc(ref Message msg)
 	{
@@ -760,15 +781,17 @@ class TrackBar : ControlSuperClass
 		}
 	}
 
+
 	///
 	protected override void prevWndProc(ref Message msg)
 	{
 		msg.result = dfl.internal.utf.callWindowProc(trackbarPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
 	}
 	
+	
 	///
 	final LRESULT prevwproc(UINT msg, WPARAM wparam, LPARAM lparam)
 	{
-		return dfl.internal.utf.callWindowProc(trackbarPrevWndProc, hwnd, msg, wparam, lparam);
+		return dfl.internal.utf.callWindowProc(trackbarPrevWndProc, _hwnd, msg, wparam, lparam);
 	}
 }

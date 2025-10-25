@@ -60,11 +60,11 @@ abstract class ListControl: ControlSuperClass // docmain
 	}
 	
 	
-	override @property Color backColor() // getter
+	override @property Color backColor() const // getter
 	{
-		if(Color.empty == backc)
+		if(Color.empty == _backColor)
 			return defaultBackColor;
-		return backc;
+		return _backColor;
 	}
 	
 	alias backColor = Control.backColor; // Overload.
@@ -76,11 +76,11 @@ abstract class ListControl: ControlSuperClass // docmain
 	}
 	
 	
-	override @property Color foreColor() // getter
+	override @property Color foreColor() const // getter
 	{
-		if(Color.empty == forec)
+		if(Color.empty == _foreColor)
 			return defaultForeColor;
-		return forec;
+		return _foreColor;
 	}
 	
 	alias foreColor = Control.foreColor; // Overload.
@@ -1154,10 +1154,10 @@ class ListBox: ListControl // docmain
 		_initListbox();
 		
 		// Default useTabStops and vertical scrolling.
-		wstyle |= WS_TABSTOP | LBS_USETABSTOPS | LBS_HASSTRINGS | WS_VSCROLL | LBS_NOTIFY;
-		wexstyle |= WS_EX_CLIENTEDGE;
-		ctrlStyle |= ControlStyles.SELECTABLE;
-		wclassStyle = listboxClassStyle;
+		_windowStyle |= WS_TABSTOP | LBS_USETABSTOPS | LBS_HASSTRINGS | WS_VSCROLL | LBS_NOTIFY;
+		_windowStyleEx |= WS_EX_CLIENTEDGE;
+		_controlStyle |= ControlStyles.SELECTABLE;
+		_windowClassStyle = listboxClassStyle;
 		
 		icollection = createItemCollection();
 		selidxcollection = new SelectedIndexCollection(this);
@@ -1171,7 +1171,7 @@ class ListBox: ListControl // docmain
 		
 		// Set the Ctrl ID to the HWND so that it is unique
 		// and WM_MEASUREITEM will work properly.
-		SetWindowLongPtrA(hwnd, GWL_ID, cast(LONG_PTR)hwnd);
+		SetWindowLongPtrA(_hwnd, GWL_ID, cast(LONG_PTR)_hwnd);
 		
 		if(hextent != 0)
 			prevwproc(LB_SETHORIZONTALEXTENT, hextent, 0);
@@ -1267,12 +1267,11 @@ class ListBox: ListControl // docmain
 	}
 	do
 	{
-		DrawItemState state;
-		state = cast(DrawItemState)dis.itemState;
+		DrawItemState state = cast(DrawItemState)dis.itemState;
 		
 		if(dis.itemID == -1)
 		{
-			FillRect(dis.hDC, &dis.rcItem, hbrBg);
+			FillRect(dis.hDC, &dis.rcItem, backgroundHbrush);
 			if(state & DrawItemState.FOCUS)
 				DrawFocusRect(dis.hDC, &dis.rcItem);
 		}
@@ -1293,7 +1292,7 @@ class ListBox: ListControl // docmain
 			}
 			
 			prepareDc(dis.hDC);
-			diea = new DrawItemEventArgs(new Graphics(dis.hDC, false), wfont,
+			diea = new DrawItemEventArgs(new Graphics(dis.hDC, false), _windowFont,
 				Rect(&dis.rcItem), dis.itemID, state, fc, bc);
 			
 			onDrawItem(diea);
@@ -1422,7 +1421,7 @@ class ListBox: ListControl // docmain
 	LRESULT prevwproc(UINT msg, WPARAM wparam, LPARAM lparam)
 	{
 		//return CallWindowProcA(listviewPrevWndProc, hwnd, msg, wparam, lparam);
-		return dfl.internal.utf.callWindowProc(listboxPrevWndProc, hwnd, msg, wparam, lparam);
+		return dfl.internal.utf.callWindowProc(listboxPrevWndProc, _hwnd, msg, wparam, lparam);
 	}
 }
 

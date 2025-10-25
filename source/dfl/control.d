@@ -113,14 +113,13 @@ private
 	extern(Windows) BOOL getZIndexCallback(HWND hwnd, LPARAM lparam)
 	{
 		GetZIndex* gzi = cast(GetZIndex*)lparam;
-		if(hwnd == gzi.find.hwnd)
+		if(hwnd == gzi.find._hwnd)
 		{
 			gzi.index = gzi._tmp;
 			return FALSE; // Stop, found it.
 		}
 		
-		Control ctrl;
-		ctrl = Control.fromHandle(hwnd);
+		Control ctrl = Control.fromHandle(hwnd);
 		if(ctrl && ctrl.parent is gzi.find.parent)
 		{
 			gzi._tmp++;
@@ -231,46 +230,46 @@ struct CreateParams
 
 deprecated class UICuesEventArgs: EventArgs
 {
-	deprecated:
+deprecated:
 	
 	this(UICues uic)
 	{
-		chg = uic;
+		_uiCues = uic;
 	}
 	
 	
-	final UICues changed() // getter
+	final @property UICues changed() const // getter
 	{
-		return chg;
+		return _uiCues;
 	}
 	
 	
-	final bool changeFocus()
+	final @property bool changeFocus() const
 	{
-		return (chg & UICues.CHANGE_FOCUS) != 0;
+		return (_uiCues & UICues.CHANGE_FOCUS) != 0;
 	}
 	
 	
-	final bool changeKeyboard()
+	final @property bool changeKeyboard() const
 	{
-		return (chg & UICues.CHANGE_KEYBOARD) != 0;
+		return (_uiCues & UICues.CHANGE_KEYBOARD) != 0;
 	}
 	
 	
-	final bool showFocus()
+	final @property bool showFocus() const
 	{
-		return (chg & UICues.SHOW_FOCUS) != 0;
+		return (_uiCues & UICues.SHOW_FOCUS) != 0;
 	}
 	
 	
-	final bool showKeyboard()
+	final @property bool showKeyboard() const
 	{
-		return (chg & UICues.SHOW_KEYBOARD) != 0;
+		return (_uiCues & UICues.SHOW_KEYBOARD) != 0;
 	}
 	
 	
-	private:
-	UICues chg;
+private:
+	UICues _uiCues;
 }
 
 
@@ -280,19 +279,19 @@ class ControlEventArgs: EventArgs
 	///
 	this(Control ctrl)
 	{
-		this.ctrl = ctrl;
+		this._ctrl = ctrl;
 	}
 	
 	
 	///
 	final @property Control control() // getter
 	{
-		return ctrl;
+		return _ctrl;
 	}
 	
 	
-	private:
-	Control ctrl;
+private:
+	Control _ctrl;
 }
 
 
@@ -302,33 +301,33 @@ class HelpEventArgs: EventArgs
 	///
 	this(Point mousePos)
 	{
-		mpos = mousePos;
+		_mousePos = mousePos;
 	}
 	
 	
 	///
 	final @property void handled(bool byes) // setter
 	{
-		hand = byes;
+		_handled = byes;
 	}
 	
 	/// ditto
-	final @property bool handled() // getter
+	final @property bool handled() const // getter
 	{
-		return hand;
+		return _handled;
 	}
 	
 	
 	///
-	final @property Point mousePos() // getter
+	final @property Point mousePos() const // getter
 	{
-		return mpos;
+		return _mousePos;
 	}
 	
 	
-	private:
-	Point mpos;
-	bool hand = false;
+private:
+	Point _mousePos;
+	bool _handled = false;
 }
 
 
@@ -338,19 +337,19 @@ class InvalidateEventArgs: EventArgs
 	///
 	this(Rect invalidRect)
 	{
-		ir = invalidRect;
+		_invalidRect = invalidRect;
 	}
 	
 	
 	///
-	final @property Rect invalidRect() // getter
+	final @property Rect invalidRect() const // getter
 	{
-		return ir;
+		return _invalidRect;
 	}
 	
 	
-	private:
-	Rect ir;
+private:
+	Rect _invalidRect;
 }
 
 
@@ -358,44 +357,44 @@ class InvalidateEventArgs: EventArgs
 // New dimensions before resizing.
 deprecated class BeforeResizeEventArgs: EventArgs
 {
-	deprecated:
+deprecated:
 	
 	///
 	this(int width, int height)
 	{
-		this.w = width;
-		this.h = height;
+		this._width = width;
+		this._height = height;
 	}
 	
 	
 	///
-	void width(int cx) // setter
+	@property void width(int cx) // setter
 	{
-		w = cx;
+		_width = cx;
 	}
 	
 	/// ditto
-	int width() // getter
+	@property int width() const // getter
 	{
-		return w;
+		return _width;
 	}
 	
 	
 	///
-	void height(int cy) // setter
+	@property void height(int cy) // setter
 	{
-		h = cy;
+		_height = cy;
 	}
 	
 	/// ditto
-	int height() // getter
+	@property int height() const // getter
 	{
-		return h;
+		return _height;
 	}
 	
 	
-	private:
-	int w, h;
+private:
+	int _width, _height;
 }
 
 
@@ -405,19 +404,19 @@ class LayoutEventArgs: EventArgs
 	///
 	this(Control affectedControl)
 	{
-		ac = affectedControl;
+		_affectedControl = affectedControl;
 	}
 	
 	
 	///
 	final @property Control affectedControl() // getter
 	{
-		return ac;
+		return _affectedControl;
 	}
 	
 	
-	private:
-	Control ac;
+private:
+	Control _affectedControl;
 }
 
 
@@ -427,8 +426,7 @@ version(DFL_NO_DRAG_DROP) {} else
 	class DragEventArgs: EventArgs
 	{
 		///
-		this(dfl.data.IDataObject dataObj, int keyState, int x, int y,
-			DragDropEffects allowedEffect, DragDropEffects effect)
+		this(dfl.data.IDataObject dataObj, int keyState, int x, int y, DragDropEffects allowedEffect, DragDropEffects effect)
 		{
 			_dobj = dataObj;
 			_keyState = keyState;
@@ -440,7 +438,7 @@ version(DFL_NO_DRAG_DROP) {} else
 		
 		
 		///
-		final @property DragDropEffects allowedEffect() // getter
+		final @property DragDropEffects allowedEffect() const // getter
 		{
 			return _allowedEffect;
 		}
@@ -454,7 +452,7 @@ version(DFL_NO_DRAG_DROP) {} else
 		
 		
 		/// ditto
-		final @property DragDropEffects effect() // getter
+		final @property DragDropEffects effect() const // getter
 		{
 			return _effect;
 		}
@@ -469,27 +467,27 @@ version(DFL_NO_DRAG_DROP) {} else
 		
 		///
 		// State of ctrl, alt, shift, and mouse buttons.
-		final @property int keyState() // getter
+		final @property int keyState() const // getter
 		{
 			return _keyState;
 		}
 		
 		
 		///
-		final @property int x() // getter
+		final @property int x() const // getter
 		{
 			return _x;
 		}
 		
 		
 		///
-		final @property int y() // getter
+		final @property int y() const // getter
 		{
 			return _y;
 		}
 		
 		
-		private:
+	private:
 		dfl.data.IDataObject _dobj;
 		int _keyState;
 		int _x, _y;
@@ -504,12 +502,12 @@ version(DFL_NO_DRAG_DROP) {} else
 		this(DragDropEffects effect, bool useDefaultCursors)
 		{
 			_effect = effect;
-			udefcurs = useDefaultCursors;
+			_useDefaultCursors = useDefaultCursors;
 		}
 		
 		
 		///
-		final @property DragDropEffects effect() // getter
+		final @property DragDropEffects effect() const // getter
 		{
 			return _effect;
 		}
@@ -518,19 +516,19 @@ version(DFL_NO_DRAG_DROP) {} else
 		///
 		final @property void useDefaultCursors(bool byes) // setter
 		{
-			udefcurs = byes;
+			_useDefaultCursors = byes;
 		}
 		
 		/// ditto
-		final @property bool useDefaultCursors() // getter
+		final @property bool useDefaultCursors() const // getter
 		{
-			return udefcurs;
+			return _useDefaultCursors;
 		}
 		
 		
-		private:
+	private:
 		DragDropEffects _effect;
-		bool udefcurs;
+		bool _useDefaultCursors;
 	}
 	
 	
@@ -541,7 +539,7 @@ version(DFL_NO_DRAG_DROP) {} else
 		this(int keyState, bool escapePressed, DragAction action)
 		{
 			_keyState = keyState;
-			escp = escapePressed;
+			_escapePressed = escapePressed;
 			_action = action;
 		}
 		
@@ -553,30 +551,30 @@ version(DFL_NO_DRAG_DROP) {} else
 		}
 		
 		/// ditto
-		final @property DragAction action() // getter
+		final @property DragAction action() const // getter
 		{
 			return _action;
 		}
 		
 		
 		///
-		final @property bool escapePressed() // getter
+		final @property bool escapePressed() const // getter
 		{
-			return escp;
+			return _escapePressed;
 		}
 		
 		
 		///
 		// State of ctrl, alt and shift.
-		final @property int keyState() // getter
+		final @property int keyState() const // getter
 		{
 			return _keyState;
 		}
 		
 		
-		private:
+	private:
 		int _keyState;
-		bool escp;
+		bool _escapePressed;
 		DragAction _action;
 	}
 }
@@ -734,7 +732,7 @@ class Control: DObject, IWindow // docmain
 			}
 			else
 			{
-				return children.length.toI32;
+				return _children.length.toI32;
 			}
 		}
 		
@@ -756,7 +754,7 @@ class Control: DObject, IWindow // docmain
 			}
 			else
 			{
-				return children[i];
+				return _children[i];
 			}
 		}
 		
@@ -803,7 +801,7 @@ class Control: DObject, IWindow // docmain
 			}
 			else
 			{
-				foreach(i, Control onCtrl; children)
+				foreach(i, Control onCtrl; _children)
 				{
 					if(i > int.max)
 						throw new DflException("indexof() failure");
@@ -840,11 +838,11 @@ class Control: DObject, IWindow // docmain
 		package void _removeNotCreated(int i)
 		{
 			if(!i)
-				children = children[1 .. $];
-			else if(i + 1 == children.length)
-				children = children[0 .. i];
+				_children = _children[1 .. $];
+			else if(i + 1 == _children.length)
+				_children = _children[0 .. i];
 			else
-				children = children[0 .. i] ~ children[i + 1 .. $];
+				_children = _children[0 .. i] ~ _children[i + 1 .. $];
 		}
 		
 		
@@ -912,7 +910,7 @@ class Control: DObject, IWindow // docmain
 			}
 			else
 			{
-				foreach(Control ctrl; children)
+				foreach(Control ctrl; _children)
 				{
 					result = dg(ctrl);
 					if(result)
@@ -926,9 +924,9 @@ class Control: DObject, IWindow // docmain
 		mixin OpApplyAddIndex!(opApply, Control);
 		
 		
-		package:
+	package:
 		Control _owner;
-		Control[] children; // Only valid if -owner- isn't created yet (or is recreating).
+		Control[] _children; // Only valid if -owner- isn't created yet (or is recreating).
 		
 		
 		/+
@@ -952,7 +950,7 @@ class Control: DObject, IWindow // docmain
 			if(i < 0 || i >= length - 1)
 				return;
 			
-			children = children[0 .. i] ~ children[i + 1 .. i + 2] ~ children[i .. i + 1] ~ children[i + 2 .. $];
+			_children = _children[0 .. i] ~ _children[i + 1 .. i + 2] ~ _children[i .. i + 1] ~ _children[i + 2 .. $];
 		}
 		
 		
@@ -967,7 +965,7 @@ class Control: DObject, IWindow // docmain
 			if(i <= 0 || i >= length)
 				return;
 			
-			children = children[0 .. i - 1] ~ children[i + 1 .. i + 2] ~ children[i .. i + 1] ~ children[i + 2 .. $];
+			_children = _children[0 .. i - 1] ~ _children[i + 1 .. i + 2] ~ _children[i .. i + 1] ~ _children[i + 2 .. $];
 		}
 		
 		
@@ -982,7 +980,7 @@ class Control: DObject, IWindow // docmain
 			if(i <= 0 || i >= length)
 				return;
 			
-			children = children[i .. i + 1] ~ children[0 .. i] ~ children[i + 1 .. $];
+			_children = _children[i .. i + 1] ~ _children[0 .. i] ~ _children[i + 1 .. $];
 		}
 		
 		
@@ -997,7 +995,7 @@ class Control: DObject, IWindow // docmain
 			if(i < 0 || i >= length - 1)
 				return;
 			
-			children = children[0 .. i] ~ children[i + 1 .. $] ~ children[i .. i + 1];
+			_children = _children[0 .. i] ~ _children[i + 1 .. $] ~ _children[i .. i + 1];
 		}
 		
 		
@@ -1014,7 +1012,7 @@ class Control: DObject, IWindow // docmain
 		{
 			if(!(_exStyle() & WS_EX_CONTROLPARENT))
 			{
-				if(!(cbits & CBits.FORM))
+				if(!(_cbits & CBits.FORM))
 				{
 					//if((cea.control._style() & WS_TABSTOP) || (cea.control._exStyle() & WS_EX_CONTROLPARENT))
 						_exStyle(_exStyle() | WS_EX_CONTROLPARENT);
@@ -1063,7 +1061,7 @@ class Control: DObject, IWindow // docmain
 			createHandle();
 		}
 		
-		return hwnd;
+		return _hwnd;
 	}
 	
 	
@@ -1081,19 +1079,19 @@ class Control: DObject, IWindow // docmain
 			
 			if(byes)
 			{
-				if(!droptarget)
+				if(!_dropTarget)
 				{
 					if(isHandleCreated)
 					{
-						droptarget = new DropTarget(this);
-						switch(RegisterDragDrop(hwnd, droptarget))
+						_dropTarget = new DropTarget(this);
+						switch(RegisterDragDrop(_hwnd, _dropTarget))
 						{
 							case S_OK:
 							case DRAGDROP_E_ALREADYREGISTERED: // Hmm.
 								break;
 							case DRAGDROP_E_INVALIDHWND:
 							case E_OUTOFMEMORY:
-								droptarget = null;
+								_dropTarget = null;
 								throw new DflException("Unable to register drag-drop");
 							default:
 								assert(0);
@@ -1103,11 +1101,11 @@ class Control: DObject, IWindow // docmain
 			}
 			else
 			{
-				if(droptarget)
+				if(_dropTarget)
 				{
-					destroy(droptarget); // delete is deprecated.
-					droptarget = null;
-					switch(RevokeDragDrop(hwnd))
+					destroy(_dropTarget); // delete is deprecated.
+					_dropTarget = null;
+					switch(RevokeDragDrop(_hwnd))
 					{
 						case S_OK:
 							break;
@@ -1130,7 +1128,7 @@ class Control: DObject, IWindow // docmain
 		}
 		
 		/// ditto
-		@property bool allowDrop() // getter
+		@property bool allowDrop() const // getter
 		{
 			/+
 			return (_exStyle() & WS_EX_ACCEPTFILES) != 0;
@@ -1166,15 +1164,14 @@ class Control: DObject, IWindow // docmain
 	
 	private void _propagateBackColorAmbience()
 	{
-		Color bc;
-		bc = backColor;
+		Color bc = backColor;
 		
 		
 		void pa(Control pc)
 		{
 			foreach(Control ctrl; pc.controls)
 			{
-				if(Color.empty == ctrl.backc) // If default.
+				if(Color.empty == ctrl.backColor) // If default.
 				{
 					if(bc == ctrl.backColor) // If same default.
 					{
@@ -1207,11 +1204,11 @@ class Control: DObject, IWindow // docmain
 	///
 	@property void backColor(Color c) // setter
 	{
-		if(backc == c)
+		if(_backColor == c)
 			return;
 		
 		deleteThisBackgroundBrush(); // Needs to be recreated with new color.
-		backc = c;
+		_backColor = c;
 		onBackColorChanged(EventArgs.empty);
 		
 		_propagateBackColorAmbience();
@@ -1220,9 +1217,9 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	/// ditto
-	@property Color backColor() // getter
+	@property Color backColor() const // getter
 	{
-		if(Color.empty == backc)
+		if(Color.empty == _backColor)
 		{
 			if(parent)
 			{
@@ -1230,14 +1227,14 @@ class Control: DObject, IWindow // docmain
 			}
 			return defaultBackColor;
 		}
-		return backc;
+		return _backColor;
 	}
 	
 	
 	///
-	final @property int bottom() // getter
+	final @property int bottom() const // getter
 	{
-		return wrect.bottom;
+		return _windowRect.bottom;
 	}
 	
 	
@@ -1248,9 +1245,9 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	/// ditto
-	final @property Rect bounds() // getter
+	final @property Rect bounds() const // getter
 	{
-		return wrect;
+		return _windowRect;
 	}
 	
 	
@@ -1263,7 +1260,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	protected void setBoundsCore(int x, int y, int width, int height, BoundsSpecified specified)
+	protected void setBoundsCore(int x_, int y_, int width_, int height_, BoundsSpecified specified)
 	{
 		// Make sure at least one flag is set.
 		//if(!(specified & BoundsSpecified.ALL))
@@ -1277,51 +1274,51 @@ class Control: DObject, IWindow // docmain
 			if(specified & BoundsSpecified.X)
 			{
 				if(!(specified & BoundsSpecified.Y))
-					y = this.top();
+					y_ = this.top();
 				swpf &= ~SWP_NOMOVE;
 			}
 			else if(specified & BoundsSpecified.Y)
 			{
-				x = this.left();
+				x_ = this.left();
 				swpf &= ~SWP_NOMOVE;
 			}
 			
 			if(specified & BoundsSpecified.WIDTH)
 			{
 				if(!(specified & BoundsSpecified.HEIGHT))
-					height = this.height();
+					height_ = this.height();
 				swpf &= ~SWP_NOSIZE;
 			}
 			else if(specified & BoundsSpecified.HEIGHT)
 			{
-				width = this.width();
+				width_ = this.width();
 				swpf &= ~SWP_NOSIZE;
 			}
 			
-			SetWindowPos(hwnd, HWND.init, x, y, width, height, swpf);
+			SetWindowPos(_hwnd, HWND.init, x_, y_, width_, height_, swpf);
 			// Window events will update -wrect-.
 		}
 		else
 		{
 			if(specified & BoundsSpecified.X)
-				wrect.x = x;
+				_windowRect.x = x_;
 			if(specified & BoundsSpecified.Y)
-				wrect.y = y;
+				_windowRect.y = y_;
 			if(specified & BoundsSpecified.WIDTH)
 			{
-				if(width < 0)
-					width = 0;
+				if(width_ < 0)
+					width_ = 0;
 				
-				wrect.width = width;
-				wclientsz.width = width;
+				_windowRect.width = width_;
+				_clientWindowSize.width = width_;
 			}
 			if(specified & BoundsSpecified.HEIGHT)
 			{
-				if(height < 0)
-					height = 0;
+				if(height_ < 0)
+					height_ = 0;
 				
-				wrect.height = height;
-				wclientsz.height = height;
+				_windowRect.height = height_;
+				_clientWindowSize.height = height_;
 			}
 			
 			//oldwrect = wrect;
@@ -1338,7 +1335,7 @@ class Control: DObject, IWindow // docmain
 		+/
 		//return visible && enabled;
 		// Don't need to check -isHandleCreated- because IsWindowVisible() will fail from a null HWND.
-		return /+ isHandleCreated && +/ IsWindowVisible(hwnd) && IsWindowEnabled(hwnd);
+		return /+ isHandleCreated && +/ IsWindowVisible(_hwnd) && IsWindowEnabled(_hwnd);
 	}
 	
 	
@@ -1355,8 +1352,8 @@ class Control: DObject, IWindow // docmain
 	{
 		// All parent controls need to be visible and enabled, too.
 		// Don't need to check -isHandleCreated- because IsWindowVisible() will fail from a null HWND.
-		return /+ isHandleCreated && +/ (ctrlStyle & ControlStyles.SELECTABLE) &&
-			IsWindowVisible(hwnd) && IsWindowEnabled(hwnd);
+		return /+ isHandleCreated && +/ (_controlStyle & ControlStyles.SELECTABLE) &&
+			IsWindowVisible(_hwnd) && IsWindowEnabled(_hwnd);
 	}
 	
 	
@@ -1368,16 +1365,16 @@ class Control: DObject, IWindow // docmain
 	
 	///
 	// Returns true if this control has the mouse capture.
-	final @property bool capture() // getter
+	final @property bool capture() const // getter
 	{
-		return isHandleCreated && hwnd == GetCapture();
+		return isHandleCreated && _hwnd == GetCapture();
 	}
 	
 	/// ditto
 	final @property void capture(bool cyes) // setter
 	{
 		if(cyes)
-			SetCapture(hwnd);
+			SetCapture(_hwnd);
 		else
 			ReleaseCapture();
 	}
@@ -1386,16 +1383,10 @@ class Control: DObject, IWindow // docmain
 	// When true, validating and validated events are fired when the control
 	// receives focus. Typically set to false for controls such as a Help button.
 	// Default is true.
-	deprecated final bool causesValidation() // getter
+	deprecated final bool causesValidation() const // getter
 	{
 		//return cvalidation;
 		return false;
-	}
-	
-	
-	deprecated protected void onCausesValidationChanged(EventArgs ea)
-	{
-		//causesValidationChanged(this, ea);
 	}
 	
 	
@@ -1412,15 +1403,21 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	///
-	final @property Rect clientRectangle() // getter
+	deprecated protected void onCausesValidationChanged(EventArgs ea)
 	{
-		return Rect(Point(0, 0), wclientsz);
+		//causesValidationChanged(this, ea);
 	}
 	
 	
 	///
-	final bool contains(Control ctrl)
+	final @property Rect clientRectangle() const // getter
+	{
+		return Rect(Point(0, 0), _clientWindowSize);
+	}
+	
+	
+	///
+	final bool contains(Control ctrl) const
 	{
 		//return controls.contains(ctrl);
 		return ctrl && ctrl.parent is this;
@@ -1428,9 +1425,9 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	final @property Size clientSize() // getter
+	final @property Size clientSize() const // getter
 	{
-		return wclientsz;
+		return _clientWindowSize;
 	}
 	
 	/// ditto
@@ -1471,7 +1468,7 @@ class Control: DObject, IWindow // docmain
 			return false;
 		
 		HWND hwfocus = GetFocus();
-		return hwfocus == hwnd || IsChild(hwnd, hwfocus);
+		return hwfocus == _hwnd || IsChild(_hwnd, hwfocus);
 	}
 	
 	
@@ -1485,10 +1482,10 @@ class Control: DObject, IWindow // docmain
 	///
 	@property void contextMenu(ContextMenu menu) // setter
 	{
-		if(cmenu is menu)
+		if(_contextMenu is menu)
 			return;
 		
-		cmenu = menu;
+		_contextMenu = menu;
 		
 		if(isHandleCreated)
 		{
@@ -1499,21 +1496,21 @@ class Control: DObject, IWindow // docmain
 	/// ditto
 	@property ContextMenu contextMenu() // getter
 	{
-		return cmenu;
+		return _contextMenu;
 	}
 	
 	
 	///
 	final @property ControlCollection controls() // getter
 	{
-		if (!ccollection)
-			ccollection = new ControlCollection(this);
-		return ccollection;
+		if (!_controlCollection)
+			_controlCollection = new ControlCollection(this);
+		return _controlCollection;
 	}
 	
 	
 	///
-	final @property bool created() // getter
+	final @property bool created() const // getter
 	{
 		// TODO: only return true when createHandle finishes.
 		// Will also need to update uses of created/isHandleCreated.
@@ -1525,15 +1522,14 @@ class Control: DObject, IWindow // docmain
 	
 	private void _propagateCursorAmbience()
 	{
-		Cursor cur;
-		cur = cursor;
+		Cursor cur = cursor;
 		
 		
 		void pa(Control pc)
 		{
 			foreach(Control ctrl; pc.controls)
 			{
-				if(ctrl.wcurs is null) // If default.
+				if(ctrl._windowCursor is null) // If default.
 				{
 					if(cur is ctrl.cursor) // If same default.
 					{
@@ -1565,11 +1561,11 @@ class Control: DObject, IWindow // docmain
 			if(visible && enabled)
 			{
 				Point curpt = Cursor.position;
-				if(hwnd == WindowFromPoint(curpt.point))
+				if(_hwnd == WindowFromPoint(curpt.point))
 				{
-					SendMessageA(hwnd, WM_SETCURSOR, cast(WPARAM)hwnd,
+					SendMessageA(_hwnd, WM_SETCURSOR, cast(WPARAM)_hwnd,
 						MAKELPARAM(
-							SendMessageA(hwnd, WM_NCHITTEST, 0, MAKELPARAM(curpt.x, curpt.y)).toI32,
+							SendMessageA(_hwnd, WM_NCHITTEST, 0, MAKELPARAM(curpt.x, curpt.y)).toI32,
 							WM_MOUSEMOVE)
 							);
 				}
@@ -1583,10 +1579,10 @@ class Control: DObject, IWindow // docmain
 	///
 	@property void cursor(Cursor cur) // setter
 	{
-		if(cur is wcurs)
+		if(cur is _windowCursor)
 			return;
 		
-		wcurs = cur;
+		_windowCursor = cur;
 		onCursorChanged(EventArgs.empty);
 		
 		_propagateCursorAmbience();
@@ -1595,7 +1591,7 @@ class Control: DObject, IWindow // docmain
 	/// ditto
 	@property Cursor cursor() // getter
 	{
-		if(!wcurs)
+		if(!_windowCursor)
 		{
 			if(parent)
 			{
@@ -1603,7 +1599,7 @@ class Control: DObject, IWindow // docmain
 			}
 			return _defaultCursor;
 		}
-		return wcurs;
+		return _windowCursor;
 	}
 	
 	
@@ -1632,8 +1628,7 @@ class Control: DObject, IWindow // docmain
 	
 	private static Font _createCompatibleFont()
 	{
-		Font result;
-		result = _createOldFont();
+		Font result = _createOldFont();
 		
 		try
 		{
@@ -1771,7 +1766,15 @@ class Control: DObject, IWindow // docmain
 	///
 	@property Rect displayRectangle() // getter
 	{
-		return clientRectangle;
+		Rect result = clientRectangle;
+		
+		// Subtract dock padding.
+		result.x = result.x + _dockPadding.left;
+		result.width = result.width - _dockPadding.right - _dockPadding.left;
+		result.y = result.y + _dockPadding.top;
+		result.height = result.height - _dockPadding.bottom - _dockPadding.top;
+
+		return result;
 	}
 	
 	
@@ -1796,19 +1799,19 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	@property DockStyle dock() // getter
+	@property DockStyle dock() const // getter
 	{
-		return sdock;
+		return _dockStyle;
 	}
 	
 	/// ditto
 	@property void dock(DockStyle ds) // setter
 	{
-		if(ds == sdock)
+		if(ds == _dockStyle)
 			return;
 		
-		DockStyle _olddock = sdock;
-		sdock = ds;
+		DockStyle _olddock = _dockStyle;
+		_dockStyle = ds;
 		/+
 		anch = AnchorStyles.NONE; // Can't be set at the same time.
 		+/
@@ -1839,9 +1842,9 @@ class Control: DObject, IWindow // docmain
 	
 	
 	/// Get or set whether or not this control currently has its bounds managed. Fires onHasLayoutChanged as needed.
-	final @property bool hasLayout() // getter
+	final @property bool hasLayout() const // getter
 	{
-		if(cbits & CBits.HAS_LAYOUT)
+		if(_cbits & CBits.HAS_LAYOUT)
 			return true;
 		return false;
 	}
@@ -1853,9 +1856,9 @@ class Control: DObject, IWindow // docmain
 		//	return; // No! setting this property again must trigger onHasLayoutChanged again.
 		
 		if(byes)
-			cbits |= CBits.HAS_LAYOUT;
+			_cbits |= CBits.HAS_LAYOUT;
 		else
-			cbits &= ~CBits.HAS_LAYOUT;
+			_cbits &= ~CBits.HAS_LAYOUT;
 		
 		if(byes) // No need if layout is removed.
 		{
@@ -1867,19 +1870,222 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
+	///
+	class DockPaddingEdges
+	{
+	private:
+		int _left, _top, _right, _bottom;
+		int _all;
+		
+		
+	final:
+		void changed()
+		{
+			dockPaddingChanged();
+		}
+		
+		
+	public:
+		///
+		@property void all(int x) // setter
+		{
+			_bottom = _right = _top = _left = _all = x;
+			
+			changed();
+		}
+		
+		/// ditto
+		final @property int all() const // getter
+		{
+			return _all;
+		}
+		
+		/// ditto
+		@property void left(int x) // setter
+		{
+			_left = x;
+			
+			changed();
+		}
+		
+		/// ditto
+		@property int left() const // getter
+		{
+			return _left;
+		}
+		
+		/// ditto
+		@property void top(int x) // setter
+		{
+			_top = x;
+			
+			changed();
+		}
+		
+		/// ditto
+		@property int top() const // getter
+		{
+			return _top;
+		}
+		
+		/// ditto
+		@property void right(int x) // setter
+		{
+			_right = x;
+			
+			changed();
+		}
+		
+		/// ditto
+		@property int right() const // getter
+		{
+			return _right;
+		}
+		
+		/// ditto
+		@property void bottom(int x) // setter
+		{
+			_bottom = x;
+			
+			changed();
+		}
+		
+		/// ditto
+		@property int bottom() const // getter
+		{
+			return _bottom;
+		}
+	}
+	
+	
+	///
+	final @property DockPaddingEdges dockPadding() // getter
+	{
+		return _dockPadding;
+	}
+	
+	
+	///
+	void dockPaddingChanged()
+	{
+		alayout(this);
+	}
+	
+
+	///
+	class DockMarginEdges
+	{
+	private:
+		int _left, _top, _right, _bottom;
+		int _all;
+		
+		
+		void changed()
+		{
+			dockMarginChanged();
+		}
+		
+		
+	public:
+		///
+		@property void all(int x) // setter
+		{
+			_bottom = _right = _top = _left = _all = x;
+			
+			changed();
+		}
+		
+		/// ditto
+		final @property int all() const // getter
+		{
+			return _all;
+		}
+		
+		/// ditto
+		@property void left(int x) // setter
+		{
+			_left = x;
+			
+			changed();
+		}
+		
+		/// ditto
+		@property int left() const // getter
+		{
+			return _left;
+		}
+		
+		/// ditto
+		@property void top(int x) // setter
+		{
+			_top = x;
+			
+			changed();
+		}
+		
+		/// ditto
+		@property int top() const // getter
+		{
+			return _top;
+		}
+		
+		/// ditto
+		@property void right(int x) // setter
+		{
+			_right = x;
+			
+			changed();
+		}
+		
+		/// ditto
+		@property int right() const // getter
+		{
+			return _right;
+		}
+		
+		/// ditto
+		@property void bottom(int x) // setter
+		{
+			_bottom = x;
+			
+			changed();
+		}
+		
+		/// ditto
+		@property int bottom() const // getter
+		{
+			return _bottom;
+		}
+	}
+	
+	
+	///
+	final @property DockMarginEdges dockMargin() // getter
+	{
+		return _dockMargin;
+	}
+
+	
+	///
+	void dockMarginChanged()
+	{
+		alayout(this);
+	}
+	
+	
 	package final void _venabled(bool byes)
 	{
 		if(isHandleCreated)
 		{
-			EnableWindow(hwnd, byes);
+			EnableWindow(_hwnd, byes);
 			// Window events will update -wstyle-.
 		}
 		else
 		{
 			if(byes)
-				wstyle &= ~WS_DISABLED;
+				_windowStyle &= ~WS_DISABLED;
 			else
-				wstyle |= WS_DISABLED;
+				_windowStyle |= WS_DISABLED;
 		}
 	}
 	
@@ -1888,9 +2094,9 @@ class Control: DObject, IWindow // docmain
 	final @property void enabled(bool byes) // setter
 	{
 		if(byes)
-			cbits |= CBits.ENABLED;
+			_cbits |= CBits.ENABLED;
 		else
-			cbits &= ~CBits.ENABLED;
+			_cbits &= ~CBits.ENABLED;
 		
 		/+
 		if(!byes)
@@ -1910,13 +2116,13 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	///
-	final @property bool enabled() // getter
+	final @property bool enabled() const // getter
 	{
 		/*
 		return IsWindowEnabled(hwnd) ? true : false;
 		*/
 		
-		return (wstyle & WS_DISABLED) == 0;
+		return (_windowStyle & WS_DISABLED) == 0;
 	}
 	
 	
@@ -1960,7 +2166,7 @@ class Control: DObject, IWindow // docmain
 	
 	
 	/// Has focus.
-	@property bool focused() // getter
+	@property bool focused() const // getter
 	{
 		//return isHandleCreated && hwnd == GetFocus();
 		return created && fromChildHandle(GetFocus()) is this;
@@ -1970,12 +2176,12 @@ class Control: DObject, IWindow // docmain
 	///
 	@property void font(Font f) // setter
 	{
-		if(wfont is f)
+		if(_windowFont is f)
 			return;
 		
-		wfont = f;
+		_windowFont = f;
 		if(isHandleCreated)
-			SendMessageA(hwnd, WM_SETFONT, cast(WPARAM)wfont.handle, MAKELPARAM(true, 0));
+			SendMessageA(_hwnd, WM_SETFONT, cast(WPARAM)_windowFont.handle, MAKELPARAM(true, 0));
 		onFontChanged(EventArgs.empty);
 		
 		_propagateFontAmbience();
@@ -1984,7 +2190,7 @@ class Control: DObject, IWindow // docmain
 	/// ditto
 	@property Font font() // getter
 	{
-		if(!wfont)
+		if(!_windowFont)
 		{
 			if(parent)
 			{
@@ -1992,21 +2198,20 @@ class Control: DObject, IWindow // docmain
 			}
 			return defaultFont;
 		}
-		return wfont;
+		return _windowFont;
 	}
 	
 	
 	private void _propagateForeColorAmbience()
 	{
-		Color fc;
-		fc = foreColor;
+		Color fc = foreColor;
 		
 		
 		void pa(Control pc)
 		{
 			foreach(Control ctrl; pc.controls)
 			{
-				if(Color.empty == ctrl.forec) // If default.
+				if(Color.empty == ctrl._foreColor) // If default.
 				{
 					if(fc == ctrl.foreColor) // If same default.
 					{
@@ -2038,10 +2243,10 @@ class Control: DObject, IWindow // docmain
 	///
 	@property void foreColor(Color c) // setter
 	{
-		if(c == forec)
+		if(c == _foreColor)
 			return;
 		
-		forec = c;
+		_foreColor = c;
 		onForeColorChanged(EventArgs.empty);
 		
 		_propagateForeColorAmbience();
@@ -2050,9 +2255,9 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	/// ditto
-	@property Color foreColor() // getter
+	@property Color foreColor() const // getter
 	{
-		if(Color.empty == forec)
+		if(Color.empty == _foreColor)
 		{
 			if(parent)
 			{
@@ -2060,7 +2265,7 @@ class Control: DObject, IWindow // docmain
 			}
 			return defaultForeColor;
 		}
-		return forec;
+		return _foreColor;
 	}
 	
 	
@@ -2073,11 +2278,11 @@ class Control: DObject, IWindow // docmain
 		
 		if(isHandleCreated)
 		{
-			return GetWindow(hwnd, GW_CHILD) != HWND.init;
+			return GetWindow(_hwnd, GW_CHILD) != HWND.init;
 		}
 		else
 		{
-			return controls.children.length != 0;
+			return controls._children.length != 0;
 		}
 	}
 	
@@ -2095,16 +2300,16 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	/// ditto
-	final @property int height() // getter
+	final @property int height() const // getter
 	{
-		return wrect.height;
+		return _windowRect.height;
 	}
 	
 	
 	///
 	final @property bool isHandleCreated() const nothrow @safe // getter
 	{
-		return hwnd != HWND.init;
+		return _hwnd != HWND.init;
 	}
 	
 	
@@ -2121,9 +2326,9 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	/// ditto
-	final @property int left() // getter
+	final @property int left() const // getter
 	{
-		return wrect.x;
+		return _windowRect.x;
 	}
 	
 	
@@ -2138,9 +2343,9 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	/// ditto
-	final @property Point location() // getter
+	final @property Point location() const // getter
 	{
-		return wrect.location;
+		return _windowRect.location;
 	}
 	
 	
@@ -2198,13 +2403,13 @@ class Control: DObject, IWindow // docmain
 	/// Property: get or set the name of this control used in code.
 	final @property void name(Dstring txt) // setter
 	{
-		_ctrlname = txt;
+		_controlName = txt;
 	}
 	
 	/// ditto
-	final @property Dstring name() // getter
+	final @property Dstring name() const // getter
 	{
-		return _ctrlname;
+		return _controlName;
 	}
 	
 	
@@ -2233,9 +2438,8 @@ class Control: DObject, IWindow // docmain
 	final Form findForm()
 	{
 		Form f;
-		Control c;
-		
-		c = this;
+		Control c = this;
+
 		for(;;)
 		{
 			f = cast(Form)c;
@@ -2252,7 +2456,7 @@ class Control: DObject, IWindow // docmain
 	///
 	final @property void parent(Control c) // setter
 	{
-		if(c is wparent)
+		if(c is _parentWindow)
 			return;
 		
 		if(!(_style() & WS_CHILD) || (_exStyle() & WS_EX_MDICHILD))
@@ -2261,10 +2465,8 @@ class Control: DObject, IWindow // docmain
 		//scope ControlEventArgs pcea = new ControlEventArgs(c);
 		//onParentChanging(pcea);
 		
-		Control oldparent;
+		Control oldparent = _parentWindow;
 		_FixAmbientOld oldinfo;
-		
-		oldparent = wparent;
 		
 		if(oldparent)
 		{
@@ -2287,19 +2489,19 @@ class Control: DObject, IWindow // docmain
 		
 		if(c)
 		{
-			wparent = c;
+			_parentWindow = c;
 			
 			// I want the destroy notification. Don't need it anymore.
 			//c._exStyle(c._exStyle() & ~WS_EX_NOPARENTNOTIFY);
 			
 			if(c.isHandleCreated)
 			{
-				cbits &= ~CBits.NEED_INIT_LAYOUT;
+				_cbits &= ~CBits.NEED_INIT_LAYOUT;
 				
 				//if(created)
 				if(isHandleCreated)
 				{
-					SetParent(hwnd, c.hwnd);
+					SetParent(_hwnd, c._hwnd);
 				}
 				else
 				{
@@ -2319,7 +2521,7 @@ class Control: DObject, IWindow // docmain
 			{
 				// If the parent exists and isn't created, need to add
 				// -this- to its children array.
-				c.controls.children ~= this;
+				c.controls._children ~= this;
 				
 				onParentChanged(EventArgs.empty);
 				if(oldparent)
@@ -2327,17 +2529,17 @@ class Control: DObject, IWindow // docmain
 				c._ctrladded(cea);
 				_fixAmbient(&oldinfo);
 				
-				cbits |= CBits.NEED_INIT_LAYOUT;
+				_cbits |= CBits.NEED_INIT_LAYOUT;
 			}
 		}
 		else
 		{
 			assert(c is null);
 			//wparent = c;
-			wparent = null;
+			_parentWindow = null;
 			
 			if(isHandleCreated)
-				SetParent(hwnd, HWND.init);
+				SetParent(_hwnd, HWND.init);
 			
 			onParentChanged(EventArgs.empty);
 			assert(oldparent !is null);
@@ -2347,15 +2549,21 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	/// ditto
-	final @property Control parent() // getter
+	final @property Control parent()// getter
 	{
-		return wparent;
+		return _parentWindow;
 	}
-	
+
+	/// ditto
+	final @property const(Control) parent() const // getter
+	{
+		return _parentWindow;
+	}
+
 	
 	private Control _fetchParent()
 	{
-		HWND hwParent = GetParent(hwnd);
+		HWND hwParent = GetParent(_hwnd);
 		return fromHandle(hwParent);
 	}
 	
@@ -2375,31 +2583,31 @@ class Control: DObject, IWindow // docmain
 		if(isHandleCreated)
 		{
 			// Need to make a copy of the region.
-			SetWindowRgn(hwnd, dupHrgn(rgn.handle), true);
+			SetWindowRgn(_hwnd, dupHrgn(rgn.handle), true);
 		}
 		
-		wregion = rgn;
+		_windowRegion = rgn;
 	}
 	
 	/// ditto
 	final @property Region region() // getter
 	{
-		return wregion;
+		return _windowRegion;
 	}
 	
 	
 	private Region _fetchRegion()
 	{
 		HRGN hrgn = CreateRectRgn(0, 0, 1, 1);
-		GetWindowRgn(hwnd, hrgn);
+		GetWindowRgn(_hwnd, hrgn);
 		return new Region(hrgn); // Owned because GetWindowRgn() gives a copy.
 	}
 	
 	
 	///
-	final @property int right() // getter
+	final @property int right() const // getter
 	{
-		return wrect.right;
+		return _windowRect.right;
 	}
 	
 	
@@ -2458,13 +2666,12 @@ class Control: DObject, IWindow // docmain
 	
 	private void _propagateRtolAmbience()
 	{
-		RightToLeft rl;
-		rl = rightToLeft;
+		RightToLeft rl = rightToLeft;
 		
 		
 		void pa(Control pc)
 		{
-			if(RightToLeft.INHERIT == pc.rtol)
+			if(RightToLeft.INHERIT == pc._rightToLeft)
 			{
 				//pc._fixRtol(rtol);
 				pc._fixRtol(rl); // Set the specific parent value so it doesn't have to look up the chain.
@@ -2486,9 +2693,9 @@ class Control: DObject, IWindow // docmain
 	///
 	@property void rightToLeft(RightToLeft val) // setter
 	{
-		if(rtol != val)
+		if(_rightToLeft != val)
 		{
-			rtol = val;
+			_rightToLeft = val;
 			onRightToLeftChanged(EventArgs.empty);
 			_propagateRtolAmbience(); // Also sets the class style and invalidates.
 		}
@@ -2496,13 +2703,13 @@ class Control: DObject, IWindow // docmain
 	
 	/// ditto
 	// Returns YES or NO; if inherited, returns parent's setting.
-	@property RightToLeft rightToLeft() // getter
+	@property RightToLeft rightToLeft() const // getter
 	{
-		if(RightToLeft.INHERIT == rtol)
+		if(RightToLeft.INHERIT == _rightToLeft)
 		{
 			return parent ? parent.rightToLeft : RightToLeft.NO;
 		}
-		return rtol;
+		return _rightToLeft;
 	}
 	
 	
@@ -2554,7 +2761,7 @@ class Control: DObject, IWindow // docmain
 		else
 			newinfo.set(this);
 		
-		if(RightToLeft.INHERIT == rtol)
+		if(RightToLeft.INHERIT == _rightToLeft)
 		{
 			if(newinfo.rightToLeft !is oldinfo.rightToLeft)
 			{
@@ -2563,7 +2770,7 @@ class Control: DObject, IWindow // docmain
 			}
 		}
 		
-		if(Color.empty == backc)
+		if(Color.empty == _backColor)
 		{
 			if(newinfo.backColor !is oldinfo.backColor)
 			{
@@ -2572,7 +2779,7 @@ class Control: DObject, IWindow // docmain
 			}
 		}
 		
-		if(Color.empty == forec)
+		if(Color.empty == _foreColor)
 		{
 			if(newinfo.foreColor !is oldinfo.foreColor)
 			{
@@ -2581,7 +2788,7 @@ class Control: DObject, IWindow // docmain
 			}
 		}
 		
-		if(!wfont)
+		if(!_windowFont)
 		{
 			if(newinfo.font !is oldinfo.font)
 			{
@@ -2590,7 +2797,7 @@ class Control: DObject, IWindow // docmain
 			}
 		}
 		
-		if(!wcurs)
+		if(!_windowCursor)
 		{
 			if(newinfo.cursor !is oldinfo.cursor)
 			{
@@ -2634,9 +2841,9 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	/// ditto
-	final @property Size size() // getter
+	final @property Size size() const // getter
 	{
-		return wrect.size; // struct Size, not sizeof.
+		return _windowRect.size; // struct Size, not sizeof.
 	}
 	
 	
@@ -2682,7 +2889,7 @@ class Control: DObject, IWindow // docmain
 			
 			BOOL getZIndexCallback(HWND hWnd)
 			{
-				if(hWnd is hwnd)
+				if(hWnd is _hwnd)
 				{
 					index = tmp;
 					return FALSE; // Stop, found it.
@@ -2697,7 +2904,7 @@ class Control: DObject, IWindow // docmain
 				return TRUE; // Keep looking.
 			}
 			
-			enumChildWindows(parent.hwnd, &getZIndexCallback);
+			enumChildWindows(parent._hwnd, &getZIndexCallback);
 			return index;
 		}
 		else
@@ -2729,19 +2936,19 @@ class Control: DObject, IWindow // docmain
 	/// Property: get or set additional data tagged onto the control.
 	final @property void tag(Object o) // setter
 	{
-		otag = o;
+		_objectTag = o;
 	}
 	
 	/// ditto
 	final @property Object tag() // getter
 	{
-		return otag;
+		return _objectTag;
 	}
 	
 	
 	private Dstring _fetchText() const
 	{
-		return dfl.internal.utf.getWindowText(cast(void*)hwnd);
+		return dfl.internal.utf.getWindowText(cast(void*)_hwnd);
 	}
 	
 	
@@ -2750,18 +2957,18 @@ class Control: DObject, IWindow // docmain
 	{
 		if(isHandleCreated)
 		{
-			if(ctrlStyle & ControlStyles.CACHE_TEXT)
+			if(_controlStyle & ControlStyles.CACHE_TEXT)
 			{
 				//if(wtext == txt)
 				//	return;
-				wtext = txt;
+				_windowText = txt;
 			}
 			
-			dfl.internal.utf.setWindowText(hwnd, txt);
+			dfl.internal.utf.setWindowText(_hwnd, txt);
 		}
 		else
 		{
-			wtext = txt;
+			_windowText = txt;
 		}
 	}
 	
@@ -2770,14 +2977,14 @@ class Control: DObject, IWindow // docmain
 	{
 		if(isHandleCreated)
 		{
-			if(ctrlStyle & ControlStyles.CACHE_TEXT)
-				return wtext;
+			if(_controlStyle & ControlStyles.CACHE_TEXT)
+				return _windowText;
 			
 			return _fetchText();
 		}
 		else
 		{
-			return wtext;
+			return _windowText;
 		}
 	}
 	
@@ -2789,9 +2996,9 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	/// ditto
-	final @property int top() // getter
+	final @property int top() const // getter
 	{
-		return wrect.y;
+		return _windowRect.y;
 	}
 	
 	
@@ -2802,7 +3009,7 @@ class Control: DObject, IWindow // docmain
 	{
 		if(isHandleCreated)
 		{
-			HWND hwCurrent = hwnd;
+			HWND hwCurrent = _hwnd;
 			HWND hwParent;
 			
 			for(;;)
@@ -2818,8 +3025,7 @@ class Control: DObject, IWindow // docmain
 		}
 		else
 		{
-			Control ctrl;
-			ctrl = this;
+			Control ctrl = this;
 			while(ctrl.parent)
 			{
 				ctrl = ctrl.parent; // This shouldn't jump owners..
@@ -2851,7 +3057,7 @@ class Control: DObject, IWindow // docmain
 		//if(isHandleCreated)
 		//	wstyle = GetWindowLongPtrA(hwnd, GWL_STYLE); // ...
 		//return (wstyle & WS_VISIBLE) != 0;
-		return (cbits & CBits.VISIBLE) != 0;
+		return (_cbits & CBits.VISIBLE) != 0;
 	}
 	
 	
@@ -2862,9 +3068,9 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	/// ditto
-	final @property int width() // getter
+	final @property int width() const // getter
 	{
-		return wrect.width;
+		return _windowRect.width;
 	}
 	
 	
@@ -2878,7 +3084,7 @@ class Control: DObject, IWindow // docmain
 			return;
 		}
 		
-		SetWindowPos(hwnd, HWND_BOTTOM, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+		SetWindowPos(_hwnd, HWND_BOTTOM, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 	}
 	
 	
@@ -2892,7 +3098,7 @@ class Control: DObject, IWindow // docmain
 			return;
 		}
 		
-		SetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+		SetWindowPos(_hwnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 		//BringWindowToTop(hwnd);
 	}
 	
@@ -2910,10 +3116,8 @@ class Control: DObject, IWindow // docmain
 			return;
 		}
 		
-		HWND hw;
-		
 		// Need to move back twice because the previous one already precedes this one.
-		hw = GetWindow(hwnd, GW_HWNDPREV);
+		HWND hw = GetWindow(_hwnd, GW_HWNDPREV);
 		if(!hw)
 		{
 			hw = HWND_TOP;
@@ -2925,7 +3129,7 @@ class Control: DObject, IWindow // docmain
 				hw = HWND_TOP;
 		}
 		
-		SetWindowPos(hwnd, hw, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+		SetWindowPos(_hwnd, hw, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 	}
 	
 	
@@ -2942,20 +3146,18 @@ class Control: DObject, IWindow // docmain
 			return;
 		}
 		
-		HWND hw;
-		
-		hw = GetWindow(hwnd, GW_HWNDNEXT);
+		HWND hw = GetWindow(_hwnd, GW_HWNDNEXT);
 		if(!hw)
 			hw = HWND_BOTTOM;
 		
-		SetWindowPos(hwnd, hw, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+		SetWindowPos(_hwnd, hw, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 	}
 	
 	
 	// NOTE: true if no children, even if this not created.
 	package final @property bool areChildrenCreated() // getter
 	{
-		return !controls.children.length;
+		return !controls._children.length;
 	}
 	
 	
@@ -2963,9 +3165,8 @@ class Control: DObject, IWindow // docmain
 	{
 		assert(isHandleCreated);
 		
-		Control[] ctrls;
-		ctrls = controls.children;
-		controls.children = null;
+		Control[] ctrls = controls._children;
+		controls._children = null;
 		
 		foreach(Control ctrl; ctrls)
 		{
@@ -2993,7 +3194,7 @@ class Control: DObject, IWindow // docmain
 	{
 		HDC hdc = GetDC(handle); // Create handle as necessary.
 		SetTextColor(hdc, foreColor.toRgb());
-		return new CommonGraphics(hwnd, hdc);
+		return new CommonGraphics(_hwnd, hdc);
 	}
 	
 	
@@ -3003,19 +3204,19 @@ class Control: DObject, IWindow // docmain
 		{
 			this(Control ctrl)
 			{
-				this.ctrl = ctrl;
+				this._ctrl = ctrl;
 			}
 			~this()
 			{
-				if (dataObj)
+				if (_dataObj)
 				{
-					GC.removeRoot(cast(void*)dataObj);
-					destroy(dataObj);
+					GC.removeRoot(cast(void*)_dataObj);
+					destroy(_dataObj);
 				}
 			}
 			
 			
-			extern(Windows):
+		extern(Windows):
 			override HRESULT QueryInterface(IID* riid, void** ppv)
 			{
 				if(*riid == _IID_IDropTarget)
@@ -3047,9 +3248,9 @@ class Control: DObject, IWindow // docmain
 					//dataObj = new ComToDdataObject(pDataObject);
 					ensureDataObj(pDataObject);
 					
-					scope DragEventArgs ea = new DragEventArgs(dataObj, cast(int)grfKeyState, pt.x, pt.y, 
+					scope DragEventArgs ea = new DragEventArgs(_dataObj, cast(int)grfKeyState, pt.x, pt.y, 
 						cast(DragDropEffects)*pdwEffect, DragDropEffects.NONE); // TODO: ?
-					ctrl.onDragEnter(ea);
+					_ctrl.onDragEnter(ea);
 					*pdwEffect = ea.effect;
 					
 					result = S_OK;
@@ -3071,11 +3272,11 @@ class Control: DObject, IWindow // docmain
 				
 				try
 				{
-					assert(dataObj !is null);
+					assert(_dataObj !is null);
 					
-					scope DragEventArgs ea = new DragEventArgs(dataObj, cast(int)grfKeyState, pt.x, pt.y, 
+					scope DragEventArgs ea = new DragEventArgs(_dataObj, cast(int)grfKeyState, pt.x, pt.y, 
 						cast(DragDropEffects)*pdwEffect, DragDropEffects.NONE); // TODO: ?
-					ctrl.onDragOver(ea);
+					_ctrl.onDragOver(ea);
 					*pdwEffect = ea.effect;
 					
 					result = S_OK;
@@ -3097,7 +3298,7 @@ class Control: DObject, IWindow // docmain
 				
 				try
 				{
-					ctrl.onDragLeave(EventArgs.empty);
+					_ctrl.onDragLeave(EventArgs.empty);
 					
 					killDataObj();
 					
@@ -3123,9 +3324,9 @@ class Control: DObject, IWindow // docmain
 					//assert(dataObj !is null);
 					ensureDataObj(pDataObject);
 					
-					scope DragEventArgs ea = new DragEventArgs(dataObj, cast(int)grfKeyState, pt.x, pt.y, 
+					scope DragEventArgs ea = new DragEventArgs(_dataObj, cast(int)grfKeyState, pt.x, pt.y, 
 						cast(DragDropEffects)*pdwEffect, DragDropEffects.NONE); // TODO: ?
-					ctrl.onDragDrop(ea);
+					_ctrl.onDragDrop(ea);
 					*pdwEffect = ea.effect;
 					
 					result = S_OK;
@@ -3141,25 +3342,24 @@ class Control: DObject, IWindow // docmain
 			}
 			
 			
-			private:
+		private:
 			
-			Control ctrl;
-			//dfl.data.IDataObject dataObj;
-			ComToDdataObject dataObj;
+			Control _ctrl;
+			ComToDdataObject _dataObj; //dfl.data.IDataObject dataObj;
 			
 			
 			void ensureDataObj(dfl.internal.wincom.IDataObject pDataObject)
 			{
-				if(!dataObj)
+				if(!_dataObj)
 				{
-					dataObj = new ComToDdataObject(pDataObject);
-					GC.addRoot(cast(void*)dataObj);
+					_dataObj = new ComToDdataObject(pDataObject);
+					GC.addRoot(cast(void*)_dataObj);
 				}
-				else if (!dataObj.isSameDataObject(pDataObject))
+				else if (!_dataObj.isSameDataObject(pDataObject))
 				{
-					GC.removeRoot(cast(void*)dataObj);
-					dataObj = new ComToDdataObject(pDataObject);
-					GC.addRoot(cast(void*)dataObj);
+					GC.removeRoot(cast(void*)_dataObj);
+					_dataObj = new ComToDdataObject(pDataObject);
+					GC.addRoot(cast(void*)_dataObj);
 				}
 			}
 			
@@ -3205,12 +3405,12 @@ class Control: DObject, IWindow // docmain
 		{
 			this(Control ctrl)
 			{
-				this.ctrl = ctrl;
-				mbtns = Control.mouseButtons;
+				this._ctrl = ctrl;
+				_mbtns = Control.mouseButtons;
 			}
 			
 			
-			extern(Windows):
+		extern(Windows):
 			override HRESULT QueryInterface(IID* riid, void** ppv)
 			{
 				if(*riid == _IID_IDropSource)
@@ -3247,7 +3447,7 @@ class Control: DObject, IWindow // docmain
 					}
 					else
 					{
-						if(mbtns & MouseButtons.LEFT)
+						if(_mbtns & MouseButtons.LEFT)
 						{
 							if(!(grfKeyState & MK_LBUTTON))
 							{
@@ -3263,7 +3463,7 @@ class Control: DObject, IWindow // docmain
 								goto qdoit;
 							}
 						}
-						if(mbtns & MouseButtons.RIGHT)
+						if(_mbtns & MouseButtons.RIGHT)
 						{
 							if(!(grfKeyState & MK_RBUTTON))
 							{
@@ -3279,7 +3479,7 @@ class Control: DObject, IWindow // docmain
 								goto qdoit;
 							}
 						}
-						if(mbtns & MouseButtons.MIDDLE)
+						if(_mbtns & MouseButtons.MIDDLE)
 						{
 							if(!(grfKeyState & MK_MBUTTON))
 							{
@@ -3299,10 +3499,10 @@ class Control: DObject, IWindow // docmain
 						act = cast(DragAction)DragAction.CONTINUE;
 					}
 					
-					qdoit:
+				qdoit:
 					scope QueryContinueDragEventArgs ea = new QueryContinueDragEventArgs(cast(int)grfKeyState,
 						fEscapePressed != FALSE, act); // TODO: ?
-					ctrl.onQueryContinueDrag(ea);
+					_ctrl.onQueryContinueDrag(ea);
 					
 					result = cast(HRESULT)ea.action;
 				}
@@ -3324,7 +3524,7 @@ class Control: DObject, IWindow // docmain
 				try
 				{
 					scope GiveFeedbackEventArgs ea = new GiveFeedbackEventArgs(cast(DragDropEffects)dwEffect, true);
-					ctrl.onGiveFeedback(ea);
+					_ctrl.onGiveFeedback(ea);
 					
 					result = ea.useDefaultCursors ? DRAGDROP_S_USEDEFAULTCURSORS : S_OK;
 				}
@@ -3339,9 +3539,9 @@ class Control: DObject, IWindow // docmain
 			}
 			
 			
-			private:
-			Control ctrl;
-			MouseButtons mbtns;
+		private:
+			Control _ctrl;
+			MouseButtons _mbtns;
 		}
 		
 		
@@ -3362,14 +3562,11 @@ class Control: DObject, IWindow // docmain
 		/// Perform a drag/drop operation.
 		final DragDropEffects doDragDrop(dfl.data.IDataObject dataObj, DragDropEffects allowedEffects)
 		{
-			Object foo = cast(Object)dataObj; // Hold a reference to the Object...
+			Object foo = cast(Object)dataObj; // NOTE: Hold a reference to the Object...
 			
 			DWORD effect;
-			DropSource dropsrc;
-			dfl.internal.wincom.IDataObject dropdata;
-			
-			dropsrc = new DropSource(this);
-			dropdata = new DtoComDataObject(dataObj);
+			DropSource dropsrc = new DropSource(this);
+			dfl.internal.wincom.IDataObject dropdata = new DtoComDataObject(dataObj);
 			
 			// dataObj seems to be killed too early.
 			switch(DoDragDrop(dropdata, dropsrc, cast(DWORD)allowedEffects, &effect))
@@ -3411,13 +3608,13 @@ class Control: DObject, IWindow // docmain
 	{
 		if(!isHandleCreated)
 			return super.opEquals(ctrl);
-		return hwnd == ctrl.hwnd;
+		return _hwnd == ctrl._hwnd;
 	}
 	
 	
 	override size_t toHash() const nothrow @trusted
 	{
-		return hashOf(hwnd);
+		return hashOf(_hwnd);
 	}
 	
 
@@ -3432,7 +3629,7 @@ class Control: DObject, IWindow // docmain
 	
 	int opCmp(Control ctrl)
 	{
-		if(!isHandleCreated || hwnd != ctrl.hwnd)
+		if(!isHandleCreated || _hwnd != ctrl._hwnd)
 			return super.opCmp(ctrl);
 		return 0;
 	}
@@ -3441,7 +3638,7 @@ class Control: DObject, IWindow // docmain
 	/// Set focus.
 	final bool focus()
 	{
-		return SetFocus(hwnd) != HWND.init;
+		return SetFocus(_hwnd) != HWND.init;
 	}
 	
 	
@@ -3477,8 +3674,7 @@ class Control: DObject, IWindow // docmain
 	///
 	final Control getChildAtPoint(Point pt)
 	{
-		HWND hwChild;
-		hwChild = ChildWindowFromPoint(hwnd, pt.point);
+		HWND hwChild = ChildWindowFromPoint(_hwnd, pt.point);
 		if(!hwChild)
 			return null;
 		return fromChildHandle(hwChild);
@@ -3505,9 +3701,9 @@ class Control: DObject, IWindow // docmain
 	
 	package final void redrawEntire()
 	{
-		if(hwnd)
+		if(_hwnd)
 		{
-			SetWindowPos(hwnd, HWND.init, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_DRAWFRAME | SWP_NOMOVE
+			SetWindowPos(_hwnd, HWND.init, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_DRAWFRAME | SWP_NOMOVE
 				| SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
 		}
 	}
@@ -3515,9 +3711,9 @@ class Control: DObject, IWindow // docmain
 	
 	package final void recalcEntire()
 	{
-		if(hwnd)
+		if(_hwnd)
 		{
-			SetWindowPos(hwnd, HWND.init, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE
+			SetWindowPos(_hwnd, HWND.init, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE
 				| SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
 		}
 	}
@@ -3526,61 +3722,61 @@ class Control: DObject, IWindow // docmain
 	///
 	final void invalidate()
 	{
-		if(!hwnd)
+		if(!_hwnd)
 			return;
 		
-		RedrawWindow(hwnd, null, HRGN.init, RDW_ERASE | RDW_INVALIDATE | RDW_NOCHILDREN);
+		RedrawWindow(_hwnd, null, HRGN.init, RDW_ERASE | RDW_INVALIDATE | RDW_NOCHILDREN);
 	}
 	
 	/// ditto
 	final void invalidate(bool andChildren)
 	{
-		if(!hwnd)
+		if(!_hwnd)
 			return;
 		
-		RedrawWindow(hwnd, null, HRGN.init, RDW_ERASE | RDW_INVALIDATE | (andChildren ? RDW_ALLCHILDREN : RDW_NOCHILDREN));
+		RedrawWindow(_hwnd, null, HRGN.init, RDW_ERASE | RDW_INVALIDATE | (andChildren ? RDW_ALLCHILDREN : RDW_NOCHILDREN));
 	}
 	
 	/// ditto
 	final void invalidate(Rect r)
 	{
-		if(!hwnd)
+		if(!_hwnd)
 			return;
 		
 		RECT rect;
 		r.getRect(&rect);
 		
-		RedrawWindow(hwnd, &rect, HRGN.init, RDW_ERASE | RDW_INVALIDATE | RDW_NOCHILDREN);
+		RedrawWindow(_hwnd, &rect, HRGN.init, RDW_ERASE | RDW_INVALIDATE | RDW_NOCHILDREN);
 	}
 	
 	/// ditto
 	final void invalidate(Rect r, bool andChildren)
 	{
-		if(!hwnd)
+		if(!_hwnd)
 			return;
 		
 		RECT rect;
 		r.getRect(&rect);
 		
-		RedrawWindow(hwnd, &rect, HRGN.init, RDW_ERASE | RDW_INVALIDATE | (andChildren ? RDW_ALLCHILDREN : RDW_NOCHILDREN));
+		RedrawWindow(_hwnd, &rect, HRGN.init, RDW_ERASE | RDW_INVALIDATE | (andChildren ? RDW_ALLCHILDREN : RDW_NOCHILDREN));
 	}
 	
 	/// ditto
 	final void invalidate(Region rgn)
 	{
-		if(!hwnd)
+		if(!_hwnd)
 			return;
 		
-		RedrawWindow(hwnd, null, rgn.handle, RDW_ERASE | RDW_INVALIDATE | RDW_NOCHILDREN);
+		RedrawWindow(_hwnd, null, rgn.handle, RDW_ERASE | RDW_INVALIDATE | RDW_NOCHILDREN);
 	}
 	
 	/// ditto
 	final void invalidate(Region rgn, bool andChildren)
 	{
-		if(!hwnd)
+		if(!_hwnd)
 			return;
 		
-		RedrawWindow(hwnd, null, rgn.handle, RDW_ERASE | RDW_INVALIDATE | (andChildren ? RDW_ALLCHILDREN : RDW_NOCHILDREN));
+		RedrawWindow(_hwnd, null, rgn.handle, RDW_ERASE | RDW_INVALIDATE | (andChildren ? RDW_ALLCHILDREN : RDW_NOCHILDREN));
 	}
 	
 	
@@ -3588,17 +3784,17 @@ class Control: DObject, IWindow // docmain
 	// Redraws the entire control, including nonclient area.
 	final void redraw()
 	{
-		if(!hwnd)
+		if(!_hwnd)
 			return;
 		
-		RedrawWindow(hwnd, null, HRGN.init, RDW_ERASE | RDW_INVALIDATE | RDW_FRAME);
+		RedrawWindow(_hwnd, null, HRGN.init, RDW_ERASE | RDW_INVALIDATE | RDW_FRAME);
 	}
 	
 	
 	/// Returns true if the window does not belong to the current thread.
 	@property bool invokeRequired() // getter
 	{
-		DWORD tid = GetWindowThreadProcessId(hwnd, null);
+		DWORD tid = GetWindowThreadProcessId(_hwnd, null);
 		return tid != GetCurrentThreadId();
 	}
 	
@@ -3614,7 +3810,7 @@ class Control: DObject, IWindow // docmain
 	// Exceptions are propagated back to the caller of invoke().
 	final Object invoke(Object delegate(Object[]) dg, Object[] args ...)
 	{
-		if(!hwnd)
+		if(!_hwnd)
 			badInvokeHandle();
 		
 		static assert((DflInvokeParam*).sizeof <= LPARAM.sizeof);
@@ -3642,7 +3838,7 @@ class Control: DObject, IWindow // docmain
 		dflInvokeParam.nparams = args.length;
 		dflInvokeParam.params[0] = cast(size_t)&dip;
 		
-		if(LRESULT_DFL_INVOKE != SendMessageA(hwnd, wmDfl, WPARAM_DFL_INVOKE_PARAMS, cast(LPARAM)&dflInvokeParam))
+		if(LRESULT_DFL_INVOKE != SendMessageA(_hwnd, wmDfl, WPARAM_DFL_INVOKE_PARAMS, cast(LPARAM)&dflInvokeParam))
 			throw new DflException("Invoke failure");
 		if(dflInvokeParam.exception)
 			throw dflInvokeParam.exception;
@@ -3653,7 +3849,7 @@ class Control: DObject, IWindow // docmain
 	/// ditto
 	final void invoke(void delegate() dg)
 	{
-		if(!hwnd)
+		if(!_hwnd)
 			badInvokeHandle();
 		
 		static assert((DflInvokeParam*).sizeof <= LPARAM.sizeof);
@@ -3678,7 +3874,7 @@ class Control: DObject, IWindow // docmain
 		dflInvokeParam.nparams = 0;
 		dflInvokeParam.params[0] = cast(size_t)&dip;
 		
-		if(LRESULT_DFL_INVOKE != SendMessageA(hwnd, wmDfl, WPARAM_DFL_INVOKE_NOPARAMS, cast(LPARAM)&dflInvokeParam))
+		if(LRESULT_DFL_INVOKE != SendMessageA(_hwnd, wmDfl, WPARAM_DFL_INVOKE_NOPARAMS, cast(LPARAM)&dflInvokeParam))
 			throw new DflException("Invoke failure");
 		if(dflInvokeParam.exception)
 			throw dflInvokeParam.exception;
@@ -3694,7 +3890,7 @@ class Control: DObject, IWindow // docmain
 	// trigger the threadException event or the default exception dialog.
 	final void delayInvoke(void function() fn)
 	{
-		if(!hwnd)
+		if(!_hwnd)
 			badInvokeHandle();
 		
 		static assert((DflInvokeParam*).sizeof <= LPARAM.sizeof);
@@ -3714,7 +3910,7 @@ class Control: DObject, IWindow // docmain
 		dflInvokeParam.nparams = 0;
 		dflInvokeParam.params[0] = cast(size_t)fn;
 
-		PostMessageA(hwnd, wmDfl, WPARAM_DFL_DELAY_INVOKE_NOPARAMS, cast(LPARAM)dflInvokeParam);
+		PostMessageA(_hwnd, wmDfl, WPARAM_DFL_DELAY_INVOKE_NOPARAMS, cast(LPARAM)dflInvokeParam);
 	}
 	
 	/// ditto
@@ -3725,7 +3921,7 @@ class Control: DObject, IWindow // docmain
 	// It is unsafe to pass references to a delayed function.
 	final void delayInvoke(void function(Control, size_t[]) fn, size_t[] params ...)
 	{
-		if(!hwnd)
+		if(!_hwnd)
 			badInvokeHandle();
 		
 		static assert((DflInvokeParam*).sizeof <= LPARAM.sizeof);
@@ -3740,7 +3936,7 @@ class Control: DObject, IWindow // docmain
 		dflInvokeParams.nparams = params.length;
 		dflInvokeParams.params.ptr[0 .. params.length] = params[];
 		
-		PostMessageA(hwnd, wmDfl, WPARAM_DFL_DELAY_INVOKE_PARAMS, cast(LPARAM)dflInvokeParams);
+		PostMessageA(_hwnd, wmDfl, WPARAM_DFL_DELAY_INVOKE_PARAMS, cast(LPARAM)dflInvokeParams);
 	}
 	
 	deprecated alias beginInvoke = delayInvoke;
@@ -3749,8 +3945,7 @@ class Control: DObject, IWindow // docmain
 	///
 	static bool isMnemonic(dchar charCode, Dstring text)
 	{
-		size_t ui;
-		for(ui = 0; ui != text.length; ui++)
+		for(size_t ui = 0; ui != text.length; ui++)
 		{
 			if('&' == text[ui])
 			{
@@ -3770,7 +3965,7 @@ class Control: DObject, IWindow // docmain
 	/// Converts a screen Point to a client Point.
 	final Point pointToClient(Point pt)
 	{
-		ScreenToClient(hwnd, &pt.point);
+		ScreenToClient(_hwnd, &pt.point);
 		return pt;
 	}
 	
@@ -3778,7 +3973,7 @@ class Control: DObject, IWindow // docmain
 	/// Converts a client Point to a screen Point.
 	final Point pointToScreen(Point pt)
 	{
-		ClientToScreen(hwnd, &pt.point);
+		ClientToScreen(_hwnd, &pt.point);
 		return pt;
 	}
 	
@@ -3789,7 +3984,7 @@ class Control: DObject, IWindow // docmain
 		RECT rect;
 		r.getRect(&rect);
 		
-		MapWindowPoints(HWND.init, hwnd, cast(POINT*)&rect, 2);
+		MapWindowPoints(HWND.init, _hwnd, cast(POINT*)&rect, 2);
 		return Rect(&rect);
 	}
 	
@@ -3800,7 +3995,7 @@ class Control: DObject, IWindow // docmain
 		RECT rect;
 		r.getRect(&rect);
 		
-		MapWindowPoints(hwnd, HWND.init, cast(POINT*)&rect, 2);
+		MapWindowPoints(_hwnd, HWND.init, cast(POINT*)&rect, 2);
 		return Rect(&rect);
 	}
 	
@@ -3897,12 +4092,9 @@ class Control: DObject, IWindow // docmain
 	///
 	final Size getAutoScaleSize(Font f)
 	{
-		Size result;
-		Graphics g;
-		g = createGraphics();
-		result = g.getScaleSize(f);
-		g.dispose();
-		return result;
+		Graphics g = createGraphics();
+		scope(exit) g.dispose();
+		return g.getScaleSize(f);
 	}
 	
 	/// ditto
@@ -4183,8 +4375,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	package final bool _selectNextControl(Form ctrltoplevel,
-		Control ctrl, bool forward, bool tabStopOnly, bool nested, bool wrap)
+	package final bool _selectNextControl(Form ctrltoplevel, Control ctrl, bool forward, bool tabStopOnly, bool nested, bool wrap)
 	{
 		if(!created)
 			return false;
@@ -4268,18 +4459,19 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	final void setBounds(int x, int y, int width, int height)
+	final void setBounds(int x_, int y_, int width_, int height_)
 	{
-		setBoundsCore(x, y, width, height, BoundsSpecified.ALL);
+		setBoundsCore(x_, y_, width_, height_, BoundsSpecified.ALL);
 	}
 	
 	/// ditto
-	final void setBounds(int x, int y, int width, int height, BoundsSpecified specified)
+	final void setBounds(int x_, int y_, int width_, int height_, BoundsSpecified specified)
 	{
-		setBoundsCore(x, y, width, height, specified);
+		setBoundsCore(x_, y_, width_, height_, specified);
 	}
 	
 	
+	///
 	override Dstring toString() const
 	{
 		return text;
@@ -4292,7 +4484,7 @@ class Control: DObject, IWindow // docmain
 		if(!created)
 			return;
 		
-		UpdateWindow(hwnd);
+		UpdateWindow(_hwnd);
 	}
 	
 	
@@ -4308,8 +4500,8 @@ class Control: DObject, IWindow // docmain
 	package final Rect _fetchBounds()
 	{
 		RECT r;
-		GetWindowRect(hwnd, &r);
-		HWND hwParent = GetParent(hwnd);
+		GetWindowRect(_hwnd, &r);
+		HWND hwParent = GetParent(_hwnd);
 		if(hwParent && (_style() & WS_CHILD))
 			MapWindowPoints(HWND.init, hwParent, cast(POINT*)&r, 2);
 		return Rect(&r);
@@ -4319,7 +4511,7 @@ class Control: DObject, IWindow // docmain
 	package final Size _fetchClientSize()
 	{
 		RECT r;
-		GetClientRect(hwnd, &r);
+		GetClientRect(_hwnd, &r);
 		return Size(r.right, r.bottom);
 	}
 	
@@ -4337,32 +4529,29 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
+	///
 	protected void onMoving(MovingEventArgs cea)
 	{
 		moving(this, cea);
 	}
 	
+
 	///
 	protected void onMove(EventArgs ea)
 	{
 		move(this, ea);
 	}
 	
-	
-	/+
-	protected void onLocationChanged(EventArgs ea)
-	{
-		locationChanged(this, ea);
-	}
-	+/
 	alias onLocationChanged = onMove;
 	
 	
+	///
 	protected void onSizing(SizingEventArgs cea)
 	{
 		sizing(this, cea);
 	}
 	
+
 	///
 	protected void onResize(EventArgs ea)
 	{
@@ -4538,20 +4727,19 @@ class Control: DObject, IWindow // docmain
 	
 	private void _propagateFontAmbience()
 	{
-		Font fon;
-		fon = font;
+		Font fon = font;
 		
 		
 		void pa(Control pc)
 		{
 			foreach(Control ctrl; pc.controls)
 			{
-				if(!ctrl.wfont) // If default.
+				if(!ctrl._windowFont) // If default.
 				{
 					if(fon is ctrl.font) // If same default.
 					{
 						if(ctrl.isHandleCreated)
-							SendMessageA(ctrl.hwnd, WM_SETFONT, cast(WPARAM)fon.handle, MAKELPARAM(true, 0));
+							SendMessageA(ctrl._hwnd, WM_SETFONT, cast(WPARAM)fon.handle, MAKELPARAM(true, 0));
 						ctrl.onFontChanged(EventArgs.empty);
 						
 						pa(ctrl); // Recursive.
@@ -4592,11 +4780,11 @@ class Control: DObject, IWindow // docmain
 	///
 	protected void onVisibleChanged(EventArgs ea)
 	{
-		if(wparent)
+		if(_parentWindow)
 		{
-			wparent.vchanged();
+			_parentWindow.vchanged();
 			suspendLayout(); // NOTE: exception could cause failure to restore.
-			wparent.alayout(this);
+			_parentWindow.alayout(this);
 			resumeLayout(false);
 		}
 		if(visible)
@@ -4609,7 +4797,7 @@ class Control: DObject, IWindow // docmain
 			// If no focus or the focused control is hidden, try to select something...
 			HWND hwfocus = GetFocus();
 			if(!hwfocus
-				|| (hwfocus == hwnd && !getStyle(ControlStyles.SELECTABLE))
+				|| (hwfocus == _hwnd && !getStyle(ControlStyles.SELECTABLE))
 				|| !IsWindowVisible(hwfocus))
 			{
 				selectNextControl(null, true, true, true, false);
@@ -4645,18 +4833,17 @@ class Control: DObject, IWindow // docmain
 	///
 	protected void onHandleCreated(EventArgs ea)
 	{
-		if(!(cbits & CBits.VSTYLE))
+		if(!(_cbits & CBits.VSTYLE))
 			_disableVisualStyle();
 		
-		Font fon;
-		fon = font;
+		Font fon = font;
 		if(fon)
-			SendMessageA(hwnd, WM_SETFONT, cast(WPARAM)fon.handle, 0);
+			SendMessageA(_hwnd, WM_SETFONT, cast(WPARAM)fon.handle, 0);
 		
-		if(wregion)
+		if(_windowRegion)
 		{
 			// Need to make a copy of the region.
-			SetWindowRgn(hwnd, dupHrgn(wregion.handle), true);
+			SetWindowRgn(_hwnd, dupHrgn(_windowRegion.handle), true);
 		}
 		
 		version(DFL_NO_DRAG_DROP) {} else
@@ -4687,7 +4874,7 @@ class Control: DObject, IWindow // docmain
 	{
 		RECT rect;
 		pea.clipRectangle.getRect(&rect);
-		FillRect(pea.graphics.handle, &rect, hbrBg);
+		FillRect(pea.graphics.handle, &rect, backgroundHbrush);
 	}
 	
 	
@@ -4741,7 +4928,7 @@ class Control: DObject, IWindow // docmain
 			//case 0x0019: //WM_CTLCOLOR; obsolete.
 				prepareDc(cast(HDC)m.wParam);
 				//assert(GetObjectA(hbrBg, 0, null));
-				m.result = cast(LRESULT)hbrBg;
+				m.result = cast(LRESULT)backgroundHbrush;
 				break;
 			
 			default:
@@ -4757,7 +4944,7 @@ class Control: DObject, IWindow // docmain
 	{
 		if(pt.x < 0 || pt.y < 0)
 			return HWND.init;
-		if(pt.x > wclientsz.width || pt.y > wclientsz.height)
+		if(pt.x > _clientWindowSize.width || pt.y > _clientWindowSize.height)
 			return HWND.init;
 		
 		// NOTE: doesn't include non-DFL windows...
@@ -4769,10 +4956,10 @@ class Control: DObject, IWindow // docmain
 			if(!ctrl.isHandleCreated) // Shouldn't..
 				continue;
 			if(ctrl.bounds.contains(pt))
-				return ctrl.hwnd;
+				return ctrl._hwnd;
 		}
 		
-		return hwnd; // Just over this control.
+		return _hwnd; // Just over this control.
 	}
 	
 	
@@ -4810,44 +4997,44 @@ class Control: DObject, IWindow // docmain
 		switch(msg.msg)
 		{
 			case WM_PAINT:
+			{
+				// This can't be done in BeginPaint() becuase part might get
+				// validated during this event ?
+				//RECT uprect;
+				//GetUpdateRect(hwnd, &uprect, true);
+				//onInvalidated(new InvalidateEventArgs(Rect(&uprect)));
+				
+				PAINTSTRUCT ps;
+				BeginPaint(msg.hWnd, &ps);
+				try
 				{
-					// This can't be done in BeginPaint() becuase part might get
-					// validated during this event ?
-					//RECT uprect;
-					//GetUpdateRect(hwnd, &uprect, true);
 					//onInvalidated(new InvalidateEventArgs(Rect(&uprect)));
 					
-					PAINTSTRUCT ps;
-					BeginPaint(msg.hWnd, &ps);
-					try
+					scope PaintEventArgs pea = new PaintEventArgs(new Graphics(ps.hdc, false), Rect(&ps.rcPaint));
+					
+					// Probably because ControlStyles.ALL_PAINTING_IN_WM_PAINT.
+					if(ps.fErase)
 					{
-						//onInvalidated(new InvalidateEventArgs(Rect(&uprect)));
-						
-						scope PaintEventArgs pea = new PaintEventArgs(new Graphics(ps.hdc, false), Rect(&ps.rcPaint));
-						
-						// Probably because ControlStyles.ALL_PAINTING_IN_WM_PAINT.
-						if(ps.fErase)
-						{
-							prepareDc(ps.hdc);
-							onPaintBackground(pea);
-						}
-						
 						prepareDc(ps.hdc);
-						onPaint(pea);
+						onPaintBackground(pea);
 					}
-					finally
-					{
-						EndPaint(hwnd, &ps);
-					}
+					
+					prepareDc(ps.hdc);
+					onPaint(pea);
+				}
+				finally
+				{
+					EndPaint(msg.hWnd, &ps);
 				}
 				return;
-			
+			}
+		
 			case WM_ERASEBKGND:
-				if(ctrlStyle & ControlStyles.OPAQUE)
+				if(_controlStyle & ControlStyles.OPAQUE)
 				{
 					msg.result = 1; // Erased.
 				}
-				else if(!(ctrlStyle & ControlStyles.ALL_PAINTING_IN_WM_PAINT))
+				else if(!(_controlStyle & ControlStyles.ALL_PAINTING_IN_WM_PAINT))
 				{
 					RECT uprect;
 					/+
@@ -4864,13 +5051,13 @@ class Control: DObject, IWindow // docmain
 					msg.result = 1; // Erased.
 				}
 				return;
-			
+		
 			case WM_PRINTCLIENT:
 				prepareDc(cast(HDC)msg.wParam);
-				scope PaintEventArgs pea = new PaintEventArgs(new Graphics(cast(HDC)msg.wParam, false), Rect(Point(0, 0), wclientsz));
+				scope PaintEventArgs pea = new PaintEventArgs(new Graphics(cast(HDC)msg.wParam, false), Rect(Point(0, 0), _clientWindowSize));
 				onPaint(pea);
 				return;
-			
+		
 			case WM_CTLCOLORSTATIC:
 			case WM_CTLCOLORLISTBOX:
 			case WM_CTLCOLOREDIT:
@@ -4878,113 +5065,113 @@ class Control: DObject, IWindow // docmain
 			case WM_CTLCOLORBTN:
 			//case WM_CTLCOLORDLG: // TODO: ?
 			//case 0x0019: //WM_CTLCOLOR; obsolete.
+			{
+				Control ctrl = fromChildHandle(cast(HWND)msg.lParam);
+				if(ctrl)
 				{
-					Control ctrl = fromChildHandle(cast(HWND)msg.lParam);
-					if(ctrl)
-					{
-						//ctrl.prepareDc(cast(HDC)msg.wParam);
-						//msg.result = cast(LRESULT)ctrl.hbrBg;
-						ctrl.onReflectedMessage(msg);
-						return;
-					}
+					//ctrl.prepareDc(cast(HDC)msg.wParam);
+					//msg.result = cast(LRESULT)ctrl.hbrBg;
+					ctrl.onReflectedMessage(msg);
+					return;
 				}
 				break;
-			
+			}
+		
 			case WM_WINDOWPOSCHANGED:
+			{
+				WINDOWPOS* wp = cast(WINDOWPOS*)msg.lParam;
+				bool needLayout = false;
+				
+				//if(!wp.hwndInsertAfter)
+				//	wp.flags |= SWP_NOZORDER; // TODO: ?
+				
+				bool didvis = false;
+				if(wp.flags & (SWP_HIDEWINDOW | SWP_SHOWWINDOW))
 				{
-					WINDOWPOS* wp = cast(WINDOWPOS*)msg.lParam;
-					bool needLayout = false;
-					
-					//if(!wp.hwndInsertAfter)
-					//	wp.flags |= SWP_NOZORDER; // TODO: ?
-					
-					bool didvis = false;
-					if(wp.flags & (SWP_HIDEWINDOW | SWP_SHOWWINDOW))
+					needLayout = true; // Only if not didvis / if not recreating.
+					if(!recreatingHandle) // NOTE: suppresses onVisibleChanged
 					{
-						needLayout = true; // Only if not didvis / if not recreating.
-						if(!recreatingHandle) // NOTE: suppresses onVisibleChanged
-						{
-							if(wp.flags & SWP_HIDEWINDOW) // Hiding.
-								_clicking = false;
-							onVisibleChanged(EventArgs.empty);
-							didvis = true;
-							//break; // Showing min/max includes other flags.
-						}
+						if(wp.flags & SWP_HIDEWINDOW) // Hiding.
+							_clicking = false;
+						onVisibleChanged(EventArgs.empty);
+						didvis = true;
+						//break; // Showing min/max includes other flags.
 					}
+				}
+				
+				if(!(wp.flags & SWP_NOZORDER) /+ || (wp.flags & SWP_SHOWWINDOW) +/)
+				{
+					if(_parentWindow)
+						_parentWindow.vchanged();
+				}
+				
+				if(!(wp.flags & SWP_NOMOVE))
+				{
+					onMove(EventArgs.empty);
+				}
+				
+				if(!(wp.flags & SWP_NOSIZE))
+				{
+					if(szdraw)
+						invalidate(true);
 					
-					if(!(wp.flags & SWP_NOZORDER) /+ || (wp.flags & SWP_SHOWWINDOW) +/)
-					{
-						if(wparent)
-							wparent.vchanged();
-					}
+					onResize(EventArgs.empty);
 					
-					if(!(wp.flags & SWP_NOMOVE))
-					{
-						onMove(EventArgs.empty);
-					}
+					needLayout = true;
+				}
+				
+				// Frame change results in a new client size.
+				if(wp.flags & SWP_FRAMECHANGED)
+				{
+					if(szdraw)
+						invalidate(true);
 					
-					if(!(wp.flags & SWP_NOSIZE))
+					needLayout = true;
+				}
+				
+				if(!didvis) // onVisibleChanged already triggers layout.
+				{
+					if(/+ (wp.flags & SWP_SHOWWINDOW) || +/ !(wp.flags & SWP_NOSIZE) ||
+						!(wp.flags & SWP_NOZORDER)) // z-order determines what is positioned first.
 					{
-						if(szdraw)
-							invalidate(true);
-						
-						onResize(EventArgs.empty);
-						
+						suspendLayout(); // NOTE: exception could cause failure to restore.
+						if(_parentWindow)
+							_parentWindow.alayout(this);
+						resumeLayout(false);
 						needLayout = true;
 					}
 					
-					// Frame change results in a new client size.
-					if(wp.flags & SWP_FRAMECHANGED)
+					if(needLayout)
 					{
-						if(szdraw)
-							invalidate(true);
-						
-						needLayout = true;
-					}
-					
-					if(!didvis) // onVisibleChanged already triggers layout.
-					{
-						if(/+ (wp.flags & SWP_SHOWWINDOW) || +/ !(wp.flags & SWP_NOSIZE) ||
-							!(wp.flags & SWP_NOZORDER)) // z-order determines what is positioned first.
-						{
-							suspendLayout(); // NOTE: exception could cause failure to restore.
-							if(wparent)
-								wparent.alayout(this);
-							resumeLayout(false);
-							needLayout = true;
-						}
-						
-						if(needLayout)
-						{
-							alayout(this);
-						}
+						alayout(this);
 					}
 				}
 				break;
-			
+			}
+		
 			case WM_WINDOWPOSCHANGING:
+			{
+				WINDOWPOS* wp = cast(WINDOWPOS*)msg.lParam;
+				
+				if (!(wp.flags & SWP_NOMOVE)
+					&& (location.x != wp.x || location.y != wp.y))
 				{
-					WINDOWPOS* wp = cast(WINDOWPOS*)msg.lParam;
-					
-					if (!(wp.flags & SWP_NOMOVE)
-					 && (location.x != wp.x || location.y != wp.y))
-					{
-						scope e = new MovingEventArgs(Point(wp.x, wp.y));
-						onMoving(e);
-						wp.x = e.x;
-						wp.y = e.y;
-					}
-					if (!(wp.flags & SWP_NOSIZE)
-					 && (width != wp.cx || height != wp.cy))
-					{
-						scope e = new SizingEventArgs(Size(wp.cx, wp.cy));
-						onSizing(e);
-						wp.cx = e.width;
-						wp.cy = e.height;
-					}
+					scope e = new MovingEventArgs(Point(wp.x, wp.y));
+					onMoving(e);
+					wp.x = e.x;
+					wp.y = e.y;
+				}
+				if (!(wp.flags & SWP_NOSIZE)
+					&& (width != wp.cx || height != wp.cy))
+				{
+					scope e = new SizingEventArgs(Size(wp.cx, wp.cy));
+					onSizing(e);
+					wp.cx = e.width;
+					wp.cy = e.height;
 				}
 				break;
-			
+			}
+		
 			case WM_MOUSEMOVE:
 				if(_clicking)
 				{
@@ -5000,7 +5187,7 @@ class Control: DObject, IWindow // docmain
 						
 						POINT pt;
 						GetCursorPos(&pt);
-						MapWindowPoints(HWND.init, hwnd, &pt, 1);
+						MapWindowPoints(HWND.init, _hwnd, &pt, 1);
 						scope MouseEventArgs mea = new MouseEventArgs(wparamMouseButtons(msg.wParam), 0, pt.x, pt.y, 0);
 						onMouseEnter(mea);
 						
@@ -5015,28 +5202,27 @@ class Control: DObject, IWindow // docmain
 				
 				onMouseMove(new MouseEventArgs(wparamMouseButtons(msg.wParam), 0, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam), 0));
 				break;
-			
+		
 			case WM_SETCURSOR:
 				// Just update it so that Control.defWndProc() can set it correctly.
-				if(cast(HWND)msg.wParam == hwnd)
+				if(cast(HWND)msg.wParam == _hwnd)
 				{
-					Cursor cur;
-					cur = cursor;
+					Cursor cur = cursor;
 					if(cur)
 					{
-						if(cast(HCURSOR)GetClassLongPtrA(hwnd, GCL_HCURSOR) != cur.handle)
-							SetClassLongPtrA(hwnd, GCL_HCURSOR, cast(LONG_PTR)cur.handle);
+						if(cast(HCURSOR)GetClassLongPtrA(_hwnd, GCL_HCURSOR) != cur.handle)
+							SetClassLongPtrA(_hwnd, GCL_HCURSOR, cast(LONG_PTR)cur.handle);
 					}
 					else
 					{
-						if(cast(HCURSOR)GetClassLongPtrA(hwnd, GCL_HCURSOR) != HCURSOR.init)
-							SetClassLongPtrA(hwnd, GCL_HCURSOR, cast(LONG_PTR)cast(HCURSOR)null);
+						if(cast(HCURSOR)GetClassLongPtrA(_hwnd, GCL_HCURSOR) != HCURSOR.init)
+							SetClassLongPtrA(_hwnd, GCL_HCURSOR, cast(LONG_PTR)cast(HCURSOR)null);
 					}
 					Control.defWndProc(msg);
 					return;
 				}
 				break;
-			
+		
 			/+
 			case WM_NEXTDLGCTL:
 				if(!LOWORD(msg.lParam))
@@ -5046,7 +5232,7 @@ class Control: DObject, IWindow // docmain
 				}
 				break;
 			+/
-			
+		
 			case WM_KEYDOWN:
 			case WM_KEYUP:
 			case WM_CHAR:
@@ -5073,215 +5259,202 @@ class Control: DObject, IWindow // docmain
 
 				//msg.result = !processKeyEventArgs(msg);
 				return;
-			
+		
 			case WM_MOUSEWHEEL: // Requires Windows 98 or NT4.
-				{
-					scope MouseEventArgs mea = new MouseEventArgs(wparamMouseButtons(LOWORD(msg.wParam)), 0, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.wParam), 0);
-					onMouseWheel(mea);
-				}
+			{
+				scope MouseEventArgs mea = new MouseEventArgs(wparamMouseButtons(LOWORD(msg.wParam)), 0, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.wParam), 0);
+				onMouseWheel(mea);
 				break;
-			
+			}
+		
 			case WM_MOUSEHOVER: // Requires Windows 95 with IE 5.5, 98 or NT4.
-				{
-					scope MouseEventArgs mea = new MouseEventArgs(wparamMouseButtons(msg.wParam), 0, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam), 0);
-					onMouseHover(mea);
-				}
+			{
+				scope MouseEventArgs mea = new MouseEventArgs(wparamMouseButtons(msg.wParam), 0, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam), 0);
+				onMouseHover(mea);
 				break;
-			
+			}
+		
 			case WM_MOUSELEAVE: // Requires Windows 95 with IE 5.5, 98 or NT4.
-				{
-					menter = false;
-					
-					POINT pt;
-					GetCursorPos(&pt);
-					MapWindowPoints(HWND.init, hwnd, &pt, 1);
-					scope MouseEventArgs mea = new MouseEventArgs(wparamMouseButtons(msg.wParam), 0, pt.x, pt.y, 0);
-					onMouseLeave(mea);
-				}
+			{
+				menter = false;
+				
+				POINT pt;
+				GetCursorPos(&pt);
+				MapWindowPoints(HWND.init, _hwnd, &pt, 1);
+				scope MouseEventArgs mea = new MouseEventArgs(wparamMouseButtons(msg.wParam), 0, pt.x, pt.y, 0);
+				onMouseLeave(mea);
 				break;
-			
+			}
+		
 			case WM_LBUTTONDOWN:
-				{
-					_clicking = true;
-					
-					scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.LEFT, 1, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam), 0);
-					onMouseDown(mea);
-					
-					//if(ctrlStyle & ControlStyles.SELECTABLE)
-					//	SetFocus(hwnd); // No, this goofs up stuff, including the ComboBox dropdown.
-				}
+			{
+				_clicking = true;
+				
+				scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.LEFT, 1, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam), 0);
+				onMouseDown(mea);
+				
+				//if(ctrlStyle & ControlStyles.SELECTABLE)
+				//	SetFocus(hwnd); // No, this goofs up stuff, including the ComboBox dropdown.
 				break;
-			
+			}
+		
 			case WM_RBUTTONDOWN:
-				{
-					scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.RIGHT, 1, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam), 0);
-					onMouseDown(mea);
-				}
+			{
+				scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.RIGHT, 1, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam), 0);
+				onMouseDown(mea);
 				break;
-			
+			}
+		
 			case WM_MBUTTONDOWN:
-				{
-					scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.MIDDLE, 1, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam), 0);
-					onMouseDown(mea);
-				}
+			{
+				scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.MIDDLE, 1, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam), 0);
+				onMouseDown(mea);
 				break;
-			
+			}
+		
 			case WM_LBUTTONUP:
+			{
+				if(msg.lParam == -1)
+					break;
+				
+				// Use temp in case of exception.
+				bool wasClicking = _clicking;
+				_clicking = false;
+				
+				scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.LEFT, 1, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam), 0);
+				onMouseUp(mea);
+				
+				if(wasClicking && (_controlStyle & ControlStyles.STANDARD_CLICK))
 				{
-					if(msg.lParam == -1)
-						break;
-					
-					// Use temp in case of exception.
-					bool wasClicking = _clicking;
-					_clicking = false;
-					
-					scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.LEFT, 1, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam), 0);
-					onMouseUp(mea);
-					
-					if(wasClicking && (ctrlStyle & ControlStyles.STANDARD_CLICK))
+					// See if the mouse up was over the control.
+					if(Rect(0, 0, _clientWindowSize.width, _clientWindowSize.height).contains(mea.x, mea.y))
 					{
-						// See if the mouse up was over the control.
-						if(Rect(0, 0, wclientsz.width, wclientsz.height).contains(mea.x, mea.y))
-						{
-							// Now make sure there's no child in the way.
-							//if(ChildWindowFromPoint(hwnd, Point(mea.x, mea.y).point) == hwnd) // Includes hidden windows.
-							if(pointOverVisibleChild(Point(mea.x, mea.y)) == hwnd)
-								onClick(EventArgs.empty);
-						}
+						// Now make sure there's no child in the way.
+						//if(ChildWindowFromPoint(hwnd, Point(mea.x, mea.y).point) == hwnd) // Includes hidden windows.
+						if(pointOverVisibleChild(Point(mea.x, mea.y)) == _hwnd)
+							onClick(EventArgs.empty);
 					}
 				}
 				break;
-			
-			version(CUSTOM_MSG_HOOK)
-			{}
-			else
-			{
+			}
+		
+			version(CUSTOM_MSG_HOOK) {} else {
 				case WM_DRAWITEM:
+				{
+					DRAWITEMSTRUCT* dis = cast(DRAWITEMSTRUCT*)msg.lParam;
+					if(dis.CtlType == ODT_MENU)
 					{
-						Control ctrl;
-						
-						DRAWITEMSTRUCT* dis = cast(DRAWITEMSTRUCT*)msg.lParam;
-						if(dis.CtlType == ODT_MENU)
+						// dis.hwndItem is the HMENU.
+					}
+					else
+					{
+						Control ctrl = Control.fromChildHandle(dis.hwndItem);
+						if(ctrl)
 						{
-							// dis.hwndItem is the HMENU.
-						}
-						else
-						{
-							ctrl = Control.fromChildHandle(dis.hwndItem);
-							if(ctrl)
-							{
-								//msg.result = ctrl.customMsg(*(cast(CustomMsg*)&msg));
-								ctrl.onReflectedMessage(msg);
-								return;
-							}
+							//msg.result = ctrl.customMsg(*(cast(CustomMsg*)&msg));
+							ctrl.onReflectedMessage(msg);
+							return;
 						}
 					}
 					break;
+				}
 				
 				case WM_MEASUREITEM:
+				{
+					MEASUREITEMSTRUCT* mis = cast(MEASUREITEMSTRUCT*)msg.lParam;
+					if(!(mis.CtlType == ODT_MENU))
 					{
-						Control ctrl;
-						
-						MEASUREITEMSTRUCT* mis = cast(MEASUREITEMSTRUCT*)msg.lParam;
-						if(!(mis.CtlType == ODT_MENU))
+						Control ctrl = Control.fromChildHandle(cast(HWND)mis.CtlID);
+						if(ctrl)
 						{
-							ctrl = Control.fromChildHandle(cast(HWND)mis.CtlID);
-							if(ctrl)
-							{
-								//msg.result = ctrl.customMsg(*(cast(CustomMsg*)&msg));
-								ctrl.onReflectedMessage(msg);
-								return;
-							}
+							//msg.result = ctrl.customMsg(*(cast(CustomMsg*)&msg));
+							ctrl.onReflectedMessage(msg);
+							return;
 						}
 					}
 					break;
+				}
 				
 				case WM_COMMAND:
+				{
+					HWND hwnd = cast(HWND)msg.lParam;
+					Control ctrl = Control.fromChildHandle(hwnd);
+					if(ctrl)
 					{
-						HWND hwnd = cast(HWND)msg.lParam;
-						Control ctrl = Control.fromChildHandle(hwnd);
-						if(ctrl)
-						{
-							//msg.result = ctrl.customMsg(*(cast(CustomMsg*)&msg));
-							ctrl.onReflectedMessage(msg);
-							return;
-						}
-						else
-						{
-							int menuID = LOWORD(msg.wParam);
-							MenuItem m = cast(MenuItem)Application.lookupMenuID(menuID);
-							if(m)
-							{
-								//msg.result = m.customMsg(*(cast(CustomMsg*)&msg));
-								m._reflectMenu(msg);
-								//return; // TODO: ?
-							}
-							return;
-						}
+						//msg.result = ctrl.customMsg(*(cast(CustomMsg*)&msg));
+						ctrl.onReflectedMessage(msg);
+						return;
 					}
-				
-				case WM_NOTIFY:
+					else
 					{
-						NMHDR* nmh = cast(NMHDR*)msg.lParam;
-						Control ctrl = Control.fromChildHandle(nmh.hwndFrom);
-						if(ctrl)
-						{
-							//msg.result = ctrl.customMsg(*(cast(CustomMsg*)&msg));
-							ctrl.onReflectedMessage(msg);
-							return;
-						}
-					}
-					break;
-				
-				case WM_HSCROLL:
-				case WM_VSCROLL:
-					{
-						Control ctrl;
-						HWND hWnd;
-
-						hWnd = cast(HWND)msg.lParam;
-						ctrl = Control.fromChildHandle(hWnd);
-						if(ctrl)
-						{
-							ctrl.onReflectedMessage(msg);
-							return;
-						}
-					}
-					break;
-
-				case WM_MENUSELECT:
-					{
-						UINT mflags;
-						UINT uitem;
-						int mid;
-						MenuItem m;
-						
-						mflags = HIWORD(msg.wParam);
-						uitem = LOWORD(msg.wParam); // Depends on the flags.
-						
-						if(mflags & MF_SYSMENU)
-							break;
-						
-						if(mflags & MF_POPUP)
-						{
-							// -uitem- is an index.
-							mid = GetMenuItemID(cast(HMENU)msg.lParam, uitem);
-						}
-						else
-						{
-							// -uitem- is the item identifier.
-							mid = uitem;
-						}
-						
-						m = cast(MenuItem)Application.lookupMenuID(mid);
+						int menuID = LOWORD(msg.wParam);
+						MenuItem m = cast(MenuItem)Application.lookupMenuID(menuID);
 						if(m)
 						{
 							//msg.result = m.customMsg(*(cast(CustomMsg*)&msg));
 							m._reflectMenu(msg);
-							//return;
+							//return; // TODO: ?
 						}
+						return;
+					}
+				}
+				
+				case WM_NOTIFY:
+				{
+					NMHDR* nmh = cast(NMHDR*)msg.lParam;
+					Control ctrl = Control.fromChildHandle(nmh.hwndFrom);
+					if(ctrl)
+					{
+						//msg.result = ctrl.customMsg(*(cast(CustomMsg*)&msg));
+						ctrl.onReflectedMessage(msg);
+						return;
 					}
 					break;
+				}
+				
+				case WM_HSCROLL:
+				case WM_VSCROLL:
+				{
+					HWND hWnd = cast(HWND)msg.lParam;
+					Control ctrl = Control.fromChildHandle(hWnd);
+					if(ctrl)
+					{
+						ctrl.onReflectedMessage(msg);
+						return;
+					}
+					break;
+				}
+
+				case WM_MENUSELECT:
+				{
+					UINT mflags = HIWORD(msg.wParam);
+					
+					if(mflags & MF_SYSMENU)
+						break;
+					
+					int mid;
+					UINT uitem = LOWORD(msg.wParam); // Depends on the flags.
+
+					if(mflags & MF_POPUP)
+					{
+						// -uitem- is an index.
+						mid = GetMenuItemID(cast(HMENU)msg.lParam, uitem);
+					}
+					else
+					{
+						// -uitem- is the item identifier.
+						mid = uitem;
+					}
+					
+					MenuItem m = cast(MenuItem)Application.lookupMenuID(mid);
+					if(m)
+					{
+						//msg.result = m.customMsg(*(cast(CustomMsg*)&msg));
+						m._reflectMenu(msg);
+						//return;
+					}
+					break;
+				}
 				
 				case WM_INITMENUPOPUP:
 					if(HIWORD(msg.lParam))
@@ -5290,10 +5463,8 @@ class Control: DObject, IWindow // docmain
 					}
 					else
 					{
-						MenuItem m;
-						
-						//m = cast(MenuItem)Application.lookupMenuID(GetMenuItemID(cast(HMENU)msg.wParam, LOWORD(msg.lParam)));
-						m = cast(MenuItem)Application.lookupMenu(cast(HMENU)msg.wParam);
+						//MenuItem m = cast(MenuItem)Application.lookupMenuID(GetMenuItemID(cast(HMENU)msg.wParam, LOWORD(msg.lParam)));
+						MenuItem m = cast(MenuItem)Application.lookupMenu(cast(HMENU)msg.wParam);
 						if(m)
 						{
 							//msg.result = m.customMsg(*(cast(CustomMsg*)&msg));
@@ -5304,61 +5475,59 @@ class Control: DObject, IWindow // docmain
 					break;
 				
 				case WM_INITMENU:
+				{
+					ContextMenu m = cast(ContextMenu)Application.lookupMenu(cast(HMENU)msg.wParam);
+					if(m)
 					{
-						ContextMenu m;
-						
-						m = cast(ContextMenu)Application.lookupMenu(cast(HMENU)msg.wParam);
-						if(m)
-						{
-							//msg.result = m.customMsg(*(cast(CustomMsg*)&msg));
-							m._reflectMenu(msg);
-							//return;
-						}
+						//msg.result = m.customMsg(*(cast(CustomMsg*)&msg));
+						m._reflectMenu(msg);
+						//return;
 					}
 					break;
+				}
+			}
+		
+			case WM_RBUTTONUP:
+			{
+				scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.RIGHT, 1, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam), 0);
+				onMouseUp(mea);
+				break;
+			}
+		
+			case WM_MBUTTONUP:
+			{
+				scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.MIDDLE, 1, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam), 0);
+				onMouseUp(mea);
+				break;
+			}
+		
+			case WM_LBUTTONDBLCLK:
+			{
+				scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.LEFT, 2, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam), 0);
+				onMouseDown(mea);
+				
+				if((_controlStyle & (ControlStyles.STANDARD_CLICK | ControlStyles.STANDARD_DOUBLE_CLICK))
+					== (ControlStyles.STANDARD_CLICK | ControlStyles.STANDARD_DOUBLE_CLICK))
+				{
+					onDoubleClick(EventArgs.empty);
+				}
+				break;
+			}
+		
+			case WM_RBUTTONDBLCLK:
+			{
+				scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.RIGHT, 2, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam), 0);
+				onMouseDown(mea);
+				break;
 			}
 			
-			case WM_RBUTTONUP:
-				{
-					scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.RIGHT, 1, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam), 0);
-					onMouseUp(mea);
-				}
-				break;
-			
-			case WM_MBUTTONUP:
-				{
-					scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.MIDDLE, 1, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam), 0);
-					onMouseUp(mea);
-				}
-				break;
-			
-			case WM_LBUTTONDBLCLK:
-				{
-					scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.LEFT, 2, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam), 0);
-					onMouseDown(mea);
-					
-					if((ctrlStyle & (ControlStyles.STANDARD_CLICK | ControlStyles.STANDARD_DOUBLE_CLICK))
-						== (ControlStyles.STANDARD_CLICK | ControlStyles.STANDARD_DOUBLE_CLICK))
-					{
-						onDoubleClick(EventArgs.empty);
-					}
-				}
-				break;
-			
-			case WM_RBUTTONDBLCLK:
-				{
-					scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.RIGHT, 2, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam), 0);
-					onMouseDown(mea);
-				}
-				break;
-			
 			case WM_MBUTTONDBLCLK:
-				{
-					scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.MIDDLE, 2, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam), 0);
-					onMouseDown(mea);
-				}
+			{
+				scope MouseEventArgs mea = new MouseEventArgs(MouseButtons.MIDDLE, 2, GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam), 0);
+				onMouseDown(mea);
 				break;
-			
+			}
+		
 			case WM_SETFOCUS:
 				_wmSetFocus();
 				// defWndProc* Form focuses a child.
@@ -5409,8 +5578,8 @@ class Control: DObject, IWindow // docmain
 				
 				// Need to fetch it because cast(char*)lparam isn't always accessible ?
 				// Should this go in _wndProc()? Need to defWndProc() first ?
-				if(ctrlStyle & ControlStyles.CACHE_TEXT)
-					wtext = _fetchText();
+				if(_controlStyle & ControlStyles.CACHE_TEXT)
+					_windowText = _fetchText();
 				
 				onTextChanged(EventArgs.empty);
 				return;
@@ -5423,7 +5592,7 @@ class Control: DObject, IWindow // docmain
 				
 				// defWndProc*
 				return;
-			
+		
 			/+
 			case WM_STYLECHANGED:
 				{
@@ -5440,7 +5609,7 @@ class Control: DObject, IWindow // docmain
 				}
 				break;
 			+/
-			
+		
 			case WM_ACTIVATE:
 				switch(LOWORD(msg.wParam))
 				{
@@ -5451,11 +5620,11 @@ class Control: DObject, IWindow // docmain
 					default:
 				}
 				break;
-			
+		
 			case WM_CONTEXTMENU:
-				if(hwnd == cast(HWND)msg.wParam)
+				if(_hwnd == cast(HWND)msg.wParam)
 				{
-					if(cmenu)
+					if(_contextMenu)
 					{
 						// Shift+F10 causes xPos and yPos to be -1.
 						
@@ -5467,27 +5636,27 @@ class Control: DObject, IWindow // docmain
 							point = Point(GET_X_LPARAM(msg.lParam), GET_Y_LPARAM(msg.lParam));
 						
 						SetFocus(handle); // TODO: ?
-						cmenu.show(this, point);
+						_contextMenu.show(this, point);
 						
 						return;
 					}
 				}
 				break;
-			
+		
 			case WM_HELP:
+			{
+				HELPINFO* hi = cast(HELPINFO*)msg.lParam;
+				
+				scope HelpEventArgs hea = new HelpEventArgs(Point(hi.MousePos.x, hi.MousePos.y));
+				onHelpRequested(hea);
+				if(hea.handled)
 				{
-					HELPINFO* hi = cast(HELPINFO*)msg.lParam;
-					
-					scope HelpEventArgs hea = new HelpEventArgs(Point(hi.MousePos.x, hi.MousePos.y));
-					onHelpRequested(hea);
-					if(hea.handled)
-					{
-						msg.result = TRUE;
-						return;
-					}
+					msg.result = TRUE;
+					return;
 				}
 				break;
-			
+			}
+		
 			case WM_SYSCOLORCHANGE:
 				onSystemColorsChanged(EventArgs.empty);
 				
@@ -5520,9 +5689,9 @@ class Control: DObject, IWindow // docmain
 					SendMessageA(ctrl.handle, WM_PALETTECHANGED, msg.wParam, msg.lParam);
 				}
 				break;
-			
+		
 			//case WM_QUERYNEWPALETTE: // Send this message to children ?
-			
+		
 			/+
 			// Moved this stuff to -parent-.
 			case WM_PARENTNOTIFY:
@@ -5550,87 +5719,86 @@ class Control: DObject, IWindow // docmain
 				}
 				break;
 			+/
-			
+		
 			case WM_CREATE:
 				/+
 				if(wparent)
 					initLayout(); // TODO: ?
 				+/
-				if(cbits & CBits.NEED_INIT_LAYOUT)
+				if(_cbits & CBits.NEED_INIT_LAYOUT)
 				{
 					if(visible)
 					{
-						if(wparent)
+						if(_parentWindow)
 						{
-							wparent.vchanged();
+							_parentWindow.vchanged();
 							suspendLayout(); // NOTE: exception could cause failure to restore.
-							wparent.alayout(this);
+							_parentWindow.alayout(this);
 							resumeLayout(false);
 						}
 						alayout(this);
 					}
 				}
 				break;
-			
+		
 			case WM_DESTROY:
 				onHandleDestroyed(EventArgs.empty);
 				break;
 			
 			case WM_GETDLGCODE:
+			{
+				version(_DFL_WINDOWS_HUNG_WORKAROUND)
 				{
-					version(_DFL_WINDOWS_HUNG_WORKAROUND)
-					{
-						/+
-						if(ctrlStyle & ControlStyles.CONTAINER_CONTROL)
-						{
-							if(!(_exStyle & WS_EX_CONTROLPARENT))
-								assert(0);
-						}
-						+/
-						
-						DWORD dw;
-						dw = GetTickCount();
-						if(ldlgcode < dw - 1020)
-						{
-							ldlgcode = dw - 1000;
-						}
-						else
-						{
-							ldlgcode += 50;
-							if(ldlgcode > dw)
-							{
-								// Probably a problem with WS_EX_CONTROLPARENT and WS_TABSTOP.
-								if(ldlgcode >= ldlgcode.max - 10_000)
-								{
-									ldlgcode = 0;
-									throw new WindowsHungDflException("Windows hung");
-								}
-								//msg.result |= 0x0004 | 0x0002 | 0x0001; //DLGC_WANTALLKEYS | DLGC_WANTTAB | DLGC_WANTARROWS;
-								ldlgcode = ldlgcode.max - 10_000;
-								return;
-							}
-						}
-					}
-					
 					/+
-					if(msg.lParam)
+					if(ctrlStyle & ControlStyles.CONTAINER_CONTROL)
 					{
-						Message m;
-						m._winMsg = *cast(MSG*)msg.lParam;
-						if(processKeyEventArgs(m))
-							return;
+						if(!(_exStyle & WS_EX_CONTROLPARENT))
+							assert(0);
 					}
 					+/
 					
-					defWndProc(msg);
-					
-					// Only want chars if ALT isn't down, because it would break mnemonics.
-					if(!(GetKeyState(VK_MENU) & 0x8000))
-						msg.result |= DLGC_WANTCHARS;
-					
+					DWORD dw = GetTickCount();
+					if(ldlgcode < dw - 1020)
+					{
+						ldlgcode = dw - 1000;
+					}
+					else
+					{
+						ldlgcode += 50;
+						if(ldlgcode > dw)
+						{
+							// Probably a problem with WS_EX_CONTROLPARENT and WS_TABSTOP.
+							if(ldlgcode >= ldlgcode.max - 10_000)
+							{
+								ldlgcode = 0;
+								throw new WindowsHungDflException("Windows hung");
+							}
+							//msg.result |= 0x0004 | 0x0002 | 0x0001; //DLGC_WANTALLKEYS | DLGC_WANTTAB | DLGC_WANTARROWS;
+							ldlgcode = ldlgcode.max - 10_000;
+							return;
+						}
+					}
 				}
-				return;
 			
+				/+
+				if(msg.lParam)
+				{
+					Message m;
+					m._winMsg = *cast(MSG*)msg.lParam;
+					if(processKeyEventArgs(m))
+						return;
+				}
+				+/
+				
+				defWndProc(msg);
+				
+				// Only want chars if ALT isn't down, because it would break mnemonics.
+				if(!(GetKeyState(VK_MENU) & 0x8000))
+					msg.result |= DLGC_WANTCHARS;
+				
+				return;
+			}
+		
 			case WM_CLOSE:
 				/+{
 					if(parent)
@@ -5642,17 +5810,15 @@ class Control: DObject, IWindow // docmain
 					}
 				}+/
 				return; // Prevent defWndProc from destroying the window!
-			
+		
 			case 0: // WM_NULL
 				// Don't confuse with failed RegisterWindowMessage().
 				break;
-			
+		
 			default:
+			{
 				//defWndProc(msg);
-				version(DFL_NO_WM_GETCONTROLNAME)
-				{
-				}
-				else
+				version(DFL_NO_WM_GETCONTROLNAME) {} else
 				{
 					if(msg.msg == wmGetControlName)
 					{
@@ -5673,8 +5839,7 @@ class Control: DObject, IWindow // docmain
 										else
 										{
 											// ANSI.
-											Dstring ansi;
-											ansi = dfl.internal.utf.toAnsi(this.name);
+											Dstring ansi = dfl.internal.utf.toAnsi(this.name);
 											if(msg.wParam <= ansi.length)
 												ansi = ansi[0 .. msg.wParam - 1];
 											(cast(char*)msg.lParam)[0 .. ansi.length] = ansi[];
@@ -5685,8 +5850,7 @@ class Control: DObject, IWindow // docmain
 									else
 									{
 										// Unicode.
-										Dwstring uni;
-										uni = dfl.internal.utf.toUnicode(this.name);
+										Dwstring uni = dfl.internal.utf.toUnicode(this.name);
 										if(msg.wParam <= uni.length)
 											uni = uni[0 .. msg.wParam - 1];
 										(cast(wchar*)msg.lParam)[0 .. uni.length] = uni[];
@@ -5702,14 +5866,14 @@ class Control: DObject, IWindow // docmain
 						}
 					}
 				}
+			}
 		}
 		
 		defWndProc(msg);
 		
 		if(msg.msg == WM_CREATE)
 		{
-			EventArgs ea;
-			ea = EventArgs.empty;
+			EventArgs ea = EventArgs.empty;
 			onHandleCreated(ea);
 			
 			debug
@@ -5774,8 +5938,8 @@ class Control: DObject, IWindow // docmain
 			needCalcSize = false;
 			RECT crect;
 			GetClientRect(msg.hWnd, &crect);
-			wclientsz.width = crect.right;
-			wclientsz.height = crect.bottom;
+			_clientWindowSize.width = crect.right;
+			_clientWindowSize.height = crect.bottom;
 		}
 		
 		switch(msg.msg)
@@ -5783,76 +5947,75 @@ class Control: DObject, IWindow // docmain
 			case WM_NCCALCSIZE:
 				needCalcSize = true;
 				break;
-			
+		
 			case WM_WINDOWPOSCHANGED:
+			{
+				WINDOWPOS* wp = cast(WINDOWPOS*)msg.lParam;
+				
+				if(!recreatingHandle)
 				{
-					WINDOWPOS* wp = cast(WINDOWPOS*)msg.lParam;
-					
-					if(!recreatingHandle)
+					//wstyle = GetWindowLongPtrA(hwnd, GWL_STYLE); // ..WM_SHOWWINDOW.
+					if(wp.flags & (SWP_HIDEWINDOW | SWP_SHOWWINDOW))
 					{
-						//wstyle = GetWindowLongPtrA(hwnd, GWL_STYLE); // ..WM_SHOWWINDOW.
-						if(wp.flags & (SWP_HIDEWINDOW | SWP_SHOWWINDOW))
+						//wstyle = GetWindowLongPtrA(hwnd, GWL_STYLE);
+						_cbits |= CBits.VISIBLE;
+						_windowStyle |= WS_VISIBLE;
+						if(wp.flags & SWP_HIDEWINDOW) // Hiding.
 						{
-							//wstyle = GetWindowLongPtrA(hwnd, GWL_STYLE);
-							cbits |= CBits.VISIBLE;
-							wstyle |= WS_VISIBLE;
-							if(wp.flags & SWP_HIDEWINDOW) // Hiding.
-							{
-								cbits &= ~CBits.VISIBLE;
-								wstyle &= ~WS_VISIBLE;
-							}
-							//break; // Showing min/max includes other flags.
+							_cbits &= ~CBits.VISIBLE;
+							_windowStyle &= ~WS_VISIBLE;
 						}
-					}
-					
-					//if(!(wp.flags & SWP_NOMOVE))
-					//	wrect.location = Point(wp.x, wp.y);
-					if(!(wp.flags & SWP_NOSIZE) || !(wp.flags & SWP_NOMOVE) || (wp.flags & SWP_FRAMECHANGED))
-					{
-						//wrect = _fetchBounds();
-						wrect = Rect(wp.x, wp.y, wp.cx, wp.cy);
-						wclientsz = _fetchClientSize();
-					}
-					
-					if((wp.flags & (SWP_SHOWWINDOW | SWP_HIDEWINDOW)) || !(wp.flags & SWP_NOSIZE))
-					{
-						DWORD rstyle;
-						rstyle = GetWindowLongPtrA(msg.hWnd, GWL_STYLE).toI32;
-						rstyle &= WS_MAXIMIZE | WS_MINIMIZE;
-						wstyle &= ~(WS_MAXIMIZE | WS_MINIMIZE);
-						wstyle |= rstyle;
+						//break; // Showing min/max includes other flags.
 					}
 				}
+				
+				//if(!(wp.flags & SWP_NOMOVE))
+				//	wrect.location = Point(wp.x, wp.y);
+				if(!(wp.flags & SWP_NOSIZE) || !(wp.flags & SWP_NOMOVE) || (wp.flags & SWP_FRAMECHANGED))
+				{
+					//wrect = _fetchBounds();
+					_windowRect = Rect(wp.x, wp.y, wp.cx, wp.cy);
+					_clientWindowSize = _fetchClientSize();
+				}
+				
+				if((wp.flags & (SWP_SHOWWINDOW | SWP_HIDEWINDOW)) || !(wp.flags & SWP_NOSIZE))
+				{
+					DWORD rstyle = GetWindowLongPtrA(msg.hWnd, GWL_STYLE).toI32;
+					rstyle &= WS_MAXIMIZE | WS_MINIMIZE;
+					_windowStyle &= ~(WS_MAXIMIZE | WS_MINIMIZE);
+					_windowStyle |= rstyle;
+				}
 				break;
-			
+			}
+		
 			/+
 			case WM_WINDOWPOSCHANGING:
 				//oldwrect = wrect;
 				break;
 			+/
-			
+		
 			/+
 			case WM_SETFONT:
 				//wfont = _fetchFont();
 				break;
 			+/
-			
+		
 			case WM_STYLECHANGED:
-				{
-					STYLESTRUCT* ss = cast(STYLESTRUCT*)msg.lParam;
-					
-					if(msg.wParam == GWL_STYLE)
-						wstyle = ss.styleNew;
-					else if(msg.wParam == GWL_EXSTYLE)
-						wexstyle = ss.styleNew;
-					
-					/+
-					wrect = _fetchBounds();
-					wclientsz = _fetchClientSize();
-					+/
-				}
+			{
+				STYLESTRUCT* ss = cast(STYLESTRUCT*)msg.lParam;
+				
+				if(msg.wParam == GWL_STYLE)
+					_windowStyle = ss.styleNew;
+				else if(msg.wParam == GWL_EXSTYLE)
+					_windowStyleEx = ss.styleNew;
+				
+				/+
+				wrect = _fetchBounds();
+				wclientsz = _fetchClientSize();
+				+/
 				break;
-			
+			}
+		
 			/+
 			// NOTE: this is sent even if the parent is shown.
 			case WM_SHOWWINDOW:
@@ -5900,7 +6063,7 @@ class Control: DObject, IWindow // docmain
 				}
 				break;
 			+/
-			
+		
 			case WM_ENABLE:
 				/+
 				//if(IsWindowEnabled(hwnd))
@@ -5909,9 +6072,9 @@ class Control: DObject, IWindow // docmain
 				else
 					wstyle |= WS_DISABLED;
 				+/
-				wstyle = GetWindowLongPtrA(hwnd, GWL_STYLE).toI32;
+				_windowStyle = GetWindowLongPtrA(_hwnd, GWL_STYLE).toI32;
 				break;
-			
+		
 			/+
 			case WM_PARENTNOTIFY:
 				switch(LOWORD(msg.wParam))
@@ -5924,36 +6087,35 @@ class Control: DObject, IWindow // docmain
 				}
 				break;
 			+/
-			
+		
 			case WM_NCCREATE:
-				{
-					//hwnd = msg.hWnd;
-					
-					/+
-					// Not using CREATESTRUCT for window bounds because it can contain
-					// CW_USEDEFAULT and other magic values.
-					
-					CREATESTRUCTA* cs;
-					cs = cast(CREATESTRUCTA*)msg.lParam;
-					
-					//wrect = Rect(cs.x, cs.y, cs.cx, cs.cy);
-					+/
-					
-					wrect = _fetchBounds();
-					//oldwrect = wrect;
-					wclientsz = _fetchClientSize();
-				}
+			{
+				//hwnd = msg.hWnd;
+				
+				/+
+				// Not using CREATESTRUCT for window bounds because it can contain
+				// CW_USEDEFAULT and other magic values.
+				
+				CREATESTRUCTA* cs;
+				cs = cast(CREATESTRUCTA*)msg.lParam;
+				
+				//wrect = Rect(cs.x, cs.y, cs.cx, cs.cy);
+				+/
+				
+				_windowRect = _fetchBounds();
+				//oldwrect = wrect;
+				_clientWindowSize = _fetchClientSize();
 				break;
-			
+			}
+		
 			case WM_CREATE:
 				try
 				{
-					cbits |= CBits.CREATED;
+					_cbits |= CBits.CREATED;
 					
 					//hwnd = msg.hWnd;
 					
-					CREATESTRUCTA* cs;
-					cs = cast(CREATESTRUCTA*)msg.lParam;
+					CREATESTRUCTA* cs = cast(CREATESTRUCTA*)msg.lParam;
 					/+
 					// Done in WM_NCCREATE now.
 					//wrect = _fetchBounds();
@@ -5962,16 +6124,16 @@ class Control: DObject, IWindow // docmain
 					+/
 					
 					// If class style was changed, update.
-					if(_fetchClassLongPtr() != wclassStyle)
-						SetClassLongPtrA(hwnd, GCL_STYLE, wclassStyle);
+					if(_fetchClassLongPtr() != _windowClassStyle)
+						SetClassLongPtrA(_hwnd, GCL_STYLE, _windowClassStyle);
 					
 					// Need to update clientSize in case of styles in createParams().
-					wclientsz = _fetchClientSize();
+					_clientWindowSize = _fetchClientSize();
 					
 					//finishCreating(msg.hWnd);
 					
-					if(!(ctrlStyle & ControlStyles.CACHE_TEXT))
-						wtext = null;
+					if(!(_controlStyle & ControlStyles.CACHE_TEXT))
+						_windowText = null;
 					
 					/+
 					// Gets created on demand instead.
@@ -5992,7 +6154,7 @@ class Control: DObject, IWindow // docmain
 					if(recreatingHandle)
 					{
 						// After existing messages and functions are done.
-						delayInvoke(function(Control cthis, size_t[] params){ cthis.cbits &= ~CBits.RECREATING; });
+						delayInvoke(function(Control cthis, size_t[] params){ cthis._cbits &= ~CBits.RECREATING; });
 					}
 				}
 				catch(DThrowable e)
@@ -6000,22 +6162,22 @@ class Control: DObject, IWindow // docmain
 					Application.onThreadException(e);
 				}
 				break;
-			
+		
 			case WM_DESTROY:
-				cbits &= ~CBits.CREATED;
+				_cbits &= ~CBits.CREATED;
 				if(!recreatingHandle)
-					cbits &= ~CBits.FORMLOADED;
+					_cbits &= ~CBits.FORMLOADED;
 				_destroying();
 				//if(!killing)
 				if(recreatingHandle)
 					fillRecreationData();
 				break;
-			
+		
 			case WM_NCDESTROY:
-				Application.removeHwnd(hwnd);
-				hwnd = HWND.init;
+				Application.removeHwnd(_hwnd);
+				_hwnd = HWND.init;
 				break;
-			
+		
 			default:
 				/+
 				if(msg.msg == wmDfl)
@@ -6047,20 +6209,20 @@ class Control: DObject, IWindow // docmain
 	
 	package final void doShow()
 	{
-		if(wparent) // Exclude owner.
+		if(_parentWindow) // Exclude owner.
 		{
-			SetWindowPos(hwnd, HWND.init, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_SHOWWINDOW | SWP_NOACTIVATE | SWP_NOZORDER);
+			SetWindowPos(_hwnd, HWND.init, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_SHOWWINDOW | SWP_NOACTIVATE | SWP_NOZORDER);
 		}
 		else
 		{
-			SetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_SHOWWINDOW);
+			SetWindowPos(_hwnd, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_SHOWWINDOW);
 		}
 	}
 	
 	
 	package final void doHide()
 	{
-		SetWindowPos(hwnd, HWND.init, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE | SWP_HIDEWINDOW | SWP_NOZORDER);
+		SetWindowPos(_hwnd, HWND.init, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE | SWP_HIDEWINDOW | SWP_NOZORDER);
 	}
 	
 	
@@ -6135,7 +6297,7 @@ class Control: DObject, IWindow // docmain
 	{
 		//name = DObject.toString(); // TODO: ?
 		
-		wrect.size = defaultSize;
+		_windowRect.size = defaultSize;
 		//oldwrect = wrect;
 		
 		/+
@@ -6144,24 +6306,27 @@ class Control: DObject, IWindow // docmain
 		wfont = defaultFont;
 		wcurs = new Cursor(LoadCursorA(HINSTANCE.init, IDC_ARROW), false);
 		+/
-		backc = Color.empty;
-		forec = Color.empty;
-		wfont = null;
-		wcurs = null;
+		_backColor = Color.empty;
+		_foreColor = Color.empty;
+		_windowFont = null;
+		_windowCursor = null;
+
+		_dockPadding = new DockPaddingEdges;
+		_dockMargin = new DockMarginEdges;
 	}
 	
 	/// ditto
 	this(Dstring text)
 	{
 		this();
-		wtext = text;
+		_windowText = text;
 	}
 	
 	/// ditto
 	this(Control cparent, Dstring text)
 	{
 		this();
-		wtext = text;
+		_windowText = text;
 		parent = cparent;
 	}
 	
@@ -6169,16 +6334,16 @@ class Control: DObject, IWindow // docmain
 	this(Dstring text, int left, int top, int width, int height)
 	{
 		this();
-		wtext = text;
-		wrect = Rect(left, top, width, height);
+		_windowText = text;
+		_windowRect = Rect(left, top, width, height);
 	}
 	
 	/// ditto
 	this(Control cparent, Dstring text, int left, int top, int width, int height)
 	{
 		this();
-		wtext = text;
-		wrect = Rect(left, top, width, height);
+		_windowText = text;
+		_windowRect = Rect(left, top, width, height);
 		parent = cparent;
 	}
 	
@@ -6238,14 +6403,14 @@ class Control: DObject, IWindow // docmain
 		{
 			killing = true;
 			
-			cmenu = cmenu.init;
-			_ctrlname = _ctrlname.init;
-			otag = otag.init;
-			wcurs = wcurs.init;
-			wfont = wfont.init;
-			wparent = wparent.init;
-			wregion = wregion.init;
-			wtext = wtext.init;
+			_contextMenu = _contextMenu.init;
+			_controlName = _controlName.init;
+			_objectTag = _objectTag.init;
+			_windowCursor = _windowCursor.init;
+			_windowFont = _windowFont.init;
+			_parentWindow = _parentWindow.init;
+			_windowRegion = _windowRegion.init;
+			_windowText = _windowText.init;
 			deleteThisBackgroundBrush();
 			//controls.children = null; // Not GC-safe in dtor.
 			//controls = null; // Causes bad things. Leaving it will do just fine.
@@ -6263,13 +6428,13 @@ class Control: DObject, IWindow // docmain
 			hwnd = HWND.init;
 		}
 		+/
-		assert(hwnd == HWND.init);
+		assert(_hwnd == HWND.init);
 		
 		onDisposed(EventArgs.empty);
 	}
 	
 	
-	protected:
+protected:
 	
 	///
 	@property Size defaultSize() // getter
@@ -6304,7 +6469,6 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	//final void resizeRedraw(bool byes) // setter
 	public final @property void resizeRedraw(bool byes) // setter
 	{
 		/+
@@ -6321,7 +6485,7 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	/// ditto
-	final @property bool resizeRedraw() // getter
+	public final @property bool resizeRedraw() const // getter
 	{
 		//return (_classStyle() & (CS_HREDRAW | CS_VREDRAW)) != 0;
 		return szdraw;
@@ -6355,14 +6519,13 @@ class Control: DObject, IWindow // docmain
 	{
 		assert(isHandleCreated);
 		
-		HMODULE hmuxt;
-		hmuxt = GetModuleHandleA("uxtheme.dll");
+		HMODULE hmuxt = GetModuleHandleA("uxtheme.dll");
 		if(hmuxt)
 		{
 			auto setWinTheme = cast(typeof(&SetWindowTheme))GetProcAddress(hmuxt, "SetWindowTheme");
 			if(setWinTheme)
 			{
-				setWinTheme(hwnd, " "w.ptr, " "w.ptr); // Clear the theme.
+				setWinTheme(_hwnd, " "w.ptr, " "w.ptr); // Clear the theme.
 			}
 		}
 	}
@@ -6373,9 +6536,9 @@ class Control: DObject, IWindow // docmain
 	{
 		if(!byes)
 		{
-			if(cbits & CBits.VSTYLE)
+			if(_cbits & CBits.VSTYLE)
 				return;
-			cbits |= CBits.VSTYLE;
+			_cbits |= CBits.VSTYLE;
 			
 			if(isHandleCreated)
 			{
@@ -6384,9 +6547,9 @@ class Control: DObject, IWindow // docmain
 		}
 		else
 		{
-			if(!(cbits & CBits.VSTYLE))
+			if(!(_cbits & CBits.VSTYLE))
 				return;
-			cbits &= ~CBits.VSTYLE;
+			_cbits &= ~CBits.VSTYLE;
 			
 			if(isHandleCreated)
 				_disableVisualStyle();
@@ -6408,9 +6571,9 @@ class Control: DObject, IWindow // docmain
 	
 	deprecated package final void createClassHandle(Dstring className)
 	{
-		if(!wparent || !wparent.handle || killing)
+		if(!_parentWindow || !_parentWindow.handle || killing)
 		{
-			create_err:
+		create_err:
 			throw new DflException("Control creation failure");
 		}
 		
@@ -6420,9 +6583,9 @@ class Control: DObject, IWindow // docmain
 			return;
 		
 		Application.creatingControl(this);
-		hwnd = dfl.internal.utf.createWindowEx(wexstyle, className, wtext, wstyle, wrect.x, wrect.y,
-			wrect.width, wrect.height, wparent.handle, HMENU.init, Application.getInstance(), null);
-		if(!hwnd)
+		_hwnd = dfl.internal.utf.createWindowEx(_windowStyleEx, className, _windowText, _windowStyle, _windowRect.x, _windowRect.y,
+			_windowRect.width, _windowRect.height, _parentWindow.handle, HMENU.init, Application.getInstance(), null);
+		if(!_hwnd)
 			goto create_err;
 	}
 	
@@ -6432,26 +6595,22 @@ class Control: DObject, IWindow // docmain
 	// Be sure to call super.createParams() or all the create params will need to be filled.
 	void createParams(ref CreateParams cp)
 	{
-		with(cp)
-		{
-			className = CONTROL_CLASSNAME;
-			caption = wtext;
-			param = null;
-			//parent = wparent.handle;
-			parent = wparent ? wparent.handle : HWND.init;
-			menu = HMENU.init;
-			inst = Application.getInstance();
-			x = wrect.x;
-			y = wrect.y;
-			width = wrect.width;
-			height = wrect.height;
-			classStyle = wclassStyle;
-			exStyle = wexstyle;
-			wstyle |= WS_VISIBLE;
-			if(!(cbits & CBits.VISIBLE))
-				wstyle &= ~WS_VISIBLE;
-			style = wstyle;
-		}
+		cp.className = CONTROL_CLASSNAME;
+		cp.caption = _windowText;
+		cp.param = null;
+		cp.parent = _parentWindow ? _parentWindow.handle : HWND.init;
+		cp.menu = HMENU.init;
+		cp.inst = Application.getInstance();
+		cp.x = _windowRect.x;
+		cp.y = _windowRect.y;
+		cp.width = _windowRect.width;
+		cp.height = _windowRect.height;
+		cp.classStyle = _windowClassStyle;
+		cp.exStyle = _windowStyleEx;
+		_windowStyle |= WS_VISIBLE;
+		if(!(_cbits & CBits.VISIBLE))
+			_windowStyle &= ~WS_VISIBLE;
+		cp.style = _windowStyle;
 	}
 	
 	
@@ -6490,7 +6649,7 @@ class Control: DObject, IWindow // docmain
 				cprintf("Creating Control handle while disposing.\n");
 			}
 			
-			create_err:
+		create_err:
 			Dstring kmsg = "Control creation failure";
 			if(name.length)
 				kmsg ~= " (" ~ name ~ ")";
@@ -6504,8 +6663,8 @@ class Control: DObject, IWindow // docmain
 		}
 		
 		// Need the parent's handle to exist.
-		if(wparent)
-			wparent.createHandle();
+		if(_parentWindow)
+			_parentWindow.createHandle();
 		
 		// This is here because wparent.createHandle() might create me.
 		//if(created)
@@ -6521,14 +6680,14 @@ class Control: DObject, IWindow // docmain
 		createParams(cp);
 		assert(!isHandleCreated); // Make sure the handle wasn't created in createParams().
 		
-		wtext = cp.caption;
-		//wrect = Rect(cp.x, cp.y, cp.width, cp.height); // This gets updated in WM_CREATE.
-		wclassStyle = cp.classStyle;
-		wexstyle = cp.exStyle;
-		wstyle = cp.style;
+		_windowText = cp.caption;
+		//_windowRect = Rect(cp.x, cp.y, cp.width, cp.height); // This gets updated in WM_CREATE.
+		_windowClassStyle = cp.classStyle;
+		_windowStyleEx = cp.exStyle;
+		_windowStyle = cp.style;
 		
 		//if(cp.style & WS_CHILD) // Breaks context-help.
-		if((ctrlStyle & ControlStyles.CONTAINER_CONTROL) && (cp.style & WS_CHILD))
+		if((_controlStyle & ControlStyles.CONTAINER_CONTROL) && (cp.style & WS_CHILD))
 		{
 			cp.exStyle |= WS_EX_CONTROLPARENT;
 		}
@@ -6536,9 +6695,9 @@ class Control: DObject, IWindow // docmain
 		bool vis = (cp.style & WS_VISIBLE) != 0;
 		
 		Application.creatingControl(this);
-		hwnd = dfl.internal.utf.createWindowEx(cp.exStyle, cp.className, cp.caption, (cp.style & ~WS_VISIBLE), cp.x, cp.y,
+		_hwnd = dfl.internal.utf.createWindowEx(cp.exStyle, cp.className, cp.caption, (cp.style & ~WS_VISIBLE), cp.x, cp.y,
 			cp.width, cp.height, cp.parent, cp.menu, cp.inst, cp.param);
-		if(!hwnd)
+		if(!_hwnd)
 		{
 			debug(APP_PRINT)
 			{
@@ -6572,9 +6731,9 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	public final @property bool recreatingHandle() // getter
+	public final @property bool recreatingHandle() const // getter
 	{
-		if(cbits & CBits.RECREATING)
+		if(_cbits & CBits.RECREATING)
 			return true;
 		return false;
 	}
@@ -6582,7 +6741,7 @@ class Control: DObject, IWindow // docmain
 	
 	private void _setAllRecreating()
 	{
-		cbits |= CBits.RECREATING;
+		_cbits |= CBits.RECREATING;
 		foreach(Control cc; controls)
 		{
 			cc._setAllRecreating();
@@ -6605,7 +6764,7 @@ class Control: DObject, IWindow // docmain
 			return;
 		
 		bool hfocus = focused;
-		HWND prevHwnd = GetWindow(hwnd, GW_HWNDPREV);
+		HWND prevHwnd = GetWindow(_hwnd, GW_HWNDPREV);
 		
 		_setAllRecreating();
 		//scope(exit)
@@ -6615,9 +6774,9 @@ class Control: DObject, IWindow // docmain
 		createHandle();
 		
 		if(prevHwnd)
-			SetWindowPos(hwnd, prevHwnd, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
+			SetWindowPos(_hwnd, prevHwnd, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
 		else
-			SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
+			SetWindowPos(_hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE | SWP_NOACTIVATE);
 		if(hfocus)
 			select();
 	}
@@ -6629,7 +6788,7 @@ class Control: DObject, IWindow // docmain
 		if(!isHandleCreated)
 			return;
 		
-		DestroyWindow(hwnd);
+		DestroyWindow(_hwnd);
 		
 		// This stuff is done in WM_DESTROY because DestroyWindow() could be called elsewhere..
 		//hwnd = HWND.init; // Done in WM_DESTROY.
@@ -6641,8 +6800,8 @@ class Control: DObject, IWindow // docmain
 	{
 		//cprintf(" { fillRecreationData %.*s }\n", name);
 		
-		if(!(ctrlStyle & ControlStyles.CACHE_TEXT))
-			wtext = _fetchText();
+		if(!(_controlStyle & ControlStyles.CACHE_TEXT))
+			_windowText = _fetchText();
 		
 		//wclassStyle = _fetchClassLongPtr(); // TODO: ?
 		
@@ -6652,7 +6811,7 @@ class Control: DObject, IWindow // docmain
 		{
 			ccs ~= cc;
 		}
-		controls.children = ccs;
+		controls._children = ccs;
 	}
 	
 	
@@ -6664,9 +6823,9 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	final bool getStyle(ControlStyles flag)
+	final bool getStyle(ControlStyles flag) const
 	{
-		return (ctrlStyle & flag) != 0;
+		return (_controlStyle & flag) != 0;
 	}
 	
 	/// ditto
@@ -6675,15 +6834,15 @@ class Control: DObject, IWindow // docmain
 		if(flag & ControlStyles.CACHE_TEXT)
 		{
 			if(value)
-				wtext = _fetchText();
+				_windowText = _fetchText();
 			else
-				wtext = null;
+				_windowText = null;
 		}
 		
 		if(value)
-			ctrlStyle |= flag;
+			_controlStyle |= flag;
 		else
-			ctrlStyle &= ~flag;
+			_controlStyle &= ~flag;
 	}
 	
 	
@@ -6694,7 +6853,7 @@ class Control: DObject, IWindow // docmain
 		LONG newClassStyles = _classStyle();
 		LONG newWndStyles = _style();
 		
-		if(ctrlStyle & ControlStyles.STANDARD_DOUBLE_CLICK)
+		if(_controlStyle & ControlStyles.STANDARD_DOUBLE_CLICK)
 			newClassStyles |= CS_DBLCLKS;
 		else
 			newClassStyles &= ~CS_DBLCLKS;
@@ -6719,10 +6878,10 @@ class Control: DObject, IWindow // docmain
 	
 	
 	///
-	final bool getTopLevel()
+	final bool getTopLevel() const
 	{
 		// return GetParent(hwnd) == HWND.init;
-		return wparent is null;
+		return _parentWindow is null;
 	}
 	
 	
@@ -6731,7 +6890,7 @@ class Control: DObject, IWindow // docmain
 		if(vcheck && !visible)
 			return;
 		
-		if(cbits & CBits.IN_LAYOUT)
+		if(_cbits & CBits.IN_LAYOUT)
 			return;
 		
 		//if(_allowLayout)
@@ -6764,8 +6923,7 @@ class Control: DObject, IWindow // docmain
 				
 				if(ctrl._rtype() & 1) // Radio type.
 				{
-					LONG wlg;
-					wlg = ctrl._style();
+					LONG wlg = ctrl._style();
 					if(foundRadio)
 					{
 						if(wlg & WS_GROUP)
@@ -6798,11 +6956,11 @@ class Control: DObject, IWindow // docmain
 	// Called after adding the control to a container.
 	void initLayout()
 	{
-		assert(wparent !is null);
+		assert(_parentWindow !is null);
 		if(visible && created) // TODO: ?
 		{
-			wparent.vchanged();
-			wparent.alayout(this);
+			_parentWindow.vchanged();
+			_parentWindow.alayout(this);
 		}
 	}
 	
@@ -6812,15 +6970,14 @@ class Control: DObject, IWindow // docmain
 	{
 		// NOTE: exception could cause failure to restore.
 		//suspendLayout();
-		cbits |= CBits.IN_LAYOUT;
+		_cbits |= CBits.IN_LAYOUT;
 		
 		debug(EVENT_PRINT)
 		{
 			cprintf("{ Event: onLayout - Control %.*s }\n", name);
 		}
 		
-		Rect area;
-		area = displayRectangle;
+		Rect area = displayRectangle; // area is padding-adjusted already.
 		
 		foreach(Control ctrl; controls)
 		{
@@ -6832,7 +6989,7 @@ class Control: DObject, IWindow // docmain
 			//Rect prevctrlbounds;
 			//prevctrlbounds = ctrl.bounds;
 			//ctrl.suspendLayout(); // NOTE: exception could cause failure to restore.
-			switch(ctrl.sdock)
+			switch(ctrl._dockStyle)
 			{
 				case DockStyle.NONE:
 					/+
@@ -6861,31 +7018,57 @@ class Control: DObject, IWindow // docmain
 					break;
 				
 				case DockStyle.LEFT:
-					ctrl.setBoundsCore(area.x, area.y, 0, area.height, cast(BoundsSpecified)(BoundsSpecified.LOCATION | BoundsSpecified.HEIGHT));
-					area.x = area.x + ctrl.width;
-					area.width = area.width - ctrl.width;
-					break;
-				
-				case DockStyle.TOP:
-					ctrl.setBoundsCore(area.x, area.y, area.width, 0, cast(BoundsSpecified)(BoundsSpecified.LOCATION | BoundsSpecified.WIDTH));
-					area.y = area.y + ctrl.height;
-					area.height = area.height - ctrl.height;
-					break;
-				
-				case DockStyle.FILL:
-					//ctrl.bounds(Rect(area.x, area.y, area.width, area.height));
-					ctrl.bounds = area;
-					// area = ?
-					break;
-				
-				case DockStyle.BOTTOM:
-					ctrl.setBoundsCore(area.x, area.bottom - ctrl.height, area.width, 0, cast(BoundsSpecified)(BoundsSpecified.LOCATION | BoundsSpecified.WIDTH));
-					area.height = area.height - ctrl.height;
+					Rect ctrlbounds;
+					ctrlbounds.x = area.x + ctrl.dockMargin.left;
+					ctrlbounds.y = area.y + ctrl.dockMargin.top;
+					// ctrlbounds.width = 0;
+					ctrlbounds.height = area.height - ctrl.dockMargin.top - ctrl.dockMargin.bottom;
+					ctrl.setBoundsCore(ctrlbounds.x, ctrlbounds.y, ctrlbounds.width, ctrlbounds.height, cast(BoundsSpecified)(BoundsSpecified.LOCATION | BoundsSpecified.HEIGHT));
+					
+					area.x = area.x + ctrl.width + ctrl.dockMargin.left + ctrl.dockMargin.right;
+					area.width = area.width - ctrl.width - ctrl.dockMargin.left - ctrl.dockMargin.right;
 					break;
 				
 				case DockStyle.RIGHT:
-					ctrl.setBoundsCore(area.right - ctrl.width, area.y, 0, area.height, cast(BoundsSpecified)(BoundsSpecified.LOCATION | BoundsSpecified.HEIGHT));
-					area.width = area.width - ctrl.width;
+					Rect ctrlbounds;
+					ctrlbounds.x = area.width - ctrl.width - ctrl.dockMargin.right;
+					ctrlbounds.y = area.y + ctrl.dockMargin.top;
+					// ctrlbounds.width = 0;
+					ctrlbounds.height = area.height - ctrl.dockMargin.top - ctrl.dockMargin.bottom;
+					ctrl.setBoundsCore(ctrlbounds.x, ctrlbounds.y, ctrlbounds.width, ctrlbounds.height, cast(BoundsSpecified)(BoundsSpecified.LOCATION | BoundsSpecified.HEIGHT));
+
+					area.width = area.width - ctrl.width - ctrl.dockMargin.left - ctrl.dockMargin.right;
+					break;
+				
+				case DockStyle.TOP:
+					Rect ctrlbounds;
+					ctrlbounds.x = area.x + ctrl.dockMargin.left;
+					ctrlbounds.y = area.y + ctrl.dockMargin.top;
+					ctrlbounds.width = area.width - ctrl.dockMargin.left - ctrl.dockMargin.right;
+					// ctrlbounds.height = 0;
+					ctrl.setBoundsCore(ctrlbounds.x, ctrlbounds.y, ctrlbounds.width, ctrlbounds.height, cast(BoundsSpecified)(BoundsSpecified.LOCATION | BoundsSpecified.WIDTH));
+					
+					area.y = area.y + ctrl.height + ctrl.dockMargin.top + ctrl.dockMargin.bottom;
+					area.height = area.height - ctrl.height - ctrl.dockMargin.top - ctrl.dockMargin.bottom;
+					break;
+				
+				case DockStyle.BOTTOM:
+					Rect ctrlbounds;
+					ctrlbounds.x = area.x + ctrl.dockMargin.left;
+					ctrlbounds.y = area.bottom - ctrl.height - ctrl.dockMargin.bottom;
+					ctrlbounds.width = area.width - ctrl.dockMargin.left - ctrl.dockMargin.right;
+					// ctrlbounds.height = 0;
+					ctrl.setBoundsCore(ctrlbounds.x, ctrlbounds.y, ctrlbounds.width, ctrlbounds.height, cast(BoundsSpecified)(BoundsSpecified.LOCATION | BoundsSpecified.WIDTH));
+
+					area.height = area.height - ctrl.height - ctrl.dockMargin.top - ctrl.dockMargin.bottom;
+					break;
+				
+				case DockStyle.FILL:
+					area.width = area.width - ctrl.dockMargin.left - ctrl.dockMargin.right;
+					area.height = area.height - ctrl.dockMargin.top - ctrl.dockMargin.bottom;
+					area.x = area.x + ctrl.dockMargin.left;
+					area.y = area.y + ctrl.dockMargin.top;
+					ctrl.bounds = area;
 					break;
 				
 				default:
@@ -6898,7 +7081,7 @@ class Control: DObject, IWindow // docmain
 		layout(this, lea);
 		
 		//resumeLayout(false);
-		cbits &= ~CBits.IN_LAYOUT;
+		_cbits &= ~CBits.IN_LAYOUT;
 	}
 	
 	/+
@@ -6920,7 +7103,7 @@ class Control: DObject, IWindow // docmain
 			mask = (DLGC_WANTCHARS | DLGC_WANTALLKEYS);
 		}
 
-		return (SendMessage(hwnd, WM_GETDLGCODE, 0, 0) & mask) != 0;
+		return (SendMessage(_hwnd, WM_GETDLGCODE, 0, 0) & mask) != 0;
 	}
 
 
@@ -6954,7 +7137,7 @@ class Control: DObject, IWindow // docmain
 		// 	&& (SendMessage(hwnd, WM_GETDLGCODE, 0, 0) & mask) != 0;
 		if (isHandleCreated)
 		{
-			LRESULT r = SendMessage(hwnd, WM_GETDLGCODE, 0, 0);
+			LRESULT r = SendMessage(_hwnd, WM_GETDLGCODE, 0, 0);
 			return (r & mask) != 0;
 		}
 		return false;
@@ -6979,14 +7162,14 @@ class Control: DObject, IWindow // docmain
 		{
 			if(byes)
 			{
-				cbits |= CBits.VISIBLE;
-				wstyle |= WS_VISIBLE;
+				_cbits |= CBits.VISIBLE;
+				_windowStyle |= WS_VISIBLE;
 				createControl();
 			}
 			else
 			{
-				cbits &= ~CBits.VISIBLE;
-				wstyle &= ~WS_VISIBLE;
+				_cbits &= ~CBits.VISIBLE;
+				_windowStyle &= ~WS_VISIBLE;
 				return; // Not created and being hidden..
 			}
 		}
@@ -6996,7 +7179,7 @@ class Control: DObject, IWindow // docmain
 	package final bool _wantTabKey()
 	{
 		// if(ctrlStyle & ControlStyles.WANT_TAB_KEY)
-		if((DLGC_WANTTAB & sendMessage(hwnd, WM_GETDLGCODE, 0, 0)) != 0)
+		if((DLGC_WANTTAB & sendMessage(_hwnd, WM_GETDLGCODE, 0, 0)) != 0)
 			return true;
 		else
 			return false;
@@ -7013,35 +7196,35 @@ class Control: DObject, IWindow // docmain
 		{
 			case WM_CHAR:
 			case WM_SYSCHAR:
-				{
-					scope KeyPressEventArgs kpea = new KeyPressEventArgs(cast(dchar)msg.wParam, modifierKeys);
-					onKeyPress(kpea);
-					return kpea.handled;
-				}
+			{
+				scope KeyPressEventArgs kpea = new KeyPressEventArgs(cast(dchar)msg.wParam, modifierKeys);
+				onKeyPress(kpea);
+				return kpea.handled;
+			}
 
 			case WM_KEYDOWN:
 			case WM_SYSKEYDOWN:
+			{
+				scope KeyEventArgs kea = new KeyEventArgs(cast(Keys)(msg.wParam | modifierKeys));
+				ushort repeat = msg.lParam & 0xFFFF; // First 16 bits.
+				for(; repeat; repeat--)
 				{
-					scope KeyEventArgs kea = new KeyEventArgs(cast(Keys)(msg.wParam | modifierKeys));
-					ushort repeat = msg.lParam & 0xFFFF; // First 16 bits.
-					for(; repeat; repeat--)
-					{
-						//kea.handled = false;
-						onKeyDown(kea);
-					}
-					
-					return kea.handled;
+					//kea.handled = false;
+					onKeyDown(kea);
 				}
-			
+				
+				return kea.handled;
+			}
+		
 			case WM_KEYUP:
 			case WM_SYSKEYUP: // TODO: Is it correct?
-				{
-					// Repeat count is always 1 for key up.
-					scope KeyEventArgs kea = new KeyEventArgs(cast(Keys)(msg.wParam | modifierKeys));
-					onKeyUp(kea);
-					return kea.handled;
-				}
-			
+			{
+				// Repeat count is always 1 for key up.
+				scope KeyEventArgs kea = new KeyEventArgs(cast(Keys)(msg.wParam | modifierKeys));
+				onKeyUp(kea);
+				return kea.handled;
+			}
+		
 			default:
 				assert(0); // Does not reached here, if WM is traped in Control.wndProc() correctly.
 		}
@@ -7092,7 +7275,7 @@ class Control: DObject, IWindow // docmain
 	else version(DFL_NO_COMPAT)
 		package enum _compat = CCompat.NONE;
 	else
-		package @property CCompat _compat() // getter
+		package @property CCompat _compat() const // getter
 			{ if(Application._compat & DflCompat.CONTROL_RECREATE_095) return CCompat.DFL095; return CCompat.NONE; }
 	
 	
@@ -7106,39 +7289,41 @@ class Control: DObject, IWindow // docmain
 	}
 	
 	
-	package:
-	HWND hwnd;
+package:
+	HWND _hwnd;
 	//AnchorStyles anch = cast(AnchorStyles)(AnchorStyles.TOP | AnchorStyles.LEFT);
 	//bool cvalidation = true;
-	ContextMenu cmenu;
-	DockStyle sdock = DockStyle.NONE;
-	Dstring _ctrlname;
-	Object otag;
-	Color backc, forec;
-	Rect wrect;
+	ContextMenu _contextMenu;
+	DockStyle _dockStyle = DockStyle.NONE;
+	DockPaddingEdges _dockPadding;
+	DockMarginEdges _dockMargin;
+	Dstring _controlName;
+	Object _objectTag;
+	Color _backColor, _foreColor;
+	Rect _windowRect;
 	//Rect oldwrect;
-	Size wclientsz;
-	Cursor wcurs;
-	Font wfont;
-	Control wparent;
-	Region wregion;
-	ControlCollection ccollection;
-	Dstring wtext; // After creation, this isn't used unless ControlStyles.CACHE_TEXT.
-	ControlStyles ctrlStyle = ControlStyles.STANDARD_CLICK | ControlStyles.STANDARD_DOUBLE_CLICK /+ | ControlStyles.RESIZE_REDRAW +/ ;
-	HBRUSH _hbrBg;
-	RightToLeft rtol = RightToLeft.INHERIT;
+	Size _clientWindowSize;
+	Cursor _windowCursor;
+	Font _windowFont;
+	Control _parentWindow;
+	Region _windowRegion;
+	ControlCollection _controlCollection;
+	Dstring _windowText; // After creation, this isn't used unless ControlStyles.CACHE_TEXT.
+	ControlStyles _controlStyle = ControlStyles.STANDARD_CLICK | ControlStyles.STANDARD_DOUBLE_CLICK /+ | ControlStyles.RESIZE_REDRAW +/ ;
+	HBRUSH _backgroundHbrush;
+	RightToLeft _rightToLeft = RightToLeft.INHERIT;
 	uint _disallowLayout = 0;
 	
 	version(DFL_NO_DRAG_DROP) {} else
 	{
-		DropTarget droptarget = null;
+		DropTarget _dropTarget = null;
 		bool _allowDrop = false;
 	}
 	
 	// NOTE: WS_VISIBLE is not reliable.
-	LONG wstyle = WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS; // Child, visible and enabled by default.
-	LONG wexstyle;
-	LONG wclassStyle = WNDCLASS_STYLE;
+	LONG _windowStyle = WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS; // Child, visible and enabled by default.
+	LONG _windowStyleEx;
+	LONG _windowClassStyle = WNDCLASS_STYLE;
 	
 	
 	enum CBits: uint
@@ -7173,136 +7358,198 @@ class Control: DObject, IWindow // docmain
 	
 	//CBits cbits = CBits.ALLOW_LAYOUT;
 	//CBits cbits = CBits.NONE;
-	CBits cbits = CBits.VISIBLE | CBits.VSTYLE | CBits.ENABLED;
+	CBits _cbits = CBits.VISIBLE | CBits.VSTYLE | CBits.ENABLED;
 	
 	
-	final:
+final:
 	
 	@property void menter(bool byes) // setter
-		{ if(byes) cbits |= CBits.MENTER; else cbits &= ~CBits.MENTER; }
-	@property bool menter() // getter
-		{ return (cbits & CBits.MENTER) != 0; }
+	{
+		if(byes)
+			_cbits |= CBits.MENTER;
+		else
+			_cbits &= ~CBits.MENTER;
+	}
+	@property bool menter() const // getter
+	{
+		return (_cbits & CBits.MENTER) != 0;
+	}
 	
 	@property void killing(bool byes) // setter
-		//{ if(byes) cbits |= CBits.KILLING; else cbits &= ~CBits.KILLING; }
-		{ assert(byes); if(byes) cbits |= CBits.KILLING; }
-	@property bool killing() // getter
-		{ return (cbits & CBits.KILLING) != 0; }
+	//{ if(byes) cbits |= CBits.KILLING; else cbits &= ~CBits.KILLING; }
+	{
+		assert(byes);
+		if(byes)
+			_cbits |= CBits.KILLING;
+	}
+	@property bool killing() const // getter
+	{
+		return (_cbits & CBits.KILLING) != 0;
+	}
 	
 	@property void owned(bool byes) // setter
-		{ if(byes) cbits |= CBits.OWNED; else cbits &= ~CBits.OWNED; }
-	@property bool owned() // getter
-		{ return (cbits & CBits.OWNED) != 0; }
+	{
+		if(byes)
+			_cbits |= CBits.OWNED;
+		else
+			_cbits &= ~CBits.OWNED;
+	}
+	@property bool owned() const // getter
+	{
+		return (_cbits & CBits.OWNED) != 0;
+	}
 	
 	/+
 	void _allowLayout(bool byes) // setter
-		{ if(byes) cbits |= CBits.ALLOW_LAYOUT; else cbits &= ~CBits.ALLOW_LAYOUT; }
-	bool _allowLayout() // getter
-		{ return (cbits & CBits.ALLOW_LAYOUT) != 0; }
-	+/
+	{
+		if(byes)
+			cbits |= CBits.ALLOW_LAYOUT;
+		else
+			cbits &= ~CBits.ALLOW_LAYOUT;
+	}
 	
+	bool _allowLayout() // getter
+	{
+		return (cbits & CBits.ALLOW_LAYOUT) != 0;
+	}
+	+/
+
 	@property void _clicking(bool byes) // setter
-		{ if(byes) cbits |= CBits.CLICKING; else cbits &= ~CBits.CLICKING; }
-	@property bool _clicking() // getter
-		{ return (cbits & CBits.CLICKING) != 0; }
+	{
+		if(byes)
+			_cbits |= CBits.CLICKING;
+		else
+			_cbits &= ~CBits.CLICKING;
+	}
+	@property bool _clicking() const // getter
+	{
+		return (_cbits & CBits.CLICKING) != 0;
+	}
 	
 	@property void needCalcSize(bool byes) // setter
-		{ if(byes) cbits |= CBits.NEED_CALC_SIZE; else cbits &= ~CBits.NEED_CALC_SIZE; }
-	@property bool needCalcSize() // getter
-		{ return (cbits & CBits.NEED_CALC_SIZE) != 0; }
+	{
+		if(byes)
+			_cbits |= CBits.NEED_CALC_SIZE;
+		else
+			_cbits &= ~CBits.NEED_CALC_SIZE;
+	}
+	@property bool needCalcSize() const // getter
+	{
+		return (_cbits & CBits.NEED_CALC_SIZE) != 0;
+	}
 	
 	@property void szdraw(bool byes) // setter
-		{ if(byes) cbits |= CBits.SZDRAW; else cbits &= ~CBits.SZDRAW; }
-	@property bool szdraw() // getter
-		{ return (cbits & CBits.SZDRAW) != 0; }
+	{
+		if(byes)
+			_cbits |= CBits.SZDRAW;
+		else
+			_cbits &= ~CBits.SZDRAW;
+	}
+	@property bool szdraw() const // getter
+	{
+		return (_cbits & CBits.SZDRAW) != 0;
+	}
 	
 	@property void ownedbg(bool byes) // setter
-		{ if(byes) cbits |= CBits.OWNEDBG; else cbits &= ~CBits.OWNEDBG; }
-	@property bool ownedbg() // getter
-		{ return (cbits & CBits.OWNEDBG) != 0; }
+	{
+		if(byes)
+			_cbits |= CBits.OWNEDBG;
+		else
+		_cbits &= ~CBits.OWNEDBG;
+	}
+	@property bool ownedbg() const // getter
+	{
+		return (_cbits & CBits.OWNEDBG) != 0;
+	}
 	
 	debug
 	{
 		@property void _handlecreated(bool byes) // setter
-			{ if(byes) cbits |= CBits.HANDLE_CREATED; else cbits &= ~CBits.HANDLE_CREATED; }
-		@property bool _handlecreated() // getter
-			{ return (cbits & CBits.HANDLE_CREATED) != 0; }
+		{
+			if(byes)
+				_cbits |= CBits.HANDLE_CREATED;
+			else
+				_cbits &= ~CBits.HANDLE_CREATED;
+		}
+		@property bool _handlecreated() const // getter
+		{
+			return (_cbits & CBits.HANDLE_CREATED) != 0;
+		}
 	}
 	
 	
-	@property LONG _exStyle()
+	@property LONG _exStyle() const // getter
 	{
 		// return GetWindowLongPtrA(hwnd, GWL_EXSTYLE);
-		return wexstyle;
+		return _windowStyleEx;
 	}
 	
-	
-	@property void _exStyle(LONG wl)
+	@property void _exStyle(LONG wl) // setter
 	{
 		if(isHandleCreated)
 		{
-			SetWindowLongPtrA(hwnd, GWL_EXSTYLE, wl);
+			SetWindowLongPtrA(_hwnd, GWL_EXSTYLE, wl);
 		}
 		
-		wexstyle = wl;
+		_windowStyleEx = wl;
 	}
 	
 	
-	@property LONG _style()
+	@property LONG _style() const // getter
 	{
 		// return GetWindowLongPtrA(hwnd, GWL_STYLE);
-		return wstyle;
+		return _windowStyle;
 	}
 	
-	
-	@property void _style(LONG wl)
+	@property void _style(LONG wl) // setter
 	{
 		if(isHandleCreated)
 		{
-			SetWindowLongPtrA(hwnd, GWL_STYLE, wl);
+			SetWindowLongPtrA(_hwnd, GWL_STYLE, wl);
 		}
 		
-		wstyle = wl;
+		_windowStyle = wl;
 	}
 	
 	
-	@property HBRUSH hbrBg() // getter
+	deprecated alias hbrBg = backgroundHbrush;
+
+	@property HBRUSH backgroundHbrush() // getter
 	{
-		if(_hbrBg)
-			return _hbrBg;
-		if(backc == Color.empty && parent && backColor == parent.backColor)
+		if(_backgroundHbrush)
+			return _backgroundHbrush;
+		if(_backColor == Color.empty && parent && backColor == parent.backColor)
 		{
 			ownedbg = false;
-			_hbrBg = parent.hbrBg;
-			return _hbrBg;
+			_backgroundHbrush = parent.backgroundHbrush;
+			return _backgroundHbrush;
 		}
-		hbrBg = backColor.createBrush(); // Call hbrBg's setter and set ownedbg.
-		return _hbrBg;
+		backgroundHbrush = backColor.createBrush(); // Call hbrBg's setter and set ownedbg.
+		return _backgroundHbrush;
 	}
 	
-	
-	@property void hbrBg(HBRUSH hbr) // setter
+	@property void backgroundHbrush(HBRUSH hbr) // setter
 	in
 	{
 		if(hbr)
 		{
-			assert(!_hbrBg);
+			assert(!_backgroundHbrush);
 		}
 	}
 	do
 	{
-		_hbrBg = hbr;
+		_backgroundHbrush = hbr;
 		ownedbg = true;
 	}
 	
 	
 	void deleteThisBackgroundBrush()
 	{
-		if(_hbrBg)
+		if(_backgroundHbrush)
 		{
 			if(ownedbg)
-				DeleteObject(_hbrBg);
-			_hbrBg = HBRUSH.init;
+				DeleteObject(_backgroundHbrush);
+			_backgroundHbrush = HBRUSH.init;
 		}
 	}
 	
@@ -7310,17 +7557,17 @@ class Control: DObject, IWindow // docmain
 	LRESULT defwproc(UINT msg, WPARAM wparam, LPARAM lparam)
 	{
 		//return DefWindowProcA(hwnd, msg, wparam, lparam);
-		return dfl.internal.utf.defWindowProc(hwnd, msg, wparam, lparam);
+		return dfl.internal.utf.defWindowProc(_hwnd, msg, wparam, lparam);
 	}
 	
 	
 	LONG_PTR _fetchClassLongPtr()
 	{
-		return GetClassLongPtrA(hwnd, GCL_STYLE);
+		return GetClassLongPtrA(_hwnd, GCL_STYLE);
 	}
 	
 	
-	LONG _classStyle()
+	LONG _classStyle() // getter
 	{
 		// return GetClassLongPtrA(hwnd, GCL_STYLE);
 		// return wclassStyle;
@@ -7328,21 +7575,20 @@ class Control: DObject, IWindow // docmain
 		if(isHandleCreated)
 		{
 			// Always fetch because it's not guaranteed to be accurate.
-			wclassStyle = _fetchClassLongPtr().toI32;
+			_windowClassStyle = _fetchClassLongPtr().toI32;
 		}
 		
-		return wclassStyle;
+		return _windowClassStyle;
 	}
 	
-	
-	void _classStyle(LONG cl)
+	void _classStyle(LONG cl) // setter
 	{
 		if(isHandleCreated)
 		{
-			SetClassLongPtrA(hwnd, GCL_STYLE, cl);
+			SetClassLongPtrA(_hwnd, GCL_STYLE, cl);
 		}
 		
-		wclassStyle = cl;
+		_windowClassStyle = cl;
 	}
 }
 
@@ -7358,52 +7604,49 @@ package abstract class ControlSuperClass: Control // dapi.d
 		switch(msg.msg)
 		{
 			case WM_PAINT:
-				{
-					RECT uprect;
-					//GetUpdateRect(hwnd, &uprect, true);
-					//onInvalidated(new InvalidateEventArgs(Rect(&uprect)));
-					
-					//if(!msg.wParam)
-						GetUpdateRect(hwnd, &uprect, false); // Preserve.
-					
-					prevWndProc(msg);
-					
-					// Now fake a normal paint event...
-					
-					scope Graphics gpx = new CommonGraphics(hwnd, GetDC(hwnd));
-					//scope Graphics gpx = new CommonGraphics(hwnd, msg.wParam ? cast(HDC)msg.wParam : GetDC(hwnd), msg.wParam ? false : true);
-					HRGN hrgn;
-					
-					hrgn = CreateRectRgnIndirect(&uprect);
-					SelectClipRgn(gpx.handle, hrgn);
-					DeleteObject(hrgn);
-					
-					scope PaintEventArgs pea = new PaintEventArgs(gpx, Rect(&uprect));
-					
-					// Can't erase the background now, Windows just painted..
-					//if(ps.fErase)
-					//{
-					//	prepareDc(gpx.handle);
-					//	onPaintBackground(pea);
-					//}
-					
-					prepareDc(gpx.handle);
-					onPaint(pea);
-				}
+			{
+				RECT uprect;
+				//GetUpdateRect(hwnd, &uprect, true);
+				//onInvalidated(new InvalidateEventArgs(Rect(&uprect)));
+				
+				//if(!msg.wParam)
+					GetUpdateRect(_hwnd, &uprect, false); // Preserve.
+				
+				prevWndProc(msg);
+				
+				// Now fake a normal paint event...
+				
+				scope Graphics gpx = new CommonGraphics(_hwnd, GetDC(_hwnd));
+				//scope Graphics gpx = new CommonGraphics(hwnd, msg.wParam ? cast(HDC)msg.wParam : GetDC(hwnd), msg.wParam ? false : true);
+				HRGN hrgn = CreateRectRgnIndirect(&uprect);
+				SelectClipRgn(gpx.handle, hrgn);
+				DeleteObject(hrgn);
+				
+				scope PaintEventArgs pea = new PaintEventArgs(gpx, Rect(&uprect));
+				
+				// Can't erase the background now, Windows just painted..
+				//if(ps.fErase)
+				//{
+				//	prepareDc(gpx.handle);
+				//	onPaintBackground(pea);
+				//}
+				
+				prepareDc(gpx.handle);
+				onPaint(pea);
 				break;
+			}
 			
 			case WM_PRINTCLIENT:
-				{
-					prevWndProc(msg);
-					
-					scope Graphics gpx = new CommonGraphics(hwnd, GetDC(hwnd));
-					scope PaintEventArgs pea = new PaintEventArgs(gpx,
-						Rect(Point(0, 0), wclientsz));
-					
-					prepareDc(pea.graphics.handle);
-					onPaint(pea);
-				}
+			{
+				prevWndProc(msg);
+				
+				scope Graphics gpx = new CommonGraphics(_hwnd, GetDC(_hwnd));
+				scope PaintEventArgs pea = new PaintEventArgs(gpx, Rect(Point(0, 0), _clientWindowSize));
+				
+				prepareDc(pea.graphics.handle);
+				onPaint(pea);
 				break;
+			}
 			
 			case WM_PRINT:
 				Control.defWndProc(msg);
@@ -7478,58 +7721,58 @@ package abstract class ControlSuperClass: Control // dapi.d
 ///
 class ScrollableControl: Control // docmain
 {
-	// ///
+	///
 	deprecated void autoScroll(bool byes) // setter
 	{
 		if(byes)
-			cbits |= CBits.ASCROLL;
+			_cbits |= CBits.ASCROLL;
 		else
-			cbits &= ~CBits.ASCROLL;
+			_cbits &= ~CBits.ASCROLL;
 	}
 	
-	// /// ditto
-	deprecated bool autoScroll() // getter
+	/// ditto
+	deprecated bool autoScroll() const // getter
 	{
-		return (cbits & CBits.ASCROLL) == CBits.ASCROLL;
+		return (_cbits & CBits.ASCROLL) == CBits.ASCROLL;
 	}
 	
 	
-	// ///
+	///
 	deprecated final void autoScrollMargin(Size sz) // setter
 	{
 		//scrollmargin = sz;
 	}
 	
-	// /// ditto
-	deprecated final Size autoScrollMargin() // getter
+	/// ditto
+	deprecated final Size autoScrollMargin() const // getter
 	{
 		//return scrollmargin;
 		return Size(0, 0);
 	}
 	
 	
-	// ///
+	///
 	deprecated final void autoScrollMinSize(Size sz) // setter
 	{
 		//scrollmin = sz;
 	}
 	
-	// /// ditto
-	deprecated final Size autoScrollMinSize() // getter
+	/// ditto
+	deprecated final Size autoScrollMinSize() const // getter
 	{
 		//return scrollmin;
 		return Size(0, 0);
 	}
 	
 	
-	// ///
+	///
 	deprecated final void autoScrollPosition(Point pt) // setter
 	{
 		//autoscrollpos = pt;
 	}
 	
-	// /// ditto
-	deprecated final Point autoScrollPosition() // getter
+	/// ditto
+	deprecated final Point autoScrollPosition() const // getter
 	{
 		//return autoscrollpos;
 		return Point(0, 0);
@@ -7537,9 +7780,9 @@ class ScrollableControl: Control // docmain
 	
 	
 	///
-	final @property Size autoScaleBaseSize() // getter
+	final @property Size autoScaleBaseSize() const // getter
 	{
-		return autossz;
+		return _autoScrollSize;
 	}
 	
 	/// ditto
@@ -7551,7 +7794,7 @@ class ScrollableControl: Control // docmain
 	}
 	do
 	{
-		autossz = newSize;
+		_autoScrollSize = newSize;
 	}
 	
 	
@@ -7559,24 +7802,26 @@ class ScrollableControl: Control // docmain
 	final @property void autoScale(bool byes) // setter
 	{
 		if(byes)
-			cbits |= CBits.ASCALE;
+			_cbits |= CBits.ASCALE;
 		else
-			cbits &= ~CBits.ASCALE;
+			_cbits &= ~CBits.ASCALE;
 	}
 	
 	/// ditto
-	final @property bool autoScale() // getter
+	final @property bool autoScale() const // getter
 	{
-		return (cbits & CBits.ASCALE) == CBits.ASCALE;
+		return (_cbits & CBits.ASCALE) == CBits.ASCALE;
 	}
 	
 	
-	final @property Point scrollPosition() // getter
+	///
+	final @property Point scrollPosition() const // getter
 	{
-		return Point(xspos, yspos);
+		return Point(_xScrollPostision, _yScrollPosition);
 	}
 	
 	
+	///
 	static Size calcScale(Size area, Size toScale, Size fromScale) // package
 	in
 	{
@@ -7591,12 +7836,14 @@ class ScrollableControl: Control // docmain
 	}
 	
 	
+	///
 	Size calcScale(Size area, Size toScale) // package
 	{
 		return calcScale(area, toScale, DEFAULT_SCALE);
 	}
 	
 	
+	///
 	final void _scale(Size toScale) // package
 	{
 		bool first = true;
@@ -7613,10 +7860,8 @@ class ScrollableControl: Control // docmain
 			}
 			else
 			{
-				Point pt;
-				Size sz;
-				sz = calcScale(Size(c.left, c.top), toScale, fromScale);
-				pt = Point(sz.width, sz.height);
+				Size sz = calcScale(Size(c.left, c.top), toScale, fromScale);
+				Point pt = Point(sz.width, sz.height);
 				sz = calcScale(c.size, toScale, fromScale);
 				c.bounds = Rect(pt, sz);
 			}
@@ -7680,16 +7925,10 @@ class ScrollableControl: Control // docmain
 	}
 	
 	
-	//override final Rect displayRectangle() // getter
+	///
 	override @property Rect displayRectangle() // getter
 	{
-		Rect result = clientRectangle;
-		
-		// Subtract dock padding.
-		result.x = result.x + dpad.left;
-		result.width = result.width - dpad.right - dpad.left;
-		result.y = result.y + dpad.top;
-		result.height = result.height - dpad.bottom - dpad.top;
+		Rect result = super.displayRectangle();
 		
 		// Add scroll width.
 		if(scrollSize.width > clientSize.width)
@@ -7707,127 +7946,22 @@ class ScrollableControl: Control // docmain
 	///
 	final @property void scrollSize(Size sz) // setter
 	{
-		scrollsz = sz;
+		_scrollSize = sz;
 		
 		_fixScrollBounds(); // Implies _adjustScrollSize().
 	}
 	
 	/// ditto
-	final @property Size scrollSize() // getter
+	final @property Size scrollSize() const // getter
 	{
-		return scrollsz;
+		return _scrollSize;
 	}
 	
 	
 	///
-	class DockPaddingEdges
-	{
-		private:
-		
-		int _left, _top, _right, _bottom;
-		int _all;
-		//package void delegate() changed;
-		
-		
-		final:
-		
-		void changed()
-		{
-			dpadChanged();
-		}
-		
-		
-		public:
-		
-		///
-		@property void all(int x) // setter
-		{
-			_bottom = _right = _top = _left = _all = x;
-			
-			changed();
-		}
-		
-		/// ditto
-		final @property int all() // getter
-		{
-			return _all;
-		}
-		
-		/// ditto
-		@property void left(int x) // setter
-		{
-			_left = x;
-			
-			changed();
-		}
-		
-		/// ditto
-		@property int left() // getter
-		{
-			return _left;
-		}
-		
-		/// ditto
-		@property void top(int x) // setter
-		{
-			_top = x;
-			
-			changed();
-		}
-		
-		/// ditto
-		@property int top() // getter
-		{
-			return _top;
-		}
-		
-		/// ditto
-		@property void right(int x) // setter
-		{
-			_right = x;
-			
-			changed();
-		}
-		
-		/// ditto
-		@property int right() // getter
-		{
-			return _right;
-		}
-		
-		/// ditto
-		@property void bottom(int x) // setter
-		{
-			_bottom = x;
-			
-			changed();
-		}
-		
-		/// ditto
-		@property int bottom() // getter
-		{
-			return _bottom;
-		}
-	}
-	
-	
-	///
-	final @property DockPaddingEdges dockPadding() // getter
-	{
-		return dpad;
-	}
-	
-	
 	deprecated final void setAutoScrollMargin(int x, int y)
 	{
 		//
-	}
-	
-	
-	this()
-	{
-		super();
-		_init();
 	}
 	
 	
@@ -7849,7 +7983,7 @@ class ScrollableControl: Control // docmain
 	
 	
 	/// ditto
-	final @property bool hScroll() // getter
+	final @property bool hScroll() const // getter
 	{
 		return (_style() & WS_HSCROLL) != 0;
 	}
@@ -7870,13 +8004,13 @@ class ScrollableControl: Control // docmain
 	}
 	
 	/// ditto
-	final @property bool vScroll() // getter
+	final @property bool vScroll() const // getter
 	{
 		return (_style() & WS_VSCROLL) != 0;
 	}
 	
 	
-	protected:
+protected:
 	
 	
 	/+
@@ -7901,130 +8035,130 @@ class ScrollableControl: Control // docmain
 		switch(m.msg)
 		{
 			case WM_VSCROLL:
+			{
+				SCROLLINFO si = void;
+				si.cbSize = SCROLLINFO.sizeof;
+				si.fMask = SIF_ALL;
+				if(GetScrollInfo(m.hWnd, SB_VERT, &si))
 				{
-					SCROLLINFO si = void;
-					si.cbSize = SCROLLINFO.sizeof;
-					si.fMask = SIF_ALL;
-					if(GetScrollInfo(m.hWnd, SB_VERT, &si))
+					int delta;
+					int maxp = scrollSize.height - clientSize.height;
+					switch(LOWORD(m.wParam))
 					{
-						int delta, maxp;
-						maxp = scrollSize.height - clientSize.height;
-						switch(LOWORD(m.wParam))
-						{
-							case SB_LINEDOWN:
-								if(yspos >= maxp)
-									return;
-								delta = maxp - yspos;
-								if(autossz.height < delta)
-									delta = autossz.height;
-								break;
-							case SB_LINEUP:
-								if(yspos <= 0)
-									return;
-								delta = yspos;
-								if(autossz.height < delta)
-									delta = autossz.height;
-								delta = -delta;
-								break;
-							case SB_PAGEDOWN:
-								if(yspos >= maxp)
-									return;
-								if(yspos >= maxp)
-									return;
-								delta = maxp - yspos;
-								if(clientSize.height < delta)
-									delta = clientSize.height;
-								break;
-							case SB_PAGEUP:
-								if(yspos <= 0)
-									return;
-								delta = yspos;
-								if(clientSize.height < delta)
-									delta = clientSize.height;
-								delta = -delta;
-								break;
-							case SB_THUMBTRACK:
-							case SB_THUMBPOSITION:
-								//delta = cast(int)HIWORD(m.wParam) - yspos; // Limited to 16-bits.
-								delta = si.nTrackPos - yspos;
-								break;
-							case SB_BOTTOM:
-								delta = maxp - yspos;
-								break;
-							case SB_TOP:
-								delta = -yspos;
-								break;
-							default:
-						}
-						yspos += delta;
-						SetScrollPos(m.hWnd, SB_VERT, yspos, TRUE);
-						ScrollWindow(m.hWnd, 0, -delta, null, null);
+						case SB_LINEDOWN:
+							if(_yScrollPosition >= maxp)
+								return;
+							delta = maxp - _yScrollPosition;
+							if(_autoScrollSize.height < delta)
+								delta = _autoScrollSize.height;
+							break;
+						case SB_LINEUP:
+							if(_yScrollPosition <= 0)
+								return;
+							delta = _yScrollPosition;
+							if(_autoScrollSize.height < delta)
+								delta = _autoScrollSize.height;
+							delta = -delta;
+							break;
+						case SB_PAGEDOWN:
+							if(_yScrollPosition >= maxp)
+								return;
+							if(_yScrollPosition >= maxp)
+								return;
+							delta = maxp - _yScrollPosition;
+							if(clientSize.height < delta)
+								delta = clientSize.height;
+							break;
+						case SB_PAGEUP:
+							if(_yScrollPosition <= 0)
+								return;
+							delta = _yScrollPosition;
+							if(clientSize.height < delta)
+								delta = clientSize.height;
+							delta = -delta;
+							break;
+						case SB_THUMBTRACK:
+						case SB_THUMBPOSITION:
+							//delta = cast(int)HIWORD(m.wParam) - yspos; // Limited to 16-bits.
+							delta = si.nTrackPos - _yScrollPosition;
+							break;
+						case SB_BOTTOM:
+							delta = maxp - _yScrollPosition;
+							break;
+						case SB_TOP:
+							delta = -_yScrollPosition;
+							break;
+						default:
 					}
+					_yScrollPosition += delta;
+					SetScrollPos(m.hWnd, SB_VERT, _yScrollPosition, TRUE);
+					ScrollWindow(m.hWnd, 0, -delta, null, null);
 				}
 				break;
+			}
 			
 			case WM_HSCROLL:
+			{
+				SCROLLINFO si = void;
+				si.cbSize = SCROLLINFO.sizeof;
+				si.fMask = SIF_ALL;
+				if(GetScrollInfo(m.hWnd, SB_HORZ, &si))
 				{
-					SCROLLINFO si = void;
-					si.cbSize = SCROLLINFO.sizeof;
-					si.fMask = SIF_ALL;
-					if(GetScrollInfo(m.hWnd, SB_HORZ, &si))
+					int delta;
+					int maxp = scrollSize.width - clientSize.width;
+					switch(LOWORD(m.wParam))
 					{
-						int delta, maxp;
-						maxp = scrollSize.width - clientSize.width;
-						switch(LOWORD(m.wParam))
-						{
-							case SB_LINERIGHT:
-								if(xspos >= maxp)
-									return;
-								delta = maxp - xspos;
-								if(autossz.width < delta)
-									delta = autossz.width;
-								break;
-							case SB_LINELEFT:
-								if(xspos <= 0)
-									return;
-								delta = xspos;
-								if(autossz.width < delta)
-									delta = autossz.width;
-								delta = -delta;
-								break;
-							case SB_PAGERIGHT:
-								if(xspos >= maxp)
-									return;
-								if(xspos >= maxp)
-									return;
-								delta = maxp - xspos;
-								if(clientSize.width < delta)
-									delta = clientSize.width;
-								break;
-							case SB_PAGELEFT:
-								if(xspos <= 0)
-									return;
-								delta = xspos;
-								if(clientSize.width < delta)
-									delta = clientSize.width;
-								delta = -delta;
-								break;
-							case SB_THUMBTRACK:
-							case SB_THUMBPOSITION:
-								//delta = cast(int)HIWORD(m.wParam) - xspos; // Limited to 16-bits.
-								delta = si.nTrackPos - xspos;
-								break;
-							case SB_RIGHT:
-								delta = maxp - xspos;
-								break;
-							case SB_LEFT:
-								delta = -xspos;
-								break;
-							default:
-						}
-						xspos += delta;
-						SetScrollPos(m.hWnd, SB_HORZ, xspos, TRUE);
-						ScrollWindow(m.hWnd, -delta, 0, null, null);
+						case SB_LINERIGHT:
+							if(_xScrollPostision >= maxp)
+								return;
+							delta = maxp - _xScrollPostision;
+							if(_autoScrollSize.width < delta)
+								delta = _autoScrollSize.width;
+							break;
+						case SB_LINELEFT:
+							if(_xScrollPostision <= 0)
+								return;
+							delta = _xScrollPostision;
+							if(_autoScrollSize.width < delta)
+								delta = _autoScrollSize.width;
+							delta = -delta;
+							break;
+						case SB_PAGERIGHT:
+							if(_xScrollPostision >= maxp)
+								return;
+							if(_xScrollPostision >= maxp)
+								return;
+							delta = maxp - _xScrollPostision;
+							if(clientSize.width < delta)
+								delta = clientSize.width;
+							break;
+						case SB_PAGELEFT:
+							if(_xScrollPostision <= 0)
+								return;
+							delta = _xScrollPostision;
+							if(clientSize.width < delta)
+								delta = clientSize.width;
+							delta = -delta;
+							break;
+						case SB_THUMBTRACK:
+						case SB_THUMBPOSITION:
+							//delta = cast(int)HIWORD(m.wParam) - xspos; // Limited to 16-bits.
+							delta = si.nTrackPos - _xScrollPostision;
+							break;
+						case SB_RIGHT:
+							delta = maxp - _xScrollPostision;
+							break;
+						case SB_LEFT:
+							delta = -_xScrollPostision;
+							break;
+						default:
 					}
+					_xScrollPostision += delta;
+					SetScrollPos(m.hWnd, SB_HORZ, _xScrollPostision, TRUE);
+					ScrollWindow(m.hWnd, -delta, 0, null, null);
 				}
 				break;
+			}
 			
 			default:
 		}
@@ -8044,29 +8178,29 @@ class ScrollableControl: Control // docmain
 		
 		if(ea.delta < 0)
 		{
-			if(yspos < maxp)
+			if(_yScrollPosition < maxp)
 			{
-				delta = maxp - yspos;
-				if(autossz.height * wlines < delta)
-					delta = autossz.height * wlines;
+				delta = maxp - _yScrollPosition;
+				if(_autoScrollSize.height * wlines < delta)
+					delta = _autoScrollSize.height * wlines;
 				
-				yspos += delta;
-				SetScrollPos(hwnd, SB_VERT, yspos, TRUE);
-				ScrollWindow(hwnd, 0, -delta, null, null);
+				_yScrollPosition += delta;
+				SetScrollPos(_hwnd, SB_VERT, _yScrollPosition, TRUE);
+				ScrollWindow(_hwnd, 0, -delta, null, null);
 			}
 		}
 		else
 		{
-			if(yspos > 0)
+			if(_yScrollPosition > 0)
 			{
-				delta = yspos;
-				if(autossz.height * wlines < delta)
-					delta = autossz.height * wlines;
+				delta = _yScrollPosition;
+				if(_autoScrollSize.height * wlines < delta)
+					delta = _autoScrollSize.height * wlines;
 				delta = -delta;
 				
-				yspos += delta;
-				SetScrollPos(hwnd, SB_VERT, yspos, TRUE);
-				ScrollWindow(hwnd, 0, -delta, null, null);
+				_yScrollPosition += delta;
+				SetScrollPos(_hwnd, SB_VERT, _yScrollPosition, TRUE);
+				ScrollWindow(_hwnd, 0, -delta, null, null);
 			}
 		}
 		
@@ -8076,8 +8210,8 @@ class ScrollableControl: Control // docmain
 	
 	override void onHandleCreated(EventArgs ea)
 	{
-		xspos = 0;
-		yspos = 0;
+		_xScrollPostision = 0;
+		_yScrollPosition = 0;
 		
 		super.onHandleCreated(ea);
 		
@@ -8105,32 +8239,32 @@ class ScrollableControl: Control // docmain
 		{
 			int ydiff = 0, xdiff = 0;
 			
-			if(yspos > scrollSize.height - clientSize.height)
+			if(_yScrollPosition > scrollSize.height - clientSize.height)
 			{
-				ydiff = (clientSize.height + yspos) - scrollSize.height;
-				yspos -= ydiff;
-				if(yspos < 0)
+				ydiff = (clientSize.height + _yScrollPosition) - scrollSize.height;
+				_yScrollPosition -= ydiff;
+				if(_yScrollPosition < 0)
 				{
-					ydiff += yspos;
-					yspos = 0;
+					ydiff += _yScrollPosition;
+					_yScrollPosition = 0;
 				}
 			}
 			
-			if(xspos > scrollSize.width - clientSize.width)
+			if(_xScrollPostision > scrollSize.width - clientSize.width)
 			{
-				xdiff = (clientSize.width + xspos) - scrollSize.width;
-				xspos -= xdiff;
-				if(xspos < 0)
+				xdiff = (clientSize.width + _xScrollPostision) - scrollSize.width;
+				_xScrollPostision -= xdiff;
+				if(_xScrollPostision < 0)
 				{
-					xdiff += xspos;
-					xspos = 0;
+					xdiff += _xScrollPostision;
+					_xScrollPostision = 0;
 				}
 			}
 			
 			if(isHandleCreated)
 			{
 				if(xdiff || ydiff)
-					ScrollWindow(hwnd, xdiff, ydiff, null, null);
+					ScrollWindow(_hwnd, xdiff, ydiff, null, null);
 				
 				_adjustScrollSize();
 			}
@@ -8146,26 +8280,12 @@ class ScrollableControl: Control // docmain
 	}
 	
 	
-	private:
+private:
 	//Size scrollmargin, scrollmin;
 	//Point autoscrollpos;
-	DockPaddingEdges dpad;
-	Size autossz = DEFAULT_SCALE;
-	Size scrollsz = Size(0, 0);
-	int xspos = 0, yspos = 0;
-	
-	
-	void _init()
-	{
-		dpad = new DockPaddingEdges;
-		//dpad.changed = &dpadChanged;
-	}
-	
-	
-	void dpadChanged()
-	{
-		alayout(this);
-	}
+	Size _autoScrollSize = DEFAULT_SCALE;
+	Size _scrollSize = Size(0, 0);
+	int _xScrollPostision = 0, _yScrollPosition = 0;
 	
 	
 	void _adjustScrollSize(BOOL fRedraw = TRUE)
@@ -8180,7 +8300,7 @@ class ScrollableControl: Control // docmain
 		{
 			si.cbSize = SCROLLINFO.sizeof;
 			si.fMask = SIF_RANGE | SIF_PAGE | SIF_POS;
-			si.nPos = yspos;
+			si.nPos = _yScrollPosition;
 			si.nMin = 0;
 			si.nMax = clientSize.height;
 			si.nPage = clientSize.height;
@@ -8188,13 +8308,13 @@ class ScrollableControl: Control // docmain
 				si.nMax = scrollSize.height;
 			if(si.nMax)
 				si.nMax--;
-			SetScrollInfo(hwnd, SB_VERT, &si, fRedraw);
+			SetScrollInfo(_hwnd, SB_VERT, &si, fRedraw);
 		}
 		//if(hScroll)
 		{
 			si.cbSize = SCROLLINFO.sizeof;
 			si.fMask = SIF_RANGE | SIF_PAGE | SIF_POS;
-			si.nPos = xspos;
+			si.nPos = _xScrollPostision;
 			si.nMin = 0;
 			si.nMax = clientSize.width;
 			si.nPage = clientSize.width;
@@ -8202,7 +8322,7 @@ class ScrollableControl: Control // docmain
 				si.nMax = scrollSize.width;
 			if(si.nMax)
 				si.nMax--;
-			SetScrollInfo(hwnd, SB_HORZ, &si, fRedraw);
+			SetScrollInfo(_hwnd, SB_HORZ, &si, fRedraw);
 		}
 	}
 }
@@ -8237,8 +8357,8 @@ class ContainerControl: ScrollableControl, IContainerControl // docmain
 		}
 		return null;
 		+/
-		Control ctrlfocus, ctrl;
-		ctrl = ctrlfocus = Control.fromChildHandle(GetFocus());
+		Control ctrlfocus = Control.fromChildHandle(GetFocus());
+		Control ctrl = ctrlfocus;
 		while(ctrl)
 		{
 			if(ctrl is this)
@@ -8274,10 +8394,9 @@ class ContainerControl: ScrollableControl, IContainerControl // docmain
 	///
 	final @property Form parentForm() // getter
 	{
-		Control par;
 		Form f;
 		
-		for(par = parent; par; par = par.parent)
+		for(Control par = parent; par; par = par.parent)
 		{
 			f = cast(Form)par;
 			if(f)
@@ -8316,7 +8435,7 @@ class ContainerControl: ScrollableControl, IContainerControl // docmain
 	private void _init()
 	{
 		//wexstyle |= WS_EX_CONTROLPARENT;
-		ctrlStyle |= ControlStyles.CONTAINER_CONTROL;
+		_controlStyle |= ControlStyles.CONTAINER_CONTROL;
 	}
 	
 	
@@ -8324,7 +8443,7 @@ class ContainerControl: ScrollableControl, IContainerControl // docmain
 	{
 		if(isHandleCreated)
 		{
-            return selectNextControl(activeControl, forward, tabStop, true, false);
+			return selectNextControl(activeControl, forward, tabStop, true, false);
 		}
 		return false;
 	}

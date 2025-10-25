@@ -425,7 +425,7 @@ class ToolBar: ControlSuperClass // docmain
 		
 		dock = DockStyle.TOP;
 		
-		wclassStyle = toolbarClassStyle;
+		_windowClassStyle = toolbarClassStyle;
 	}
 	
 	
@@ -668,9 +668,9 @@ class ToolBar: ControlSuperClass // docmain
 				clickedHwnd = null;
 				clickedButton = null;
 				
-				if (Rect(0, 0, wclientsz.width, wclientsz.height).contains(pt))
+				if (Rect(0, 0, _clientWindowSize.width, _clientWindowSize.height).contains(pt))
 				{
-					if (pointOverVisibleChild(pt) == hwnd)
+					if (pointOverVisibleChild(pt) == _hwnd)
 					{
 						for (size_t i; i < this.buttons.length; i++)
 						{
@@ -921,7 +921,7 @@ final:
 	LRESULT prevwproc(UINT msg, WPARAM wparam, LPARAM lparam)
 	{
 		//return CallWindowProcA(toolbarPrevWndProc, hwnd, msg, wparam, lparam);
-		return dfl.internal.utf.callWindowProc(toolbarPrevWndProc, hwnd, msg, wparam, lparam);
+		return dfl.internal.utf.callWindowProc(toolbarPrevWndProc, _hwnd, msg, wparam, lparam);
 	}
 }
 

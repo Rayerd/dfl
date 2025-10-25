@@ -34,8 +34,8 @@ class ProgressBar: ControlSuperClass // docmain
 	{
 		_initProgressbar();
 		
-		wexstyle |= WS_EX_CLIENTEDGE;
-		wclassStyle = progressbarClassStyle;
+		_windowStyleEx |= WS_EX_CLIENTEDGE;
+		_windowClassStyle = progressbarClassStyle;
 	}
 	
 	
@@ -278,7 +278,7 @@ private:
 package:
 	final LRESULT prevwproc(UINT msg, WPARAM wparam, LPARAM lparam)
 	{
-		return dfl.internal.utf.callWindowProc(progressbarPrevWndProc, hwnd, msg, wparam, lparam);
+		return dfl.internal.utf.callWindowProc(progressbarPrevWndProc, _hwnd, msg, wparam, lparam);
 	}
 }
 

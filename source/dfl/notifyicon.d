@@ -563,8 +563,8 @@ class NotifyIconControl: Control
 		}
 		
 		Application.creatingControl(this);
-		hwnd = CreateWindowExA(wexstyle, CONTROL_CLASSNAME.ptr, "NotifyIcon", 0, 0, 0, 0, 0, null, null, Application.getInstance(), null);
-		if(!hwnd)
+		_hwnd = CreateWindowExA(_windowStyleEx, CONTROL_CLASSNAME.ptr, "NotifyIcon", 0, 0, 0, 0, 0, null, null, Application.getInstance(), null);
+		if(!_hwnd)
 			goto create_err;
 	}
 	

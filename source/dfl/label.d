@@ -54,7 +54,7 @@ class Label: Control // docmain
 	}
 	
 	/// ditto
-	@property BorderStyle borderStyle() // getter
+	@property BorderStyle borderStyle() const // getter
 	{
 		if(_exStyle() & WS_EX_CLIENTEDGE)
 			return BorderStyle.FIXED_3D;
@@ -92,10 +92,8 @@ class Label: Control // docmain
 	///
 	@property Size preferredSize() // getter
 	{
-		Size result;
-		Graphics g;
-		g = isHandleCreated ? createGraphics() : Graphics.getScreen();
-		result = g.measureText(text, font, tfmt);
+		Graphics g = isHandleCreated ? createGraphics() : Graphics.getScreen();
+		Size result = g.measureText(text, font, tfmt);
 		g.dispose();
 		return result;
 	}
@@ -114,7 +112,7 @@ class Label: Control // docmain
 	{
 		super.text = newText;
 		
-		if(autosz)
+		if(_autosz)
 			doAutoSize(newText);
 		
 		invalidate(false);
@@ -126,9 +124,9 @@ class Label: Control // docmain
 	///
 	@property void autoSize(bool byes) // setter
 	{
-		if(byes != autosz)
+		if(byes != _autosz)
 		{
-			autosz = byes;
+			_autosz = byes;
 			
 			if(byes)
 			{
@@ -138,9 +136,9 @@ class Label: Control // docmain
 	}
 	
 	/// ditto
-	@property bool autoSize() // getter
+	@property bool autoSize() const // getter
 	{
-		return autosz;
+		return _autosz;
 	}
 	
 	
@@ -192,8 +190,7 @@ class Label: Control // docmain
 	/// ditto
 	@property ContentAlignment textAlign() // getter
 	{
-		TextAlignment ta;
-		ta = tfmt.alignment;
+		TextAlignment ta = tfmt.alignment;
 		
 		if(ta & TextAlignment.BOTTOM)
 		{
@@ -243,7 +240,7 @@ class Label: Control // docmain
 	}
 	
 	
-	protected override @property Size defaultSize() // getter
+	protected override @property Size defaultSize() const // getter
 	{
 		return Size(100, 23);
 	}
@@ -252,16 +249,13 @@ class Label: Control // docmain
 	protected override void onPaint(PaintEventArgs ea)
 	{
 		int x, y, w, h;
-		Dstring text;
-		
-		text = this.text;
+		Dstring text = this.text;
 		
 		if(tfmt.alignment & TextAlignment.MIDDLE)
 		{
 			// Graphics.drawText() does not support middle alignment
 			// if the text is multiline, so need to do extra work.
-			Size sz;
-			sz = ea.graphics.measureText(text, font, tfmt);
+			Size sz = ea.graphics.measureText(text, font, tfmt);
 			x = 0;
 			//if(sz.height >= this.clientSize.height)
 			//	y = 0;
@@ -274,8 +268,7 @@ class Label: Control // docmain
 		{
 			// Graphics.drawText() does not support bottom alignment
 			// if the text is multiline, so need to do extra work.
-			Size sz;
-			sz = ea.graphics.measureText(text, font, tfmt);
+			Size sz = ea.graphics.measureText(text, font, tfmt);
 			x = 0;
 			//if(sz.height >= this.clientSize.height)
 			//	y = 0;
@@ -292,9 +285,7 @@ class Label: Control // docmain
 			h = clientSize.height;
 		}
 		
-		Color c;
-		//c = foreColor;
-		c = foreColor.solidColor(backColor);
+		Color c = foreColor.solidColor(backColor);
 		
 		if(enabled)
 		{
@@ -305,8 +296,7 @@ class Label: Control // docmain
 			version(LABEL_GRAYSTRING)
 			{
 				// GrayString() is pretty ugly.
-				GrayStringA(ea.graphics.handle, null, &_disabledOutputProc,
-					cast(LPARAM)cast(void*)this, -1, x, y, w, h);
+				GrayStringA(ea.graphics.handle, null, &_disabledOutputProc, cast(LPARAM)cast(void*)this, -1, x, y, w, h);
 			}
 			else
 			{
@@ -341,7 +331,7 @@ class Label: Control // docmain
 	
 	protected override void onFontChanged(EventArgs ea)
 	{
-		if(autosz)
+		if(_autosz)
 			doAutoSize(text);
 		
 		invalidate(false);
@@ -380,9 +370,9 @@ class Label: Control // docmain
 	}
 	
 	
-	private:
+private:
 	TextFormat _tfmt;
-	bool autosz = false;
+	bool _autosz = false;
 	
 	
 	@property void tfmt(TextFormat tf) // setter

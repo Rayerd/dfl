@@ -113,7 +113,7 @@ class FormShortcutEventArgs: EventArgs
 	}
 	
 	
-	private:
+private:
 	Keys _shortcut;
 }
 
@@ -259,10 +259,10 @@ class Form: ContainerControl, IDialogResult // docmain
 	final @property Point parentCenter() // getter
 	{
 		Control cwparent;
-		if(wstyle & WS_CHILD)
-			cwparent = wparent;
+		if(_windowStyle & WS_CHILD)
+			cwparent = _parentWindow;
 		else
-			cwparent = wowner;
+			cwparent = _ownerWindow;
 		
 		if(!cwparent || !cwparent.visible)
 			return screenCenter;
@@ -293,20 +293,20 @@ class Form: ContainerControl, IDialogResult // docmain
 		super.createParams(cp);
 		
 		cp.className = FORM_CLASSNAME;
-		cp.menu = wmenu ? wmenu.handle : HMENU.init;
+		cp.menu = _windowManu ? _windowManu.handle : HMENU.init;
 		
 		Control cwparent;
 		if(cp.style & WS_CHILD)
-			cwparent = wparent;
+			cwparent = _parentWindow;
 		else
-			cwparent = wowner;
+			cwparent = _ownerWindow;
 		
 		//cp.parent = wparent ? wparent.handle : HWND.init;
 		//if(!(cp.style & WS_CHILD))
 		//	cp.parent = wowner ? wowner.handle : HWND.init;
 		cp.parent = cwparent ? cwparent.handle : HWND.init;
 		if(!cp.parent)
-			cp.parent = sowner;
+			cp.parent = _dialogOwnerWindow;
 		version(DFL_PARK_WINDOW)
 		{
 			if(!cp.parent && !showInTaskbar)
@@ -322,7 +322,7 @@ class Form: ContainerControl, IDialogResult // docmain
 
 		if(!recreatingHandle)
 		{
-			switch(startpos)
+			switch(_startPosition)
 			{
 				case FormStartPosition.CENTER_PARENT:
 					if(cwparent && cwparent.visible)
@@ -419,9 +419,9 @@ class Form: ContainerControl, IDialogResult // docmain
 		}
 		
 		// Need the owner's handle to exist.
-		if(wowner)
+		if(_ownerWindow)
 		//	wowner.createHandle(); // DMD 0.111: class dfl.control.Control member createHandle is not accessible
-			wowner._createHandle();
+			_ownerWindow._createHandle();
 		
 		// This is here because wowner.createHandle() might create me.
 		//if(created)
@@ -435,18 +435,18 @@ class Form: ContainerControl, IDialogResult // docmain
 		createParams(cp);
 		assert(!isHandleCreated); // Make sure the handle wasn't created in createParams().
 		
-		wtext = cp.caption;
-		wrect = Rect(cp.x, cp.y, cp.width, cp.height); // Avoid CW_USEDEFAULT problems. This gets updated in WM_CREATE.
-		wclassStyle = cp.classStyle;
-		wexstyle = cp.exStyle;
-		wstyle = cp.style;
+		_windowText = cp.caption;
+		_windowRect = Rect(cp.x, cp.y, cp.width, cp.height); // Avoid CW_USEDEFAULT problems. This gets updated in WM_CREATE.
+		_windowClassStyle = cp.classStyle;
+		_windowStyleEx = cp.exStyle;
+		_windowStyle = cp.style;
 		
 		// Use local var to avoid changing -cp- at this point.
 		int ly = cp.y;
 		
 		// Delay setting visible.
 		//vis = wstyle;
-		vis = cbits;
+		vis = _cbits;
 		vis |= CBits.FVISIBLE;
 		if(!(vis & CBits.VISIBLE))
 			vis &= ~CBits.FVISIBLE;
@@ -458,17 +458,17 @@ class Form: ContainerControl, IDialogResult // docmain
 		{
 			cprintf("form classname: %.*s\n", cp.className.length.toI32, cp.className.ptr);
 		}
-		hwnd = dfl.internal.utf.createWindowEx(cp.exStyle, cp.className, cp.caption, wstyle & ~WS_VISIBLE,
+		_hwnd = dfl.internal.utf.createWindowEx(cp.exStyle, cp.className, cp.caption, _windowStyle & ~WS_VISIBLE,
 			cp.x, ly, cp.width, cp.height, cp.parent, cp.menu, cp.inst, cp.param);
-		assert(hwnd);
-		assert(IsWindow(hwnd));
+		assert(_hwnd);
+		assert(IsWindow(_hwnd));
 		debug (APP_PRINT)
 		{
 			char[256] classBuf;
-			GetClassNameA(GetAncestor(hwnd, GA_ROOT), classBuf.ptr, classBuf.length);
+			GetClassNameA(GetAncestor(_hwnd, GA_ROOT), classBuf.ptr, classBuf.length);
 			cprintf("root className: %.*s\n", classBuf.length.toI32, classBuf.ptr);
 		}
-		if(!hwnd)
+		if(!_hwnd)
 		{
 			debug
 			{
@@ -482,24 +482,24 @@ class Form: ContainerControl, IDialogResult // docmain
 		
 		if(setLayeredWindowAttributes)
 		{
-			BYTE alpha = opacityToAlpha(opa);
+			BYTE alpha = opacityToAlpha(_opacity);
 			DWORD flags = 0;
 			
 			if(alpha != BYTE.max)
 				flags |= LWA_ALPHA;
 			
-			if(transKey != Color.empty)
+			if(_transKey != Color.empty)
 				flags |= LWA_COLORKEY;
 			
 			if(flags)
 			{
 				//_exStyle(_exStyle() | WS_EX_LAYERED); // Should already be set.
-				setLayeredWindowAttributes(hwnd, transKey.toRgb(), alpha, flags);
+				setLayeredWindowAttributes(_hwnd, _transKey.toRgb(), alpha, flags);
 			}
 		}
 		
-		if(!nofilter)
-			Application.addMessageFilter(mfilter); // To process IsDialogMessage().
+		if(!_noMessageFilter)
+			Application.addMessageFilter(_messagefilter); // To process IsDialogMessage().
 		
 		//createChildren();
 		try
@@ -522,7 +522,7 @@ class Form: ContainerControl, IDialogResult // docmain
 				_scale();
 				
 				// Scaling can goof up the centering, so fix it..
-				switch(startpos)
+				switch(_startPosition)
 				{
 					case FormStartPosition.CENTER_PARENT:
 						centerToParent();
@@ -558,22 +558,22 @@ class Form: ContainerControl, IDialogResult // docmain
 		//if(vis & CBits.VISIBLE)
 		if(vis & CBits.FVISIBLE)
 		{
-			cbits |= CBits.VISIBLE;
-			wstyle |= WS_VISIBLE;
+			_cbits |= CBits.VISIBLE;
+			_windowStyle |= WS_VISIBLE;
 			if(recreatingHandle)
 				goto show_normal;
 			// These fire onVisibleChanged as needed...
 			switch(windowState)
 			{
 				case FormWindowState.NORMAL: show_normal:
-					ShowWindow(hwnd, SW_SHOW);
+					ShowWindow(_hwnd, SW_SHOW);
 					// TODO: Possible To-Do: see if non-MDI is "main form" and use SHOWNORMAL or doShow.
 					break;
 				case FormWindowState.MAXIMIZED:
-					ShowWindow(hwnd, SW_SHOWMAXIMIZED);
+					ShowWindow(_hwnd, SW_SHOWMAXIMIZED);
 					break;
 				case FormWindowState.MINIMIZED:
-					ShowWindow(hwnd, SW_SHOWMINIMIZED);
+					ShowWindow(_hwnd, SW_SHOWMINIMIZED);
 					break;
 				default:
 					assert(0);
@@ -618,9 +618,9 @@ class Form: ContainerControl, IDialogResult // docmain
 				//hide();
 				//show();
 				// Do it directly so that DFL code can't prevent it.
-				cbits |= CBits.RECREATING;
+				_cbits |= CBits.RECREATING;
 				scope(exit)
-					cbits &= ~CBits.RECREATING;
+					_cbits &= ~CBits.RECREATING;
 				doHide();
 				doShow();
 			}
@@ -682,7 +682,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	///
 	final @property void dialogResult(DialogResult dr) // setter
 	{
-		fresult = dr;
+		formDialogResult = dr;
 		
 		if(!(Application._compat & DflCompat.FORM_DIALOGRESULT_096))
 		{
@@ -694,15 +694,15 @@ class Form: ContainerControl, IDialogResult // docmain
 	/// ditto
 	final @property DialogResult dialogResult() // getter
 	{
-		return fresult;
+		return formDialogResult;
 	}
 	
 	
-	override @property Color backColor() // getter
+	override @property Color backColor() const // getter
 	{
-		if(Color.empty == backc)
+		if(Color.empty == _backColor)
 			return defaultBackColor; // Control's.
-		return backc;
+		return _backColor;
 	}
 	
 	alias backColor = Control.backColor; // Overload.
@@ -721,13 +721,13 @@ class Form: ContainerControl, IDialogResult // docmain
 		if(isHandleCreated && visible)
 		{
 			vis = true;
-			cbits |= CBits.RECREATING;
+			_cbits |= CBits.RECREATING;
 			// Do it directly so that DFL code can't prevent it.
 			//doHide();
-			ShowWindow(hwnd, SW_HIDE);
+			ShowWindow(_hwnd, SW_HIDE);
 		}
 		scope(exit)
-			cbits &= ~CBits.RECREATING;
+			_cbits &= ~CBits.RECREATING;
 		
 		LONG st;
 		LONG exst;
@@ -814,7 +814,7 @@ class Form: ContainerControl, IDialogResult // docmain
 			{
 				//hide();
 				//show();
-				SetWindowPos(hwnd, HWND.init, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE
+				SetWindowPos(_hwnd, HWND.init, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE
 					| SWP_NOSIZE | SWP_NOZORDER); // Recalculate the frame while hidden.
 				_resetSystemMenu();
 				// Do it directly so that DFL code can't prevent it.
@@ -823,7 +823,7 @@ class Form: ContainerControl, IDialogResult // docmain
 			}
 			else
 			{
-				SetWindowPos(hwnd, HWND.init, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE
+				SetWindowPos(_hwnd, HWND.init, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE
 					| SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE); // Recalculate the frame.
 				_resetSystemMenu();
 			}
@@ -889,9 +889,9 @@ class Form: ContainerControl, IDialogResult // docmain
 	{
 		HICON hico, hicoSm;
 		
-		if(wicon)
+		if(_windowIcon)
 		{
-			hico = wicon.handle;
+			hico = _windowIcon.handle;
 			
 			int smx, smy;
 			smx = GetSystemMetrics(SM_CXSMICON);
@@ -901,11 +901,11 @@ class Form: ContainerControl, IDialogResult // docmain
 				hicoSm = CopyImage(hico, IMAGE_ICON, smx, smy, 0);
 			if(hicoSm)
 			{
-				wiconSm = new Icon(hicoSm);
+				_windowIconSmall = new Icon(hicoSm);
 			}
 			else
 			{
-				wiconSm = null;
+				_windowIconSmall = null;
 				hicoSm = hico;
 			}
 		}
@@ -914,11 +914,11 @@ class Form: ContainerControl, IDialogResult // docmain
 			hico = HICON.init;
 			hicoSm = HICON.init;
 			
-			wiconSm = null;
+			_windowIconSmall = null;
 		}
 		
-		SendMessageA(hwnd, WM_SETICON, ICON_BIG, cast(LPARAM)hico);
-		SendMessageA(hwnd, WM_SETICON, ICON_SMALL, cast(LPARAM)hicoSm);
+		SendMessageA(_hwnd, WM_SETICON, ICON_BIG, cast(LPARAM)hico);
+		SendMessageA(_hwnd, WM_SETICON, ICON_SMALL, cast(LPARAM)hicoSm);
 		
 		if(visible)
 			redrawEntire();
@@ -928,7 +928,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	///
 	final @property void icon(Icon ico) // setter
 	{
-		wicon = ico;
+		_windowIcon = ico;
 		
 		if(isHandleCreated)
 			_setIcon();
@@ -937,7 +937,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	/// ditto
 	final @property Icon icon() // getter
 	{
-		return wicon;
+		return _windowIcon;
 	}
 	
 	/// keyPreview
@@ -1086,12 +1086,12 @@ class Form: ContainerControl, IDialogResult // docmain
 			}+/
 			do
 			{
-				if(wmdiparent is frm)
+				if(_mdiParent is frm)
 					return;
 				
 				_removeFromOldOwner();
-				wowner = null;
-				wmdiparent = null; // Safety in case of exception.
+				_ownerWindow = null;
+				_mdiParent = null; // Safety in case of exception.
 				
 				if(frm)
 				{
@@ -1109,10 +1109,10 @@ class Form: ContainerControl, IDialogResult // docmain
 					_style((_style() | WS_CHILD) & ~WS_POPUP);
 					_exStyle(_exStyle() | WS_EX_MDICHILD);
 					
-					wparent = frm.mdiClient;
-					wmdiparent = frm;
+					_parentWindow = frm.mdiClient;
+					_mdiParent = frm;
 					if(isHandleCreated)
-						SetParent(hwnd, frm.mdiClient.hwnd);
+						SetParent(_hwnd, frm.mdiClient._hwnd);
 				}
 				else
 				{
@@ -1120,8 +1120,8 @@ class Form: ContainerControl, IDialogResult // docmain
 					_style((_style() | WS_POPUP) & ~WS_CHILD);
 					
 					if(isHandleCreated)
-						SetParent(hwnd, HWND.init);
-					wparent = null;
+						SetParent(_hwnd, HWND.init);
+					_parentWindow = null;
 					
 					//wmdiparent = null;
 				}
@@ -1138,7 +1138,7 @@ class Form: ContainerControl, IDialogResult // docmain
 			else
 			{
 				//if(isMdiChild)
-					return wmdiparent;
+					return _mdiParent;
 				//return null;
 			}
 		}
@@ -1201,8 +1201,8 @@ class Form: ContainerControl, IDialogResult // docmain
 	{
 		super.onHandleCreated(ea);
 		
-		if(wmenu)
-			wmenu._setHwnd(handle);
+		if(_windowManu)
+			_windowManu._setHwnd(handle);
 		
 		_setIcon();
 		
@@ -1218,7 +1218,7 @@ class Form: ContainerControl, IDialogResult // docmain
 		{
 			RECT rect;
 			_getSizeGripArea(&rect);
-			InvalidateRect(hwnd, &rect, TRUE);
+			InvalidateRect(_hwnd, &rect, TRUE);
 		}
 	}
 	
@@ -1234,11 +1234,11 @@ class Form: ContainerControl, IDialogResult // docmain
 	
 	private bool _isPaintingSizeGrip()
 	{
-		if(grip)
+		if(_grip)
 		{
-			if(wstyle & WS_THICKFRAME)
+			if(_windowStyle & WS_THICKFRAME)
 			{
-				return !(wstyle & (WS_MINIMIZE | WS_MAXIMIZE |
+				return !(_windowStyle & (WS_MINIMIZE | WS_MAXIMIZE |
 					WS_VSCROLL | WS_HSCROLL));
 			}
 		}
@@ -1281,15 +1281,15 @@ class Form: ContainerControl, IDialogResult // docmain
 				SetMenu(hwnd, HMENU.init);
 			}
 			
-			if(wmenu)
-				wmenu._setHwnd(HWND.init);
-			wmenu = inMenu;
+			if(_windowManu)
+				_windowManu._setHwnd(HWND.init);
+			_windowManu = inMenu;
 			
 			DrawMenuBar(hwnd);
 		}
 		else
 		{
-			wmenu = inMenu;
+			_windowManu = inMenu;
 			_recalcClientSize();
 		}
 	}
@@ -1297,7 +1297,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	/// ditto
 	final @property MainMenu menu() // getter
 	{
-		return wmenu;
+		return _windowManu;
 	}
 	
 	
@@ -1315,18 +1315,18 @@ class Form: ContainerControl, IDialogResult // docmain
 	{
 		if(!min.width && !min.height)
 		{
-			minsz.width = 0;
-			minsz.height = 0;
+			_minSize.width = 0;
+			_minSize.height = 0;
 			return;
 		}
 		
-		if(maxsz.width && maxsz.height)
+		if(_maxSize.width && _maxSize.height)
 		{
-			if(min.width > maxsz.width || min.height > maxsz.height)
+			if(min.width > _maxSize.width || min.height > _maxSize.height)
 				throw new DflException("Minimum size cannot be bigger than maximum size");
 		}
 		
-		minsz = min;
+		_minSize = min;
 		
 		bool ischangesz = false;
 		Size changesz;
@@ -1350,7 +1350,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	/// ditto
 	final @property Size minimumSize() // getter
 	{
-		return minsz;
+		return _minSize;
 	}
 	
 	
@@ -1359,18 +1359,18 @@ class Form: ContainerControl, IDialogResult // docmain
 	{
 		if(!max.width && !max.height)
 		{
-			maxsz.width = 0;
-			maxsz.height = 0;
+			_maxSize.width = 0;
+			_maxSize.height = 0;
 			return;
 		}
 		
 		//if(minsz.width && minsz.height)
 		{
-			if(max.width < minsz.width || max.height < minsz.height)
+			if(max.width < _minSize.width || max.height < _minSize.height)
 				throw new DflException("Maximum size cannot be smaller than minimum size");
 		}
 		
-		maxsz = max;
+		_maxSize = max;
 		
 		bool ischangesz = false;
 		Size changesz;
@@ -1394,14 +1394,14 @@ class Form: ContainerControl, IDialogResult // docmain
 	/// ditto
 	final @property Size maximumSize() // getter
 	{
-		return maxsz;
+		return _maxSize;
 	}
 	
 	
 	///
 	final @property bool modal() // getter
 	{
-		return wmodal;
+		return _windowModal;
 	}
 	
 	
@@ -1430,26 +1430,26 @@ class Form: ContainerControl, IDialogResult // docmain
 			
 			if(opa >= 1.0)
 			{
-				this.opa = 1.0;
+				this._opacity = 1.0;
 				alpha = BYTE.max;
 			}
 			else if(opa <= 0.0)
 			{
-				this.opa = 0.0;
+				this._opacity = 0.0;
 				alpha = BYTE.min;
 			}
 			else
 			{
-				this.opa = opa;
+				this._opacity = opa;
 				alpha = opacityToAlpha(opa);
 			}
 			
 			if(alpha == BYTE.max) // Disable
 			{
-				if(transKey == Color.empty)
+				if(_transKey == Color.empty)
 					_exStyle(_exStyle() & ~WS_EX_LAYERED);
 				else
-					setLayeredWindowAttributes(handle, transKey.toRgb(), 0, LWA_COLORKEY);
+					setLayeredWindowAttributes(handle, _transKey.toRgb(), 0, LWA_COLORKEY);
 			}
 			else
 			{
@@ -1457,10 +1457,10 @@ class Form: ContainerControl, IDialogResult // docmain
 				if(isHandleCreated)
 				{
 					//_exStyle(_exStyle() | WS_EX_LAYERED);
-					if(transKey == Color.empty)
+					if(_transKey == Color.empty)
 						setLayeredWindowAttributes(handle, 0, alpha, LWA_ALPHA);
 					else
-						setLayeredWindowAttributes(handle, transKey.toRgb(), alpha, LWA_ALPHA | LWA_COLORKEY);
+						setLayeredWindowAttributes(handle, _transKey.toRgb(), alpha, LWA_ALPHA | LWA_COLORKEY);
 				}
 			}
 		}
@@ -1469,7 +1469,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	/// ditto
 	final @property double opacity() // getter
 	{
-		return opa;
+		return _opacity;
 	}
 	
 	
@@ -1488,19 +1488,19 @@ class Form: ContainerControl, IDialogResult // docmain
 	{
 		int idx;
 		
-		if(wmdiparent)
+		if(_mdiParent)
 		{
-			idx = findIsIndex!(Form)(wmdiparent._mdiChildren, this);
+			idx = findIsIndex!(Form)(_mdiParent._mdiChildren, this);
 			if(-1 != idx)
-				wmdiparent._mdiChildren = removeIndex!(Form)(wmdiparent._mdiChildren, idx);
+				_mdiParent._mdiChildren = removeIndex!(Form)(_mdiParent._mdiChildren, idx);
 			//else
 			//	assert(0);
 		}
-		else if(wowner)
+		else if(_ownerWindow)
 		{
-			idx = findIsIndex!(Form)(wowner._owned, this);
+			idx = findIsIndex!(Form)(_ownerWindow._owned, this);
 			if(-1 != idx)
-				wowner._owned = removeIndex!(Form)(wowner._owned, idx);
+				_ownerWindow._owned = removeIndex!(Form)(_ownerWindow._owned, idx);
 			//else
 			//	assert(0);
 		}
@@ -1527,13 +1527,13 @@ class Form: ContainerControl, IDialogResult // docmain
 	}+/
 	do
 	{
-		if(wowner is frm)
+		if(_ownerWindow is frm)
 			return;
 		
 		// Remove from old owner.
 		_removeFromOldOwner();
-		wmdiparent = null;
-		wowner = null; // Safety in case of exception.
+		_mdiParent = null;
+		_ownerWindow = null; // Safety in case of exception.
 		_exStyle(_exStyle() & ~WS_EX_MDICHILD);
 		_style((_style() | WS_POPUP) & ~WS_CHILD);
 		
@@ -1550,11 +1550,11 @@ class Form: ContainerControl, IDialogResult // docmain
 			_thisa[0] = this;
 			frm._owned = frm._owned ~ _thisa;
 			
-			wowner = frm;
+			_ownerWindow = frm;
 			if(isHandleCreated)
 			{
 				if(CCompat.DFL095 == _compat)
-					SetParent(hwnd, frm.hwnd);
+					SetParent(_hwnd, frm._hwnd);
 				else
 					_crecreate();
 			}
@@ -1564,7 +1564,7 @@ class Form: ContainerControl, IDialogResult // docmain
 			if(isHandleCreated)
 			{
 				if(showInTaskbar || CCompat.DFL095 == _compat)
-					SetParent(hwnd, HWND.init);
+					SetParent(_hwnd, HWND.init);
 				else
 					_crecreate();
 			}
@@ -1576,7 +1576,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	/// ditto
 	final @property Form owner() // getter
 	{
-		return wowner;
+		return _ownerWindow;
 	}
 	
 	
@@ -1593,11 +1593,11 @@ class Form: ContainerControl, IDialogResult // docmain
 			{
 				//hide();
 				// Do it directly so that DFL code can't prevent it.
-				cbits |= CBits.RECREATING;
+				_cbits |= CBits.RECREATING;
 				doHide();
 			}
 			scope(exit)
-				cbits &= ~CBits.RECREATING;
+				_cbits &= ~CBits.RECREATING;
 			
 			if(byes)
 			{
@@ -1637,9 +1637,9 @@ class Form: ContainerControl, IDialogResult // docmain
 		else
 		{
 			if(byes)
-				wexstyle |= WS_EX_APPWINDOW;
+				_windowStyleEx |= WS_EX_APPWINDOW;
 			else
-				wexstyle &= ~WS_EX_APPWINDOW;
+				_windowStyleEx &= ~WS_EX_APPWINDOW;
 		}
 	}
 	
@@ -1653,37 +1653,37 @@ class Form: ContainerControl, IDialogResult // docmain
 	///
 	final @property void sizingGrip(bool byes) // setter
 	{
-		if(grip == byes)
+		if(_grip == byes)
 			return;
 		
-		this.grip = byes;
+		this._grip = byes;
 		
 		if(isHandleCreated)
 		{
 			RECT rect;
 			_getSizeGripArea(&rect);
 			
-			InvalidateRect(hwnd, &rect, TRUE);
+			InvalidateRect(_hwnd, &rect, TRUE);
 		}
 	}
 	
 	/// ditto
 	final @property bool sizingGrip() // getter
 	{
-		return grip;
+		return _grip;
 	}
 	
 	
 	///
 	final @property void startPosition(FormStartPosition startpos) // setter
 	{
-		this.startpos = startpos;
+		this._startPosition = startpos;
 	}
 	
 	/// ditto
 	final @property FormStartPosition startPosition() // getter
 	{
-		return startpos;
+		return _startPosition;
 	}
 	
 	
@@ -1704,9 +1704,9 @@ class Form: ContainerControl, IDialogResult // docmain
 		else
 		{
 			if(byes)
-				wexstyle |= WS_EX_TOPMOST;
+				_windowStyleEx |= WS_EX_TOPMOST;
 			else
-				wexstyle &= ~WS_EX_TOPMOST;
+				_windowStyleEx &= ~WS_EX_TOPMOST;
 		}
 	}
 	
@@ -1722,8 +1722,8 @@ class Form: ContainerControl, IDialogResult // docmain
 	{
 		if(setLayeredWindowAttributes)
 		{
-			transKey = c;
-			BYTE alpha = opacityToAlpha(opa);
+			_transKey = c;
+			BYTE alpha = opacityToAlpha(_opacity);
 			
 			if(c == Color.empty) // Disable
 			{
@@ -1750,7 +1750,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	/// ditto
 	final @property Color transparencyKey() // getter
 	{
-		return transKey;
+		return _transKey;
 	}
 	
 	
@@ -1823,11 +1823,11 @@ class Form: ContainerControl, IDialogResult // docmain
 			
 			version(OLD_MODAL_CLOSE)
 			{
-				if(!wmodal)
+				if(!_windowModal)
 				{
 					if(byes)
 					{
-						cbits &= ~CBits.NOCLOSING;
+						_cbits &= ~CBits.NOCLOSING;
 					}
 				}
 			}
@@ -1843,11 +1843,11 @@ class Form: ContainerControl, IDialogResult // docmain
 					nozombie();
 				}
 				
-				if(wstyle & WS_MAXIMIZE)
+				if(_windowStyle & WS_MAXIMIZE)
 				{
-					ShowWindow(hwnd, SW_MAXIMIZE);
-					cbits |= CBits.VISIBLE; // TODO: ?
-					wstyle |= WS_VISIBLE; // TODO: ?
+					ShowWindow(_hwnd, SW_MAXIMIZE);
+					_cbits |= CBits.VISIBLE; // TODO: ?
+					_windowStyle |= WS_VISIBLE; // TODO: ?
 					onVisibleChanged(EventArgs.empty);
 					return;
 				}
@@ -1870,11 +1870,11 @@ class Form: ContainerControl, IDialogResult // docmain
 	{
 		version(OLD_MODAL_CLOSE)
 		{
-			if(!wmodal)
+			if(!_windowModal)
 			{
 				if(visible)
 				{
-					cbits &= ~CBits.NOCLOSING;
+					_cbits &= ~CBits.NOCLOSING;
 				}
 			}
 		}
@@ -1883,9 +1883,9 @@ class Form: ContainerControl, IDialogResult // docmain
 		{
 			if(visible)
 			{
-				if(!(cbits & CBits.FORMLOADED))
+				if(!(_cbits & CBits.FORMLOADED))
 				{
-					cbits |= CBits.FORMLOADED;
+					_cbits |= CBits.FORMLOADED;
 					onLoad(EventArgs.empty);
 				}
 			}
@@ -1929,15 +1929,15 @@ class Form: ContainerControl, IDialogResult // docmain
 			return;
 		
 		if(isMdiChild)
-			DefMDIChildProcA(hwnd, WM_CLOSE, 0, 0);
-		DestroyWindow(hwnd);
+			DefMDIChildProcA(_hwnd, WM_CLOSE, 0, 0);
+		DestroyWindow(_hwnd);
 	}
 	
 	
 	///
 	final void close()
 	{
-		if(wmodal)
+		if(_windowModal)
 		{
 			/+
 			if(DialogResult.NONE == fresult)
@@ -1948,11 +1948,11 @@ class Form: ContainerControl, IDialogResult // docmain
 			
 			version(OLD_MODAL_CLOSE)
 			{
-				cbits |= CBits.NOCLOSING;
+				_cbits |= CBits.NOCLOSING;
 				//doHide();
 				setVisibleCore(false);
 				//if(!visible)
-				if(!wmodal)
+				if(!_windowModal)
 					onClosed(EventArgs.empty);
 			}
 			else
@@ -1961,7 +1961,7 @@ class Form: ContainerControl, IDialogResult // docmain
 				onClosing(cea);
 				if(!cea.cancel)
 				{
-					wmodal = false; // Must be false or will result in recursion.
+					_windowModal = false; // Must be false or will result in recursion.
 					destroyHandle();
 				}
 			}
@@ -2020,11 +2020,11 @@ class Form: ContainerControl, IDialogResult // docmain
 	final DialogResult showDialog()
 	{
 		// Use active window as the owner.
-		this.sowner = GetActiveWindow();
-		if(this.sowner == this.hwnd) // Possible due to fast flash?
-			this.sowner = HWND.init;
+		this._dialogOwnerWindow = GetActiveWindow();
+		if(this._dialogOwnerWindow == this._hwnd) // Possible due to fast flash?
+			this._dialogOwnerWindow = HWND.init;
 		showDialog2();
-		return fresult;
+		return formDialogResult;
 	}
 	
 	/// ditto
@@ -2033,9 +2033,9 @@ class Form: ContainerControl, IDialogResult // docmain
 		//this.sowner = iwsowner ? iwsowner.handle : GetActiveWindow();
 		if(!iwsowner)
 			return showDialog();
-		this.sowner = iwsowner.handle;
+		this._dialogOwnerWindow = iwsowner.handle;
 		showDialog2();
-		return fresult;
+		return formDialogResult;
 	}
 	
 	
@@ -2051,7 +2051,7 @@ class Form: ContainerControl, IDialogResult // docmain
 		}
 		
 		LONG wl = _style();
-		sownerEnabled = false;
+		_dialogOwnerWindowEnabled = false;
 		
 		if(wl & WS_DISABLED)
 		{
@@ -2068,7 +2068,7 @@ class Form: ContainerControl, IDialogResult // docmain
 			//if(wl & WS_VISIBLE)
 			if(visible)
 			{
-				if(!wmodal && owner && sowner == owner.handle)
+				if(!_windowModal && owner && _dialogOwnerWindow == owner.handle)
 				{
 				}
 				else
@@ -2084,7 +2084,7 @@ class Form: ContainerControl, IDialogResult // docmain
 				}
 			}
 			
-			if(sowner == hwnd)
+			if(_dialogOwnerWindow == _hwnd)
 			{
 				bad_owner:
 				debug
@@ -2105,35 +2105,35 @@ class Form: ContainerControl, IDialogResult // docmain
 		
 		try
 		{
-			if(sowner)
+			if(_dialogOwnerWindow)
 			{
-				LONG owl = GetWindowLongPtrA(sowner, GWL_STYLE).toI32;
+				LONG owl = GetWindowLongPtrA(_dialogOwnerWindow, GWL_STYLE).toI32;
 				if(owl & WS_CHILD)
 					goto bad_owner;
 				
-				wowner = cast(Form)fromHandle(sowner);
+				_ownerWindow = cast(Form)fromHandle(_dialogOwnerWindow);
 				
 				if(!(owl & WS_DISABLED))
 				{
-					sownerEnabled = true;
-					EnableWindow(sowner, false);
+					_dialogOwnerWindowEnabled = true;
+					EnableWindow(_dialogOwnerWindow, false);
 				}
 			}
 			
 			show();
 			onShown(EventArgs.empty);
 			
-			wmodal = true;
+			_windowModal = true;
 			for(;;)
 			{
 				if(!Application.doEvents())
 				{
-					wmodal = false;
+					_windowModal = false;
 					//dialogResult = DialogResult.ABORT; // TODO: ?
 					// Leave it at DialogResult.NONE ?
 					break;
 				}
-				if(!wmodal)
+				if(!_windowModal)
 					break;
 				/+
 				//assert(visible);
@@ -2148,18 +2148,18 @@ class Form: ContainerControl, IDialogResult // docmain
 		}
 		finally
 		{
-			if(sownerEnabled)
+			if(_dialogOwnerWindowEnabled)
 			{
-				EnableWindow(sowner, true); // In case of exception.
-				SetActiveWindow(sowner);
+				EnableWindow(_dialogOwnerWindow, true); // In case of exception.
+				SetActiveWindow(_dialogOwnerWindow);
 				//SetFocus(sowner);
 			}
 			
 			//if(!wmodal)
 			//	DestroyWindow(hwnd);
 			
-			wmodal = false;
-			sowner = HWND.init;
+			_windowModal = false;
+			_dialogOwnerWindow = HWND.init;
 			
 			//hide();
 			// Do it directly so that DFL code can't prevent it.
@@ -2245,7 +2245,7 @@ class Form: ContainerControl, IDialogResult // docmain
 		{
 			// Needed anyway because MDI client form needs it.
 			HWND hwfocus = GetFocus();
-			if(!hwfocus || !IsChild(hwnd, hwfocus))
+			if(!hwfocus || !IsChild(_hwnd, hwfocus))
 				_selectNextControl(this, null, true, true, true, false);
 		}
 
@@ -2266,8 +2266,8 @@ class Form: ContainerControl, IDialogResult // docmain
 		_recalcClientSize();
 		
 		//wicon = new Icon(LoadIconA(HINSTANCE.init, IDI_APPLICATION), false);
-		wicon = SystemIcons.application;
-		transKey = Color.empty;
+		_windowIcon = SystemIcons.application;
+		_transKey = Color.empty;
 	}
 	
 	
@@ -2275,13 +2275,13 @@ class Form: ContainerControl, IDialogResult // docmain
 	{
 		super();
 		
-		mfilter = new FormMessageFilter(this);
+		_messagefilter = new FormMessageFilter(this);
 		
 		// Default border: FormBorderStyle.SIZABLE.
 		// Default visible: false.
-		wstyle = WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
-		wexstyle = /+ WS_EX_CONTROLPARENT | +/ WS_EX_WINDOWEDGE | WS_EX_APPWINDOW;
-		cbits |= CBits.FORM;
+		_windowStyle = WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
+		_windowStyleEx = /+ WS_EX_CONTROLPARENT | +/ WS_EX_WINDOWEDGE | WS_EX_APPWINDOW;
+		_cbits |= CBits.FORM;
 		
 		_init();
 	}
@@ -2333,10 +2333,10 @@ class Form: ContainerControl, IDialogResult // docmain
 			//case WM_CREATE: // WM_NCCREATE seems like a better choice.
 			case WM_NCCREATE:
 				// Make sure Windows doesn't magically change the styles.
-				SetWindowLongPtrA(hwnd, GWL_EXSTYLE, wexstyle);
-				SetWindowLongPtrA(hwnd, GWL_STYLE, wstyle & ~WS_VISIBLE);
+				SetWindowLongPtrA(_hwnd, GWL_EXSTYLE, _windowStyleEx);
+				SetWindowLongPtrA(_hwnd, GWL_STYLE, _windowStyle & ~WS_VISIBLE);
 				
-				SetWindowPos(hwnd, HWND.init, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE
+				SetWindowPos(_hwnd, HWND.init, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE
 					| SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE); // Recalculate the frame.
 				
 				_setSystemMenu();
@@ -2348,7 +2348,7 @@ class Form: ContainerControl, IDialogResult // docmain
 					
 					if(wp.flags & SWP_HIDEWINDOW)
 					{
-						if(wmodal)
+						if(_windowModal)
 						{
 							version(OLD_MODAL_CLOSE)
 							{
@@ -2479,21 +2479,21 @@ class Form: ContainerControl, IDialogResult // docmain
 							{
 								RECT rect;
 								_getSizeGripArea(&rect);
-								InvalidateRect(hwnd, &rect, TRUE);
+								InvalidateRect(_hwnd, &rect, TRUE);
 							}
 						}
 					}
 					
 					if(wp.flags & SWP_HIDEWINDOW)
 					{
-						if(sownerEnabled)
+						if(_dialogOwnerWindowEnabled)
 						{
-							EnableWindow(sowner, true);
-							SetActiveWindow(sowner);
+							EnableWindow(_dialogOwnerWindow, true);
+							SetActiveWindow(_dialogOwnerWindow);
 							//SetFocus(sowner);
 						}
 						
-						wmodal = false;
+						_windowModal = false;
 					}
 				}
 				break;
@@ -2505,19 +2505,19 @@ class Form: ContainerControl, IDialogResult // docmain
 					MINMAXINFO* mmi;
 					mmi = cast(MINMAXINFO*)msg.lParam;
 					
-					if(minsz.width && minsz.height)
+					if(_minSize.width && _minSize.height)
 					{
-						if(mmi.ptMinTrackSize.x < minsz.width)
-							mmi.ptMinTrackSize.x = minsz.width;
-						if(mmi.ptMinTrackSize.y < minsz.height)
-							mmi.ptMinTrackSize.y = minsz.height;
+						if(mmi.ptMinTrackSize.x < _minSize.width)
+							mmi.ptMinTrackSize.x = _minSize.width;
+						if(mmi.ptMinTrackSize.y < _minSize.height)
+							mmi.ptMinTrackSize.y = _minSize.height;
 					}
-					if(maxsz.width && maxsz.height)
+					if(_maxSize.width && _maxSize.height)
 					{
-						if(mmi.ptMaxTrackSize.x > maxsz.width)
-							mmi.ptMaxTrackSize.x = maxsz.width;
-						if(mmi.ptMaxTrackSize.y > maxsz.height)
-							mmi.ptMaxTrackSize.y = maxsz.height;
+						if(mmi.ptMaxTrackSize.x > _maxSize.width)
+							mmi.ptMaxTrackSize.x = _maxSize.width;
+						if(mmi.ptMaxTrackSize.y > _maxSize.height)
+							mmi.ptMaxTrackSize.y = _maxSize.height;
 					}
 					
 					// Do this again so that the user's preference isn't
@@ -2535,7 +2535,7 @@ class Form: ContainerControl, IDialogResult // docmain
 				+/
 				if(!recreatingHandle)
 				{
-					if(!(cbits & CBits.NOCLOSING))
+					if(!(_cbits & CBits.NOCLOSING))
 					{
 						onClosed(EventArgs.empty);
 					}
@@ -2595,13 +2595,13 @@ class Form: ContainerControl, IDialogResult // docmain
 	{
 		_removeFromOldOwner();
 		//wowner = null;
-		wmdiparent = null;
+		_mdiParent = null;
 		
-		Application.removeMessageFilter(mfilter);
+		Application.removeMessageFilter(_messagefilter);
 		//mfilter = null;
 		
-		if(wmenu)
-			wmenu._setHwnd(HWND.init);
+		if(_windowManu)
+			_windowManu._setHwnd(HWND.init);
 		
 		super._destroying();
 	}
@@ -2617,10 +2617,10 @@ class Form: ContainerControl, IDialogResult // docmain
 	{
 		assert(isHandleCreated);
 		
-		if(!hw || hw == this.hwnd)
+		if(!hw || hw == this._hwnd)
 			return false;
 		
-		if(IsChild(this.hwnd, hw))
+		if(IsChild(this._hwnd, hw))
 		{
 			version(NO_MDI)
 			{
@@ -2629,7 +2629,7 @@ class Form: ContainerControl, IDialogResult // docmain
 			{
 				if(mdiClient && mdiClient.isHandleCreated)
 				{
-					if(IsChild(mdiClient.hwnd, hw))
+					if(IsChild(mdiClient._hwnd, hw))
 						return false; // !
 				}
 			}
@@ -2677,13 +2677,13 @@ class Form: ContainerControl, IDialogResult // docmain
 				if(ibc !is acceptButton)
 				{
 					acceptButton.notifyDefault(false);
-					_lastSelBtn = ctrl.hwnd;
+					_lastSelBtn = ctrl._hwnd;
 				}
 				//else don't set _lastSelBtn to accept button.
 			}
 			else
 			{
-				_lastSelBtn = ctrl.hwnd;
+				_lastSelBtn = ctrl._hwnd;
 			}
 			
 			ibc.notifyDefault(true);
@@ -2726,7 +2726,7 @@ class Form: ContainerControl, IDialogResult // docmain
 			}
 			else
 			{
-				SetFocus(ctrl.hwnd);
+				SetFocus(ctrl._hwnd);
 			}
 		}
 		if(acceptButton)
@@ -2743,11 +2743,11 @@ class Form: ContainerControl, IDialogResult // docmain
 			bool wasselbtn = _selbefore();
 			
 			// Need to do some things, like select-all for edit.
-			DefDlgProcA(this.hwnd, WM_NEXTDLGCTL, cast(WPARAM)ctrl.hwnd, MAKELPARAM(true, 0));
+			DefDlgProcA(this._hwnd, WM_NEXTDLGCTL, cast(WPARAM)ctrl._hwnd, MAKELPARAM(true, 0));
 			
 			_selafter(ctrl, wasselbtn);
 			
-			_lastSel = ctrl.hwnd;
+			_lastSel = ctrl._hwnd;
 		}
 	}
 	
@@ -2762,7 +2762,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	private void _selonecontrol()
 	{
 		HWND hwfocus = GetFocus();
-		if(!hwfocus || hwfocus == hwnd)
+		if(!hwfocus || hwfocus == _hwnd)
 		{
 			_selectNextControl(this, null, true, true, true, false);
 			if(!GetFocus())
@@ -2783,7 +2783,7 @@ class Form: ContainerControl, IDialogResult // docmain
 		bool retValue = false;
 		MSG win32Message = msg._winMsg;
 		if ((_mdiClient !is null) && (_mdiClient.handle !is/+ != +/ null) &&
-			TranslateMDISysAccel(_mdiClient.hwnd, &win32Message))
+			TranslateMDISysAccel(_mdiClient._hwnd, &win32Message))
 		{
 			retValue = true;
 		}
@@ -3030,11 +3030,11 @@ class Form: ContainerControl, IDialogResult // docmain
 			
 			// NOTE: WM_MDIACTIVATE here is to the MDI child forms.
 			case WM_MDIACTIVATE:
-				if(cast(HWND)msg.lParam == hwnd)
+				if(cast(HWND)msg.lParam == _hwnd)
 				{
 					_selactivate();
 				}
-				else if(cast(HWND)msg.wParam == hwnd)
+				else if(cast(HWND)msg.wParam == _hwnd)
 				{
 					_seldeactivate();
 				}
@@ -3062,7 +3062,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	
-	protected:
+protected:
 	
 	///
 	void onClosing(CancelEventArgs cea)
@@ -3088,7 +3088,7 @@ class Form: ContainerControl, IDialogResult // docmain
 		r.bottom = height;
 		
 		LONG wl = _style();
-		auto hasmenu = wmenu;
+		auto hasmenu = _windowManu;
 		AdjustWindowRectEx(&r, wl, !(wl & WS_CHILD) && hasmenu !is null, _exStyle());
 		
 		setBoundsCore(0, 0, r.right - r.left, r.bottom - r.top, BoundsSpecified.SIZE);
@@ -3104,22 +3104,22 @@ class Form: ContainerControl, IDialogResult // docmain
 		else
 		{
 			if(specified & BoundsSpecified.X)
-				wrect.x = x;
+				_windowRect.x = x;
 			if(specified & BoundsSpecified.Y)
-				wrect.y = y;
+				_windowRect.y = y;
 			if(specified & BoundsSpecified.WIDTH)
 			{
 				if(width < 0)
 					width = 0;
 				
-				wrect.width = width;
+				_windowRect.width = width;
 			}
 			if(specified & BoundsSpecified.HEIGHT)
 			{
 				if(height < 0)
 					height = 0;
 				
-				wrect.height = height;
+				_windowRect.height = height;
 			}
 			
 			_recalcClientSize();
@@ -3130,7 +3130,7 @@ class Form: ContainerControl, IDialogResult // docmain
 	// Must be called before handle creation.
 	final void noMessageFilter() // package
 	{
-		nofilter = true;
+		_noMessageFilter = true;
 	}
 	
 	
@@ -3141,29 +3141,28 @@ class Form: ContainerControl, IDialogResult // docmain
 	}
 	
 	
-	private:
+private:
 	IButtonControl _acceptButton, _cancelButton;
-	bool autoscale = true;
-	Size autoscaleBase;
-	DialogResult fresult = DialogResult.NONE;
-	Icon wicon, wiconSm;
-	MainMenu wmenu;
-	Size minsz, maxsz; // {0, 0} means none.
-	bool wmodal = false;
-	bool sownerEnabled;
-	HWND sowner;
-	double opa = 1.0; // Opacity.
-	Color transKey;
-	bool grip = false;
-	FormStartPosition startpos = FormStartPosition.DEFAULT_LOCATION;
-	FormMessageFilter mfilter;
-	//const FormMessageFilter mfilter;
+	bool _autoScale = true;
+	Size _autoScaleBase;
+	DialogResult formDialogResult = DialogResult.NONE;
+	Icon _windowIcon, _windowIconSmall;
+	MainMenu _windowManu;
+	Size _minSize, _maxSize; // {0, 0} means none.
+	bool _windowModal = false;
+	bool _dialogOwnerWindowEnabled;
+	HWND _dialogOwnerWindow;
+	double _opacity = 1.0; // Opacity.
+	Color _transKey;
+	bool _grip = false;
+	FormStartPosition _startPosition = FormStartPosition.DEFAULT_LOCATION;
+	FormMessageFilter _messagefilter;
 	bool _loaded = false;
 	void delegate(Object sender, FormShortcutEventArgs ea)[Keys] _shortcuts;
 	Form[] _owned, _mdiChildren; // Always set because they can be created and destroyed at any time.
-	Form wowner = null, wmdiparent = null;
+	Form _ownerWindow = null, _mdiParent = null;
 	//bool _closingvisible;
-	bool nofilter = false;
+	bool _noMessageFilter = false;
 	bool _keyPreview = false; // Gets or sets a value indicating whether the form will receive key events
 	                          // before the event is passed to the control that has focus.
 	bool _mnemonicProcessed = false;
@@ -3190,19 +3189,19 @@ class Form: ContainerControl, IDialogResult // docmain
 			version(NO_MDI)
 				enum bool mdistuff = false;
 			else
-				bool mdistuff = form.mdiClient && form.mdiClient.isHandleCreated
-					&& (form.mdiClient.handle == m.hWnd || IsChild(form.mdiClient.handle, m.hWnd));
+				bool mdistuff = _form.mdiClient && _form.mdiClient.isHandleCreated
+					&& (_form.mdiClient.handle == m.hWnd || IsChild(_form.mdiClient.handle, m.hWnd));
 			
 			if(mdistuff)
 			{
 			}
-			else if(m.hWnd == form.handle || IsChild(form.handle, m.hWnd))
+			else if(m.hWnd == _form.handle || IsChild(_form.handle, m.hWnd))
 			{
 				{
 					HWND hwfocus = GetFocus();
 					// Don't need _isNonMdiChild here; mdistuff excludes MDI stuff.
-					if(hwfocus != form._lastSel && IsChild(form.handle, hwfocus))
-						form._lastSel = hwfocus; // TODO: ?
+					if(hwfocus != _form._lastSel && IsChild(_form.handle, hwfocus))
+						_form._lastSel = hwfocus; // TODO: ?
 				}
 				
 				switch(m.msg)
@@ -3213,15 +3212,13 @@ class Form: ContainerControl, IDialogResult // docmain
 					case WM_KEYDOWN:
 						{
 							void delegate(Object sender, FormShortcutEventArgs ea)* ppressed;
-							Keys k;
-							
-							k = cast(Keys)m.wParam | Control.modifierKeys;
-							ppressed = k in form._shortcuts;
+							Keys k = cast(Keys)m.wParam | Control.modifierKeys;
+							ppressed = k in _form._shortcuts;
 							
 							if(ppressed)
 							{
 								scope FormShortcutEventArgs ea = new FormShortcutEventArgs(k);
-								(*ppressed)(form, ea);
+								(*ppressed)(_form, ea);
 								return true; // Prevent.
 							}
 						}
@@ -3244,19 +3241,19 @@ class Form: ContainerControl, IDialogResult // docmain
 								// the value of TextBox.acceptsReturn.
 							
 							case Keys.ESCAPE:
-								if(form.cancelButton)
+								if(_form.cancelButton)
 								{
 									//dfl.internal.utf.isDialogMessage(form.handle, &m._winMsg); // Closes the parent; bad for nested controls.
-									if(m.hWnd == form.handle || IsChild(form.handle, m.hWnd))
+									if(m.hWnd == _form.handle || IsChild(_form.handle, m.hWnd))
 									{
 										if(WM_KEYDOWN == m.msg)
 										{
 											Message mesc;
-											mesc.hWnd = form.handle;
+											mesc.hWnd = _form.handle;
 											mesc.msg = WM_COMMAND;
 											mesc.wParam = MAKEWPARAM(IDCANCEL, 0);
 											//mesc.lParam = form.cancelButton.handle; // handle isn't here, isn't guaranteed to be, and doesn't matter.
-											form.wndProc(mesc);
+											_form.wndProc(mesc);
 										}
 										return true; // Prevent.
 									}
@@ -3267,8 +3264,7 @@ class Form: ContainerControl, IDialogResult // docmain
 								//if(dfl.internal.utf.isDialogMessage(form.handle, &m._winMsg)) // Stopped working after removing controlparent.
 								//	return true; // Prevent.
 								{
-									LRESULT dlgc;
-									dlgc = SendMessageA(m.hWnd, WM_GETDLGCODE, 0, 0);
+									LRESULT dlgc = SendMessageA(m.hWnd, WM_GETDLGCODE, 0, 0);
 									if(!(dlgc & (DLGC_WANTALLKEYS | DLGC_WANTARROWS)))
 									{
 										if(WM_KEYDOWN == m.msg)
@@ -3277,11 +3273,11 @@ class Form: ContainerControl, IDialogResult // docmain
 											{
 												case Keys.UP, Keys.LEFT:
 													// Backwards...
-													Control._dlgselnext(form, m.hWnd, false, false, true);
+													Control._dlgselnext(_form, m.hWnd, false, false, true);
 													break;
 												case Keys.DOWN, Keys.RIGHT:
 													// Forwards...
-													Control._dlgselnext(form, m.hWnd, true, false, true);
+													Control._dlgselnext(_form, m.hWnd, true, false, true);
 													break;
 												default:
 													assert(0);
@@ -3323,13 +3319,13 @@ class Form: ContainerControl, IDialogResult // docmain
 										{
 											// Backwards...
 											//DefDlgProcA(form.handle, WM_NEXTDLGCTL, 1, MAKELPARAM(FALSE, 0));
-											_dlgselnext(form, m.hWnd, false);
+											_dlgselnext(_form, m.hWnd, false);
 										}
 										else
 										{
 											// Forwards...
 											//DefDlgProcA(form.handle, WM_NEXTDLGCTL, 0, MAKELPARAM(FALSE, 0));
-											_dlgselnext(form, m.hWnd, true);
+											_dlgselnext(_form, m.hWnd, true);
 										}
 									}
 								}
@@ -3365,7 +3361,7 @@ class Form: ContainerControl, IDialogResult // docmain
 							
 							bool foundmhw = false;
 							bool foundmn = false;
-							eachGoodChildHandle(form.handle,
+							eachGoodChildHandle(_form.handle,
 								(HWND hw)
 								{
 									if(foundmhw)
@@ -3389,7 +3385,7 @@ class Form: ContainerControl, IDialogResult // docmain
 							if(!foundmhw)
 							{
 								// Didn't find current control, so go from top-to-bottom.
-								eachGoodChildHandle(form.handle,
+								eachGoodChildHandle(_form.handle,
 									(HWND hw)
 									{
 										if(pmnemonic(hw))
@@ -3403,7 +3399,7 @@ class Form: ContainerControl, IDialogResult // docmain
 							else
 							{
 								// Didn't find mnemonic after current control, so go from top-to-this.
-								eachGoodChildHandle(form.handle,
+								eachGoodChildHandle(_form.handle,
 									(HWND hw)
 									{
 										if(pmnemonic(hw))
@@ -3424,13 +3420,13 @@ class Form: ContainerControl, IDialogResult // docmain
 					case WM_LBUTTONUP:
 					case WM_MBUTTONUP:
 					case WM_RBUTTONUP:
-						if(m.hWnd != form.hwnd)
+						if(m.hWnd != _form._hwnd)
 						{
 							Control ctrl = Control.fromChildHandle(m.hWnd);
 							if(ctrl.focused && ctrl.canSelect)
 							{
-								bool wasselbtn = form._selbefore();
-								form._selafter(ctrl, wasselbtn);
+								bool wasselbtn = _form._selbefore();
+								_form._selafter(ctrl, wasselbtn);
 							}
 						}
 						break;
@@ -3445,12 +3441,12 @@ class Form: ContainerControl, IDialogResult // docmain
 		
 		this(Form form)
 		{
-			this.form = form;
+			this._form = form;
 		}
 		
 		
-		private:
-		Form form;
+	private:
+		Form _form;
 	}
 	
 	
@@ -3471,16 +3467,16 @@ class Form: ContainerControl, IDialogResult // docmain
 	{
 		RECT r;
 		r.left = 0;
-		r.right = wrect.width;
+		r.right = _windowRect.width;
 		r.top = 0;
-		r.bottom = wrect.height;
+		r.bottom = _windowRect.height;
 		
 		LONG wl = _style();
-		auto hasmenu = wmenu;
+		auto hasmenu = _windowManu;
 		AdjustWindowRectEx(&r, wl, hasmenu !is null && !(wl & WS_CHILD), _exStyle());
 		
 		// Subtract the difference.
-		wclientsz = Size(wrect.width - ((r.right - r.left) - wrect.width), wrect.height - ((r.bottom - r.top) - wrect.height));
+		_clientWindowSize = Size(_windowRect.width - ((r.right - r.left) - _windowRect.width), _windowRect.height - ((r.bottom - r.top) - _windowRect.height));
 	}
 }
 
@@ -3494,9 +3490,9 @@ version(NO_MDI) {} else
 		{
 			_initMdiclient();
 			
-			wclassStyle = mdiclientClassStyle;
-			wstyle |= WS_VSCROLL | WS_HSCROLL;
-			wexstyle |= WS_EX_CLIENTEDGE /+ | WS_EX_CONTROLPARENT +/;
+			_windowClassStyle = mdiclientClassStyle;
+			_windowStyle |= WS_VSCROLL | WS_HSCROLL;
+			_windowStyleEx |= WS_EX_CLIENTEDGE /+ | WS_EX_CONTROLPARENT +/;
 			
 			dock = DockStyle.FILL;
 		}
@@ -3607,16 +3603,16 @@ version(NO_MDI) {} else
 		
 		protected override void createParams(ref CreateParams cp)
 		{
-			if(!wparent)
+			if(!_parentWindow)
 				throw new DflException("Invalid MDI child parent");
 			
 			super.createParams(cp);
 			
 			cp.className = MDICLIENT_CLASSNAME;
 			
-			ccs.hWindowMenu = HMENU.init; //wowner.menu ? wowner.menu.handle : HMENU.init;
-			ccs.idFirstChild = 10000;
-			cp.param = &ccs;
+			_clientCreateStruct.hWindowMenu = HMENU.init; //wowner.menu ? wowner.menu.handle : HMENU.init;
+			_clientCreateStruct.idFirstChild = 10000;
+			cp.param = &_clientCreateStruct;
 		}
 		
 		
@@ -3626,11 +3622,11 @@ version(NO_MDI) {} else
 		}
 		
 		
-		override @property Color backColor() // getter
+		override @property Color backColor() const // getter
 		{
-			if(Color.empty == backc)
+			if(Color.empty == _backColor)
 				return defaultBackColor;
-			return backc;
+			return _backColor;
 		}
 		
 		alias backColor = Control.backColor; // Overload.
@@ -3651,8 +3647,8 @@ version(NO_MDI) {} else
 		}
 		
 		
-		private:
-		CLIENTCREATESTRUCT ccs;
+	private:
+		CLIENTCREATESTRUCT _clientCreateStruct;
 	}
 }
 

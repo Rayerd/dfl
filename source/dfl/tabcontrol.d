@@ -45,10 +45,10 @@ class TabPage: Panel
 	{
 		Application.ppin(cast(void*)this);
 		
-		ctrlStyle |= ControlStyles.CONTAINER_CONTROL;
+		_controlStyle |= ControlStyles.CONTAINER_CONTROL;
 		
-		wstyle &= ~WS_VISIBLE;
-		cbits &= ~CBits.VISIBLE;
+		_windowStyle &= ~WS_VISIBLE;
+		_cbits &= ~CBits.VISIBLE;
 	}
 	
 	
@@ -197,7 +197,7 @@ class TabPageCollection
 	protected this(TabControl owner)
 	in
 	{
-		assert(owner.tchildren is null);
+		assert(owner._tabPageCollection is null);
 	}
 	do
 	{
@@ -205,7 +205,7 @@ class TabPageCollection
 	}
 	
 	
-	private:
+private:
 	
 	TabControl tc;
 	TabPage[] _pages = null;
@@ -218,9 +218,6 @@ class TabPageCollection
 	}
 	do
 	{
-		Rect area;
-		area = tc.displayRectangle;
-		
 		Message m;
 		m.hWnd = tc.handle;
 		
@@ -264,7 +261,7 @@ class TabPageCollection
 	}
 	
 	
-	package final @property bool created() // getter
+	package final @property bool created() const // getter
 	{
 		return tc && tc.created();
 	}
@@ -321,8 +318,7 @@ class TabPageCollection
 		{
 			if(created)
 			{
-				Message m;
-				m = Message(tc.handle, TCM_DELETEALLITEMS, 0, 0);
+				Message m = Message(tc.handle, TCM_DELETEALLITEMS, 0, 0);
 				tc.prevWndProc(m);
 			}
 		}
@@ -332,8 +328,7 @@ class TabPageCollection
 			
 			if(created)
 			{
-				Message m;
-				m = Message(tc.handle, TCM_DELETEITEM, idx, 0);
+				Message m = Message(tc.handle, TCM_DELETEITEM, idx, 0);
 				tc.prevWndProc(m);
 				
 				// Hide this one.
@@ -348,7 +343,7 @@ class TabPageCollection
 	}
 	
 	
-	public:
+public:
 	
 	mixin ListWrapArray!(TabPage, _pages,
 		_blankListCallback!(TabPage), _added,
@@ -392,9 +387,9 @@ class TabControlBase: ControlSuperClass
 	{
 		_initTabcontrol();
 		
-		wstyle |= WS_TABSTOP;
-		ctrlStyle |= ControlStyles.SELECTABLE | ControlStyles.CONTAINER_CONTROL;
-		wclassStyle = tabcontrolClassStyle;
+		_windowStyle |= WS_TABSTOP;
+		_controlStyle |= ControlStyles.SELECTABLE | ControlStyles.CONTAINER_CONTROL;
+		_windowClassStyle = tabcontrolClassStyle;
 	}
 	
 	
@@ -403,25 +398,25 @@ class TabControlBase: ControlSuperClass
 	{
 		switch(dm)
 		{
-			case TabDrawMode.OWNER_DRAW_FIXED:
-				_style(wstyle | TCS_OWNERDRAWFIXED);
-				break;
-			
-			case TabDrawMode.NORMAL:
-				_style(wstyle & ~TCS_OWNERDRAWFIXED);
-				break;
-			
-			default:
-				assert(0);
+		case TabDrawMode.OWNER_DRAW_FIXED:
+			_style(_windowStyle | TCS_OWNERDRAWFIXED);
+			break;
+		
+		case TabDrawMode.NORMAL:
+			_style(_windowStyle & ~TCS_OWNERDRAWFIXED);
+			break;
+		
+		default:
+			assert(0);
 		}
 		
 		_crecreate();
 	}
 	
 	/// ditto
-	final @property TabDrawMode drawMode() // getter
+	final @property TabDrawMode drawMode() const // getter
 	{
-		if(wstyle & TCS_OWNERDRAWFIXED)
+		if(_windowStyle & TCS_OWNERDRAWFIXED)
 			return TabDrawMode.OWNER_DRAW_FIXED;
 		return TabDrawMode.NORMAL;
 	}
@@ -431,26 +426,25 @@ class TabControlBase: ControlSuperClass
 	{
 		if(!created)
 		{
-			return super.displayRectangle(); // Hack?
+			return super.displayRectangle();
 		}
 		else
 		{
 			RECT drr;
-			Message m;
 			drr.left = 0;
 			drr.top = 0;
 			drr.right = clientSize.width;
 			drr.bottom = clientSize.height;
-			m = Message(hwnd, TCM_ADJUSTRECT, FALSE, cast(LPARAM)&drr);
+			Message m = Message(_hwnd, TCM_ADJUSTRECT, FALSE, cast(LPARAM)&drr);
 			prevWndProc(m);
 			return Rect(&drr);
 		}
 	}
 	
 	
-	protected override @property Size defaultSize() // getter
+	protected override @property Size defaultSize() const // getter
 	{
-		return Size(200, 200); // ?
+		return Size(200, 200); // TODO: ?
 	}
 	
 	
@@ -462,8 +456,7 @@ class TabControlBase: ControlSuperClass
 		if(created)
 		{
 			RECT rt;
-			Message m;
-			m = Message(hwnd, TCM_GETITEMRECT, cast(WPARAM)i, cast(LPARAM)&rt);
+			Message m = Message(_hwnd, TCM_GETITEMRECT, cast(WPARAM)i, cast(LPARAM)&rt);
 			prevWndProc(m);
 			if(!m.result)
 				goto rtfail;
@@ -471,7 +464,7 @@ class TabControlBase: ControlSuperClass
 		}
 		else
 		{
-			rtfail:
+		rtfail:
 			with(result)
 			{
 				x = 0;
@@ -525,56 +518,56 @@ class TabControlBase: ControlSuperClass
 		
 		switch(m.msg)
 		{
-			/+
-			case WM_SETFOCUS:
-				_exStyle(_exStyle() | WS_EX_CONTROLPARENT);
-				break;
-			
-			case WM_KILLFOCUS:
-				_exStyle(_exStyle() & ~WS_EX_CONTROLPARENT);
-				break;
-			+/
-			
-			case TCM_DELETEALLITEMS:
-				m.result = FALSE;
-				return;
-			
-			case TCM_DELETEITEM:
-				m.result = FALSE;
-				return;
-			
-			case TCM_INSERTITEMA:
-			case TCM_INSERTITEMW:
-				m.result = -1;
-				return;
-			
-			//case TCM_REMOVEIMAGE:
-			//	return;
-			
-			//case TCM_SETIMAGELIST:
-			//	m.result = cast(LRESULT)null;
-			//	return;
-			
-			case TCM_SETITEMA:
-			case TCM_SETITEMW:
-				m.result = FALSE;
-				return;
-			
-			case TCM_SETITEMEXTRA:
-				m.result = FALSE;
-				return;
-			
-			case TCM_SETITEMSIZE:
-				m.result = 0;
-				return;
-			
-			case TCM_SETPADDING:
-				return;
-			
-			case TCM_SETTOOLTIPS:
-				return;
-			
-			default:
+		/+
+		case WM_SETFOCUS:
+			_exStyle(_exStyle() | WS_EX_CONTROLPARENT);
+			break;
+		
+		case WM_KILLFOCUS:
+			_exStyle(_exStyle() & ~WS_EX_CONTROLPARENT);
+			break;
+		+/
+		
+		case TCM_DELETEALLITEMS:
+			m.result = FALSE;
+			return;
+		
+		case TCM_DELETEITEM:
+			m.result = FALSE;
+			return;
+		
+		case TCM_INSERTITEMA:
+		case TCM_INSERTITEMW:
+			m.result = -1;
+			return;
+		
+		//case TCM_REMOVEIMAGE:
+		//	return;
+		
+		//case TCM_SETIMAGELIST:
+		//	m.result = cast(LRESULT)null;
+		//	return;
+		
+		case TCM_SETITEMA:
+		case TCM_SETITEMW:
+			m.result = FALSE;
+			return;
+		
+		case TCM_SETITEMEXTRA:
+			m.result = FALSE;
+			return;
+		
+		case TCM_SETITEMSIZE:
+			m.result = 0;
+			return;
+		
+		case TCM_SETPADDING:
+			return;
+		
+		case TCM_SETTOOLTIPS:
+			return;
+		
+		default:
 		}
 		
 		super.wndProc(m);
@@ -585,30 +578,28 @@ class TabControlBase: ControlSuperClass
 	{
 		super.onReflectedMessage(m);
 		
-		TabPage page;
-		NMHDR* nmh;
-		nmh = cast(NMHDR*)m.lParam;
+		NMHDR* nmh = cast(NMHDR*)m.lParam;
 		
 		switch(nmh.code)
 		{
-			case TCN_SELCHANGE:
-				onSelectedIndexChanged(EventArgs.empty);
-				break;
-			
-			case TCN_SELCHANGING:
+		case TCN_SELCHANGE:
+			onSelectedIndexChanged(EventArgs.empty);
+			break;
+		
+		case TCN_SELCHANGING:
+			{
+				scope CancelEventArgs ea = new CancelEventArgs;
+				onSelectedIndexChanging(ea);
+				if(ea.cancel)
 				{
-					scope CancelEventArgs ea = new CancelEventArgs;
-					onSelectedIndexChanging(ea);
-					if(ea.cancel)
-					{
-						m.result = TRUE; // Prevent change.
-						return;
-					}
+					m.result = TRUE; // Prevent change.
+					return;
 				}
-				m.result = FALSE; // Allow change.
-				return;
-			
-			default:
+			}
+			m.result = FALSE; // Allow change.
+			return;
+		
+		default:
 		}
 	}
 }
@@ -619,7 +610,7 @@ class TabControl: TabControlBase // docmain
 {
 	this()
 	{
-		tchildren = new TabPageCollection(this);
+		_tabPageCollection = new TabPageCollection(this);
 		_pad = Point(6, 3);
 	}
 	
@@ -629,24 +620,24 @@ class TabControl: TabControlBase // docmain
 	{
 		switch(talign)
 		{
-			case TabAlignment.TOP:
-				_style(wstyle & ~(TCS_VERTICAL | TCS_RIGHT | TCS_BOTTOM));
-				break;
-			
-			case TabAlignment.BOTTOM:
-				_style((wstyle & ~(TCS_VERTICAL | TCS_RIGHT)) | TCS_BOTTOM);
-				break;
-			
-			case TabAlignment.LEFT:
-				_style((wstyle & ~(TCS_BOTTOM | TCS_RIGHT)) | TCS_VERTICAL);
-				break;
-			
-			case TabAlignment.RIGHT:
-				_style((wstyle & ~TCS_BOTTOM) | TCS_VERTICAL | TCS_RIGHT);
-				break;
-			
-			default:
-				assert(0);
+		case TabAlignment.TOP:
+			_style(_windowStyle & ~(TCS_VERTICAL | TCS_RIGHT | TCS_BOTTOM));
+			break;
+		
+		case TabAlignment.BOTTOM:
+			_style((_windowStyle & ~(TCS_VERTICAL | TCS_RIGHT)) | TCS_BOTTOM);
+			break;
+		
+		case TabAlignment.LEFT:
+			_style((_windowStyle & ~(TCS_BOTTOM | TCS_RIGHT)) | TCS_VERTICAL);
+			break;
+		
+		case TabAlignment.RIGHT:
+			_style((_windowStyle & ~TCS_BOTTOM) | TCS_VERTICAL | TCS_RIGHT);
+			break;
+		
+		default:
+			assert(0);
 		}
 		
 		// Display rectangle changed.
@@ -655,27 +646,26 @@ class TabControl: TabControlBase // docmain
 		{
 			invalidate(true); // Update children too ?
 			
-			TabPage page;
-			page = selectedTab;
+			TabPage page = selectedTab;
 			if(page)
 				page.realBounds = displayRectangle;
 		}
 	}
 	
 	/// ditto
-	final @property TabAlignment alignment() // getter
+	final @property TabAlignment alignment() const // getter
 	{
-		// Note: TCS_RIGHT and TCS_BOTTOM are the same flag.
+		// NOTE: TCS_RIGHT and TCS_BOTTOM are the same flag.
 		
-		if(wstyle & TCS_VERTICAL)
+		if(_windowStyle & TCS_VERTICAL)
 		{
-			if(wstyle & TCS_RIGHT)
+			if(_windowStyle & TCS_RIGHT)
 				return TabAlignment.RIGHT;
 			return TabAlignment.LEFT;
 		}
 		else
 		{
-			if(wstyle & TCS_BOTTOM)
+			if(_windowStyle & TCS_BOTTOM)
 				return TabAlignment.BOTTOM;
 			return TabAlignment.TOP;
 		}
@@ -687,39 +677,38 @@ class TabControl: TabControlBase // docmain
 	{
 		switch(tappear)
 		{
-			case TabAppearance.NORMAL:
-				_style(wstyle & ~(TCS_BUTTONS | TCS_FLATBUTTONS));
-				break;
-			
-			case TabAppearance.BUTTONS:
-				_style((wstyle & ~TCS_FLATBUTTONS) | TCS_BUTTONS);
-				break;
-			
-			case TabAppearance.FLAT_BUTTONS:
-				_style(wstyle | TCS_BUTTONS | TCS_FLATBUTTONS);
-				break;
-			
-			default:
-				assert(0);
+		case TabAppearance.NORMAL:
+			_style(_windowStyle & ~(TCS_BUTTONS | TCS_FLATBUTTONS));
+			break;
+		
+		case TabAppearance.BUTTONS:
+			_style((_windowStyle & ~TCS_FLATBUTTONS) | TCS_BUTTONS);
+			break;
+		
+		case TabAppearance.FLAT_BUTTONS:
+			_style(_windowStyle | TCS_BUTTONS | TCS_FLATBUTTONS);
+			break;
+		
+		default:
+			assert(0);
 		}
 		
 		if(created && visible)
 		{
 			invalidate(false);
 			
-			TabPage page;
-			page = selectedTab;
+			TabPage page = selectedTab;
 			if(page)
 				page.realBounds = displayRectangle;
 		}
 	}
 	
 	/// ditto
-	final @property TabAppearance appearance() // getter
+	final @property TabAppearance appearance() const // getter
 	{
-		if(wstyle & TCS_FLATBUTTONS)
+		if(_windowStyle & TCS_FLATBUTTONS)
 			return TabAppearance.FLAT_BUTTONS;
-		if(wstyle & TCS_BUTTONS)
+		if(_windowStyle & TCS_BUTTONS)
 			return TabAppearance.BUTTONS;
 		return TabAppearance.NORMAL;
 	}
@@ -730,10 +719,9 @@ class TabControl: TabControlBase // docmain
 	{
 		if(created)
 		{
-			SendMessageA(hwnd, TCM_SETPADDING, 0, MAKELPARAM(pad.x, pad.y));
+			SendMessageA(_hwnd, TCM_SETPADDING, 0, MAKELPARAM(pad.x, pad.y));
 			
-			TabPage page;
-			page = selectedTab;
+			TabPage page = selectedTab;
 			if(page)
 				page.realBounds = displayRectangle;
 		}
@@ -742,7 +730,7 @@ class TabControl: TabControlBase // docmain
 	}
 	
 	/// ditto
-	final @property Point padding() // getter
+	final @property Point padding() const // getter
 	{
 		return _pad;
 	}
@@ -751,7 +739,7 @@ class TabControl: TabControlBase // docmain
 	///
 	final @property TabPageCollection tabPages() // getter
 	{
-		return tchildren;
+		return _tabPageCollection;
 	}
 	
 	
@@ -763,14 +751,13 @@ class TabControl: TabControlBase // docmain
 		else
 			_style(_style() & ~TCS_MULTILINE);
 		
-		TabPage page;
-		page = selectedTab;
+		TabPage page = selectedTab;
 		if(page)
 			page.realBounds = displayRectangle;
 	}
 	
 	/// ditto
-	final @property bool multiline() // getter
+	final @property bool multiline() const // getter
 	{
 		return (_style() & TCS_MULTILINE) != 0;
 	}
@@ -781,44 +768,41 @@ class TabControl: TabControlBase // docmain
 	{
 		if(!created || !multiline)
 			return 0;
-		Message m;
-		m = Message(hwnd, TCM_GETROWCOUNT, 0, 0);
+		Message m = Message(_hwnd, TCM_GETROWCOUNT, 0, 0);
 		prevWndProc(m);
 		return cast(int)m.result;
 	}
 	
 	
 	///
-	final @property int tabCount() // getter
+	final @property int tabCount() const // getter
 	{
-		return tchildren._pages.length.toI32;
+		return _tabPageCollection._pages.length.toI32;
 	}
 	
 	
 	///
 	final @property void selectedIndex(int i) // setter
 	{
-		if(!created || !tchildren._pages.length)
+		if(!created || !_tabPageCollection._pages.length)
 			return;
 		
-		TabPage curpage;
-		curpage = selectedTab;
-		if(curpage is tchildren._pages[i])
+		TabPage curpage = selectedTab;
+		if(curpage is _tabPageCollection._pages[i])
 			return; // Already selected.
 		curpage.realVisible = false;
 		
-		SendMessageA(hwnd, TCM_SETCURSEL, cast(WPARAM)i, 0);
-		tabToFront(tchildren._pages[i]);
+		SendMessageA(_hwnd, TCM_SETCURSEL, cast(WPARAM)i, 0);
+		tabToFront(_tabPageCollection._pages[i]);
 	}
 	
 	/// ditto
 	// Returns -1 if there are no tabs selected.
 	final @property int selectedIndex() // getter
 	{
-		if(!created || !tchildren._pages.length)
+		if(!created || !_tabPageCollection._pages.length)
 			return -1;
-		Message m;
-		m = Message(hwnd, TCM_GETCURSEL, 0, 0);
+		Message m = Message(_hwnd, TCM_GETCURSEL, 0, 0);
 		prevWndProc(m);
 		return cast(int)m.result;
 	}
@@ -827,8 +811,7 @@ class TabControl: TabControlBase // docmain
 	///
 	final @property void selectedTab(TabPage page) // setter
 	{
-		int i;
-		i = tabPages.indexOf(page);
+		int i = tabPages.indexOf(page);
 		if(-1 != i)
 			selectedIndex = i;
 	}
@@ -836,11 +819,10 @@ class TabControl: TabControlBase // docmain
 	/// ditto
 	final @property TabPage selectedTab() // getter
 	{
-		int i;
-		i = selectedIndex;
+		int i = selectedIndex;
 		if(-1 == i)
 			return null;
-		return tchildren._pages[i];
+		return _tabPageCollection._pages[i];
 	}
 	
 	
@@ -866,30 +848,28 @@ class TabControl: TabControlBase // docmain
 	{
 		super.onHandleCreated(ea);
 		
-		SendMessageA(hwnd, TCM_SETPADDING, 0, MAKELPARAM(_pad.x, _pad.y));
+		SendMessageA(_hwnd, TCM_SETPADDING, 0, MAKELPARAM(_pad.x, _pad.y));
 		
-		tchildren.doPages();
+		_tabPageCollection.doPages();
 		
 		// Bring selected tab to front.
-		if(tchildren._pages.length)
+		if(_tabPageCollection._pages.length)
 		{
-			int i;
-			i = selectedIndex;
+			int i = selectedIndex;
 			if(-1 != i)
-				tabToFront(tchildren._pages[i]);
+				tabToFront(_tabPageCollection._pages[i]);
 		}
 	}
 	
 	
 	protected override void onLayout(LayoutEventArgs ea)
 	{
-		if(tchildren._pages.length)
+		if(_tabPageCollection._pages.length)
 		{
-			int i;
-			i = selectedIndex;
+			int i = selectedIndex;
 			if(-1 != i)
 			{
-				tchildren._pages[i].realBounds = displayRectangle;
+				_tabPageCollection._pages[i].realBounds = displayRectangle;
 				//assert(tchildren._pages[i].bounds == displayRectangle);
 			}
 		}
@@ -939,31 +919,29 @@ class TabControl: TabControlBase // docmain
 	
 	protected override void onReflectedMessage(ref Message m)
 	{
-		TabPage page;
-		NMHDR* nmh;
-		nmh = cast(NMHDR*)m.lParam;
+		NMHDR* nmh = cast(NMHDR*)m.lParam;
 		
 		switch(nmh.code)
 		{
-			case TCN_SELCHANGE:
-				page = selectedTab;
+		case TCN_SELCHANGE:
+			TabPage page = selectedTab;
+			if(page)
+				tabToFront(page);
+			super.onReflectedMessage(m);
+			break;
+		
+		case TCN_SELCHANGING:
+			super.onReflectedMessage(m);
+			if(!m.result) // Allowed.
+			{
+				TabPage page = selectedTab;
 				if(page)
-					tabToFront(page);
-				super.onReflectedMessage(m);
-				break;
-			
-			case TCN_SELCHANGING:
-				super.onReflectedMessage(m);
-				if(!m.result) // Allowed.
-				{
-					page = selectedTab;
-					if(page)
-						page.realVisible = false;
-				}
-				return;
-			
-			default:
-				super.onReflectedMessage(m);
+					page.realVisible = false;
+			}
+			return;
+		
+		default:
+			super.onReflectedMessage(m);
 		}
 	}
 	
@@ -976,9 +954,9 @@ class TabControl: TabControlBase // docmain
 	+/
 	
 	
-	private:
+private:
 	Point _pad;
-	TabPageCollection tchildren;
+	TabPageCollection _tabPageCollection;
 	
 	
 	void tabToFront(TabPage page)
@@ -1004,8 +982,7 @@ class TabControl: TabControlBase // docmain
 	}
 	do
 	{
-		int i;
-		i = tabPages.indexOf(page);
+		int i = tabPages.indexOf(page);
 		assert(-1 != i);
 		
 		//TC_ITEMA tci;
@@ -1015,12 +992,12 @@ class TabControl: TabControlBase // docmain
 		if(dfl.internal.utf.useUnicode)
 		{
 			tci.tciw.pszText = cast(typeof(tci.tciw.pszText))dfl.internal.utf.toUnicodez(newText);
-			m = Message(hwnd, TCM_SETITEMW, cast(WPARAM)i, cast(LPARAM)&tci.tciw);
+			m = Message(_hwnd, TCM_SETITEMW, cast(WPARAM)i, cast(LPARAM)&tci.tciw);
 		}
 		else
 		{
 			tci.tcia.pszText = cast(typeof(tci.tcia.pszText))dfl.internal.utf.toAnsiz(newText);
-			m = Message(hwnd, TCM_SETITEMA, cast(WPARAM)i, cast(LPARAM)&tci.tcia);
+			m = Message(_hwnd, TCM_SETITEMA, cast(WPARAM)i, cast(LPARAM)&tci.tcia);
 		}
 		prevWndProc(m);
 		

@@ -26,7 +26,7 @@ version(NO_DRAG_DROP)
 ///
 class GroupBox: ControlSuperClass // docmain
 {
-	override @property Rect displayRectangle() // getter
+	override @property Rect displayRectangle() const // getter
 	{
 		// Should only calculate this upon setting the text ?
 		
@@ -68,11 +68,11 @@ class GroupBox: ControlSuperClass // docmain
 		}
 		_textHeight = _defTextHeight;
 		
-		wstyle |= BS_GROUPBOX /+ | WS_TABSTOP +/; // Should WS_TABSTOP be set?
+		_windowStyle |= BS_GROUPBOX /+ | WS_TABSTOP +/; // Should WS_TABSTOP be set?
 		//wstyle |= BS_GROUPBOX | WS_TABSTOP;
 		//wexstyle |= WS_EX_CONTROLPARENT; // ?
-		wclassStyle = buttonClassStyle;
-		ctrlStyle |= ControlStyles.CONTAINER_CONTROL;
+		_windowClassStyle = buttonClassStyle;
+		_controlStyle |= ControlStyles.CONTAINER_CONTROL;
 	}
 	
 	
@@ -120,7 +120,7 @@ class GroupBox: ControlSuperClass // docmain
 		
 		RECT rect;
 		ea.clipRectangle.getRect(&rect);
-		FillRect(ea.graphics.handle, &rect, hbrBg);
+		FillRect(ea.graphics.handle, &rect, backgroundHbrush);
 	}
 	
 	

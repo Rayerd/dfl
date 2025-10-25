@@ -1906,7 +1906,7 @@ extern(Windows) LRESULT dflWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 		Application.creatingControl(null); // Reset.
 		
 		Application.controls[hwnd] = ctrl;
-		ctrl.hwnd = hwnd;
+		ctrl._hwnd = hwnd;
 		debug(APP_PRINT)
 			cprintf("Added window 0x%X.\n", cast(uint)hwnd);
 		

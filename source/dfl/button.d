@@ -206,9 +206,9 @@ abstract class ButtonBase: ControlSuperClass // docmain
 	{
 		_initButton();
 		
-		wstyle |= WS_TABSTOP /+ | BS_NOTIFY +/;
-		ctrlStyle |= ControlStyles.SELECTABLE;
-		wclassStyle = buttonClassStyle;
+		_windowStyle |= WS_TABSTOP /+ | BS_NOTIFY +/;
+		_controlStyle |= ControlStyles.SELECTABLE;
+		_windowClassStyle = buttonClassStyle;
 	}
 	
 	
@@ -267,7 +267,7 @@ abstract class ButtonBase: ControlSuperClass // docmain
 			//SendMessageA(handle, BM_SETSTYLE, LOWORD(newStyle), MAKELPARAM(TRUE, 0));
 			SendMessageA(handle, BM_SETSTYLE, newStyle, MAKELPARAM(TRUE, 0));
 		
-		wstyle = newStyle;
+		_windowStyle = newStyle;
 		//_style(newStyle);
 	}
 	
@@ -604,7 +604,7 @@ class CheckBox: ButtonBase // docmain
 	
 	this()
 	{
-		wstyle |= BS_AUTOCHECKBOX | BS_LEFT | BS_VCENTER; // Auto check and MIDDLE_LEFT by default.
+		_windowStyle |= BS_AUTOCHECKBOX | BS_LEFT | BS_VCENTER; // Auto check and MIDDLE_LEFT by default.
 	}
 	
 	
@@ -739,9 +739,9 @@ class RadioButton: ButtonBase // docmain
 	
 	this()
 	{
-		wstyle &= ~WS_TABSTOP;
+		_windowStyle &= ~WS_TABSTOP;
 		//wstyle |= BS_AUTORADIOBUTTON | BS_LEFT | BS_VCENTER; // MIDDLE_LEFT by default.
-		wstyle |= BS_RADIOBUTTON | BS_LEFT | BS_VCENTER; // MIDDLE_LEFT by default.
+		_windowStyle |= BS_RADIOBUTTON | BS_LEFT | BS_VCENTER; // MIDDLE_LEFT by default.
 	}
 	
 	

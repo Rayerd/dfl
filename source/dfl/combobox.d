@@ -37,10 +37,10 @@ class ComboBox: ListControl // docmain
 	{
 		_initCombobox();
 		
-		wstyle |= WS_TABSTOP | WS_VSCROLL | CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_HASSTRINGS;
-		wexstyle |= WS_EX_CLIENTEDGE;
-		ctrlStyle |= ControlStyles.SELECTABLE;
-		wclassStyle = comboboxClassStyle;
+		_windowStyle |= WS_TABSTOP | WS_VSCROLL | CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_HASSTRINGS;
+		_windowStyleEx |= WS_EX_CLIENTEDGE;
+		_controlStyle |= ControlStyles.SELECTABLE;
+		_windowClassStyle = comboboxClassStyle;
 		
 		icollection = createItemCollection();
 	}
@@ -49,8 +49,7 @@ class ComboBox: ListControl // docmain
 	///
 	final @property void dropDownStyle(ComboBoxStyle ddstyle) // setter
 	{
-		LONG st;
-		st = _style() & ~(CBS_DROPDOWN | CBS_DROPDOWNLIST | CBS_SIMPLE);
+		LONG st = _style() & ~(CBS_DROPDOWN | CBS_DROPDOWNLIST | CBS_SIMPLE);
 		
 		final switch(ddstyle)
 		{
@@ -439,10 +438,10 @@ class ComboBox: ListControl // docmain
 	// This is a lot faster than retrieving the text, but retrieving the text is completely accurate.
 	@property uint textLength() // getter
 	{
-		if(!(ctrlStyle & ControlStyles.CACHE_TEXT) && isHandleCreated)
+		if(!(_controlStyle & ControlStyles.CACHE_TEXT) && isHandleCreated)
 			//return cast(uint)SendMessageA(handle, WM_GETTEXTLENGTH, 0, 0);
 			return cast(uint)dfl.internal.utf.sendMessage(handle, WM_GETTEXTLENGTH, 0, 0);
-		return wtext.length.toI32;
+		return _windowText.length.toI32;
 	}
 	
 	
@@ -678,7 +677,7 @@ class ComboBox: ListControl // docmain
 		
 		// Set the Ctrl ID to the HWND so that it is unique
 		// and WM_MEASUREITEM will work properly.
-		SetWindowLongPtrA(hwnd, GWL_ID, cast(LONG_PTR)hwnd);
+		SetWindowLongPtrA(_hwnd, GWL_ID, cast(LONG_PTR)_hwnd);
 		
 		//prevwproc(EM_SETLIMITTEXT, cast(WPARAM)lim, 0);
 		maxLength = lim; // Call virtual function.
@@ -692,7 +691,7 @@ class ComboBox: ListControl // docmain
 			prevwproc(CB_SETITEMHEIGHT, 0, iheight);
 		
 		Message m;
-		m.hWnd = hwnd;
+		m.hWnd = _hwnd;
 		m.msg = CB_INSERTSTRING;
 		// Note: duplicate code.
 		if(dfl.internal.utf.useUnicode)
@@ -750,7 +749,7 @@ class ComboBox: ListControl // docmain
 	{
 		RECT rect;
 		pea.clipRectangle.getRect(&rect);
-		FillRect(pea.graphics.handle, &rect, parent.hbrBg); // Hack.
+		FillRect(pea.graphics.handle, &rect, parent.backgroundHbrush); // Hack.
 	}
 	
 	
@@ -761,10 +760,9 @@ class ComboBox: ListControl // docmain
 		
 		// TODO: check if correct implementation.
 		if(hasDropList)
-			wrect.height = DEFAULT_ITEM_HEIGHT * 8;
+			_windowRect.height = DEFAULT_ITEM_HEIGHT * 8;
 		
-		Dstring ft;
-		ft = wtext;
+		Dstring ft = _windowText;
 		
 		super.createHandle();
 		
@@ -778,9 +776,9 @@ class ComboBox: ListControl // docmain
 		// text isn't put in the edit box for some reason.
 		Message m;
 		if(dfl.internal.utf.useUnicode)
-			m = Message(hwnd, WM_SETTEXT, 0, cast(LPARAM)dfl.internal.utf.toUnicodez(ft));
+			m = Message(_hwnd, WM_SETTEXT, 0, cast(LPARAM)dfl.internal.utf.toUnicodez(ft));
 		else
-			m = Message(hwnd, WM_SETTEXT, 0, cast(LPARAM)dfl.internal.utf.toAnsiz(ft)); // Can this be unsafeAnsiz()?
+			m = Message(_hwnd, WM_SETTEXT, 0, cast(LPARAM)dfl.internal.utf.toAnsiz(ft)); // Can this be unsafeAnsiz()?
 		prevWndProc(m);
 	}
 	
@@ -849,7 +847,7 @@ class ComboBox: ListControl // docmain
 			}
 			
 			prepareDc(dis.hDC);
-			diea = new DrawItemEventArgs(new Graphics(dis.hDC, false), wfont,
+			diea = new DrawItemEventArgs(new Graphics(dis.hDC, false), _windowFont,
 				Rect(&dis.rcItem), dis.itemID, state, fc, bc);
 			
 			onDrawItem(diea);
@@ -1076,7 +1074,7 @@ class ComboBox: ListControl // docmain
 	LRESULT prevwproc(UINT msg, WPARAM wparam, LPARAM lparam)
 	{
 		//return CallWindowProcA(listviewPrevWndProc, hwnd, msg, wparam, lparam);
-		return dfl.internal.utf.callWindowProc(comboboxPrevWndProc, hwnd, msg, wparam, lparam);
+		return dfl.internal.utf.callWindowProc(comboboxPrevWndProc, _hwnd, msg, wparam, lparam);
 	}
 }
 

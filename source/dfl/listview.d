@@ -1261,10 +1261,10 @@ class ListView: ControlSuperClass // docmain
 		selobjcollection = new SelectedItemCollection(this);
 		checkedis = new CheckedIndexCollection(this);
 		
-		wstyle |= WS_TABSTOP | LVS_ALIGNTOP | LVS_AUTOARRANGE | LVS_SHAREIMAGELISTS;
-		wexstyle |= WS_EX_CLIENTEDGE;
-		ctrlStyle |= ControlStyles.SELECTABLE;
-		wclassStyle = listviewClassStyle;
+		_windowStyle |= WS_TABSTOP | LVS_ALIGNTOP | LVS_AUTOARRANGE | LVS_SHAREIMAGELISTS;
+		_windowStyleEx |= WS_EX_CLIENTEDGE;
+		_controlStyle |= ControlStyles.SELECTABLE;
+		_windowClassStyle = listviewClassStyle;
 	}
 	
 	
@@ -1376,11 +1376,11 @@ class ListView: ControlSuperClass // docmain
 	}
 	
 	
-	override @property Color backColor() // getter
+	override @property Color backColor() const // getter
 	{
-		if(Color.empty == backc)
+		if(Color.empty == _backColor)
 			return defaultBackColor;
-		return backc;
+		return _backColor;
 	}
 	
 	
@@ -1490,11 +1490,11 @@ class ListView: ControlSuperClass // docmain
 	}
 	
 	
-	override @property Color foreColor() // getter
+	override @property Color foreColor() const // getter
 	{
-		if(Color.empty == forec)
+		if(Color.empty == _foreColor)
 			return defaultForeColor;
-		return forec;
+		return _foreColor;
 	}
 	
 	
@@ -2780,7 +2780,7 @@ class ListView: ControlSuperClass // docmain
 	LRESULT prevwproc(UINT msg, WPARAM wparam, LPARAM lparam)
 	{
 		//return CallWindowProcA(listviewPrevWndProc, hwnd, msg, wparam, lparam);
-		return dfl.internal.utf.callWindowProc(listviewPrevWndProc, hwnd, msg, wparam, lparam);
+		return dfl.internal.utf.callWindowProc(listviewPrevWndProc, _hwnd, msg, wparam, lparam);
 	}
 }
 

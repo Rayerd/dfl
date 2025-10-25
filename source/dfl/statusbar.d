@@ -420,8 +420,8 @@ class StatusBar: ControlSuperClass // docmain
 		_initStatusbar();
 		
 		_issimple = true;
-		wstyle |= SBARS_SIZEGRIP;
-		wclassStyle = statusbarClassStyle;
+		_windowStyle |= SBARS_SIZEGRIP;
+		_windowClassStyle = statusbarClassStyle;
 		//height = ?;
 		dock = DockStyle.BOTTOM;
 		
@@ -504,7 +504,7 @@ class StatusBar: ControlSuperClass // docmain
 	/// ditto
 	final @property bool sizingGrip() // getter
 	{
-		if(wstyle & SBARS_SIZEGRIP)
+		if(_windowStyle & SBARS_SIZEGRIP)
 			return true;
 		return false;
 	}
@@ -601,7 +601,7 @@ class StatusBar: ControlSuperClass // docmain
 	LRESULT prevwproc(UINT msg, WPARAM wparam, LPARAM lparam)
 	{
 		//return CallWindowProcA(statusbarPrevWndProc, hwnd, msg, wparam, lparam);
-		return dfl.internal.utf.callWindowProc(statusbarPrevWndProc, hwnd, msg, wparam, lparam);
+		return dfl.internal.utf.callWindowProc(statusbarPrevWndProc, _hwnd, msg, wparam, lparam);
 	}
 	
 	

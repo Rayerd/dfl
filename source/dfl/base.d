@@ -634,6 +634,16 @@ enum ContentAlignment: ubyte
 
 
 ///
+enum Orientation : ubyte
+{
+	HORIZONTAL = 0,
+	VERTICAL = 1,
+	HORIZONTAL_INVERSE = 2, // extra.
+	VERTICAL_INVERSE = 3 // extra.
+}
+
+
+///
 enum CharacterCasing: ubyte
 {
 	NORMAL, ///
