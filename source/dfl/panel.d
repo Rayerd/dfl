@@ -7,13 +7,25 @@ module dfl.panel;
 
 import dfl.base;
 import dfl.control;
+import dfl.drawing;
+import dfl.label;
 
 import dfl.internal.winapi;
 
 
-///
+/// Panel control container
 class Panel: ContainerControl // docmain
 {
+	/// Constructor
+	this()
+	{
+		//ctrlStyle |= ControlStyles.SELECTABLE | ControlStyles.CONTAINER_CONTROL;
+		_controlStyle |= ControlStyles.CONTAINER_CONTROL;
+		/+ wstyle |= WS_TABSTOP; +/ // Should WS_TABSTOP be set?
+		//wexstyle |= WS_EX_CONTROLPARENT; // Allow tabbing through children. ?
+	}
+
+
 	///
 	@property void borderStyle(BorderStyle bs) // setter
 	{
@@ -42,7 +54,7 @@ class Panel: ContainerControl // docmain
 	}
 	
 	/// ditto
-	@property BorderStyle borderStyle() // getter
+	@property BorderStyle borderStyle() const // getter
 	{
 		if(_exStyle() & WS_EX_CLIENTEDGE)
 			return BorderStyle.FIXED_3D;
@@ -50,14 +62,67 @@ class Panel: ContainerControl // docmain
 			return BorderStyle.FIXED_SINGLE;
 		return BorderStyle.NONE;
 	}
-	
-	
-	this()
-	{
-		//ctrlStyle |= ControlStyles.SELECTABLE | ControlStyles.CONTAINER_CONTROL;
-		ctrlStyle |= ControlStyles.CONTAINER_CONTROL;
-		/+ wstyle |= WS_TABSTOP; +/ // Should WS_TABSTOP be set?
-		//wexstyle |= WS_EX_CONTROLPARENT; // Allow tabbing through children. ?
-	}
 }
 
+
+/// StackPanel control for automatic stacking of child controls
+class StackPanel : Panel
+{
+	///
+	void orientation(Orientation orientation) nothrow pure @property // setter
+	{
+		_orientation = orientation;
+	}
+
+	/// ditto
+	Orientation orientation() const nothrow pure @property // getter
+	{
+		return _orientation;
+	}
+
+
+	///
+	void add(Control c)
+	{
+		if (typeid(c) == typeid(Separator))
+		{
+			c.width = 1;
+			c.height = 1;
+		}
+
+		controls.add(c);
+		final switch (orientation)
+		{
+		case Orientation.HORIZONTAL:
+			c.dock = DockStyle.LEFT;
+			break;
+		case Orientation.VERTICAL:
+			c.dock = DockStyle.TOP;
+			break;
+		case Orientation.HORIZONTAL_INVERSE:
+			c.dock = DockStyle.RIGHT;
+			break;
+		case Orientation.VERTICAL_INVERSE:
+			c.dock = DockStyle.BOTTOM;
+		}
+		c.parent = this;
+	}
+
+
+private:
+	Orientation _orientation = Orientation.VERTICAL; ///
+}
+
+
+/// Simplle separator control for use in StackPanel
+class Separator : Label
+{
+	/// Constructor
+	this()
+	{
+		_exStyle(_exStyle() & ~WS_EX_CLIENTEDGE);
+		_style(_style() | WS_BORDER);
+
+		backColor = SystemColors.controlDarkDark;
+	}
+}
