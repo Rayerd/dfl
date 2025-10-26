@@ -634,6 +634,22 @@ enum ContentAlignment: ubyte
 
 
 ///
+enum LocationAlignment: ubyte
+{
+	NONE, ///
+	TOP_LEFT, ///
+	BOTTOM_CENTER, ///
+	BOTTOM_LEFT, ///
+	BOTTOM_RIGHT, ///
+	MIDDLE_CENTER, ///
+	MIDDLE_LEFT, ///
+	MIDDLE_RIGHT, ///
+	TOP_CENTER, ///
+	TOP_RIGHT, ///
+}
+
+
+///
 enum Orientation : ubyte
 {
 	HORIZONTAL = 0,

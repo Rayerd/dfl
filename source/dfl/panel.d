@@ -69,13 +69,15 @@ class Panel: ContainerControl // docmain
 class StackPanel : Panel
 {
 	///
-	void orientation(Orientation orientation) nothrow pure @property // setter
+	void orientation(Orientation orientaion) @property // setter
 	{
-		_orientation = orientation;
+		_orientation = orientaion;
+		foreach (ctrl; controls)
+			_setOrientation(ctrl, orientaion);
 	}
 
-	/// ditto
-	Orientation orientation() const nothrow pure @property // getter
+	///
+	Orientation orientation() const @property // getter
 	{
 		return _orientation;
 	}
@@ -90,7 +92,20 @@ class StackPanel : Panel
 			c.height = 1;
 		}
 
+		_setOrientation(c, _orientation);
 		controls.add(c);
+		c.parent = this;
+	}
+
+
+private:
+
+	Orientation _orientation; ///
+
+
+	///
+	void _setOrientation(Control c, Orientation orientation)
+	{
 		final switch (orientation)
 		{
 		case Orientation.HORIZONTAL:
@@ -105,12 +120,7 @@ class StackPanel : Panel
 		case Orientation.VERTICAL_INVERSE:
 			c.dock = DockStyle.BOTTOM;
 		}
-		c.parent = this;
 	}
-
-
-private:
-	Orientation _orientation = Orientation.VERTICAL; ///
 }
 
 

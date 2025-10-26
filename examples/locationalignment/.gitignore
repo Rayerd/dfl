@@ -1,0 +1,16 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/hello_dfl
+hello_dfl.so
+hello_dfl.dylib
+hello_dfl.dll
+hello_dfl.a
+hello_dfl.lib
+hello_dfl-test-*
+*.exe
+*.pdb
+*.o
+*.obj
+*.lst

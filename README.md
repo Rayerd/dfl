@@ -27,6 +27,13 @@ void main()
 ![screen shot](./image/welcomtodfl.png "screen shot")
 
 ## Recent major features
+- **Add LocationAlignment property to Control class for easily layout customize GUI elements (with example code) .**
+	- While WinForms' Anchor maintains a constant distance to the edge of the parent control, LocationAlignment sets the distance to the edge of the parent control to zero.
+	- LocationAlignment is affected by the dockMargin property.
+	- LocationAlignment and DockStyle cannot be used at the same time.
+
+![screen shot](./examples/locationalignment/image/screenshot.png "screen shot")
+
 - **Enabled padding and margin configuration for all Control types.**
 - **StackPanel class and example code are now comming.**
 

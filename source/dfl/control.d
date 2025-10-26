@@ -1296,7 +1296,7 @@ class Control: DObject, IWindow // docmain
 			}
 			
 			SetWindowPos(_hwnd, HWND.init, x_, y_, width_, height_, swpf);
-			// Window events will update -wrect-.
+			// Window events will update -_windowRect-.
 		}
 		else
 		{
@@ -1320,8 +1320,6 @@ class Control: DObject, IWindow // docmain
 				_windowRect.height = height_;
 				_clientWindowSize.height = height_;
 			}
-			
-			//oldwrect = wrect;
 		}
 	}
 	
@@ -1815,6 +1813,7 @@ class Control: DObject, IWindow // docmain
 		/+
 		anch = AnchorStyles.NONE; // Can't be set at the same time.
 		+/
+		_locationAlignment = LocationAlignment.NONE; // Can't be set at the same time.
 		
 		if(DockStyle.NONE == ds)
 		{
@@ -6951,7 +6950,21 @@ protected:
 		}
 	}
 	
-	
+
+	///
+	void locationAlignment(LocationAlignment alignment) // setter
+	{
+		_locationAlignment = alignment;
+		_dockStyle = DockStyle.NONE; // Can't be set at the same time.
+	}
+
+	/// ditto
+	LocationAlignment locationAlignment() const // getter
+	{
+		return _locationAlignment;
+	}
+
+
 	///
 	// Called after adding the control to a container.
 	void initLayout()
@@ -6986,10 +6999,60 @@ protected:
 			if(ctrl._rtype() & (2 | 4)) // Mdichild | Tabpage
 				continue;
 			
+			if(ctrl.locationAlignment != LocationAlignment.NONE)
+			{
+				Rect ctrlbounds = ctrl.bounds;
+
+				if (ctrl.locationAlignment == LocationAlignment.TOP_LEFT
+					|| ctrl.locationAlignment == LocationAlignment.TOP_CENTER
+					|| ctrl.locationAlignment == LocationAlignment.TOP_RIGHT)
+				{
+					ctrlbounds.y = area.y + ctrl.dockMargin.top;
+				}
+
+				if (ctrl.locationAlignment == LocationAlignment.MIDDLE_LEFT
+					|| ctrl.locationAlignment == LocationAlignment.MIDDLE_CENTER
+					|| ctrl.locationAlignment == LocationAlignment.MIDDLE_RIGHT)
+				{
+					ctrlbounds.y = area.y + (area.height - ctrl.height) / 2;
+				}
+
+				if (ctrl.locationAlignment == LocationAlignment.BOTTOM_LEFT
+					|| ctrl.locationAlignment == LocationAlignment.BOTTOM_CENTER
+					|| ctrl.locationAlignment == LocationAlignment.BOTTOM_RIGHT)
+				{
+					ctrlbounds.y = area.bottom - ctrl.height - ctrl.dockMargin.bottom;
+				}
+
+				if (ctrl.locationAlignment == LocationAlignment.TOP_LEFT
+					|| ctrl.locationAlignment == LocationAlignment.MIDDLE_LEFT
+					|| ctrl.locationAlignment == LocationAlignment.BOTTOM_LEFT)
+				{
+					ctrlbounds.x = area.x + ctrl.dockMargin.left;
+				}
+
+				if (ctrl.locationAlignment == LocationAlignment.TOP_RIGHT
+					|| ctrl.locationAlignment == LocationAlignment.MIDDLE_RIGHT
+					|| ctrl.locationAlignment == LocationAlignment.BOTTOM_RIGHT)
+				{
+					ctrlbounds.x = area.right - ctrl.width - ctrl.dockMargin.right;
+				}
+
+				if (ctrl.locationAlignment == LocationAlignment.TOP_CENTER
+					|| ctrl.locationAlignment == LocationAlignment.MIDDLE_CENTER
+					|| ctrl.locationAlignment == LocationAlignment.BOTTOM_CENTER)
+				{
+					ctrlbounds.x = area.x + (area.width - ctrl.width) / 2;
+				}
+
+				ctrl.setBoundsCore(ctrlbounds.x, ctrlbounds.y, ctrlbounds.width, ctrlbounds.height, cast(BoundsSpecified)BoundsSpecified.LOCATION);
+				continue;
+			}
+
 			//Rect prevctrlbounds;
 			//prevctrlbounds = ctrl.bounds;
 			//ctrl.suspendLayout(); // NOTE: exception could cause failure to restore.
-			switch(ctrl._dockStyle)
+			final switch(ctrl._dockStyle)
 			{
 				case DockStyle.NONE:
 					/+
@@ -7069,10 +7132,6 @@ protected:
 					area.x = area.x + ctrl.dockMargin.left;
 					area.y = area.y + ctrl.dockMargin.top;
 					ctrl.bounds = area;
-					break;
-				
-				default:
-					assert(0);
 			}
 			//ctrl.resumeLayout(true);
 			//ctrl.resumeLayout(prevctrlbounds != ctrl.bounds);
@@ -7294,6 +7353,7 @@ package:
 	//AnchorStyles anch = cast(AnchorStyles)(AnchorStyles.TOP | AnchorStyles.LEFT);
 	//bool cvalidation = true;
 	ContextMenu _contextMenu;
+	LocationAlignment _locationAlignment = LocationAlignment.NONE;
 	DockStyle _dockStyle = DockStyle.NONE;
 	DockPaddingEdges _dockPadding;
 	DockMarginEdges _dockMargin;
