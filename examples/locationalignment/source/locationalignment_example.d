@@ -4,7 +4,6 @@ class MainForm : Form
 {
 	private StackPanel _contentPanel;
 	private Panel[] _configPanels;
-	private Button _changeOrientaionButton;
 
 	private enum DEFAULT_PANEL_SIZE = Size(240, 80);
 
