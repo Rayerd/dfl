@@ -39,7 +39,7 @@ void main()
 
 ![screen shot](./examples/stackpanel/image/screenshot.png "screen shot")
 
-- Reworked build-scripts (makelib.bat, makecoff.bar and go.bat) to better work with DUB and MSVC 2022.
+- Reworked build-scripts (makelib.bat, makecoff.bat and go.bat) to better work with DUB and MSVC 2022.
 	- dfl.lib and dfl_debug.lib are created in \dfl\bin, just like DUB.
 - Module "dfl.toggleswitch" and example code are now comming.
 
