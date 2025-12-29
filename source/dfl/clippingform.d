@@ -7,28 +7,26 @@ import dfl.event;
 import dfl.drawing;
 
 import dfl.internal.dlib : toI32;
+import dfl.internal.dpiaware;
 
 import core.memory;
-import core.sys.windows.windows;
+import core.sys.windows.winbase;
+import core.sys.windows.wingdi;
+import core.sys.windows.windef;
+import core.sys.windows.winuser;
 
 ///
 struct RegionRects
 {
-private:
-	RGNDATA* _rgn = null;
-	size_t _capacity = 0;
-	size_t _width = 0;
-	size_t _height = 0;
-
-public:
-	@property size_t width() const
+	///
+	@property size_t width() const pure nothrow
 	{
 		return _width;
 	}
 	
 	
 	///
-	@property size_t height() const
+	@property size_t height() const pure nothrow
 	{
 		return _height;
 	}
@@ -38,9 +36,7 @@ public:
 	void clear()
 	{
 		if (_rgn)
-		{
 			GC.free(_rgn);
-		}
 		_rgn = null;
 		_capacity = 0;
 		_width = 0;
@@ -54,19 +50,16 @@ public:
 		if (_capacity == 0)
 		{
 			_capacity = 1024;
-			_rgn = cast(RGNDATA*) GC.malloc(
-				RGNDATAHEADER.sizeof + RECT.sizeof * _capacity);
+			_rgn = cast(RGNDATA*)GC.malloc(RGNDATAHEADER.sizeof + RECT.sizeof * _capacity);
 			_rgn.rdh.nCount = 0;
 		}
 		else if (_rgn.rdh.nCount == _capacity)
 		{
 			_capacity *= 2;
-			_rgn = cast(RGNDATA*) GC.realloc(cast(void*)_rgn,
-				RGNDATAHEADER.sizeof + RECT.sizeof * _capacity);
+			_rgn = cast(RGNDATA*)GC.realloc(cast(void*)_rgn, RGNDATAHEADER.sizeof + RECT.sizeof * _capacity);
 		}
 		(cast(RECT*)_rgn.Buffer.ptr)[_rgn.rdh.nCount++] = rc;
 	}
-	
 	
 	/// ditto
 	void add(int l, int t, int r, int b)
@@ -74,9 +67,8 @@ public:
 		add(RECT(l, t, r, b));
 	}
 	
-	
 	/// ditto
-	void opOpAssign(string op)(RECT rc) if (op == "~")
+	void opOpAssign(string op : "~")(RECT rc)
 	{
 		add(rc);
 	}
@@ -85,83 +77,90 @@ public:
 	///
 	@property Region region()
 	{
-		if (_rgn is null) return null;
+		if (_rgn is null)
+			return null;
 		with (_rgn.rdh)
 		{
 			dwSize = RGNDATAHEADER.sizeof;
-			iType  = RDH_RECTANGLES;
-			nRgnSize = RGNDATAHEADER.sizeof.toI32 + RECT.sizeof.toI32*nCount.toI32;
-			rcBound = RECT(0,0,_width.toI32,_height.toI32);
+			iType = RDH_RECTANGLES;
+			nRgnSize = RGNDATAHEADER.sizeof.toI32 + RECT.sizeof.toI32 * nCount.toI32;
+			rcBound = RECT(0, 0, _width.toI32, _height.toI32);
 		}
 		if (auto hRgn = ExtCreateRegion(null, _rgn.rdh.nRgnSize, _rgn))
-		{
 			return new Region(hRgn);
-		}
 		throw new Exception("Failed to make a region data.");
 	}
+
+
+	///
+	Region create(MemoryGraphics mg, int dpi = USER_DEFAULT_SCREEN_DPI)
+	{
+		clear();
+		_width = MulDiv(mg.width, dpi, USER_DEFAULT_SCREEN_DPI);
+		_height = MulDiv(mg.height, dpi, USER_DEFAULT_SCREEN_DPI);
+		auto g = new MemoryGraphics(_width.toI32, _height.toI32, mg.handle);
+		Bitmap bmp = new Bitmap(mg.toHBitmap(mg.handle));
+		bmp.drawStretched(g, Rect(0, 0, _width, _height));
+		return _createClippingRegionFromHDC(g.hbitmap);
+	}
 	
-	
-	private Region createClippingRegionFromHDC(HBITMAP hBitmap)
+	/// ditto
+	Region create(Image img, int dpi = USER_DEFAULT_SCREEN_DPI)
+	{
+		clear();
+		_width = MulDiv(img.width, dpi, USER_DEFAULT_SCREEN_DPI);
+		_height = MulDiv(img.height, dpi, USER_DEFAULT_SCREEN_DPI);
+		auto g = new MemoryGraphics(_width.toI32, _height.toI32);
+		img.drawStretched(g, Rect(0, 0, _width, _height));
+		return _createClippingRegionFromHDC(g.hbitmap);
+	}
+
+private:
+	RGNDATA* _rgn = null; ///
+	size_t _capacity = 0; ///
+	size_t _width = 0; ///
+	size_t _height = 0; ///
+
+	///
+	Region _createClippingRegionFromHDC(HBITMAP hBitmap)
 	{
 		HDC hDC = CreateCompatibleDC(null);
-		auto h = _height;
-		auto w = _width;
-		if (!hDC) throw new Exception("Failed to get device context data.");
+		if (!hDC)
+			throw new Exception("Failed to get device context data.");
 		BITMAPINFOHEADER bi;
 		with(bi)
 		{
 			biSize        = BITMAPINFOHEADER.sizeof;
-			biWidth       = w.toI32;
-			biHeight      = h.toI32;
+			biWidth       = _width.toI32;
+			biHeight      = _height.toI32;
 			biPlanes      = 1;
 			biBitCount    = 32;
 			biCompression = BI_RGB;
 		}
-		auto pxs = new COLORREF[w];
-		COLORREF tr;
-		for (int y = 1; y < h; ++y)
+		auto pixels = new COLORREF[_width];
+		COLORREF transparentColor;
+		for (int y = 1; y < _height; ++y)
 		{
-			GetDIBits(hDC, hBitmap, h.toI32-y, 1, pxs.ptr, cast(BITMAPINFO*)&bi, DIB_RGB_COLORS);
-			if (y == 1) tr = pxs[0];
-			for (int x = 0; x < w; x++)
+			GetDIBits(hDC, hBitmap, _height.toI32 - y, 1, pixels.ptr, cast(BITMAPINFO*)&bi, DIB_RGB_COLORS);
+			if (y == 1)
+				transparentColor = pixels[0];
+			for (int x = 0; x < _width; x++)
 			{
-				if (pxs[x] == tr) continue;
+				if (pixels[x] == transparentColor) continue;
 				int sx = x;
-				while (x < w)
+				while (x < _width)
 				{
-					if (pxs[x++] == tr) break;
+					if (pixels[x++] == transparentColor) break;
 				}
-				add(sx, y-1, x-1, y);
+				int l = sx;
+				int t = y-1;
+				int r = x-1;
+				int b = y;
+				add(l, t, r, b); // L,T,R,B
 			}
 		}
 		DeleteDC(hDC);
 		return region;
-	}
-	
-	
-	///
-	Region create(MemoryGraphics g)
-	{
-		clear();
-		_width = g.width;
-		_height = g.height;
-		return createClippingRegionFromHDC(g.hbitmap);
-	}
-	
-	
-	/// ditto
-	Region create(Image img)
-	{
-		clear();
-		_width = img.width;
-		_height = img.height;
-		if (auto bmp = cast(Bitmap)img)
-		{
-			return createClippingRegionFromHDC(bmp.handle);
-		}
-		auto g = new MemoryGraphics(img.width, img.height);
-		img.draw(g, Point(0,0));
-		return create(g);
 	}
 }
 
@@ -169,54 +168,89 @@ public:
 ///
 class ClippingForm : Form
 {
-private:
-	Image _image;
-	RegionRects _regionRects;
-
-protected:
-	override void createParams(ref CreateParams cp)
-	{
-		super.createParams(cp);
-		cp.style = WS_POPUP;
-		cp.exStyle |= WS_EX_TOPMOST;
-	}
-
-public:
 	///
-	@property Image clipping()
+	@property inout(Image) clipping() inout // getter
 	{
 		return _image;
 	}
 	
-	
 	/// ditto
-	@property void clipping(Image img)
+	@property void clipping(Image img) // setter
 	{
 		_image = img;
 	}
 	
 	
+protected:
+
 	///
 	override void onHandleCreated(EventArgs ea)
 	{
-		if (_image)
-		{
-			region = _regionRects.create(_image);
-		}
 		super.onHandleCreated(ea);
+
+		_updateRegionWithDpi(dpi);
 	}
 	
 	
 	///
 	override void onPaint(PaintEventArgs pea)
 	{
+		super.onPaint(pea);
 		if (_image)
 		{
-			_image.draw(pea.graphics, Point(0,0));
+			// TODO: If the dpi is not an integer ratio (100%, 200%, 300%...),
+			//       the window size and image size will be misaligned.
+			Rect rect;
+			rect.x = 0;
+			rect.y = 0;
+			rect.width = MulDiv(width, dpi, USER_DEFAULT_SCREEN_DPI);
+			rect.height = MulDiv(height, dpi, USER_DEFAULT_SCREEN_DPI);
+			_image.drawStretched(pea.graphics, rect);
 		}
-		else
+	}
+
+
+	///
+	override void wndProc(ref Message msg)
+	{
+		switch(msg.msg)
 		{
-			super.onPaint(pea);
+			case WM_DPICHANGED:
+			{
+				super.wndProc(msg); // Call it before, because window size must be changed.
+
+				_updateRegionWithDpi(dpi);
+
+				invalidate();
+				return; // Exit function without call super.wndProc().
+			}
+
+			default:
+		}
+		super.wndProc(msg);
+	}
+
+
+	///
+	override void createParams(ref CreateParams cp)
+	{
+		super.createParams(cp);
+		cp.style = WS_POPUP;
+	}
+
+
+private:
+
+	Image _image; ///
+	RegionRects _regionRects; ///
+
+
+	///
+	void _updateRegionWithDpi(uint dpi_)
+	{
+		if (_image)
+		{
+			this.region = _regionRects.create(_image, dpi_);
 		}
 	}
 }

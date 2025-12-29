@@ -19,7 +19,9 @@
 			"label": "dub: Build toggleswitch_sample",
 			"detail": "dub build --compiler=dmd.EXE -a=x86_64 -b=debug -c=application",
 			"presentation": {
-				"clear": true
+				"clear": true,
+				"showReuseMessage": true,
+				"focus": false
 			}
 		}
 	]

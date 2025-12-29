@@ -8,7 +8,6 @@ else
 {
 	pragma(lib, "dfl.lib");
 }
-
 class MainForm : Form
 {
 	private StatusBar _statusBar;
@@ -46,5 +45,7 @@ class MainForm : Form
 
 void main()
 {
+	Application.enableVisualStyles();
+	Application.setHighDpiMode(HighDpiMode.PER_MONITOR_V2);
 	Application.run(new MainForm());
 }

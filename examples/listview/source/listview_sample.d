@@ -1,4 +1,5 @@
 import dfl;
+
 import std.conv;
 
 version(Have_dfl) // For DUB.
@@ -21,13 +22,35 @@ class MainForm : Form
 		// Create
 		_listView = new ListView();
 		_listView.parent = this;
+		_listView.paint ~= (Control c, PaintEventArgs e) {
+			Rect rect1 = _listView.getItemRect(0);
+			e.graphics.drawRectangle(new Pen(Color.red), rect1);
+
+			Rect rect2 = _listView.getItemRect(1, ItemBoundsPortion.LABEL);
+			e.graphics.drawRectangle(new Pen(Color.red), rect2);
+
+			Rect rect3 = _listView.getItemRect(2, ItemBoundsPortion.ENTIRE);
+			e.graphics.drawRectangle(new Pen(Color.red), rect3);
+
+			Rect rect4 = _listView.getItemRect(3, ItemBoundsPortion.ITEM_ONLY);
+			e.graphics.drawRectangle(new Pen(Color.red), rect4);
+		};
 
 		// Style
-		_listView.dock = DockStyle.FILL;
-		_listView.view = View.DETAILS;
+		_listView.size = Size(200, 300);
+		// _listView.dock = DockStyle.FILL;
+		_listView.dock = DockStyle.TOP;
+		// _listView.dock = DockStyle.BOTTOM;
+		// _listView.dock = DockStyle.LEFT;
+		// _listView.dock = DockStyle.RIGHT;
+		// _listView.dock = DockStyle.NONE;
+
+		// _listView.view = View.DETAILS;
 		// _listView.view = View.LIST;
-		// _listView.view = View.LARGE_ICON;
+		_listView.view = View.LARGE_ICON;
 		// _listView.view = View.SMALL_ICON;
+
+		_listView.autoArrange = true;
 		_listView.gridLines = true;
 		_listView.multiSelect = false;
 		_listView.hideSelection = false;
@@ -75,12 +98,9 @@ class MainForm : Form
 	}
 }
 
-static this()
-{
-	Application.enableVisualStyles();
-}
-
 void main()
 {
+	Application.enableVisualStyles();
+	Application.setHighDpiMode(HighDpiMode.PER_MONITOR_V2);
 	Application.run(new MainForm());
 }

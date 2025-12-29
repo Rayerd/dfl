@@ -72,7 +72,7 @@ abstract class ButtonBase: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	@property ContentAlignment textAlign() // getter
+	@property ContentAlignment textAlign() const // getter
 	{
 		LONG wl = _bstyle();
 		
@@ -124,7 +124,7 @@ abstract class ButtonBase: ControlSuperClass // docmain
 		super.createParams(cp);
 		
 		cp.className = BUTTON_CLASSNAME;
-		if(isdef)
+		if(_isDefault)
 		{
 			cp.menu = cast(HMENU)IDOK;
 			if(!(cp.style & WS_DISABLED))
@@ -212,20 +212,20 @@ abstract class ButtonBase: ControlSuperClass // docmain
 	}
 	
 	
-	protected:
+protected:
 	
 	///
 	final @property void isDefault(bool byes) // setter
 	{
-		isdef = byes;
+		_isDefault = byes;
 	}
 	
 	/// ditto
-	final @property bool isDefault() // getter
+	final @property bool isDefault() const // getter
 	{
 		//return (_bstyle() & BS_DEFPUSHBUTTON) == BS_DEFPUSHBUTTON;
 		//return GetDlgCtrlID(m.hWnd) == IDOK;
-		return isdef;
+		return _isDefault;
 	}
 	
 	
@@ -247,18 +247,18 @@ abstract class ButtonBase: ControlSuperClass // docmain
 	
 	
 	///
-	override @property Size defaultSize() // getter
+	override @property Size defaultSize() const // getter
 	{
 		return Size(75, 23);
 	}
 	
 	
-	private:
-	bool isdef = false;
+private:
+	bool _isDefault = false;
 	
 	
-	package:
-	final:
+package:
+final:
 	// Automatically redraws button styles, unlike _style().
 	// Don't use with regular window styles ?
 	void _bstyle(LONG newStyle)
@@ -272,7 +272,7 @@ abstract class ButtonBase: ControlSuperClass // docmain
 	}
 	
 	
-	LONG _bstyle()
+	LONG _bstyle() const 
 	{
 		return _style();
 	}
@@ -288,15 +288,15 @@ class Button: ButtonBase, IButtonControl // docmain
 	
 	
 	///
-	@property DialogResult dialogResult() // getter
+	@property DialogResult dialogResult() const // getter
 	{
-		return dresult;
+		return _dialogResult;
 	}
 	
 	/// ditto
 	@property void dialogResult(DialogResult dr) // setter
 	{
-		dresult = dr;
+		_dialogResult = dr;
 	}
 	
 	
@@ -357,8 +357,7 @@ class Button: ButtonBase, IButtonControl // docmain
 					
 					// To-do: check if correct implementation.
 					
-					DWORD bst;
-					bst = _bstyle();
+					DWORD bst = _bstyle();
 					if(bst & BS_DEFPUSHBUTTON)
 					{
 						//_bstyle(bst); // Force the border to be updated. Only works when enabling.
@@ -370,7 +369,7 @@ class Button: ButtonBase, IButtonControl // docmain
 					else if(m.wParam)
 					{
 						//if(GetDlgCtrlID(m.hWnd) == IDOK)
-						if(isdef)
+						if(_isDefault)
 						{
 							_bstyle(bst | BS_DEFPUSHBUTTON);
 						}
@@ -399,7 +398,7 @@ class Button: ButtonBase, IButtonControl // docmain
 	///
 	final @property Image image() // getter
 	{
-		return _img;
+		return _image;
 	}
 	
 	/// ditto
@@ -419,7 +418,7 @@ class Button: ButtonBase, IButtonControl // docmain
 		}
 		+/
 		
-		_img = null; // In case of exception.
+		_image = null; // In case of exception.
 		LONG imgst = 0;
 		if(img)
 		{
@@ -461,18 +460,18 @@ class Button: ButtonBase, IButtonControl // docmain
 			}
 		}
 		
-		_img = img;
+		_image = img;
 		_style((_style() & ~(BS_BITMAP | BS_ICON)) | imgst); // Redrawn manually in setImg().
 		if(img)
 		{
 			if(isHandleCreated)
-				setImg(imgst);
+				_setImg(imgst);
 		}
 		//_bstyle((_bstyle() & ~(BS_BITMAP | BS_ICON)) | imgst);
 	}
 	
 	
-	private void setImg(LONG bsImageStyle)
+	private void _setImg(LONG bsImageStyle)
 	in
 	{
 		assert(isHandleCreated);
@@ -498,10 +497,10 @@ class Button: ButtonBase, IButtonControl // docmain
 			return;
 		}
 		+/
-		if(!_img)
+		if(!_image)
 			return;
 		HGDIOBJ hgo;
-		switch(_img._imgtype(&hgo))
+		switch(_image._imgtype(&hgo))
 		{
 			case 1:
 				wparam = IMAGE_BITMAP;
@@ -526,7 +525,7 @@ class Button: ButtonBase, IButtonControl // docmain
 	{
 		super.onHandleCreated(ea);
 		
-		setImg(_bstyle());
+		_setImg(_bstyle());
 	}
 	
 	
@@ -544,9 +543,9 @@ class Button: ButtonBase, IButtonControl // docmain
 	}
 	
 	
-	private:
-	DialogResult dresult = DialogResult.NONE;
-	Image _img = null;
+private:
+	DialogResult _dialogResult = DialogResult.NONE;
+	Image _image = null;
 	//Bitmap _picbm = null; // If -_img- is a Picture, need to keep a separate Bitmap.
 }
 
@@ -572,7 +571,7 @@ class CheckBox: ButtonBase // docmain
 	}
 	
 	/// ditto
-	final @property Appearance appearance() // getter
+	final @property Appearance appearance() const // getter
 	{
 		if(_bstyle() & BS_PUSHLIKE)
 			return Appearance.BUTTON;
@@ -593,7 +592,7 @@ class CheckBox: ButtonBase // docmain
 	}
 	
 	/// ditto
-	final @property bool autoCheck() // getter
+	final @property bool autoCheck() const // getter
 	{
 		/+
 		return (_bstyle() & BS_AUTOCHECKBOX) == BS_AUTOCHECKBOX;
@@ -671,7 +670,7 @@ class CheckBox: ButtonBase // docmain
 	}
 	
 	
-	private:
+private:
 	CheckState _check = CheckState.UNCHECKED; // Not always accurate.
 	bool _autocheck = true;
 	
@@ -704,7 +703,7 @@ class RadioButton: ButtonBase // docmain
 	}
 	
 	/// ditto
-	final @property Appearance appearance() // getter
+	final @property Appearance appearance() const // getter
 	{
 		if(_bstyle() & BS_PUSHLIKE)
 			return Appearance.BUTTON;
@@ -723,17 +722,17 @@ class RadioButton: ButtonBase // docmain
 		// Enabling/disabling the window before creation messes
 		// up the autocheck style flag, so handle it manually.
 		+/
-		_autocheck = byes;
+		_autoCheck = byes;
 	}
 	
 	
 	/// ditto
-	final @property bool autoCheck() // getter
+	final @property bool autoCheck() const // getter
 	{
 		/+ // Also commented out when using BS_AUTORADIOBUTTON.
 		return (_bstyle() & BS_AUTOCHECKBOX) == BS_AUTOCHECKBOX;
 		+/
-		return _autocheck;
+		return _autoCheck;
 	}
 	
 	
@@ -782,12 +781,12 @@ class RadioButton: ButtonBase // docmain
 	final @property void checked(bool byes) // setter
 	{
 		if(byes)
-			_check = CheckState.CHECKED;
+			_checkState = CheckState.CHECKED;
 		else
-			_check = CheckState.UNCHECKED;
+			_checkState = CheckState.UNCHECKED;
 		
 		if(isHandleCreated)
-			SendMessageA(handle, BM_SETCHECK, cast(WPARAM)_check, 0);
+			SendMessageA(handle, BM_SETCHECK, cast(WPARAM)_checkState, 0);
 	}
 	
 	/// ditto
@@ -796,14 +795,14 @@ class RadioButton: ButtonBase // docmain
 	{
 		if(isHandleCreated)
 			_updateState();
-		return _check != CheckState.UNCHECKED;
+		return _checkState != CheckState.UNCHECKED;
 	}
 	
 	
 	///
 	final @property void checkState(CheckState st) // setter
 	{
-		_check = st;
+		_checkState = st;
 		
 		if(isHandleCreated)
 			SendMessageA(handle, BM_SETCHECK, cast(WPARAM)st, 0);
@@ -814,7 +813,7 @@ class RadioButton: ButtonBase // docmain
 	{
 		if(isHandleCreated)
 			_updateState();
-		return _check;
+		return _checkState;
 	}
 	
 	
@@ -837,7 +836,7 @@ class RadioButton: ButtonBase // docmain
 			_bstyle((_bstyle() & ~BS_AUTORADIOBUTTON) | BS_RADIOBUTTON);
 		+/
 		
-		SendMessageA(handle, BM_SETCHECK, cast(WPARAM)_check, 0);
+		SendMessageA(handle, BM_SETCHECK, cast(WPARAM)_checkState, 0);
 	}
 	
 	
@@ -879,14 +878,14 @@ class RadioButton: ButtonBase // docmain
 	}
 	
 	
-	private:
-	CheckState _check = CheckState.UNCHECKED; // Not always accurate.
-	bool _autocheck = true;
+private:
+	CheckState _checkState = CheckState.UNCHECKED; // Not always accurate.
+	bool _autoCheck = true;
 	
 	
 	void _updateState()
 	{
-		_check = cast(CheckState)SendMessageA(handle, BM_GETCHECK, 0, 0);
+		_checkState = cast(CheckState)SendMessageA(handle, BM_GETCHECK, 0, 0);
 	}
 }
 

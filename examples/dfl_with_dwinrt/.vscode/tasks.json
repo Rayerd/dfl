@@ -6,8 +6,8 @@
 			"run": false,
 			"cwd": ".",
 			"compiler": "$current",
-			"archType": "$current",
 			"buildType": "$current",
+			"archType": "x86_64",
 			"configuration": "$current",
 			"problemMatcher": [
 				"$dmd"
@@ -19,7 +19,9 @@
 			"label": "dub: Build dfl_with_dwinrt example",
 			"detail": "dub build --compiler=dmd.EXE -a=x86_64 -b=debug -c=application",
 			"presentation": {
-				"clear": true
+				"clear": true,
+				"showReuseMessage": true,
+				"focus": false
 			}
 		}
 	]

@@ -23,6 +23,7 @@ class MainForm : Form
 		// ToolBar setting
 		_toolBar = new ToolBar;
 		_toolBar.parent = this;
+		_toolBar.buttonSize = Size(30, 30);
 		_toolBar.dock = DockStyle.TOP;
 
 		ToolBarButton button1 = new ToolBarButton("Bold");
@@ -194,12 +195,9 @@ class MainForm : Form
 	}
 }
 
-static this()
-{
-	// Application.enableVisualStyles();
-}
-
 void main()
 {
+	Application.enableVisualStyles();
+	Application.setHighDpiMode(HighDpiMode.PER_MONITOR_V2);
 	Application.run(new MainForm());
 }

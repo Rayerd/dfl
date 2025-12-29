@@ -6,7 +6,6 @@
 			"run": false,
 			"cwd": ".",
 			"compiler": "$current",
-			"archType": "$current",
 			"buildType": "$current",
 			"configuration": "$current",
 			"problemMatcher": [
@@ -19,7 +18,9 @@
 			"label": "dub: Build toastnotifier_sample",
 			"detail": "dub build --compiler=dmd.EXE -a=x86_64 -b=debug -c=application",
 			"presentation": {
-				"clear": true
+				"clear": true,
+				"focus": false,
+				"showReuseMessage": true
 			}
 		}
 	]

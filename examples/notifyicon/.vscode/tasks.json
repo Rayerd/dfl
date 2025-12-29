@@ -19,6 +19,8 @@
 			"label": "dub: Build notifyicon_sample",
 			"detail": "dub build --compiler=dmd.EXE -a=x86_64 -b=debug -c=application",
 			"presentation": {
+				"focus": false,
+				"showReuseMessage": true,
 				"clear": true,
 			}
 		}

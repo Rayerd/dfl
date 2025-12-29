@@ -19,6 +19,7 @@ import dfl.panel;
 import dfl.textbox;
 import dfl.toolbar;
 
+import dfl.internal.dpiaware;
 import dfl.internal.utf;
 
 import std.algorithm;
@@ -967,9 +968,9 @@ class PrinterSettings
 		this.supportColor = DeviceCapabilities(toUnicodez(deviceName), "", DC_COLORDEVICE, null, pDevMode) == 1 ? true : false;
 		this.landscapeAngle = DeviceCapabilities(toUnicodez(deviceName), "", DC_ORIENTATION, null, pDevMode);
 		// this.printToFile =
-		this.printerResolutions = _createPrinterResolutionArray(hDevMode)[0..$>=5?5:$]; // First 5 items.
-		this.paperSizes = _createPaperSizeArray(hDevMode)[0..$>=5?5:$]; // First 5 items.
-		this.paperSources = _createPaperSourceArray(hDevMode)[0..$>=5?5:$]; // First 5 items.
+		this.printerResolutions = _createPrinterResolutionArray(hDevMode)[0..$ >= 5 ? 5 : $]; // First 5 items.
+		this.paperSizes = _createPaperSizeArray(hDevMode)[0..$ >= 5 ? 5 : $]; // First 5 items.
+		this.paperSources = _createPaperSourceArray(hDevMode)[0..$ >= 5 ? 5 : $]; // First 5 items.
 		// this.isPlotter =
 		// this.duplex =
 
@@ -1084,6 +1085,7 @@ class PaperSize
 		paperName = "";
 	}
 	/// ditto
+	// Paper width and height with 1/100 inch unit.
 	this(int rawKind, string name, int width, int height)
 	{
 		this.rawKind = rawKind;
@@ -2192,7 +2194,7 @@ class PrintPreviewControl : Control
 		document.printerSettings.setHdevnames(pd.hDevNames);
 		document.printerSettings.defaultPageSettings.setHdevmode(pd.hDevMode);
 
-		Rect screenRect = Rect(0, 0, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN));
+		Rect screenRect = Rect(0, 0, GetSystemMetricsForDpi(SM_CXSCREEN, dpi), GetSystemMetricsForDpi(SM_CYSCREEN, dpi));
 		_offscreen = new MemoryGraphics(screenRect.width, screenRect.height);
 		_offscreen.fillRectangle(new SolidBrush(Color.gray), screenRect);
 
@@ -2228,8 +2230,8 @@ class PrintPreviewControl : Control
 					e.graphics.handle, // DST
 					0,
 					0,
-					onscreenWidth,
-					onscreenHeight,
+					MulDiv(onscreenWidth, dpi, USER_DEFAULT_SCREEN_DPI),
+					MulDiv(onscreenHeight, dpi, USER_DEFAULT_SCREEN_DPI),
 					_offscreen.handle, // SRC
 					0,
 					0,
@@ -2240,7 +2242,13 @@ class PrintPreviewControl : Control
 			}
 			else
 			{
-				_offscreen.copyTo(e.graphics, 0, 0, _offscreen.width, _offscreen.height);
+				_offscreen.copyTo(
+					e.graphics, // DST
+					0,
+					0,
+					MulDiv(_offscreen.width, dpi, USER_DEFAULT_SCREEN_DPI),
+					MulDiv(_offscreen.height, dpi, USER_DEFAULT_SCREEN_DPI)
+				);
 			}
 		}
 	}
@@ -2291,11 +2299,13 @@ class PrintPreviewDialog : Form
 		_toolBar.style = ToolBarStyle.NORMAL;
 
 		_imageList = new ImageList;
-		_imageList.imageSize = Size(32,32);
+		_imageList.imageSize = Size(32, 32);
 		_imageList.transparentColor = Color.red;
 		ubyte[] bmpData = cast(ubyte[])import(r"image\previewprintdialog_toolbar.bmp");
 		auto pic = new Picture(bmpData);
 		_imageList.images.addStrip(pic.toBitmap());
+
+		_toolBar.buttonSize = Size(64, 64); // TODO: ?
 		_toolBar.imageList = _imageList;
 
 		_button1 = new ToolBarButton("Print...");
@@ -2375,7 +2385,8 @@ class PrintPreviewDialog : Form
 		_fromPageLabel.parent = _pageSelectPanel;
 		_fromPageLabel.text = "Page ";
 		_fromPageLabel.width = 50;
-		_fromPageLabel.textAlign = ContentAlignment.MIDDLE_RIGHT;
+		_fromPageLabel.dockMargin.left = 20 * dpi / USER_DEFAULT_SCREEN_DPI;
+		_fromPageLabel.autoSize = true;
 		_fromPageLabel.dock = DockStyle.LEFT;
 
  		_fromPage = new TextBox();
@@ -2492,8 +2503,7 @@ class PrintPreviewDialog : Form
 	///
 	private void _reset(PrintDocument doc)
 	{
-		this.width = 1024;
-		this.height = 960;
+		this.size = Size(1024, 960);
 		this.windowState = FormWindowState.NORMAL;
 
 		_previewControl.rows = 1;    // Single page view
@@ -2556,7 +2566,7 @@ class PrintPreviewDialog : Form
 		{
 			_previewPanel.hScroll = true;
 			_previewPanel.vScroll = true;
-			_previewPanel.scrollSize = Size(GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN));
+			_previewPanel.scrollSize = Size(GetSystemMetricsForDpi(SM_CXSCREEN, dpi), GetSystemMetricsForDpi(SM_CYSCREEN, dpi));
 			_previewPanel.performLayout();
 		}
 		else
@@ -2626,7 +2636,7 @@ class PreviewPrintController : PrintController
 	{
 		Graphics pageGraphics = _pages[e.currentPage - 1].graphics;
 		pageGraphics.pageUnit = GraphicsUnit.DISPLAY; // Initialize graphics unit that is changed in user side.
-		Font font = new Font("MS Gothic", 100/+pt+/ * e.pageSettings.printerResolution.y / 72); // 1 point == 1/72 inches
+		Font font = new Font("MS Gothic", 100/+pt+/ * e.pageSettings.printerResolution.y / 72); // TODO: Really 100 pt? 1 point == 1/72 inches
 		_drawPageNumber(pageGraphics, e.currentPage, font); // Draw the current page number.
 	}
 
@@ -2634,8 +2644,8 @@ class PreviewPrintController : PrintController
 	override void onEndPrint(PrintDocument document, PrintEventArgs e)
 	{
 		const Rect screenRect = {
-			const int deviceWidth = GetSystemMetrics(SM_CXSCREEN); // pixel unit.
-			const int deviceHeight = GetSystemMetrics(SM_CYSCREEN); // pixel unit.
+			const int deviceWidth = GetSystemMetricsForDpi(SM_CXSCREEN, _previewControl.dpi); // pixel unit.
+			const int deviceHeight = GetSystemMetricsForDpi(SM_CYSCREEN, _previewControl.dpi); // pixel unit.
 			return Rect(0, 0, deviceWidth, deviceHeight); // TODO: Gets MemoryGraphics size as the background DC.
 		}();
 
@@ -2692,8 +2702,8 @@ class PreviewPrintController : PrintController
 				pageGraphics.handle, // SRC
 				0,
 				0,
-				paperRect.width * 100 / DEFAULT_PRINTER_RESOLUTION_X,
-				paperRect.height * 100 / DEFAULT_PRINTER_RESOLUTION_Y,
+				paperRect.width * 100 / DEFAULT_PRINTER_RESOLUTION_X * 2, // TODO: magic number?
+				paperRect.height * 100 / DEFAULT_PRINTER_RESOLUTION_Y * 2, // TODO: magic number?
 				SRCCOPY
 			);
 			pageGraphics.dispose(); // Created in onStartPage().

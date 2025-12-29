@@ -302,7 +302,7 @@ template ListWrapArray(TValue, alias Array,
 			}
 		}
 		Array = Array[0 .. index] ~ (&value)[0 .. 1] ~ Array[index .. Array.length];
-		insert_done:
+	insert_done:
 		ItemAddedCallback(index, value); // Added.
 	}
 	

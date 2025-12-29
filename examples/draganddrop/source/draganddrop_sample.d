@@ -124,5 +124,6 @@ class DragAcceptLabel : Label
 void main()
 {
 	Application.enableVisualStyles();
+	Application.setHighDpiMode(HighDpiMode.PER_MONITOR_V2);
 	Application.run(new MainForm());
 }

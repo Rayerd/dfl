@@ -11,11 +11,23 @@ import dfl.imagelist;
 import dfl.menu;
 
 import dfl.internal.dlib;
+import dfl.internal.dpiaware;
 static import dfl.internal.utf;
 
+import core.sys.windows.windef;
+import core.sys.windows.winbase;
+import core.sys.windows.winuser;
+import core.sys.windows.wingdi;
 import core.sys.windows.commctrl;
-import core.sys.windows.windows;
 
+
+///
+enum // Work around for TBMF_ not defined in dmd's core.sys.windows.commctrl
+{
+	TBMF_PAD = 0x00000001,
+	TBMF_BARPAD = 0x00000002,
+	TBMF_BUTTONSPACING = 0x00000004,
+}
 
 ///
 enum ToolBarButtonStyle: ubyte
@@ -74,7 +86,7 @@ class ToolBarButton
 	}
 	
 	/// ditto
-	final @property int imageIndex() const // getter
+	final @property int imageIndex() const nothrow // getter
 	{
 		return _imageIndex;
 	}
@@ -106,7 +118,7 @@ class ToolBarButton
 	}
 	
 	/// ditto
-	final @property ToolBarButtonStyle style() const // getter
+	final @property inout(ToolBarButtonStyle) style() inout // getter
 	{
 		return _style;
 	}
@@ -162,7 +174,7 @@ class ToolBarButton
 	}
 	
 	/// ditto
-	final @property Object tag() // getter
+	final @property inout(Object) tag() inout nothrow // getter
 	{
 		return _tag;
 	}
@@ -175,14 +187,14 @@ class ToolBarButton
 	}
 	
 	/// ditto
-	final @property ContextMenu dropDownMenu() // getter
+	final @property inout(ContextMenu) dropDownMenu() inout // getter
 	{
 		return _contextMenu;
 	}
 	
 	
 	///
-	final @property ToolBar parent() // getter
+	final @property inout(ToolBar) parent() inout // getter
 	{
 		return _toolBar;
 	}
@@ -372,8 +384,8 @@ class ToolBar: ControlSuperClass // docmain
 		///
 		void _added(size_t idx, ToolBarButton val)
 		{
-			val._toolBar = tbar;
-			val._id = tbar._allocTbbID();
+			val._toolBar = _toolBar;
+			val._id = _toolBar._allocTbbID();
 			
 			if (created)
 			{
@@ -410,7 +422,7 @@ class ToolBar: ControlSuperClass // docmain
 	
 	
 	///
-	private @property ToolBar tbar()
+	private @property ToolBar _toolBar()
 	{
 		return this;
 	}
@@ -421,7 +433,7 @@ class ToolBar: ControlSuperClass // docmain
 	{
 		_initToolbar();
 		
-		_tbuttons = new ToolBarButtonCollection();
+		_toolBarButtons = new ToolBarButtonCollection();
 		
 		dock = DockStyle.TOP;
 		
@@ -430,17 +442,41 @@ class ToolBar: ControlSuperClass // docmain
 	
 	
 	///
-	final @property ToolBarButtonCollection buttons() // getter
+	final @property inout(ToolBarButtonCollection) buttons() inout // getter
 	{
-		return _tbuttons;
+		return _toolBarButtons;
 	}
 	
 	
-	// TODO: buttonSize...
+	///
+	final @property void buttonSize(Size sz) // setter
+	{
+		if (sz == _buttonSize) return;
+		_buttonSize = sz;
+		_setButtonSize(sz);
+	}
+
+	/// ditto
+	final @property Size buttonSize() const // getter
+	{
+		return _buttonSize;
+	}
 	
+	private void _setButtonSize(Size sz)
+	{
+		if (!isHandleCreated) return;
+
+		const int buttonW = MulDiv(sz.width, dpi, USER_DEFAULT_SCREEN_DPI);
+		const int buttonH = MulDiv(sz.height, dpi, USER_DEFAULT_SCREEN_DPI);
+		SendMessage(handle, TB_SETBUTTONSIZE, 0, MAKELPARAM(buttonW, buttonH));
+
+		// SendMessage(handle, TB_AUTOSIZE, 0, 0);
+		// SendMessage(parent.handle, WM_SIZE, 0, 0);
+	}
+
 	
 	///
-	final @property ToolBarAppearance appearance() // getter
+	final @property ToolBarAppearance appearance() const nothrow // getter
 	{
 		return _appearance;
 	}
@@ -473,7 +509,7 @@ class ToolBar: ControlSuperClass // docmain
 
 	
 	///
-	final @property ToolBarStyle style() // getter
+	final @property ToolBarStyle style() const nothrow // getter
 	{
 		return _toolBarStyle;
 	}
@@ -565,27 +601,27 @@ class ToolBar: ControlSuperClass // docmain
 	
 
 	///
-	final @property Size imageSize() // getter
+	final @property Size imageSize() const // getter
 	{
 		if (_imageList)
 			return _imageList.imageSize;
-		return Size(16, 16); // TODO: ?
+		else
+		{
+			int cxIcon = GetSystemMetricsForDpi(SM_CXSMICON, dpi); // small icon size x
+			int cyIcon = GetSystemMetricsForDpi(SM_CYSMICON, dpi); // small icon size y
+			return Size(cxIcon, cyIcon);
+		}
 	}
 	
 	
 	///
-	final @property void imageList(ImageList imglist) // setter
+	final @property void imageList(ImageList imageList) // setter
 	{
-		if (isHandleCreated)
-		{
-			prevwproc(TB_SETIMAGELIST, 0, cast(WPARAM)imglist.handle);
-		}
-		
-		_imageList = imglist;
+		_imageList = imageList;
 	}
 	
 	/// ditto
-	final @property ImageList imageList() // getter
+	final @property inout(ImageList) imageList() inout // getter
 	{
 		return _imageList;
 	}
@@ -668,7 +704,7 @@ class ToolBar: ControlSuperClass // docmain
 				clickedHwnd = null;
 				clickedButton = null;
 				
-				if (Rect(0, 0, _clientWindowSize.width, _clientWindowSize.height).contains(pt))
+				if (Rect(0, 0, _clientSize.width, _clientSize.height).contains(pt))
 				{
 					if (pointOverVisibleChild(pt) == _hwnd)
 					{
@@ -759,7 +795,7 @@ class ToolBar: ControlSuperClass // docmain
 	
 
 	///
-	protected override @property Size defaultSize() // getter
+	protected override @property Size defaultSize() const // getter
 	{
 		return Size(100, 16);
 	}
@@ -812,10 +848,131 @@ class ToolBar: ControlSuperClass // docmain
 	}
 	
 	
-	// Used internally
-	/+package+/ final ToolBarButton buttomFromID(int id) // package
+	///
+	protected override void onHandleCreated(EventArgs ea)
 	{
-		foreach (tbb; _tbuttons._buttons)
+		super.onHandleCreated(ea);
+
+		_buildToolBarButtons();
+	}
+
+
+	///
+	protected override void onDpiChanged(uint newDpi)
+	{
+		_buildToolBarButtons();
+	}
+
+
+	///
+	private void _buildToolBarButtons()
+	{
+		SendMessage(handle, TB_BUTTONSTRUCTSIZE, TBBUTTON.sizeof, 0); // Initialize ToolBar.
+		SendMessage(handle, TB_SETEXTENDEDSTYLE, 0, TBSTYLE_EX_DRAWDDARROWS); // Enable Drop-Down-Arrows-Button on ToolBar.
+
+		if (_imageList)
+		{
+			const Size iconSize = {
+				int w, h;
+				ImageList_GetIconSize(_imageList.handle, &w, &h);
+				return Size(w, h);
+			}();
+			
+			const Size newIconSize = Size(
+				MulDiv(iconSize.width, dpi, USER_DEFAULT_SCREEN_DPI),
+				MulDiv(iconSize.height, dpi, USER_DEFAULT_SCREEN_DPI)
+			);
+			const iconCount = ImageList_GetImageCount(_imageList.handle);
+			const Size newBitmapSize = Size(newIconSize.width * iconCount, newIconSize.height);
+
+			auto newGraphics = new MemoryGraphics(newBitmapSize.width, newBitmapSize.height);
+
+			for (int index; index < iconCount; index++)
+			{
+				IMAGEINFO ii;
+				ImageList_GetImageInfo(_imageList.handle, index, &ii);
+				int w = ii.rcImage.right - ii.rcImage.left;
+				int h = ii.rcImage.bottom - ii.rcImage.top;
+
+				HDC hdcSrc = CreateCompatibleDC(null);
+				HGDIOBJ objSrc = SelectObject(hdcSrc, ii.hbmImage);
+
+				HDC hdcDst = CreateCompatibleDC(null);
+				HBITMAP bmpDst = CreateCompatibleBitmap(hdcSrc, w, h);
+				HGDIOBJ objDst = SelectObject(hdcDst, bmpDst);
+
+				BitBlt(hdcDst, 0, 0, w, h,
+					hdcSrc, ii.rcImage.left, ii.rcImage.top, SRCCOPY);
+
+				auto tempGraphics = new MemoryGraphics(w, h);
+				tempGraphics.fillRectangle(new SolidBrush(Color.red), Rect(0, 0, w, h));
+
+				ImageList_DrawEx(_imageList.handle, index, tempGraphics.handle, 0, 0, 0, 0, CLR_NONE, CLR_NONE, ILD_NORMAL);
+
+				int lstretch = SetStretchBltMode(tempGraphics.handle, STRETCH_HALFTONE);
+				StretchBlt(newGraphics.handle, newIconSize.width * index, 0, newIconSize.width, newIconSize.height,
+					tempGraphics.handle, 0, 0, tempGraphics.width, tempGraphics.height, SRCCOPY);
+				SetStretchBltMode(tempGraphics.handle, lstretch);
+
+				SelectObject(hdcDst, objDst);
+				SelectObject(hdcSrc, objSrc);
+				DeleteObject(bmpDst);
+				DeleteDC(hdcDst);
+				DeleteDC(hdcSrc);
+			}
+
+			ImageList oldImageList = _imageListForDpi;
+
+			_imageListForDpi = new ImageList;
+			_imageListForDpi.imageSize = Size(newIconSize.width, newIconSize.height);
+			_imageListForDpi.transparentColor = _imageList.transparentColor;
+			_imageListForDpi.colorDepth = _imageList.colorDepth;
+			_imageListForDpi.images.addStrip(newGraphics.toBitmap);
+
+			// NOTE: This is required for the bitmap method, but not for the image list method.
+			// const int cxIcon = GetSystemMetricsForDpi(SM_CXSMICON, dpi);
+			// const int cyIcon = GetSystemMetricsForDpi(SM_CYSMICON, dpi);
+			// SendMessage(handle, TB_SETBITMAPSIZE, 0, MAKELPARAM(cxIcon, cyIcon));
+
+			SendMessage(handle, TB_SETIMAGELIST, 0, cast(WPARAM)_imageListForDpi.handle);
+			
+			if (oldImageList)
+				oldImageList.dispose;
+		}
+
+		while (1)
+		{
+			if (0 == SendMessage(handle, TB_BUTTONCOUNT, 0, 0))
+				break;
+			SendMessage(handle, TB_DELETEBUTTON, 0, 0);
+		}
+
+		foreach (idx, tbb; _toolBarButtons._buttons)
+		{
+			_ins(idx, tbb);
+		}
+
+		TBMETRICS tbm;
+		tbm.cbSize = TBMETRICS.sizeof;
+		tbm.dwMask = TBMF_PAD | TBMF_BUTTONSPACING;
+		// SendMessage(handle, TB_GETMETRICS, 0, cast(LPARAM)&tbm);
+		tbm.cxPad = MulDiv(7, dpi, USER_DEFAULT_SCREEN_DPI);
+		tbm.cyPad = MulDiv(6, dpi, USER_DEFAULT_SCREEN_DPI);
+		tbm.cxButtonSpacing = 0;
+		tbm.cyButtonSpacing = 0;
+		SendMessage(handle, TB_SETMETRICS, 0, cast(LPARAM)&tbm);
+
+		_setButtonSize(_buttonSize); // TODO: ?
+
+		SendMessage(handle, TB_AUTOSIZE, 0, 0);
+		SendMessage(parent.handle, WM_SIZE, 0, 0);
+	}
+
+
+	// Used internally
+	/+package+/ final inout(ToolBarButton) buttomFromID(int id) inout // package
+	{
+		foreach (tbb; _toolBarButtons._buttons)
 		{
 			if (id == tbb._id)
 				return tbb;
@@ -843,30 +1000,6 @@ class ToolBar: ControlSuperClass // docmain
 	
 	
 	///
-	protected override void onHandleCreated(EventArgs ea)
-	{
-		super.onHandleCreated(ea);
-		
-		//static assert(TBBUTTON.sizeof == 20);
-		prevwproc(TB_BUTTONSTRUCTSIZE, TBBUTTON.sizeof, 0);
-		
-		//prevwproc(TB_SETPADDING, 0, MAKELPARAM(0, 0));
-		
-		if (_imageList)
-			prevwproc(TB_SETIMAGELIST, 0, cast(WPARAM)_imageList.handle);
-		
-		foreach (idx, tbb; _tbuttons._buttons)
-		{
-			_ins(idx, tbb);
-		}
-		
-		SendMessage(handle, TB_SETEXTENDEDSTYLE, 0, TBSTYLE_EX_DRAWDDARROWS);
-
-		//prevwproc(TB_AUTOSIZE, 0, 0);
-	}
-	
-	
-	///
 	protected override void prevWndProc(ref Message msg)
 	{
 		//msg.result = CallWindowProcA(toolbarPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
@@ -876,11 +1009,13 @@ class ToolBar: ControlSuperClass // docmain
 	
 private:
 	
-	ToolBarButtonCollection _tbuttons;
+	ToolBarButtonCollection _toolBarButtons;
 	ToolBarAppearance _appearance = ToolBarAppearance.NORMAL;
 	ToolBarStyle _toolBarStyle = ToolBarStyle.NORMAL;
 	BorderStyle _borderStyle = BorderStyle.NONE;
 	ImageList _imageList;
+	ImageList _imageListForDpi;
+	Size _buttonSize;
 	
 
 	///
@@ -893,25 +1028,21 @@ private:
 		xtb.idCommand = tbb._id;
 		xtb.dwData = cast(DWORD)cast(void*)tbb;
 		xtb.fsState = tbb._state;
-		xtb.fsStyle = TBSTYLE_AUTOSIZE | tbb._style; // TBSTYLE_AUTOSIZE factors in the text's width instead of default button size.
-		LRESULT lresult;
+		xtb.fsStyle = TBSTYLE_AUTOSIZE | tbb.style; // TBSTYLE_AUTOSIZE factors in the text's width instead of default button size.
+
 		// MSDN says iString can be either an int offset or pointer to a string buffer.
-		if (dfl.internal.utf.useUnicode)
+		if (tbb._text.length)
 		{
-			if (tbb._text.length)
+			if (dfl.internal.utf.useUnicode)
 				xtb.iString = cast(typeof(xtb.iString))dfl.internal.utf.toUnicodez(tbb._text);
-			//prevwproc(TB_ADDBUTTONSW, 1, cast(LPARAM)&xtb);
-			lresult = prevwproc(TB_INSERTBUTTONW, idx, cast(LPARAM)&xtb);
-		}
-		else
-		{
-			if (tbb._text.length)
+			else
 				xtb.iString = cast(typeof(xtb.iString))dfl.internal.utf.toAnsiz(tbb._text);
-			//prevwproc(TB_ADDBUTTONSA, 1, cast(LPARAM)&xtb);
-			lresult = prevwproc(TB_INSERTBUTTONA, idx, cast(LPARAM)&xtb);
 		}
-		//if(!lresult)
-		//	throw new DflException("Unable to add ToolBarButton");
+
+		LRESULT lresult = prevwproc(TB_INSERTBUTTON, idx, cast(LPARAM)&xtb);
+
+		if(!lresult)
+			throw new DflException("Unable to add ToolBarButton");
 	}
 	
 	
@@ -948,4 +1079,3 @@ private
 		}
 	}
 }
-

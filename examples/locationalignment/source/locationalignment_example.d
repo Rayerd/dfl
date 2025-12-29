@@ -121,12 +121,9 @@ class MainForm : Form
 	}
 }
 
-void main(string[] args)
+void main()
 {
-		Application.enableVisualStyles();
-
-		import dfl.internal.dpiaware;
-		SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
-
-		Application.run(new MainForm());
+	Application.enableVisualStyles();
+	Application.setHighDpiMode(HighDpiMode.PER_MONITOR_V2);
+	Application.run(new MainForm());
 }

@@ -11,12 +11,18 @@ import dfl.collections;
 import dfl.control;
 import dfl.drawing;
 import dfl.event;
-import dfl.internal.winapi;
 
 import dfl.internal.dlib;
-static import dfl.internal.utf;
+import dfl.internal.dpiaware;
+import dfl.internal.utf;
 
-import std.algorithm;
+import core.sys.windows.winbase;
+import core.sys.windows.winuser;
+import core.sys.windows.windef;
+import core.sys.windows.wingdi;
+
+static import std.algorithm;
+
 
 private extern(C) void* memmove(void*, void*, size_t len);
 
@@ -62,7 +68,7 @@ abstract class ListControl: ControlSuperClass // docmain
 	
 	override @property Color backColor() const // getter
 	{
-		if(Color.empty == _backColor)
+		if (Color.empty == _backColor)
 			return defaultBackColor;
 		return _backColor;
 	}
@@ -70,7 +76,7 @@ abstract class ListControl: ControlSuperClass // docmain
 	alias backColor = Control.backColor; // Overload.
 	
 	
-	static @property Color defaultForeColor() //getter
+	static @property Color defaultForeColor() // getter
 	{
 		return SystemColors.windowText;
 	}
@@ -78,7 +84,7 @@ abstract class ListControl: ControlSuperClass // docmain
 	
 	override @property Color foreColor() const // getter
 	{
-		if(Color.empty == _foreColor)
+		if (Color.empty == _foreColor)
 			return defaultForeColor;
 		return _foreColor;
 	}
@@ -91,7 +97,7 @@ abstract class ListControl: ControlSuperClass // docmain
 	}
 	
 	
-	protected:
+protected:
 	
 	///
 	void onSelectedValueChanged(EventArgs ea)
@@ -127,25 +133,25 @@ class ListBox: ListControl // docmain
 	{
 		@property int length() // getter
 		{
-			if(!lbox.isHandleCreated)
+			if (!_listBox.isHandleCreated)
 				return 0;
 			
-			if(lbox.isMultSel())
+			if (_listBox.isMultSel())
 			{
-				return lbox.prevwproc(LB_GETSELCOUNT, 0, 0).toI32;
+				return _listBox.prevwproc(LB_GETSELCOUNT, 0, 0).toI32;
 			}
 			else
 			{
-				return (lbox.selectedIndex == -1) ? 0 : 1;
+				return (_listBox.selectedIndex == -1) ? 0 : 1;
 			}
 		}
 		
 		
 		int opIndex(int idx)
 		{
-			foreach(int onidx; this)
+			foreach (int onidx; this)
 			{
-				if(!idx)
+				if (!idx)
 					return onidx;
 				idx--;
 			}
@@ -164,9 +170,9 @@ class ListBox: ListControl // docmain
 		int indexOf(int idx)
 		{
 			int i = 0;
-			foreach(int onidx; this)
+			foreach (int onidx; this)
 			{
-				if(onidx == idx)
+				if (onidx == idx)
 					return i;
 				i++;
 			}
@@ -178,25 +184,23 @@ class ListBox: ListControl // docmain
 		{
 			int result = 0;
 			
-			if(lbox.isMultSel())
+			if (_listBox.isMultSel())
 			{
-				int[] items;
-				items = new int[length];
-				if(items.length != lbox.prevwproc(LB_GETSELITEMS, items.length, cast(LPARAM)cast(int*)items))
+				int[] items = new int[length];
+				if (items.length != _listBox.prevwproc(LB_GETSELITEMS, items.length, cast(LPARAM)cast(int*)items))
 					throw new DflException("Unable to enumerate selected list items");
-				foreach(int _idx; items)
+				foreach (int _idx; items)
 				{
 					int idx = _idx; // Prevent ref.
 					result = dg(idx);
-					if(result)
+					if (result)
 						break;
 				}
 			}
 			else
 			{
-				int idx;
-				idx = lbox.selectedIndex;
-				if(-1 != idx)
+				int idx = _listBox.selectedIndex;
+				if (-1 != idx)
 					result = dg(idx);
 			}
 			return result;
@@ -207,12 +211,12 @@ class ListBox: ListControl // docmain
 		
 		protected this(ListBox lb)
 		{
-			lbox = lb;
+			_listBox = lb;
 		}
 		
 		
-		package:
-		ListBox lbox;
+	package:
+		ListBox _listBox;
 	}
 	
 	
@@ -221,25 +225,25 @@ class ListBox: ListControl // docmain
 	{
 		@property int length() // getter
 		{
-			if(!lbox.isHandleCreated)
+			if (!_listBox.isHandleCreated)
 				return 0;
 			
-			if(lbox.isMultSel())
+			if (_listBox.isMultSel())
 			{
-				return lbox.prevwproc(LB_GETSELCOUNT, 0, 0).toI32;
+				return _listBox.prevwproc(LB_GETSELCOUNT, 0, 0).toI32;
 			}
 			else
 			{
-				return (lbox.selectedIndex == -1) ? 0 : 1;
+				return (_listBox.selectedIndex == -1) ? 0 : 1;
 			}
 		}
 		
 		
 		Object opIndex(int idx)
 		{
-			foreach(Object obj; this)
+			foreach (Object obj; this)
 			{
-				if(!idx)
+				if (!idx)
 					return obj;
 				idx--;
 			}
@@ -264,9 +268,9 @@ class ListBox: ListControl // docmain
 		int indexOf(Object obj)
 		{
 			int idx = 0;
-			foreach(Object onobj; this)
+			foreach (Object onobj; this)
 			{
-				if(onobj == obj) // Not using is.
+				if (onobj == obj) // Not using is.
 					return idx;
 				idx++;
 			}
@@ -277,10 +281,10 @@ class ListBox: ListControl // docmain
 		int indexOf(Dstring str)
 		{
 			int idx = 0;
-			foreach(Object onobj; this)
+			foreach (Object onobj; this)
 			{
-				//if(getObjectString(onobj) is str && getObjectString(onobj).length == str.length)
-				if(getObjectString(onobj) == str)
+				//if (getObjectString(onobj) is str && getObjectString(onobj).length == str.length)
+				if (getObjectString(onobj) == str)
 					return idx;
 				idx++;
 			}
@@ -293,26 +297,23 @@ class ListBox: ListControl // docmain
 		{
 			int result = 0;
 			
-			if(lbox.isMultSel())
+			if (_listBox.isMultSel())
 			{
-				int[] items;
-				items = new int[length];
-				if(items.length != lbox.prevwproc(LB_GETSELITEMS, items.length, cast(LPARAM)cast(int*)items))
+				int[] items = new int[length];
+				if (items.length != _listBox.prevwproc(LB_GETSELITEMS, items.length, cast(LPARAM)cast(int*)items))
 					throw new DflException("Unable to enumerate selected list items");
-				foreach(int idx; items)
+				foreach (int idx; items)
 				{
-					Object obj;
-					obj = lbox.items[idx];
+					Object obj = _listBox.items[idx];
 					result = dg(obj);
-					if(result)
+					if (result)
 						break;
 				}
 			}
 			else
 			{
-				Object obj;
-				obj = lbox.selectedItem;
-				if(obj)
+				Object obj = _listBox.selectedItem;
+				if (obj)
 					result = dg(obj);
 			}
 			return result;
@@ -324,29 +325,25 @@ class ListBox: ListControl // docmain
 		{
 			int result = 0;
 			
-			if(lbox.isMultSel())
+			if (_listBox.isMultSel())
 			{
-				int[] items;
-				items = new int[length];
-				if(items.length != lbox.prevwproc(LB_GETSELITEMS, items.length, cast(LPARAM)cast(int*)items))
+				int[] items = new int[length];
+				if (items.length != _listBox.prevwproc(LB_GETSELITEMS, items.length, cast(LPARAM)cast(int*)items))
 					throw new DflException("Unable to enumerate selected list items");
-				foreach(int idx; items)
+				foreach (int idx; items)
 				{
-					Dstring str;
-					str = getObjectString(lbox.items[idx]);
+					Dstring str = getObjectString(_listBox.items[idx]);
 					result = dg(str);
-					if(result)
+					if (result)
 						break;
 				}
 			}
 			else
 			{
-				Object obj;
-				Dstring str;
-				obj = lbox.selectedItem;
-				if(obj)
+				Object obj = _listBox.selectedItem;
+				if (obj)
 				{
-					str = getObjectString(obj);
+					Dstring str = getObjectString(obj);
 					result = dg(str);
 				}
 			}
@@ -364,12 +361,12 @@ class ListBox: ListControl // docmain
 		
 		protected this(ListBox lb)
 		{
-			lbox = lb;
+			_listBox = lb;
 		}
 		
 		
-		package:
-		ListBox lbox;
+	package:
+		ListBox _listBox;
 	}
 	
 	
@@ -379,7 +376,7 @@ class ListBox: ListControl // docmain
 	enum int NO_MATCHES = LB_ERR;
 	
 	
-	protected override @property Size defaultSize() // getter
+	protected override @property Size defaultSize() const // getter
 	{
 		return Size(120, 95);
 	}
@@ -388,7 +385,7 @@ class ListBox: ListControl // docmain
 	///
 	@property void borderStyle(BorderStyle bs) // setter
 	{
-		final switch(bs)
+		final switch (bs)
 		{
 			case BorderStyle.FIXED_3D:
 				_style(_style() & ~WS_BORDER);
@@ -406,18 +403,18 @@ class ListBox: ListControl // docmain
 				break;
 		}
 		
-		if(isHandleCreated)
+		if (isHandleCreated)
 		{
 			redrawEntire();
 		}
 	}
 	
 	/// ditto
-	@property BorderStyle borderStyle() // getter
+	@property BorderStyle borderStyle() const // getter
 	{
-		if(_exStyle() & WS_EX_CLIENTEDGE)
+		if (_exStyle() & WS_EX_CLIENTEDGE)
 			return BorderStyle.FIXED_3D;
-		else if(_style() & WS_BORDER)
+		else if (_style() & WS_BORDER)
 			return BorderStyle.FIXED_SINGLE;
 		return BorderStyle.NONE;
 	}
@@ -428,7 +425,7 @@ class ListBox: ListControl // docmain
 	{
 		LONG wl = _style() & ~(LBS_OWNERDRAWVARIABLE | LBS_OWNERDRAWFIXED);
 		
-		final switch(dm)
+		final switch (dm)
 		{
 			case DrawMode.OWNER_DRAW_VARIABLE:
 				wl |= LBS_OWNERDRAWVARIABLE;
@@ -448,13 +445,13 @@ class ListBox: ListControl // docmain
 	}
 	
 	/// ditto
-	@property DrawMode drawMode() // getter
+	@property DrawMode drawMode() const // getter
 	{
 		LONG wl = _style();
 		
-		if(wl & LBS_OWNERDRAWVARIABLE)
+		if (wl & LBS_OWNERDRAWVARIABLE)
 			return DrawMode.OWNER_DRAW_VARIABLE;
-		if(wl & LBS_OWNERDRAWFIXED)
+		if (wl & LBS_OWNERDRAWFIXED)
 			return DrawMode.OWNER_DRAW_FIXED;
 		return DrawMode.NORMAL;
 	}
@@ -463,25 +460,25 @@ class ListBox: ListControl // docmain
 	///
 	final @property void horizontalExtent(int he) // setter
 	{
-		if(isHandleCreated)
+		if (isHandleCreated)
 			prevwproc(LB_SETHORIZONTALEXTENT, he, 0);
 		
-		hextent = he;
+		_horizontalExtent = he;
 	}
 	
 	/// ditto
 	final @property int horizontalExtent() // getter
 	{
-		if(isHandleCreated)
-			hextent = cast(int)prevwproc(LB_GETHORIZONTALEXTENT, 0, 0);
-		return hextent;
+		if (isHandleCreated)
+			_horizontalExtent = cast(int)prevwproc(LB_GETHORIZONTALEXTENT, 0, 0);
+		return _horizontalExtent;
 	}
 	
 	
 	///
 	final @property void horizontalScrollbar(bool byes) // setter
 	{
-		if(byes)
+		if (byes)
 			_style(_style() | WS_HSCROLL);
 		else
 			_style(_style() & ~WS_HSCROLL);
@@ -490,16 +487,16 @@ class ListBox: ListControl // docmain
 	}
 	
 	/// ditto
-	final @property bool horizontalScrollbar() // getter
+	final @property bool horizontalScrollbar() const // getter
 	{
 		return (_style() & WS_HSCROLL) != 0;
 	}
 	
 	
 	///
-	final @property void integralHeight(bool byes) //setter
+	final @property void integralHeight(bool byes) // setter
 	{
-		if(byes)
+		if (byes)
 			_style(_style() & ~LBS_NOINTEGRALHEIGHT);
 		else
 			_style(_style() | LBS_NOINTEGRALHEIGHT);
@@ -508,7 +505,7 @@ class ListBox: ListControl // docmain
 	}
 	
 	/// ditto
-	final @property bool integralHeight() // getter
+	final @property bool integralHeight() const // getter
 	{
 		return (_style() & LBS_NOINTEGRALHEIGHT) == 0;
 	}
@@ -518,26 +515,26 @@ class ListBox: ListControl // docmain
 	// This function has no effect if the drawMode is OWNER_DRAW_VARIABLE.
 	final @property void itemHeight(int h) // setter
 	{
-		if(drawMode == DrawMode.OWNER_DRAW_VARIABLE)
+		if (drawMode == DrawMode.OWNER_DRAW_VARIABLE)
 			return;
 		
-		iheight = h;
+		_itemHeight = h;
 		
-		if(isHandleCreated)
-			prevwproc(LB_SETITEMHEIGHT, 0, MAKELPARAM(h, 0));
+		if (isHandleCreated)
+			prevwproc(LB_SETITEMHEIGHT, 0, MAKELPARAM(MulDiv(h, dpi, USER_DEFAULT_SCREEN_DPI), 0));
 	}
 	
 	/// ditto
 	// Return value is meaningless when drawMode is OWNER_DRAW_VARIABLE.
-	final @property int itemHeight() // getter
+	final @property int itemHeight() const // getter
 	{
 		// Requesting it like this when owner draw variable doesn't work.
 		/+
-		if(!isHandleCreated)
+		if (!isHandleCreated)
 			return iheight;
 		
 		int result = prevwproc(LB_GETITEMHEIGHT, 0, 0);
-		if(result == LB_ERR)
+		if (result == LB_ERR)
 			result = iheight; // ?
 		else
 			iheight = result;
@@ -545,14 +542,14 @@ class ListBox: ListControl // docmain
 		return result;
 		+/
 		
-		return iheight;
+		return _itemHeight;
 	}
 	
 	
 	///
-	final @property ObjectCollection items() // getter
+	final @property inout(ObjectCollection) items() inout // getter
 	{
-		return icollection;
+		return _itemCollection;
 	}
 	
 	
@@ -561,7 +558,7 @@ class ListBox: ListControl // docmain
 	{
 		// TODO: is this the correct implementation?
 		
-		if(byes)
+		if (byes)
 			_style(_style() | LBS_MULTICOLUMN | WS_HSCROLL);
 		else
 			_style(_style() & ~(LBS_MULTICOLUMN | WS_HSCROLL));
@@ -570,7 +567,7 @@ class ListBox: ListControl // docmain
 	}
 	
 	/// ditto
-	final @property bool multiColumn() // getter
+	final @property bool multiColumn() const // getter
 	{
 		return (_style() & LBS_MULTICOLUMN) != 0;
 	}
@@ -579,7 +576,7 @@ class ListBox: ListControl // docmain
 	///
 	final @property void scrollAlwaysVisible(bool byes) // setter
 	{
-		if(byes)
+		if (byes)
 			_style(_style() | LBS_DISABLENOSCROLL);
 		else
 			_style(_style() & ~LBS_DISABLENOSCROLL);
@@ -588,7 +585,7 @@ class ListBox: ListControl // docmain
 	}
 	
 	/// ditto
-	final @property bool scrollAlwaysVisible() // getter
+	final @property bool scrollAlwaysVisible() const // getter
 	{
 		return (_style() & LBS_DISABLENOSCROLL) != 0;
 	}
@@ -596,11 +593,11 @@ class ListBox: ListControl // docmain
 	
 	override @property void selectedIndex(int idx) // setter
 	{
-		if(isHandleCreated)
+		if (isHandleCreated)
 		{
-			if(isMultSel())
+			if (isMultSel())
 			{
-				if(idx == -1)
+				if (idx == -1)
 				{
 					// Remove all selection.
 					
@@ -610,21 +607,18 @@ class ListBox: ListControl // docmain
 					// Get the indices directly because deselecting them during
 					// selidxcollection.foreach could screw it up.
 					
-					int[] items;
-					
-					items = new int[selidxcollection.length];
-					if(items.length != prevwproc(LB_GETSELITEMS, items.length, cast(LPARAM)cast(int*)items))
+					int[] items = new int[_selectedIndexCollection.length];
+					if (items.length != prevwproc(LB_GETSELITEMS, items.length, cast(LPARAM)cast(int*)items))
 						throw new DflException("Unable to clear selected list items");
 					
-					foreach(int _idx; items)
+					foreach (int _idx; items)
 					{
 						prevwproc(LB_SETSEL, false, _idx);
 					}
 				}
 				else
 				{
-					// ?
-					prevwproc(LB_SETSEL, true, idx);
+					prevwproc(LB_SETSEL, true, idx); // TODO: ?
 				}
 			}
 			else
@@ -636,18 +630,18 @@ class ListBox: ListControl // docmain
 	
 	override @property int selectedIndex() // getter
 	{
-		if(isHandleCreated)
+		if (isHandleCreated)
 		{
-			if(isMultSel())
+			if (isMultSel())
 			{
-				if(selidxcollection.length)
-					return selidxcollection[0];
+				if (_selectedIndexCollection.length)
+					return _selectedIndexCollection[0];
 			}
 			else
 			{
 				LRESULT result;
 				result = prevwproc(LB_GETCURSEL, 0, 0);
-				if(LB_ERR != result) // Redundant.
+				if (LB_ERR != result) // Redundant.
 					return cast(int)result;
 			}
 		}
@@ -658,27 +652,24 @@ class ListBox: ListControl // docmain
 	///
 	final @property void selectedItem(Object o) // setter
 	{
-		int i;
-		i = items.indexOf(o);
-		if(i != -1)
+		int i = items.indexOf(o);
+		if (i != -1)
 			selectedIndex = i;
 	}
 	
 	/// ditto
 	final @property void selectedItem(Dstring str) // setter
 	{
-		int i;
-		i = items.indexOf(str);
-		if(i != -1)
+		int i = items.indexOf(str);
+		if (i != -1)
 			selectedIndex = i;
 	}
 	
 	
 	final @property Object selectedItem() // getter
 	{
-		int idx;
-		idx = selectedIndex;
-		if(idx == -1)
+		int idx = selectedIndex;
+		if (idx == -1)
 			return null;
 		return items[idx];
 	}
@@ -701,16 +692,16 @@ class ListBox: ListControl // docmain
 	
 	
 	///
-	final @property SelectedIndexCollection selectedIndices() // getter
+	final @property inout(SelectedIndexCollection) selectedIndices() inout // getter
 	{
-		return selidxcollection;
+		return _selectedIndexCollection;
 	}
 	
 	
 	///
-	final @property SelectedObjectCollection selectedItems() // getter
+	final @property inout(SelectedObjectCollection) selectedItems() inout // getter
 	{
-		return selobjcollection;
+		return _selectedObjectCollection;
 	}
 	
 	
@@ -719,7 +710,7 @@ class ListBox: ListControl // docmain
 	{
 		LONG wl = _style() & ~(LBS_NOSEL | LBS_EXTENDEDSEL | LBS_MULTIPLESEL);
 		
-		final switch(selmode)
+		final switch (selmode)
 		{
 			case SelectionMode.ONE:
 				break;
@@ -743,15 +734,15 @@ class ListBox: ListControl // docmain
 	}
 	
 	/// ditto
-	@property SelectionMode selectionMode() // getter
+	@property SelectionMode selectionMode() const // getter
 	{
 		LONG wl = _style();
 		
-		if(wl & LBS_NOSEL)
+		if (wl & LBS_NOSEL)
 			return SelectionMode.NONE;
-		if(wl & LBS_EXTENDEDSEL)
+		if (wl & LBS_EXTENDEDSEL)
 			return SelectionMode.MULTI_EXTENDED;
-		if(wl & LBS_MULTIPLESEL)
+		if (wl & LBS_MULTIPLESEL)
 			return SelectionMode.MULTI_SIMPLE;
 		return SelectionMode.ONE;
 	}
@@ -761,7 +752,7 @@ class ListBox: ListControl // docmain
 	final @property void sorted(bool byes) // setter
 	{
 		/+
-		if(byes)
+		if (byes)
 			_style(_style() | LBS_SORT);
 		else
 			_style(_style() & ~LBS_SORT);
@@ -770,7 +761,7 @@ class ListBox: ListControl // docmain
 	}
 	
 	/// ditto
-	final @property bool sorted() // getter
+	final @property bool sorted() const // getter
 	{
 		//return (_style() & LBS_SORT) != 0;
 		return _sorting;
@@ -780,14 +771,14 @@ class ListBox: ListControl // docmain
 	///
 	final @property void topIndex(int idx) // setter
 	{
-		if(isHandleCreated)
+		if (isHandleCreated)
 			prevwproc(LB_SETTOPINDEX, idx, 0);
 	}
 	
 	/// ditto
 	final @property int topIndex() // getter
 	{
-		if(isHandleCreated)
+		if (isHandleCreated)
 			return prevwproc(LB_GETTOPINDEX, 0, 0).toI32;
 		return 0;
 	}
@@ -796,7 +787,7 @@ class ListBox: ListControl // docmain
 	///
 	final @property void useTabStops(bool byes) // setter
 	{
-		if(byes)
+		if (byes)
 			_style(_style() | LBS_USETABSTOPS);
 		else
 			_style(_style() & ~LBS_USETABSTOPS);
@@ -805,7 +796,7 @@ class ListBox: ListControl // docmain
 	}
 	
 	/// ditto
-	final @property bool useTabStops() // getter
+	final @property bool useTabStops() const // getter
 	{
 		return (_style() & LBS_USETABSTOPS) != 0;
 	}
@@ -834,7 +825,7 @@ class ListBox: ListControl // docmain
 	///
 	final void clearSelected()
 	{
-		if(created)
+		if (created)
 			selectedIndex = -1;
 	}
 	
@@ -846,13 +837,14 @@ class ListBox: ListControl // docmain
 		
 		int result = NO_MATCHES;
 		
-		if(created)
+		if (created)
 		{
-			if(dfl.internal.utf.useUnicode)
-				result = prevwproc(LB_FINDSTRING, startIndex, cast(LPARAM)dfl.internal.utf.toUnicodez(str)).toI32;
+			if (useUnicode)
+				result = prevwproc(LB_FINDSTRING, startIndex, cast(LPARAM)toUnicodez(str)).toI32;
 			else
-				result = prevwproc(LB_FINDSTRING, startIndex, cast(LPARAM)dfl.internal.utf.unsafeAnsiz(str)).toI32;
-			if(result == LB_ERR) // Redundant.
+				result = prevwproc(LB_FINDSTRING, startIndex, cast(LPARAM)unsafeAnsiz(str)).toI32;
+			
+			if (result == LB_ERR) // Redundant.
 				result = NO_MATCHES;
 		}
 		
@@ -873,13 +865,14 @@ class ListBox: ListControl // docmain
 		
 		int result = NO_MATCHES;
 		
-		if(created)
+		if (created)
 		{
-			if(dfl.internal.utf.useUnicode)
-				result = prevwproc(LB_FINDSTRINGEXACT, startIndex, cast(LPARAM)dfl.internal.utf.toUnicodez(str)).toI32;
+			if (useUnicode)
+				result = prevwproc(LB_FINDSTRINGEXACT, startIndex, cast(LPARAM)toUnicodez(str)).toI32;
 			else
-				result = prevwproc(LB_FINDSTRINGEXACT, startIndex, cast(LPARAM)dfl.internal.utf.unsafeAnsiz(str)).toI32;
-			if(result == LB_ERR) // Redundant.
+				result = prevwproc(LB_FINDSTRINGEXACT, startIndex, cast(LPARAM)unsafeAnsiz(str)).toI32;
+			
+			if (result == LB_ERR) // Redundant.
 				result = NO_MATCHES;
 		}
 		
@@ -897,9 +890,9 @@ class ListBox: ListControl // docmain
 	final int getItemHeight(int idx)
 	{
 		int result = prevwproc(LB_GETITEMHEIGHT, idx, 0).toI32;
-		if(LB_ERR == result)
+		if (LB_ERR == result)
 			throw new DflException("Unable to obtain item height");
-		return result;
+		return MulDiv(result, USER_DEFAULT_SCREEN_DPI, dpi);
 	}
 	
 	
@@ -907,9 +900,9 @@ class ListBox: ListControl // docmain
 	final Rect getItemRectangle(int idx)
 	{
 		RECT rect;
-		if(LB_ERR == prevwproc(LB_GETITEMRECT, idx, cast(LPARAM)&rect))
+		if (LB_ERR == prevwproc(LB_GETITEMRECT, idx, cast(LPARAM)&rect))
 		{
-			//if(idx >= 0 && idx < items.length)
+			//if (idx >= 0 && idx < items.length)
 				return Rect(0, 0, 0, 0); // ?
 			//throw new DflException("Unable to obtain item rectangle");
 		}
@@ -934,13 +927,13 @@ class ListBox: ListControl // docmain
 		
 		int result = NO_MATCHES;
 		
-		if(created)
+		if (created)
 		{
 			result = prevwproc(LB_ITEMFROMPOINT, 0, MAKELPARAM(x, y)).toI32;
-			if(!HIWORD(result)) // In client area
+			if (!HIWORD(result)) // In client area
 			{
 				//result = LOWORD(result); // High word already 0.
-				if(result < 0 || !getItemRectangle(result).contains(x, y))
+				if (result < 0 || !getItemRectangle(result).contains(x, y))
 					result = NO_MATCHES;
 			}
 			else // Outside client area.
@@ -962,7 +955,7 @@ class ListBox: ListControl // docmain
 	///
 	final void setSelected(int idx, bool byes)
 	{
-		if(created)
+		if (created)
 			prevwproc(LB_SETSEL, byes, idx);
 	}
 	
@@ -977,10 +970,9 @@ class ListBox: ListControl // docmain
 	///
 	void sort()
 	{
-		if(icollection._items.length)
+		if (_itemCollection._items.length)
 		{
-			Object[] itemscopy;
-			itemscopy = icollection._items.dup;
+			Object[] itemscopy = _itemCollection._items.dup;
 			std.algorithm.sort(itemscopy);
 			
 			items.clear();
@@ -989,7 +981,7 @@ class ListBox: ListControl // docmain
 			scope(exit)
 				endUpdate();
 			
-			foreach(i, Object o; itemscopy)
+			foreach (i, Object o; itemscopy)
 			{
 				if (i > int.max)
 					throw new DflException("sort() failure");
@@ -1004,20 +996,20 @@ class ListBox: ListControl // docmain
 	{
 		protected this(ListBox lbox)
 		{
-			this.lbox = lbox;
+			this._listBox = lbox;
 		}
 		
 		
 		protected this(ListBox lbox, Object[] range)
 		{
-			this.lbox = lbox;
+			this._listBox = lbox;
 			addRange(range);
 		}
 		
 		
 		protected this(ListBox lbox, Dstring[] range)
 		{
-			this.lbox = lbox;
+			this._listBox = lbox;
 			addRange(range);
 		}
 		
@@ -1033,7 +1025,7 @@ class ListBox: ListControl // docmain
 		
 		void add(Object value)
 		{
-			add2(value);
+			_add2(value);
 		}
 		
 		
@@ -1045,9 +1037,9 @@ class ListBox: ListControl // docmain
 		
 		void addRange(Object[] range)
 		{
-			if(lbox.sorted)
+			if (_listBox.sorted)
 			{
-				foreach(Object value; range)
+				foreach (Object value; range)
 				{
 					add(value);
 				}
@@ -1061,34 +1053,34 @@ class ListBox: ListControl // docmain
 		
 		void addRange(Dstring[] range)
 		{
-			foreach(Dstring value; range)
+			foreach (Dstring value; range)
 			{
 				add(value);
 			}
 		}
 		
 		
-		private:
+	private:
 		
-		ListBox lbox;
+		ListBox _listBox;
 		Object[] _items;
 		
 		
-		LRESULT insert2(WPARAM idx, Dstring val)
+		LRESULT _insert2(WPARAM idx, Dstring val)
 		{
 			insert(idx.toI32, val);
 			return idx;
 		}
 		
 		
-		LRESULT add2(Object val)
+		LRESULT _add2(Object val)
 		{
 			int i;
-			if(lbox.sorted)
+			if (_listBox.sorted)
 			{
-				for(i = 0; i != _items.length.toI32; i++)
+				for (i = 0; i != _items.length.toI32; i++)
 				{
-					if(val < _items[i])
+					if (val < _items[i])
 						break;
 				}
 			}
@@ -1103,44 +1095,44 @@ class ListBox: ListControl // docmain
 		}
 		
 		
-		LRESULT add2(Dstring val)
+		LRESULT _add2(Dstring val)
 		{
-			return add2(new ListString(val));
+			return _add2(new ListString(val));
 		}
 		
 		
 		void _added(size_t idx, Object val)
 		{
-			if(lbox.created)
+			if (_listBox.created)
 			{
-				if(dfl.internal.utf.useUnicode)
-					lbox.prevwproc(LB_INSERTSTRING, idx, cast(LPARAM)dfl.internal.utf.toUnicodez(getObjectString(val)));
+				if (useUnicode)
+					_listBox.prevwproc(LB_INSERTSTRING, idx, cast(LPARAM)toUnicodez(getObjectString(val)));
 				else
-					lbox.prevwproc(LB_INSERTSTRING, idx, cast(LPARAM)dfl.internal.utf.toAnsiz(getObjectString(val))); // Can this be unsafeAnsiz()?
+					_listBox.prevwproc(LB_INSERTSTRING, idx, cast(LPARAM)toAnsiz(getObjectString(val))); // Can this be unsafeAnsiz()?
 			}
 		}
 		
 		
 		void _removed(size_t idx, Object val)
 		{
-			if(size_t.max == idx) // Clear all.
+			if (size_t.max == idx) // Clear all.
 			{
-				if(lbox.created)
+				if (_listBox.created)
 				{
-					lbox.prevwproc(LB_RESETCONTENT, 0, 0);
+					_listBox.prevwproc(LB_RESETCONTENT, 0, 0);
 				}
 			}
 			else
 			{
-				if(lbox.created)
+				if (_listBox.created)
 				{
-					lbox.prevwproc(LB_DELETESTRING, cast(WPARAM)idx, 0);
+					_listBox.prevwproc(LB_DELETESTRING, cast(WPARAM)idx, 0);
 				}
 			}
 		}
 		
 		
-		public:
+	public:
 		
 		mixin ListWrapArray!(Object, _items,
 			_blankListCallback!(Object), _added,
@@ -1154,14 +1146,14 @@ class ListBox: ListControl // docmain
 		_initListbox();
 		
 		// Default useTabStops and vertical scrolling.
-		_windowStyle |= WS_TABSTOP | LBS_USETABSTOPS | LBS_HASSTRINGS | WS_VSCROLL | LBS_NOTIFY;
+		_windowStyle |= WS_CHILD | WS_TABSTOP | LBS_USETABSTOPS | LBS_HASSTRINGS | WS_VSCROLL | LBS_NOTIFY;
 		_windowStyleEx |= WS_EX_CLIENTEDGE;
 		_controlStyle |= ControlStyles.SELECTABLE;
 		_windowClassStyle = listboxClassStyle;
 		
-		icollection = createItemCollection();
-		selidxcollection = new SelectedIndexCollection(this);
-		selobjcollection = new SelectedObjectCollection(this);
+		_itemCollection = createItemCollection();
+		_selectedIndexCollection = new SelectedIndexCollection(this);
+		_selectedObjectCollection = new SelectedObjectCollection(this);
 	}
 	
 	
@@ -1173,45 +1165,31 @@ class ListBox: ListControl // docmain
 		// and WM_MEASUREITEM will work properly.
 		SetWindowLongPtrA(_hwnd, GWL_ID, cast(LONG_PTR)_hwnd);
 		
-		if(hextent != 0)
-			prevwproc(LB_SETHORIZONTALEXTENT, hextent, 0);
+		if (_horizontalExtent != 0)
+			prevwproc(LB_SETHORIZONTALEXTENT, _horizontalExtent, 0);
 		
-		if(iheight != DEFAULT_ITEM_HEIGHT)
-			prevwproc(LB_SETITEMHEIGHT, 0, MAKELPARAM(iheight, 0));
+		if (_itemHeight != DEFAULT_ITEM_HEIGHT)
+			prevwproc(LB_SETITEMHEIGHT, 0, MAKELPARAM(MulDiv(_itemHeight, dpi, USER_DEFAULT_SCREEN_DPI), 0));
 		
 		Message m;
 		m.hWnd = handle;
 		m.msg = LB_INSERTSTRING;
-		// NOTE: duplicate code.
-		if(dfl.internal.utf.useUnicode)
+
+		foreach (i, Object obj; _itemCollection._items)
 		{
-			foreach(i, Object obj; icollection._items)
-			{
-				m.wParam = i;
-				m.lParam = cast(LPARAM)dfl.internal.utf.toUnicodez(getObjectString(obj)); // <--
-				
-				prevWndProc(m);
-				//if(LB_ERR == m.result || LB_ERRSPACE == m.result)
-				if(m.result < 0)
-					throw new DflException("Unable to add list item");
-				
-				//prevwproc(LB_SETITEMDATA, m.result, cast(LPARAM)cast(void*)obj);
-			}
-		}
-		else
-		{
-			foreach(i, Object obj; icollection._items)
-			{
-				m.wParam = i;
-				m.lParam = cast(LPARAM)dfl.internal.utf.toAnsiz(getObjectString(obj)); // Can this be unsafeAnsiz? // <--
-				
-				prevWndProc(m);
-				//if(LB_ERR == m.result || LB_ERRSPACE == m.result)
-				if(m.result < 0)
-					throw new DflException("Unable to add list item");
-				
-				//prevwproc(LB_SETITEMDATA, m.result, cast(LPARAM)cast(void*)obj);
-			}
+			m.wParam = i;
+
+			static if (useUnicode)
+				m.lParam = cast(LPARAM)toUnicodez(getObjectString(obj));
+			else
+				m.lParam = cast(LPARAM)toAnsiz(getObjectString(obj)); // Can this be unsafeAnsiz?
+			
+			prevWndProc(m);
+			//if (LB_ERR == m.result || LB_ERRSPACE == m.result)
+			if (m.result < 0)
+				throw new DflException("Unable to add list item");
+			
+			//prevwproc(LB_SETITEMDATA, m.result, cast(LPARAM)cast(void*)obj);
 		}
 		
 		//redrawEntire();
@@ -1221,7 +1199,7 @@ class ListBox: ListControl // docmain
 	/+
 	override void createHandle()
 	{
-		if(isHandleCreated)
+		if (isHandleCreated)
 			return;
 		
 		createClassHandle(LISTBOX_CLASSNAME);
@@ -1236,6 +1214,7 @@ class ListBox: ListControl // docmain
 		super.createParams(cp);
 		
 		cp.className = LISTBOX_CLASSNAME;
+		cp.style |= LBS_NOINTEGRALHEIGHT;
 	}
 	
 	
@@ -1243,7 +1222,7 @@ class ListBox: ListControl // docmain
 	Event!(ListBox, MeasureItemEventArgs) measureItem; ///
 	
 	
-	protected:
+protected:
 	
 	///
 	void onDrawItem(DrawItemEventArgs dieh)
@@ -1269,18 +1248,17 @@ class ListBox: ListControl // docmain
 	{
 		DrawItemState state = cast(DrawItemState)dis.itemState;
 		
-		if(dis.itemID == -1)
+		if (dis.itemID == -1)
 		{
 			FillRect(dis.hDC, &dis.rcItem, backgroundHbrush);
-			if(state & DrawItemState.FOCUS)
+			if (state & DrawItemState.FOCUS)
 				DrawFocusRect(dis.hDC, &dis.rcItem);
 		}
 		else
 		{
-			DrawItemEventArgs diea;
 			Color bc, fc;
 			
-			if(state & DrawItemState.SELECTED)
+			if (state & DrawItemState.SELECTED)
 			{
 				bc = Color.systemColor(COLOR_HIGHLIGHT);
 				fc = Color.systemColor(COLOR_HIGHLIGHTTEXT);
@@ -1292,7 +1270,7 @@ class ListBox: ListControl // docmain
 			}
 			
 			prepareDc(dis.hDC);
-			diea = new DrawItemEventArgs(new Graphics(dis.hDC, false), _windowFont,
+			DrawItemEventArgs diea = new DrawItemEventArgs(new Graphics(dis.hDC, false), _windowFont,
 				Rect(&dis.rcItem), dis.itemID, state, fc, bc);
 			
 			onDrawItem(diea);
@@ -1307,22 +1285,21 @@ class ListBox: ListControl // docmain
 	}
 	do
 	{
-		MeasureItemEventArgs miea;
 		scope Graphics gpx = new CommonGraphics(handle(), GetDC(handle));
-		miea = new MeasureItemEventArgs(gpx, mis.itemID, /+ mis.itemHeight +/ iheight);
-		miea.itemWidth = mis.itemWidth;
+		MeasureItemEventArgs miea = new MeasureItemEventArgs(gpx, mis.itemID, /+ mis.itemHeight +/ _itemHeight);
+		miea.itemWidth = MulDiv(mis.itemWidth, USER_DEFAULT_SCREEN_DPI, dpi);
 		
 		onMeasureItem(miea);
 		
-		mis.itemHeight = miea.itemHeight;
-		mis.itemWidth = miea.itemWidth;
+		mis.itemHeight = MulDiv(miea.itemHeight, dpi , USER_DEFAULT_SCREEN_DPI);
+		mis.itemWidth = MulDiv(miea.itemWidth, dpi, USER_DEFAULT_SCREEN_DPI);
 	}
 	
 	
 	override void prevWndProc(ref Message msg)
 	{
 		//msg.result = CallWindowProcA(listboxPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
-		msg.result = dfl.internal.utf.callWindowProc(listboxPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
+		msg.result = callWindowProc(listboxPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
 	}
 	
 	
@@ -1330,7 +1307,7 @@ class ListBox: ListControl // docmain
 	{
 		super.onReflectedMessage(m);
 		
-		switch(m.msg)
+		switch (m.msg)
 		{
 			case WM_DRAWITEM:
 				_WmDrawItem(cast(DRAWITEMSTRUCT*)m.lParam);
@@ -1344,7 +1321,7 @@ class ListBox: ListControl // docmain
 			
 			case WM_COMMAND:
 				assert(cast(HWND)m.lParam == handle);
-				switch(HIWORD(m.wParam))
+				switch (HIWORD(m.wParam))
 				{
 					case LBN_SELCHANGE:
 						onSelectedIndexChanged(EventArgs.empty);
@@ -1362,30 +1339,39 @@ class ListBox: ListControl // docmain
 		}
 	}
 	
+
+	override void onDpiChanged(uint newDpi)
+	{
+		// If you want to apply _itemHeight, you should call SendMessage with LB_SETITEMHEIGHT.
+		//
+		// LPARAM newHeight = MAKELPARAM(MulDiv(_itemHeight, this._windowDpi, USER_DEFAULT_SCREEN_DPI), 0);
+		// SendMessage(handle, LB_SETITEMHEIGHT, 0, newHeight);
+
+		// TODO: Performed once in Control.wndProc(), but perform twice as work around.
+		_windowScaledFont = _createScaledFont(font, newDpi);
+		SendMessage(handle, WM_SETFONT, cast(WPARAM)_windowScaledFont.handle, MAKELPARAM(true, 0));
+	}
+
 	
 	override void wndProc(ref Message msg)
 	{
-		switch(msg.msg)
+		switch (msg.msg)
 		{
 			case LB_ADDSTRING:
-				//msg.result = icollection.add2(stringFromStringz(cast(char*)msg.lParam).dup); // TODO: fix.
-				//msg.result = icollection.add2(stringFromStringz(cast(char*)msg.lParam).idup); // TODO: fix. // Needed in D2. Doesn't work in D1.
-				msg.result = icollection.add2(cast(Dstring)stringFromStringz(cast(char*)msg.lParam).dup); // TODO: fix. // Needed in D2.
+				msg.result = _itemCollection._add2(cast(Dstring)stringFromStringz(cast(char*)msg.lParam).dup);
 				return;
 			
 			case LB_INSERTSTRING:
-				//msg.result = icollection.insert2(msg.wParam, stringFromStringz(cast(char*)msg.lParam).dup); // TODO: fix.
-				//msg.result = icollection.insert2(msg.wParam, stringFromStringz(cast(char*)msg.lParam).idup); // TODO: fix. // Needed in D2. Doesn't work in D1.
-				msg.result = icollection.insert2(msg.wParam, cast(Dstring)stringFromStringz(cast(char*)msg.lParam).dup); // TODO: fix. // Needed in D2.
+				msg.result = _itemCollection._insert2(msg.wParam, cast(Dstring)stringFromStringz(cast(char*)msg.lParam).dup);
 				return;
 			
 			case LB_DELETESTRING:
-				icollection.removeAt(msg.wParam.toI32);
-				msg.result = icollection.length;
+				_itemCollection.removeAt(msg.wParam.toI32);
+				msg.result = _itemCollection.length;
 				return;
 			
 			case LB_RESETCONTENT:
-				icollection.clear();
+				_itemCollection.clear();
 				return;
 			
 			case LB_SETITEMDATA:
@@ -1402,26 +1388,25 @@ class ListBox: ListControl // docmain
 				return;
 			
 			default:
+				super.wndProc(msg);
 		}
-		super.wndProc(msg);
 	}
 	
 	
-	private:
-	int hextent = 0;
-	int iheight = DEFAULT_ITEM_HEIGHT;
-	ObjectCollection icollection;
-	SelectedIndexCollection selidxcollection;
-	SelectedObjectCollection selobjcollection;
+private:
+	int _horizontalExtent = 0;
+	int _itemHeight = DEFAULT_ITEM_HEIGHT;
+	ObjectCollection _itemCollection;
+	SelectedIndexCollection _selectedIndexCollection;
+	SelectedObjectCollection _selectedObjectCollection;
 	bool _sorting = false;
 	
 	
-	package:
-	final:
+package:
+final:
 	LRESULT prevwproc(UINT msg, WPARAM wparam, LPARAM lparam)
 	{
-		//return CallWindowProcA(listviewPrevWndProc, hwnd, msg, wparam, lparam);
-		return dfl.internal.utf.callWindowProc(listboxPrevWndProc, _hwnd, msg, wparam, lparam);
+		return callWindowProc(listboxPrevWndProc, _hwnd, msg, wparam, lparam);
 	}
 }
 

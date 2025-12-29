@@ -16,6 +16,11 @@
 				"kind": "build",
 				"isDefault": true
 			},
+			"presentation": {
+				"focus": false,
+				"showReuseMessage": true,
+				"clear": true
+			},
 			"label": "dub: Build timechartrenderer_sample",
 			"detail": "dub build --compiler=dmd.EXE -a=x86_64 -b=debug -c=application"
 		}

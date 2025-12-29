@@ -27,15 +27,24 @@ void main()
 ![screen shot](./image/welcomtodfl.png "screen shot")
 
 ## Recent major features
-- **Add LocationAlignment property to Control class for easily layout customize GUI elements (with example code) .**
+- **Supports dpi-aware (per monitor v2).**
+	- Add Application.setHighDpiMode method.
+		- DPI_UNAWARE
+		- SYSTEM_AWARE
+		- PER_MONITOR
+		- PER_MONITOR_V2
+		- DPI_UNAWARE_GDI_SCALED
+	- Add Control.onDpiChanged method for recursive dpi-change.
+
+- Add LocationAlignment property to Control class for easily layout customize GUI elements (with example code) .
 	- While WinForms' Anchor maintains a constant distance to the edge of the parent control, LocationAlignment sets the distance to the edge of the parent control to zero.
 	- LocationAlignment is affected by the dockMargin property.
 	- LocationAlignment and DockStyle cannot be used at the same time.
 
 ![screen shot](./examples/locationalignment/image/screenshot.png "screen shot")
 
-- **Enabled padding and margin configuration for all Control types.**
-- **StackPanel class and example code are now comming.**
+- Enabled padding and margin configuration for all Control types.
+- StackPanel class and example code are now comming.
 
 ![screen shot](./examples/stackpanel/image/screenshot.png "screen shot")
 
@@ -45,26 +54,21 @@ void main()
 
 ![screen shot](./examples/toggleswitch/image/screenshot.png "screen shot")
 
-- Module "dfl.toastnotifier" is now comming.
-	- ToastNotifier (with example)
-	- ToastNotifierLegacy (with example)
+- Module "dfl.toastnotifier" is now comming (with example).
+	- ToastNotifier
+	- ToastNotifierLegacy
 
 ![screen shot](./examples/toastnotifier/image/screenshot.png "screen shot")
 
-- Removed dependency on undeaD library.
-- Windows OMF support has been removed (for DMD v2.109.0).
 - Registered DFL to DUB.
-- Supported multiple screens.
-- Module "dfl.chart" is now comming.
-	- TableRenderer (with example)
-	- LineGraphRenderer (with example)
-	- TimeChartRenderer (with example)
-- Module "dfl.printing" is now comming.
+- Module "dfl.chart" is now comming (with example).
+	- TableRenderer
+	- LineGraphRenderer
+	- TimeChartRenderer
+- Module "dfl.printing" is now comming (with example).
 	- PrintDialog
 	- PrintSetupDialog
 	- PrintPreviewDialog
-- Remove dflexe.
-- Remove GTK-based DFL.
 - Remove some bundled libraries such as user32_dfl.lib etc... (From now on, use dmd-bundled libraries such as the MinGW platform library and so on.)
 
 ## Screen shots

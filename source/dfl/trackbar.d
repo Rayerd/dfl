@@ -715,7 +715,7 @@ class TrackBar : ControlSuperClass
 
 
 	///
-	protected override @property Size defaultSize() // getter
+	protected override @property Size defaultSize() const // getter
 	{
 		return Size(104, _preferredDimension);
 	}

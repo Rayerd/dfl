@@ -799,11 +799,11 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	}
 	
 	
-	override @property Cursor cursor() // getter
+	override @property inout(Cursor) cursor() inout // getter
 	{
 		if(!_windowCursor)
-			return _defaultCursor;
-		return _windowCursor;
+			return cast(inout(Cursor))_defaultCursor;
+		return cast(inout(Cursor))_windowCursor;
 	}
 	
 	alias cursor = Control.cursor; // Overload.
@@ -1103,7 +1103,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 	}
 	
 	
-	protected override @property Size defaultSize() // getter
+	protected override @property Size defaultSize() const // getter
 	{
 		return Size(120, 23); // ?
 	}

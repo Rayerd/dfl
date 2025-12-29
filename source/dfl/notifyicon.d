@@ -436,7 +436,7 @@ class NotifyIcon // docmain
 	}
 	
 	
-	private:
+private:
 	
 	DFL_NOTIFYICONDATA _nid; ///
 	int _tipLen = 0; ///

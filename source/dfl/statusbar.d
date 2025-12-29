@@ -13,8 +13,11 @@ import dfl.control;
 import dfl.event;
 
 import dfl.internal.dlib;
+import dfl.internal.dpiaware;
 import dfl.internal.utf;
-import dfl.internal.winapi;
+
+import core.sys.windows.windows;
+import core.sys.windows.commctrl;
 
 
 private extern(Windows) void _initStatusbar();
@@ -61,44 +64,52 @@ class StatusBarPanel: DObject
 	}
 	
 	
+	///
 	override Dstring toString() const
 	{
 		return _txt;
 	}
 	
 	
+	///
 	override Dequ opEquals(Object o) const
 	{
-		return _txt == getObjectString(o); // ?
+		return _txt == getObjectString(o); // TODO: ?
 	}
 	
+	/// ditto
 	Dequ opEquals(StatusBarPanel pnl) const
 	{
 		return _txt == pnl._txt;
 	}
 	
+	/// ditto
 	Dequ opEquals(Dstring val) const
 	{
 		return _txt == val;
 	}
 	
 	
+	///
 	override int opCmp(Object o) const
 	{
-		return stringICmp(_txt, getObjectString(o)); // ?
+		return stringICmp(_txt, getObjectString(o)); // TODO: ?
 	}
 	
+	/// ditto
 	int opCmp(StatusBarPanel pnl) const
 	{
 		return stringICmp(_txt, pnl._txt);
 	}
 	
+	/// ditto
 	int opCmp(Dstring val) const
 	{
 		return stringICmp(_txt, val);
 	}
 
 
+	///
 	override size_t toHash() const nothrow @safe
 	{
 		return hashOf(_txt);
@@ -158,12 +169,12 @@ class StatusBarPanel: DObject
 		
 		if(_parent && _parent.isHandleCreated)
 		{
-			_parent.panels._fixtexts(); // Also fixes styles.
+			_parent.panels._fixTexts(); // Also fixes styles.
 		}
 	}
 	
 	/// ditto
-	final @property StatusBarPanelBorderStyle borderStyle() // getter
+	final @property StatusBarPanelBorderStyle borderStyle() const // getter
 	{
 		if(_utype & SBT_POPOUT)
 			return StatusBarPanelBorderStyle.RAISED;
@@ -197,7 +208,7 @@ class StatusBarPanel: DObject
 	
 	
 	///
-	final @property StatusBar parent() // getter
+	final @property inout(StatusBar) parent() inout // getter
 	{
 		return _parent;
 	}
@@ -220,7 +231,7 @@ class StatusBarPanel: DObject
 	}
 	
 	/// ditto
-	final @property Dstring text() // getter
+	final @property Dstring text() const // getter
 	{
 		return _txt;
 	}
@@ -248,18 +259,18 @@ class StatusBarPanel: DObject
 		
 		if(_parent && _parent.isHandleCreated)
 		{
-			_parent.panels._fixwidths();
+			_parent.panels._fixWidths();
 		}
 	}
 	
 	/// ditto
-	final @property int width() // getter
+	final @property int width() const // getter
 	{
 		return _width;
 	}
 	
 	
-	private:
+private:
 	
 	Dstring _txt = null;
 	int _width = 100;
@@ -295,46 +306,59 @@ class StatusBar: ControlSuperClass // docmain
 		protected this(StatusBar sb)
 		in
 		{
-			assert(sb.lpanels is null);
+			assert(sb._lpanels is null);
 		}
 		do
 		{
-			this.sb = sb;
+			this._statusBar = sb;
 		}
 		
 		
-		private:
+	private:
 		
-		StatusBar sb;
+		StatusBar _statusBar;
 		package StatusBarPanel[] _panels;
 		
 		
-		package void _fixwidths()
+		///
+		void _fixWidthsCore(uint newDpi)
 		{
 			assert(isHandleCreated);
 			
-			UINT[20] _pws = void;
-			UINT[] pws = _pws;
-			if(_panels.length > _pws.length)
-				pws = new UINT[_panels.length];
-			UINT right = 0;
-			foreach(idx, pnl; _panels)
+			UINT[20] panelWidthsStatic = void;
+			UINT[] panelWidths = panelWidthsStatic;
+			if(_panels.length > panelWidthsStatic.length)
+				panelWidths = new UINT[_panels.length];
+			UINT rightEdge = 0;
+			foreach(index, panel; _panels)
 			{
-				if(-1 == pnl.width)
+				if(-1 == panel.width)
 				{
-					pws[idx] = -1;
+					panelWidths[index] = -1;
 				}
 				else
 				{
-					right += pnl.width;
-					pws[idx] = right;
+					rightEdge += MulDiv(panel.width, newDpi, USER_DEFAULT_SCREEN_DPI);
+					panelWidths[index] = rightEdge;
 				}
 			}
-			sb.prevwproc(SB_SETPARTS, cast(WPARAM)_panels.length, cast(LPARAM)pws.ptr);
+			sendMessage(_hwnd, SB_SETPARTS, cast(WPARAM)_panels.length, cast(LPARAM)panelWidths.ptr);
+		}
+
+		/// ditto
+		void _fixWidths()
+		{
+			_fixWidthsCore(dpi);
+		}
+
+		/// ditto
+		void _fixWidthsWithDpi(uint newDpi)
+		{
+			_fixWidthsCore(newDpi);
 		}
 		
 		
-		void _fixtexts()
+		void _fixTexts()
 		{
 			assert(isHandleCreated);
 			
@@ -342,26 +366,26 @@ class StatusBar: ControlSuperClass // docmain
 			{
 				foreach(idx, pnl; _panels)
 				{
-					sb.prevwproc(SB_SETTEXTW, cast(WPARAM)idx | pnl._utype, cast(LPARAM)dfl.internal.utf.toUnicodez(pnl._txt));
+					_statusBar.prevwproc(SB_SETTEXTW, cast(WPARAM)idx | pnl._utype, cast(LPARAM)dfl.internal.utf.toUnicodez(pnl._txt));
 				}
 			}
 			else
 			{
 				foreach(idx, pnl; _panels)
 				{
-					sb.prevwproc(SB_SETTEXTA, cast(WPARAM)idx | pnl._utype, cast(LPARAM)dfl.internal.utf.toAnsiz(pnl._txt));
+					_statusBar.prevwproc(SB_SETTEXTA, cast(WPARAM)idx | pnl._utype, cast(LPARAM)dfl.internal.utf.toAnsiz(pnl._txt));
 				}
 			}
 		}
 		
 		
-		void _setcurparts()
+		void _setCurrentParts()
 		{
 			assert(isHandleCreated);
 			
-			_fixwidths();
+			_fixWidths();
 			
-			_fixtexts();
+			_fixTexts();
 		}
 		
 		
@@ -369,16 +393,16 @@ class StatusBar: ControlSuperClass // docmain
 		{
 			if(size_t.max == idx) // Clear all.
 			{
-				if(sb.isHandleCreated)
+				if(_statusBar.isHandleCreated)
 				{
-					sb.prevwproc(SB_SETPARTS, 0, 0); // 0 parts.
+					_statusBar.prevwproc(SB_SETPARTS, 0, 0); // 0 parts.
 				}
 			}
 			else
 			{
-				if(sb.isHandleCreated)
+				if(_statusBar.isHandleCreated)
 				{
-					_setcurparts();
+					_setCurrentParts();
 				}
 			}
 		}
@@ -389,11 +413,11 @@ class StatusBar: ControlSuperClass // docmain
 			if(val._parent)
 				throw new DflException("StatusBarPanel already belongs to a StatusBar");
 			
-			val._parent = sb;
+			val._parent = _statusBar;
 			
-			if(sb.isHandleCreated)
+			if(_statusBar.isHandleCreated)
 			{
-				_setcurparts();
+				_setCurrentParts();
 			}
 		}
 		
@@ -405,7 +429,7 @@ class StatusBar: ControlSuperClass // docmain
 		}
 		
 		
-		public:
+	public:
 		
 		mixin ListWrapArray!(StatusBarPanel, _panels,
 			_adding, _added,
@@ -425,13 +449,14 @@ class StatusBar: ControlSuperClass // docmain
 		//height = ?;
 		dock = DockStyle.BOTTOM;
 		
-		lpanels = new StatusBarPanelCollection(this);
+		_lpanels = new StatusBarPanelCollection(this);
 	}
 	
 	
 	// backColor / font / foreColor ...
 	
 	
+	///
 	override @property void dock(DockStyle ds) // setter
 	{
 		switch(ds)
@@ -450,9 +475,9 @@ class StatusBar: ControlSuperClass // docmain
 	
 	
 	///
-	final @property StatusBarPanelCollection panels() // getter
+	final @property inout(StatusBarPanelCollection) panels() inout // getter
 	{
-		return lpanels;
+		return _lpanels;
 	}
 	
 	
@@ -483,7 +508,7 @@ class StatusBar: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final @property bool showPanels() // getter
+	final @property bool showPanels() const // getter
 	{
 		return !_issimple;
 	}
@@ -502,7 +527,7 @@ class StatusBar: ControlSuperClass // docmain
 	}
 	
 	/// ditto
-	final @property bool sizingGrip() // getter
+	final @property bool sizingGrip() const // getter
 	{
 		if(_windowStyle & SBARS_SIZEGRIP)
 			return true;
@@ -510,6 +535,7 @@ class StatusBar: ControlSuperClass // docmain
 	}
 	
 	
+	///
 	override @property void text(Dstring txt) // setter
 	{
 		if(isHandleCreated && !showPanels)
@@ -536,13 +562,13 @@ class StatusBar: ControlSuperClass // docmain
 		if(_issimple)
 		{
 			prevwproc(SB_SIMPLE, cast(WPARAM)true, 0);
-			panels._setcurparts();
+			panels._setCurrentParts();
 			if(_simpletext.length)
 				_sendidxtext(255, 0, _simpletext);
 		}
 		else
 		{
-			panels._setcurparts();
+			panels._setCurrentParts();
 			prevwproc(SB_SIMPLE, cast(WPARAM)false, 0);
 		}
 	}
@@ -561,8 +587,14 @@ class StatusBar: ControlSuperClass // docmain
 		//msg.result = CallWindowProcA(statusbarPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
 		msg.result = dfl.internal.utf.callWindowProc(statusbarPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
 	}
+
+
+	protected override void onDpiChanged(uint newDpi)
+	{
+		_lpanels._fixWidthsWithDpi(newDpi);
+	}
 	
-	
+
 	/+
 	protected override void createHandle()
 	{
@@ -574,7 +606,7 @@ class StatusBar: ControlSuperClass // docmain
 	//Event!(StatusBar, StatusBarPanelClickEventArgs) panelClick; ///
 	
 	
-	protected:
+protected:
 	
 	// onDrawItem ...
 	
@@ -588,15 +620,15 @@ class StatusBar: ControlSuperClass // docmain
 	+/
 	
 	
-	private:
+private:
 	
-	StatusBarPanelCollection lpanels;
+	StatusBarPanelCollection _lpanels;
 	Dstring _simpletext = null;
 	bool _issimple = true;
 	
 	
-	package:
-	final:
+package:
+final:
 	
 	LRESULT prevwproc(UINT msg, WPARAM wparam, LPARAM lparam)
 	{
@@ -615,4 +647,3 @@ class StatusBar: ControlSuperClass // docmain
 			prevwproc(SB_SETTEXTA, cast(WPARAM)idx | utype, cast(LPARAM)dfl.internal.utf.toAnsiz(txt));
 	}
 }
-

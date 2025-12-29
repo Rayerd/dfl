@@ -100,12 +100,9 @@ class MainForm : Form
 	}
 }
 
-static this()
-{
-	Application.enableVisualStyles();
-}
-
 void main()
 {
+	Application.enableVisualStyles();
+	Application.setHighDpiMode(HighDpiMode.DPI_UNAWARE_GDI_SCALED);
 	Application.run(new MainForm());
 }

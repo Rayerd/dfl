@@ -31,7 +31,7 @@ class ItemDragEventArgs : EventArgs
 		return this._item;
 	}
 
-	private:
+private:
 	MouseButtons _button;
 	Object _item;
 }
@@ -48,7 +48,7 @@ class DragDropListBox : ListBox
 	///
 	Event!(DragDropListBox, ItemDragEventArgs) itemDrag;
 
-	protected:
+protected:
 	
 	///
 	void onItemDrag(ItemDragEventArgs e)
@@ -215,18 +215,18 @@ class DragDropListBox : ListBox
 		super.wndProc(msg);
 	}
 
-	private:
+private:
 
 	/// Currently depressed modifier keys.
 	static @property Keys modifierKeys() // getter
 	{
 		// Is there a better way to do this?
 		Keys ks = Keys.NONE;
-		if(GetAsyncKeyState(VK_SHIFT) & 0x8000)
+		if (GetAsyncKeyState(VK_SHIFT) & 0x8000)
 			ks |= Keys.SHIFT;
-		if(GetAsyncKeyState(VK_MENU) & 0x8000)
+		if (GetAsyncKeyState(VK_MENU) & 0x8000)
 			ks |= Keys.ALT;
-		if(GetAsyncKeyState(VK_CONTROL) & 0x8000)
+		if (GetAsyncKeyState(VK_CONTROL) & 0x8000)
 			ks|= Keys.CONTROL;
 		return ks;
 	}
@@ -235,11 +235,11 @@ class DragDropListBox : ListBox
 	static MouseButtons wparamMouseButtons(WPARAM wparam)
 	{
 		MouseButtons result;
-		if(wparam & MK_LBUTTON)
+		if (wparam & MK_LBUTTON)
 			result |= MouseButtons.LEFT;
-		if(wparam & MK_RBUTTON)
+		if (wparam & MK_RBUTTON)
 			result |= MouseButtons.RIGHT;
-		if(wparam & MK_MBUTTON)
+		if (wparam & MK_MBUTTON)
 			result |= MouseButtons.MIDDLE;
 		return result;
 	}
@@ -347,7 +347,7 @@ class MainForm : Form
 			// else ...
 		};
 		_list.queryContinueDrag ~= (Control sender, QueryContinueDragEventArgs e) {
-			if(e.escapePressed)
+			if (e.escapePressed)
 			{
 				e.action = DragAction.CANCEL; // Cancel by ESC key.
 			}
@@ -359,12 +359,9 @@ class MainForm : Form
 	}
 }
 
-static this()
-{
-	Application.enableVisualStyles();
-}
-
 void main()
 {
+	Application.enableVisualStyles();
+	Application.setHighDpiMode(HighDpiMode.PER_MONITOR_V2);
 	Application.run(new MainForm());
 }

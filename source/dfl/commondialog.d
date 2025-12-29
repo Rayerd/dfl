@@ -11,13 +11,16 @@ import dfl.control;
 import dfl.drawing;
 import dfl.event;
 
-import dfl.internal.winapi;
-import dfl.internal.utf;
-
 public import dfl.filedialog;
 public import dfl.folderdialog;
 public import dfl.colordialog;
 public import dfl.fontdialog;
+
+import dfl.internal.utf;
+
+import core.sys.windows.winuser;
+import core.sys.windows.windef;
+import core.sys.windows.commdlg;
 
 
 ///
@@ -38,33 +41,30 @@ abstract class CommonDialog // docmain
 	Event!(CommonDialog, HelpEventArgs) helpRequest;
 	
 	
-	protected:
+protected:
 	
 	///
 	// See the CDN_* Windows notification messages.
 	UINT_PTR hookProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
-		switch(msg)
+		switch (msg)
 		{
 			case WM_NOTIFY:
+			{
+				NMHDR* nmhdr = cast(NMHDR*)lparam;
+				switch (nmhdr.code)
 				{
-					NMHDR* nmhdr;
-					nmhdr = cast(NMHDR*)lparam;
-					switch(nmhdr.code)
+					case CDN_HELP:
 					{
-						case CDN_HELP:
-							{
-								Point pt;
-								GetCursorPos(&pt.point);
-								onHelpRequest(new HelpEventArgs(pt));
-							}
-							break;
-						
-						default:
+						Point pt;
+						GetCursorPos(&pt.point);
+						onHelpRequest(new HelpEventArgs(pt));
+						break;
 					}
+					default:
 				}
 				break;
-			
+			}
 			default:
 		}
 		
@@ -87,7 +87,7 @@ abstract class CommonDialog // docmain
 	abstract bool runDialog(HWND owner);
 	
 	
-	package final void _cantrun()
+	package final void _cantRun()
 	{
 		throw new DflException("Error running dialog");
 	}

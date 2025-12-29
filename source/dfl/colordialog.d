@@ -179,7 +179,7 @@ class ColorDialog: CommonDialog // docmain
 		{
 			if(!CommDlgExtendedError())
 				return false;
-			_cantrun();
+			_cantRun();
 		}
 		return true;
 	}

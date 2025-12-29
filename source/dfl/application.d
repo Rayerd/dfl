@@ -19,6 +19,7 @@ import dfl.menu;
 
 import dfl.internal.clib;
 import dfl.internal.dlib;
+import dfl.internal.dpiaware;
 import dfl.internal.utf;
 import dfl.internal.winapi;
 import dfl.internal.wincom;
@@ -165,6 +166,30 @@ final class Application // docmain
 	
 	
 static:
+	
+
+	///
+	void setHighDpiMode(HighDpiMode highDpiMode)
+	{
+		final switch (highDpiMode)
+		{
+			case HighDpiMode.DPI_UNAWARE:
+				SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_UNAWARE);
+				return;
+			case HighDpiMode.SYSTEM_AWARE:
+				SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE);
+				return;
+			case HighDpiMode.PER_MONITOR:
+				SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
+				return;
+			case HighDpiMode.PER_MONITOR_V2:
+				SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+				return;
+			case HighDpiMode.DPI_UNAWARE_GDI_SCALED:
+				SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_UNAWARE_GDISCALED);
+		}
+	}
+
 	
 	///
 	// Should be called before creating any controls.

@@ -1,6 +1,13 @@
 import dwinrt;
 
-import dfl;
+import dfl.application;
+import dfl.base;
+import dfl.form;
+import dfl.button;
+import dfl.control;
+import dfl.drawing;
+import dfl.messagebox;
+import dfl.event;
 
 import Windows.Ui.Notifications;
 import Windows.UI.Popups;
@@ -18,8 +25,7 @@ void main()
 	Application.enableVisualStyles();
 
 	// DPI Aware.
-	import dfl.internal.dpiaware;
-	SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+	Application.setHighDpiMode(HighDpiMode.PER_MONITOR_V2);
 
 	Application.run(new MainForm);
 }

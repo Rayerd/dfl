@@ -107,12 +107,11 @@ void main()
 {
 	Application.enableVisualStyles();
 
-	// NOTE: DPI Awareness
-	import dfl.internal.dpiaware;
-	SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_UNAWARE); // OK
-	// SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_UNAWARE_GDISCALED); // ditto
-	// SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE); // NG, Windows suppresses the display of balloon tips if DPI awareness mode.
-	// SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2); // ditto.
+	// NOTE: DPI Awareness is limited support in Windows 10 and 11.
+	Application.setHighDpiMode(HighDpiMode.DPI_UNAWARE); // OK
+	// Application.setHighDpiMode(HighDpiMode.DPI_UNAWARE_GDI_SCALED); // ditto
+	// Application.setHighDpiMode(HighDpiMode.SYSTEM_AWARE); // NG, Windows 10 suppresses the display of balloon tips if DPI awareness mode.
+	// Application.setHighDpiMode(HighDpiMode.PER_MONITOR_V2); // ditto.
 
 	Application.run(new MainForm());
 }

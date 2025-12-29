@@ -20,7 +20,9 @@
 				"isDefault": true
 			},
 			"presentation": {
-				"clear": true
+				"clear": true,
+				"focus": false,
+				"showReuseMessage": true
 			}
 		},
 		{
@@ -41,7 +43,9 @@
 				"kind": "test"
 			},
 			"presentation": {
-				"clear": true
+				"clear": true,
+				"focus": false,
+				"showReuseMessage": true
 			}
 		}
 	]

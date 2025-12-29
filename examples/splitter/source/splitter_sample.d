@@ -68,7 +68,7 @@ class MainForm : Form
 
 		_splitter2 = new Splitter();
 		_splitter2.dock = DockStyle.TOP;
-		_splitter2.movingGrip = false; 
+		_splitter2.movingGrip = false;
 		_splitter2.parent = this;
 
 		_panel3 = new Panel();
@@ -79,12 +79,9 @@ class MainForm : Form
 	}
 }
 
-static this()
-{
-	Application.enableVisualStyles();
-}
-
 void main()
 {
+	Application.enableVisualStyles();
+	Application.setHighDpiMode(HighDpiMode.PER_MONITOR_V2);
 	Application.run(new MainForm());
 }

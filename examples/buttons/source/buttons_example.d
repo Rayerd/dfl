@@ -41,10 +41,20 @@ class MainForm : Form
 
 	public this()
 	{
+		// Control.defaultFont = new Font("Seoge UI", 9.0f);
+
 		// Form setting
 		this.text = "Buttons example";
+		this.startPosition = FormStartPosition.DEFAULT_LOCATION; // Default.
+		// this.startPosition = FormStartPosition.DEFAULT_BOUNDS; // Location and size are system defined.
+		// this.startPosition = FormStartPosition.CENTER_SCREEN; // Location is center of current monitor, but size is user defined.
+		// this.startPosition = FormStartPosition.CENTER_PARENT; // Location is system defined, but size is user defined.
+		// this.startPosition = FormStartPosition.MANUAL; // Location and size are user defined.
+
+		// this.location = Point(400,300);
 		this.size = Size(400,300);
-		this.formBorderStyle = FormBorderStyle.FIXED_DIALOG;
+		
+		this.formBorderStyle = FormBorderStyle.SIZABLE; // FormBorderStyle.FIXED_DIALOG;
 		this.maximizeBox = false;
 		
 		// Default button
@@ -152,15 +162,9 @@ class MainForm : Form
 	}
 }
 
-static this()
-{
-	Application.enableVisualStyles();
-}
-
 void main()
 {
-	// Don't call this here!!
-	// Application.enableVisualStyles();
-
+	Application.enableVisualStyles();
+	Application.setHighDpiMode(HighDpiMode.PER_MONITOR_V2);
 	Application.run(new MainForm());
 }

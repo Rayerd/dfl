@@ -1574,7 +1574,7 @@ class TreeView: ControlSuperClass // docmain
 	}
 	
 	
-	protected override @property Size defaultSize() // getter
+	protected override @property Size defaultSize() const // getter
 	{
 		return Size(120, 100);
 	}

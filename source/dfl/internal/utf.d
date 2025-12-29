@@ -697,8 +697,7 @@ Dstring emGetSelText(HWND hwnd, size_t selTextLength)
 		}
 		else
 		{
-			SendMessageWProc proc;
-			proc = _loadSendMessageW();
+			SendMessageWProc proc = _loadSendMessageW();
 		}
 		
 		wchar[] buf = new wchar[selTextLength + 1];
@@ -729,8 +728,7 @@ Dstring getSelectedText(HWND hwnd)
 		}
 		else
 		{
-			SendMessageWProc proc;
-			proc = _loadSendMessageW();
+			SendMessageWProc proc = _loadSendMessageW();
 		}
 		
 		proc(hwnd, EM_GETSEL, cast(WPARAM)&v1, cast(LPARAM)&v2);
@@ -790,8 +788,7 @@ void emSetPasswordChar(HWND hwnd, dchar pwc)
 		}
 		else
 		{
-			SendMessageWProc proc;
-			proc = _loadSendMessageW();
+			SendMessageWProc proc = _loadSendMessageW();
 		}
 		
 		proc(hwnd, EM_SETPASSWORDCHAR, pwc, 0); // TODO: ?
@@ -819,8 +816,7 @@ dchar emGetPasswordChar(HWND hwnd)
 		}
 		else
 		{
-			SendMessageWProc proc;
-			proc = _loadSendMessageW();
+			SendMessageWProc proc = _loadSendMessageW();
 		}
 		
 		return cast(dchar)proc(hwnd, EM_GETPASSWORDCHAR, 0, 0); // TODO: ?
@@ -848,8 +844,7 @@ LRESULT sendMessage(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 		}
 		else
 		{
-			SendMessageWProc proc;
-			proc = _loadSendMessageW();
+			SendMessageWProc proc = _loadSendMessageW();
 		}
 		
 		return proc(hwnd, msg, wparam, lparam);
@@ -871,8 +866,7 @@ LRESULT sendMessage(HWND hwnd, UINT msg, WPARAM wparam, Dstring lparam, bool saf
 		}
 		else
 		{
-			SendMessageWProc proc;
-			proc = _loadSendMessageW();
+			SendMessageWProc proc = _loadSendMessageW();
 		}
 		
 		return proc(hwnd, msg, wparam, cast(LPARAM)toUnicodez(lparam));
@@ -2028,22 +2022,34 @@ Dstring regQueryValueString(HKEY hkey, Dstring valueName, LPDWORD lpType = null)
 }
 
 
-struct LogFont
+struct LogicalFont
 {
-	union
+	LOGFONT lf;
+
+	///
+	@property void faceName(const Dstring name) // setter
 	{
-		LOGFONTW lfw;
-		LOGFONTA lfa;
+		size_t len = (name.length+1) < LF_FACESIZE ? (name.length+1) : LF_FACESIZE;
+		static if (useUnicode)
+			lf.lfFaceName[0 .. len] = toUnicodez(name)[0 .. len];
+		else
+			lf.lfFaceName[0 .. len] = toAnsiz(name)[0 .. len];
 	}
-	alias lf = lfw;
-	
-	Dstring faceName;
+
+	/// ditto
+	@property Dstring faceName() const // getter
+	{
+		static if (useUnicode)
+			return fromUnicodez(cast(wchar*)lf.lfFaceName.ptr);
+		else
+			return fromAnsiz(cast(char*)lf.lfFaceName.ptr);
+	}
 }
 
 
-HFONT createFontIndirect(ref LogFont lf)
+HFONT createFontIndirect(ref LogicalFont logFont)
 {
-	if(useUnicode)
+	static if (useUnicode)
 	{
 		version(STATIC_UNICODE)
 		{
@@ -2062,39 +2068,21 @@ HFONT createFontIndirect(ref LogFont lf)
 			}
 		}
 		
-		Dwstring ws = toUnicode(lf.faceName);
-		if(ws.length >= LF_FACESIZE)
-			ws = ws[0 .. LF_FACESIZE - 1]; // TODO: ?
-		foreach(idx, wch; ws)
-		{
-			lf.lfw.lfFaceName[idx] = wch;
-		}
-		lf.lfw.lfFaceName[ws.length] = 0;
-		
-		return proc(&lf.lfw);
+		return proc(&logFont.lf);
 	}
 	else
 	{
-		Dstring as = toAnsi(lf.faceName);
-		if(as.length >= LF_FACESIZE)
-			as = as[0 .. LF_FACESIZE - 1]; // TODO: ?
-		foreach(idx, ach; as)
-		{
-			lf.lfa.lfFaceName[idx] = ach;
-		}
-		lf.lfa.lfFaceName[as.length] = 0;
-		
-		return CreateFontIndirectA(&lf.lfa);
+		return CreateFontIndirectA(&logFont.lf);
 	}
 }
 
 
 // GetObject for a LogFont.
-int getLogFont(HFONT hf, ref LogFont lf)
+int getLogFont(HFONT hFont, out LogicalFont logFont)
 {
-	static if(useUnicode)
+	static if (useUnicode)
 	{
-		version(STATIC_UNICODE)
+		version (STATIC_UNICODE)
 		{
 			alias proc = GetObjectW;
 		}
@@ -2103,25 +2091,19 @@ int getLogFont(HFONT hf, ref LogFont lf)
 			enum NAME = "GetObjectW";
 			static GetObjectWProc proc = null;
 			
-			if(!proc)
+			if (!proc)
 			{
 				proc = cast(GetObjectWProc)GetProcAddress(gdi32, NAME.ptr);
-				if(!proc)
+				if (!proc)
 					getProcErr(NAME);
 			}
 		}
 		
-		if(LOGFONTW.sizeof != proc(hf, LOGFONTW.sizeof, &lf.lfw))
-			return 0;
-		lf.faceName = fromUnicodez(lf.lfw.lfFaceName.ptr);
-		return LOGFONTW.sizeof;
+		return proc(hFont, LOGFONTW.sizeof, &logFont.lf);
 	}
 	else
 	{
-		if(LOGFONTA.sizeof != GetObjectA(hf, LOGFONTA.sizeof, &lf.lfa))
-			return 0;
-		lf.faceName = fromAnsiz(lf.lfa.lfFaceName.ptr);
-		return LOGFONTA.sizeof;
+		return GetObjectA(hFont, LOGFONTA.sizeof, &logFont.lf);
 	}
 }
 
@@ -2141,8 +2123,7 @@ Dstring shGetPathFromIDList(LPCITEMIDLIST pidl)
 			
 			if(!pathproc)
 			{
-				HMODULE hmod;
-				hmod = GetModuleHandleA("shell32.dll");
+				HMODULE hmod = GetModuleHandleA("shell32.dll");
 				
 				pathproc = cast(SHGetPathFromIDListWProc)GetProcAddress(hmod, PATH_NAME.ptr);
 				if(!pathproc)

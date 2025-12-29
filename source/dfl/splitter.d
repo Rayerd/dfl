@@ -10,7 +10,11 @@ import dfl.control;
 import dfl.drawing;
 import dfl.event;
 
-import dfl.internal.winapi;
+import dfl.internal.dpiaware;
+
+import core.sys.windows.windef;
+import core.sys.windows.wingdi;
+import core.sys.windows.winuser;
 
 
 ///
@@ -27,14 +31,14 @@ class SplitterEventArgs: EventArgs
 	
 	
 	///
-	final @property int x() // getter
+	final @property int x() const // getter
 	{
 		return _x;
 	}
 	
 	
 	///
-	final @property int y() // getter
+	final @property int y() const // getter
 	{
 		return _y;
 	}
@@ -47,7 +51,7 @@ class SplitterEventArgs: EventArgs
 	}
 	
 	/// ditto
-	final @property int splitX() // getter
+	final @property int splitX() const // getter
 	{
 		return _splitX;
 	}
@@ -60,7 +64,7 @@ class SplitterEventArgs: EventArgs
 	}
 	
 	/// ditto
-	final @property int splitY() // getter
+	final @property int splitY() const // getter
 	{
 		return _splitY;
 	}
@@ -79,9 +83,9 @@ class Splitter: Control // docmain
 {
 	this()
 	{
-		this.dock = DockStyle.LEFT;
+		dock = DockStyle.LEFT;
 		
-		if(HBRUSH.init == _hbrxor)
+		if (HBRUSH.init == _hbrxor)
 			_inithbrxor();
 	}
 	
@@ -98,7 +102,7 @@ class Splitter: Control // docmain
 	
 	override @property void dock(DockStyle ds) // setter
 	{
-		switch(ds)
+		switch (ds)
 		{
 			case DockStyle.LEFT:
 			case DockStyle.RIGHT:
@@ -120,35 +124,35 @@ class Splitter: Control // docmain
 	alias dock = Control.dock; // Overload.
 	
 	
-	package void initsplit(int sx, int sy)
+	package void initSplit(int sx, int sy)
 	{
 		capture = true;
 		_downing = true;
 		
-		switch(dock)
+		switch (dock)
 		{
 			case DockStyle.TOP:
 			case DockStyle.BOTTOM:
-				_downpos = sy;
-				_lastpos = 0;
-				_drawxorClient(0, _lastpos);
+				_downPos = sy * dpi / USER_DEFAULT_SCREEN_DPI;
+				_lastPos = 0;
+				_drawxorClient(0, _lastPos);
 				break;
 			
 			default: // LEFT / RIGHT.
-				_downpos = sx;
-				_lastpos = 0;
-				_drawxorClient(_lastpos, 0);
+				_downPos = sx * dpi / USER_DEFAULT_SCREEN_DPI;
+				_lastPos = 0;
+				_drawxorClient(_lastPos, 0);
 		}
 	}
 	
 	
 	final void resumeSplit(int sx, int sy) // package
 	{
-		if(Control.mouseButtons & MouseButtons.LEFT)
+		if (Control.mouseButtons & MouseButtons.LEFT)
 		{
-			initsplit(sx, sy);
+			initSplit(sx, sy); // Convert to dpi-scaled point in initSplit().
 			
-			if(cursor)
+			if (cursor)
 				Cursor.current = cursor;
 		}
 	}
@@ -157,26 +161,26 @@ class Splitter: Control // docmain
 	final void resumeSplit() // package
 	{
 		Point pt = pointToClient(Cursor.position);
-		return resumeSplit(pt.x, pt.y);
+		return resumeSplit(pt.x, pt.y); // Convert to dpi-scaled point in resumeSplit().
 	}
 	
 	
 	///
 	@property void movingGrip(bool byes) // setter
 	{
-		if(_mgrip == byes)
+		if (_mgrip == byes)
 			return;
 		
 		this._mgrip = byes;
 		
-		if(created)
+		if (created)
 		{
 			invalidate();
 		}
 	}
 	
 	/// ditto
-	@property bool movingGrip() // getter
+	@property bool movingGrip() const // getter
 	{
 		return _mgrip;
 	}
@@ -186,16 +190,18 @@ class Splitter: Control // docmain
 	{
 		super.onPaint(ea);
 		
-		if(_mgrip)
+		if (_mgrip)
 		{
-			ea.graphics.drawMoveGrip(displayRectangle, DockStyle.LEFT == dock || DockStyle.RIGHT == dock);
+			ea.graphics.drawMoveGrip(
+				displayRectangle * dpi / USER_DEFAULT_SCREEN_DPI,
+				DockStyle.LEFT == dock || DockStyle.RIGHT == dock);
 		}
 	}
 	
 	
 	protected override void onResize(EventArgs ea)
 	{
-		if(_mgrip)
+		if (_mgrip)
 		{
 			invalidate();
 		}
@@ -208,9 +214,9 @@ class Splitter: Control // docmain
 	{
 		super.onMouseDown(mea);
 		
-		if(mea.button == MouseButtons.LEFT && 1 == mea.clicks)
+		if (mea.button == MouseButtons.LEFT && 1 == mea.clicks)
 		{
-			initsplit(mea.x, mea.y);
+			initSplit(mea.x, mea.y); // Convert to dpi-scaled point in initSplit().
 		}
 	}
 	
@@ -219,22 +225,30 @@ class Splitter: Control // docmain
 	{
 		super.onMouseMove(mea);
 		
-		if(_downing)
+		if (_downing)
 		{
-			switch(dock)
+			// mea.x is dpi-scaled.
+			// mea.y is dpi-scaled.
+			// _downPos is dpi-scaled.
+			// _lastPos is dpi-scaled.
+			switch (dock)
 			{
 				case DockStyle.TOP:
 				case DockStyle.BOTTOM:
-					_drawxorClient(0, mea.y - _downpos, 0, _lastpos);
-					_lastpos = mea.y - _downpos;
+					_drawxorClient(0, mea.y - _downPos, 0, _lastPos);
+					_lastPos = mea.y - _downPos;
 					break;
 				
 				default: // LEFT / RIGHT.
-					_drawxorClient(mea.x - _downpos, 0, _lastpos, 0);
-					_lastpos = mea.x - _downpos;
+					_drawxorClient(mea.x - _downPos, 0, _lastPos, 0);
+					_lastPos = mea.x - _downPos;
 			}
 			
-			scope sea = new SplitterEventArgs(mea.x, mea.y, left, top);
+			scope sea = new SplitterEventArgs(
+				mea.x * USER_DEFAULT_SCREEN_DPI / dpi,
+				mea.y * USER_DEFAULT_SCREEN_DPI / dpi,
+				left,
+				top);
 			onSplitterMoving(sea);
 		}
 	}
@@ -244,10 +258,15 @@ class Splitter: Control // docmain
 	{
 		super.onMove(ea);
 		
-		if(_downing)
+		if (_downing)
 		{
-			Point curpos = pointToClient(Cursor.position);
-			scope sea = new SplitterEventArgs(curpos.x, curpos.y, left, top);
+			// curPos is dpi-scaled.
+			Point curPos = pointToClient(Cursor.position);
+			scope sea = new SplitterEventArgs(
+				curPos.x * USER_DEFAULT_SCREEN_DPI / dpi,
+				curPos.y * USER_DEFAULT_SCREEN_DPI / dpi,
+				left,
+				top);
 			onSplitterMoved(sea);
 		}
 	}
@@ -256,47 +275,47 @@ class Splitter: Control // docmain
 	final Control getSplitControl() // package
 	{
 		Control splat; // Splitted.
-		final switch(this.dock())
+		final switch (dock)
 		{
 			case DockStyle.LEFT:
-				foreach(Control ctrl; parent.controls())
+				foreach (Control ctrl; parent.controls())
 				{
-					if(DockStyle.LEFT != ctrl.dock)
+					if (DockStyle.LEFT != ctrl.dock)
 						continue;
-					if(ctrl == cast(Control)this)
+					if (ctrl == cast(Control)this)
 						return splat;
 					splat = ctrl;
 				}
 				break;
 			
 			case DockStyle.RIGHT:
-				foreach(Control ctrl; parent.controls())
+				foreach (Control ctrl; parent.controls())
 				{
-					if(DockStyle.RIGHT != ctrl.dock)
+					if (DockStyle.RIGHT != ctrl.dock)
 						continue;
-					if(ctrl == cast(Control)this)
+					if (ctrl == cast(Control)this)
 						return splat;
 					splat = ctrl;
 				}
 				break;
 			
 			case DockStyle.TOP:
-				foreach(Control ctrl; parent.controls())
+				foreach (Control ctrl; parent.controls())
 				{
-					if(DockStyle.TOP != ctrl.dock)
+					if (DockStyle.TOP != ctrl.dock)
 						continue;
-					if(ctrl == cast(Control)this)
+					if (ctrl == cast(Control)this)
 						return splat;
 					splat = ctrl;
 				}
 				break;
 			
 			case DockStyle.BOTTOM:
-				foreach(Control ctrl; parent.controls())
+				foreach (Control ctrl; parent.controls())
 				{
-					if(DockStyle.BOTTOM != ctrl.dock)
+					if (DockStyle.BOTTOM != ctrl.dock)
 						continue;
-					if(ctrl == cast(Control)this)
+					if (ctrl == cast(Control)this)
 						return splat;
 					splat = ctrl;
 				}
@@ -316,23 +335,25 @@ class Splitter: Control // docmain
 	
 	protected override void onMouseUp(MouseEventArgs mea)
 	{
-		if(_downing)
+		if (_downing)
 		{
 			capture = false;
 			_downing = false;
 			
-			if(mea.button != MouseButtons.LEFT)
+			if (mea.button != MouseButtons.LEFT)
 			{
+				// _lastPos is dpi-scaled.
+
 				// Abort.
-				switch(dock)
+				switch (dock)
 				{
 					case DockStyle.TOP:
 					case DockStyle.BOTTOM:
-						_drawxorClient(0, _lastpos);
+						_drawxorClient(0, _lastPos);
 						break;
 					
 					default: // LEFT / RIGHT.
-						_drawxorClient(_lastpos, 0);
+						_drawxorClient(_lastPos, 0);
 				}
 				super.onMouseUp(mea);
 				return;
@@ -340,50 +361,88 @@ class Splitter: Control // docmain
 			
 			int adj, val, vx;
 			auto splat = getSplitControl(); // Splitted.
-			if(splat)
+			if (splat)
 			{
-				switch(this.dock())
+				switch (dock)
 				{
 					case DockStyle.LEFT:
-						_drawxorClient(_lastpos, 0);
-						val = left - splat.left + mea.x - _downpos;
-						if(val < _msize)
-							val = _msize;
-						splat.width = val;
+						// _lastPos is dpi-scaled.
+						// left and splat.left is NOT dpi-scaled.
+						// mea.x is dpi-scaled.
+						// _downPos is dpi-scaled.
+						// val is dpi-scaled.
+						// _minSize is NOT dpi-scaled.
+						// splat.width is NOT dpi-scaled.
+						_drawxorClient(_lastPos, 0);
+						val = (left - splat.left) * dpi / USER_DEFAULT_SCREEN_DPI + mea.x - _downPos;
+						if (val < _minSize * dpi / USER_DEFAULT_SCREEN_DPI)
+							val = _minSize * dpi / USER_DEFAULT_SCREEN_DPI;
+						splat.width = val * USER_DEFAULT_SCREEN_DPI / dpi;
 						break;
 					
 					case DockStyle.RIGHT:
-						_drawxorClient(_lastpos, 0);
-						adj = right - splat.left + mea.x - _downpos;
-						val = splat.width - adj;
-						vx = splat.left + adj;
-						if(val < _msize)
+						// _lastPos is dpi-scaled.
+						// right and splat.left is NOT dpi-scaled.
+						// mea.x is dpi-scaled.
+						// _downPos is dpi-scaled.
+						// val is dpi-scaled.
+						// vx is dpi-scaled.
+						// _minSize is NOT dpi-scaled.
+						// splat.width is NOT dpi-scaled.
+						_drawxorClient(_lastPos, 0);
+						adj = (right - splat.left) * dpi / USER_DEFAULT_SCREEN_DPI + mea.x - _downPos;
+						val = splat.width * dpi / USER_DEFAULT_SCREEN_DPI - adj;
+						vx = splat.left * dpi / USER_DEFAULT_SCREEN_DPI + adj;
+						if (val < _minSize * dpi / USER_DEFAULT_SCREEN_DPI)
 						{
-							vx -= _msize - val;
-							val = _msize;
+							vx -= _minSize * dpi / USER_DEFAULT_SCREEN_DPI - val;
+							val = _minSize * dpi / USER_DEFAULT_SCREEN_DPI;
 						}
-						splat.bounds = Rect(vx, splat.top, val, splat.height);
+						splat.bounds = Rect(
+							vx * USER_DEFAULT_SCREEN_DPI / dpi,
+							splat.top,
+							val * USER_DEFAULT_SCREEN_DPI / dpi,
+							splat.height);
 						break;
 					
 					case DockStyle.TOP:
-						_drawxorClient(0, _lastpos);
-						val = top - splat.top + mea.y - _downpos;
-						if(val < _msize)
-							val = _msize;
-						splat.height = val;
+						// _lastPos is dpi-scaled.
+						// top and splat.top is NOT dpi-scaled.
+						// mea.y is dpi-scaled.
+						// _downPos is dpi-scaled.
+						// val is dpi-scaled.
+						// _minSize is NOT dpi-scaled.
+						// splat.height is NOT dpi-scaled.
+						_drawxorClient(0, _lastPos);
+						val = (top - splat.top) * dpi / USER_DEFAULT_SCREEN_DPI + mea.y - _downPos;
+						if (val < _minSize * dpi / USER_DEFAULT_SCREEN_DPI)
+							val = _minSize * dpi / USER_DEFAULT_SCREEN_DPI;
+						splat.height = val * USER_DEFAULT_SCREEN_DPI / dpi;
 						break;
 					
 					case DockStyle.BOTTOM:
-						_drawxorClient(0, _lastpos);
-						adj = bottom - splat.top + mea.y - _downpos;
-						val = splat.height - adj;
-						vx = splat.top + adj;
-						if(val < _msize)
+						// _lastPos is dpi-scaled.
+						// bottom and splat.bottom is NOT dpi-scaled.
+						// mea.y is dpi-scaled.
+						// _downPos is dpi-scaled.
+						// val is dpi-scaled.
+						// _minSize is NOT dpi-scaled.
+						// splat.bounds is NOT dpi-scaled.
+						// vx is dpi-scaled.
+						_drawxorClient(0, _lastPos);
+						adj = (bottom - splat.top) * dpi / USER_DEFAULT_SCREEN_DPI + mea.y - _downPos;
+						val = splat.height * dpi / USER_DEFAULT_SCREEN_DPI - adj;
+						vx = splat.top * dpi / USER_DEFAULT_SCREEN_DPI + adj;
+						if (val < _minSize * dpi / USER_DEFAULT_SCREEN_DPI)
 						{
-							vx -= _msize - val;
-							val = _msize;
+							vx -= _minSize * dpi / USER_DEFAULT_SCREEN_DPI - val;
+							val = _minSize * dpi / USER_DEFAULT_SCREEN_DPI;
 						}
-						splat.bounds = Rect(splat.left, vx, splat.width, val);
+						splat.bounds = Rect(
+							splat.left,
+							vx * USER_DEFAULT_SCREEN_DPI / dpi,
+							splat.width,
+							val * USER_DEFAULT_SCREEN_DPI / dpi);
 						break;
 					
 					default:
@@ -403,22 +462,22 @@ class Splitter: Control // docmain
 	
 	
 	/+
-	// Not quite sure how to implement this yet.
+	// NOTE: Not quite sure how to implement this yet.
 	// Might need to scan all controls until one of:
-	//    Control with opposite dock (right if left dock): stay -mextra- away from it,
+	//    Control with opposite dock (right if left dock): stay -_mextra- away from it,
 	//    Control with fill dock: that control can't have less than -mextra- width,
-	//    Reached end of child controls: stay -mextra- away from the edge.
+	//    Reached end of child controls: stay -_mextra- away from the edge.
 	
 	///
 	final @property void minExtra(int min) // setter
 	{
-		mextra = min;
+		_mextra = min;
 	}
 	
 	/// ditto
 	final @property int minExtra() // getter
 	{
-		return mextra;
+		return _mextra;
 	}
 	+/
 	
@@ -426,23 +485,29 @@ class Splitter: Control // docmain
 	///
 	final @property void minSize(int min) // setter
 	{
-		_msize = min;
+		// _minSize and min are NOT dpi-scaled.
+		_minSize = min;
 	}
 	
 	/// ditto
-	final @property int minSize() // getter
+	final @property int minSize() const // getter
 	{
-		return _msize;
+		// _minSize is NOT dpi-scaled.
+		return _minSize;
 	}
 	
 	
 	///
 	final @property void splitPosition(int pos) // setter
 	{
+		// pos is NOT dpi-scaled.
+		// splat.width is NOT dpi-scaled.
+		// splat.height is NOT dpi-scaled.
+
 		auto splat = getSplitControl(); // Splitted.
-		if(splat)
+		if (splat)
 		{
-			switch(this.dock())
+			switch (dock)
 			{
 				case DockStyle.LEFT:
 				case DockStyle.RIGHT:
@@ -463,10 +528,13 @@ class Splitter: Control // docmain
 	// -1 if not docked to a control.
 	final @property int splitPosition() // getter
 	{
+		// splat.width is NOT dpi-scaled.
+		// splat.height is NOT dpi-scaled.
+
 		auto splat = getSplitControl(); // Splitted.
-		if(splat)
+		if (splat)
 		{
-			switch(this.dock())
+			switch (dock)
 			{
 				case DockStyle.LEFT:
 				case DockStyle.RIGHT:
@@ -489,16 +557,19 @@ class Splitter: Control // docmain
 	
 protected:
 	
-	override @property Size defaultSize() // getter
+	override @property Size defaultSize() const // getter
 	{
-		int sx = GetSystemMetrics(SM_CXSIZEFRAME);
-		int sy = GetSystemMetrics(SM_CYSIZEFRAME);
+		// sx and sy are dpi-scaled.
+		int sx = GetSystemMetricsForDpi(SM_CXSIZEFRAME, dpi);
+		int sy = GetSystemMetricsForDpi(SM_CYSIZEFRAME, dpi);
+		
 		// Need a bit extra room for the move-grips.
-		if(sx < 5)
-			sx = 5;
-		if(sy < 5)
-			sy = 5;
-		return Size(sx, sy);
+		int bit = 5 * dpi / USER_DEFAULT_SCREEN_DPI;
+		if (sx < bit)
+			sx = bit;
+		if (sy < bit)
+			sy = bit;
+		return Size(sx, sy) * USER_DEFAULT_SCREEN_DPI / dpi;
 	}
 	
 	
@@ -520,10 +591,10 @@ private:
 	
 	bool _downing = false;
 	bool _mgrip = true;
-	int _downpos;
-	int _lastpos;
-	int _msize = 25; // Min size of control that's being sized from the splitter.
-	int _mextra = 25; // Min size of the control on the opposite side.
+	int _downPos;
+	int _lastPos;
+	int _minSize = 25; // Min size of control that's being sized from the splitter.
+	// int _mextra = 25; // NOTE: Not implemented yet. Min size of the control on the opposite side.
 	
 	static HBRUSH _hbrxor;
 	
@@ -552,8 +623,12 @@ private:
 	{
 		POINT pt = POINT(x, y);
 		MapWindowPoints(handle, parent.handle, &pt, 1);
-		
-		_drawxor(hdc, Rect(pt.x, pt.y, width, height));
+
+		uint dpi = GetDpiForWindow(WindowFromDC(hdc));
+		int w = width * dpi / USER_DEFAULT_SCREEN_DPI;
+		int h = height * dpi / USER_DEFAULT_SCREEN_DPI;
+
+		_drawxor(hdc, Rect(pt.x, pt.y, w, h));
 	}
 	
 	
@@ -561,7 +636,7 @@ private:
 	{
 		HDC hdc = GetDCEx(parent.handle, null, DCX_CACHE);
 		
-		if(xold != int.min)
+		if (xold != int.min)
 			_drawxorClient(hdc, xold, yold);
 		
 		_drawxorClient(hdc, x, y);

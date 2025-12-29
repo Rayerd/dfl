@@ -10,7 +10,7 @@ import dfl.control;
 import dfl.drawing;
 import dfl.label;
 
-import dfl.internal.winapi;
+import core.sys.windows.winuser;
 
 
 /// Panel control container
@@ -69,15 +69,15 @@ class Panel: ContainerControl // docmain
 class StackPanel : Panel
 {
 	///
-	void orientation(Orientation orientaion) @property // setter
+	@property void orientation(Orientation orientaion) // setter
 	{
 		_orientation = orientaion;
 		foreach (ctrl; controls)
 			_setOrientation(ctrl, orientaion);
 	}
 
-	///
-	Orientation orientation() const @property // getter
+	/// ditto
+	@property Orientation orientation() const // getter
 	{
 		return _orientation;
 	}

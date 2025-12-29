@@ -8,8 +8,10 @@ module dfl.messagebox;
 import dfl.base;
 
 import dfl.internal.dlib;
-import dfl.internal.winapi;
 static import dfl.internal.utf;
+
+import core.sys.windows.winuser;
+
 
 ///
 enum MsgBoxButtons

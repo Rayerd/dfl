@@ -31,7 +31,7 @@ class MainForm : Form
 		_progress.marqueeAnimationSpeed = 0; // Default; 30 ms.
 
 		_mode = new ComboBox();
-		_mode.parent =  this;
+		_mode.parent = this;
 		_mode.location = Point(20, 150);
 		_mode.dropDownStyle = ComboBoxStyle.DROP_DOWN_LIST;
 		_mode.items.add("BLOCKS");
@@ -85,12 +85,9 @@ class MainForm : Form
 	}
 }
 
-static this()
-{
-	Application.enableVisualStyles(); // Apply visual styles.
-}
-
 void main()
 {
+	Application.enableVisualStyles();
+	Application.setHighDpiMode(HighDpiMode.PER_MONITOR_V2);
 	Application.run(new MainForm());
 }

@@ -58,7 +58,6 @@ struct ComPtr(BaseType : IUnknown)
 	///
 	this(this)
 	{
-		_comObj = this._comObj;
 		_comObj.AddRef();
 	}
 

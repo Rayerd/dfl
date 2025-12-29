@@ -1,4 +1,5 @@
 import dfl;
+
 import std.traits : EnumMembers;
 
 version(Have_dfl) // For DUB.
@@ -35,6 +36,7 @@ class MainForm : Form
 		// Create ImageList
 		_imagelist = new ImageList();
 		_imagelist.imageSize = Size(24, 24); // Each bitmap size in image list (W24[dots] x H24[dots] x 3[icons]).
+		_imagelist.transparentColor = Color.white;
 		_imagelist.images.addStrip(_icons);
 
 		// Create ComboBox
@@ -126,12 +128,9 @@ class MainForm : Form
 	}
 }
 
-static this()
-{
-	Application.enableVisualStyles();
-}
-
 void main()
 {
+	Application.enableVisualStyles();
+	Application.setHighDpiMode(HighDpiMode.PER_MONITOR_V2);
 	Application.run(new MainForm());
 }

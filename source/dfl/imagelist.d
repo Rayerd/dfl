@@ -10,7 +10,11 @@ import dfl.collections;
 import dfl.drawing;
 
 import dfl.internal.dlib;
-import dfl.internal.winapi;
+
+import core.sys.windows.winbase;
+import core.sys.windows.windef;
+import core.sys.windows.commctrl;
+import core.sys.windows.wingdi;
 
 
 ///
@@ -93,7 +97,7 @@ class ImageList // docmain
 		}
 		
 		
-		package:
+	package:
 		
 		Image[] _images;
 		
@@ -108,12 +112,10 @@ class ImageList // docmain
 			
 			override void draw(Graphics g, Point pt)
 			{
-				HDC memdc;
-				memdc = CreateCompatibleDC(g.handle);
+				HDC memdc = CreateCompatibleDC(g.handle);
 				try
 				{
-					HGDIOBJ hgo;
-					hgo = SelectObject(memdc, hbm);
+					HGDIOBJ hgo = SelectObject(memdc, hbm);
 					BitBlt(g.handle, pt.x, pt.y, partBounds.width, partBounds.height, memdc, partBounds.x, partBounds.y, SRCCOPY);
 					SelectObject(memdc, hgo); // Old bitmap.
 				}
@@ -126,14 +128,11 @@ class ImageList // docmain
 			
 			override void drawStretched(Graphics g, Rect r)
 			{
-				HDC memdc;
-				memdc = CreateCompatibleDC(g.handle);
+				HDC memdc = CreateCompatibleDC(g.handle);
 				try
 				{
-					HGDIOBJ hgo;
-					int lstretch;
-					hgo = SelectObject(memdc, hbm);
-					lstretch = SetStretchBltMode(g.handle, COLORONCOLOR);
+					HGDIOBJ hgo = SelectObject(memdc, hbm);
+					int lstretch = SetStretchBltMode(g.handle, COLORONCOLOR);
 					StretchBlt(g.handle, r.x, r.y, r.width, r.height,
 						memdc, partBounds.x, partBounds.y, partBounds.width, partBounds.height, SRCCOPY);
 					SetStretchBltMode(g.handle, lstretch);
@@ -212,7 +211,7 @@ class ImageList // docmain
 		}
 		
 		
-		public:
+	public:
 		
 		mixin ListWrapArray!(Image, _images,
 			_adding, _added,
@@ -225,8 +224,8 @@ class ImageList // docmain
 	{
 		InitCommonControls();
 		
-		_cimages = new ImageCollection();
-		_transcolor = Color.transparent;
+		_imageCollections = new ImageCollection();
+		_transparentColor = Color.transparent;
 	}
 	
 	
@@ -235,13 +234,13 @@ class ImageList // docmain
 	{
 		assert(!isHandleCreated);
 		
-		this._depth = depth;
+		this._colorDepth = depth;
 	}
 	
 	/// ditto
-	final @property ColorDepth colorDepth() // getter
+	final @property ColorDepth colorDepth() const // getter
 	{
-		return _depth;
+		return _colorDepth;
 	}
 	
 	
@@ -250,13 +249,13 @@ class ImageList // docmain
 	{
 		assert(!isHandleCreated);
 		
-		_transcolor = tc;
+		_transparentColor = tc;
 	}
 	
 	/// ditto
-	final @property Color transparentColor() // getter
+	final @property Color transparentColor() const // getter
 	{
-		return _transcolor;
+		return _transparentColor;
 	}
 	
 	
@@ -267,21 +266,21 @@ class ImageList // docmain
 		
 		assert(sz.width && sz.height);
 		
-		_w = sz.width;
-		_h = sz.height;
+		_width = sz.width;
+		_height = sz.height;
 	}
 	
 	/// ditto
-	final @property Size imageSize() // getter
+	final @property Size imageSize() const // getter
 	{
-		return Size(_w, _h);
+		return Size(_width, _height);
 	}
 	
 	
 	///
-	final @property ImageCollection images() // getter
+	final @property inout(ImageCollection) images() inout // getter
 	{
-		return _cimages;
+		return _imageCollections;
 	}
 	
 	
@@ -292,7 +291,7 @@ class ImageList // docmain
 	}
 	
 	/// ditto
-	final @property Object tag() // getter
+	final @property inout(Object) tag() inout // getter
 	{
 		return this._tag;
 	}
@@ -331,7 +330,7 @@ class ImageList // docmain
 	///
 	final @property bool isHandleCreated() // getter
 	{
-		return HIMAGELIST.init != _hil;
+		return HIMAGELIST.init != _hImageList;
 	}
 	
 	
@@ -339,8 +338,8 @@ class ImageList // docmain
 	final @property HIMAGELIST handle() // getter
 	{
 		if(!isHandleCreated)
-			_createimagelist();
-		return _hil;
+			_createImageList();
+		return _hImageList;
 	}
 	
 	
@@ -354,8 +353,8 @@ class ImageList // docmain
 	void dispose(bool disposing)
 	{
 		if(isHandleCreated)
-			imageListDestroy(_hil);
-		_hil = HIMAGELIST.init;
+			imageListDestroy(_hImageList);
+		_hImageList = HIMAGELIST.init;
 		
 		if(disposing)
 		{
@@ -371,26 +370,27 @@ class ImageList // docmain
 	}
 	
 	
-	private:
+private:
 	
-	ColorDepth _depth = ColorDepth.DEPTH_8BIT;
-	Color _transcolor;
-	ImageCollection _cimages;
-	HIMAGELIST _hil;
-	int _w = 16, _h = 16;
+	ColorDepth _colorDepth = ColorDepth.DEPTH_8BIT;
+	Color _transparentColor;
+	ImageCollection _imageCollections;
+	HIMAGELIST _hImageList;
+	int _width = 16;
+	int _height = 16;
 	Object _tag;
 	
 	
-	void _createimagelist()
+	void _createImageList()
 	{
-		if(isHandleCreated)
+		if (isHandleCreated)
 		{
-			imageListDestroy(_hil);
-			_hil = HIMAGELIST.init;
+			imageListDestroy(_hImageList);
+			_hImageList = HIMAGELIST.init;
 		}
 		
 		UINT flags = ILC_MASK;
-		switch(_depth)
+		switch (_colorDepth)
 		{
 			case ColorDepth.DEPTH_4BIT:          flags |= ILC_COLOR4;  break;
 			default: case ColorDepth.DEPTH_8BIT: flags |= ILC_COLOR8;  break;
@@ -399,12 +399,12 @@ class ImageList // docmain
 			case ColorDepth.DEPTH_32BIT:         flags |= ILC_COLOR32; break;
 		}
 		
-		// Note: cGrow is not a limit, but how many images to preallocate each grow.
-		_hil = imageListCreate(_w, _h, flags, _cimages._images.length.toI32, 4 + _cimages._images.length.toI32 / 4);
-		if(!_hil)
+		// NOTE: cGrow is not a limit, but how many images to preallocate each grow.
+		_hImageList = imageListCreate(_width, _height, flags, _imageCollections._images.length.toI32, 4 + _imageCollections._images.length.toI32 / 4);
+		if (!_hImageList)
 			throw new DflException("Unable to create image list");
 		
-		foreach(img; _cimages._images)
+		foreach (img; _imageCollections._images)
 		{
 			_addimg(img);
 		}
@@ -430,7 +430,7 @@ class ImageList // docmain
 				break;
 			
 			case 2:
-				result = imageListAddIcon(_hil, cast(HICON)hgo);
+				result = imageListAddIcon(_hImageList, cast(HICON)hgo);
 				break;
 			
 			default:
@@ -447,16 +447,16 @@ class ImageList // docmain
 		assert(isHandleCreated);
 		
 		COLORREF cr;
-		if(_transcolor == Color.empty
-			|| _transcolor == Color.transparent)
+		if(_transparentColor == Color.empty
+			|| _transparentColor == Color.transparent)
 		{
-			cr = CLR_NONE; // ?
+			cr = CLR_DEFAULT;
 		}
 		else
 		{
-			cr = _transcolor.toRgb();
+			cr = _transparentColor.toRgb();
 		}
-		return imageListAddMasked(_hil, cast(HBITMAP)hbm, cr);
+		return imageListAddMasked(_hImageList, cast(HBITMAP)hbm, cr);
 	}
 }
 
@@ -465,8 +465,7 @@ private extern(Windows)
 {
 	// This was the only way I could figure out how to use the current actctx (Windows issue).
 	
-	HIMAGELIST imageListCreate(
-		int cx, int cy, UINT flags, int cInitial, int cGrow)
+	HIMAGELIST imageListCreate(int cx, int cy, UINT flags, int cInitial, int cGrow)
 	{
 		alias TProc = typeof(&ImageList_Create);
 		static TProc proc = null;
@@ -475,8 +474,7 @@ private extern(Windows)
 		return proc(cx, cy, flags, cInitial, cGrow);
 	}
 	
-	int imageListAddIcon(
-		HIMAGELIST himl, HICON hicon)
+	int imageListAddIcon(HIMAGELIST himl, HICON hicon)
 	{
 		alias TProc = typeof(&ImageList_AddIcon);
 		static TProc proc = null;
@@ -485,8 +483,7 @@ private extern(Windows)
 		return proc(himl, hicon);
 	}
 	
-	int imageListAddMasked(
-		HIMAGELIST himl, HBITMAP hbmImage, COLORREF crMask)
+	int imageListAddMasked(HIMAGELIST himl, HBITMAP hbmImage, COLORREF crMask)
 	{
 		alias TProc = typeof(&ImageList_AddMasked);
 		static TProc proc = null;
@@ -495,8 +492,7 @@ private extern(Windows)
 		return proc(himl, hbmImage, crMask);
 	}
 	
-	BOOL imageListRemove(
-		HIMAGELIST himl, int i)
+	BOOL imageListRemove(HIMAGELIST himl, int i)
 	{
 		alias TProc = typeof(&ImageList_Remove);
 		static TProc proc = null;
@@ -505,8 +501,7 @@ private extern(Windows)
 		return proc(himl, i);
 	}
 	
-	BOOL imageListDestroy(
-		HIMAGELIST himl)
+	BOOL imageListDestroy(HIMAGELIST himl)
 	{
 		alias TProc = typeof(&ImageList_Destroy);
 		static TProc proc = null;

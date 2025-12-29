@@ -54,7 +54,7 @@ class ProgressBar: ControlSuperClass // docmain
 		
 		_max = max;
 		
-		if(_val > max)
+		if(_value > max)
 			value = max;
 	}
 	
@@ -80,7 +80,7 @@ class ProgressBar: ControlSuperClass // docmain
 		
 		_min = min;
 		
-		if(_val < min)
+		if(_value < min)
 			value = min;
 	}
 	
@@ -125,13 +125,13 @@ class ProgressBar: ControlSuperClass // docmain
 			prevwproc(PBM_SETPOS, setval, 0);
 		}
 		
-		_val = setval;
+		_value = setval;
 	}
 	
 	/// ditto
 	final @property int value() // getter
 	{
-		return _val;
+		return _value;
 	}
 	
 	
@@ -142,16 +142,14 @@ class ProgressBar: ControlSuperClass // docmain
 		final switch (newStyle)
 		{
 			case ProgressBarStyle.BLOCKS:
-				SetWindowLongPtrA(handle, GWL_STYLE, currentStyle & ~PBS_SMOOTH & ~PBS_MARQUEE);
-				prevwproc(PBM_SETMARQUEE, false, 0);
-				value = _val;
+				SetWindowLongPtrA(handle, GWL_STYLE, (currentStyle & ~PBS_SMOOTH) & ~PBS_MARQUEE);
 				recreateHandle(); // Apply PBS_SMOOTH
+				prevwproc(PBM_SETMARQUEE, false, 0);
 				break;
 			case ProgressBarStyle.CONTINUOUS:
-				SetWindowLongPtrA(handle, GWL_STYLE, currentStyle | PBS_SMOOTH & ~PBS_MARQUEE);
-				prevwproc(PBM_SETMARQUEE, false, 0);
-				value = _val;
+				SetWindowLongPtrA(handle, GWL_STYLE, (currentStyle | PBS_SMOOTH) & ~PBS_MARQUEE);
 				recreateHandle(); // Apply PBS_SMOOTH
+				prevwproc(PBM_SETMARQUEE, false, 0);
 				break;
 			case ProgressBarStyle.MARQUEE:
 				SetWindowLongPtrA(handle, GWL_STYLE, currentStyle | PBS_MARQUEE);
@@ -192,7 +190,7 @@ class ProgressBar: ControlSuperClass // docmain
 	///
 	final void increment(int incby)
 	{
-		int newpos = _val + incby;
+		int newpos = _value + incby;
 		if(newpos < _min)
 			newpos = _min;
 		if(newpos > _max)
@@ -203,7 +201,7 @@ class ProgressBar: ControlSuperClass // docmain
 			prevwproc(PBM_SETPOS, newpos, 0);
 		}
 		
-		_val = newpos;
+		_value = newpos;
 	}
 	
 	
@@ -229,14 +227,14 @@ protected:
 			prevwproc(PBM_SETSTEP, _step, 0);
 		}
 		
-		if(_val != VAL_INIT)
+		if(_value != VALUE_INIT)
 		{
-			prevwproc(PBM_SETPOS, _val, 0);
+			prevwproc(PBM_SETPOS, _value, 0);
 		}
 	}
 	
 	
-	override @property Size defaultSize() // getter
+	override @property Size defaultSize() const // getter
 	{
 		return Size(100, 23);
 	}
@@ -266,12 +264,12 @@ private:
 	enum MIN_INIT = 0;
 	enum MAX_INIT = 100;
 	enum STEP_INIT = 10;
-	enum VAL_INIT = 0;
+	enum VALUE_INIT = 0;
 	
 	int _min = MIN_INIT;
 	int _max = MAX_INIT;
 	int _step = STEP_INIT;
-	int _val = VAL_INIT;
+	int _value = VALUE_INIT;
 	int _marqueeAnimationSpeed = 0; // Default; 30 ms
 	
 	

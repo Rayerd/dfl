@@ -12,6 +12,7 @@ import dfl.control;
 import dfl.drawing;
 import dfl.event;
 
+import dfl.internal.dpiaware;
 import dfl.internal.winapi;
 static import dfl.internal.utf;
 
@@ -26,18 +27,40 @@ version(NO_DRAG_DROP)
 ///
 class GroupBox: ControlSuperClass // docmain
 {
+	this()
+	{
+		_initButton();
+		
+		if (DEFAULT_TEXT_HEIGHT_INIT == _defaultTextHeight)
+		{
+			//_recalcTextHeight(defaultFont);
+			_recalcTextHeight(font);
+			_defaultTextHeight = _textHeight;
+		}
+		_textHeight = _defaultTextHeight;
+		
+		_windowStyle |= BS_GROUPBOX /+ | WS_TABSTOP +/; // Should WS_TABSTOP be set?
+		//wstyle |= BS_GROUPBOX | WS_TABSTOP;
+		//wexstyle |= WS_EX_CONTROLPARENT; // ?
+		_windowClassStyle = buttonClassStyle;
+		_controlStyle |= ControlStyles.CONTAINER_CONTROL;
+	}
+
+
+	///
 	override @property Rect displayRectangle() const // getter
 	{
 		// Should only calculate this upon setting the text ?
 		
-		int xw = GetSystemMetrics(SM_CXFRAME);
-		int yw = GetSystemMetrics(SM_CYFRAME);
+		int xw = GetSystemMetricsForDpi(SM_CXFRAME, dpi);
+		int yw = GetSystemMetricsForDpi(SM_CYFRAME, dpi);
 		//const int _textHeight = 13; // Hack.
 		return Rect(xw, yw + _textHeight, clientSize.width - xw * 2, clientSize.height - yw - _textHeight - yw);
 	}
 	
 	
-	override @property Size defaultSize() // getter
+	///
+	override @property Size defaultSize() const // getter
 	{
 		return Size(200, 100);
 	}
@@ -45,6 +68,7 @@ class GroupBox: ControlSuperClass // docmain
 	
 	version(DFL_NO_DRAG_DROP) {} else
 	{
+		///
 		override @property void allowDrop(bool dyes) // setter
 		{
 			//if(dyes)
@@ -56,26 +80,7 @@ class GroupBox: ControlSuperClass // docmain
 	}
 	
 	
-	this()
-	{
-		_initButton();
-		
-		if(DEFTEXTHEIGHT_INIT == _defTextHeight)
-		{
-			//_recalcTextHeight(defaultFont);
-			_recalcTextHeight(font);
-			_defTextHeight = _textHeight;
-		}
-		_textHeight = _defTextHeight;
-		
-		_windowStyle |= BS_GROUPBOX /+ | WS_TABSTOP +/; // Should WS_TABSTOP be set?
-		//wstyle |= BS_GROUPBOX | WS_TABSTOP;
-		//wexstyle |= WS_EX_CONTROLPARENT; // ?
-		_windowClassStyle = buttonClassStyle;
-		_controlStyle |= ControlStyles.CONTAINER_CONTROL;
-	}
-	
-	
+	///
 	protected override void onFontChanged(EventArgs ea)
 	{
 		_dispChanged();
@@ -84,6 +89,7 @@ class GroupBox: ControlSuperClass // docmain
 	}
 	
 	
+	///
 	protected override void onHandleCreated(EventArgs ea)
 	{
 		super.onHandleCreated(ea);
@@ -92,6 +98,7 @@ class GroupBox: ControlSuperClass // docmain
 	}
 	
 	
+	///
 	protected override void createParams(ref CreateParams cp)
 	{
 		super.createParams(cp);
@@ -100,9 +107,10 @@ class GroupBox: ControlSuperClass // docmain
 	}
 	
 	
+	///
 	protected override void wndProc(ref Message msg)
 	{
-		switch(msg.msg)
+		switch (msg.msg)
 		{
 			case WM_NCHITTEST:
 				Control._defWndProc(msg);
@@ -114,100 +122,37 @@ class GroupBox: ControlSuperClass // docmain
 	}
 	
 	
+	///
 	protected override void onPaintBackground(PaintEventArgs ea)
 	{
-		//Control.onPaintBackground(ea); // DMD 0.106: not accessible.
-		
-		RECT rect;
-		ea.clipRectangle.getRect(&rect);
-		FillRect(ea.graphics.handle, &rect, backgroundHbrush);
+		Control.onPaintBackground(ea);
 	}
 	
 	
+	///
 	protected override void prevWndProc(ref Message msg)
 	{
-		//msg.result = CallWindowProcA(buttonPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
 		msg.result = dfl.internal.utf.callWindowProc(buttonPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
-		
-		// Work around a Windows issue...
-		if(WM_PAINT == msg.msg)
-		{
-			auto hmuxt = GetModuleHandleA("uxtheme.dll");
-			if(hmuxt)
-			{
-				auto isAppThemed = cast(typeof(&IsAppThemed))GetProcAddress(hmuxt, "IsAppThemed");
-				if(isAppThemed && isAppThemed())
-				{
-					auto txt = text;
-					if(txt.length)
-					{
-						auto openThemeData = cast(typeof(&OpenThemeData))GetProcAddress(hmuxt, "OpenThemeData");
-						HTHEME htd;
-						if(openThemeData
-							&& HTHEME.init != (htd = openThemeData(msg.hWnd, "Button")))
-						{
-							HDC hdc = cast(HDC)msg.wParam;
-							//PAINTSTRUCT ps;
-							bool gotdc = false;
-							if(!hdc)
-							{
-								//hdc = BeginPaint(msg.hWnd, &ps);
-								gotdc = true;
-								hdc = GetDC(msg.hWnd);
-							}
-							try
-							{
-								scope g = new Graphics(hdc, false); // Not owned.
-								auto f = font;
-								scope tfmt = new TextFormat(TextFormatFlags.SINGLE_LINE);
-								
-								Color c;
-								COLORREF cr;
-								auto getThemeColor = cast(typeof(&GetThemeColor))GetProcAddress(hmuxt, "GetThemeColor");
-								auto gtcState = enabled ? (1 /*PBS_NORMAL*/) : (2 /*GBS_DISABLED*/);
-								if(getThemeColor
-									&& 0 == getThemeColor(htd, 4 /*BP_GROUPBOX*/, gtcState, 3803 /*TMT_TEXTCOLOR*/, &cr))
-									c = Color.fromRgb(cr);
-								else
-									c = enabled ? foreColor : SystemColors.grayText; // ?
-								
-								Size tsz = g.measureText(txt, f, tfmt);
-								
-								g.fillRectangle(backColor, 8, 0, 2 + tsz.width + 2, tsz.height + 2);
-								g.drawText(txt, f, c, Rect(8 + 2, 0, tsz.width, tsz.height), tfmt);
-							}
-							finally
-							{
-								//if(ps.hdc)
-								//	EndPaint(msg.hWnd, &ps);
-								if(gotdc)
-									ReleaseDC(msg.hWnd, hdc);
-								
-								auto closeThemeData = cast(typeof(&CloseThemeData))GetProcAddress(hmuxt, "CloseThemeData");
-								assert(closeThemeData !is null);
-								closeThemeData(htd);
-							}
-						}
-					}
-				}
-			}
-		}
 	}
 	
 	
-	private:
+private:
 	
-	enum int DEFTEXTHEIGHT_INIT = -1;
-	static int _defTextHeight = DEFTEXTHEIGHT_INIT;
-	int _textHeight = -1;
+	enum int DEFAULT_TEXT_HEIGHT_INIT = -1; /// 
+	static int _defaultTextHeight = DEFAULT_TEXT_HEIGHT_INIT; /// 
+	int _textHeight = -1; /// 
 	
 	
+	///
 	void _recalcTextHeight(Font f)
 	{
-		_textHeight = cast(int)f.getSize(GraphicsUnit.PIXEL);
+		HDC hdc = GetDC(_hwnd);
+		scope(exit) ReleaseDC(_hwnd, hdc);
+		_textHeight = cast(int)f.getSize(hdc, GraphicsUnit.PIXEL);
 	}
 	
 	
+	///
 	void _dispChanged()
 	{
 		int old = _textHeight;

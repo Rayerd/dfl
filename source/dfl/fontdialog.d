@@ -14,7 +14,11 @@ import dfl.commondialog;
 
 import dfl.internal.dlib;
 import dfl.internal.utf;
-import dfl.internal.winapi;
+
+import core.sys.windows.winbase;
+import core.sys.windows.winuser;
+import core.sys.windows.windef;
+import core.sys.windows.commdlg;
 
 
 private extern(Windows) nothrow
@@ -30,38 +34,38 @@ class FontDialog: CommonDialog
 	{
 		Application.ppin(cast(void*)this);
 		
-		cf.lStructSize = cf.sizeof;
-		cf.Flags = INIT_FLAGS;
-		cf.lpLogFont = cast(typeof(cf.lpLogFont))&lf;
-		cf.lCustData = cast(typeof(cf.lCustData))cast(void*)this;
-		cf.lpfnHook = &fontHookProc;
-		cf.rgbColors = 0;
+		_chooseFont.lStructSize = _chooseFont.sizeof;
+		_chooseFont.Flags = INIT_FLAGS;
+		_chooseFont.lpLogFont = &_logFont.lf;
+		_chooseFont.lCustData = cast(typeof(_chooseFont.lCustData))cast(void*)this;
+		_chooseFont.lpfnHook = &fontHookProc;
+		_chooseFont.rgbColors = 0;
 	}
 	
 	
 	override void reset()
 	{
-		_fon = null;
-		cf.Flags = INIT_FLAGS;
-		cf.rgbColors = 0;
-		cf.nSizeMin = 0;
-		cf.nSizeMax = 0;
+		_font = null;
+		_chooseFont.Flags = INIT_FLAGS;
+		_chooseFont.rgbColors = 0;
+		_chooseFont.nSizeMin = 0;
+		_chooseFont.nSizeMax = 0;
 	}
 	
 	
 	///
 	final @property void allowSimulations(bool byes) // setter
 	{
-		if(byes)
-			cf.Flags &= ~CF_NOSIMULATIONS;
+		if (byes)
+			_chooseFont.Flags &= ~CF_NOSIMULATIONS;
 		else
-			cf.Flags |= CF_NOSIMULATIONS;
+			_chooseFont.Flags |= CF_NOSIMULATIONS;
 	}
 	
 	/// ditto
 	final @property bool allowSimulations() // getter
 	{
-		if(cf.Flags & CF_NOSIMULATIONS)
+		if (_chooseFont.Flags & CF_NOSIMULATIONS)
 			return false;
 		return true;
 	}
@@ -70,16 +74,16 @@ class FontDialog: CommonDialog
 	///
 	final @property void allowVectorFonts(bool byes) // setter
 	{
-		if(byes)
-			cf.Flags &= ~CF_NOVECTORFONTS;
+		if (byes)
+			_chooseFont.Flags &= ~CF_NOVECTORFONTS;
 		else
-			cf.Flags |= CF_NOVECTORFONTS;
+			_chooseFont.Flags |= CF_NOVECTORFONTS;
 	}
 	
 	/// ditto
 	final @property bool allowVectorFonts() // getter
 	{
-		if(cf.Flags & CF_NOVECTORFONTS)
+		if (_chooseFont.Flags & CF_NOVECTORFONTS)
 			return false;
 		return true;
 	}
@@ -88,16 +92,16 @@ class FontDialog: CommonDialog
 	///
 	final @property void allowVerticalFonts(bool byes) // setter
 	{
-		if(byes)
-			cf.Flags &= ~CF_NOVERTFONTS;
+		if (byes)
+			_chooseFont.Flags &= ~CF_NOVERTFONTS;
 		else
-			cf.Flags |= CF_NOVERTFONTS;
+			_chooseFont.Flags |= CF_NOVERTFONTS;
 	}
 	
 	/// ditto
 	final @property bool allowVerticalFonts() // getter
 	{
-		if(cf.Flags & CF_NOVERTFONTS)
+		if (_chooseFont.Flags & CF_NOVERTFONTS)
 			return false;
 		return true;
 	}
@@ -106,29 +110,29 @@ class FontDialog: CommonDialog
 	///
 	final @property void color(Color c) // setter
 	{
-		cf.rgbColors = c.toRgb();
+		_chooseFont.rgbColors = c.toRgb();
 	}
 	
 	/// ditto
 	final @property Color color() // getter
 	{
-		return Color.fromRgb(cf.rgbColors);
+		return Color.fromRgb(_chooseFont.rgbColors);
 	}
 	
 	
 	///
 	final @property void fixedPitchOnly(bool byes) // setter
 	{
-		if(byes)
-			cf.Flags |= CF_FIXEDPITCHONLY;
+		if (byes)
+			_chooseFont.Flags |= CF_FIXEDPITCHONLY;
 		else
-			cf.Flags &= ~CF_FIXEDPITCHONLY;
+			_chooseFont.Flags &= ~CF_FIXEDPITCHONLY;
 	}
 	
 	/// ditto
 	final @property bool fixedPitchOnly() // getter
 	{
-		if(cf.Flags & CF_FIXEDPITCHONLY)
+		if (_chooseFont.Flags & CF_FIXEDPITCHONLY)
 			return true;
 		return false;
 	}
@@ -137,31 +141,31 @@ class FontDialog: CommonDialog
 	///
 	final @property void font(Font f) // setter
 	{
-		_fon = f;
+		_font = f;
 	}
 	
 	/// ditto
 	final @property Font font() // getter
 	{
-		if(!_fon)
-			_fon = Control.defaultFont; // ?
-		return _fon;
+		if (!_font)
+			_font = Control.defaultFont; // TODO: ?
+		return _font;
 	}
 	
 	
 	///
 	final @property void fontMustExist(bool byes) // setter
 	{
-		if(byes)
-			cf.Flags |= CF_FORCEFONTEXIST;
+		if (byes)
+			_chooseFont.Flags |= CF_FORCEFONTEXIST;
 		else
-			cf.Flags &= ~CF_FORCEFONTEXIST;
+			_chooseFont.Flags &= ~CF_FORCEFONTEXIST;
 	}
 	
 	/// ditto
 	final @property bool fontMustExist() // getter
 	{
-		if(cf.Flags & CF_FORCEFONTEXIST)
+		if (_chooseFont.Flags & CF_FORCEFONTEXIST)
 			return true;
 		return false;
 	}
@@ -170,25 +174,25 @@ class FontDialog: CommonDialog
 	///
 	final @property void maxSize(int max) // setter
 	{
-		if(max > 0)
+		if (max > 0)
 		{
-			if(max > cf.nSizeMin)
-				cf.nSizeMax = max;
-			cf.Flags |= CF_LIMITSIZE;
+			if(max > _chooseFont.nSizeMin)
+				_chooseFont.nSizeMax = max;
+			_chooseFont.Flags |= CF_LIMITSIZE;
 		}
 		else
 		{
-			cf.Flags &= ~CF_LIMITSIZE;
-			cf.nSizeMax = 0;
-			cf.nSizeMin = 0;
+			_chooseFont.Flags &= ~CF_LIMITSIZE;
+			_chooseFont.nSizeMax = 0;
+			_chooseFont.nSizeMin = 0;
 		}
 	}
 	
 	/// ditto
 	final @property int maxSize() // getter
 	{
-		if(cf.Flags & CF_LIMITSIZE)
-			return cf.nSizeMax;
+		if (_chooseFont.Flags & CF_LIMITSIZE)
+			return _chooseFont.nSizeMax;
 		return 0;
 	}
 	
@@ -196,17 +200,17 @@ class FontDialog: CommonDialog
 	///
 	final @property void minSize(int min) // setter
 	{
-		if(min > cf.nSizeMax)
-			cf.nSizeMax = min;
-		cf.nSizeMin = min;
-		cf.Flags |= CF_LIMITSIZE;
+		if (min > _chooseFont.nSizeMax)
+			_chooseFont.nSizeMax = min;
+		_chooseFont.nSizeMin = min;
+		_chooseFont.Flags |= CF_LIMITSIZE;
 	}
 	
 	/// ditto
 	final @property int minSize() // getter
 	{
-		if(cf.Flags & CF_LIMITSIZE)
-			return cf.nSizeMin;
+		if (_chooseFont.Flags & CF_LIMITSIZE)
+			return _chooseFont.nSizeMin;
 		return 0;
 	}
 	
@@ -214,16 +218,16 @@ class FontDialog: CommonDialog
 	///
 	final @property void scriptsOnly(bool byes) // setter
 	{
-		if(byes)
-			cf.Flags |= CF_SCRIPTSONLY;
+		if (byes)
+			_chooseFont.Flags |= CF_SCRIPTSONLY;
 		else
-			cf.Flags &= ~CF_SCRIPTSONLY;
+			_chooseFont.Flags &= ~CF_SCRIPTSONLY;
 	}
 	
 	/// ditto
 	final @property bool scriptsOnly() // getter
 	{
-		if(cf.Flags & CF_SCRIPTSONLY)
+		if (_chooseFont.Flags & CF_SCRIPTSONLY)
 			return true;
 		return false;
 	}
@@ -232,16 +236,16 @@ class FontDialog: CommonDialog
 	///
 	final @property void showApply(bool byes) // setter
 	{
-		if(byes)
-			cf.Flags |= CF_APPLY;
+		if (byes)
+			_chooseFont.Flags |= CF_APPLY;
 		else
-			cf.Flags &= ~CF_APPLY;
+			_chooseFont.Flags &= ~CF_APPLY;
 	}
 	
 	/// ditto
 	final @property bool showApply() // getter
 	{
-		if(cf.Flags & CF_APPLY)
+		if (_chooseFont.Flags & CF_APPLY)
 			return true;
 		return false;
 	}
@@ -250,16 +254,16 @@ class FontDialog: CommonDialog
 	///
 	final @property void showHelp(bool byes) // setter
 	{
-		if(byes)
-			cf.Flags |= CF_SHOWHELP;
+		if (byes)
+			_chooseFont.Flags |= CF_SHOWHELP;
 		else
-			cf.Flags &= ~CF_SHOWHELP;
+			_chooseFont.Flags &= ~CF_SHOWHELP;
 	}
 	
 	/// ditto
 	final @property bool showHelp() // getter
 	{
-		if(cf.Flags & CF_SHOWHELP)
+		if (_chooseFont.Flags & CF_SHOWHELP)
 			return true;
 		return false;
 	}
@@ -268,16 +272,16 @@ class FontDialog: CommonDialog
 	///
 	final @property void showEffects(bool byes) // setter
 	{
-		if(byes)
-			cf.Flags |= CF_EFFECTS;
+		if (byes)
+			_chooseFont.Flags |= CF_EFFECTS;
 		else
-			cf.Flags &= ~CF_EFFECTS;
+			_chooseFont.Flags &= ~CF_EFFECTS;
 	}
 	
 	/// ditto
 	final @property bool showEffects() // getter
 	{
-		if(cf.Flags & CF_EFFECTS)
+		if (_chooseFont.Flags & CF_EFFECTS)
 			return true;
 		return false;
 	}
@@ -303,12 +307,12 @@ class FontDialog: CommonDialog
 	
 	protected override UINT_PTR hookProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
-		switch(msg)
+		switch (msg)
 		{
 			case WM_COMMAND:
-				switch(LOWORD(wparam))
+				switch (LOWORD(wparam))
 				{
-					case CF_APPLY: // ?
+					case CF_APPLY: // TODO: ?
 						_update();
 						onApply(EventArgs.empty);
 						break;
@@ -326,11 +330,11 @@ class FontDialog: CommonDialog
 	
 	protected override bool runDialog(HWND owner)
 	{
-		if(!_runDialog(owner))
+		if (!_runDialog(owner))
 		{
-			if(!CommDlgExtendedError())
+			if (!CommDlgExtendedError())
 				return false;
-			_cantrun();
+			_cantRun();
 		}
 		return true;
 	}
@@ -340,32 +344,32 @@ class FontDialog: CommonDialog
 	{
 		BOOL result = FALSE;
 		
-		cf.hwndOwner = owner;
+		_chooseFont.hwndOwner = owner;
 		
-		static if(dfl.internal.utf.useUnicode)
+		static if (useUnicode)
 		{
-			font._info(&lf); // -font- gets default font if not set.
+			font._getLogFont(_logFont); // -font- gets default font if not set.
 			
 			enum NAME = "ChooseFontW";
 			static ChooseFontWProc proc = null;
 			
-			if(!proc)
+			if (!proc)
 			{
 				proc = cast(ChooseFontWProc)GetProcAddress(GetModuleHandleA("comdlg32.dll"), NAME.ptr);
-				if(!proc)
+				if (!proc)
 					throw new Exception("Unable to load procedure " ~ NAME ~ ".");
 			}
 			
-			result = proc(&cf);
+			result = proc(&_chooseFont);
 		}
 		else
 		{
-			font._info(&lf); // -font- gets default font if not set.
+			font._getLogFont(_logFont); // -font- gets default font if not set.
 			
-			result = ChooseFontA(&cf);
+			result = ChooseFontA(&_chooseFont);
 		}
 		
-		if(result)
+		if (result)
 		{
 			_update();
 			return result;
@@ -376,14 +380,7 @@ class FontDialog: CommonDialog
 	
 	private void _update()
 	{
-		LogFont lfont;
-		
-		static if(dfl.internal.utf.useUnicode)
-			Font.LOGFONTWtoLogFont(lfont, &lf);
-		else
-			Font.LOGFONTAtoLogFont(lfont, &lf);
-		
-		_fon = new Font(Font._create(lfont), true);
+		_font = new Font(Font.createHFont(_logFont), true);
 	}
 	
 	
@@ -394,35 +391,11 @@ class FontDialog: CommonDialog
 	}
 	
 	
-	private:
+private:
 	
-	static if (dfl.internal.utf.useUnicode)
-	{
-		CHOOSEFONTW cfw;
-		alias cf = cfw;
-	}
-	else
-	{
-		CHOOSEFONTA cfa;
-		alias cf = cfa;
-	}
-	static assert(CHOOSEFONTW.sizeof == CHOOSEFONTA.sizeof);
-	static assert(CHOOSEFONTW.Flags.offsetof == CHOOSEFONTA.Flags.offsetof);
-	static assert(CHOOSEFONTW.nSizeMax.offsetof == CHOOSEFONTA.nSizeMax.offsetof);
-	
-	static if (dfl.internal.utf.useUnicode)
-	{
-		LOGFONTW lfw;
-		alias lf = lfw;
-	}
-	else
-	{
-		LOGFONTA lfa;
-		alias lf = lfa;
-	}
-	static assert(LOGFONTW.lfFaceName.offsetof == LOGFONTA.lfFaceName.offsetof);
-	
-	Font _fon;
+	CHOOSEFONT _chooseFont;
+	LogicalFont _logFont;
+	Font _font;
 	
 	
 	enum UINT INIT_FLAGS = CF_EFFECTS | CF_ENABLEHOOK | CF_INITTOLOGFONTSTRUCT | CF_SCREENFONTS;
@@ -440,45 +413,38 @@ private extern(Windows) UINT_PTR fontHookProc(HWND hwnd, UINT msg, WPARAM wparam
 	
 	try
 	{
-		if(msg == WM_INITDIALOG)
+		if (msg == WM_INITDIALOG)
 		{
-			static if (dfl.internal.utf.useUnicode)
+			static if (useUnicode)
 			{
-				CHOOSEFONTW* cf;
-				cf = cast(CHOOSEFONTW*)lparam;
+				CHOOSEFONTW* cf = cast(CHOOSEFONTW*)lparam;
 				SetPropW(hwnd, toUnicodez(PROP_STR), cast(HANDLE)cf.lCustData);
 				fd = cast(FontDialog)cast(void*)cf.lCustData;
 			}
 			else
 			{
-				CHOOSEFONTA* cf;
-				cf = cast(CHOOSEFONTA*)lparam;
+				CHOOSEFONTA* cf = cast(CHOOSEFONTA*)lparam;
 				SetPropA(hwnd, toAnsiz(PROP_STR), cast(HANDLE)cf.lCustData);
 				fd = cast(FontDialog)cast(void*)cf.lCustData;
 			}
 		}
 		else
 		{
-			static if (dfl.internal.utf.useUnicode)
-			{
+			static if (useUnicode)
 				fd = cast(FontDialog)cast(void*)GetPropW(hwnd, toUnicodez(PROP_STR));
-			}
 			else
-			{
 				fd = cast(FontDialog)cast(void*)GetPropA(hwnd, toAnsiz(PROP_STR));
-			}
 		}
 		
-		if(fd)
+		if (fd)
 		{
 			result = fd.hookProc(hwnd, msg, wparam, lparam);
 		}
 	}
-	catch(DThrowable e)
+	catch (DThrowable e)
 	{
 		Application.onThreadException(e);
 	}
 	
 	return result;
 }
-

@@ -12,6 +12,11 @@
 			"problemMatcher": [
 				"$dmd"
 			],
+			"presentation": {
+				"focus": false,
+				"showReuseMessage": true,
+				"clear": false
+			},
 			"group": {
 				"kind": "build",
 				"isDefault": true

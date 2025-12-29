@@ -229,10 +229,7 @@ void main(string[] args)
 			manager.unregisterActivator();
 
 		Application.enableVisualStyles();
-
-		import dfl.internal.dpiaware;
-		SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
-
+		Application.setHighDpiMode(HighDpiMode.PER_MONITOR_V2);
 		Application.run(new MainForm()); // Show your main form.
 		break;
 
@@ -246,13 +243,15 @@ void main(string[] args)
 
 		msgBox("<Embedding>\n" ~ args.join("\n")); // Calling msgBox() establishes a message loop.
 
+		Application.enableVisualStyles();
+		Application.setHighDpiMode(HighDpiMode.PER_MONITOR_V2);
 		Application.run(new Form()); // Show simple form experimentally. Of course, a message loop is configured.
 
 		// NOTE: Call this methos if you want to uninstall this app.
-		static if (0)
+		static if (1)
 		{
 			manager.unregisterAumidAndComServer();
 			manager.uninstallShellLink();
 		}
 	}
-}	
+}

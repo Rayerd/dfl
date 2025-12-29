@@ -8,12 +8,17 @@ module dfl.drawing;
 import dfl.base;
 
 import dfl.internal.dlib;
-import dfl.internal.winapi;
+import dfl.internal.dpiaware;
 import dfl.internal.wincom;
 import dfl.internal.utf;
 import dfl.internal.com;
 
-import std.stdio;
+import core.sys.windows.winuser;
+import core.sys.windows.wingdi;
+import core.sys.windows.winbase;
+import core.sys.windows.windef;
+
+import std.stdio : File;
 
 version(D_Version2)
 {
@@ -139,7 +144,45 @@ struct Point // docmain
 		return result;
 	}
 
+
+	///
+	Point opBinary(string op : "*")(int v) const pure nothrow
+	{
+		Point result;
+		result.x = x * v;
+		result.y = y * v;
+		return result;
+	}
+
+	/// ditto
+	Point opBinary(string op : "*")(double v) const pure nothrow
+	{
+		Point result;
+		result.x = cast(int)(x * v);
+		result.y = cast(int)(y * v);
+		return result;
+	}
 	
+
+	///
+	Point opBinary(string op : "/")(int v) const pure nothrow
+	{
+		Point result;
+		result.x = x / v;
+		result.y = y / v;
+		return result;
+	}
+
+	/// ditto
+	Point opBinary(string op : "/")(double v) const pure nothrow
+	{
+		Point result;
+		result.x = cast(int)(x / v);
+		result.y = cast(int)(y / v);
+		return result;
+	}
+	
+
 	///
 	void opOpAssign(string op : "+")(Size sz) pure nothrow
 	{
@@ -168,7 +211,37 @@ struct Point // docmain
 		x -= p.x;
 		y -= p.y;
 	}
-	
+
+
+	///
+	void opOpAssign(string op : "*")(int v) pure nothrow
+	{
+		x *= v;
+		y *= v;
+	}
+
+	/// ditto
+	void opOpAssign(string op : "*")(double v) pure nothrow
+	{
+		x = cast(int)(cast(double)x * v);
+		y = cast(int)(cast(double)y * v);
+	}
+
+
+	///
+	void opOpAssign(string op : "/")(int v) pure nothrow
+	{
+		x /= v;
+		y /= v;
+	}
+
+	/// ditto
+	void opOpAssign(string op : "/")(double v) pure nothrow
+	{
+		x = cast(int)(cast(double)x / v);
+		y = cast(int)(cast(double)y / v);
+	}
+
 
 	///
 	Point opUnary(string op : "-")() const pure nothrow
@@ -194,6 +267,14 @@ struct Point // docmain
 		assert(Point(4, 5) == p);
 		p -= Size(1, 1);
 		assert(Point(3, 4) == p);
+		p = p * 2;
+		assert(Point(6, 8) == p);
+		p *= 0.5;
+		assert(Point(3, 4) == p);
+		p = Point(4, 8) / 2;
+		assert(Point(2, 4) == p);
+		p /= 2;
+		assert(Point(1, 2) == p);
 	}
 }
 
@@ -288,6 +369,44 @@ struct Size // docmain
 	
 	
 	///
+	Size opBinary(string op : "*")(int v) const pure nothrow
+	{
+		Size result;
+		result.width = width * v;
+		result.height = height * v;
+		return result;
+	}
+
+	/// ditto
+	Size opBinary(string op : "*")(double v) const pure nothrow
+	{
+		Size result;
+		result.width = cast(int)(cast(double)width * v);
+		result.height = cast(int)(cast(double)height * v);
+		return result;
+	}
+	
+	
+	///
+	Size opBinary(string op : "/")(int v) const pure nothrow
+	{
+		Size result;
+		result.width = width / v;
+		result.height = height / v;
+		return result;
+	}
+
+	/// ditto
+	Size opBinary(string op : "/")(double v) const pure nothrow
+	{
+		Size result;
+		result.width = cast(int)(cast(double)width / v);
+		result.height = cast(int)(cast(double)height / v);
+		return result;
+	}
+
+
+	///
 	void opOpAssign(string op : "+")(Size sz) pure nothrow
 	{
 		width += sz.width;
@@ -303,6 +422,36 @@ struct Size // docmain
 	}
 
 
+	///
+	void opOpAssign(string op : "*")(int v) pure nothrow
+	{
+		width *= v;
+		height *= v;
+	}
+
+	/// ditto
+	void opOpAssign(string op : "*")(double v) pure nothrow
+	{
+		width = cast(int)(cast(double)width * v);
+		height = cast(int)(cast(double)height * v);
+	}
+
+
+	///
+	void opOpAssign(string op : "/")(int v) pure nothrow
+	{
+		width /= v;
+		height /= v;
+	}
+
+	/// ditto
+	void opOpAssign(string op : "/")(double v) pure nothrow
+	{
+		width = cast(int)(cast(double)width / v);
+		height = cast(int)(cast(double)height / v);
+	}
+
+
 	unittest
 	{
 		Size s = Size(3, 4);
@@ -313,6 +462,14 @@ struct Size // docmain
 		assert(Size(4, 5) == s);
 		s -= Size(1, 1);
 		assert(Size(3, 4) == s);
+		s = s * 2;
+		assert(Size(6, 8) == s);
+		s *= 0.5;
+		assert(Size(3, 4) == s);
+		s = Size(4, 8) / 2;
+		assert(Size(2, 4) == s);
+		s /= 2;
+		assert(Size(1, 2) == s);
 	}
 }
 
@@ -561,6 +718,34 @@ struct Rect // docmain
 	
 	// void offset(Point), void offset(int, int)
 	// static Rect union(Rect, Rect)
+
+
+	///
+	Rect opBinary(string op : "*", Number)(Number n) pure nothrow const
+	{
+		return Rect(
+			cast(int)(cast(typeof(n))x * n),
+			cast(int)(cast(typeof(n))y * n),
+			cast(int)(cast(typeof(n))width * n),
+			cast(int)(cast(typeof(n))height * n));
+	}
+
+	/// ditto
+	Rect opBinary(string op : "/", Number)(Number n) pure nothrow const
+	{
+		return Rect(
+			cast(int)(cast(typeof(n))x / n),
+			cast(int)(cast(typeof(n))y / n),
+			cast(int)(cast(typeof(n))width / n),
+			cast(int)(cast(typeof(n))height / n));
+	}
+
+
+	///
+	Rect opUnary(string op : "-")() pure nothrow const
+	{
+		return Rect(-x, -y, -width, -height);
+	}
 }
 
 
@@ -593,6 +778,10 @@ unittest
 	assert(r.intersectsWith(Rect(5, 6, 1, 1)));
 	assert(!r.intersectsWith(Rect(7, 6, 1, 1)));
 	assert(!r.intersectsWith(Rect(6, 7, 1, 1)));
+
+	assert(Rect(1,2,3,4) * 2 == Rect(2,4,6,8));
+	assert(Rect(2,4,6,8) / 2 == Rect(1,2,3,4));
+	assert(-Rect(1,2,3,4) == Rect(-1,-2,-3,-4));
 }
 
 
@@ -1156,25 +1345,25 @@ static:
 	/// ditto
 	@property Icon error() // getter
 	{
-		return new Icon(LoadIconA(null, IDI_HAND), false);
+		return new Icon(LoadIcon(null, IDI_HAND), false);
 	}
 	
 	/// ditto
 	@property Icon question() // getter
 	{
-		return new Icon(LoadIconA(null, IDI_QUESTION), false);
+		return new Icon(LoadIcon(null, IDI_QUESTION), false);
 	}
 	
 	/// ditto
 	@property Icon warning() // getter
 	{
-		return new Icon(LoadIconA(null, IDI_EXCLAMATION), false);
+		return new Icon(LoadIcon(null, IDI_EXCLAMATION), false);
 	}
 	
 	/// ditto
 	@property Icon information() // getter
 	{
-		return new Icon(LoadIconA(null, IDI_INFORMATION), false);
+		return new Icon(LoadIcon(null, IDI_INFORMATION), false);
 	}
 }
 
@@ -1218,12 +1407,12 @@ HBITMAP copyHBitmap(HBITMAP hSrcBitmap)
 	BITMAP tBitmap;
 	GetObject(hSrcBitmap, tBitmap.sizeof, &tBitmap);
 	HDC hDC = GetDC(null);
-	HBITMAP hDstBitmap = dfl.internal.winapi.CreateCompatibleBitmap(hDC, tBitmap.bmWidth, tBitmap.bmHeight);
+	HBITMAP hDstBitmap = CreateCompatibleBitmap(hDC, tBitmap.bmWidth, tBitmap.bmHeight);
 	HDC hSrcDC = CreateCompatibleDC(hDC);
 	HDC hDstDC = CreateCompatibleDC(hDC);
 	HGDIOBJ hPrevSrcBitmap = SelectObject(hSrcDC, hSrcBitmap);
 	HGDIOBJ hPrevDstBitmap = SelectObject(hDstDC, hDstBitmap);
-	dfl.internal.winapi.BitBlt(hDstDC, 0, 0, tBitmap.bmWidth, tBitmap.bmHeight, hSrcDC, 0, 0, SRCCOPY);
+	BitBlt(hDstDC, 0, 0, tBitmap.bmWidth, tBitmap.bmHeight, hSrcDC, 0, 0, SRCCOPY);
 	SelectObject(hSrcDC, hPrevSrcBitmap);
 	SelectObject(hDstDC, hPrevDstBitmap);
 	DeleteDC(hSrcDC);
@@ -1305,7 +1494,7 @@ class Bitmap: Image // docmain
 	// Load from a bmp file.
 	this(Dstring fileName)
 	{
-		this._hbm = cast(HBITMAP)dfl.internal.utf.loadImage(null, fileName, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+		this._hbm = cast(HBITMAP)loadImage(null, fileName, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		if(!this._hbm)
 			throw new DflException("Unable to load bitmap from file '" ~ fileName ~ "'");
 	}
@@ -1515,27 +1704,27 @@ final class EnhancedMetaFile: Image
 	}
 	
 	///
-	override int width() const pure nothrow @property // getter
+	override int width() const nothrow @property // getter
 	{
 		with (_emfh)
 			return MulDiv(rclFrame.right - rclFrame.left, szlDevice.cx * 10, szlMicrometers.cx);
 	}
 	
 	///
-	override int height() const pure nothrow @property // getter
+	override int height() const nothrow @property // getter
 	{
 		with (_emfh)
 			return MulDiv(rclFrame.bottom - rclFrame.top, szlDevice.cy * 10, szlMicrometers.cy);
 	}
 	
 	///
-	override Size size() const pure nothrow @property // getter
+	override Size size() const nothrow @property // getter
 	{
 		return Size(width, height);
 	}
 	
 	///
-	Rect frameRectangle() const pure nothrow @property
+	Rect frameRectangle() const nothrow @property
 	{
 		with (_emfh)
 		{
@@ -1892,18 +2081,16 @@ private:
 	///
 	static dfl.internal.wincom.IPicture _fromFileName(Dstring fileName)
 	{
-		alias HANDLE = dfl.internal.winapi.HANDLE; // Otherwise, odd conflict with wine.
-		
-		HANDLE hf = dfl.internal.utf.createFile(fileName, GENERIC_READ, FILE_SHARE_READ, null,
+		HANDLE hFile = createFile(fileName, GENERIC_READ, FILE_SHARE_READ, null,
 			OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, null);
-		if(!hf)
+		if(!hFile)
 			return null;
 		
-		DWORD dwsz = GetFileSize(hf, null);
+		DWORD dwsz = GetFileSize(hFile, null);
 		if(0xFFFFFFFF == dwsz)
 		{
-			failclose:
-			CloseHandle(hf);
+		failclose:
+			CloseHandle(hFile);
 			return null;
 		}
 		
@@ -1914,21 +2101,21 @@ private:
 		void* pg = GlobalLock(hg);
 		if(!pg)
 		{
-			CloseHandle(hf);
+			CloseHandle(hFile);
 			CloseHandle(hg);
 			return null;
 		}
 		
 		DWORD dw;
-		if(!ReadFile(hf, pg, dwsz, &dw, null) || dwsz != dw)
+		if(!ReadFile(hFile, pg, dwsz, &dw, null) || dwsz != dw)
 		{
-			CloseHandle(hf);
+			CloseHandle(hFile);
 			GlobalUnlock(hg);
 			CloseHandle(hg);
 			return null;
 		}
 		
-		CloseHandle(hf);
+		CloseHandle(hFile);
 		GlobalUnlock(hg);
 		
 		IStream istm;
@@ -2036,7 +2223,7 @@ class TextFormat
 	}
 	
 	/// ditto
-	final @property TextAlignment alignment() // getter
+	final @property TextAlignment alignment() const // getter
 	{
 		return _align;
 	}
@@ -2049,20 +2236,20 @@ class TextFormat
 	}
 	
 	/// ditto
-	final @property TextFormatFlags formatFlags() // getter
+	final @property TextFormatFlags formatFlags() const // getter
 	{
 		return _flags;
 	}
 	
 	
 	///
-	final @property void trimming(TextTrimming tt) // getter
+	final @property void trimming(TextTrimming tt) // setter
 	{
 		_trim = tt;
 	}
 	
 	/// ditto
-	final @property TextTrimming trimming() // getter
+	final @property TextTrimming trimming() const // getter
 	{
 		return _trim;
 	}
@@ -2077,7 +2264,7 @@ class TextFormat
 	}
 	
 	/// ditto
-	final @property int tabLength() // getter
+	final @property int tabLength() const // getter
 	{
 		return _params.iTabLength;
 	}
@@ -2360,6 +2547,11 @@ class Screen
 		}
 		
 	}
+
+	HMONITOR handle() @property const // getter
+	{
+		return hmonitor;
+	}
 	
 	
 private:
@@ -2615,6 +2807,11 @@ class Graphics // docmain
 {
 	// Used internally.
 	this(HDC hdc, bool owned = true, GraphicsUnit graphicsUnit = GraphicsUnit.DISPLAY)
+	in
+	{
+		assert(hdc);
+	}
+	body
 	{
 		this._hdc = hdc;
 		this._owned = owned;
@@ -2764,7 +2961,7 @@ class Graphics // docmain
 		
 		RECT rect;
 		r.getRect(&rect);
-		dfl.internal.utf.drawTextEx(_hdc, text, &rect, DT_EXPANDTABS | DT_TABSTOP |
+		drawTextEx(_hdc, text, &rect, DT_EXPANDTABS | DT_TABSTOP |
 			fmt._trim | fmt._flags | fmt._align, &fmt._params);
 		
 		// Reset stuff.
@@ -2809,7 +3006,7 @@ class Graphics // docmain
 		
 		prevFont = cast(HFONT)SelectObject(hdc, font ? font.handle : null);
 		
-		dfl.internal.utf.getTextExtentPoint32(hdc, text, &sz);
+		getTextExtentPoint32(hdc, text, &sz);
 		
 		//if(prevFont)
 			SelectObject(hdc, prevFont);
@@ -2833,7 +3030,7 @@ class Graphics // docmain
 		
 		HFONT prevFont = cast(HFONT)SelectObject(_hdc, font ? font.handle : null);
 		
-		if(!dfl.internal.utf.drawTextEx(_hdc, text, &rect, DT_EXPANDTABS | DT_TABSTOP |
+		if(!drawTextEx(_hdc, text, &rect, DT_EXPANDTABS | DT_TABSTOP |
 			fmt._trim | fmt._flags | fmt._align | DT_CALCRECT | DT_NOCLIP, &fmt._params))
 		{
 			//throw new DflException("Text measure error");
@@ -2869,7 +3066,7 @@ class Graphics // docmain
 	
 	
 	/+
-	// Doesn't work... dfl.internal.utf.drawTextEx uses a different buffer!
+	// Doesn't work... drawTextEx uses a different buffer!
 	// ///
 	final Dstring getTrimmedText(Dstring text, Font font, Rect r, TextFormat fmt) // deprecated
 	{
@@ -2887,7 +3084,7 @@ class Graphics // docmain
 					prevFont = cast(HFONT)SelectObject(hdc, font ? font.handle : null);
 					
 					// DT_CALCRECT needs to prevent it from actually drawing.
-					if(!dfl.internal.utf.drawTextEx(hdc, newtext, &rect, DT_EXPANDTABS | DT_TABSTOP |
+					if(!drawTextEx(hdc, newtext, &rect, DT_EXPANDTABS | DT_TABSTOP |
 						fmt._trim | fmt._flags | fmt._align | DT_CALCRECT | DT_MODIFYSTRING | DT_NOCLIP, &fmt._params))
 					{
 						//throw new DflException("Text trimming error");
@@ -3201,7 +3398,7 @@ class Graphics // docmain
 		HPEN prevPen = SelectObject(_hdc, pen.handle);
 		HBRUSH prevBrush = SelectObject(_hdc, cast(HBRUSH)GetStockObject(NULL_BRUSH)); // Don't fill it in.
 		
-		dfl.internal.winapi.Rectangle(_hdc, x, y, x + width, y + height);
+		Rectangle(_hdc, x, y, x + width, y + height);
 		
 		// Reset stuff.
 		SelectObject(_hdc, prevPen);
@@ -3231,7 +3428,7 @@ class Graphics // docmain
 		
 		foreach(ref Rect r; rs)
 		{
-			dfl.internal.winapi.Rectangle(_hdc, r.x, r.y, r.x + r.width, r.y + r.height);
+			Rectangle(_hdc, r.x, r.y, r.x + r.width, r.y + r.height);
 		}
 		
 		// Reset stuff.
@@ -3285,7 +3482,7 @@ class Graphics // docmain
 	///
 	final bool copyTo(HDC dest, int destX, int destY, int width, int height, int srcX = 0, int srcY = 0, DWORD rop = SRCCOPY) // package
 	{
-		return cast(bool)dfl.internal.winapi.BitBlt(dest, destX, destY, width, height, this.handle, srcX, srcY, rop);
+		return cast(bool)BitBlt(dest, destX, destY, width, height, this.handle, srcX, srcY, rop);
 	}
 	
 	
@@ -3310,7 +3507,11 @@ class Graphics // docmain
 	}
 	do
 	{
-		return GetDeviceCaps(_hdc, LOGPIXELSX); // NOTE: Allways return 96 in video display (View document of SetProcessDPIAware()).
+		HWND hWnd = WindowFromDC(_hdc);
+		if (IsWindow(hWnd))
+			return GetDpiForWindow(hWnd);
+		else
+			return GetDeviceCaps(_hdc, LOGPIXELSX); // NOTE: Allways return 96 in video display (View document of SetProcessDPIAware()).
 	}
 
 	/// ditto
@@ -3321,7 +3522,11 @@ class Graphics // docmain
 	}
 	do
 	{
-		return GetDeviceCaps(_hdc, LOGPIXELSY); // NOTE: Allways return 96 in video display (View document of SetProcessDPIAware()).
+		HWND hWnd = WindowFromDC(_hdc);
+		if (IsWindow(hWnd))
+			return GetDpiForWindow(hWnd);
+		else
+			return GetDeviceCaps(_hdc, LOGPIXELSY); // NOTE: Allways return 96 in video display (View document of SetProcessDPIAware()).
 	}
 	
 
@@ -3417,14 +3622,14 @@ class Graphics // docmain
 	}
 
 	/// ditto
-	GraphicsUnit pageUnit() // getter
+	GraphicsUnit pageUnit() const nothrow // getter
 	{
 		return _pageUnit;
 	}
 
 
 	///
-	final @property HDC handle() // getter
+	final @property inout(HDC) handle() inout // getter
 	{
 		return _hdc;
 	}
@@ -3453,7 +3658,7 @@ class MemoryGraphics: Graphics // docmain
 	// Graphics compatible with the current screen.
 	this(int width, int height)
 	{
-		HDC _hdc = GetWindowDC(null);
+		_hdc = GetWindowDC(null);
 		scope(exit)
 			ReleaseDC(null, _hdc);
 		this(width, height, _hdc);
@@ -3475,8 +3680,8 @@ class MemoryGraphics: Graphics // docmain
 	// Used internally.
 	this(int width, int height, HDC hdcCompatible) // package
 	{
-		_w = width;
-		_h = height;
+		_width = width;
+		_height = height;
 		
 		_hbm = CreateCompatibleBitmap(hdcCompatible, width, height);
 		if(!_hbm)
@@ -3502,23 +3707,23 @@ class MemoryGraphics: Graphics // docmain
 	
 	
 	///
-	final @property int width() // getter
+	final @property int width() const // getter
 	{
-		return _w;
+		return _width;
 	}
 	
 	
 	///
-	final @property int height() // getter
+	final @property int height() const // getter
 	{
-		return _h;
+		return _height;
 	}
 	
 	
 	///
-	final Size size() // getter
+	final Size size() const // getter
 	{
-		return Size(_w, _h);
+		return Size(_width, _height);
 	}
 	
 	
@@ -3598,7 +3803,7 @@ class MemoryGraphics: Graphics // docmain
 private:
 	HGDIOBJ _hbmOld;
 	HBITMAP _hbm;
-	int _w, _h;
+	int _width, _height;
 }
 
 ///
@@ -3749,7 +3954,7 @@ class Icon: Image // docmain
 	// Load from an ico file.
 	this(Dstring fileName)
 	{
-		this._hi = cast(HICON)dfl.internal.utf.loadImage(null, fileName, IMAGE_ICON, 0, 0, LR_LOADFROMFILE);
+		this._hi = cast(HICON)loadImage(null, fileName, IMAGE_ICON, 0, 0, LR_LOADFROMFILE);
 		if(!this._hi)
 			throw new DflException("Unable to load icon from file '" ~ fileName ~ "'");
 	}
@@ -4011,113 +4216,160 @@ enum FontSmoothing
 ///
 class Font // docmain
 {
-	// Used internally.
-	static void LOGFONTAtoLogFont(ref LogFont lf, LOGFONTA* plfa) // package // deprecated
+	///
+	this(Dstring name, float emSize, GraphicsUnit unit)
 	{
-		lf.lfa = *plfa;
-		lf.faceName = dfl.internal.utf.fromAnsiz(plfa.lfFaceName.ptr);
+		this(name, emSize, FontStyle.REGULAR, unit, DEFAULT_CHARSET, FontSmoothing.DEFAULT);
 	}
 	
-	// Used internally.
-	static void LOGFONTWtoLogFont(ref LogFont lf, LOGFONTW* plfw) // package // deprecated
+	/// ditto
+	this(Dstring name, float emSize, FontStyle style = FontStyle.REGULAR, GraphicsUnit unit = GraphicsUnit.POINT)
 	{
-		lf.lfw = *plfw;
-		lf.faceName = dfl.internal.utf.fromUnicodez(plfw.lfFaceName.ptr);
+		this(name, emSize, style, unit, DEFAULT_CHARSET, FontSmoothing.DEFAULT);
+	}
+	
+	/// ditto
+	this(Dstring name, float emSize, FontStyle style, GraphicsUnit unit, FontSmoothing smoothing = FontSmoothing.DEFAULT)
+	{
+		this(name, emSize, style, unit, DEFAULT_CHARSET, smoothing);
+	}
+	
+	/// ditto
+	// This is a somewhat internal function.
+	// -gdiCharSet- is one of *_CHARSET from wingdi.h
+	this(Dstring name, float emSize, FontStyle style, GraphicsUnit unit, ubyte gdiCharSet, FontSmoothing smoothing)
+	{
+		LogicalFont logFont;
+		logFont.faceName = name;
+		logFont.lf.lfCharSet = gdiCharSet;
+		logFont.lf.lfQuality = cast(BYTE)smoothing;
+		logFont.lf.lfOutPrecision = OUT_DEFAULT_PRECIS;
+		logFont.lf.lfClipPrecision = CLIP_DEFAULT_PRECIS;
+		logFont.lf.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE;
+		
+		this(logFont, emSize, style, unit);
+	}
+	
+	/// ditto
+	this(Font baseFont, FontStyle style)
+	{
+		this._unit = baseFont._unit;
+		this._fontStyle = style;
+
+		LogicalFont logFont;
+		baseFont._getLogFont(logFont);
+		_fontStyleToLogFont(logFont, style);
+
+		this(createHFont(logFont));
+	}
+	
+	/// ditto
+	this(Font baseFont, float emSize, FontStyle style)
+	{
+		this._unit = baseFont._unit;
+		this._fontStyle = style;
+
+		LogicalFont logFont;
+		baseFont._getLogFont(logFont);
+		_fontStyleToLogFont(logFont, style);
+
+		logFont.lf.lfHeight = -cast(LONG)emSize;
+
+		this(createHFont(logFont));
+	}
+
+	/// ditto
+	// Used internally.
+	this(ref LogicalFont logFont) // package
+	{
+		this(createHFont(logFont), logFont, true);
+	}
+	
+	/// ditto
+	// This is a somewhat internal function.
+	this(ref LogicalFont logFont, float emSize, FontStyle style, GraphicsUnit unit)
+	{
+		this._unit = unit;
+		this._fontStyle = style;
+		
+		_fontStyleToLogFont(logFont, style);
+
+		logFont.lf.lfHeight = -cast(LONG)emSize;
+		
+		this(createHFont(logFont));
+	}
+	
+	/// ditto
+	// Used internally.
+	this(HFONT hFont, bool owned = true) // package
+	{
+		this._hFont = hFont;
+		this._owned = owned;
+		this._unit = GraphicsUnit.POINT;
+
+		LogicalFont logFont;
+		_getLogFont(logFont);
+		this._fontStyle = _logFontToFontStyle(logFont);
+
+		this._lfHeight = logFont.lf.lfHeight;
+		this._lfName = logFont.faceName;
+		this._lfCharSet = logFont.lf.lfCharSet;
+	}
+
+	/// ditto
+	// Used internally.
+	this(HFONT hFont, LogicalFont logFont, bool owned = true) // package
+	{
+		this._hFont = hFont;
+		this._owned = owned;
+		this._unit = GraphicsUnit.POINT;
+		this._fontStyle = _logFontToFontStyle(logFont);
+
+		this._lfHeight = logFont.lf.lfHeight;
+		this._lfName = logFont.faceName;
+		this._lfCharSet = logFont.lf.lfCharSet;
 	}
 	
 	
 	///
-	// Used internally.
-	this(HFONT hf, LOGFONTA* plfa, bool owned = true) // package // deprecated
+	package static HFONT createHFont(ref LogicalFont logFont)
 	{
-		LogFont lf;
-		LOGFONTAtoLogFont(lf, plfa);
-		
-		this._hf = hf;
-		this._owned = owned;
-		this._unit = GraphicsUnit.POINT;
-		
-		_fstyle = _style(lf);
-		_initLf(lf);
-	}
-	
-	/// ditto
-	// Used internally.
-	this(HFONT hf, ref LogFont lf, bool owned = true) // package
-	{
-		this._hf = hf;
-		this._owned = owned;
-		this._unit = GraphicsUnit.POINT;
-		
-		_fstyle = _style(lf);
-		_initLf(lf);
-	}
-	
-	/// ditto
-	// Used internally.
-	this(HFONT hf, bool owned = true) // package
-	{
-		this._hf = hf;
-		this._owned = owned;
-		this._unit = GraphicsUnit.POINT;
-		
-		LogFont lf;
-		_info(lf);
-		
-		_fstyle = _style(lf);
-		_initLf(lf);
-	}
-	
-	/// ditto
-	// Used internally.
-	this(LOGFONTA* plfa, bool owned = true) // package // deprecated
-	{
-		LogFont lf;
-		LOGFONTAtoLogFont(lf, plfa);
-		
-		this(_create(lf), lf, owned);
-	}
-	
-	/// ditto
-	// Used internally.
-	this(ref LogFont lf, bool owned = true) // package
-	{
-		this(_create(lf), lf, owned);
-	}
-	
-	
-	///
-	package static HFONT _create(ref LogFont lf)
-	{
-		HFONT result = dfl.internal.utf.createFontIndirect(lf);
-		if(!result)
+		HFONT result = createFontIndirect(logFont);
+		if (!result)
 			throw new DflException("Unable to create font");
 		return result;
 	}
-	
-	
+
+
 	///
-	private static void _style(ref LogFont lf, FontStyle style)
+	~this()
 	{
-		lf.lf.lfWeight = (style & FontStyle.BOLD) ? FW_BOLD : FW_NORMAL;
-		lf.lf.lfItalic = (style & FontStyle.ITALIC) ? TRUE : FALSE;
-		lf.lf.lfUnderline = (style & FontStyle.UNDERLINE) ? TRUE : FALSE;
-		lf.lf.lfStrikeOut = (style & FontStyle.STRIKEOUT) ? TRUE : FALSE;
+		if (_owned)
+			DeleteObject(_hFont);
 	}
 	
 	
 	///
-	private static FontStyle _style(ref LogFont lf)
+	private static void _fontStyleToLogFont(ref LogicalFont toLogFont, in FontStyle fromFontStyle)
+	{
+		toLogFont.lf.lfWeight = (fromFontStyle & FontStyle.BOLD) ? FW_BOLD : FW_NORMAL;
+		toLogFont.lf.lfItalic = (fromFontStyle & FontStyle.ITALIC) ? TRUE : FALSE;
+		toLogFont.lf.lfUnderline = (fromFontStyle & FontStyle.UNDERLINE) ? TRUE : FALSE;
+		toLogFont.lf.lfStrikeOut = (fromFontStyle & FontStyle.STRIKEOUT) ? TRUE : FALSE;
+	}
+	
+	/// ditto
+	private static FontStyle _logFontToFontStyle(const ref LogicalFont logFont)
 	{
 		FontStyle style = FontStyle.REGULAR;
 		
-		if(lf.lf.lfWeight >= FW_BOLD)
+		if(logFont.lf.lfWeight >= FW_BOLD)
 			style |= FontStyle.BOLD;
-		if(lf.lf.lfItalic)
+		if(logFont.lf.lfItalic)
 			style |= FontStyle.ITALIC;
-		if(lf.lf.lfUnderline)
+		if(logFont.lf.lfUnderline)
 			style |= FontStyle.UNDERLINE;
-		if(lf.lf.lfStrikeOut)
+		if(logFont.lf.lfStrikeOut)
 			style |= FontStyle.STRIKEOUT;
 		
 		return style;
@@ -4125,33 +4377,21 @@ class Font // docmain
 	
 	
 	///
-	package void _info(LOGFONTA* lf) // deprecated
+	package void _getLogFont(out LogicalFont logFont)
 	{
-		if(GetObjectA(_hf, LOGFONTA.sizeof, lf) != LOGFONTA.sizeof)
-			throw new DflException("Unable to get font information");
-	}
-	
-	/// ditto
-	package void _info(LOGFONTW* lf) // deprecated
-	{
-		auto proc = cast(GetObjectWProc)GetProcAddress(GetModuleHandleA("gdi32.dll"), "GetObjectW");
-		
-		if(!proc || proc(_hf, LOGFONTW.sizeof, lf) != LOGFONTW.sizeof)
-			throw new DflException("Unable to get font information");
-	}
-	
-	/// ditto
-	package void _info(ref LogFont lf)
-	{
-		if(!dfl.internal.utf.getLogFont(_hf, lf))
+		int ret = getLogFont(_hFont, logFont);
+		if (!ret)
 			throw new DflException("Unable to get font information");
 	}
 	
 	
 	///
-	package static LONG getLfHeight(float emSize, GraphicsUnit unit)
+	package static LONG getLfHeight(HDC hdc, float emSize, GraphicsUnit unit, uint dpi)
 	{
-		final switch(unit)
+		if (emSize < 0)
+			emSize = -emSize;
+		
+		final switch (unit)
 		{
 			case GraphicsUnit.PIXEL:
 			{
@@ -4159,14 +4399,10 @@ class Font // docmain
 			}
 			case GraphicsUnit.POINT:
 			{
-				HDC hdc = GetWindowDC(null);
-				LONG result = MulDiv(cast(int)(emSize * 100), GetDeviceCaps(hdc, LOGPIXELSY), 72 * 100);
-				ReleaseDC(null, hdc);
-				return result;
+				return -MulDiv(cast(int)(emSize * 100), dpi, 72 * 100);
 			}
 			case GraphicsUnit.DISPLAY:
 			{
-				HDC hdc = GetWindowDC(null);
 				int device = GetDeviceCaps(hdc, TECHNOLOGY);
 				if (device == DT_RASDISPLAY)
 				{ // Video display
@@ -4174,38 +4410,24 @@ class Font // docmain
 				}
 				else
 				{ // Printer
-					LONG result = MulDiv(cast(int)(emSize * 100), GetDeviceCaps(hdc, LOGPIXELSY), 100/+75+/ * 100); // .NET Framework 2.0+
-					ReleaseDC(null, hdc);
-					return result;
+					return -MulDiv(cast(int)(emSize * 100), dpi, 100/+75+/ * 100); // .NET Framework 2.0+
 				}
 			}
 			case GraphicsUnit.MILLIMETER:
 			{
-				HDC hdc = GetWindowDC(null);
-				LONG result = MulDiv(cast(int)(emSize * 100), GetDeviceCaps(hdc, LOGPIXELSY), 2540);
-				ReleaseDC(null, hdc);
-				return result;
+				return -MulDiv(cast(int)(emSize * 100), dpi, 2540);
 			}
 			case GraphicsUnit.INCH:
 			{
-				HDC hdc = GetWindowDC(null);
-				LONG result = cast(LONG)(emSize * cast(float)GetDeviceCaps(hdc, LOGPIXELSY));
-				ReleaseDC(null, hdc);
-				return result;
+				return -cast(LONG)(emSize * cast(float)dpi);
 			}
 			case GraphicsUnit.DOCUMENT:
 			{
-				HDC hdc = GetWindowDC(null);
-				LONG result = MulDiv(cast(int)(emSize * 100), GetDeviceCaps(hdc, LOGPIXELSY), 300 * 100);
-				ReleaseDC(null, hdc);
-				return result;
+				return -MulDiv(cast(int)(emSize * 100), dpi, 300 * 100);
 			}
 			case GraphicsUnit.TWIP:
 			{
-				HDC hdc = GetWindowDC(null);
-				LONG result = MulDiv(cast(int)(emSize * 100), GetDeviceCaps(hdc, LOGPIXELSY), 1440 * 100);
-				ReleaseDC(null, hdc);
-				return result;
+				return -MulDiv(cast(int)(emSize * 100), dpi, 1440 * 100);
 			}
 		}
 	}
@@ -4217,16 +4439,12 @@ class Font // docmain
 		if(lfHeight < 0)
 			lfHeight = -lfHeight;
 		
-		final switch(toUnit)
+		final switch (toUnit)
 		{
 			case GraphicsUnit.PIXEL:
-			{
 				return cast(float)lfHeight;
-			}
 			case GraphicsUnit.POINT:
-			{
 				return cast(float)MulDiv(lfHeight, 72, GetDeviceCaps(hdc, LOGPIXELSY));
-			}
 			case GraphicsUnit.DISPLAY:
 			{
 				int tech = GetDeviceCaps(hdc, TECHNOLOGY);
@@ -4244,227 +4462,84 @@ class Font // docmain
 				}
 			}
 			case GraphicsUnit.MILLIMETER:
-			{
 				return cast(float)MulDiv(lfHeight, 254, GetDeviceCaps(hdc, LOGPIXELSY)) / 10.0;
-			}
 			case GraphicsUnit.INCH:
-			{
 				return cast(float)lfHeight / cast(float)GetDeviceCaps(hdc, LOGPIXELSY);
-			}
 			case GraphicsUnit.DOCUMENT:
-			{
 				return cast(float)MulDiv(lfHeight, 300, GetDeviceCaps(hdc, LOGPIXELSY));
-			}
 			case GraphicsUnit.TWIP:
-			{
 				return cast(float)MulDiv(lfHeight, 1440, GetDeviceCaps(hdc, LOGPIXELSY));
-			}
 		}
 	}
 	
-	/// ditto
-	package static float getEmSize(LONG lfHeight, GraphicsUnit toUnit)
+
+	///
+	final @property inout(HFONT) handle() inout // getter
 	{
-		if(GraphicsUnit.PIXEL == toUnit)
-		{
-			if(lfHeight < 0)
-				return cast(float)-lfHeight;
-			return cast(float)lfHeight;
-		}
-		HDC hdc = GetWindowDC(null);
-		float result = getEmSize(hdc, lfHeight, toUnit);
-		ReleaseDC(null, hdc);
-		return result;
+		return _hFont;
 	}
 	
 	
 	///
-	this(Font font, FontStyle style)
-	{
-		LogFont lf;
-		_unit = font._unit;
-		font._info(lf);
-		_style(lf, style);
-		this(_create(lf));
-		
-		_fstyle = style;
-		_initLf(font, lf);
-	}
-	
-	/// ditto
-	this(Dstring name, float emSize, GraphicsUnit unit)
-	{
-		this(name, emSize, FontStyle.REGULAR, unit);
-	}
-	
-	/// ditto
-	this(Dstring name, float emSize, FontStyle style = FontStyle.REGULAR,
-		GraphicsUnit unit = GraphicsUnit.POINT)
-	{
-		this(name, emSize, style, unit, DEFAULT_CHARSET, FontSmoothing.DEFAULT);
-	}
-	
-	/// ditto
-	this(Dstring name, float emSize, FontStyle style,
-		GraphicsUnit unit, FontSmoothing smoothing)
-	{
-		this(name, emSize, style, unit, DEFAULT_CHARSET, smoothing);
-	}
-	
-	/// ditto
-	// This is a somewhat internal function.
-	// -gdiCharSet- is one of *_CHARSET from wingdi.h
-	this(Dstring name, float emSize, FontStyle style,
-		GraphicsUnit unit, ubyte gdiCharSet,
-		FontSmoothing smoothing = FontSmoothing.DEFAULT)
-	{
-		LogFont lf;
-		
-		lf.faceName = name;
-		lf.lf.lfCharSet = gdiCharSet;
-		lf.lf.lfQuality = cast(BYTE)smoothing;
-		lf.lf.lfOutPrecision = OUT_DEFAULT_PRECIS;
-		lf.lf.lfClipPrecision = CLIP_DEFAULT_PRECIS;
-		lf.lf.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE;
-		
-		this(lf, emSize, style, unit);
-	}
-	
-	/// ditto
-	// This is a somewhat internal function.
-	this(ref LogFont lf, float emSize, FontStyle style, GraphicsUnit unit)
-	{
-		_unit = unit;
-		
-		lf.lf.lfHeight = -getLfHeight(emSize, unit);
-		_style(lf, style);
-		
-		this(_create(lf));
-		
-		_fstyle = style;
-		_initLf(lf);
-	}
-	
-	
-	///
-	~this()
-	{
-		if(_owned)
-			DeleteObject(_hf);
-	}
-	
-	
-	///
-	final @property HFONT handle() // getter
-	{
-		return _hf;
-	}
-	
-	
-	///
-	final @property GraphicsUnit unit() // getter
+	final @property GraphicsUnit unit() const // getter
 	{
 		return _unit;
 	}
 	
 	
-	///
-	final @property float size() // getter
+	/// Returns font point.
+	final @property float size() const // getter
 	{
-		/+
-		LOGFONTA lf;
-		_info(&lf);
-		return getEmSize(lf.lf.lfHeight, _unit);
-		+/
-		return getEmSize(this._lfHeight, _unit);
+		// return getEmSize(this._lfHeight, _unit);
+		return this._lfHeight;
 	}
 	
 	
 	///
-	final float getSize(GraphicsUnit unit)
+	final float getSize(HDC hdc, GraphicsUnit unit) const
 	{
-		/+
-		LOGFONTA lf;
-		_info(&lf);
-		return getEmSize(lf.lf.lfHeight, unit);
-		+/
-		return getEmSize(this._lfHeight, unit);
+		return Font.getEmSize(hdc, this._lfHeight, unit);
 	}
 	
 	/// ditto
-	final float getSize(GraphicsUnit unit, Graphics g)
+	final float getSize(Graphics g, GraphicsUnit unit) const
 	{
-		return getEmSize(g.handle, this._lfHeight, unit);
+		return Font.getEmSize(g.handle, this._lfHeight, unit);
 	}
 	
 	
 	///
-	final @property FontStyle style() // getter
+	final @property FontStyle style() const // getter
 	{
-		return _fstyle;
+		return _fontStyle;
 	}
 	
 	
 	///
-	final @property Dstring name() // getter
+	final @property Dstring name() const // getter
 	{
 		return _lfName;
 	}
 	
 	
 	///
-	final @property ubyte gdiCharSet() // getter
+	final @property ubyte gdiCharSet() const // getter
 	{
 		return _lfCharSet;
 	}
 	
 	
-	/+
-	private void _initLf(LOGFONTA* lf)
-	{
-		this.lfHeight = lf.lfHeight;
-		this.lfName = stringFromStringz(lf.lfFaceName.ptr).dup;
-		this.lfCharSet = lf.lfCharSet;
-	}
-	+/
-	
-	
-	///
-	private void _initLf(ref LogFont lf)
-	{
-		this._lfHeight = lf.lf.lfHeight;
-		this._lfName = lf.faceName;
-		this._lfCharSet = lf.lf.lfCharSet;
-	}
-	
-	
-	/+
-	private void _initLf(Font otherfont, LOGFONTA* lf)
-	{
-		this.lfHeight = otherfont.lfHeight;
-		this.lfName = otherfont.lfName;
-		this.lfCharSet = otherfont.lfCharSet;
-	}
-	+/
-	
-	///
-	private void _initLf(Font otherfont, ref LogFont lf)
-	{
-		this._lfHeight = otherfont._lfHeight;
-		this._lfName = otherfont._lfName;
-		this._lfCharSet = otherfont._lfCharSet;
-	}
-	
-	
 private:
-	HFONT _hf;
-	GraphicsUnit _unit;
-	bool _owned = true;
-	FontStyle _fstyle;
+	HFONT _hFont;
+
+	const GraphicsUnit _unit;
+	const FontStyle _fontStyle;
+	const bool _owned = true; // Owned _hFont member
 	
-	LONG _lfHeight;
-	Dstring _lfName;
-	ubyte _lfCharSet;
+	// LOGFONT infomations
+	const LONG _lfHeight; /// emSize in LOGFONT.lfHeight
+	const Dstring _lfName;
+	const ubyte _lfCharSet;
 }
 
 

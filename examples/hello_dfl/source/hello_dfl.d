@@ -1,5 +1,5 @@
-import std.conv : to;
 import dfl;
+import std.conv : to;
 
 version(Have_dfl) // For DUB.
 {
@@ -54,28 +54,55 @@ class MainForm : Form
 
 	override void onPaint(PaintEventArgs pea)
 	{
-		pea.graphics.drawLine(new Pen(Color.blue, 5, PenStyle.SOLID), Point(50, 200), Point(150, 170));
-		pea.graphics.drawRectangle(new Pen(Color.black), 20, 170, 100, 50);
-		pea.graphics.fillRectangle(Color.green, 200, 10, 50, 50);
-		pea.graphics.drawEllipse(new Pen(Color.red), 100, 10, 50, 50);
-		pea.graphics.fillEllipse(new SolidBrush(Color.purple), 200, 100, 50, 50);
+		import dfl.internal.dpiaware;
+
+		Point pt1 = Point(50, 200) * dpi / USER_DEFAULT_SCREEN_DPI;
+		Point pt2 = Point(150, 170) * dpi / USER_DEFAULT_SCREEN_DPI;
+		pea.graphics.drawLine(new Pen(Color.blue, 5, PenStyle.SOLID), pt1, pt2);
+
+		Rect rt1 = Rect(20, 170, 100, 50) * dpi / USER_DEFAULT_SCREEN_DPI;
+		pea.graphics.drawRectangle(new Pen(Color.black), rt1);
+
+		Rect rt2 = Rect(200, 10, 50, 50) * dpi / USER_DEFAULT_SCREEN_DPI;
+		pea.graphics.fillRectangle(Color.green, rt2);
+		
+		Rect rt3 = Rect(100, 10, 50, 50) * dpi / USER_DEFAULT_SCREEN_DPI;
+		pea.graphics.drawEllipse(new Pen(Color.red), rt3);
+		
+		Rect rt4 = Rect(200, 100, 50, 50) * dpi / USER_DEFAULT_SCREEN_DPI;
+		pea.graphics.fillEllipse(new SolidBrush(Color.purple), rt4);
 	}
 }
 
+import core.sys.windows.windows;
+import std.format;
+
+shared wstring names;
+enum int MAX_TITLE = 1000;
+
+extern(Windows)
+BOOL enumCallBack(HWND hwnd, LPARAM lParam) nothrow
+{
+	wchar* str = cast(wchar*)new wchar[MAX_TITLE];
+	int len = GetWindowText(hwnd, str, MAX_TITLE);
+	names ~= "-" ~ str[0..len].dup ~ "\n";
+	return TRUE;
+}
 class TestButton : Button
 {
 	override void onClick(EventArgs ea)
 	{
-		msgBox("hi");
+		wstring _ = names;
+		names.length = 0;
+		EnumChildWindows(parent.handle, &enumCallBack, 0);
+		msgBox(names.to!string);
+		// msgBox("hi");
 	}
-}
-
-static this()
-{
-	Application.enableVisualStyles();
 }
 
 void main()
 {
+	Application.enableVisualStyles();
+	Application.setHighDpiMode(HighDpiMode.PER_MONITOR_V2);
 	Application.run(new MainForm());
 }

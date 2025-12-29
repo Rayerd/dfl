@@ -91,8 +91,8 @@ class TableRenderer(T...)
 		// Draw records.
 		foreach (record; (_hasHeader ? csvReader!(Tuple!T)(_csv, null) : csvReader!(Tuple!T)(_csv)))
 		{
-			int rows = (_hasHeader?1:0) + lastRecord - firstRecord + 1;
-			if (firstRecord + (_hasHeader?1:0) <= row && row <= rows)
+			int rows = (_hasHeader ? 1 : 0) + lastRecord - firstRecord + 1;
+			if (firstRecord + (_hasHeader ? 1 : 0) <= row && row <= rows)
 			{
 				int y = location.y + viewLine * height + _paddingY;
 				foreach (int col, value; record)
@@ -101,7 +101,7 @@ class TableRenderer(T...)
 					g.drawText(to!string(value), _recordFont, _textColor, Rect(x, y, _width[col] - _paddingX, _height - _paddingY), _recordTextFormat);
 				}
 				// Draw horizontal line.
-				if (_horizontalLine && viewLine < lastRecord - firstRecord + (_showHeader?1:0))
+				if (_horizontalLine && viewLine < lastRecord - firstRecord + (_showHeader ? 1 : 0))
 				{
 					int y2 = location.y + height * (viewLine + 1);
 					g.drawLine(new Pen(_lineColor), Point(location.x, y2), Point(bounds.right, y2));
@@ -194,7 +194,7 @@ class TableRenderer(T...)
 	///
 	Rect bounds() const
 	{
-		int rows = (_showHeader?1:0) + lastRecord - firstRecord + 1;
+		int rows = (_showHeader ? 1 : 0) + lastRecord - firstRecord + 1;
 		return Rect(_location.x, _location.y, sum(_width), height * rows);
 	}
 
@@ -497,9 +497,9 @@ class LineGraphRenderer(T...)
 				g.drawLine(
 					new Pen(_plotAreaBoundsColor),
 					_originPoint.x - _verticalScaleLineOuterSide,
-					cast(int)(y + LINE_HEIGHT / 2 + (_vZeroPos == VerticalZeroPosition.BOTTOM ? -1: 0)),
+					cast(int)(y + LINE_HEIGHT / 2 + (_vZeroPos == VerticalZeroPosition.BOTTOM ? -1 : 0)),
 					_originPoint.x + _verticalScaleLineInnerSide,
-					cast(int)(y + LINE_HEIGHT / 2 + (_vZeroPos == VerticalZeroPosition.BOTTOM ? -1: 0))
+					cast(int)(y + LINE_HEIGHT / 2 + (_vZeroPos == VerticalZeroPosition.BOTTOM ? -1 : 0))
 				);
 				index++;
 			}
@@ -514,7 +514,7 @@ class LineGraphRenderer(T...)
 				foreach (label; csvReader!(Tuple!T)(_csv, null))
 				{
 					int x = _originPoint.x + _plotAreaLeftPadding + i * _horizontalScaleSpan - cast(int)_horizontalScaleHeight;
-					int y = baseY + _originPoint.y + (_vZeroPos == VerticalZeroPosition.BOTTOM ? _plotAreaAndHorizontalScaleSpanY: -_plotAreaAndHorizontalScaleSpanY - _horizontalScaleHeight);
+					int y = baseY + _originPoint.y + (_vZeroPos == VerticalZeroPosition.BOTTOM ? _plotAreaAndHorizontalScaleSpanY : -_plotAreaAndHorizontalScaleSpanY - _horizontalScaleHeight);
 					g.drawText(
 						label[0],
 						new Font("MS Gothic", 12f),
@@ -576,9 +576,9 @@ class LineGraphRenderer(T...)
 			{
 				static if (!(is(T[0] == string) && col == 0))
 				{
-					int y1 = cast(int)(baseY + _originPoint.y + vRatio * prevRecord[col] * (_vZeroPos == VerticalZeroPosition.BOTTOM ? -1: 1));
-					int y2 = cast(int)(baseY + _originPoint.y + vRatio * value * (_vZeroPos == VerticalZeroPosition.BOTTOM ? -1: 1));
-					int seriesIndex = col - (is(T[0] == string)?1:0);
+					int y1 = cast(int)(baseY + _originPoint.y + vRatio * prevRecord[col] * (_vZeroPos == VerticalZeroPosition.BOTTOM ? -1 : 1));
+					int y2 = cast(int)(baseY + _originPoint.y + vRatio * value * (_vZeroPos == VerticalZeroPosition.BOTTOM ? -1 : 1));
+					int seriesIndex = col - (is(T[0] == string) ? 1 : 0);
 					if (!isFirstRecord)
 					{
 						g.drawLine(

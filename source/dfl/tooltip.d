@@ -8,9 +8,11 @@ module dfl.tooltip;
 import dfl.application;
 import dfl.base;
 import dfl.control;
+import dfl.drawing;
 
 import dfl.internal.clib;
 import dfl.internal.dlib;
+import dfl.internal.dpiaware;
 import dfl.internal.utf;
 
 import core.sys.windows.commctrl;
@@ -39,11 +41,14 @@ private:
 	else
 		enum TOOLTIPS_CLASS = "tooltips_class32";
 	enum size_t MAX_TIP_TEXT_LENGTH = 2045;
+	enum int DEFAULT_TIP_WIDTH = -1;
 	
 	HWND _hwtt; // Tooltip control handle.
 	bool _active = true;
 	ToolTipIcon _icon = ToolTipIcon.NONE;
 	Dstring _title;
+	Font _font;
+	uint _dpi;
 
 
 package:
@@ -52,18 +57,22 @@ package:
 		_initCommonControls(ICC_TREEVIEW_CLASSES); // Includes tooltip.
 		
 		_hwtt = CreateWindowEx(WS_EX_TOPMOST | WS_EX_TOOLWINDOW, TOOLTIPS_CLASS.ptr,
-			"", style, 0, 0, 50, 50, null, null, null, null);
+			"", style, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, null, null, null, null);
 		if(!_hwtt)
 			throw new DflException("Unable to create tooltip");
 
-		SendMessage(_hwtt, TTM_SETMAXTIPWIDTH, 0, int.max); // Support multi line.
+		_dpi = GetDpiForWindow(_hwtt);
+		const int fontSizePt = 9; // default size
+		const int fontHeight = -MulDiv(fontSizePt, _dpi, USER_DEFAULT_SCREEN_DPI);
+		_font = new Font("Segoe UI", fontHeight);
+		SendMessage(_hwtt, WM_SETFONT, cast(WPARAM)_font.handle, TRUE);
 	}
 	
 	
 public:
 	this()
 	{
-		enum TTS_USEVISUALSTYLE = 0x100;
+		// enum TTS_USEVISUALSTYLE = 0x100;
 		this(cast(DWORD)(WS_POPUP | TTS_NOPREFIX));
 	}
 	
@@ -76,9 +85,9 @@ public:
 	
 	
 	///
-	final @property HWND handle() // getter
+	final @property HWND handle() const // getter
 	{
-		return _hwtt;
+		return cast(HWND)_hwtt;
 	}
 	
 	
@@ -90,7 +99,7 @@ public:
 	}
 	
 	/// ditto
-	final @property bool active() // getter
+	final @property bool active() const // getter
 	{
 		return _active;
 	}
@@ -156,8 +165,7 @@ public:
 	///
 	final @property void isBalloon(bool byes) // setter
 	{
-		LONG wl;
-		wl = GetWindowLongPtr(_hwtt, GWL_STYLE).toI32;
+		LONG wl = GetWindowLongPtr(_hwtt, GWL_STYLE).toI32;
 		if(byes)
 		{
 			if(wl & TTS_BALLOON)
@@ -174,17 +182,16 @@ public:
 	}
 	
 	/// ditto
-	final @property bool isBalloon() // getter
+	final @property bool isBalloon() const // getter
 	{
-		return (GetWindowLongPtr(_hwtt, GWL_STYLE) & TTS_BALLOON) != 0;
+		return (GetWindowLongPtr(cast(HWND)_hwtt, GWL_STYLE) & TTS_BALLOON) != 0;
 	}
 	
 
 	///
 	final @property void stripAmpersands(bool byes) // setter
 	{
-		LONG wl;
-		wl = GetWindowLongPtr(_hwtt, GWL_STYLE).toI32;
+		LONG wl = GetWindowLongPtr(_hwtt, GWL_STYLE).toI32;
 		if(!byes)
 		{
 			if(wl & TTS_NOPREFIX)
@@ -201,9 +208,9 @@ public:
 	}
 	
 	/// ditto
-	final @property bool stripAmpersands() // getter
+	final @property bool stripAmpersands() const // getter
 	{
-		return (GetWindowLongPtr(_hwtt, GWL_STYLE) & TTS_NOPREFIX) == 0;
+		return (GetWindowLongPtr(cast(HWND)_hwtt, GWL_STYLE) & TTS_NOPREFIX) == 0;
 	}
 	
 
@@ -218,7 +225,7 @@ public:
 	}
 	
 	/// ditto
-	final @property ToolTipIcon toolTipIcon() // getter
+	final @property inout(ToolTipIcon) toolTipIcon() inout // getter
 	{
 		return _icon;
 	}
@@ -237,7 +244,7 @@ public:
 	}
 	
 	/// ditto
-	final @property Dstring toolTipTitle() // getter
+	final @property Dstring toolTipTitle() const // getter
 	{
 		return _title;
 	}
@@ -246,8 +253,7 @@ public:
 	///
 	final @property void useAnimation(bool byes) // setter
 	{
-		LONG wl;
-		wl = GetWindowLongPtr(_hwtt, GWL_STYLE).toI32;
+		LONG wl = GetWindowLongPtr(_hwtt, GWL_STYLE).toI32;
 		if(!byes)
 		{
 			if(wl & TTS_NOANIMATE)
@@ -264,17 +270,16 @@ public:
 	}
 	
 	/// ditto
-	final @property bool useAnimation() // getter
+	final @property bool useAnimation() const // getter
 	{
-		return (GetWindowLongPtr(_hwtt, GWL_STYLE) & TTS_NOANIMATE) == 0;
+		return (GetWindowLongPtr(cast(HWND)_hwtt, GWL_STYLE) & TTS_NOANIMATE) == 0;
 	}
 	
 
 	///
 	final @property void useFading(bool byes) // setter
 	{
-		LONG wl;
-		wl = GetWindowLongPtr(_hwtt, GWL_STYLE).toI32;
+		LONG wl = GetWindowLongPtr(_hwtt, GWL_STYLE).toI32;
 		if(!byes)
 		{
 			if(wl & TTS_NOFADE)
@@ -291,17 +296,16 @@ public:
 	}
 	
 	/// ditto
-	final @property bool useFading() // getter
+	final @property bool useFading() const // getter
 	{
-		return (GetWindowLongPtr(_hwtt, GWL_STYLE) & TTS_NOFADE) == 0;
+		return (GetWindowLongPtr(cast(HWND)_hwtt, GWL_STYLE) & TTS_NOFADE) == 0;
 	}
 
 
 	///
 	final @property void showAlways(bool byes) // setter
 	{
-		LONG wl;
-		wl = GetWindowLongPtr(_hwtt, GWL_STYLE).toI32;
+		LONG wl = GetWindowLongPtr(_hwtt, GWL_STYLE).toI32;
 		if(byes)
 		{
 			if(wl & TTS_ALWAYSTIP)
@@ -318,9 +322,9 @@ public:
 	}
 	
 	/// ditto
-	final @property bool showAlways() // getter
+	final @property bool showAlways() const // getter
 	{
-		return (GetWindowLongPtr(_hwtt, GWL_STYLE) & TTS_ALWAYSTIP) != 0;
+		return (GetWindowLongPtr(cast(HWND)_hwtt, GWL_STYLE) & TTS_ALWAYSTIP) != 0;
 	}
 	
 	
@@ -340,7 +344,7 @@ public:
 	
 	///
 	// WARNING: possible buffer overflow.
-	final Dstring getToolTip(Control ctrl)
+	final Dstring getToolTip(Control ctrl) const
 	{
 		Dstring result;
 		TOOLINFO tool;
@@ -357,7 +361,7 @@ public:
 			scope(exit)
 				dfl.internal.clib.free(tool.lpszText);
 			tool.lpszText[0 .. 2] = 0;
-			SendMessage(_hwtt, TTM_GETTEXT, 0, cast(LPARAM)&tool);
+			SendMessage(cast(HWND)_hwtt, TTM_GETTEXT, 0, cast(LPARAM)&tool);
 			if(!(cast(wchar*)tool.lpszText)[0])
 				result = null;
 			else
@@ -462,5 +466,27 @@ public:
 			if(lr)
 				Application.refCountInc(cast(void*)this);
 		}
+	}
+
+
+	///
+	// Extra.
+	void disableAutoWrap()
+	{
+		SendMessage(_hwtt, TTM_SETMAXTIPWIDTH, 0, DEFAULT_TIP_WIDTH);
+	}
+
+
+	///
+	// Extra.
+	void maxWidth(int width) @property // setter
+	{
+		SendMessage(_hwtt, TTM_SETMAXTIPWIDTH, 0, width);
+	}
+	
+	/// ditto
+	int maxWidth() const @property // getter
+	{
+		return cast(int)SendMessage(cast(HWND)_hwtt, TTM_GETMAXTIPWIDTH, 0, 0);
 	}
 }

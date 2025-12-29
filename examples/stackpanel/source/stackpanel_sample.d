@@ -1,4 +1,9 @@
 import dfl;
+
+import dfl.internal.dpiaware : USER_DEFAULT_SCREEN_DPI;
+
+import core.sys.windows.winbase;
+
 class MainForm : Form
 {
 	private StackPanel _sidePanel;
@@ -7,6 +12,8 @@ class MainForm : Form
 
 	this()
 	{
+		Control.defaultFont = new Font("Segoe UI", 16f);
+
 		this.text = "StackPanel example";
 		this.size = Size(500, 500);
 
@@ -53,10 +60,11 @@ class MainForm : Form
 		_headerPanel.dockMargin.all = 10;
 		_headerPanel.paint ~= (Control c, PaintEventArgs e) {
 			Graphics g = e.graphics;
-			Rect rect = c.displayRectangle;
+			Rect rect = c.displayRectangle * dpi / USER_DEFAULT_SCREEN_DPI;
 			g.drawRectangle(new Pen(SystemColors.controlDarkDark), rect);
 			rect.inflate(-10, -10);
-			g.drawText("TOP docking area", new Font("MS Gothic", 20f), Color.black, rect);
+			Font scaledFont = new Font("MS Gothic", MulDiv(20, dpi, USER_DEFAULT_SCREEN_DPI));
+			g.drawText("TOP docking area", scaledFont, Color.black, rect);
 		};
 		_headerPanel.resizeRedraw = true; // For owner-draw on resize.
 		// _headerPanel.width = 200;
@@ -68,22 +76,20 @@ class MainForm : Form
 		_contentPanel.dockMargin.all = 10;
 		_contentPanel.paint ~= (Control c, PaintEventArgs e) {
 			Graphics g = e.graphics;
-			Rect rect = c.displayRectangle;
+			Rect rect = c.displayRectangle * dpi / USER_DEFAULT_SCREEN_DPI;
 			g.drawRectangle(new Pen(SystemColors.controlDarkDark), rect);
 			rect.inflate(-10, -10);
-			g.drawText("FILL docking area", new Font("MS Gothic", 20f), Color.black, rect);
+			Font scaledFont = new Font("MS Gothic", MulDiv(20, dpi, USER_DEFAULT_SCREEN_DPI));
+			g.drawText("FILL docking area", scaledFont, Color.black, rect);
 		};
 		_contentPanel.resizeRedraw = true; // For owner-draw on resize.
 		_contentPanel.parent = this;
 	}
 }
 
-void main(string[] args)
+void main()
 {
-		Application.enableVisualStyles();
-
-		import dfl.internal.dpiaware;
-		SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
-
-		Application.run(new MainForm());
+	Application.enableVisualStyles();
+	Application.setHighDpiMode(HighDpiMode.PER_MONITOR_V2);
+	Application.run(new MainForm());
 }

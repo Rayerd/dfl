@@ -92,11 +92,11 @@ enum PROCESS_DPI_AWARENESS
 
 
 alias DPI_AWARENESS_CONTEXT = HANDLE; ///
-enum DPI_AWARENESS_CONTEXT DPI_AWARENESS_CONTEXT_UNAWARE = cast(void*)-1; /// 
-enum DPI_AWARENESS_CONTEXT DPI_AWARENESS_CONTEXT_SYSTEM_AWARE = cast(void*)-2; /// 
-enum DPI_AWARENESS_CONTEXT DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE = cast(void*)-3; /// 
-enum DPI_AWARENESS_CONTEXT DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 = cast(void*)-4; /// 
-enum DPI_AWARENESS_CONTEXT DPI_AWARENESS_CONTEXT_UNAWARE_GDISCALED = cast(void*)-5; /// 
+enum DPI_AWARENESS_CONTEXT DPI_AWARENESS_CONTEXT_UNAWARE = cast(void*)-1; ///
+enum DPI_AWARENESS_CONTEXT DPI_AWARENESS_CONTEXT_SYSTEM_AWARE = cast(void*)-2; ///
+enum DPI_AWARENESS_CONTEXT DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE = cast(void*)-3; ///
+enum DPI_AWARENESS_CONTEXT DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 = cast(void*)-4; ///
+enum DPI_AWARENESS_CONTEXT DPI_AWARENESS_CONTEXT_UNAWARE_GDISCALED = cast(void*)-5; ///
 
 
 enum WM_DPICHANGED = 0x02E0; ///
@@ -194,4 +194,63 @@ double getScaleFactorPerDefaultScreenDpi(HMONITOR hMon)
 		return cast(double)bufScale / USER_DEFAULT_SCREEN_DPI;
 	else
 		return 1.0;
+}
+
+
+///
+class DpiConverter
+{
+	import dfl.drawing;
+	import std.math.rounding : ceil;
+
+	///
+	this(Screen screen)
+	{
+		_screen = screen;
+		_displayScale = getScaleFactorPerDefaultScreenDpi(_screen.handle);
+	}
+
+
+	///
+	Point point(in Point p) const
+	{
+		return Point(
+			ceil(cast(double)p.x * _displayScale),
+			ceil(cast(double)p.y * _displayScale));
+	}
+
+	/// ditto
+	Size size(in Size s) const
+	{
+		return Size(
+			ceil(cast(double)s.width * _displayScale),
+			ceil(cast(double)s.height * _displayScale));
+	}
+
+	/// ditto
+	Rect rect(in Rect r) const
+	{
+		return Rect(
+			ceil(cast(double)r.x * _displayScale),
+			ceil(cast(double)r.y * _displayScale),
+			ceil(cast(double)r.width * _displayScale),
+			ceil(cast(double)r.height * _displayScale));
+	}
+
+
+	///
+	void displayScale(double scale) @property // setter
+	{
+		_displayScale = scale;
+	}
+
+	/// ditto
+	double displayScale() const @property // getter
+	{
+		return _displayScale;
+	}
+
+private:
+	Screen _screen;
+	double _displayScale;
 }

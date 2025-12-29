@@ -12,24 +12,28 @@ import dfl.drawing;
 import dfl.event;
 
 import dfl.internal.dlib;
-import dfl.internal.winapi;
+import dfl.internal.dpiaware;
+
+import core.sys.windows.winbase;
+import core.sys.windows.winuser;
 
 
 ///
 class Label: Control // docmain
 {
+	///
 	this()
 	{
 		resizeRedraw = true; // Word wrap and center correctly.
 		
-		tfmt = new TextFormat(TextFormatFlags.WORD_BREAK | TextFormatFlags.LINE_LIMIT);
+		_tfmt = new TextFormat(TextFormatFlags.WORD_BREAK | TextFormatFlags.LINE_LIMIT);
 	}
 	
 	
 	///
 	@property void borderStyle(BorderStyle bs) // setter
 	{
-		final switch(bs)
+		final switch (bs)
 		{
 			case BorderStyle.FIXED_3D:
 				_style(_style() & ~WS_BORDER);
@@ -47,7 +51,7 @@ class Label: Control // docmain
 				break;
 		}
 		
-		if(isHandleCreated)
+		if (isHandleCreated)
 		{
 			redrawEntire();
 		}
@@ -56,9 +60,9 @@ class Label: Control // docmain
 	/// ditto
 	@property BorderStyle borderStyle() const // getter
 	{
-		if(_exStyle() & WS_EX_CLIENTEDGE)
+		if (_exStyle() & WS_EX_CLIENTEDGE)
 			return BorderStyle.FIXED_3D;
-		else if(_style() & WS_BORDER)
+		else if (_style() & WS_BORDER)
 			return BorderStyle.FIXED_SINGLE;
 		return BorderStyle.NONE;
 	}
@@ -67,14 +71,14 @@ class Label: Control // docmain
 	///
 	final @property void useMnemonic(bool byes) // setter
 	{
-		if(byes)
+		if (byes)
 		{
-			tfmt.formatFlags = tfmt.formatFlags & ~TextFormatFlags.NO_PREFIX;
+			_tfmt.formatFlags = _tfmt.formatFlags & ~TextFormatFlags.NO_PREFIX;
 			_style(_style() & ~SS_NOPREFIX);
 		}
 		else
 		{
-			tfmt.formatFlags = tfmt.formatFlags | TextFormatFlags.NO_PREFIX;
+			_tfmt.formatFlags = _tfmt.formatFlags | TextFormatFlags.NO_PREFIX;
 			_style(_style() | SS_NOPREFIX);
 		}
 		
@@ -83,38 +87,52 @@ class Label: Control // docmain
 	}
 	
 	/// ditto
-	final @property bool useMnemonic() // getter
+	final @property bool useMnemonic() const // getter
 	{
-		return (tfmt.formatFlags & TextFormatFlags.NO_PREFIX) == 0;
+		return (_tfmt.formatFlags & TextFormatFlags.NO_PREFIX) == 0;
 	}
 	
 	
 	///
 	@property Size preferredSize() // getter
 	{
-		Graphics g = isHandleCreated ? createGraphics() : Graphics.getScreen();
-		Size result = g.measureText(text, font, tfmt);
+		Graphics g;
+		if (isHandleCreated)
+			g = createGraphics();
+		else
+			g = Graphics.getScreen();
+		Size result = g.measureText(text, _windowScaledFont, _tfmt); // DPI-scaled.
 		g.dispose();
 		return result;
 	}
 	
 	
-	private void doAutoSize(Dstring text)
+	///
+	private void _doAutoSize()
 	{
-		//if(isHandleCreated)
-		{
-			clientSize = preferredSize;
-		}
+		if (!_autoSize) return;
+		
+		const uint border = {
+			final switch (borderStyle)
+			{
+				case BorderStyle.FIXED_3D:
+					return 2;
+				case BorderStyle.FIXED_SINGLE:
+					return 1;
+				case BorderStyle.NONE:
+					return 0;
+			}
+		}();
+		const Size withinBoundsBorder = preferredSize + Size(border * 2, border * 2); // DPI-scaled.
+		size = withinBoundsBorder * USER_DEFAULT_SCREEN_DPI / dpi; // Not DPI-scaled.
 	}
 	
 	
+	///
 	override @property void text(Dstring newText) // setter
 	{
 		super.text = newText;
-		
-		if(_autosz)
-			doAutoSize(newText);
-		
+		_doAutoSize();
 		invalidate(false);
 	}
 	
@@ -124,81 +142,75 @@ class Label: Control // docmain
 	///
 	@property void autoSize(bool byes) // setter
 	{
-		if(byes != _autosz)
-		{
-			_autosz = byes;
-			
-			if(byes)
-			{
-				doAutoSize(text);
-			}
-		}
+		if (byes != _autoSize)
+			_autoSize = byes;
+		_doAutoSize();
 	}
 	
 	/// ditto
 	@property bool autoSize() const // getter
 	{
-		return _autosz;
+		return _autoSize;
 	}
 	
 	
 	///
 	@property void textAlign(ContentAlignment calign) // setter
 	{
-		final switch(calign)
+		final switch (calign)
 		{
 			case ContentAlignment.TOP_LEFT:
-				tfmt.alignment = TextAlignment.TOP | TextAlignment.LEFT;
+				_tfmt.alignment = TextAlignment.TOP | TextAlignment.LEFT;
 				break;
 			
 			case ContentAlignment.BOTTOM_CENTER:
-				tfmt.alignment = TextAlignment.BOTTOM | TextAlignment.CENTER;
+				_tfmt.alignment = TextAlignment.BOTTOM | TextAlignment.CENTER;
 				break;
 			
 			case ContentAlignment.BOTTOM_LEFT:
-				tfmt.alignment = TextAlignment.BOTTOM | TextAlignment.LEFT;
+				_tfmt.alignment = TextAlignment.BOTTOM | TextAlignment.LEFT;
 				break;
 			
 			case ContentAlignment.BOTTOM_RIGHT:
-				tfmt.alignment = TextAlignment.BOTTOM | TextAlignment.RIGHT;
+				_tfmt.alignment = TextAlignment.BOTTOM | TextAlignment.RIGHT;
 				break;
 			
 			case ContentAlignment.MIDDLE_CENTER:
-				tfmt.alignment = TextAlignment.MIDDLE | TextAlignment.CENTER;
+				_tfmt.alignment = TextAlignment.MIDDLE | TextAlignment.CENTER;
 				break;
 			
 			case ContentAlignment.MIDDLE_LEFT:
-				tfmt.alignment = TextAlignment.MIDDLE | TextAlignment.LEFT;
+				_tfmt.alignment = TextAlignment.MIDDLE | TextAlignment.LEFT;
 				break;
 			
 			case ContentAlignment.MIDDLE_RIGHT:
-				tfmt.alignment = TextAlignment.MIDDLE | TextAlignment.RIGHT;
+				_tfmt.alignment = TextAlignment.MIDDLE | TextAlignment.RIGHT;
 				break;
 			
 			case ContentAlignment.TOP_CENTER:
-				tfmt.alignment = TextAlignment.TOP | TextAlignment.CENTER;
+				_tfmt.alignment = TextAlignment.TOP | TextAlignment.CENTER;
 				break;
 			
 			case ContentAlignment.TOP_RIGHT:
-				tfmt.alignment = TextAlignment.TOP | TextAlignment.RIGHT;
+				_tfmt.alignment = TextAlignment.TOP | TextAlignment.RIGHT;
 				break;
 		}
 		
-		invalidate(); // ?
+		invalidate(); // TODO: ?
 	}
 	
 	/// ditto
-	@property ContentAlignment textAlign() // getter
+	@property ContentAlignment textAlign() const // getter
 	{
-		TextAlignment ta = tfmt.alignment;
+		TextAlignment ta = _tfmt.alignment;
 		
-		if(ta & TextAlignment.BOTTOM)
+		if (ta & TextAlignment.BOTTOM)
 		{
-			if(ta & TextAlignment.RIGHT)
+			if (ta & TextAlignment.RIGHT)
 			{
 				return ContentAlignment.BOTTOM_RIGHT;
 			}
-			else if(ta & TextAlignment.CENTER)
+			else if (ta & TextAlignment.CENTER)
 			{
 				return ContentAlignment.BOTTOM_CENTER;
 			}
@@ -207,13 +219,13 @@ class Label: Control // docmain
 				return ContentAlignment.BOTTOM_LEFT;
 			}
 		}
-		else if(ta & TextAlignment.MIDDLE)
+		else if (ta & TextAlignment.MIDDLE)
 		{
-			if(ta & TextAlignment.RIGHT)
+			if (ta & TextAlignment.RIGHT)
 			{
 				return ContentAlignment.MIDDLE_RIGHT;
 			}
-			else if(ta & TextAlignment.CENTER)
+			else if (ta & TextAlignment.CENTER)
 			{
 				return ContentAlignment.MIDDLE_CENTER;
 			}
@@ -224,11 +236,11 @@ class Label: Control // docmain
 		}
 		else // Top.
 		{
-			if(ta & TextAlignment.RIGHT)
+			if (ta & TextAlignment.RIGHT)
 			{
 				return ContentAlignment.TOP_RIGHT;
 			}
-			else if(ta & TextAlignment.CENTER)
+			else if (ta & TextAlignment.CENTER)
 			{
 				return ContentAlignment.TOP_CENTER;
 			}
@@ -240,87 +252,82 @@ class Label: Control // docmain
 	}
 	
 	
+	///
 	protected override @property Size defaultSize() const // getter
 	{
 		return Size(100, 23);
 	}
 	
 	
+	///
 	protected override void onPaint(PaintEventArgs ea)
 	{
-		int x, y, w, h;
-		Dstring text = this.text;
-		
-		if(tfmt.alignment & TextAlignment.MIDDLE)
-		{
-			// Graphics.drawText() does not support middle alignment
-			// if the text is multiline, so need to do extra work.
-			Size sz = ea.graphics.measureText(text, font, tfmt);
-			x = 0;
-			//if(sz.height >= this.clientSize.height)
-			//	y = 0;
-			//else
-				y = (this.clientSize.height - sz.height) / 2;
-			w = clientSize.width;
-			h = sz.height;
-		}
-		else if(tfmt.alignment & TextAlignment.BOTTOM)
-		{
-			// Graphics.drawText() does not support bottom alignment
-			// if the text is multiline, so need to do extra work.
-			Size sz = ea.graphics.measureText(text, font, tfmt);
-			x = 0;
-			//if(sz.height >= this.clientSize.height)
-			//	y = 0;
-			//else
-				y = this.clientSize.height - sz.height;
-			w = clientSize.width;
-			h = sz.height;
-		}
-		else
-		{
-			x = 0;
-			y = 0;
-			w = clientSize.width;
-			h = clientSize.height;
-		}
-		
-		Color c = foreColor.solidColor(backColor);
-		
-		if(enabled)
-		{
-			ea.graphics.drawText(text, font, c, Rect(x, y, w, h), tfmt);
-		}
-		else
-		{
-			version(LABEL_GRAYSTRING)
+		super.onPaint(ea);
+
+		const Rect rect = {
+			Rect rc;
+			if (_tfmt.alignment & TextAlignment.MIDDLE)
 			{
-				// GrayString() is pretty ugly.
-				GrayStringA(ea.graphics.handle, null, &_disabledOutputProc, cast(LPARAM)cast(void*)this, -1, x, y, w, h);
+				// Graphics.drawText() does not support middle alignment
+				// if the text is multiline, so need to do extra work.
+				Size dpiScaledSize = ea.graphics.measureText(text, _windowScaledFont, _tfmt);
+				rc.x = 0;
+				rc.y = (MulDiv(size.height, dpi, USER_DEFAULT_SCREEN_DPI) - dpiScaledSize.height) / 2;
+				rc.width = MulDiv(size.width, dpi, USER_DEFAULT_SCREEN_DPI);
+				rc.height = dpiScaledSize.height;
+			}
+			else if (_tfmt.alignment & TextAlignment.BOTTOM)
+			{
+				// Graphics.drawText() does not support bottom alignment
+				// if the text is multiline, so need to do extra work.
+				Size dpiScaledSize = ea.graphics.measureText(text, _windowScaledFont, _tfmt);
+				rc.x = 0;
+				rc.y = MulDiv(size.height, dpi, USER_DEFAULT_SCREEN_DPI) - dpiScaledSize.height;
+				rc.width = MulDiv(size.width, dpi, USER_DEFAULT_SCREEN_DPI);
+				rc.height = dpiScaledSize.height;
 			}
 			else
 			{
-				ea.graphics.drawTextDisabled(text, font, c, backColor, Rect(x, y, w, h), tfmt);
+				rc.x = 0;
+				rc.y = 0;
+				rc.width = MulDiv(size.width, dpi, USER_DEFAULT_SCREEN_DPI);
+				rc.height = MulDiv(size.height, dpi, USER_DEFAULT_SCREEN_DPI);
+			}
+			return rc;
+		}();
+		
+		const Color color = foreColor.solidColor(backColor);
+
+		if (enabled)
+		{
+			const Rect r = rect * dpi / USER_DEFAULT_SCREEN_DPI;
+			ea.graphics.drawText(text, _windowScaledFont, color, r, _tfmt);
+		}
+		else
+		{
+			version (LABEL_GRAYSTRING)
+			{
+				// GrayString() is pretty ugly.
+				GrayStringA(ea.graphics.handle, null, &_disabledOutputProc, cast(LPARAM)cast(void*)this, -1, rect.x, rect.y, rect.width, rect.height);
+			}
+			else
+			{
+				ea.graphics.drawTextDisabled(text, _windowScaledFont, color, backColor, rect, _tfmt);
 			}
 		}
-		
-		super.onPaint(ea);
 	}
 	
 	
-	/+
+	///
 	protected override void onHandleCreated(EventArgs ea)
 	{
 		super.onHandleCreated(ea);
 		
-		/+
-		if(autosz)
-			doAutoSize(text);
-		+/
+		_doAutoSize();
 	}
-	+/
 	
 	
+	///
 	protected override void onEnabledChanged(EventArgs ea)
 	{
 		invalidate(false);
@@ -329,20 +336,27 @@ class Label: Control // docmain
 	}
 	
 	
+	///
 	protected override void onFontChanged(EventArgs ea)
 	{
-		if(_autosz)
-			doAutoSize(text);
+		_doAutoSize();
 		
 		invalidate(false);
 		
 		super.onFontChanged(ea);
 	}
 	
+	///
+	protected override void onDpiChanged(uint newDpi)
+	{
+		_doAutoSize();
+	}
 	
+
+	///
 	protected override void wndProc(ref Message m)
 	{
-		switch(m.msg)
+		switch (m.msg)
 		{
 			case WM_GETDLGCODE:
 				super.wndProc(m);
@@ -356,11 +370,12 @@ class Label: Control // docmain
 	}
 	
 	
+	///
 	protected override bool processMnemonic(dchar charCode)
 	{
-		if(visible && enabled)
+		if (visible && enabled)
 		{
-			if(isMnemonic(charCode, text))
+			if (isMnemonic(charCode, text))
 			{
 				select(true, true);
 				return true;
@@ -371,17 +386,19 @@ class Label: Control // docmain
 	
 	
 private:
-	TextFormat _tfmt;
-	bool _autosz = false;
+	TextFormat _textFormat; ///
+	bool _autoSize = false; ///
 	
 	
-	@property void tfmt(TextFormat tf) // setter
+	///
+	@property void _tfmt(TextFormat tf) // setter
 	{
-		_tfmt = tf;
+		_textFormat = tf;
 	}
 	
 	
-	@property TextFormat tfmt() // getter
+	///
+	@property inout(TextFormat) _tfmt() inout // getter
 	{
 		/+
 		// This causes it to invert.
@@ -391,13 +408,14 @@ private:
 			_tfmt.formatFlags = _tfmt.formatFlags & ~TextFormatFlags.DIRECTION_RIGHT_TO_LEFT;
 		+/
 		
-		return _tfmt;
+		return _textFormat;
 	}
 }
 
 
 version(LABEL_GRAYSTRING)
 {
+	///
 	private extern(Windows) BOOL _disabledOutputProc(HDC hdc, LPARAM lpData, int cchData)
 	{
 		BOOL result = TRUE;
@@ -405,13 +423,13 @@ version(LABEL_GRAYSTRING)
 		{
 			scope Graphics g = new Graphics(hdc, false);
 			Label l;
-			with(l = cast(Label)cast(void*)lpData)
+			with (l = cast(Label)cast(void*)lpData)
 			{
 				g.drawText(text, font, foreColor,
 					Rect(0, 0, clientSize.width, clientSize.height), tfmt);
 			}
 		}
-		catch(DThrowable e)
+		catch (DThrowable e)
 		{
 			Application.onThreadException(e);
 			result = FALSE;

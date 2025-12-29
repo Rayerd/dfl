@@ -873,7 +873,7 @@ class OpenFileDialog: FileDialog // docmain
 		{
 			if(!CommDlgExtendedError())
 				return false;
-			_cantrun();
+			_cantRun();
 		}
 		return true;
 	}

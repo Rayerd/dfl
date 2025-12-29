@@ -10,7 +10,9 @@ import dfl.control;
 import dfl.drawing;
 import dfl.event;
 
-import core.sys.windows.windows;
+import dfl.internal.dpiaware;
+
+import core.sys.windows.winuser;
 
 
 ///
@@ -42,10 +44,10 @@ public:
 	///
 	final @property void image(Image img) // setter
 	{
-		if (this._img is img)
+		if (this._image is img)
 			return;
 		
-		if (_mode == PictureBoxSizeMode.AUTO_SIZE)
+		if (_sizeMode == PictureBoxSizeMode.AUTO_SIZE)
 		{
 			if (img)
 				clientSize = img.size;
@@ -53,7 +55,7 @@ public:
 				clientSize = Size(0, 0);
 		}
 		
-		this._img = img;
+		this._image = img;
 		
 		if (created)
 			invalidate();
@@ -64,21 +66,21 @@ public:
 	/// ditto
 	final @property Image image() // getter
 	{
-		return _img;
+		return _image;
 	}
 	
 	
 	///
 	final @property void sizeMode(PictureBoxSizeMode sm) // setter
 	{
-		if (_mode == sm)
+		if (_sizeMode == sm)
 			return;
 		
 		final switch(sm)
 		{
 			case PictureBoxSizeMode.AUTO_SIZE:
-				if (_img)
-					clientSize = _img.size;
+				if (_image)
+					clientSize = _image.size;
 				else
 					clientSize = Size(0, 0);
 				break;
@@ -96,7 +98,7 @@ public:
 				break;
 		}
 		
-		_mode = sm;
+		_sizeMode = sm;
 		
 		if (created)
 			invalidate();
@@ -107,7 +109,7 @@ public:
 	/// ditto
 	final @property PictureBoxSizeMode sizeMode() // getter
 	{
-		return _mode;
+		return _sizeMode;
 	}
 	
 	
@@ -171,27 +173,31 @@ protected:
 	///
 	override void onPaint(PaintEventArgs ea)
 	{
-		if (_img)
+		if (_image)
 		{
-			final switch (_mode)
+			final switch (_sizeMode)
 			{
 			case PictureBoxSizeMode.NORMAL:
 			case PictureBoxSizeMode.AUTO_SIZE: // Drawn the same as normal.
-				_img.draw(ea.graphics, Point(0, 0));
+				_image.drawStretched(ea.graphics, Rect(0, 0, _image.width, _image.height) * dpi / USER_DEFAULT_SCREEN_DPI);
 				break;
 			
 			case PictureBoxSizeMode.CENTER_IMAGE:
-				Size imageSize = _img.size;
-				_img.draw(ea.graphics, Point((clientSize.width  - imageSize.width) / 2,
-					(clientSize.height - imageSize.height) / 2));
+				Rect r = Rect(
+					(clientSize.width - _image.size.width) / 2,
+					(clientSize.height - _image.size.height) / 2,
+					_image.size.width,
+					_image.size.height
+				);
+				_image.drawStretched(ea.graphics, r * dpi / USER_DEFAULT_SCREEN_DPI);
 				break;
 			
 			case PictureBoxSizeMode.STRETCH_IMAGE:
-				_img.drawStretched(ea.graphics, Rect(0, 0, clientSize.width, clientSize.height));
+				_image.drawStretched(ea.graphics, Rect(0, 0, clientSize.width, clientSize.height) * dpi / USER_DEFAULT_SCREEN_DPI);
 				break;
 			
 			case PictureBoxSizeMode.ZOOM:
-				Size imageSize = _img.size;
+				Size imageSize = _image.size;
 				Point center = Point(clientSize.width / 2, clientSize.height / 2);
 				double ratio = {
 					if (clientSize.width > clientSize.height)
@@ -204,7 +210,7 @@ protected:
 				rect.height = cast(int)(imageSize.height * ratio);
 				rect.x = center.x - rect.width / 2;
 				rect.y = center.y - rect.height / 2;
-				_img.drawStretched(ea.graphics, rect);
+				_image.drawStretched(ea.graphics, rect * dpi / USER_DEFAULT_SCREEN_DPI);
 				break;
 			}
 		}
@@ -216,7 +222,7 @@ protected:
 	///
 	override void onResize(EventArgs ea)
 	{
-		if (PictureBoxSizeMode.CENTER_IMAGE == _mode || PictureBoxSizeMode.STRETCH_IMAGE == _mode)
+		if (PictureBoxSizeMode.CENTER_IMAGE == _sizeMode || PictureBoxSizeMode.STRETCH_IMAGE == _sizeMode)
 			invalidate();
 		
 		super.onResize(ea);
@@ -224,7 +230,7 @@ protected:
 	
 	
 private:
-	PictureBoxSizeMode _mode = PictureBoxSizeMode.NORMAL;
-	Image _img = null;
+	PictureBoxSizeMode _sizeMode = PictureBoxSizeMode.NORMAL;
+	Image _image = null;
 }
 

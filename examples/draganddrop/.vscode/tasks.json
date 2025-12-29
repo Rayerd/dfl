@@ -18,7 +18,9 @@
 			},
 			"label": "dub: Build draganddrop_sample",
 			"presentation": {
-				"clear": true
+				"clear": true,
+				"focus": false,
+				"showReuseMessage": false
 			}
 		}
 	]

@@ -10,6 +10,7 @@ import dfl.event;
 
 import dfl.internal.clib;
 import dfl.internal.dlib;
+import dfl.internal.dpiaware;
 import dfl.internal.winapi;
 
 import core.internal.hash;
@@ -367,40 +368,40 @@ abstract class WaitHandle
 	
 	this()
 	{
-		h = INVALID_HANDLE;
+		_handle = INVALID_HANDLE;
 	}
 	
 	
 	// Used internally.
 	this(HANDLE h, bool owned = true)
 	{
-		this.h = h;
-		this.owned = owned;
+		this._handle = h;
+		this._owned = owned;
 	}
 	
 	
 	@property HANDLE handle() nothrow // getter
 	{
-		return h;
+		return _handle;
 	}
 	
 	
 	@property void handle(HANDLE h) // setter
 	{
-		this.h = h;
+		this._handle = h;
 	}
 	
 	
 	void close()
 	{
-		CloseHandle(h);
-		h = INVALID_HANDLE;
+		CloseHandle(_handle);
+		_handle = INVALID_HANDLE;
 	}
 	
 	
 	~this()
 	{
-		if(owned)
+		if(_owned)
 			close();
 	}
 	
@@ -473,9 +474,9 @@ abstract class WaitHandle
 	}
 	
 	
-	private:
-	HANDLE h;
-	bool owned = true;
+private:
+	HANDLE _handle;
+	bool _owned = true;
 }
 
 
@@ -502,7 +503,7 @@ class AsyncResult: IAsyncResult
 interface IButtonControl // docmain
 {
 	///
-	@property DialogResult dialogResult(); // getter
+	@property DialogResult dialogResult() const; // getter
 	/// ditto
 	@property void dialogResult(DialogResult); // setter
 	
@@ -741,28 +742,28 @@ class PaintEventArgs: EventArgs
 	///
 	this(Graphics graphics, Rect clipRect) pure nothrow
 	{
-		g = graphics;
-		cr = clipRect;
+		_graphics = graphics;
+		_clipRect = clipRect;
 	}
 	
 	
 	///
 	final @property Graphics graphics() pure nothrow // getter
 	{
-		return g;
+		return _graphics;
 	}
 	
 	
 	///
 	final @property Rect clipRectangle() pure nothrow // getter
 	{
-		return cr;
+		return _clipRect;
 	}
 	
 	
-	private:
-	Graphics g;
-	Rect cr;
+private:
+	Graphics _graphics;
+	Rect _clipRect;
 }
 
 
@@ -773,31 +774,31 @@ class CancelEventArgs: EventArgs
 	// Initialize cancel to false.
 	this() pure nothrow
 	{
-		cncl = false;
+		_cancel = false;
 	}
 	
 	/// ditto
 	this(bool cancel) pure nothrow
 	{
-		cncl = cancel;
+		_cancel = cancel;
 	}
 	
 	
 	///
 	final @property void cancel(bool byes) pure nothrow // setter
 	{
-		cncl = byes;
+		_cancel = byes;
 	}
 	
 	/// ditto
 	final @property bool cancel() pure nothrow // getter
 	{
-		return cncl;
+		return _cancel;
 	}
 	
 	
-	private:
-	bool cncl;
+private:
+	bool _cancel;
 }
 
 ///
@@ -807,48 +808,48 @@ class SizingEventArgs: EventArgs
 	// Initialize cancel to false.
 	this(Size sz) pure nothrow
 	{
-		_sz = sz;
+		_size = sz;
 	}
 	
 	///
 	@property Size size() pure nothrow
 	{
-		return _sz;
+		return _size;
 	}
 	
 	/// ditto
 	@property void size(Size sz) pure nothrow
 	{
-		_sz = sz;
+		_size = sz;
 	}
 	
 	///
 	@property void width(int w) pure nothrow
 	{
-		_sz.width = w;
+		_size.width = w;
 	}
 	
 	/// ditto
 	@property int width() pure nothrow
 	{
-		return _sz.width;
+		return _size.width;
 	}
 	
 	///
 	@property void height(int h) pure nothrow
 	{
-		_sz.height = h;
+		_size.height = h;
 	}
 	
 	/// ditto
 	@property int height() pure nothrow
 	{
-		return _sz.height;
+		return _size.height;
 	}
 	
 	
-	private:
-	Size _sz;
+private:
+	Size _size;
 }
 
 ///
@@ -856,50 +857,50 @@ class MovingEventArgs: EventArgs
 {
 	///
 	// Initialize cancel to false.
-	this(Point loc) pure nothrow
+	this(Point location) pure nothrow
 	{
-		_loc = loc;
+		_location = location;
 	}
 	
 	///
 	@property Point location() pure nothrow
 	{
-		return _loc;
+		return _location;
 	}
 	
 	/// ditto
 	@property void location(Point loc) pure nothrow
 	{
-		_loc = loc;
+		_location = loc;
 	}
 	
 	///
 	@property void x(int posX) pure nothrow
 	{
-		_loc.x = posX;
+		_location.x = posX;
 	}
 	
 	/// ditto
 	@property int x() pure nothrow
 	{
-		return _loc.x;
+		return _location.x;
 	}
 	
 	///
 	@property void y(int posY) pure nothrow
 	{
-		_loc.y = posY;
+		_location.y = posY;
 	}
 	
 	/// ditto
 	@property int y() pure nothrow
 	{
-		return _loc.y;
+		return _location.y;
 	}
 	
 	
-	private:
-	Point _loc;
+private:
+	Point _location;
 }
 
 ///
@@ -908,48 +909,48 @@ class KeyEventArgs: EventArgs
 	///
 	this(Keys keys) pure nothrow
 	{
-		ks = keys;
+		_keys = keys;
 	}
 	
 	
 	///
 	final @property bool alt() pure nothrow // getter
 	{
-		return (ks & Keys.ALT) != 0;
+		return (_keys & Keys.ALT) != 0;
 	}
 	
 	
 	///
 	final @property bool control() pure nothrow // getter
 	{
-		return (ks & Keys.CONTROL) != 0;
+		return (_keys & Keys.CONTROL) != 0;
 	}
 	
 	
 	///
 	final @property void handled(bool byes) pure nothrow // setter
 	{
-		hand = byes;
+		_handled = byes;
 	}
 	
 	///
 	final @property bool handled() pure nothrow // getter
 	{
-		return hand;
+		return _handled;
 	}
 	
 	
 	///
 	final @property Keys keyCode() pure nothrow // getter
 	{
-		return ks & Keys.KEY_CODE;
+		return _keys & Keys.KEY_CODE;
 	}
 	
 	
 	///
 	final @property Keys keyData() pure nothrow // getter
 	{
-		return ks;
+		return _keys;
 	}
 	
 	
@@ -957,34 +958,34 @@ class KeyEventArgs: EventArgs
 	// -keyData- as an int.
 	final @property int keyValue() pure nothrow // getter
 	{
-		return cast(int)ks;
+		return cast(int)_keys;
 	}
 	
 	
 	///
 	final @property Keys modifiers() pure nothrow // getter
 	{
-		return ks & Keys.MODIFIERS;
+		return _keys & Keys.MODIFIERS;
 	}
 	
 	
 	///
 	final @property bool shift() pure nothrow // getter
 	{
-		return (ks & Keys.SHIFT) != 0;
+		return (_keys & Keys.SHIFT) != 0;
 	}
 	
 	
 	///
 	final @property bool windows() pure nothrow // getter
 	{
-		return (ks & Keys.WINDOWS) != 0;
+		return (_keys & Keys.WINDOWS) != 0;
 	}
 	
 	
-	private:
-	Keys ks;
-	bool hand = false;
+private:
+	Keys _keys;
+	bool _handled = false;
 }
 
 
@@ -1005,7 +1006,7 @@ class KeyPressEventArgs: KeyEventArgs
 	}
 	do
 	{
-		_keych = ch;
+		_keyChar = ch;
 		
 		int vk;
 		static import dfl.internal.utf;
@@ -1021,12 +1022,12 @@ class KeyPressEventArgs: KeyEventArgs
 	///
 	final @property dchar keyChar() // getter
 	{
-		return _keych;
+		return _keyChar;
 	}
 	
 	
-	private:
-	dchar _keych;
+private:
+	dchar _keyChar;
 }
 
 
@@ -1037,32 +1038,32 @@ class MouseEventArgs: EventArgs
 	// -delta- is mouse wheel rotations.
 	this(MouseButtons button, int clicks, int x, int y, int delta) pure nothrow
 	{
-		btn = button;
-		clks = clicks;
+		_button = button;
+		_clicks = clicks;
 		_x = x;
 		_y = y;
-		dlt = delta;
+		_delta = delta;
 	}
 	
 	
 	///
 	final @property MouseButtons button() pure nothrow // getter
 	{
-		return btn;
+		return _button;
 	}
 	
 	
 	///
 	final @property int clicks() pure nothrow // getter
 	{
-		return clks;
+		return _clicks;
 	}
 	
 	
 	///
 	final @property int delta() pure nothrow // getter
 	{
-		return dlt;
+		return _delta;
 	}
 	
 	
@@ -1080,11 +1081,11 @@ class MouseEventArgs: EventArgs
 	}
 	
 	
-	private:
-	MouseButtons btn;
-	int clks;
+private:
+	MouseButtons _button;
+	int _clicks;
 	int _x, _y;
-	int dlt;
+	int _delta;
 }
 
 ///
@@ -1170,19 +1171,19 @@ class ColumnClickEventArgs: EventArgs
 	///
 	this(int col) pure nothrow
 	{
-		this.col = col;
+		this._col = col;
 	}
 	
 	
 	///
 	final @property int column() pure nothrow // getter
 	{
-		return col;
+		return _col;
 	}
 	
 	
-	private:
-	int col;
+private:
+	int _col;
 }
 
 
@@ -1198,62 +1199,62 @@ class DrawItemEventArgs: EventArgs
 	/// ditto
 	this(Graphics g, Font f, Rect r, int i, DrawItemState dis, Color fc, Color bc) pure nothrow
 	{
-		gpx = g;
-		fnt = f;
-		rect = r;
-		idx = i;
-		distate = dis;
-		fcolor = fc;
-		bcolor = bc;
+		_gpx = g;
+		_fnt = f;
+		_rect = r;
+		_idx = i;
+		_distate = dis;
+		_fcolor = fc;
+		_bcolor = bc;
 	}
 	
 	
 	///
 	final @property Color backColor() pure nothrow // getter
 	{
-		return bcolor;
+		return _bcolor;
 	}
 	
 	
 	///
 	final @property Rect bounds() pure nothrow // getter
 	{
-		return rect;
+		return _rect;
 	}
 	
 	
 	///
 	final @property Font font() pure nothrow // getter
 	{
-		return fnt;
+		return _fnt;
 	}
 	
 	
 	///
 	final @property Color foreColor() pure nothrow // getter
 	{
-		return fcolor;
+		return _fcolor;
 	}
 	
 	
 	///
 	final @property Graphics graphics() pure nothrow // getter
 	{
-		return gpx;
+		return _gpx;
 	}
 	
 	
 	///
 	final @property int index() pure nothrow // getter
 	{
-		return idx;
+		return _idx;
 	}
 	
 	
 	///
 	final @property DrawItemState state() pure nothrow // getter
 	{
-		return distate;
+		return _distate;
 	}
 	
 	
@@ -1276,29 +1277,29 @@ class DrawItemEventArgs: EventArgs
 		}
 		+/
 		
-		gpx.fillRectangle(bcolor, rect);
+		_gpx.fillRectangle(_bcolor, _rect);
 	}
 	
 	
 	///
 	void drawFocusRectangle()
 	{
-		if(distate & DrawItemState.FOCUS)
+		if(_distate & DrawItemState.FOCUS)
 		{
-			RECT _rect;
-			rect.getRect(&_rect);
-			DrawFocusRect(gpx.handle, &_rect);
+			RECT rect;
+			_rect.getRect(&rect);
+			DrawFocusRect(_gpx.handle, &rect);
 		}
 	}
 	
 	
-	private:
-	Graphics gpx;
-	Font fnt; // Suggestion; the parent's font.
-	Rect rect;
-	int idx;
-	DrawItemState distate;
-	Color fcolor, bcolor; // Suggestion; depends on item state.
+private:
+	Graphics _gpx;
+	Font _fnt; // Suggestion; the parent's font.
+	Rect _rect;
+	int _idx;
+	DrawItemState _distate;
+	Color _fcolor, _bcolor; // Suggestion; depends on item state.
 }
 
 
@@ -1308,9 +1309,9 @@ class MeasureItemEventArgs: EventArgs
 	///
 	this(Graphics g, int index, int itemHeight)
 	{
-		gpx = g;
-		idx = index;
-		iheight = itemHeight;
+		_gpx = g;
+		_idx = index;
+		_iheight = itemHeight;
 	}
 	
 	/// ditto
@@ -1323,46 +1324,46 @@ class MeasureItemEventArgs: EventArgs
 	///
 	final @property Graphics graphics() // getter
 	{
-		return gpx;
+		return _gpx;
 	}
 	
 	
 	///
 	final @property int index() // getter
 	{
-		return idx;
+		return _idx;
 	}
 	
 	
 	///
 	final @property void itemHeight(int height) // setter
 	{
-		iheight = height;
+		_iheight = height;
 	}
 	
 	/// ditto
 	final @property int itemHeight() // getter
 	{
-		return iheight;
+		return _iheight;
 	}
 	
 	
 	///
 	final @property void itemWidth(int width) // setter
 	{
-		iwidth = width;
+		_iwidth = width;
 	}
 	
 	/// ditto
 	final @property int itemWidth() // getter
 	{
-		return iwidth;
+		return _iwidth;
 	}
 	
 	
-	private:
-	Graphics gpx;
-	int idx, iheight, iwidth = 0;
+private:
+	Graphics _gpx;
+	int _idx, _iheight, _iwidth = 0;
 }
 
 
@@ -1375,14 +1376,14 @@ class Cursor // docmain
 	// Used internally.
 	this(HCURSOR hcur, bool owned = true)
 	{
-		this.hcur = hcur;
-		this.owned = owned;
+		this._hcur = hcur;
+		this._owned = owned;
 	}
 	
 	
 	~this()
 	{
-		if(owned)
+		if(_owned)
 			dispose();
 	}
 	
@@ -1390,9 +1391,9 @@ class Cursor // docmain
 	///
 	void dispose()
 	{
-		assert(owned);
-		DestroyCursor(hcur);
-		hcur = HCURSOR.init;
+		assert(_owned);
+		DestroyCursor(_hcur);
+		_hcur = HCURSOR.init;
 	}
 	
 	
@@ -1402,7 +1403,7 @@ class Cursor // docmain
 		// Keep a reference so that it doesn't get garbage collected until set again.
 		_cur = cur;
 		
-		SetCursor(cur ? cur.hcur : HCURSOR.init);
+		SetCursor(_cur ? _cur._hcur : HCURSOR.init);
 	}
 	
 	/// ditto
@@ -1433,7 +1434,7 @@ class Cursor // docmain
 	///
 	final @property HCURSOR handle() // getter
 	{
-		return hcur;
+		return _hcur;
 	}
 	
 	
@@ -1458,7 +1459,7 @@ class Cursor // docmain
 	// Uses the actual size.
 	final void draw(Graphics g, Point pt)
 	{
-		DrawIconEx(g.handle, pt.x, pt.y, hcur, 0, 0, 0, HBRUSH.init, DI_NORMAL);
+		DrawIconEx(g.handle, pt.x, pt.y, _hcur, 0, 0, 0, HBRUSH.init, DI_NORMAL);
 	}
 	
 	/+
@@ -1482,7 +1483,7 @@ class Cursor // docmain
 		if(!height)
 			return;
 		
-		DrawIconEx(g.handle, r.x, r.y, hcur, width, height, 0, HBRUSH.init, DI_NORMAL);
+		DrawIconEx(g.handle, r.x, r.y, _hcur, width, height, 0, HBRUSH.init, DI_NORMAL);
 	}
 	
 	
@@ -1497,13 +1498,13 @@ class Cursor // docmain
 	
 	Dequ opEquals(Cursor cur) const
 	{
-		return hcur == cur.hcur;
+		return _hcur == cur._hcur;
 	}
 
 
 	override size_t toHash() const nothrow @safe
 	{
-		return hashOf(hcur);
+		return hashOf(_hcur);
 	}
 	
 	
@@ -1537,9 +1538,9 @@ class Cursor // docmain
 	}
 	
 	
-	private:
-	HCURSOR hcur;
-	bool owned = true;
+private:
+	HCURSOR _hcur;
+	bool _owned = true;
 }
 
 
@@ -1549,24 +1550,32 @@ class Cursors // docmain
 	private this() {}
 	
 	
-	static:
+static:
 	
 	///
 	@property Cursor appStarting() // getter
-	{ return new Cursor(LoadCursorA(HINSTANCE.init, IDC_APPSTARTING), false); }
+	{
+		return new Cursor(LoadCursorA(HINSTANCE.init, IDC_APPSTARTING), false);
+	}
 	
 	///
 	@property Cursor arrow() // getter
-	{ return new Cursor(LoadCursor(HINSTANCE.init, IDC_ARROW), false); }
+	{
+		return new Cursor(LoadCursor(HINSTANCE.init, IDC_ARROW), false);
+	}
 	
 	///
 	@property Cursor cross() // getter
-	{ return new Cursor(LoadCursor(HINSTANCE.init, IDC_CROSS), false); }
+	{
+		return new Cursor(LoadCursor(HINSTANCE.init, IDC_CROSS), false);
+	}
 	
 	///
 	//@property Cursor default() // getter
 	@property Cursor defaultCursor() // getter
-	{ return arrow; }
+	{
+		return arrow;
+	}
 	
 	///
 	@property Cursor hand() // getter
@@ -1722,4 +1731,24 @@ static class SystemInformation
 		}
 		return lines;
 	}
+}
+
+///
+deprecated enum DpiAwarenessContext
+{
+	UNAWARE = DPI_AWARENESS_CONTEXT_UNAWARE, ///
+	SYSTEM_AWARE = DPI_AWARENESS_CONTEXT_SYSTEM_AWARE, ///
+	PER_MONITOR_AWARE = DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE, ///
+	PER_MONITOR_AWARE_V2 = DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2, ///
+	UNAWARE_GDISCALED = DPI_AWARENESS_CONTEXT_UNAWARE_GDISCALED ///
+}
+
+///
+enum HighDpiMode
+{
+	DPI_UNAWARE = 0,
+	SYSTEM_AWARE = 1,
+	PER_MONITOR = 2,
+	PER_MONITOR_V2 = 3,
+	DPI_UNAWARE_GDI_SCALED = 4,
 }

@@ -3,7 +3,7 @@
 	"tasks": [
 		{
 			"type": "dub",
-			"run": true,
+			"run": false,
 			"cwd": ".",
 			"compiler": "$current",
 			"archType": "x86_64",
@@ -12,6 +12,11 @@
 			"problemMatcher": [
 				"$dmd"
 			],
+			"presentation": {
+				"focus": false,
+				"showReuseMessage": true,
+				"clear": true
+			},
 			"group": {
 				"kind": "build",
 				"isDefault": true

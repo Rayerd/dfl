@@ -33,7 +33,10 @@ class MainForm : Form
 		_toolBar.parent = this;
 		
 		_imageList = new ImageList;
-		_imageList.images.addStrip(new Bitmap(r".\image\toolbaricon.bmp"));
+		_imageList.transparentColor = Color.black;
+		ubyte[] bmpData = cast(ubyte[])import(r".\image\toolbaricon.bmp");
+		auto pic = new Picture(bmpData);
+		_imageList.images.addStrip(pic.toBitmap());
 		_toolBar.imageList = _imageList;
 
 		_button1 = new ToolBarButton("Border");
@@ -164,15 +167,11 @@ class MainForm : Form
 	}
 }
 
-static this()
+void main()
 {
 	// The ToolBar is always flat if the application is in visual styles.
 	// Separators are visible only if the ToolBar is ToolBarAppearance.FLAT.
-
-	// Application.enableVisualStyles();
-}
-
-void main()
-{
+	Application.enableVisualStyles();
+	Application.setHighDpiMode(HighDpiMode.PER_MONITOR_V2);
 	Application.run(new MainForm());
 }
