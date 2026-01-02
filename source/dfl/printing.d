@@ -485,6 +485,8 @@ class StandardPrintController : PrintController
 	///
 	override Graphics onStartPage(PrintDocument document, PrintPageEventArgs e)
 	{
+		e.graphics.pageUnit = GraphicsUnit.DISPLAY;
+
 		StartPage(e.graphics.handle);
 		return e.graphics;
 	}
@@ -883,8 +885,8 @@ private PrinterResolution[] _createPrinterResolutionArray(HGLOBAL hDevMode)
 
 private
 {
-	enum DEFAULT_PRINTER_RESOLUTION_X = 200;
-	enum DEFAULT_PRINTER_RESOLUTION_Y = 200;
+	enum DEFAULT_PRINTER_RESOLUTION_X = 600;
+	enum DEFAULT_PRINTER_RESOLUTION_Y = 600;
 }
 
 ///
@@ -2062,8 +2064,8 @@ private bool _createPagesetupdlgFromPrinterSettings(ref PAGESETUPDLG pd, Printer
 		DEVMODE* pDevMode = cast(DEVMODE*)GlobalLock(pd.hDevMode);
 		scope(exit)
 			GlobalUnlock(pDevMode);
-		pDevMode.dmPrintQuality = DEFAULT_PRINTER_RESOLUTION_X; // dpi
-		pDevMode.dmYResolution = DEFAULT_PRINTER_RESOLUTION_Y; // dpi
+		pDevMode.dmPrintQuality = cast(short)printerSettings.defaultPageSettings.printerResolution.x; // dpi
+		pDevMode.dmYResolution = cast(short)printerSettings.defaultPageSettings.printerResolution.y; // dpi
 		pDevMode.dmOrientation = {
 			if (printerSettings.defaultPageSettings.landscape)
 				return DMORIENT_LANDSCAPE;
@@ -2635,8 +2637,7 @@ class PreviewPrintController : PrintController
 	override void onEndPage(PrintDocument document, PrintPageEventArgs e)
 	{
 		Graphics pageGraphics = _pages[e.currentPage - 1].graphics;
-		pageGraphics.pageUnit = GraphicsUnit.DISPLAY; // Initialize graphics unit that is changed in user side.
-		Font font = new Font("MS Gothic", 100/+pt+/ * e.pageSettings.printerResolution.y / 72); // TODO: Really 100 pt? 1 point == 1/72 inches
+		Font font = new Font("MS Gothic", 100/+pt+/ * 100 / 72); // 1 point == 1/72 inches
 		_drawPageNumber(pageGraphics, e.currentPage, font); // Draw the current page number.
 	}
 
@@ -2702,8 +2703,8 @@ class PreviewPrintController : PrintController
 				pageGraphics.handle, // SRC
 				0,
 				0,
-				paperRect.width * 100 / DEFAULT_PRINTER_RESOLUTION_X * 2, // TODO: magic number?
-				paperRect.height * 100 / DEFAULT_PRINTER_RESOLUTION_Y * 2, // TODO: magic number?
+				paperRect.width * 100 / page.settings.printerResolution.x, // dpi unit
+				paperRect.height * 100 / page.settings.printerResolution.y, // dpi unit
 				SRCCOPY
 			);
 			pageGraphics.dispose(); // Created in onStartPage().

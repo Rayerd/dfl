@@ -336,8 +336,12 @@ class MainForm : Form
 				e.marginBounds.x, // e.marginBounds is 1/100 dpi unit.
 				e.marginBounds.y,
 				e.marginBounds.width,
-				e.marginBounds.height);
-			g.drawRectangle(new Pen(Color.green, 10 * e.pageSettings.printerResolution.x / 100), marginRect * e.pageSettings.printerResolution.x / 100);
+				e.marginBounds.height
+			);
+			g.drawRectangle(
+				new Pen(Color.green, 10),
+				marginRect
+			);
 
 			if (e.currentPage == 1) // Draw page 1.
 			{
@@ -356,41 +360,45 @@ class MainForm : Form
 				);
 				g.drawText(
 					str,
-					new Font("MS Gothic", 8/+pt+/ * 100 / 72 * e.pageSettings.printerResolution.x / 100),
+					new Font("MS Gothic", 10/+pt+/ * 100 / 72),
 					Color.black,
-					paramPrintRect * e.pageSettings.printerResolution.x / 100
+					paramPrintRect
 				);
 			}
 			else if (e.currentPage == 2) // Draw page 2.
 			{
-				Rect redRect = Rect(1 * 100, 1 * 100, 1 * 100, 1 * 100) * e.pageSettings.printerResolution.x / 100; // 1 x 1 inch.
+				Rect redRect = Rect(1 * 100, 1 * 100, 1 * 100, 1 * 100); // 1 x 1 inch.
 				redRect.offset(marginRect.x, marginRect.y);
 				g.fillRectangle(new SolidBrush(Color.red), redRect);
 
-				Rect blueRect = Rect(100, 100, 3 * 100, 3 * 100) * e.pageSettings.printerResolution.x / 100; // 3 x 3 inch.
+				Rect blueRect = Rect(100, 100, 3 * 100, 3 * 100); // 3 x 3 inch.
 				blueRect.offset(marginRect.x, marginRect.y);
-				g.drawRectangle(new Pen(Color.blue, 10 * e.pageSettings.printerResolution.x / 100), blueRect);
+				g.drawRectangle(new Pen(Color.blue, 10), blueRect);
 
-				Rect textRect = Rect(1 * 100, 1 * 100, 1 * 100, 1 * 100) * e.pageSettings.printerResolution.x / 100; // 1 x 1 inch.
+				Rect textRect = Rect(1 * 100, 1 * 100, 1 * 100, 1 * 100); // 1 x 1 inch.
 				textRect.offset(marginRect.x, marginRect.y);
 				g.drawText(
 					"ABCDEあいうえお",
-					new Font("MS Gothic", 12/+pt+/ * 100 / 72 * e.pageSettings.printerResolution.x / 100),
+					new Font("MS Gothic", 12/+pt+/ * 100 / 72),
 					Color.black,
 					textRect
 				);
 
-				Rect purpleRect = Rect(3 * 100, 3 * 100, 1 * 100, 1 * 100) * e.pageSettings.printerResolution.x / 100; // 1 x 1 inch.
+				Rect purpleRect = Rect(3 * 100, 3 * 100, 1 * 100, 1 * 100); // 1 x 1 inch.
 				purpleRect.offset(marginRect.x, marginRect.y);
-				g.drawEllipse(new Pen(Color.purple, 10 * e.pageSettings.printerResolution.x / 100), purpleRect);
+				g.drawEllipse(new Pen(Color.purple, 10), purpleRect);
 
-				Pen pen = new Pen(Color.black, 10 * e.pageSettings.printerResolution.x / 100);
+				Pen pen = new Pen(Color.black, 10);
 				enum lineNum = 20;
 				for (int x; x < lineNum; x++)
 				{
-					Point pt1 = Point(marginRect.x + cast(int)(x / 4.0 * 100), e.marginBounds.y);
-					Point pt2 = Point(marginRect.x + cast(int)((lineNum - x - 1)/4.0 * 100), e.marginBounds.bottom);
-					g.drawLine(pen, pt1 * e.pageSettings.printerResolution.x / 100, pt2 * e.pageSettings.printerResolution.x / 100);
+					Point pt1 = Point(
+						marginRect.x + x / 4.0 * 100,
+						e.marginBounds.y * 100 / 100);
+					Point pt2 = Point(
+						marginRect.x + (lineNum - x - 1)/4.0 * 100,
+						e.marginBounds.bottom * 100 / 100);
+					g.drawLine(pen, pt1, pt2);
 				}
 			}
 		};
