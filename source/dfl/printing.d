@@ -2626,11 +2626,11 @@ class PreviewPrintController : PrintController
 	override Graphics onStartPage(PrintDocument document, PrintPageEventArgs e)
 	{
 		Rect paperRect = _paperRectFrom(e.pageSettings);
-		auto pageGraphcis = new MemoryGraphics(paperRect.width, paperRect.height, e.graphics);
-		pageGraphcis.fillRectangle(Color.white, paperRect); // Draw the form of paper.
-		pageGraphcis.drawRectangle(new Pen(Color.black), paperRect); // Draw the border of paper.
-		_pages ~= new Page(pageGraphcis, e.pageSettings);
-		return pageGraphcis;
+		auto pageGraphics = new MemoryGraphics(paperRect.width, paperRect.height, e.graphics);
+		pageGraphics.fillRectangle(Color.white, paperRect); // Draw the form of paper.
+		pageGraphics.drawRectangle(new Pen(Color.black), paperRect); // Draw the border of paper.
+		_pages ~= new Page(pageGraphics, e.pageSettings);
+		return pageGraphics;
 	}
 
 	///
