@@ -1226,7 +1226,7 @@ class PageSettings
 	}
 
 	/// 1/100 inch unit.
-	Rect bounds() // getter
+	Rect bounds() const // getter
 	in
 	{
 		assert(this.paperSize);
@@ -1276,7 +1276,7 @@ class PageSettings
 		_landscape = l;
 	}
 	/// ditto
-	bool landscape() // getter
+	bool landscape() const // getter
 	{
 		return _landscape;
 	}
@@ -1287,7 +1287,7 @@ class PageSettings
 		_margins = m;
 	}
 	/// ditto
-	Margins margins() // getter
+	inout(Margins) margins() inout // getter
 	{
 		return _margins;
 	}
@@ -1298,7 +1298,7 @@ class PageSettings
 		_paperSize = p;
 	}
 	/// ditto
-	PaperSize paperSize() // getter
+	inout(PaperSize) paperSize() inout // getter
 	{
 		return _paperSize;
 	}
@@ -1309,7 +1309,7 @@ class PageSettings
 		_paperSource = p;
 	}
 	/// ditto
-	PaperSource paperSource() // getter
+	inout(PaperSource) paperSource() inout // getter
 	{
 		return _paperSource;
 	}
@@ -1326,7 +1326,7 @@ class PageSettings
 		_printerResolution = p;
 	}
 	/// ditto
-	PrinterResolution printerResolution() // getter
+	inout(PrinterResolution) printerResolution() inout // getter
 	{
 		return _printerResolution;
 	}
@@ -1337,7 +1337,7 @@ class PageSettings
 		_printerSettings = p;
 	}
 	/// ditto
-	PrinterSettings printerSettings() // getter
+	inout(PrinterSettings) printerSettings() inout // getter
 	{
 		return _printerSettings;
 	}
@@ -1841,7 +1841,7 @@ final class PageSetupDialog : CommonDialog
 			_pageSetupDlg.Flags &= ~PSD_NONETOWRKBUTTON;
 	}
 	/// ditto
-	bool showNetwork() // getter
+	bool showNetwork() const // getter
 	{
 		return _showNetwork;
 	}
@@ -1856,7 +1856,7 @@ final class PageSetupDialog : CommonDialog
 			_pageSetupDlg.Flags &= ~PSD_SHOWHELP;
 	}
 	/// ditto
-	bool showHelp() // getter
+	bool showHelp() const // getter
 	{
 		return _showHelp;
 	}
@@ -1879,7 +1879,7 @@ final class PageSetupDialog : CommonDialog
 		}
 	}
 	/// ditto
-	Margins minMargins() // getter
+	inout(Margins) minMargins() inout // getter
 	{
 		return _minMargins;
 	}
@@ -1889,7 +1889,7 @@ final class PageSetupDialog : CommonDialog
 	// {
 	// 	// ...
 	// }
-	// bool enableMetric() // getter
+	// bool enableMetric() const // getter
 	// {
 	// 	return _enableMetric;
 	// }
@@ -1904,7 +1904,7 @@ final class PageSetupDialog : CommonDialog
 			_pageSetupDlg.Flags |= PSD_DISABLEPRINTER;
 	}
 	/// ditto
-	bool allowPrinter() // getter
+	bool allowPrinter() const // getter
 	{
 		return _allowPrinter;
 	}
@@ -1919,7 +1919,7 @@ final class PageSetupDialog : CommonDialog
 			_pageSetupDlg.Flags |= PSD_DISABLEPAPER;
 	}
 	/// ditto
-	bool allowPaper() // getter
+	bool allowPaper() const // getter
 	{
 		return _allowPaper;
 	}
@@ -1934,7 +1934,7 @@ final class PageSetupDialog : CommonDialog
 			_pageSetupDlg.Flags |= PSD_DISABLEORIENTATION;
 	}
 	/// ditto
-	bool allowOrientation() // getter
+	bool allowOrientation() const // getter
 	{
 		return _allowOrientation;
 	}
@@ -1949,7 +1949,7 @@ final class PageSetupDialog : CommonDialog
 			_pageSetupDlg.Flags |= PSD_DISABLEMARGINS;
 	}
 	/// ditto
-	bool allowMargins() // getter
+	bool allowMargins() const // getter
 	{
 		return _allowMargins;
 	}
@@ -1960,7 +1960,7 @@ final class PageSetupDialog : CommonDialog
 		_document = document;
 	}
 	/// ditto
-	PrintDocument document() // getter
+	inout(PrintDocument) document() inout // getter
 	{
 		return _document;
 	}
@@ -2124,7 +2124,7 @@ class PrintPreviewControl : Control
 		_document = doc;
 	}
 	/// ditto
-	PrintDocument document() // getter
+	inout(PrintDocument) document() inout // getter
 	{
 		return _document;
 	}
@@ -2530,7 +2530,7 @@ class PrintPreviewDialog : Form
 		_previewControl.document = doc;
 	}
 	/// ditto
-	PrintDocument document() // getter
+	inout(PrintDocument) document() inout // getter
 	in
 	{
 		assert(_previewControl);
