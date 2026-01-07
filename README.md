@@ -9,6 +9,7 @@ import dfl;
 void main()
 {
 	Application.enableVisualStyles();
+	Application.setHighDpiMode(HighDpiMode.PER_MONITOR_V2);
 	
 	Form form = new Form;
 	form.text = "Welcome to DFL";
