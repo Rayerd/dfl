@@ -31,7 +31,7 @@ class MainForm : Form
 		_headerLabel.size = Size(200, 50);
 		_headerLabel.text = "Alarm";
 		_headerLabel.autoSize = true;
-		_headerLabel.borderStyle = BorderStyle.FIXED_SINGLE;
+		// _headerLabel.borderStyle = BorderStyle.FIXED_SINGLE;
 		_headerLabel.parent = this;
 
 		_alarmLabel1 = new Label;
@@ -48,7 +48,7 @@ class MainForm : Form
 		_alarmLabel2.size = Size(200, 50);
 		_alarmLabel2.text = "AM 07:30";
 		_alarmLabel2.autoSize = true;
-		_alarmLabel2.borderStyle = BorderStyle.FIXED_SINGLE;
+		// _alarmLabel2.borderStyle = BorderStyle.FIXED_SINGLE;
 		_alarmLabel2.parent = this;
 
 		_headerSwitch = new ToggleSwitch;
