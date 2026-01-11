@@ -15,6 +15,7 @@ import dfl.internal.utf;
 import dfl.internal.winapi;
 
 public import std.socket;
+import std.container.rbtree;
 
 import core.bitop;
 import core.sys.windows.winsock2;
@@ -100,16 +101,16 @@ void asyncSelect(AsyncSocket sock)
 	ei.sock = sock;
 	ei.exception = null;
 
-	g_allEvents[getSocketHandle(sock)] = ei;
+	_registerEventInfo(getSocketHandle(sock), ei);
 }
 
 ///
-int unregisterEvent(AsyncSocket sock) @trusted @nogc nothrow
+int unregisterEvent(AsyncSocket sock) @nogc nothrow
 {
 	if (WSAAsyncSelect(getSocketHandle(sock), g_hwNet, 0, 0) != 0)
 		return SOCKET_ERROR; // Unable to register socket events
 	
-	g_allEvents.remove(getSocketHandle(sock));
+	_unregisterEventInfo(getSocketHandle(sock));
 
 	return 0;
 }
@@ -169,7 +170,7 @@ class AsyncSocket: Socket // docmain
 	
 	
 	///
-	override void close() @nogc scope @trusted
+	override void close() scope @trusted nothrow @nogc
 	{
 		if (unregisterEvent(this) != 0)
 			assert(0);
@@ -463,7 +464,7 @@ GetHost asyncGetHostByName(Dstring name, GetHostCallback callback) // docmain
 	
 	result._handle = handle;
 	result._callback = callback;
-	g_allGetHosts[handle] = result;
+	_registerGetHost(handle, result);
 	
 	return result;
 }
@@ -484,7 +485,7 @@ GetHost asyncGetHostByAddr(uint32_t addr, GetHostCallback callback) // docmain
 	
 	result._handle = handle;
 	result._callback = callback;
-	g_allGetHosts[handle] = result;
+	_registerGetHost(handle, result);
 	
 	return result;
 }
@@ -683,13 +684,128 @@ struct EventInfo
 }
 
 
+///
+struct EventEntry
+{
+	socket_t key;
+	EventInfo value;
+}
+
+
+///
+bool _lessEventEntry(const ref EventEntry lhs, const ref EventEntry rhs)
+{
+	return lhs.key < rhs.key;
+}
+
+
+///
+EventInfo* _findEventInfo(socket_t key) @nogc nothrow
+{
+	foreach (ref entry; g_allEvents[])
+	{
+		if (entry.key == key)
+			return &entry.value;
+	}
+	return null;
+}
+
+
+///
+void _registerEventInfo(socket_t key, EventInfo info)
+{
+	if (auto p = _findEventInfo(key))
+	{
+		*p = info;
+		return;
+	}
+	g_allEvents.insert(EventEntry(key, info));
+}
+
+
+///
+void _unregisterEventInfo(socket_t key) @nogc nothrow
+{
+	auto r = g_allEvents[];
+	
+	while (!r.empty)
+	{
+		if (r.front.key == key)
+		{
+			g_allEvents.remove(r);
+			return;
+		}
+
+		r.popFront();
+	}
+}
+
+
+///
+struct GetHostEntry
+{
+	HANDLE key;
+	GetHost value;
+}
+
+
+///
+bool _lessGetHostEntry(const ref GetHostEntry lhs, const ref GetHostEntry rhs)
+{
+	return lhs.key < rhs.key;
+}
+
+
+///
+GetHost* _findGetHost(HANDLE key) @nogc nothrow
+{
+	foreach (ref entry; g_allGetHosts[])
+	{
+		if (entry.key == key)
+			return &entry.value;
+	}
+	return null;
+}
+
+
+///
+void _registerGetHost(HANDLE key, GetHost host)
+{
+	if (auto p = _findGetHost(key))
+	{
+		*p = host;
+		return;
+	}
+	g_allGetHosts.insert(GetHostEntry(key, host));
+}
+
+
+///
+void _unregisterGetHost(HANDLE key) @nogc nothrow
+{
+	auto r = g_allGetHosts[];
+	
+	while (!r.empty)
+	{
+		if (r.front.key == key)
+		{
+			g_allGetHosts.remove(r);
+			return;
+		}
+
+		r.popFront();
+	}
+}
+
+
 enum UINT WM_DFL_NETEVENT = WM_USER + 104; ///
 enum UINT WM_DFL_HOSTEVENT = WM_USER + 105; ///
 enum NETEVENT_CLASSNAME = "DFL_NetEvent"; ///
 
-EventInfo[socket_t] g_allEvents; ///
-GetHost[HANDLE] g_allGetHosts; ///
 HWND g_hwNet; ///
+
+__gshared RedBlackTree!(EventEntry, _lessEventEntry) g_allEvents; ///
+__gshared RedBlackTree!(GetHostEntry, _lessGetHostEntry) g_allGetHosts; ///
 
 
 ///
@@ -698,9 +814,10 @@ extern(Windows) LRESULT netWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 	switch(msg)
 	{
 		case WM_DFL_NETEVENT:
-			if (cast(socket_t)wparam in g_allEvents)
+		{
+			EventInfo* ei = _findEventInfo(cast(socket_t)wparam);
+			if (ei)
 			{
-				EventInfo ei = g_allEvents[cast(socket_t)wparam];
 				try
 				{
 					// ei.callback(ei.sock, cast(SocketEventType)LOWORD(lparam), HIWORD(lparam));
@@ -746,13 +863,15 @@ extern(Windows) LRESULT netWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 				}
 			}
 			break;
+		}
 		
 		case WM_DFL_HOSTEVENT:
-			if (cast(HANDLE)wparam in g_allGetHosts)
+		{
+			HANDLE handle = cast(HANDLE)wparam;
+			GetHost* gh = _findGetHost(handle);
+			if (gh)
 			{
-				GetHost gh = g_allGetHosts[cast(HANDLE)wparam];
-				assert(gh !is null);
-				g_allGetHosts.remove(cast(HANDLE)wparam);
+				_unregisterGetHost(handle);
 				try
 				{
 					gh._gotEvent(lparam);
@@ -763,7 +882,7 @@ extern(Windows) LRESULT netWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 				}
 			}
 			break;
-		
+		}
 		default:
 	}
 	
@@ -774,6 +893,9 @@ extern(Windows) LRESULT netWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 ///
 void _init()
 {
+	g_allEvents = new RedBlackTree!(EventEntry, _lessEventEntry)();
+	g_allGetHosts = new RedBlackTree!(GetHostEntry, _lessGetHostEntry)();
+
 	WNDCLASSEXA wce;
 	wce.cbSize = wce.sizeof;
 	wce.lpszClassName = NETEVENT_CLASSNAME.ptr;
