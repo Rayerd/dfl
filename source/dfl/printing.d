@@ -534,7 +534,6 @@ class PrintDocument
 
 		Graphics deviceScreen = new Graphics(hDC, false);
 		
-		PrintPageEventArgs printPageArgs;
 		auto walker = new PrintRangeWalker(this.printerSettings.printRange.ranges);
 		foreach (int pageCounter; walker)
 		{
@@ -553,13 +552,11 @@ class PrintDocument
 
 			Rect marginBounds = ps.bounds; // 1/100 inch unit.
 			Rect pageBounds = Rect(0, 0, ps.paperSize.width, ps.paperSize.height); // 1/100 inch unit.
-			printPageArgs = new PrintPageEventArgs(deviceScreen, marginBounds, pageBounds, ps, pageCounter);
+			PrintPageEventArgs printPageArgs = new PrintPageEventArgs(deviceScreen, marginBounds, pageBounds, ps, pageCounter);
 			printPageArgs.graphics = printController.onStartPage(this, printPageArgs); // Call StartPage() API
 			
 			if(!printPageArgs.cancel)
 				this.onPrintPage(printPageArgs);
-			
-			printPageArgs.graphics = deviceScreen;
 
 			printController.onEndPage(this, printPageArgs); // Call EndPage() API
 			if (printPageArgs.cancel)
@@ -887,6 +884,7 @@ private
 {
 	enum DEFAULT_PRINTER_RESOLUTION_X = 600;
 	enum DEFAULT_PRINTER_RESOLUTION_Y = 600;
+	enum OFFSCREEN_SCALE_FACTOR = 2;
 }
 
 ///
@@ -2196,9 +2194,21 @@ class PrintPreviewControl : Control
 		document.printerSettings.setHdevnames(pd.hDevNames);
 		document.printerSettings.defaultPageSettings.setHdevmode(pd.hDevMode);
 
-		Rect screenRect = Rect(0, 0, GetSystemMetricsForDpi(SM_CXSCREEN, dpi), GetSystemMetricsForDpi(SM_CYSCREEN, dpi));
-		_offscreen = new MemoryGraphics(screenRect.width, screenRect.height);
-		_offscreen.fillRectangle(new SolidBrush(Color.gray), screenRect);
+		Rect offscreenRect = Rect(
+			0,
+			0,
+			GetSystemMetricsForDpi(SM_CXSCREEN, dpi),
+			GetSystemMetricsForDpi(SM_CYSCREEN, dpi) * OFFSCREEN_SCALE_FACTOR
+		);
+
+		if (!_offscreen)
+		{
+			HDC refdc = GetDC(null);
+			scope (exit) ReleaseDC(null, refdc);
+
+			_offscreen = new MemoryGraphics(offscreenRect.width, offscreenRect.height, refdc);
+		}
+		_offscreen.fillRectangle(new SolidBrush(Color.gray), offscreenRect);
 
 		// Reset here, because print range is always all pages on preview print.
 		document.printerSettings.printRange.reset();
@@ -2218,16 +2228,16 @@ class PrintPreviewControl : Control
 		{
 			if (this.autoZoom)
 			{
-				const Rect offscreenRect = Rect(0, 0, _justDrawnSize.width, _justDrawnSize.height);
+				const Rect offscreenDrawnRect = Rect(0, 0, _justDrawnSize.width, _justDrawnSize.height);
 				uint onscreenHeight = this.height;
-				uint onscreenWidth = offscreenRect.width * this.height / offscreenRect.height;
+				uint onscreenWidth = offscreenDrawnRect.width * this.height / offscreenDrawnRect.height;
 				if (onscreenWidth >= this.width)
 				{
 					onscreenWidth = this.width;
-					onscreenHeight = offscreenRect.height * this.width / offscreenRect.width;
+					onscreenHeight = offscreenDrawnRect.height * this.width / offscreenDrawnRect.width;
 				}
 
-				SetStretchBltMode(_offscreen.handle, STRETCH_DELETESCANS); // SRC
+				SetStretchBltMode(e.graphics.handle, STRETCH_HALFTONE); // DST
 				StretchBlt(
 					e.graphics.handle, // DST
 					0,
@@ -2237,8 +2247,8 @@ class PrintPreviewControl : Control
 					_offscreen.handle, // SRC
 					0,
 					0,
-					offscreenRect.width,
-					offscreenRect.height,
+					offscreenDrawnRect.width,
+					offscreenDrawnRect.height,
 					SRCCOPY
 				);
 			}
@@ -2248,8 +2258,8 @@ class PrintPreviewControl : Control
 					e.graphics, // DST
 					0,
 					0,
-					MulDiv(_offscreen.width, dpi, USER_DEFAULT_SCREEN_DPI),
-					MulDiv(_offscreen.height, dpi, USER_DEFAULT_SCREEN_DPI)
+					_offscreen.width,
+					_offscreen.height
 				);
 			}
 		}
@@ -2541,12 +2551,6 @@ class PrintPreviewDialog : Form
 	}
 
 	///
-	protected override void wndProc(ref Message msg)
-	{
-		super.wndProc(msg);
-	}
-
-	///
 	protected override void onShown(EventArgs ea)
 	{
 		super.onShown(ea);
@@ -2568,7 +2572,9 @@ class PrintPreviewDialog : Form
 		{
 			_previewPanel.hScroll = true;
 			_previewPanel.vScroll = true;
-			_previewPanel.scrollSize = Size(GetSystemMetricsForDpi(SM_CXSCREEN, dpi), GetSystemMetricsForDpi(SM_CYSCREEN, dpi));
+			_previewPanel.scrollSize = Size(
+				GetSystemMetricsForDpi(SM_CXSCREEN, dpi),
+				GetSystemMetricsForDpi(SM_CYSCREEN, dpi) * OFFSCREEN_SCALE_FACTOR);
 			_previewPanel.performLayout();
 		}
 		else
@@ -2690,25 +2696,48 @@ class PreviewPrintController : PrintController
 		{
 			const Point pos = layoutHelper.position();
 			const Rect paperRect = _paperRectFrom(page.settings);
-			const uint pageRenderWidth = cast(uint)(paperRect.width * ratio);
-			const uint pageRenderHeight = cast(uint)(paperRect.height * ratio);
 			Graphics pageGraphics = page.graphics;
-			SetStretchBltMode(pageGraphics.handle, STRETCH_DELETESCANS); // SRC
-			StretchBlt(
-				e.hDC, // DST
-				pos.x,
-				pos.y,
-				pageRenderWidth,
-				pageRenderHeight,
-				pageGraphics.handle, // SRC
-				0,
-				0,
-				paperRect.width * 100 / page.settings.printerResolution.x, // dpi unit
-				paperRect.height * 100 / page.settings.printerResolution.y, // dpi unit
-				SRCCOPY
-			);
-			pageGraphics.dispose(); // Created in onStartPage().
+			uint pageRenderWidth;
+			uint pageRenderHeight;
+			if (_previewControl.autoZoom)
+			{
+				pageRenderWidth = cast(uint)(paperRect.width * ratio);
+				pageRenderHeight = cast(uint)(paperRect.height * ratio);
+
+				SetStretchBltMode(e.hDC, STRETCH_HALFTONE); // DST
+				StretchBlt(
+					e.hDC, // DST
+					pos.x,
+					pos.y,
+					pageRenderWidth,
+					pageRenderHeight,
+					pageGraphics.handle, // SRC
+					0,
+					0,
+					paperRect.width * 100 / page.settings.printerResolution.x, // dpi unit
+					paperRect.height * 100 / page.settings.printerResolution.y, // dpi unit
+					SRCCOPY
+				);
+			}
+			else
+			{
+				pageRenderWidth = paperRect.width * 100 / page.settings.printerResolution.x; // dpi unit
+				pageRenderHeight = paperRect.height * 100 / page.settings.printerResolution.y; // dpi unit
+
+				BitBlt(
+					e.hDC, // DST
+					pos.x,
+					pos.y,
+					pageRenderWidth, // dpi unit
+					pageRenderHeight, // dpi unit
+					pageGraphics.handle, // SRC
+					0,
+					0,
+					SRCCOPY
+				);
+			}
 			layoutHelper.appendPageSize(pageRenderWidth, pageRenderHeight);
+			pageGraphics.dispose(); // Created in onStartPage().
 		}
 	}
 	

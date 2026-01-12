@@ -360,7 +360,7 @@ class MainForm : Form
 				);
 				g.drawText(
 					str,
-					new Font("MS Gothic", 10/+pt+/ * 100 / 72),
+					new Font("MS Gothic", 16/+pt+/ * 100 / 72),
 					Color.black,
 					paramPrintRect
 				);
@@ -379,7 +379,7 @@ class MainForm : Form
 				textRect.offset(marginRect.x, marginRect.y);
 				g.drawText(
 					"ABCDEあいうえお",
-					new Font("MS Gothic", 12/+pt+/ * 100 / 72),
+					new Font("MS Gothic", 16/+pt+/ * 100 / 72),
 					Color.black,
 					textRect
 				);
