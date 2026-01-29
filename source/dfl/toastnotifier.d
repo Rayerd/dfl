@@ -43,7 +43,6 @@ import std.conv : to;
 import std.format : format;
 import std.path : baseName, stripExtension, buildNormalizedPath, setExtension;
 import std.string : replace;
-import std.logger.filelogger;
 
 
 pragma(lib, "Shlwapi"); // SHStrDupW
