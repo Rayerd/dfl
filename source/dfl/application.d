@@ -65,12 +65,12 @@ class ApplicationContext // docmain
 	///
 	final @property void mainForm(Form mainForm) // setter
 	{
-		if(_form)
+		if (_form)
 			_form.closed.removeHandler(&onMainFormClosed);
 		
 		_form = mainForm;
 		
-		if(mainForm)
+		if (mainForm)
 			mainForm.closed ~= &onMainFormClosed;
 	}
 	
@@ -116,8 +116,7 @@ private:
 
 private extern(Windows) nothrow
 {
-	alias GetTempFileNameWProc = UINT function(LPCWSTR lpPathName, LPCWSTR lpPrefixString, UINT uUnique,
-		LPWSTR lpTempFileName);
+	alias GetTempFileNameWProc = UINT function(LPCWSTR lpPathName, LPCWSTR lpPrefixString, UINT uUnique, LPWSTR lpTempFileName);
 	alias GetTempPathWProc = DWORD function(DWORD nBufferLength, LPWSTR lpBuffer);
 	alias CreateActCtxWProc = HANDLE function(PACTCTXW pActCtx);
 	alias ActivateActCtxProc = BOOL function(HANDLE hActCtx, ULONG_PTR* lpCookie);
@@ -306,7 +305,7 @@ static:
 	Dstring getSpecialPath(Dstring name) // package
 	{
 		HKEY hk;
-		if(ERROR_SUCCESS != RegOpenKeyA(HKEY_CURRENT_USER,
+		if (ERROR_SUCCESS != RegOpenKeyA(HKEY_CURRENT_USER,
 			r"Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders".ptr, &hk))
 		{
 		bad_path:
@@ -315,7 +314,7 @@ static:
 		scope(exit)
 			RegCloseKey(hk);
 		Dstring result = regQueryValueString(hk, name);
-		if(!result.length)
+		if (!result.length)
 			goto bad_path;
 		return result;
 	}
@@ -340,24 +339,24 @@ static:
 	{
 		//filters ~= mf;
 		
-		IMessageFilter[] fs = filters;
+		IMessageFilter[] fs = _filters;
 		fs ~= mf;
-		filters = fs;
+		_filters = fs;
 	}
 	
 	/// ditto
 	void removeMessageFilter(IMessageFilter mf)
 	{
-		for(size_t i = 0; i != filters.length; i++)
+		for (size_t i = 0; i != _filters.length; i++)
 		{
-			if(mf is filters[i])
+			if (mf is _filters[i])
 			{
-				if(!i)
-					filters = filters[1 .. $];
-				else if(i + 1 == filters.length)
-					filters = filters[0 .. i];
+				if (!i)
+					_filters = _filters[1 .. $];
+				else if (i + 1 == _filters.length)
+					_filters = _filters[0 .. i];
 				else
-					filters = filters[0 .. i] ~ filters[i + 1 .. $];
+					_filters = _filters[0 .. i] ~ _filters[i + 1 .. $];
 				break;
 			}
 		}
@@ -366,27 +365,27 @@ static:
 	
 	package bool _doEvents(bool* keep)
 	{
-		if(threadFlags & (TF.STOP_RUNNING | TF.QUIT))
+		if (threadFlags & (TF.STOP_RUNNING | TF.QUIT))
 			return false;
 		
 		try
 		{
 			Message msg;
 			
-			while(dfl.internal.utf.peekMessage(&msg._winMsg, HWND.init, 0, 0, PM_REMOVE))
+			while (dfl.internal.utf.peekMessage(&msg._winMsg, HWND.init, 0, 0, PM_REMOVE))
 			{
 				gotMessage(msg);
 				
-				if(msg.msg == WM_QUIT)
+				if (msg.msg == WM_QUIT)
 				{
 					threadFlags = threadFlags | TF.QUIT;
 					return false;
 				}
-				if(threadFlags & TF.STOP_RUNNING)
+				if (threadFlags & TF.STOP_RUNNING)
 				{
 					return false;
 				}
-				if(!*keep)
+				if (!*keep)
 				{
 					break;
 				}
@@ -394,7 +393,7 @@ static:
 			
 			// Execution continues after this so it's not idle.
 		}
-		catch(DThrowable e)
+		catch (DThrowable e)
 		{
 			onThreadException(e);
 		}
@@ -413,7 +412,7 @@ static:
 	/// ditto
 	bool doEvents(uint msDelay)
 	{
-		if(msDelay <= 3)
+		if (msDelay <= 3)
 			return doEvents();
 		struct TMR { public import dfl.timer; }
 		scope tmr = new TMR.Timer();
@@ -421,10 +420,10 @@ static:
 		tmr.interval = msDelay;
 		tmr.tick ~= (TMR.Timer sender, EventArgs ea) { sender.stop(); keep = false; };
 		tmr.start();
-		while(keep)
+		while (keep)
 		{
 			Application.waitForEvent();
-			if(!_doEvents(&keep))
+			if (!_doEvents(&keep))
 				return false;
 		}
 		return true;
@@ -461,13 +460,13 @@ static:
 	// may manually fire the Application.idle event.
 	void run(ApplicationContext appcon, void delegate() whileIdle)
 	{
-		if(threadFlags & TF.RUNNING)
+		if (threadFlags & TF.RUNNING)
 		{
 			//throw new DflException("Cannot have more than one message loop per thread");
 			assert(0, "Cannot have more than one message loop per thread");
 		}
 		
-		if(threadFlags & TF.QUIT)
+		if (threadFlags & TF.QUIT)
 		{
 			assert(0, "The application is shutting down");
 		}
@@ -475,7 +474,7 @@ static:
 		version(CUSTOM_MSG_HOOK)
 		{
 			HHOOK _msghook = SetWindowsHookExA(WH_CALLWNDPROCRET, &globalMsgHook, null, GetCurrentThreadId());
-			if(!_msghook)
+			if (!_msghook)
 				throw new DflException("Unable to get window messages");
 			msghook = _msghook;
 		}
@@ -487,38 +486,38 @@ static:
 		}
 		
 		
-		ctx = appcon;
-		ctx.threadExit ~= &threadJustExited;
+		_ctx = appcon;
+		_ctx.threadExit ~= &threadJustExited;
 		try
 		{
 			threadFlags = threadFlags | TF.RUNNING;
 			
-			if(ctx.mainForm)
+			if (_ctx.mainForm)
 			{
 				//ctx.mainForm.createControl();
-				ctx.mainForm.show();
+				_ctx.mainForm.show();
 			}
 			
-			for(;;)
+			for (;;)
 			{
 				try
 				{
 				still_running:
-					while(!(threadFlags & (TF.QUIT | TF.STOP_RUNNING)))
+					while (!(threadFlags & (TF.QUIT | TF.STOP_RUNNING)))
 					{
 						Message msg;
 						
-						while(dfl.internal.utf.peekMessage(&msg._winMsg, HWND.init, 0, 0, PM_REMOVE))
+						while (dfl.internal.utf.peekMessage(&msg._winMsg, HWND.init, 0, 0, PM_REMOVE))
 						{
 							gotMessage(msg);
 							
-							if(msg.msg == WM_QUIT)
+							if (msg.msg == WM_QUIT)
 							{
 								threadFlags = threadFlags | TF.QUIT;
 								break still_running;
 							}
 							
-							if(threadFlags & (TF.QUIT | TF.STOP_RUNNING))
+							if (threadFlags & (TF.QUIT | TF.STOP_RUNNING))
 								break still_running;
 						}
 						
@@ -530,7 +529,7 @@ static:
 					threadFlags = threadFlags & ~(TF.RUNNING | TF.STOP_RUNNING);
 					return;
 				}
-				catch(DThrowable e)
+				catch (DThrowable e)
 				{
 					onThreadException(e);
 				}
@@ -541,8 +540,8 @@ static:
 			threadFlags = threadFlags & ~(TF.RUNNING | TF.STOP_RUNNING);
 			
 			ApplicationContext tctx;
-			tctx = ctx;
-			ctx = null;
+			tctx = _ctx;
+			_ctx = null;
 			
 			version(CUSTOM_MSG_HOOK)
 				UnhookWindowsHookEx(msghook);
@@ -587,29 +586,29 @@ static:
 	// Will be null if not in a successful Application.run.
 	package @property ApplicationContext context() nothrow // getter
 	{
-		return ctx;
+		return _ctx;
 	}
 	
 	
 	///
 	HINSTANCE getInstance()
 	{
-		if(!hinst)
+		if (!_hinst)
 			_initInstance();
-		return hinst;
+		return _hinst;
 	}
 	
 	/// ditto
 	void setInstance(HINSTANCE inst)
 	{
-		if(hinst)
+		if (_hinst)
 		{
-			if(inst != hinst)
+			if (inst != _hinst)
 				throw new DflException("Instance is already set");
 			return;
 		}
 		
-		if(inst)
+		if (inst)
 		{
 			_initInstance(inst);
 		}
@@ -627,13 +626,13 @@ static:
 	{
 		protected override void onLoad(EventArgs ea)
 		{
-			okBtn.focus();
+			_okBtn.focus();
 		}
 		
 		
 		protected override void onClosing(CancelEventArgs cea)
 		{
-			cea.cancel = !errdone;
+			cea.cancel = !_errdone;
 		}
 		
 		
@@ -642,8 +641,8 @@ static:
 		
 		void onOkClick(Object sender, EventArgs ea)
 		{
-			errdone = true;
-			ctnu = true;
+			_errdone = true;
+			_ctnu = true;
 			//close();
 			dispose();
 		}
@@ -651,8 +650,8 @@ static:
 		
 		void onCancelClick(Object sender, EventArgs ea)
 		{
-			errdone = true;
-			ctnu = false;
+			_errdone = true;
+			_ctnu = false;
 			//close();
 			dispose();
 		}
@@ -677,17 +676,17 @@ static:
 				parent = this;
 			}
 			
-			with(errBox = new TextBox)
+			with(_errBox = new TextBox)
 			{
 				text = errmsg;
 				bounds = Rect(PADDING, 40 + PADDING, this.clientSize.width - PADDING * 2, 50);
-				errBox.backColor = this.backColor;
+				_errBox.backColor = this.backColor;
 				readOnly = true;
 				multiline = true;
 				parent = this;
 			}
 			
-			with(okBtn = new Button)
+			with(_okBtn = new Button)
 			{
 				width = 100;
 				location = Point(this.clientSize.width - width - PADDING - width - PADDING,
@@ -696,7 +695,7 @@ static:
 				parent = this;
 				click ~= &onOkClick;
 			}
-			acceptButton = okBtn;
+			acceptButton = _okBtn;
 			
 			with(new Button)
 			{
@@ -725,18 +724,18 @@ static:
 				MSG msg;
 				assert(isHandleCreated);
 				// Using the unicode stuf here messes up the redrawing for some reason.
-				while(GetMessageA(&msg, HWND.init, 0, 0)) // TODO: unicode ?
-				//while(dfl.internal.utf.getMessage(&msg, HWND.init, 0, 0))
+				while (GetMessageA(&msg, HWND.init, 0, 0)) // TODO: unicode ?
+				//while (dfl.internal.utf.getMessage(&msg, HWND.init, 0, 0))
 				{
-					if(!IsDialogMessageA(handle, &msg))
-					//if(!dfl.internal.utf.isDialogMessage(handle, &msg))
+					if (!IsDialogMessageA(handle, &msg))
+					//if (!dfl.internal.utf.isDialogMessage(handle, &msg))
 					{
 						TranslateMessage(&msg);
 						DispatchMessageA(&msg);
 						//dfl.internal.utf.dispatchMessage(&msg);
 					}
 					
-					if(!isHandleCreated)
+					if (!isHandleCreated)
 						break;
 				}
 			}
@@ -771,7 +770,7 @@ static:
 			{
 				Sleep(200);
 			}
-			while(thread1);
+			while (thread1);
 			
 			return ctnu;
 		}
@@ -784,13 +783,13 @@ static:
 			show();
 			
 			Message msg;
-			for(;;)
+			for (;;)
 			{
 				WaitMessage();
-				if(PeekMessageA(&msg._winMsg, handle, 0, 0, PM_REMOVE | PM_NOYIELD))
+				if (PeekMessageA(&msg._winMsg, handle, 0, 0, PM_REMOVE | PM_NOYIELD))
 				{
 					/+
-					//if(!IsDialogMessageA(handle, &msg._winMsg)) // Back to the old problems.
+					//if (!IsDialogMessageA(handle, &msg._winMsg)) // Back to the old problems.
 					{
 						TranslateMessage(&msg._winMsg);
 						DispatchMessageA(&msg._winMsg);
@@ -799,25 +798,25 @@ static:
 					gotMessage(msg);
 				}
 				
-				if(!isHandleCreated)
+				if (!isHandleCreated)
 					break;
 			}
 			
-			return ctnu;
+			return _ctnu;
 		}
 		
 		
 		override Dstring toString() const
 		{
-			return errBox.text;
+			return _errBox.text;
 		}
 		
 		
 	private:
-		bool errdone = false;
-		bool ctnu = false;
-		Button okBtn;
-		TextBox errBox;
+		bool _errdone = false;
+		bool _ctnu = false;
+		Button _okBtn;
+		TextBox _errBox;
 	}
 	
 	
@@ -825,7 +824,7 @@ static:
 	bool showDefaultExceptionDialog(Object e)
 	{
 		/+
-		if(IDYES == MessageBoxA(null,
+		if (IDYES == MessageBoxA(null,
 			"An application exception has occured. Click Yes to allow\r\n"
 			"the application to ignore this error and attempt to continue.\r\n"
 			"Click No to quit the application.\r\n\r\n"~
@@ -839,7 +838,7 @@ static:
 		
 		//try
 		{
-			if((new ErrForm(getObjectString(e))).doContinue())
+			if ((new ErrForm(getObjectString(e))).doContinue())
 			{
 				return true;
 			}
@@ -869,12 +868,12 @@ static:
 				}
 				else
 				{
-					if(cast(WindowsHungDflException)e)
+					if (cast(WindowsHungDflException)e)
 						return;
 				}
 			}
 			
-			if(except)
+			if (except)
 			{
 				cprintf("Error: %.*s\n", cast(int)getObjectString(e).length, getObjectString(e).ptr);
 				
@@ -883,7 +882,7 @@ static:
 			}
 			
 			except = true;
-			if(threadException.hasHandlers)
+			if (threadException.hasHandlers)
 			{
 				threadException(typeid(Application), new ThreadExceptionEventArgs(e));
 				except = false;
@@ -892,7 +891,7 @@ static:
 			else
 			{
 				// No thread exception handlers, display a dialog.
-				if(showDefaultExceptionDialog(e))
+				if (showDefaultExceptionDialog(e))
 				{
 					except = false;
 					return;
@@ -922,7 +921,7 @@ static:
 	///
 	void addHotkey(Keys k,void delegate(Object sender, KeyEventArgs ea) dg)
 	{
-		if (auto pkid = k in hotkeyId)
+		if (auto pkid = k in _hotkeyId)
 		{
 			immutable kid = *pkid;
 			hotkeyHandler[kid] ~= dg;
@@ -943,7 +942,7 @@ static:
 			immutable keycode = k & Keys.KEY_CODE;
 			if (RegisterHotKey(null, kid, mod, keycode))
 			{
-				hotkeyId[k] = kid;
+				_hotkeyId[k] = kid;
 				if (auto h = kid in hotkeyHandler)
 				{
 					*h ~= dg;
@@ -966,7 +965,7 @@ static:
 	///
 	void removeHotkey(Keys k, void delegate(Object sender, KeyEventArgs ea) dg)
 	{
-		if (auto pkid = k in hotkeyId)
+		if (auto pkid = k in _hotkeyId)
 		{
 			immutable kid = *pkid;
 			hotkeyHandler[kid].removeHandler(dg);
@@ -977,7 +976,7 @@ static:
 					throw new DflException("Hotkey cannot unresistered.");
 				}
 				hotkeyHandler.remove(kid);
-				hotkeyId.remove(k);
+				_hotkeyId.remove(k);
 			}
 		}
 	}
@@ -986,7 +985,7 @@ static:
 	///
 	void removeHotkey(Keys k)
 	{
-		if (auto pkid = k in hotkeyId)
+		if (auto pkid = k in _hotkeyId)
 		{
 			immutable kid = *pkid;
 			foreach (hnd; hotkeyHandler[kid])
@@ -999,7 +998,7 @@ static:
 				throw new DflException("Hotkey cannot unresistered.");
 			}
 			hotkeyHandler.remove(kid);
-			hotkeyId.remove(k);
+			_hotkeyId.remove(k);
 		}
 	}
 	
@@ -1061,19 +1060,19 @@ static:
 	
 	static ~this()
 	{
-		foreach (key; hotkeyId.keys)
+		foreach (key; _hotkeyId.keys)
 		{
 			removeHotkey(key);
 		}
-		hotkeyId = null;
+		_hotkeyId = null;
 	}
 	
 
 	// Returns null if not found.
 	package Control lookupHwnd(HWND hwnd) nothrow
 	{
-		auto pc = hwnd in controls;
-		if(pc)
+		auto pc = hwnd in _controls;
+		if (pc)
 			return *pc;
 		return null;
 	}
@@ -1082,7 +1081,7 @@ static:
 	// Also makes a great zombie.
 	package void removeHwnd(HWND hwnd)
 	{
-		controls.remove(hwnd);
+		_controls.remove(hwnd);
 	}
 	
 	
@@ -1118,7 +1117,7 @@ static:
 		do
 		{
 			RemovePropA(c.handle, ZOMBIE_PROP.ptr);
-			controls[c.handle] = c;
+			_controls[c.handle] = c;
 		}
 		
 		
@@ -1130,7 +1129,7 @@ static:
 		}
 		do
 		{
-			if(c.isHandleCreated)
+			if (c.isHandleCreated)
 			{
 				RemovePropA(c.handle, ZOMBIE_PROP.ptr);
 			}
@@ -1141,26 +1140,26 @@ static:
 	// Returns its new unique menu ID.
 	package int addMenuItem(MenuItem menu)
 	{
-		if(nmenus == END_MENU_ID - FIRST_MENU_ID)
+		if (_nmenus == END_MENU_ID - FIRST_MENU_ID)
 			throw new DflException("Out of menus");
 		
 		// TODO: sort menu IDs in 'menus' so that looking for free ID is much faster.
 		
-		prevMenuID++;
-		if(prevMenuID >= END_MENU_ID || prevMenuID <= FIRST_MENU_ID)
+		_prevMenuID++;
+		if (_prevMenuID >= END_MENU_ID || _prevMenuID <= FIRST_MENU_ID)
 		{
-			prevMenuID = FIRST_MENU_ID;
+			_prevMenuID = FIRST_MENU_ID;
 		previdloop:
-			for(;;)
+			for (;;)
 			{
-				for(size_t iw; iw != nmenus; iw++)
+				for (size_t iw; iw != _nmenus; iw++)
 				{
-					MenuItem mi = cast(MenuItem)menus[iw];
-					if(mi)
+					MenuItem mi = cast(MenuItem)_menus[iw];
+					if (mi)
 					{
-						if(prevMenuID == mi._menuID)
+						if (_prevMenuID == mi._menuID)
 						{
-							prevMenuID++;
+							_prevMenuID++;
 							continue previdloop;
 						}
 					}
@@ -1168,36 +1167,36 @@ static:
 				break;
 			}
 		}
-		typeof(menus) tempmenus = cast(Menu*)dfl.internal.clib.realloc(menus, Menu.sizeof * (nmenus + 1));
-		if(!tempmenus)
+		typeof(_menus) tempmenus = cast(Menu*)dfl.internal.clib.realloc(_menus, Menu.sizeof * (_nmenus + 1));
+		if (!tempmenus)
 		{
 			throw new DflException("Out of memory");
 		}
-		menus = tempmenus;
+		_menus = tempmenus;
 		
-		menus[nmenus++] = menu;
+		_menus[_nmenus++] = menu;
 		
-		return prevMenuID;
+		return _prevMenuID;
 	}
 	
 	
 	package void addContextMenu(ContextMenu menu)
 	{
-		if(nmenus == END_MENU_ID - FIRST_MENU_ID)
+		if (_nmenus == END_MENU_ID - FIRST_MENU_ID)
 			throw new DflException("Out of menus");
 		
-		int idx = nmenus;
+		int idx = _nmenus;
 		
-		nmenus++;
-		typeof(menus) tempmenus = cast(Menu*)dfl.internal.clib.realloc(menus, Menu.sizeof * nmenus);
-		if(!tempmenus)
+		_nmenus++;
+		typeof(_menus) tempmenus = cast(Menu*)dfl.internal.clib.realloc(_menus, Menu.sizeof * _nmenus);
+		if (!tempmenus)
 		{
-			nmenus--;
+			_nmenus--;
 			throw new DflException("Out of memory");
 		}
-		menus = tempmenus;
+		_menus = tempmenus;
 		
-		menus[idx] = menu;
+		_menus[idx] = menu;
 	}
 	
 	
@@ -1205,9 +1204,9 @@ static:
 	{
 		uint idx;
 		
-		for(idx = 0; idx != nmenus; idx++)
+		for (idx = 0; idx != _nmenus; idx++)
 		{
-			if(menus[idx] is menu)
+			if (_menus[idx] is menu)
 			{
 				goto found;
 			}
@@ -1215,30 +1214,30 @@ static:
 		return;
 		
 	found:
-		if(nmenus == 1)
+		if (_nmenus == 1)
 		{
-			dfl.internal.clib.free(menus);
-			menus = null;
-			nmenus--;
+			dfl.internal.clib.free(_menus);
+			_menus = null;
+			_nmenus--;
 		}
 		else
 		{
-			if(idx != nmenus - 1)
-				menus[idx] = menus[nmenus - 1]; // Move last one in its place
+			if (idx != _nmenus - 1)
+				_menus[idx] = _menus[_nmenus - 1]; // Move last one in its place
 			
-			nmenus--;
-			menus = cast(Menu*)dfl.internal.clib.realloc(menus, Menu.sizeof * nmenus);
-			assert(menus != null); // Memory shrink shouldn't be a problem.
+			_nmenus--;
+			_menus = cast(Menu*)dfl.internal.clib.realloc(_menus, Menu.sizeof * _nmenus);
+			assert(_menus != null); // Memory shrink shouldn't be a problem.
 		}
 	}
 	
 	
 	package MenuItem lookupMenuID(int menuID)
 	{
-		for(uint idx = 0; idx != nmenus; idx++)
+		for (uint idx = 0; idx != _nmenus; idx++)
 		{
-			MenuItem mi = cast(MenuItem)menus[idx];
-			if(mi && mi._menuID == menuID)
+			MenuItem mi = cast(MenuItem)_menus[idx];
+			if (mi && mi._menuID == menuID)
 				return mi;
 		}
 		return null;
@@ -1247,10 +1246,10 @@ static:
 	
 	package Menu lookupMenu(HMENU hmenu)
 	{
-		for(uint idx = 0; idx != nmenus; idx++)
+		for (uint idx = 0; idx != _nmenus; idx++)
 		{
-			if(menus[idx].handle == hmenu)
-				return menus[idx];
+			if (_menus[idx].handle == hmenu)
+				return _menus[idx];
 		}
 		return null;
 	}
@@ -1258,7 +1257,7 @@ static:
 	
 	package void creatingControl(Control ctrl) nothrow
 	{
-		TlsSetValue(tlsControl, cast(Control*)ctrl);
+		TlsSetValue(_tlsControl, cast(Control*)ctrl);
 	}
 	
 	
@@ -1267,11 +1266,11 @@ static:
 	{
 		static Resources rc = null;
 		
-		if(!rc)
+		if (!rc)
 		{
 			synchronized
 			{
-				if(!rc)
+				if (!rc)
 				{
 					rc = new Resources(getInstance());
 				}
@@ -1281,27 +1280,27 @@ static:
 	}
 	
 	
-	private UINT_PTR gctimer = 0;
-	private DWORD gcinfo = 1;
+	private UINT_PTR _gctimer = 0;
+	private DWORD _gcinfo = 1;
 	
 	
 	///
 	@property void autoCollect(bool byes) // setter
 	{
-		if(byes)
+		if (byes)
 		{
-			if(!autoCollect)
+			if (!autoCollect)
 			{
-				gcinfo = 1;
+				_gcinfo = 1;
 			}
 		}
 		else
 		{
-			if(autoCollect)
+			if (autoCollect)
 			{
-				gcinfo = 0;
-				KillTimer(HWND.init, gctimer);
-				gctimer = 0;
+				_gcinfo = 0;
+				KillTimer(HWND.init, _gctimer);
+				_gctimer = 0;
 			}
 		}
 	}
@@ -1309,13 +1308,13 @@ static:
 	/// ditto
 	@property bool autoCollect() nothrow // getter
 	{
-		return gcinfo > 0;
+		return _gcinfo > 0;
 	}
 	
 	
 	package void _waitMsg()
 	{
-		if(threadFlags & (TF.STOP_RUNNING | TF.QUIT))
+		if (threadFlags & (TF.STOP_RUNNING | TF.QUIT))
 			return;
 		
 		idle(typeid(Application), EventArgs.empty);
@@ -1330,24 +1329,24 @@ static:
 	// this function fires the -idle- event.
 	void waitForEvent()
 	{
-		if(!autoCollect)
+		if (!autoCollect)
 		{
 			_waitMsg();
 			return;
 		}
 		
-		if(1 == gcinfo)
+		if (1 == _gcinfo)
 		{
-			gcinfo = gcinfo.max;
-			assert(!gctimer);
-			gctimer = SetTimer(HWND.init, 0, 200, &_gcTimeout);
+			_gcinfo = _gcinfo.max;
+			assert(!_gctimer);
+			_gctimer = SetTimer(HWND.init, 0, 200, &_gcTimeout);
 		}
 		
 		_waitMsg();
 		
-		if(GetTickCount() > gcinfo)
+		if (GetTickCount() > _gcinfo)
 		{
-			gcinfo = 1;
+			_gcinfo = 1;
 		}
 	}
 	
@@ -1366,7 +1365,7 @@ static:
 		}
 		else
 		{
-			if(messageLoop)
+			if (messageLoop)
 			{
 				assert(0, "setCompat"); // Called too late, must enable compatibility sooner.
 			}
@@ -1385,19 +1384,19 @@ static:
 		synchronized
 		{
 			auto pref = p in _refs;
-			if(pref)
+			if (pref)
 			{
 				size_t count;
 				count = *pref;
 				
 				assert(count || -1 != by);
 				
-				if(-1 == by)
+				if (-1 == by)
 					count--;
 				else
 					count++;
 				
-				if(!count)
+				if (!count)
 				{
 					result = 0;
 					_refs.remove(p);
@@ -1408,7 +1407,7 @@ static:
 					_refs[p] = count;
 				}
 			}
-			else if(1 == by)
+			else if (1 == by)
 			{
 				_refs[p] = 1;
 				result = 1;
@@ -1447,16 +1446,16 @@ static:
 private:
 static:
 	size_t[void*] _refs;
-	IMessageFilter[] filters;
-	DWORD tlsThreadFlags;
-	DWORD tlsControl;
-	DWORD tlsFilter; // IMessageFilter[]*.
+	IMessageFilter[] _filters;
+	DWORD _tlsThreadFlags;
+	DWORD _tlsControl;
+	DWORD _tlsFilter; // IMessageFilter[]*.
 	version(CUSTOM_MSG_HOOK)
-		DWORD tlsHook; // HHOOK.
-	Control[HWND] controls;
-	HINSTANCE hinst;
-	ApplicationContext ctx = null;
-	int[Keys] hotkeyId;
+		DWORD _tlsHook; // HHOOK.
+	Control[HWND] _controls;
+	HINSTANCE _hinst;
+	ApplicationContext _ctx = null;
+	int[Keys] _hotkeyId;
 	Event!(Object, KeyEventArgs)[int] hotkeyHandler;
 	
 	// Menus.
@@ -1468,10 +1467,10 @@ static:
 	enum ushort LAST_CTRL_ID = 65500;
 	
 	
-	ushort prevMenuID = FIRST_MENU_ID;
+	ushort _prevMenuID = FIRST_MENU_ID;
 	// malloc() is needed so the menus can be garbage collected.
-	uint nmenus = 0; // Number of -menus-.
-	Menu* menus = null; // WARNING: malloc()'d memory!
+	uint _nmenus = 0; // Number of -menus-.
+	Menu* _menus = null; // WARNING: malloc()'d memory!
 	
 	
 	// Destroy all menu handles at program exit because Windows will not
@@ -1479,13 +1478,13 @@ static:
 	// Note that this is probably just a 16bit issue, but it still appeared in the 32bit docs.
 	void sdtorFreeAllMenus()
 	{
-		foreach(Menu m; menus[0 .. nmenus])
+		foreach (Menu m; _menus[0 .. _nmenus])
 		{
 			DestroyMenu(m.handle);
 		}
-		nmenus = 0;
-		dfl.internal.clib.free(menus);
-		menus = null;
+		_nmenus = 0;
+		dfl.internal.clib.free(_menus);
+		_menus = null;
 	}
 	
 	
@@ -1501,7 +1500,7 @@ static:
 		// The TlsFilterValue is being garbage collected!
 		
 		TlsFilterValue* val = cast(TlsFilterValue*)TlsGetValue(tlsFilter);
-		if(!val)
+		if (!val)
 			val = new TlsFilterValue;
 		val.filters = filters;
 		TlsSetValue(tlsFilter, cast(LPVOID)val);
@@ -1511,7 +1510,7 @@ static:
 	@property IMessageFilter[] filters() nothrow // getter
 	{
 		TlsFilterValue* val = cast(TlsFilterValue*)TlsGetValue(tlsFilter);
-		if(!val)
+		if (!val)
 			return null;
 		return val.filters;
 	}
@@ -1522,20 +1521,20 @@ static:
 	{
 		@property void msghook(HHOOK hhook) // setter
 		{
-			TlsSetValue(tlsHook, cast(LPVOID)hhook);
+			TlsSetValue(_tlsHook, cast(LPVOID)hhook);
 		}
 		
 		
 		@property HHOOK msghook() nothrow // getter
 		{
-			return cast(HHOOK)TlsGetValue(tlsHook);
+			return cast(HHOOK)TlsGetValue(_tlsHook);
 		}
 	}
 	
 	
 	Control getCreatingControl() nothrow
 	{
-		return cast(Control)cast(Control*)TlsGetValue(tlsControl);
+		return cast(Control)cast(Control*)TlsGetValue(_tlsControl);
 	}
 	
 	
@@ -1550,13 +1549,13 @@ static:
 	
 	@property TF threadFlags() nothrow // getter
 	{
-		return cast(TF)cast(DWORD)TlsGetValue(tlsThreadFlags);
+		return cast(TF)cast(DWORD)TlsGetValue(_tlsThreadFlags);
 	}
 	
 	
 	@property void threadFlags(TF flags) // setter
 	{
-		if(!TlsSetValue(tlsThreadFlags, cast(LPVOID)cast(DWORD)flags))
+		if (!TlsSetValue(_tlsThreadFlags, cast(LPVOID)cast(DWORD)flags))
 			assert(0);
 	}
 	
@@ -1576,21 +1575,21 @@ static:
 				new KeyEventArgs(cast(Keys)((mod << 16) | keycode)));
 		}
 		// Don't bother with this extra stuff if there aren't any filters.
-		if(filters.length)
+		if (_filters.length)
 		{
 			try
 			{
 				// Keep a local reference so that handlers
 				// may be added and removed during filtering.
-				IMessageFilter[] local = filters;
+				IMessageFilter[] local = _filters;
 				
-				foreach(IMessageFilter mf; local)
+				foreach (IMessageFilter mf; local)
 				{
 					// Returning true prevents dispatching.
-					if(mf.preFilterMessage(msg))
+					if (mf.preFilterMessage(msg))
 					{
 						Control ctrl = lookupHwnd(msg.hWnd);
-						if(ctrl)
+						if (ctrl)
 						{
 							ctrl.mustWndProc(msg);
 						}
@@ -1602,10 +1601,10 @@ static:
 					}
 				}
 			}
-			catch(DThrowable o)
+			catch (DThrowable o)
 			{
 				Control ctrl = lookupHwnd(msg.hWnd);
-				if(ctrl)
+				if (ctrl)
 					ctrl.mustWndProc(msg);
 				throw o;
 			}
@@ -1625,13 +1624,13 @@ package:
 
 extern(Windows) void _gcTimeout(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime) nothrow
 {
-	KillTimer(hwnd, Application.gctimer);
-	Application.gctimer = 0;
+	KillTimer(hwnd, Application._gctimer);
+	Application._gctimer = 0;
 	
 	//cprintf("Auto-collecting\n");
 	dfl.internal.dlib.gcFullCollect();
 	
-	Application.gcinfo = GetTickCount() + 4000;
+	Application._gcinfo = GetTickCount() + 4000;
 }
 
 
@@ -1649,7 +1648,7 @@ debug(SHOW_MESSAGE_INFO)
 		}
 		
 		
-		switch(m.msg)
+		switch (m.msg)
 		{
 		case WM_NULL: writeWm("WM_NULL"); break;
 		case WM_CREATE: writeWm("WM_CREATE"); break;
@@ -1782,11 +1781,11 @@ debug(SHOW_MESSAGE_INFO)
 		case WM_MEASUREITEM: writeWm("WM_MEASUREITEM"); break;
 		
 		default:
-			if(m.msg >= WM_USER && m.msg <= 0x7FFF)
+			if (m.msg >= WM_USER && m.msg <= 0x7FFF)
 			{
 				writeWm("WM_USER+" ~ std.string.toString(m.msg - WM_USER));
 			}
-			else if(m.msg >=0xC000 && m.msg <= 0xFFFF)
+			else if (m.msg >=0xC000 && m.msg <= 0xFFFF)
 			{
 				writeWm("RegisterWindowMessage");
 			}
@@ -1815,9 +1814,9 @@ extern(Windows) LRESULT dflWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 {
 	//cprintf("HWND %p; WM %d(0x%X); WPARAM %d(0x%X); LPARAM %d(0x%X);\n", hwnd, msg, msg, wparam, wparam, lparam, lparam);
 	
-	if(msg == wmDfl)
+	if (msg == wmDfl)
 	{
-		switch(wparam)
+		switch (wparam)
 		{
 		case WPARAM_DFL_INVOKE_PARAMS:
 			{
@@ -1826,13 +1825,13 @@ extern(Windows) LRESULT dflWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 				{
 					p.fp(Application.lookupHwnd(hwnd), p.params.ptr[0 .. p.nparams]);
 				}
-				catch(DThrowable e)
+				catch (DThrowable e)
 				{
 					try
 					{
 						p.exception = e;
 					}
-					catch(DThrowable e2)
+					catch (DThrowable e2)
 					{
 						Application.onThreadException(e2);
 					}
@@ -1847,13 +1846,13 @@ extern(Windows) LRESULT dflWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 				{
 					p.fp(Application.lookupHwnd(hwnd), p.params);
 				}
-				catch(DThrowable e)
+				catch (DThrowable e)
 				{
 					try
 					{
 						p.exception = e;
 					}
-					catch(DThrowable e2)
+					catch (DThrowable e2)
 					{
 						Application.onThreadException(e2);
 					}
@@ -1868,7 +1867,7 @@ extern(Windows) LRESULT dflWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 				{
 					p.fp(Application.lookupHwnd(hwnd), p.params);
 				}
-				catch(DThrowable e)
+				catch (DThrowable e)
 				{
 					Application.onThreadException(e);
 				}
@@ -1883,7 +1882,7 @@ extern(Windows) LRESULT dflWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 				{
 					p.fp(Application.lookupHwnd(hwnd), p.params.ptr[0 .. p.nparams]);
 				}
-				catch(DThrowable e)
+				catch (DThrowable e)
 				{
 					Application.onThreadException(e);
 				}
@@ -1901,10 +1900,10 @@ extern(Windows) LRESULT dflWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 	debug(SHOW_MESSAGE_INFO)
 		showMessageInfo(dm);
 	
-	if(msg == WM_NCCREATE)
+	if (msg == WM_NCCREATE)
 	{
 		ctrl = Application.getCreatingControl();
-		if(!ctrl)
+		if (!ctrl)
 		{
 			debug(APP_PRINT)
 				cprintf("Unable to add window 0x%X.\n", cast(uint)hwnd);
@@ -1912,7 +1911,7 @@ extern(Windows) LRESULT dflWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 		}
 		Application.creatingControl(null); // Reset.
 		
-		Application.controls[hwnd] = ctrl;
+		Application._controls[hwnd] = ctrl;
 		ctrl._hwnd = hwnd;
 		debug(APP_PRINT)
 			cprintf("Added window 0x%X.\n", cast(uint)hwnd);
@@ -1923,7 +1922,7 @@ extern(Windows) LRESULT dflWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 	
 	ctrl = Application.lookupHwnd(hwnd);
 	
-	if(!ctrl)
+	if (!ctrl)
 	{
 		// Zombie...
 		//return 1; // Returns correctly for most messages. e.g. WM_QUERYENDSESSION, WM_NCACTIVATE.
@@ -1934,19 +1933,19 @@ extern(Windows) LRESULT dflWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lp
 		else
 		{
 			ctrl = cast(Control)cast(void*)GetPropA(hwnd, Application.ZOMBIE_PROP.ptr);
-			if(ctrl)
+			if (ctrl)
 				ctrl.mustWndProc(dm);
 		}
 		return dm.result;
 	}
 	
-	if(ctrl)
+	if (ctrl)
 	{
 		do_msg:
 		try
 		{
 			ctrl.mustWndProc(dm);
-			if(!ctrl.preProcessMessage(dm))
+			if (!ctrl.preProcessMessage(dm))
 				ctrl._wndProc(dm);
 		}
 		catch (DThrowable e)
@@ -1966,12 +1965,12 @@ version(CUSTOM_MSG_HOOK)
 	// Needs to be re-entrant.
 	extern(Windows) LRESULT globalMsgHook(int code, WPARAM wparam, LPARAM lparam)
 	{
-		if(code == HC_ACTION)
+		if (code == HC_ACTION)
 		{
 			CustomMsg* msg = cast(CustomMsg*)lparam;
 			Control ctrl;
 			
-			switch(msg.message)
+			switch (msg.message)
 			{
 				// ...
 			}
@@ -2127,7 +2126,7 @@ void _initCommonControls(DWORD dwControls)
 		// otherwise use the old InitCommonControls().
 		
 		HMODULE hmodCommonControls = LoadLibraryA("comctl32.dll");
-		if(!hmodCommonControls)
+		if (!hmodCommonControls)
 		{
 			// throw new DflException("Unable to load 'comctl32.dll'");
 		no_comctl32:
@@ -2136,7 +2135,7 @@ void _initCommonControls(DWORD dwControls)
 		}
 		
 		InitCommonControlsExProc initProc = cast(InitCommonControlsExProc)GetProcAddress(hmodCommonControls, "InitCommonControlsEx");
-		if(!initProc)
+		if (!initProc)
 		{
 			//FreeLibrary(hmodCommonControls);
 			goto no_comctl32;
@@ -2170,14 +2169,14 @@ static this()
 {
 	dfl.internal.utf._utfinit();
 	
-	Application.tlsThreadFlags = TlsAlloc();
-	Application.tlsControl = TlsAlloc();
-	Application.tlsFilter = TlsAlloc();
+	Application._tlsThreadFlags = TlsAlloc();
+	Application._tlsControl = TlsAlloc();
+	Application._tlsFilter = TlsAlloc();
 	version(CUSTOM_MSG_HOOK)
-		Application.tlsHook = TlsAlloc();
+		Application._tlsHook = TlsAlloc();
 	
 	wmDfl = RegisterWindowMessageA("WM_DFL");
-	if(!wmDfl)
+	if (!wmDfl)
 		wmDfl = WM_USER + 0x7CD;
 	
 	version(DFL_NO_WM_GETCONTROLNAME)
@@ -2203,7 +2202,7 @@ static this()
 	else
 	{
 		trackMouseEvent = cast(TrackMouseEventProc)GetProcAddress(user32, "TrackMouseEvent");
-		if(!trackMouseEvent) // Must be Windows 95; check if common controls has it (IE 5.5).
+		if (!trackMouseEvent) // Must be Windows 95; check if common controls has it (IE 5.5).
 			trackMouseEvent = cast(TrackMouseEventProc)GetProcAddress(GetModuleHandleA("comctl32.dll"), "_TrackMouseEvent");
 	}
 	
@@ -2224,7 +2223,7 @@ static ~this()
 {
 	Application.sdtorFreeAllMenus();
 	
-	if(hmodRichtextbox)
+	if (hmodRichtextbox)
 		FreeLibrary(hmodRichtextbox);
 	
 	Ole.unintialize();
@@ -2234,7 +2233,7 @@ static ~this()
 
 void _unableToInit(Dstring what)
 {
-	/+if(what.length > 4
+	/+if (what.length > 4
 		&& what[0] == 'D' && what[1] == 'F'
 		&& what[2] == 'L' && what[3] == '_')+/
 		what = what[4 .. what.length];
@@ -2251,12 +2250,12 @@ void _initInstance()
 void _initInstance(HINSTANCE inst)
 in
 {
-	assert(!Application.hinst);
+	assert(!Application._hinst);
 	assert(inst);
 }
 do
 {
-	Application.hinst = inst;
+	Application._hinst = inst;
 	
 	dfl.internal.utf.WndClass wc;
 	wc.wc.style = WNDCLASS_STYLE;
@@ -2265,13 +2264,13 @@ do
 	
 	// Control wndclass.
 	wc.className = CONTROL_CLASSNAME;
-	if(!dfl.internal.utf.registerClass(wc))
+	if (!dfl.internal.utf.registerClass(wc))
 		_unableToInit(CONTROL_CLASSNAME);
 	
 	// Form wndclass.
 	wc.wc.cbWndExtra = DLGWINDOWEXTRA;
 	wc.className = FORM_CLASSNAME;
-	if(!dfl.internal.utf.registerClass(wc))
+	if (!dfl.internal.utf.registerClass(wc))
 		_unableToInit(FORM_CLASSNAME);
 }
 
@@ -2280,11 +2279,11 @@ extern(Windows)
 {
 	void _initTextBox()
 	{
-		if(!textBoxPrevWndProc)
+		if (!textBoxPrevWndProc)
 		{
 			dfl.internal.utf.WndClass info;
 			textBoxPrevWndProc = superClass(HINSTANCE.init, "EDIT", TEXTBOX_CLASSNAME, info);
-			if(!textBoxPrevWndProc)
+			if (!textBoxPrevWndProc)
 				_unableToInit(TEXTBOX_CLASSNAME);
 			textBoxClassStyle = info.wc.style;
 		}
@@ -2293,11 +2292,11 @@ extern(Windows)
 	
 	void _initListbox()
 	{
-		if(!listboxPrevWndProc)
+		if (!listboxPrevWndProc)
 		{
 			dfl.internal.utf.WndClass info;
 			listboxPrevWndProc = superClass(HINSTANCE.init, "LISTBOX", LISTBOX_CLASSNAME, info);
-			if(!listboxPrevWndProc)
+			if (!listboxPrevWndProc)
 				_unableToInit(LISTBOX_CLASSNAME);
 			listboxClassStyle = info.wc.style;
 		}
@@ -2307,11 +2306,11 @@ extern(Windows)
 	/+
 	void _initLabel()
 	{
-		if(!labelPrevWndProc)
+		if (!labelPrevWndProc)
 		{
 			dfl.internal.utf.WndClass info;
 			labelPrevWndProc = superClass(HINSTANCE.init, "STATIC", LABEL_CLASSNAME, info);
-			if(!labelPrevWndProc)
+			if (!labelPrevWndProc)
 				_unableToInit(LABEL_CLASSNAME);
 			labelClassStyle = info.wc.style;
 		}
@@ -2321,11 +2320,11 @@ extern(Windows)
 	
 	void _initButton()
 	{
-		if(!buttonPrevWndProc)
+		if (!buttonPrevWndProc)
 		{
 			dfl.internal.utf.WndClass info;
 			buttonPrevWndProc = superClass(HINSTANCE.init, "BUTTON", BUTTON_CLASSNAME, info);
-			if(!buttonPrevWndProc)
+			if (!buttonPrevWndProc)
 				_unableToInit(BUTTON_CLASSNAME);
 			buttonClassStyle = info.wc.style;
 		}
@@ -2334,11 +2333,11 @@ extern(Windows)
 	
 	void _initMdiclient()
 	{
-		if(!mdiclientPrevWndProc)
+		if (!mdiclientPrevWndProc)
 		{
 			dfl.internal.utf.WndClass info;
 			mdiclientPrevWndProc = superClass(HINSTANCE.init, "MDICLIENT", MDICLIENT_CLASSNAME, info);
-			if(!mdiclientPrevWndProc)
+			if (!mdiclientPrevWndProc)
 				_unableToInit(MDICLIENT_CLASSNAME);
 			mdiclientClassStyle = info.wc.style;
 		}
@@ -2347,24 +2346,24 @@ extern(Windows)
 	
 	void _initRichtextbox()
 	{
-		if(!richtextboxPrevWndProc)
+		if (!richtextboxPrevWndProc)
 		{
-			if(!hmodRichtextbox)
+			if (!hmodRichtextbox)
 			{
 				hmodRichtextbox = LoadLibraryA("Msftedit.dll");
-				if(!hmodRichtextbox)
+				if (!hmodRichtextbox)
 					throw new DflException("Unable to load 'Msftedit.dll'");
 			}
 			
 			Dstring classname;
-			if(dfl.internal.utf.useUnicode)
+			if (dfl.internal.utf.useUnicode)
 				classname = "RICHEDIT50W";
 			else
 				classname = "RICHEDIT50A";
 			
 			dfl.internal.utf.WndClass info;
 			richtextboxPrevWndProc = superClass(HINSTANCE.init, classname, RICHTEXTBOX_CLASSNAME, info);
-			if(!richtextboxPrevWndProc)
+			if (!richtextboxPrevWndProc)
 				_unableToInit(RICHTEXTBOX_CLASSNAME);
 			richtextboxClassStyle = info.wc.style;
 		}
@@ -2373,11 +2372,11 @@ extern(Windows)
 	
 	void _initCombobox()
 	{
-		if(!comboboxPrevWndProc)
+		if (!comboboxPrevWndProc)
 		{
 			dfl.internal.utf.WndClass info;
 			comboboxPrevWndProc = superClass(HINSTANCE.init, "COMBOBOX", COMBOBOX_CLASSNAME, info);
-			if(!comboboxPrevWndProc)
+			if (!comboboxPrevWndProc)
 				_unableToInit(COMBOBOX_CLASSNAME);
 			comboboxClassStyle = info.wc.style;
 		}
@@ -2386,13 +2385,13 @@ extern(Windows)
 	
 	void _initTreeview()
 	{
-		if(!treeviewPrevWndProc)
+		if (!treeviewPrevWndProc)
 		{
 			_initCommonControls(ICC_TREEVIEW_CLASSES);
 			
 			dfl.internal.utf.WndClass info;
 			treeviewPrevWndProc = superClass(HINSTANCE.init, "SysTreeView32", TREEVIEW_CLASSNAME, info);
-			if(!treeviewPrevWndProc)
+			if (!treeviewPrevWndProc)
 				_unableToInit(TREEVIEW_CLASSNAME);
 			treeviewClassStyle = info.wc.style;
 		}
@@ -2401,13 +2400,13 @@ extern(Windows)
 	
 	void _initTabcontrol()
 	{
-		if(!tabcontrolPrevWndProc)
+		if (!tabcontrolPrevWndProc)
 		{
 			_initCommonControls(ICC_TAB_CLASSES);
 			
 			dfl.internal.utf.WndClass info;
 			tabcontrolPrevWndProc = superClass(HINSTANCE.init, "SysTabControl32", TABCONTROL_CLASSNAME, info);
-			if(!tabcontrolPrevWndProc)
+			if (!tabcontrolPrevWndProc)
 				_unableToInit(TABCONTROL_CLASSNAME);
 			tabcontrolClassStyle = info.wc.style;
 		}
@@ -2416,13 +2415,13 @@ extern(Windows)
 	
 	void _initListview()
 	{
-		if(!listviewPrevWndProc)
+		if (!listviewPrevWndProc)
 		{
 			_initCommonControls(ICC_LISTVIEW_CLASSES);
 			
 			dfl.internal.utf.WndClass info;
 			listviewPrevWndProc = superClass(HINSTANCE.init, "SysListView32", LISTVIEW_CLASSNAME, info);
-			if(!listviewPrevWndProc)
+			if (!listviewPrevWndProc)
 				_unableToInit(LISTVIEW_CLASSNAME);
 			listviewClassStyle = info.wc.style;
 		}
@@ -2431,13 +2430,13 @@ extern(Windows)
 	
 	void _initStatusbar()
 	{
-		if(!statusbarPrevWndProc)
+		if (!statusbarPrevWndProc)
 		{
 			_initCommonControls(ICC_WIN95_CLASSES);
 			
 			dfl.internal.utf.WndClass info;
 			statusbarPrevWndProc = superClass(HINSTANCE.init, "msctls_statusbar32", STATUSBAR_CLASSNAME, info);
-			if(!statusbarPrevWndProc)
+			if (!statusbarPrevWndProc)
 				_unableToInit(STATUSBAR_CLASSNAME);
 			statusbarClassStyle = info.wc.style;
 		}
@@ -2446,13 +2445,13 @@ extern(Windows)
 	
 	void _initProgressbar()
 	{
-		if(!progressbarPrevWndProc)
+		if (!progressbarPrevWndProc)
 		{
 			_initCommonControls(ICC_PROGRESS_CLASS);
 			
 			dfl.internal.utf.WndClass info;
 			progressbarPrevWndProc = superClass(HINSTANCE.init, "msctls_progress32", PROGRESSBAR_CLASSNAME, info);
-			if(!progressbarPrevWndProc)
+			if (!progressbarPrevWndProc)
 				_unableToInit(PROGRESSBAR_CLASSNAME);
 			progressbarClassStyle = info.wc.style;
 		}
@@ -2460,13 +2459,13 @@ extern(Windows)
 
 	void _initTrackbar()
 	{
-		if(!trackbarPrevWndProc)
+		if (!trackbarPrevWndProc)
 		{
 			_initCommonControls(ICC_BAR_CLASSES);
 			
 			dfl.internal.utf.WndClass info;
 			trackbarPrevWndProc = superClass(HINSTANCE.init, "msctls_trackbar32", TRACKBAR_CLASSNAME, info);
-			if(!trackbarPrevWndProc)
+			if (!trackbarPrevWndProc)
 				_unableToInit(TRACKBAR_CLASSNAME);
 			trackbarClassStyle = info.wc.style;
 		}
@@ -2481,7 +2480,7 @@ WNDPROC superClass(HINSTANCE hinst, Dstring className, Dstring newClassName, out
 {
 	WNDPROC wndProc;
 	
-	if(!dfl.internal.utf.getClassInfo(hinst, className, getInfo))
+	if (!dfl.internal.utf.getClassInfo(hinst, className, getInfo))
 		throw new DflException("Unable to obtain information for window class '" ~ className ~ "'");
 	
 	wndProc = getInfo.wc.lpfnWndProc;
@@ -2492,9 +2491,8 @@ WNDPROC superClass(HINSTANCE hinst, Dstring className, Dstring newClassName, out
 	getInfo.className = newClassName;
 	getInfo.wc.hInstance = Application.getInstance();
 	
-	if(!dfl.internal.utf.registerClass(getInfo))
+	if (!dfl.internal.utf.registerClass(getInfo))
 		//throw new DflException("Unable to register window class '" ~ newClassName ~ "'");
 		return null;
 	return wndProc;
 }
-
