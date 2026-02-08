@@ -30,11 +30,11 @@ void main()
 ## Recent major features
 - **Supports dpi-aware (per monitor v2).**
 	- Add Application.setHighDpiMode method.
-		- DPI_UNAWARE
-		- SYSTEM_AWARE
-		- PER_MONITOR
-		- PER_MONITOR_V2
-		- DPI_UNAWARE_GDI_SCALED
+		- ```DPI_UNAWARE```
+		- ```SYSTEM_AWARE```
+		- ```PER_MONITOR```
+		- ```PER_MONITOR_V2```
+		- ```DPI_UNAWARE_GDI_SCALED```
 	- Add Control.onDpiChanged method for recursive dpi-change.
 
 - Add LocationAlignment property to Control class for easily layout customize GUI elements (with example code) .
