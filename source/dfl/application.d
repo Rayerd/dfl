@@ -215,83 +215,65 @@ static:
 			~`</assembly>`~"\r\n";
 		
 		HMODULE kernel32 = GetModuleHandle("kernel32.dll");
-		assert(kernel32);
+		if (!kernel32) return;
+
+		CreateActCtxWProc createActCtxW = cast(CreateActCtxWProc)GetProcAddress(kernel32, "CreateActCtxW");
+		if (!createActCtxW) return;
+
+		GetTempPathWProc getTempPathW = cast(GetTempPathWProc)GetProcAddress(kernel32, "GetTempPathW");
+		if (!getTempPathW) return;
+
+		GetTempFileNameWProc getTempFileNameW = cast(GetTempFileNameWProc)GetProcAddress(kernel32, "GetTempFileNameW");
+		if (!getTempFileNameW) return;
+
+		ActivateActCtxProc activateActCtx = cast(ActivateActCtxProc)GetProcAddress(kernel32, "ActivateActCtx");
+		if (!activateActCtx) return;
+		
+		wchar[MAX_PATH] pathbuf = void;
+		DWORD pathlen = getTempPathW(pathbuf.length, pathbuf.ptr);
+		if (pathlen == 0 || pathlen > pathbuf.length) return;
+
+		wchar[MAX_PATH] manifestbuf = void;
+		DWORD manifestlen = getTempFileNameW(pathbuf.ptr, "dmf"w.ptr, 0, manifestbuf.ptr);
+		if (!manifestlen) return;
+
+		HANDLE hf = CreateFileW(manifestbuf.ptr, GENERIC_WRITE, 0, null, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, HANDLE.init);
+		scope(exit)
+			DeleteFileW(manifestbuf.ptr);
+		if (hf == INVALID_HANDLE_VALUE) return;
+
+		DWORD written;
+		BOOL ret = WriteFile(hf, MANIFEST.ptr, MANIFEST.length * MANIFEST[0].sizeof, &written, null);
+		CloseHandle(hf);
+		if (!ret) return;
+		
+		ACTCTXW ac;
+		ac.cbSize = ACTCTXW.sizeof;
+		ac.dwFlags = 0; // Enables "lpSource" field.
+		ac.lpSource = manifestbuf.ptr;
+		
+		HANDLE hac = createActCtxW(&ac);
+		if (hac == INVALID_HANDLE_VALUE)
 		{
-			CreateActCtxWProc createActCtxW = cast(CreateActCtxWProc)GetProcAddress(kernel32, "CreateActCtxW");
-			if(createActCtxW)
-			{
-				GetTempPathWProc getTempPathW = cast(GetTempPathWProc)GetProcAddress(kernel32, "GetTempPathW");
-				assert(getTempPathW !is null);
-
-				GetTempFileNameWProc getTempFileNameW = cast(GetTempFileNameWProc)GetProcAddress(kernel32, "GetTempFileNameW");
-				assert(getTempFileNameW !is null);
-
-				ActivateActCtxProc activateActCtx = cast(ActivateActCtxProc)GetProcAddress(kernel32, "ActivateActCtx");
-				assert(activateActCtx !is null);
-				
-				DWORD pathlen;
-				wchar[MAX_PATH] pathbuf = void;
-				{
-					pathlen = getTempPathW(pathbuf.length, pathbuf.ptr);
-					if(pathlen)
-					{
-						DWORD manifestlen;
-						wchar[MAX_PATH] manifestbuf = void;
-						//if(manifestbuf)
-						{
-							manifestlen = getTempFileNameW(pathbuf.ptr, "dmf", 0, manifestbuf.ptr);
-							if(manifestlen)
-							{
-								HANDLE hf = CreateFileW(manifestbuf.ptr, GENERIC_WRITE, 0, null, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, HANDLE.init);
-								if(hf != INVALID_HANDLE_VALUE)
-								{
-									DWORD written;
-									if(WriteFile(hf, MANIFEST.ptr, MANIFEST.length, &written, null))
-									{
-										CloseHandle(hf);
-										
-										ACTCTXW ac;
-										ac.cbSize = ACTCTXW.sizeof;
-										//ac.dwFlags = 4; // ACTCTX_FLAG_ASSEMBLY_DIRECTORY_VALID
-										ac.dwFlags = 0;
-										ac.lpSource = manifestbuf.ptr;
-										//ac.lpAssemblyDirectory = pathbuf; // TODO: ?
-										
-										HANDLE hac = createActCtxW(&ac);
-										if(hac != INVALID_HANDLE_VALUE)
-										{
-											ULONG_PTR ul;
-											activateActCtx(hac, &ul);
-											
-											_initCommonControls(ICC_STANDARD_CLASSES); // Yes.
-											//InitCommonControls(); // No. Doesn't work with common controls version 6!
-											
-											// Ensure the actctx is actually associated with the message queue...
-											PostMessageA(null, wmDfl, 0, 0);
-											{
-												MSG msg;
-												PeekMessageA(&msg, null, wmDfl, wmDfl, PM_REMOVE);
-											}
-										}
-										else
-										{
-											debug(APP_PRINT)
-												cprintf("CreateActCtxW failed.\n");
-										}
-									}
-									else
-									{
-										CloseHandle(hf);
-									}
-								}
-								
-								DeleteFileW(manifestbuf.ptr);
-							}
-						}
-					}
-				}
-			}
+			debug(APP_PRINT)
+				cprintf("CreateActCtxW failed.\n");
+			return;
 		}
+
+		ULONG_PTR ul;
+		if (!activateActCtx(hac, &ul))
+		{
+			ReleaseActCtx(hac);
+			return;
+		}
+		
+		_initCommonControls(ICC_STANDARD_CLASSES); // Yes.
+		//InitCommonControls(); // No. Doesn't work with common controls version 6!
+		
+		// Ensure the actctx is actually associated with the message queue...
+		PostMessageW(null, wmDfl, 0, 0);
+		MSG msg;
+		PeekMessageW(&msg, null, wmDfl, wmDfl, PM_REMOVE);
 	}
 	
 	
