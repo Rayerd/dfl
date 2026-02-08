@@ -15,8 +15,12 @@ import dfl.event;
 import dfl.imagelist;
 
 import dfl.internal.utf;
-import dfl.internal.winapi;
 import dfl.internal.dlib;
+
+import core.sys.windows.commctrl;
+import core.sys.windows.windef;
+import core.sys.windows.wingdi;
+import core.sys.windows.winuser;
 
 
 private extern(Windows) void _initTreeview();

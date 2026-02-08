@@ -14,7 +14,9 @@ import dfl.menu;
 
 import dfl.internal.dlib;
 import dfl.internal.utf;
-import dfl.internal.winapi;
+
+import core.sys.windows.windef;
+import core.sys.windows.winuser;
 
 debug(APP_PRINT)
 {
@@ -874,7 +876,7 @@ abstract class TextBoxBase: ControlSuperClass // docmain
 			synchronized
 			{
 				if(!def)
-					def = new SafeCursor(LoadCursorA(null, IDC_IBEAM));
+					def = new SafeCursor(LoadCursor(null, IDC_IBEAM));
 			}
 		}
 		

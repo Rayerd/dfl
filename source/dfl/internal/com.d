@@ -7,8 +7,9 @@ module dfl.internal.com;
 import dfl.base : DflException;
 
 import dfl.internal.dlib;
-import dfl.internal.winapi;
 import dfl.internal.wincom;
+
+import core.sys.windows.windef;
 
 
 // Importing dfl.application here causes the compiler to crash.

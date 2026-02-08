@@ -11,7 +11,11 @@ import dfl.event;
 import dfl.internal.clib;
 import dfl.internal.dlib;
 import dfl.internal.dpiaware;
-import dfl.internal.winapi;
+
+import core.sys.windows.winbase;
+import core.sys.windows.windef;
+import core.sys.windows.wingdi;
+import core.sys.windows.winuser;
 
 
 alias HWindow = HWND;
@@ -359,7 +363,6 @@ interface IMessageFilter // docmain
 
 abstract class WaitHandle
 {
-	enum WAIT_TIMEOUT = dfl.internal.winapi.WAIT_TIMEOUT; // DMD 1.028: needs fqn, otherwise conflicts with std.thread
 	enum INVALID_HANDLE = .INVALID_HANDLE_VALUE;
 	
 	
@@ -1552,7 +1555,7 @@ static:
 	///
 	@property Cursor appStarting() // getter
 	{
-		return new Cursor(LoadCursorA(HINSTANCE.init, IDC_APPSTARTING), false);
+		return new Cursor(LoadCursor(HINSTANCE.init, IDC_APPSTARTING), false);
 	}
 	
 	///
@@ -1587,7 +1590,7 @@ static:
 			
 			if (!hcurHand)
 			{
-				hcurHand = LoadCursorA(HINSTANCE.init, IDC_HAND);
+				hcurHand = LoadCursor(HINSTANCE.init, IDC_HAND);
 				if (!hcurHand) // Must be Windows 95, so load the cursor from winhlp32.exe.
 				{
 					char[MAX_PATH] winhlpPath = void;
@@ -1607,7 +1610,7 @@ static:
 						return arrow; // Just fall back to a normal arrow.
 					}
 					
-					HCURSOR hcur = LoadCursorA(hinstWinhlp, cast(char*)106);
+					HCURSOR hcur = LoadCursor(hinstWinhlp, cast(wchar*)106);
 					if (!hcur) // No such cursor resource.
 					{
 						FreeLibrary(hinstWinhlp);
@@ -1635,7 +1638,7 @@ static:
 	///
 	@property Cursor help() // getter
 	{
-		HCURSOR hcur = LoadCursorA(HINSTANCE.init, IDC_HELP);
+		HCURSOR hcur = LoadCursor(HINSTANCE.init, IDC_HELP);
 		if (!hcur) // IDC_HELP might not be supported on Windows 95, so fall back to a normal arrow.
 			return arrow;
 		return new Cursor(hcur);
@@ -1659,43 +1662,43 @@ static:
 	///
 	@property Cursor iBeam() // getter
 	{
-		return new Cursor(LoadCursorA(HINSTANCE.init, IDC_IBEAM), false);
+		return new Cursor(LoadCursor(HINSTANCE.init, IDC_IBEAM), false);
 	}
 	
 	///
 	@property Cursor no() // getter
 	{
-		return new Cursor(LoadCursorA(HINSTANCE.init, IDC_NO), false);
+		return new Cursor(LoadCursor(HINSTANCE.init, IDC_NO), false);
 	}
 	
 	///
 	@property Cursor sizeAll() // getter
 	{
-		return new Cursor(LoadCursorA(HINSTANCE.init, IDC_SIZEALL), false);
+		return new Cursor(LoadCursor(HINSTANCE.init, IDC_SIZEALL), false);
 	}
 	
 	/// ditto
 	@property Cursor sizeNESW() // getter
 	{
-		return new Cursor(LoadCursorA(HINSTANCE.init, IDC_SIZENESW), false);
+		return new Cursor(LoadCursor(HINSTANCE.init, IDC_SIZENESW), false);
 	}
 	
 	/// ditto
 	@property Cursor sizeNS() // getter
 	{
-		return new Cursor(LoadCursorA(HINSTANCE.init, IDC_SIZENS), false);
+		return new Cursor(LoadCursor(HINSTANCE.init, IDC_SIZENS), false);
 	}
 	
 	/// ditto
 	@property Cursor sizeNWSE() // getter
 	{
-		return new Cursor(LoadCursorA(HINSTANCE.init, IDC_SIZENWSE), false);
+		return new Cursor(LoadCursor(HINSTANCE.init, IDC_SIZENWSE), false);
 	}
 	
 	/// ditto
 	@property Cursor sizeWE() // getter
 	{
-		return new Cursor(LoadCursorA(HINSTANCE.init, IDC_SIZEWE), false);
+		return new Cursor(LoadCursor(HINSTANCE.init, IDC_SIZEWE), false);
 	}
 	
 	
@@ -1711,7 +1714,7 @@ static:
 	///
 	@property Cursor waitCursor() // getter
 	{
-		return new Cursor(LoadCursorA(HINSTANCE.init, IDC_WAIT), false);
+		return new Cursor(LoadCursor(HINSTANCE.init, IDC_WAIT), false);
 	}
 }
 

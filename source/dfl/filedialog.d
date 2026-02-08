@@ -14,7 +14,11 @@ import dfl.event;
 
 import dfl.internal.dlib;
 import dfl.internal.utf;
-import dfl.internal.winapi;
+
+import core.sys.windows.commdlg;
+import core.sys.windows.winbase;
+import core.sys.windows.windef;
+import core.sys.windows.winuser;
 
 
 ///
@@ -1022,8 +1026,6 @@ class SaveFileDialog: FileDialog // docmain
 
 private extern(Windows) UINT_PTR ofnHookProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) nothrow
 {
-	alias HANDLE = dfl.internal.winapi.HANDLE; // Otherwise, odd conflict with wine.
-	
 	enum PROP_STR = "DFL_FileDialog";
 	FileDialog fd;
 	UINT_PTR result = 0;

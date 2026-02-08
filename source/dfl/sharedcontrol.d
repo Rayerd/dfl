@@ -7,7 +7,6 @@ import dfl.control;
 
 import dfl.internal.clib : free, malloc;
 import dfl.internal.dlib;
-import dfl.internal.winapi;
 
 import core.atomic;
 

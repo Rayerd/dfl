@@ -14,7 +14,9 @@ import dfl.event;
 
 import dfl.internal.dlib;
 import dfl.internal.utf;
-import dfl.internal.winapi;
+
+import core.sys.windows.windef;
+import core.sys.windows.winuser;
 
 debug(APP_PRINT)
 {

@@ -12,11 +12,16 @@ import dfl.drawing;
 import dfl.internal.dlib;
 import dfl.internal.utf;
 import dfl.internal.com;
-import dfl.internal.winapi;
+import dfl.internal.winapi : CLIPFORMAT, DROPFILES;
 import dfl.internal.wincom;
 
-import core.sys.windows.ole2 : DATA_E_FORMATETC;
+import core.sys.windows.ole2;
+import core.sys.windows.shellapi;
+import core.sys.windows.winbase;
+import core.sys.windows.windef;
+import core.sys.windows.wingdi;
 public import core.sys.windows.wingdi : BITMAPINFO;
+import core.sys.windows.winuser;
 
 
 pragma(lib, "urlmon"); // CreateFormatEnumerator()
@@ -1456,7 +1461,7 @@ extern(Windows):
 						return STG_E_MEDIUMFULL;
 					}
 
-					const uint memSize = GlobalSize(hg);
+					const size_t memSize = GlobalSize(hg);
 					if (!memSize)
 					{
 						return STG_E_MEDIUMFULL;

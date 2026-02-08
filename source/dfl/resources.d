@@ -10,7 +10,11 @@ import dfl.drawing;
 
 import dfl.internal.dlib;
 import dfl.internal.utf;
-import dfl.internal.winapi;
+
+import core.sys.windows.winbase;
+import core.sys.windows.windef;
+import core.sys.windows.winuser;
+
 
 ///
 class Resources // docmain

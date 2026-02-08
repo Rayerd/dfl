@@ -12,8 +12,13 @@ import dfl.commondialog;
 
 import dfl.internal.dlib;
 import dfl.internal.utf;
-import dfl.internal.winapi;
 import dfl.internal.wincom;
+
+import core.sys.windows.commdlg;
+import core.sys.windows.winbase;
+import core.sys.windows.windef;
+import core.sys.windows.wingdi;
+import core.sys.windows.winuser;
 
 
 ///

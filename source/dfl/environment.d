@@ -13,8 +13,10 @@ import dfl.event;
 import dfl.internal.dlib;
 import dfl.internal.clib;
 import dfl.internal.utf;
-import dfl.internal.winapi;
+import dfl.internal.winapi : LPCITEMIDLIST, LPITEMIDLIST, SHGetSpecialFolderLocation, CoTaskMemFree;
 
+import core.sys.windows.winbase;
+import core.sys.windows.windef;
 
 private extern(Windows) nothrow
 {

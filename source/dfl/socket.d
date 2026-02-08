@@ -12,13 +12,17 @@ import dfl.event;
 import dfl.internal.clib;
 import dfl.internal.dlib;
 import dfl.internal.utf;
-import dfl.internal.winapi;
+import dfl.internal.winapi : WSACancelAsyncRequest, WSAAsyncGetHostByName, WSAAsyncGetHostByAddr;
 
-public import std.socket;
-import std.container.rbtree;
+import core.sys.windows.winbase;
+import core.sys.windows.windef;
+import core.sys.windows.winuser;
 
 import core.bitop;
 import core.sys.windows.winsock2;
+
+public import std.socket;
+import std.container.rbtree;
 
 
 ///

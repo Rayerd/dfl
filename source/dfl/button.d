@@ -12,8 +12,10 @@ import dfl.drawing;
 import dfl.event;
 
 import dfl.internal.dlib;
-import dfl.internal.winapi;
 static import dfl.internal.utf;
+
+import core.sys.windows.windef;
+import core.sys.windows.winuser;
 
 
 private extern(Windows) void _initButton();

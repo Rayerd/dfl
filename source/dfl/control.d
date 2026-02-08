@@ -32,16 +32,26 @@ import dfl.internal.com;
 import dfl.internal.dlib;
 import dfl.internal.dpiaware;
 import dfl.internal.utf;
-import dfl.internal.winapi;
 import dfl.internal.wincom;
 
 import std.algorithm : max;
 
+import core.sys.windows.winbase;
+import core.sys.windows.windef;
+import core.sys.windows.wingdi;
+import core.sys.windows.winuser;
 import core.memory;
 
 
 //version = RADIO_GROUP_LAYOUT;
 version = DFL_NO_ZOMBIE_FORM;
+
+
+version(Windows)
+{
+	alias THEMEAPI = HRESULT;
+	THEMEAPI SetWindowTheme(HWND hwnd, LPCWSTR pszSubAppName, LPCWSTR pszSubIdList);
+}
 
 
 int GET_X_LPARAM(LPARAM lparam) pure
