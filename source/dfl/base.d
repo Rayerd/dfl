@@ -13,9 +13,6 @@ import dfl.internal.dlib;
 import dfl.internal.dpiaware;
 import dfl.internal.winapi;
 
-import core.internal.hash;
-import core.stdcpp.new_;
-
 
 alias HWindow = HWND;
 
@@ -401,7 +398,7 @@ abstract class WaitHandle
 	
 	~this()
 	{
-		if(_owned)
+		if (_owned)
 			close();
 	}
 	
@@ -415,19 +412,19 @@ abstract class WaitHandle
 
 		// Some implementations fail with > 64 handles, but that will return WAIT_FAILED;
 		// all implementations fail with >= 128 handles due to WAIT_ABANDONED_0 being 128.
-		if(handles.length >= 128)
+		if (handles.length >= 128)
 			fail();
 		
 		//HANDLE* hs = new HANDLE[handles.length];
 		HANDLE* hs = cast(HANDLE*)alloca(HANDLE.sizeof * handles.length);
 		
-		foreach(size_t i, WaitHandle wh; handles)
+		foreach (size_t i, WaitHandle wh; handles)
 		{
 			hs[i] = wh.handle;
 		}
 		
 		DWORD result = WaitForMultipleObjects(handles.length.toI32, hs, waitall, msTimeout);
-		if(WAIT_FAILED == result)
+		if (WAIT_FAILED == result)
 		{
 			fail();
 		}
@@ -469,7 +466,7 @@ abstract class WaitHandle
 	void waitOne(DWORD msTimeout)
 	{
 		DWORD result = WaitForSingleObject(handle, msTimeout);
-		if(WAIT_FAILED == result)
+		if (WAIT_FAILED == result)
 			throw new DflException("Wait failure");
 	}
 	
@@ -1010,7 +1007,7 @@ class KeyPressEventArgs: KeyEventArgs
 		
 		int vk;
 		static import dfl.internal.utf;
-		static if(dfl.internal.utf.useUnicode)
+		static if (dfl.internal.utf.useUnicode)
 			vk = 0xFF & VkKeyScanW(cast(WCHAR)ch);
 		else
 			vk = 0xFF & VkKeyScanA(cast(char)ch);
@@ -1284,7 +1281,7 @@ class DrawItemEventArgs: EventArgs
 	///
 	void drawFocusRectangle()
 	{
-		if(_distate & DrawItemState.FOCUS)
+		if (_distate & DrawItemState.FOCUS)
 		{
 			RECT rect;
 			_rect.getRect(&rect);
@@ -1383,7 +1380,7 @@ class Cursor // docmain
 	
 	~this()
 	{
-		if(_owned)
+		if (_owned)
 			dispose();
 	}
 	
@@ -1445,7 +1442,7 @@ class Cursor // docmain
 		Size result;
 		ICONINFO iinfo;
 		
-		if(GetIconInfo(hcur, &iinfo))
+		if (GetIconInfo(hcur, &iinfo))
 		{
 			
 		}
@@ -1477,10 +1474,10 @@ class Cursor // docmain
 		// DrawIconEx operates differently if the width or height is zero
 		// so bail out if zero and pretend the zero size cursor was drawn.
 		int width = r.width;
-		if(!width)
+		if (!width)
 			return;
 		int height = r.height;
-		if(!height)
+		if (!height)
 			return;
 		
 		DrawIconEx(g.handle, r.x, r.y, _hcur, width, height, 0, HBRUSH.init, DI_NORMAL);
@@ -1490,7 +1487,7 @@ class Cursor // docmain
 	override Dequ opEquals(Object o) const
 	{
 		Cursor cur = cast(Cursor)o;
-		if(!cur)
+		if (!cur)
 			return 0; // Not equal.
 		return opEquals(cur);
 	}
@@ -1588,10 +1585,10 @@ static:
 		{
 			static HCURSOR hcurHand;
 			
-			if(!hcurHand)
+			if (!hcurHand)
 			{
 				hcurHand = LoadCursorA(HINSTANCE.init, IDC_HAND);
-				if(!hcurHand) // Must be Windows 95, so load the cursor from winhlp32.exe.
+				if (!hcurHand) // Must be Windows 95, so load the cursor from winhlp32.exe.
 				{
 					char[MAX_PATH] winhlpPath = void;
 
@@ -1605,20 +1602,20 @@ static:
 					winhlpPath[len + filePath.length] = '\0';
 					
 					HINSTANCE hinstWinhlp = LoadLibraryExA(winhlpPath.ptr, HANDLE.init, LOAD_LIBRARY_AS_DATAFILE);
-					if(!hinstWinhlp)
+					if (!hinstWinhlp)
 					{
 						return arrow; // Just fall back to a normal arrow.
 					}
 					
 					HCURSOR hcur = LoadCursorA(hinstWinhlp, cast(char*)106);
-					if(!hcur) // No such cursor resource.
+					if (!hcur) // No such cursor resource.
 					{
 						FreeLibrary(hinstWinhlp);
 						return arrow; // Just fall back to a normal arrow.
 					}
 
 					hcurHand = CopyCursor(hcur);
-					if(!hcurHand)
+					if (!hcurHand)
 					{
 						FreeLibrary(hinstWinhlp);
 						//throw new DflException("Unable to copy cursor resource");
@@ -1639,7 +1636,7 @@ static:
 	@property Cursor help() // getter
 	{
 		HCURSOR hcur = LoadCursorA(HINSTANCE.init, IDC_HELP);
-		if(!hcur) // IDC_HELP might not be supported on Windows 95, so fall back to a normal arrow.
+		if (!hcur) // IDC_HELP might not be supported on Windows 95, so fall back to a normal arrow.
 			return arrow;
 		return new Cursor(hcur);
 	}

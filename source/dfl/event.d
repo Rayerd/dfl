@@ -30,22 +30,22 @@ template Event(T1, T2) // docmain
 		}
 		do
 		{
-			if(!_array.length)
+			if (!_array.length)
 			{
 				_array = new Handler[2];
 				_array[1] = handler;
-				unsetHot();
+				_unsetHot();
 			}
 			else
 			{
-				if(!isHot())
+				if (!_isHot())
 				{
 					_array ~= handler;
 				}
 				else // Hot.
 				{
 					_array = _array ~ (&handler)[0 .. 1]; // Force duplicate.
-					unsetHot();
+					_unsetHot();
 				}
 			}
 		}
@@ -75,28 +75,27 @@ template Event(T1, T2) // docmain
 		/// Remove the specified event handler with the exact Handler type.
 		void removeHandlerExact(Handler handler)
 		{
-			if(!_array.length)
+			if (!_array.length)
 				return;
 			
-			size_t iw;
-			for(iw = 1; iw != _array.length; iw++)
+			for(size_t iw = 1; iw != _array.length; iw++)
 			{
-				if(handler == _array[iw])
+				if (handler == _array[iw])
 				{
-					if(iw == 1 && _array.length == 2)
+					if (iw == 1 && _array.length == 2)
 					{
 						_array = null;
 						break;
 					}
 					
-					if(iw + 1 == _array.length)
+					if (iw + 1 == _array.length)
 					{
 						_array[iw] = null;
 						_array = _array[0 .. iw];
 						break;
 					}
 					
-					if(!isHot())
+					if (!_isHot())
 					{
 						_array[iw] = _array[$ - 1];
 						_array[$ - 1] = null;
@@ -105,7 +104,7 @@ template Event(T1, T2) // docmain
 					else // Hot.
 					{
 						_array = _array[0 .. iw] ~ _array[iw + 1 .. $]; // Force duplicate.
-						unsetHot();
+						_unsetHot();
 					}
 					break;
 				}
@@ -125,43 +124,41 @@ template Event(T1, T2) // docmain
 		/// Fire the event handlers.
 		void opCall(T1 v1, T2 v2)
 		{
-			if(!_array.length)
+			if (!_array.length)
 				return;
-			setHot();
+			_setHot();
 			
-			Handler[] local;
-			local = _array[1 .. _array.length];
+			Handler[] local = _array[1 .. _array.length];
 			foreach(Handler handler; local)
 			{
 				handler(v1, v2);
 			}
 			
-			if(!_array.length)
+			if (!_array.length)
 				return;
-			unsetHot();
+			_unsetHot();
 		}
 		
 		
 		///
 		int opApply(int delegate(Handler) dg)
 		{
-			if(!_array.length)
+			if (!_array.length)
 				return 0;
-			setHot();
+			_setHot();
 			
 			int result = 0;
 			
-			Handler[] local;
-			local = _array[1 .. _array.length];
+			Handler[] local = _array[1 .. _array.length];
 			foreach(Handler handler; local)
 			{
 				result = dg(handler);
-				if(result)
+				if (result)
 					break;
 			}
 			
-			if(_array.length)
-				unsetHot();
+			if (_array.length)
+				_unsetHot();
 			
 			return result;
 		}
@@ -174,25 +171,25 @@ template Event(T1, T2) // docmain
 		}
 		
 		
-		private:
+	private:
 		Handler[] _array; // Not what it seems.
 		
 		
-		void setHot()
+		void _setHot()
 		{
 			assert(_array.length);
-			_array[0] = cast(Handler)&setHot; // Non-null, GC friendly.
+			_array[0] = cast(Handler)&_setHot; // Non-null, GC friendly.
 		}
 		
 		
-		void unsetHot()
+		void _unsetHot()
 		{
 			assert(_array.length);
 			_array[0] = null;
 		}
 		
 		
-		Handler isHot()
+		Handler _isHot()
 		{
 			assert(_array.length);
 			return _array[0];
@@ -207,7 +204,7 @@ template Event(T1, T2) // docmain
 			alias TDGParams = ParameterTypeTuple!(TDG);
 			static assert(TDGParams.length == 2, "DFL: Event handler needs exactly 2 parameters");
 			
-			static if(is(TDGParams[0] : Object))
+			static if (is(TDGParams[0] : Object))
 			{
 				static assert(is(T1: TDGParams[0]), "DFL: Event handler parameter 1 type mismatch");
 			}
@@ -216,7 +213,7 @@ template Event(T1, T2) // docmain
 				static assert(is(T1 == TDGParams[0]), "DFL: Event handler parameter 1 type mismatch");
 			}
 			
-			static if(is(TDGParams[1] : Object))
+			static if (is(TDGParams[1] : Object))
 			{
 				static assert(is(T2 : TDGParams[1]), "DFL: Event handler parameter 2 type mismatch");
 			}
@@ -243,7 +240,7 @@ class EventArgs // docmain
 		
 		// synchronized // Slows it down a lot.
 		{
-			if(sz > buf.length)
+			if (sz > buf.length)
 				buf = new byte[100 + sz];
 			
 			result = buf[0 .. sz];
@@ -300,7 +297,6 @@ class ThreadExceptionEventArgs: EventArgs
 	}
 	
 	
-	private:
+private:
 	DThrowable except;
 }
-
