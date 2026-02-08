@@ -15,8 +15,8 @@ import dfl.internal.dlib;
 import dfl.internal.utf;
 import dfl.internal.winapi : LPITEMIDLIST, LPBROWSEINFOW, BROWSEINFOW, BROWSEINFOA, BIF_RETURNONLYFSDIRS, BIF_NEWDIALOGSTYLE,
 	BIF_NONEWFOLDERBUTTON, BIF_EDITBOX, SHGetSpecialFolderLocation, CoTaskMemFree, SHGetMalloc, BFFM_INITIALIZED, BFFM_SETSELECTIONW;
-import dfl.internal.wincom;
 
+import core.sys.windows.objidl;
 import core.sys.windows.winbase;
 import core.sys.windows.windef;
 import core.sys.windows.winuser;

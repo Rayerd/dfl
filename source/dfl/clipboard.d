@@ -10,7 +10,9 @@ import dfl.data;
 import dfl.drawing;
 
 import dfl.internal.dlib;
-import dfl.internal.wincom;
+
+import core.sys.windows.ole2;
+import core.sys.windows.objidl;
 
 
 ///
@@ -24,7 +26,7 @@ static:
 	/// Returns a data object that represents the entire contents of the Clipboard.
 	dfl.data.IDataObject getDataObject()
 	{
-		dfl.internal.wincom.IDataObject comDataObject;
+		core.sys.windows.objidl.IDataObject comDataObject;
 		if(S_OK != OleGetClipboard(&comDataObject))
 			throw new DflException("Unable to obtain clipboard data object");
 		return new ComToDdataObject(comDataObject);

@@ -15,8 +15,10 @@ import dfl.internal.com;
 import dfl.internal.winapi : CLIPFORMAT, DROPFILES;
 import dfl.internal.wincom;
 
+import core.sys.windows.objidl : FORMATETC, STGMEDIUM, IEnumFORMATETC, IAdviseSink, IEnumSTATDATA, TYMED, DATADIR;
 import core.sys.windows.ole2;
 import core.sys.windows.shellapi;
+import core.sys.windows.wtypes;
 import core.sys.windows.winbase;
 import core.sys.windows.windef;
 import core.sys.windows.wingdi;
@@ -998,9 +1000,9 @@ final class ComToDdataObject: dfl.data.IDataObject
 		{
 			fmte.cfFormat = cast(CLIPFORMAT)id;
 			fmte.ptd = null;
-			fmte.dwAspect = DVASPECT_CONTENT;
+			fmte.dwAspect = DVASPECT.DVASPECT_CONTENT;
 			fmte.lindex = -1;
-			fmte.tymed = TYMED_GDI;
+			fmte.tymed = TYMED.TYMED_GDI;
 
 			if (S_OK != _comDataObj.QueryGetData(&fmte/+ in +/))
 				return null;
@@ -1020,9 +1022,9 @@ final class ComToDdataObject: dfl.data.IDataObject
 		{
 			fmte.cfFormat = cast(CLIPFORMAT)id;
 			fmte.ptd = null;
-			fmte.dwAspect = DVASPECT_CONTENT;
+			fmte.dwAspect = DVASPECT.DVASPECT_CONTENT;
 			fmte.lindex = -1;
-			fmte.tymed = TYMED_HGLOBAL;
+			fmte.tymed = TYMED.TYMED_HGLOBAL;
 
 			if (S_OK != _comDataObj.QueryGetData(&fmte/+ in +/))
 				return null;
@@ -1165,9 +1167,9 @@ final class ComToDdataObject: dfl.data.IDataObject
 			{
 				fmte.cfFormat = cast(CLIPFORMAT)id;
 				fmte.ptd = null;
-				fmte.dwAspect = DVASPECT_CONTENT;
+				fmte.dwAspect = DVASPECT.DVASPECT_CONTENT;
 				fmte.lindex = -1;
-				fmte.tymed = TYMED_GDI;
+				fmte.tymed = TYMED.TYMED_GDI;
 			}
 			else if (id == CF_TEXT
 				||   id == CF_UNICODETEXT
@@ -1177,9 +1179,9 @@ final class ComToDdataObject: dfl.data.IDataObject
 			{
 				fmte.cfFormat = cast(CLIPFORMAT)id;
 				fmte.ptd = null;
-				fmte.dwAspect = DVASPECT_CONTENT;
+				fmte.dwAspect = DVASPECT.DVASPECT_CONTENT;
 				fmte.lindex = -1;
-				fmte.tymed = TYMED_HGLOBAL;
+				fmte.tymed = TYMED.TYMED_HGLOBAL;
 			}
 			else
 				return false;
@@ -1379,12 +1381,12 @@ final class DtoComDataObject: DflComObject, dfl.internal.wincom.IDataObject
 		// TODO: Lookup all Stadard and User-defined Clipboard Formats
 
 		// FormatEtc list that can send to paste target.
-		_formatetcList ~= FORMATETC(CF_BITMAP, null, DVASPECT_CONTENT, -1, TYMED_GDI);
-		_formatetcList ~= FORMATETC(CF_DIB, null, DVASPECT_CONTENT, -1, TYMED_HGLOBAL);
-		_formatetcList ~= FORMATETC(CF_TEXT, null, DVASPECT_CONTENT, -1, TYMED_HGLOBAL);
-		_formatetcList ~= FORMATETC(CF_UNICODETEXT, null, DVASPECT_CONTENT, -1, TYMED_HGLOBAL);
-		_formatetcList ~= FORMATETC(getId(DataFormats.stringFormat), null, DVASPECT_CONTENT, -1, TYMED_HGLOBAL);
-		_formatetcList ~= FORMATETC(CF_HDROP, null, DVASPECT_CONTENT, -1, TYMED_HGLOBAL);
+		_formatetcList ~= FORMATETC(CF_BITMAP, null, DVASPECT.DVASPECT_CONTENT, -1, TYMED.TYMED_GDI);
+		_formatetcList ~= FORMATETC(CF_DIB, null, DVASPECT.DVASPECT_CONTENT, -1, TYMED.TYMED_HGLOBAL);
+		_formatetcList ~= FORMATETC(CF_TEXT, null, DVASPECT.DVASPECT_CONTENT, -1, TYMED.TYMED_HGLOBAL);
+		_formatetcList ~= FORMATETC(CF_UNICODETEXT, null, DVASPECT.DVASPECT_CONTENT, -1, TYMED.TYMED_HGLOBAL);
+		_formatetcList ~= FORMATETC(getId(DataFormats.stringFormat), null, DVASPECT.DVASPECT_CONTENT, -1, TYMED.TYMED_HGLOBAL);
+		_formatetcList ~= FORMATETC(CF_HDROP, null, DVASPECT.DVASPECT_CONTENT, -1, TYMED.TYMED_HGLOBAL);
 	}
 
 	
@@ -1426,7 +1428,7 @@ extern(Windows):
 
 			if (pFormatetc.cfFormat == CF_BITMAP)
 			{
-				if (pFormatetc.tymed & TYMED_GDI)
+				if (pFormatetc.tymed & TYMED.TYMED_GDI)
 				{
 					DataFormats.Format fmt = DataFormats.getFormat(pFormatetc.cfFormat);
 					Data data = _dataObj.getData(fmt.name, true); // Should this be convertable?
@@ -1434,7 +1436,7 @@ extern(Windows):
 					Bitmap bitmap = cast(Bitmap)data.getImage();
 					assert(typeid(bitmap) == typeid(Bitmap));
 
-					pmedium.tymed = TYMED_GDI;
+					pmedium.tymed = TYMED.TYMED_GDI;
 					pmedium.hBitmap = bitmap.handle;
 					pmedium.pUnkForRelease = null;
 				}
@@ -1448,7 +1450,7 @@ extern(Windows):
 				||   pFormatetc.cfFormat == DataFormats.getFormat(DataFormats.stringFormat).id
 				||   pFormatetc.cfFormat == CF_DIB)
 			{
-				if (pFormatetc.tymed & TYMED_HGLOBAL)
+				if (pFormatetc.tymed & TYMED.TYMED_HGLOBAL)
 				{
 					DataFormats.Format fmt = DataFormats.getFormat(pFormatetc.cfFormat);
 					Data data = _dataObj.getData(fmt.name, true); // Should this be convertable?
@@ -1477,7 +1479,7 @@ extern(Windows):
 					pmem[0 .. memSize] = src[];
 					GlobalUnlock(hg);
 					
-					pmedium.tymed = TYMED_HGLOBAL;
+					pmedium.tymed = TYMED.TYMED_HGLOBAL;
 					pmedium.hGlobal = hg;
 					pmedium.pUnkForRelease = null;
 				}
@@ -1488,7 +1490,7 @@ extern(Windows):
 			}
 			else if (pFormatetc.cfFormat == CF_HDROP)
 			{
-				if (pFormatetc.tymed & TYMED_HGLOBAL)
+				if (pFormatetc.tymed & TYMED.TYMED_HGLOBAL)
 				{
 					DataFormats.Format fmt = DataFormats.getFormat(pFormatetc.cfFormat);
 					Data data = _dataObj.getData(fmt.name, true); // Should this be convertable?
@@ -1521,7 +1523,7 @@ extern(Windows):
 					p[0 .. ubfileList.length] = ubfileList[];
 					GlobalUnlock(hDrop);
 					
-					pmedium.tymed = TYMED_HGLOBAL;
+					pmedium.tymed = TYMED.TYMED_HGLOBAL;
 					pmedium.hGlobal = hDrop;
 					pmedium.pUnkForRelease = null;
 				}
@@ -1652,7 +1654,7 @@ extern(Windows):
 	{
 		try
 		{
-			if(dwDirection == DATADIR_GET)
+			if(dwDirection == DATADIR.DATADIR_GET)
 			{
 				FORMATETC[] feList;
 				foreach (ref formatetc; _formatetcList)
@@ -1669,7 +1671,7 @@ extern(Windows):
 				if (feList.length == 0)
 				{
 					// That is illegal that number of FORMATETC[] is zero.
-					feList ~= FORMATETC(0, null, DVASPECT_CONTENT, -1, TYMED_NULL);
+					feList ~= FORMATETC(0, null, DVASPECT.DVASPECT_CONTENT, -1, TYMED.TYMED_NULL);
 					return CreateFormatEnumerator(1, &(feList[0]), ppenumFormatetc);
 				}
 				else
@@ -1677,7 +1679,7 @@ extern(Windows):
 					return CreateFormatEnumerator(cast(UINT)feList.length, &(feList[0]), ppenumFormatetc);
 				}
 			}
-			else if(dwDirection == DATADIR_SET)
+			else if(dwDirection == DATADIR.DATADIR_SET)
 			{
 				return E_NOTIMPL;
 			}

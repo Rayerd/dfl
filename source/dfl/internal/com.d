@@ -9,6 +9,10 @@ import dfl.base : DflException;
 import dfl.internal.dlib;
 import dfl.internal.wincom;
 
+import core.sys.windows.basetyps;
+import core.sys.windows.objidl;
+import core.sys.windows.objidl;
+import core.sys.windows.unknwn;
 import core.sys.windows.windef;
 
 
@@ -186,14 +190,14 @@ extern(Windows):
 		auto toPos = cast(long)dlibMove.QuadPart;
 		switch(dwOrigin)
 		{
-			case STREAM_SEEK_SET:
+			case STREAM_SEEK.STREAM_SEEK_SET:
 				break;
 			
-			case STREAM_SEEK_CUR:
+			case STREAM_SEEK.STREAM_SEEK_CUR:
 				toPos = cast(long)seekpos + toPos;
 				break;
 			
-			case STREAM_SEEK_END:
+			case STREAM_SEEK.STREAM_SEEK_END:
 				toPos = cast(long)mem.length - toPos;
 				break;
 			

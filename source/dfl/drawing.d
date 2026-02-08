@@ -13,6 +13,9 @@ import dfl.internal.wincom;
 import dfl.internal.utf;
 import dfl.internal.com;
 
+import core.sys.windows.ocidl;
+import core.sys.windows.olectl;
+import core.sys.windows.objidl;
 import core.sys.windows.winuser;
 import core.sys.windows.wingdi;
 import core.sys.windows.winbase;
@@ -1785,7 +1788,7 @@ class Picture: Image // docmain
 	}
 	
 	
-	private this(dfl.internal.wincom.IPicture ipic)
+	private this(IPicture ipic)
 	{
 		_ipicture = ipic;
 	}
@@ -2041,13 +2044,13 @@ class Picture: Image // docmain
 	
 private:
 	HBITMAP _hbmimgtype;
-	dfl.internal.wincom.IPicture _ipicture = null;
+	IPicture _ipicture = null;
 	
 	
 	///
-	static dfl.internal.wincom.IPicture _fromIStream(dfl.internal.wincom.IStream istm)
+	static IPicture _fromIStream(IStream istm)
 	{
-		dfl.internal.wincom.IPicture ipic;
+		IPicture ipic;
 		switch(OleLoadPicture(istm, 0, FALSE, &_IID_IPicture, cast(void**)&ipic))
 		{
 			case S_OK:
@@ -2079,7 +2082,7 @@ private:
 	
 	
 	///
-	static dfl.internal.wincom.IPicture _fromFileName(Dstring fileName)
+	static IPicture _fromFileName(Dstring fileName)
 	{
 		HANDLE hFile = createFile(fileName, GENERIC_READ, FILE_SHARE_READ, null,
 			OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, null);
@@ -2126,14 +2129,14 @@ private:
 		}
 		// Don't need to CloseHandle(hg) due to 2nd param being TRUE.
 		
-		dfl.internal.wincom.IPicture ipic = _fromIStream(istm);
+		IPicture ipic = _fromIStream(istm);
 		istm.Release();
 		return ipic;
 	}
 	
 	
 	///
-	static dfl.internal.wincom.IPicture _fromMemory(void[] mem)
+	static IPicture _fromMemory(void[] mem)
 	{
 		return _fromIStream(new MemoryIStream(mem));
 	}

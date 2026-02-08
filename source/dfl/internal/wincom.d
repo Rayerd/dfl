@@ -5,9 +5,16 @@ module dfl.internal.wincom;
 
 import dfl.base;
 
+import core.sys.windows.objbase;
+import core.sys.windows.objfwd;
+import core.sys.windows.ole2;
+import core.sys.windows.olectl;
+import core.sys.windows.oleidl;
 import core.sys.windows.objidl;
+import core.sys.windows.unknwn;
 import core.sys.windows.winbase;
 import core.sys.windows.windef;
+import core.sys.windows.wtypes;
 
 import std.conv;
 
@@ -182,41 +189,7 @@ version(_dfl_needcom)
 	
 	extern (Windows)
 	{
-		
-		export
-		{
-			DWORD CoBuildVersion();
-			
-			int StringFromGUID2(GUID *rguid, LPOLESTR lpsz, int cbMax);
-			
-			/* init/uninit */
-			
-			HRESULT CoInitialize(LPVOID pvReserved);
-			void CoUninitialize();
-			DWORD CoGetCurrentProcess();
-			
-			
-			HRESULT CoCreateInstance(CLSID *rclsid, IUnknown UnkOuter, DWORD dwClsContext, IID* riid, void* ppv);
-			
-			//HINSTANCE CoLoadLibrary(LPOLESTR lpszLibName, BOOL bAutoFree);
-			void CoFreeLibrary(HINSTANCE hInst);
-			void CoFreeAllLibraries();
-			void CoFreeUnusedLibraries();
-		}
-		
-		interface IUnknown
-		{
-			HRESULT QueryInterface(IID* riid, void** pvObject);
-			ULONG AddRef();
-			ULONG Release();
-		}
-		
-		interface IClassFactory : IUnknown
-		{
-			HRESULT CreateInstance(IUnknown UnkOuter, IID* riid, void** pvObject);
-			HRESULT LockServer(BOOL fLock);
-		}
-		
+		///
 		class ComObject : IUnknown
 		{
 		extern (Windows):
@@ -300,205 +273,6 @@ extern(C)
 
 extern(Windows):
 
-interface ISequentialStream: IUnknown
-{
-extern(Windows):
-	HRESULT Read(void* pv, ULONG cb, ULONG* pcbRead);
-	HRESULT Write(void* pv, ULONG cb, ULONG* pcbWritten);
-}
-
-
-/// STREAM_SEEK
-enum: DWORD
-{
-	STREAM_SEEK_SET = 0,
-	STREAM_SEEK_CUR = 1,
-	STREAM_SEEK_END = 2,
-}
-alias STREAM_SEEK = DWORD;
-
-
-// TODO: implement the enum`s used here.
-struct STATSTG
-{
-	LPWSTR pwcsName;
-	DWORD type;
-	ULARGE_INTEGER cbSize;
-	FILETIME mtime;
-	FILETIME ctime;
-	FILETIME atime;
-	DWORD grfMode;
-	DWORD grfLocksSupported;
-	CLSID clsid;
-	DWORD grfStateBits;
-	DWORD reserved;
-}
-
-
-interface IStream: ISequentialStream
-{
-extern(Windows):
-	HRESULT Seek(LARGE_INTEGER dlibMove, DWORD dwOrigin, ULARGE_INTEGER* plibNewPosition);
-	HRESULT SetSize(ULARGE_INTEGER libNewSize);
-	HRESULT CopyTo(IStream pstm, ULARGE_INTEGER cb, ULARGE_INTEGER* pcbRead, ULARGE_INTEGER* pcbWritten);
-	HRESULT Commit(DWORD grfCommitFlags);
-	HRESULT Revert();
-	HRESULT LockRegion(ULARGE_INTEGER libOffset, ULARGE_INTEGER cb, DWORD dwLockType);
-	HRESULT UnlockRegion(ULARGE_INTEGER libOffset, ULARGE_INTEGER cb, DWORD dwLockType);
-	HRESULT Stat(STATSTG* pstatstg, DWORD grfStatFlag);
-	HRESULT Clone(IStream* ppstm);
-}
-alias LPSTREAM = IStream*;
-
-
-alias OLE_HANDLE = UINT;
-
-alias OLE_XPOS_HIMETRIC = LONG;
-
-alias OLE_YPOS_HIMETRIC = LONG;
-
-alias OLE_XSIZE_HIMETRIC = LONG;
-
-alias OLE_YSIZE_HIMETRIC = LONG;
-
-
-interface IPicture: IUnknown
-{
-extern(Windows):
-	HRESULT get_Handle(OLE_HANDLE* phandle);
-	HRESULT get_hPal(OLE_HANDLE* phpal);
-	HRESULT get_Type(short* ptype);
-	HRESULT get_Width(OLE_XSIZE_HIMETRIC* pwidth);
-	HRESULT get_Height(OLE_YSIZE_HIMETRIC* pheight);
-	HRESULT Render(HDC hdc, int x, int y, int cx, int cy, OLE_XPOS_HIMETRIC xSrc, OLE_YPOS_HIMETRIC ySrc, OLE_XSIZE_HIMETRIC cxSrc, OLE_YSIZE_HIMETRIC cySrc, LPCRECT prcWBounds);
-	HRESULT set_hPal(OLE_HANDLE hpal);
-	HRESULT get_CurDC(HDC* phdcOut);
-	HRESULT SelectPicture(HDC hdcIn, HDC* phdcOut, OLE_HANDLE* phbmpOut);
-	HRESULT get_KeepOriginalFormat(BOOL* pfkeep);
-	HRESULT put_KeepOriginalFormat(BOOL keep);
-	HRESULT PictureChanged();
-	HRESULT SaveAsFile(IStream pstream, BOOL fSaveMemCopy, LONG* pcbSize);
-	HRESULT get_Attributes(DWORD* pdwAttr);
-}
-
-struct DVTARGETDEVICE
-{
-	DWORD tdSize;
-	WORD tdDriverNameOffset;
-	WORD tdDeviceNameOffset;
-	WORD tdPortNameOffset;
-	WORD tdExtDevmodeOffset;
-	BYTE[1] tdData;
-}
-
-
-struct FORMATETC
-{
-	CLIPFORMAT cfFormat;
-	DVTARGETDEVICE* ptd;
-	DWORD dwAspect;
-	LONG lindex;
-	DWORD tymed;
-}
-alias LPFORMATETC = FORMATETC*;
-
-
-struct STATDATA 
-{
-	FORMATETC formatetc;
-	DWORD grfAdvf;
-	IAdviseSink pAdvSink;
-	DWORD dwConnection;
-}
-
-
-struct STGMEDIUM
-{
-	DWORD tymed;
-	union //u
-	{
-		HBITMAP hBitmap;
-		//HMETAFILEPICT hMetaFilePict;
-		HENHMETAFILE hEnhMetaFile;
-		HGLOBAL hGlobal;
-		LPOLESTR lpszFileName;
-		IStream pstm;
-		//IStorage pstg;
-	}
-	IUnknown pUnkForRelease;
-}
-alias LPSTGMEDIUM = STGMEDIUM*;
-
-
-interface IDataObject: IUnknown
-{
-extern(Windows):
-	HRESULT GetData(FORMATETC* pFormatetc, STGMEDIUM* pmedium);
-	HRESULT GetDataHere(FORMATETC* pFormatetc, STGMEDIUM* pmedium);
-	HRESULT QueryGetData(FORMATETC* pFormatetc);
-	HRESULT GetCanonicalFormatEtc(FORMATETC* pFormatetcIn, FORMATETC* pFormatetcOut);
-	HRESULT SetData(FORMATETC* pFormatetc, STGMEDIUM* pmedium, BOOL fRelease);
-	HRESULT EnumFormatEtc(DWORD dwDirection, IEnumFORMATETC* ppenumFormatetc);
-	HRESULT DAdvise(FORMATETC* pFormatetc, DWORD advf, IAdviseSink pAdvSink, DWORD* pdwConnection);
-	HRESULT DUnadvise(DWORD dwConnection);
-	HRESULT EnumDAdvise(IEnumSTATDATA* ppenumAdvise);
-}
-
-
-interface IDropSource: IUnknown
-{
-extern(Windows):
-	HRESULT QueryContinueDrag(BOOL fEscapePressed, DWORD grfKeyState);
-	HRESULT GiveFeedback(DWORD dwEffect);
-}
-
-
-interface IDropTarget: IUnknown
-{
-extern(Windows):
-	HRESULT DragEnter(IDataObject pDataObject, DWORD grfKeyState, POINTL pt, DWORD* pdwEffect);
-	HRESULT DragOver(DWORD grfKeyState, POINTL pt, DWORD* pdwEffect);
-	HRESULT DragLeave();
-	HRESULT Drop(IDataObject pDataObject, DWORD grfKeyState, POINTL pt, DWORD* pdwEffect);
-}
-
-
-interface IEnumFORMATETC: IUnknown
-{
-extern(Windows):
-	HRESULT Next(ULONG celt, FORMATETC* rgelt, ULONG* pceltFetched);
-	HRESULT Skip(ULONG celt);
-	HRESULT Reset();
-	HRESULT Clone(IEnumFORMATETC* ppenum);
-}
-
-
-interface IEnumSTATDATA: IUnknown
-{
-extern(Windows):
-	HRESULT Next(ULONG celt, STATDATA* rgelt, ULONG* pceltFetched);
-	HRESULT Skip(ULONG celt);
-	HRESULT Reset();
-	HRESULT Clone(IEnumSTATDATA* ppenum);
-}
-
-
-interface IAdviseSink: IUnknown
-{
-	// TODO: finish.
-}
-
-
-interface IMalloc: IUnknown
-{
-extern(Windows):
-	void* Alloc(ULONG cb);
-	void* Realloc(void *pv, ULONG cb);
-	void Free(void* pv);
-	ULONG GetSize(void* pv);
-	int DidAlloc(void* pv);
-	void HeapMinimize();
-}
 // Since an interface is a pointer..
 alias PMALLOC = IMalloc;
 alias LPMALLOC = IMalloc;
@@ -510,53 +284,11 @@ LONG MAP_LOGHIM_TO_PIX(LONG x, LONG logpixels)
 }
 
 
-enum: DWORD
-{
-	DVASPECT_CONTENT = 1,
-	DVASPECT_THUMBNAIL = 2,
-	DVASPECT_ICON = 4,
-	DVASPECT_DOCPRINT = 8,
-}
-alias DVASPECT = DWORD;
-
-
-enum: DWORD
-{
-	TYMED_HGLOBAL = 1,
-	TYMED_FILE = 2,
-	TYMED_ISTREAM = 4,
-	TYMED_ISTORAGE = 8,
-	TYMED_GDI = 16,
-	TYMED_MFPICT = 32,
-	TYMED_ENHMF = 64,
-	TYMED_NULL = 0
-}
-alias TYMED = DWORD;
-
-
-enum
-{
-	DATADIR_GET = 1,
-	DATADIR_SET = 2
-}
-
-
 alias WINOLEAPI = HRESULT;
 
 
-WINOLEAPI OleInitialize(LPVOID pvReserved);
-void OleUninitialize();
-WINOLEAPI DoDragDrop(IDataObject pDataObject, IDropSource pDropSource, DWORD dwOKEffect, DWORD* pdwEffect);
-WINOLEAPI RegisterDragDrop(HWND hwnd, IDropTarget pDropTarget);
-WINOLEAPI RevokeDragDrop(HWND hwnd);
-WINOLEAPI OleGetClipboard(IDataObject* ppDataObj);
-WINOLEAPI OleSetClipboard(IDataObject pDataObj);
-WINOLEAPI OleFlushClipboard();
-WINOLEAPI OleIsCurrentClipboard(IDataObject pDataObj);
-WINOLEAPI CreateStreamOnHGlobal(HGLOBAL hGlobal, BOOL fDeleteOnRelease, LPSTREAM ppstm);
-WINOLEAPI OleLoadPicture(IStream pStream, LONG lSize, BOOL fRunmode, IID* riid, void** ppv);
-void ReleaseStgMedium(LPSTGMEDIUM pStgmedium);
-WINOLEAPI CreateFormatEnumerator(UINT cfmtetc, FORMATETC* rgfmtetc, IEnumFORMATETC* ppenumfmtetc);
+WINOLEAPI CreateStreamOnHGlobal(HGLOBAL hGlobal, BOOL fDeleteOnRelease, LPSTREAM* ppstm); // Later than Windows Vista in combaseapi.h.
+WINOLEAPI CreateFormatEnumerator(UINT cfmtetc, FORMATETC* rgfmtetc, IEnumFORMATETC* ppenumfmtetc); // Later than Windows 2000 in urlmon.h.
 
 
 final class Ole

@@ -36,6 +36,8 @@ import dfl.internal.wincom;
 
 import std.algorithm : max;
 
+import core.sys.windows.ole2;
+import core.sys.windows.oleidl;
 import core.sys.windows.winbase;
 import core.sys.windows.windef;
 import core.sys.windows.wingdi;
