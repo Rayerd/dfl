@@ -29,12 +29,12 @@ abstract class FileDialog: CommonDialog // docmain
 	{
 		Application.ppin(cast(void*)this);
 		
-		ofn.lStructSize = ofn.sizeof;
-		ofn.lCustData = cast(typeof(ofn.lCustData))cast(void*)this;
-		ofn.Flags = INIT_FLAGS;
-		ofn.nFilterIndex = INIT_FILTER_INDEX;
-		initInstance();
-		ofn.lpfnHook = &ofnHookProc;
+		_ofn.lStructSize = _ofn.sizeof;
+		_ofn.lCustData = cast(typeof(_ofn.lCustData))cast(void*)this;
+		_ofn.Flags = INIT_FLAGS;
+		_ofn.nFilterIndex = INIT_FILTER_INDEX;
+		_initInstance();
+		_ofn.lpfnHook = &_ofnHookProc;
 	}
 	
 	
@@ -72,27 +72,27 @@ abstract class FileDialog: CommonDialog // docmain
 	///
 	override void reset()
 	{
-		ofn.Flags = INIT_FLAGS;
-		ofn.lpstrFilter = null;
-		ofn.nFilterIndex = INIT_FILTER_INDEX;
-		ofn.lpstrDefExt = null;
+		_ofn.Flags = INIT_FLAGS;
+		_ofn.lpstrFilter = null;
+		_ofn.nFilterIndex = INIT_FILTER_INDEX;
+		_ofn.lpstrDefExt = null;
+		_ofn.lpstrInitialDir = null;
+		_ofn.lpstrTitle = null;
 		_defext = null;
 		_fileNames = null;
 		_needRebuildFileNames = false;
 		_filter = null;
 		_showPlaceBar = false;
-		ofn.lpstrInitialDir = null;
 		_initDir = null;
-		ofn.lpstrTitle = null;
 		_title = null;
-		initInstance();
+		_initInstance();
 	}
 	
 	
 	///
-	private void initInstance()
+	private void _initInstance()
 	{
-		//ofn.hInstance = ?; // Should this be initialized?
+		//_ofn.hInstance = ?; // Should this be initialized?
 	}
 	
 	
@@ -103,7 +103,7 @@ abstract class FileDialog: CommonDialog // docmain
 	}
 	
 	
-	final @property bool addExtension() // getter
+	final @property bool addExtension() const // getter
 	{
 		return _addext;
 	}
@@ -113,62 +113,62 @@ abstract class FileDialog: CommonDialog // docmain
 	///
 	@property void checkFileExists(bool byes) // setter
 	{
-		if(byes)
-			ofn.Flags |= OFN_FILEMUSTEXIST;
+		if (byes)
+			_ofn.Flags |= OFN_FILEMUSTEXIST;
 		else
-			ofn.Flags &= ~OFN_FILEMUSTEXIST;
+			_ofn.Flags &= ~OFN_FILEMUSTEXIST;
 	}
 	
 	/// ditto
-	@property bool checkFileExists() // getter
+	@property bool checkFileExists() const // getter
 	{
-		return (ofn.Flags & OFN_FILEMUSTEXIST) != 0;
+		return (_ofn.Flags & OFN_FILEMUSTEXIST) != 0;
 	}
 	
 	
 	///
 	final @property void checkPathExists(bool byes) // setter
 	{
-		if(byes)
-			ofn.Flags |= OFN_PATHMUSTEXIST;
+		if (byes)
+			_ofn.Flags |= OFN_PATHMUSTEXIST;
 		else
-			ofn.Flags &= ~OFN_PATHMUSTEXIST;
+			_ofn.Flags &= ~OFN_PATHMUSTEXIST;
 	}
 	
 	/// ditto
-	final @property bool checkPathExists() // getter
+	final @property bool checkPathExists() const // getter
 	{
-		return (ofn.Flags & OFN_PATHMUSTEXIST) != 0;
+		return (_ofn.Flags & OFN_PATHMUSTEXIST) != 0;
 	}
 	
 	
 	///
 	final @property void defaultExt(Dstring ext) // setter
 	{
-		if(!ext.length)
+		if (!ext.length)
 		{
-			ofn.lpstrDefExt = null;
+			_ofn.lpstrDefExt = null;
 			_defext = null;
 		}
 		else
 		{
-			if(ext.length && ext[0] == '.')
+			if (ext.length && ext[0] == '.')
 				ext = ext[1 .. ext.length];
 			
-			static if(dfl.internal.utf.useUnicode)
+			static if (dfl.internal.utf.useUnicode)
 			{
-				ofnw.lpstrDefExt = dfl.internal.utf.toUnicodez(ext);
+				_ofn.lpstrDefExt = dfl.internal.utf.toUnicodez(ext);
 			}
 			else
 			{
-				ofna.lpstrDefExt = dfl.internal.utf.toAnsiz(ext);
+				_ofn.lpstrDefExt = dfl.internal.utf.toAnsiz(ext);
 			}
 			_defext = ext;
 		}
 	}
 	
 	/// ditto
-	final @property Dstring defaultExt() // getter
+	final @property Dstring defaultExt() const // getter
 	{
 		return _defext;
 	}
@@ -177,16 +177,16 @@ abstract class FileDialog: CommonDialog // docmain
 	///
 	final @property void dereferenceLinks(bool byes) // setter
 	{
-		if(byes)
-			ofn.Flags &= ~OFN_NODEREFERENCELINKS;
+		if (byes)
+			_ofn.Flags &= ~OFN_NODEREFERENCELINKS;
 		else
-			ofn.Flags |= OFN_NODEREFERENCELINKS;
+			_ofn.Flags |= OFN_NODEREFERENCELINKS;
 	}
 	
 	/// ditto
-	final @property bool dereferenceLinks() // getter
+	final @property bool dereferenceLinks() const // getter
 	{
-		return (ofn.Flags & OFN_NODEREFERENCELINKS) == 0;
+		return (_ofn.Flags & OFN_NODEREFERENCELINKS) == 0;
 	}
 	
 	
@@ -194,14 +194,14 @@ abstract class FileDialog: CommonDialog // docmain
 	final @property void showPlaceBar(bool byes) // setter
 	{
 		_showPlaceBar = byes;
-		if(byes)
-			ofn.Flags &= ~OFN_ENABLEHOOK;
+		if (byes)
+			_ofn.Flags &= ~OFN_ENABLEHOOK;
 		else
-			ofn.Flags |= OFN_ENABLEHOOK;
+			_ofn.Flags |= OFN_ENABLEHOOK;
 	}
 	
 	/// ditto
-	final @property bool showPlaceBar() // getter
+	final @property bool showPlaceBar() const // getter
 	{
 		return _showPlaceBar;
 	}
@@ -212,10 +212,10 @@ abstract class FileDialog: CommonDialog // docmain
 	{
 		// TODO: check if correct implementation.
 		
-		if(fn.length > MAX_PATH)
+		if (fn.length > MAX_PATH)
 			throw new DflException("Invalid file name");
 		
-		if(fileNames.length)
+		if (fileNames.length)
 		{
 			_fileNames = (&fn)[0 .. 1] ~ _fileNames[1 .. _fileNames.length];
 		}
@@ -229,7 +229,7 @@ abstract class FileDialog: CommonDialog // docmain
 	/// ditto
 	final @property Dstring fileName() // getter
 	{
-		if(fileNames.length)
+		if (fileNames.length)
 			return fileNames[0];
 		return null;
 	}
@@ -238,7 +238,7 @@ abstract class FileDialog: CommonDialog // docmain
 	///
 	final @property Dstring[] fileNames() // getter
 	{
-		if(_needRebuildFileNames)
+		if (_needRebuildFileNames)
 			populateFiles();
 		
 		return _fileNames;
@@ -249,9 +249,9 @@ abstract class FileDialog: CommonDialog // docmain
 	// The format string is like "Text files (*.txt)|*.txt|All files (*.*)|*.*".
 	final @property void filter(Dstring filterString) // setter
 	{
-		if(!filterString.length)
+		if (!filterString.length)
 		{
-			ofn.lpstrFilter = null;
+			_ofn.lpstrFilter = null;
 			_filter = null;
 		}
 		else
@@ -269,7 +269,7 @@ abstract class FileDialog: CommonDialog // docmain
 			size_t i, starti;
 			size_t nitems = 0;
 			
-			static if(dfl.internal.utf.useUnicode)
+			static if (dfl.internal.utf.useUnicode)
 			{
 				str.sw = new wchar[filterString.length + 2];
 				str.sw = str.sw[0 .. 0];
@@ -281,15 +281,15 @@ abstract class FileDialog: CommonDialog // docmain
 			}
 			
 			
-			for(i = starti = 0; i != filterString.length; i++)
+			for (i = starti = 0; i != filterString.length; i++)
 			{
-				switch(filterString[i])
+				switch (filterString[i])
 				{
 					case '|':
-						if(starti == i)
+						if (starti == i)
 							goto bad_filter;
 						
-						static if(dfl.internal.utf.useUnicode)
+						static if (dfl.internal.utf.useUnicode)
 						{
 							str.sw ~= dfl.internal.utf.toUnicode(filterString[starti .. i]);
 							str.sw ~= "\0"w;
@@ -311,33 +311,33 @@ abstract class FileDialog: CommonDialog // docmain
 					default:
 				}
 			}
-			if(starti == i || !(nitems % 2))
+			if (starti == i || !(nitems % 2))
 				goto bad_filter;
-			static if(dfl.internal.utf.useUnicode)
+			static if (dfl.internal.utf.useUnicode)
 			{
 				str.sw ~= dfl.internal.utf.toUnicode(filterString[starti .. i]);
 				str.sw ~= "\0\0"w;
 				
-				ofnw.lpstrFilter = str.sw.ptr;
+				_ofn.lpstrFilter = str.sw.ptr;
 			}
 			else
 			{
 				str.sa ~= dfl.internal.utf.unsafeAnsi(filterString[starti .. i]);
 				str.sa ~= "\0\0";
 				
-				ofna.lpstrFilter = str.sa.ptr;
+				_ofn.lpstrFilter = str.sa.ptr;
 			}
 			
 			_filter = filterString;
 			return;
 			
-			bad_filter:
+		bad_filter:
 			throw new DflException("Invalid file filter string");
 		}
 	}
 	
 	/// ditto
-	final @property Dstring filter() // getter
+	final @property Dstring filter() const // getter
 	{
 		return _filter;
 	}
@@ -347,40 +347,40 @@ abstract class FileDialog: CommonDialog // docmain
 	// Note: index is 1-based.
 	final @property void filterIndex(int index) // setter
 	{
-		ofn.nFilterIndex = (index > 0) ? index : 1;
+		_ofn.nFilterIndex = (index > 0) ? index : 1;
 	}
 	
 	/// ditto
-	final @property int filterIndex() // getter
+	final @property int filterIndex() const // getter
 	{
-		return ofn.nFilterIndex;
+		return _ofn.nFilterIndex;
 	}
 	
 	
 	///
 	final @property void initialDirectory(Dstring dir) // setter
 	{
-		if(!dir.length)
+		if (!dir.length)
 		{
-			ofn.lpstrInitialDir = null;
+			_ofn.lpstrInitialDir = null;
 			_initDir = null;
 		}
 		else
 		{
-			static if(dfl.internal.utf.useUnicode)
+			static if (dfl.internal.utf.useUnicode)
 			{
-				ofnw.lpstrInitialDir = dfl.internal.utf.toUnicodez(dir);
+				_ofn.lpstrInitialDir = dfl.internal.utf.toUnicodez(dir);
 			}
 			else
 			{
-				ofna.lpstrInitialDir = dfl.internal.utf.toAnsiz(dir);
+				_ofn.lpstrInitialDir = dfl.internal.utf.toAnsiz(dir);
 			}
 			_initDir = dir;
 		}
 	}
 	
 	/// ditto
-	final @property Dstring initialDirectory() // getter
+	final @property Dstring initialDirectory() const // getter
 	{
 		return _initDir;
 	}
@@ -391,79 +391,79 @@ abstract class FileDialog: CommonDialog // docmain
 	///
 	protected @property void inst(HINSTANCE hinst) // setter
 	{
-		ofn.hInstance = hinst;
+		_ofn.hInstance = hinst;
 	}
 	
 	/// ditto
 	protected @property HINSTANCE inst() // getter
 	{
-		return ofn.hInstance;
+		return _ofn.hInstance;
 	}
 	
 	
 	///
-	protected @property DWORD options() // getter
+	protected @property DWORD options() const // getter
 	{
-		return ofn.Flags;
+		return _ofn.Flags;
 	}
 	
 	
 	///
 	final @property void restoreDirectory(bool byes) // setter
 	{
-		if(byes)
-			ofn.Flags |= OFN_NOCHANGEDIR;
+		if (byes)
+			_ofn.Flags |= OFN_NOCHANGEDIR;
 		else
-			ofn.Flags &= ~OFN_NOCHANGEDIR;
+			_ofn.Flags &= ~OFN_NOCHANGEDIR;
 	}
 	
 	/// ditto
-	final @property bool restoreDirectory() // getter
+	final @property bool restoreDirectory() const // getter
 	{
-		return (ofn.Flags & OFN_NOCHANGEDIR) != 0;
+		return (_ofn.Flags & OFN_NOCHANGEDIR) != 0;
 	}
 	
 	
 	///
 	final @property void showHelp(bool byes) // setter
 	{
-		if(byes)
-			ofn.Flags |= OFN_SHOWHELP;
+		if (byes)
+			_ofn.Flags |= OFN_SHOWHELP;
 		else
-			ofn.Flags &= ~OFN_SHOWHELP;
+			_ofn.Flags &= ~OFN_SHOWHELP;
 	}
 	
 	/// ditto
-	final @property bool showHelp() // getter
+	final @property bool showHelp() const // getter
 	{
-		return (ofn.Flags & OFN_SHOWHELP) != 0;
+		return (_ofn.Flags & OFN_SHOWHELP) != 0;
 	}
 	
 	
 	///
 	final @property void title(Dstring newTitle) // setter
 	{
-		if(!newTitle.length)
+		if (!newTitle.length)
 		{
-			ofn.lpstrTitle = null;
+			_ofn.lpstrTitle = null;
 			_title = null;
 		}
 		else
 		{
-			static if(dfl.internal.utf.useUnicode)
+			static if (dfl.internal.utf.useUnicode)
 			{
-				ofnw.lpstrTitle = dfl.internal.utf.toUnicodez(newTitle);
+				_ofn.lpstrTitle = dfl.internal.utf.toUnicodez(newTitle);
 			}
 			else
 			{
-				ofna.lpstrTitle = dfl.internal.utf.toAnsiz(newTitle);
+				_ofn.lpstrTitle = dfl.internal.utf.toAnsiz(newTitle);
 			}
 			_title = newTitle;
 		}
 	}
 	
 	/// ditto
-	final @property Dstring title() // getter
+	final @property Dstring title() const // getter
 	{
 		return _title;
 	}
@@ -472,16 +472,16 @@ abstract class FileDialog: CommonDialog // docmain
 	///
 	final @property void validateNames(bool byes) // setter
 	{
-		if(byes)
-			ofn.Flags &= ~OFN_NOVALIDATE;
+		if (byes)
+			_ofn.Flags &= ~OFN_NOVALIDATE;
 		else
-			ofn.Flags |= OFN_NOVALIDATE;
+			_ofn.Flags |= OFN_NOVALIDATE;
 	}
 	
 	/// ditto
-	final @property bool validateNames() // getter
+	final @property bool validateNames() const // getter
 	{
-		return(ofn.Flags & OFN_NOVALIDATE) == 0;
+		return(_ofn.Flags & OFN_NOVALIDATE) == 0;
 	}
 	
 	
@@ -489,7 +489,7 @@ abstract class FileDialog: CommonDialog // docmain
 	Event!(FileDialog, CancelEventArgs) fileOk;
 	
 	
-	protected:
+protected:
 	
 	override bool runDialog(HWND owner)
 	{
@@ -506,46 +506,45 @@ abstract class FileDialog: CommonDialog // docmain
 
 	override UINT_PTR hookProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
-		switch(msg)
+		switch (msg)
 		{
 			case WM_NOTIFY:
-				{
-					static if (dfl.internal.utf.useUnicode)
-						OFNOTIFYW* notify = cast(OFNOTIFYW*)lparam;
-					else
-						OFNOTIFYA* notify = cast(OFNOTIFYA*)lparam;
+			{
+				static if (dfl.internal.utf.useUnicode)
+					OFNOTIFYW* notify = cast(OFNOTIFYW*)lparam;
+				else
+					OFNOTIFYA* notify = cast(OFNOTIFYA*)lparam;
 
-					switch(notify.hdr.code)
+				switch (notify.hdr.code)
+				{
+					case CDN_FILEOK:
 					{
-						case CDN_FILEOK:
-							{
-								CancelEventArgs cea;
-								cea = new CancelEventArgs;
-								onFileOk(cea);
-								if(cea.cancel)
-								{
-									static if (dfl.internal.utf.useUnicode)
-										SetWindowLongPtrW(hwnd, DWL_MSGRESULT, 1);
-									else
-										SetWindowLongPtrA(hwnd, DWL_MSGRESULT, 1);
-									return 1;
-								}
-								else
-								{
-									static if (dfl.internal.utf.useUnicode)
-										fileName = fromUnicodez(notify.lpOFN.lpstrFile);
-									else
-										fileName = fromAnsiz(notify.lpOFN.lpstrFile);
-									populateFiles();
-									return 0;
-								}
-							}
-						
-						default:
-							//cprintf("   nmhdr.code = %d/0x%X\n", nmhdr.code, nmhdr.code);
+						CancelEventArgs cea = new CancelEventArgs;
+						onFileOk(cea);
+						if (cea.cancel)
+						{
+							static if (dfl.internal.utf.useUnicode)
+								SetWindowLongPtrW(hwnd, DWL_MSGRESULT, 1);
+							else
+								SetWindowLongPtrA(hwnd, DWL_MSGRESULT, 1);
+							return 1;
+						}
+						else
+						{
+							static if (dfl.internal.utf.useUnicode)
+								fileName = fromUnicodez(notify.lpOFN.lpstrFile);
+							else
+								fileName = fromAnsiz(notify.lpOFN.lpstrFile);
+							populateFiles();
+							return 0;
+						}
 					}
+					
+					default:
+						//cprintf("   nmhdr.code = %d/0x%X\n", nmhdr.code, nmhdr.code);
 				}
-				break;
+			}
+			break;
 			
 			default:
 		}
@@ -554,16 +553,14 @@ abstract class FileDialog: CommonDialog // docmain
 	}
 	
 	
-	private:
-	static if(dfl.internal.utf.useUnicode)
+private:
+	static if (dfl.internal.utf.useUnicode)
 	{
-		OPENFILENAMEW ofnw;
-		alias ofn = ofnw;
+		OPENFILENAMEW _ofn;
 	}
 	else
 	{
-		OPENFILENAMEA ofna;
-		alias ofn = ofna;
+		OPENFILENAMEA _ofn;
 	}
 	static assert(OPENFILENAMEW.Flags.offsetof == OPENFILENAMEA.Flags.offsetof);
 
@@ -576,48 +573,45 @@ abstract class FileDialog: CommonDialog // docmain
 	bool _needRebuildFileNames = false;
 	bool _showPlaceBar = false;
 	
-	enum DWORD INIT_FLAGS = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY |
-		OFN_ENABLEHOOK | OFN_ENABLESIZING;
+	enum DWORD INIT_FLAGS = OFN_EXPLORER | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY | OFN_ENABLEHOOK | OFN_ENABLESIZING;
 	enum INIT_FILTER_INDEX = 0;
 	enum FILE_BUF_LEN = 4096; // ? 12288 ? 12800 ?
 	
 	
 	void beginOfn(HWND owner)
 	{
-		static if(dfl.internal.utf.useUnicode)
+		static if (dfl.internal.utf.useUnicode)
 		{
-			auto buf = new wchar[(ofn.Flags & OFN_ALLOWMULTISELECT) ? FILE_BUF_LEN : MAX_PATH];
+			auto buf = new wchar[(_ofn.Flags & OFN_ALLOWMULTISELECT) ? FILE_BUF_LEN : MAX_PATH];
 			buf[0] = 0;
 			
-			if(fileNames.length)
+			if (fileNames.length)
 			{
-				Dwstring ts;
-				ts = dfl.internal.utf.toUnicode(_fileNames[0]);
+				Dwstring ts = dfl.internal.utf.toUnicode(_fileNames[0]);
 				buf[0 .. ts.length] = ts[];
 				buf[ts.length] = 0;
 			}
 			
-			ofnw.nMaxFile = buf.length.toI32;
-			ofnw.lpstrFile = buf.ptr;
+			_ofn.nMaxFile = buf.length.toI32;
+			_ofn.lpstrFile = buf.ptr;
 		}
 		else
 		{
-			auto buf = new char[(ofn.Flags & OFN_ALLOWMULTISELECT) ? FILE_BUF_LEN : MAX_PATH];
+			auto buf = new char[(_ofn.Flags & OFN_ALLOWMULTISELECT) ? FILE_BUF_LEN : MAX_PATH];
 			buf[0] = 0;
 			
-			if(fileNames.length)
+			if (fileNames.length)
 			{
-				Dstring ts;
-				ts = dfl.internal.utf.unsafeAnsi(_fileNames[0]);
+				Dstring ts = dfl.internal.utf.unsafeAnsi(_fileNames[0]);
 				buf[0 .. ts.length] = ts[];
 				buf[ts.length] = 0;
 			}
 			
-			ofna.nMaxFile = buf.length.toI32;
-			ofna.lpstrFile = buf.ptr;
+			_ofn.nMaxFile = buf.length.toI32;
+			_ofn.lpstrFile = buf.ptr;
 		}
 		
-		ofn.hwndOwner = owner;
+		_ofn.hwndOwner = owner;
 	}
 	
 	
@@ -625,28 +619,29 @@ abstract class FileDialog: CommonDialog // docmain
 	void populateFiles()
 	in
 	{
-		assert(ofn.lpstrFile !is null);
+		assert(_ofn.lpstrFile !is null);
 	}
 	do
 	{
-		if(ofn.Flags & OFN_ALLOWMULTISELECT)
+		if (_ofn.Flags & OFN_ALLOWMULTISELECT)
 		{
 			// Nonstandard reserve.
 			_fileNames = new Dstring[4];
 			_fileNames = _fileNames[0 .. 0];
 			
-			static if(dfl.internal.utf.useUnicode)
+			static if (dfl.internal.utf.useUnicode)
 			{
-				wchar* startp, p;
-				p = startp = ofnw.lpstrFile;
-				for(;;)
+				wchar* startp = _ofn.lpstrFile;
+				wchar* p = startp;
+
+				for (;;)
 				{
-					if(!*p)
+					if (!*p)
 					{
 						_fileNames ~= dfl.internal.utf.fromUnicode(startp, p - startp); // dup later.
 						
 						p++;
-						if(!*p)
+						if (!*p)
 							break;
 						
 						startp = p;
@@ -658,16 +653,16 @@ abstract class FileDialog: CommonDialog // docmain
 			}
 			else
 			{
-				char* startp, p;
-				p = startp = ofna.lpstrFile;
-				for(;;)
+				char* startp = _ofn.lpstrFile;
+				char* p = startp;
+				for (;;)
 				{
-					if(!*p)
+					if (!*p)
 					{
 						_fileNames ~= dfl.internal.utf.fromAnsi(startp, p - startp); // dup later.
 						
 						p++;
-						if(!*p)
+						if (!*p)
 							break;
 						
 						startp = p;
@@ -679,7 +674,7 @@ abstract class FileDialog: CommonDialog // docmain
 			}
 			
 			assert(_fileNames.length);
-			if(_fileNames.length == 1)
+			if (_fileNames.length == 1)
 			{
 				//_fileNames[0] = _fileNames[0].dup;
 				//_fileNames[0] = _fileNames[0].idup; // Needed in D2. Doesn't work in D1.
@@ -687,19 +682,17 @@ abstract class FileDialog: CommonDialog // docmain
 			}
 			else
 			{
-				Dstring s;
-				size_t i;
-				s = _fileNames[0];
+				Dstring s = _fileNames[0];
 				
 				// Not sure which of these 2 is better...
 				/+
-				for(i = 1; i != _fileNames.length; i++)
+				for (size_t i = 1; i != _fileNames.length; i++)
 				{
 					_fileNames[i - 1] = pathJoin(s, _fileNames[i]);
 				}
 				_fileNames = _fileNames[0 .. _fileNames.length - 1];
 				+/
-				for(i = 1; i != _fileNames.length; i++)
+				for (size_t i = 1; i != _fileNames.length; i++)
 				{
 					_fileNames[i] = pathJoin(s, _fileNames[i]);
 				}
@@ -709,31 +702,29 @@ abstract class FileDialog: CommonDialog // docmain
 		else
 		{
 			_fileNames = new Dstring[1];
-			static if(dfl.internal.utf.useUnicode)
+			static if (dfl.internal.utf.useUnicode)
 			{
-				_fileNames[0] = dfl.internal.utf.fromUnicodez(ofnw.lpstrFile);
+				_fileNames[0] = dfl.internal.utf.fromUnicodez(_ofn.lpstrFile);
 			}
 			else
 			{
-				_fileNames[0] = dfl.internal.utf.fromAnsiz(ofna.lpstrFile);
+				_fileNames[0] = dfl.internal.utf.fromAnsiz(_ofn.lpstrFile);
 			}
 			
 			/+
-			if(_addext && checkFileExists() && ofn.nFilterIndex)
+			if (_addext && checkFileExists() && _ofn.nFilterIndex)
 			{
-				if(!ofn.nFileExtension || ofn.nFileExtension == _fileNames[0].length)
+				if (!_ofn.nFileExtension || _ofn.nFileExtension == _fileNames[0].length)
 				{
-					Dstring s;
-					typeof(ofn.nFilterIndex) onidx;
+					Dstring s = _filter;
+					typeof(_ofn.nFilterIndex) onidx = _ofn.nFilterIndex << 1;
+
 					int i;
-					Dstring[] exts;
 					
-					s = _filter;
-					onidx = ofn.nFilterIndex << 1;
 					do
 					{
 						i = charFindInString(s, '|');
-						if(i == -1)
+						if (i == -1)
 							goto no_such_filter;
 						
 						s = s[i + 1 .. s.length];
@@ -743,18 +734,18 @@ abstract class FileDialog: CommonDialog // docmain
 					while(onidx != 1);
 					
 					i = charFindInString(s, '|');
-					if(i != -1)
+					if (i != -1)
 						s = s[0 .. i];
 					
-					exts = stringSplit(s, ";");
-					foreach(Dstring ext; exts)
+					Dstring[] exts = stringSplit(s, ";");
+					foreach ((Dstring ext; exts)
 					{
 						cprintf("sel ext:  %.*s\n", ext);
 					}
 					
 					// ...
 					
-					no_such_filter: ;
+				no_such_filter: ;
 				}
 			}
 			+/
@@ -767,13 +758,13 @@ abstract class FileDialog: CommonDialog // docmain
 	// Call only if the dialog succeeded.
 	void finishOfn()
 	{
-		if(_needRebuildFileNames)
+		if (_needRebuildFileNames)
 			populateFiles();
 		
 		// NOTE: When don't use hook proc, Need to get file names from ofn.lpstrFile.
 		// Don't let ofn.lpstrFile be null.
 		//
-		// ofn.lpstrFile = null;
+		// _ofn.lpstrFile = null;
 	}
 	
 	
@@ -782,7 +773,7 @@ abstract class FileDialog: CommonDialog // docmain
 	{
 		_needRebuildFileNames = false;
 		
-		ofn.lpstrFile = null;
+		_ofn.lpstrFile = null;
 		_fileNames = null;
 	}
 }
@@ -801,62 +792,62 @@ class OpenFileDialog: FileDialog // docmain
 	this()
 	{
 		super();
-		ofn.Flags |= OFN_FILEMUSTEXIST;
+		_ofn.Flags |= OFN_FILEMUSTEXIST;
 	}
 	
 	
 	override void reset()
 	{
 		super.reset();
-		ofn.Flags |= OFN_FILEMUSTEXIST;
+		_ofn.Flags |= OFN_FILEMUSTEXIST;
 	}
 	
 	
 	///
 	final @property void multiselect(bool byes) // setter
 	{
-		if(byes)
-			ofn.Flags |= OFN_ALLOWMULTISELECT;
+		if (byes)
+			_ofn.Flags |= OFN_ALLOWMULTISELECT;
 		else
-			ofn.Flags &= ~OFN_ALLOWMULTISELECT;
+			_ofn.Flags &= ~OFN_ALLOWMULTISELECT;
 	}
 	
 	/// ditto
-	final @property bool multiselect() // getter
+	final @property bool multiselect() const // getter
 	{
-		return (ofn.Flags & OFN_ALLOWMULTISELECT) != 0;
+		return (_ofn.Flags & OFN_ALLOWMULTISELECT) != 0;
 	}
 	
 	
 	///
 	final @property void readOnlyChecked(bool byes) // setter
 	{
-		if(byes)
-			ofn.Flags |= OFN_READONLY;
+		if (byes)
+			_ofn.Flags |= OFN_READONLY;
 		else
-			ofn.Flags &= ~OFN_READONLY;
+			_ofn.Flags &= ~OFN_READONLY;
 	}
 	
 	/// ditto
-	final @property bool readOnlyChecked() // getter
+	final @property bool readOnlyChecked() const // getter
 	{
-		return (ofn.Flags & OFN_READONLY) != 0;
+		return (_ofn.Flags & OFN_READONLY) != 0;
 	}
 	
 	
 	///
 	final @property void showReadOnly(bool byes) // setter
 	{
-		if(byes)
-			ofn.Flags &= ~OFN_HIDEREADONLY;
+		if (byes)
+			_ofn.Flags &= ~OFN_HIDEREADONLY;
 		else
-			ofn.Flags |= OFN_HIDEREADONLY;
+			_ofn.Flags |= OFN_HIDEREADONLY;
 	}
 	
 	/// ditto
-	final @property bool showReadOnly() // getter
+	final @property bool showReadOnly() const // getter
 	{
-		return (ofn.Flags & OFN_HIDEREADONLY) == 0;
+		return (_ofn.Flags & OFN_HIDEREADONLY) == 0;
 	}
 	
 	
@@ -869,13 +860,13 @@ class OpenFileDialog: FileDialog // docmain
 	}
 
 	
-	protected:
+protected:
 	
 	override bool runDialog(HWND owner)
 	{
-		if(!_runDialog(owner))
+		if (!_runDialog(owner))
 		{
-			if(!CommDlgExtendedError())
+			if (!CommDlgExtendedError())
 				return false;
 			_cantRun();
 		}
@@ -891,27 +882,27 @@ class OpenFileDialog: FileDialog // docmain
 		
 		//synchronized(typeid(dfl.internal.utf.CurDirLockType))
 		{
-			static if(dfl.internal.utf.useUnicode)
+			static if (dfl.internal.utf.useUnicode)
 			{
 				enum NAME = "GetOpenFileNameW";
 				static GetOpenFileNameWProc proc = null;
 				
-				if(!proc)
+				if (!proc)
 				{
 					proc = cast(GetOpenFileNameWProc)GetProcAddress(GetModuleHandleA("comdlg32.dll"), NAME.ptr);
-					if(!proc)
+					if (!proc)
 						throw new Exception("Unable to load procedure " ~ NAME ~ "");
 				}
 				
-				result = proc(&ofnw);
+				result = proc(&_ofn);
 			}
 			else
 			{
-				result = GetOpenFileNameA(&ofna);
+				result = GetOpenFileNameA(&_ofn);
 			}
 		}
 		
-		if(result)
+		if (result)
 		{
 			finishOfn();
 			return result;
@@ -929,46 +920,46 @@ class SaveFileDialog: FileDialog // docmain
 	this()
 	{
 		super();
-		ofn.Flags |= OFN_OVERWRITEPROMPT;
+		_ofn.Flags |= OFN_OVERWRITEPROMPT;
 	}
 	
 	
 	override void reset()
 	{
 		super.reset();
-		ofn.Flags |= OFN_OVERWRITEPROMPT;
+		_ofn.Flags |= OFN_OVERWRITEPROMPT;
 	}
 	
 	
 	///
 	final @property void createPrompt(bool byes) // setter
 	{
-		if(byes)
-			ofn.Flags |= OFN_CREATEPROMPT;
+		if (byes)
+			_ofn.Flags |= OFN_CREATEPROMPT;
 		else
-			ofn.Flags &= ~OFN_CREATEPROMPT;
+			_ofn.Flags &= ~OFN_CREATEPROMPT;
 	}
 	
 	/// ditto
 	final @property bool createPrompt() // getter
 	{
-		return (ofn.Flags & OFN_CREATEPROMPT) != 0;
+		return (_ofn.Flags & OFN_CREATEPROMPT) != 0;
 	}
 	
 	
 	///
 	final @property void overwritePrompt(bool byes) // setter
 	{
-		if(byes)
-			ofn.Flags |= OFN_OVERWRITEPROMPT;
+		if (byes)
+			_ofn.Flags |= OFN_OVERWRITEPROMPT;
 		else
-			ofn.Flags &= ~OFN_OVERWRITEPROMPT;
+			_ofn.Flags &= ~OFN_OVERWRITEPROMPT;
 	}
 	
 	/// ditto
 	final @property bool overwritePrompt() // getter
 	{
-		return (ofn.Flags & OFN_OVERWRITEPROMPT) != 0;
+		return (_ofn.Flags & OFN_OVERWRITEPROMPT) != 0;
 	}
 	
 	
@@ -982,7 +973,7 @@ class SaveFileDialog: FileDialog // docmain
 	}
 	
 	
-	protected:
+protected:
 	
 	override bool runDialog(HWND owner)
 	{
@@ -990,19 +981,19 @@ class SaveFileDialog: FileDialog // docmain
 		
 		//synchronized(typeid(dfl.internal.utf.CurDirLockType))
 		{
-			static if(dfl.internal.utf.useUnicode)
+			static if (dfl.internal.utf.useUnicode)
 			{
 				enum NAME = "GetSaveFileNameW";
 				static GetSaveFileNameWProc proc = null;
 				
-				if(!proc)
+				if (!proc)
 				{
 					proc = cast(GetSaveFileNameWProc)GetProcAddress(GetModuleHandleA("comdlg32.dll"), NAME.ptr);
-					if(!proc)
+					if (!proc)
 						throw new Exception("Unable to load procedure " ~ NAME ~ "");
 				}
 				
-				if(proc(&ofnw))
+				if (proc(&_ofn))
 				{
 					finishOfn();
 					return true;
@@ -1010,7 +1001,7 @@ class SaveFileDialog: FileDialog // docmain
 			}
 			else
 			{
-				if(GetSaveFileNameA(&ofna))
+				if (GetSaveFileNameA(&_ofn))
 				{
 					finishOfn();
 					return true;
@@ -1024,7 +1015,7 @@ class SaveFileDialog: FileDialog // docmain
 }
 
 
-private extern(Windows) UINT_PTR ofnHookProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) nothrow
+private extern(Windows) UINT_PTR _ofnHookProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) nothrow
 {
 	enum PROP_STR = "DFL_FileDialog";
 	FileDialog fd;
@@ -1032,18 +1023,16 @@ private extern(Windows) UINT_PTR ofnHookProc(HWND hwnd, UINT msg, WPARAM wparam,
 	
 	try
 	{
-		if(msg == WM_INITDIALOG)
+		if (msg == WM_INITDIALOG)
 		{
 			static if (dfl.internal.utf.useUnicode)
 			{
-				OPENFILENAMEW* ofn;
-				ofn = cast(OPENFILENAMEW*)lparam;
+				OPENFILENAMEW* ofn = cast(OPENFILENAMEW*)lparam;
 				SetPropW(hwnd, toUnicodez(PROP_STR), cast(HANDLE)ofn.lCustData);
 			}
 			else
 			{
-				OPENFILENAMEA* ofn;
-				ofn = cast(OPENFILENAMEA*)lparam;
+				OPENFILENAMEA* ofn = cast(OPENFILENAMEA*)lparam;
 				SetPropA(hwnd, toAnsiz(PROP_STR), cast(HANDLE)ofn.lCustData);
 			}
 			fd = cast(FileDialog)cast(void*)ofn.lCustData;
@@ -1061,7 +1050,7 @@ private extern(Windows) UINT_PTR ofnHookProc(HWND hwnd, UINT msg, WPARAM wparam,
 		}
 		
 		//cprintf("hook msg(%d/0x%X) to obj %p\n", msg, msg, fd);
-		if(fd)
+		if (fd)
 		{
 			fd._needRebuildFileNames = true;
 			result = fd.hookProc(hwnd, msg, wparam, lparam);
