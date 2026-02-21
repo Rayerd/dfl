@@ -37,9 +37,9 @@ class FolderBrowserDialog: CommonDialog // docmain
 		
 		Application.ppin(cast(void*)this);
 		
-		bi.ulFlags = INIT_FLAGS;
-		bi.lParam = cast(typeof(bi.lParam))cast(void*)this;
-		bi.lpfn = &fbdHookProc;
+		_bi.ulFlags = INIT_FLAGS;
+		_bi.lParam = cast(typeof(_bi.lParam))cast(void*)this;
+		_bi.lpfn = &_fbdHookProc;
 	}
 	
 	
@@ -51,7 +51,7 @@ class FolderBrowserDialog: CommonDialog // docmain
 	
 	override DialogResult showDialog()
 	{
-		if(!runDialog(GetActiveWindow()))
+		if (!runDialog(GetActiveWindow()))
 			return DialogResult.CANCEL;
 		return DialogResult.OK;
 	}
@@ -60,7 +60,7 @@ class FolderBrowserDialog: CommonDialog // docmain
 	/// 
 	override DialogResult showDialog(IWindow owner)
 	{
-		if(!runDialog(owner ? owner.handle : GetActiveWindow()))
+		if (!runDialog(owner ? owner.handle : GetActiveWindow()))
 			return DialogResult.CANCEL;
 		return DialogResult.OK;
 	}
@@ -69,9 +69,9 @@ class FolderBrowserDialog: CommonDialog // docmain
 	///
 	override void reset()
 	{
-		bi.ulFlags = INIT_FLAGS;
-		_desc = null;
-		_selpath = null;
+		_bi.ulFlags = INIT_FLAGS;
+		_description = null;
+		_selectedPath = null;
 		_root = Environment.SpecialFolder.DESKTOP;
 	}
 	
@@ -81,13 +81,13 @@ class FolderBrowserDialog: CommonDialog // docmain
 	{
 		// lpszTitle
 		
-		_desc = desc;
+		_description = desc;
 	}
 	
 	/// ditto
 	final @property Dstring description() const // getter
 	{
-		return _desc;
+		return _description;
 	}
 	
 	
@@ -96,13 +96,13 @@ class FolderBrowserDialog: CommonDialog // docmain
 	{
 		// pszDisplayName
 		
-		_selpath = selpath;
+		_selectedPath = selpath;
 	}
 	
 	/// ditto
 	final @property Dstring selectedPath() const // getter
 	{
-		return _selpath;
+		return _selectedPath;
 	}
 	
 	
@@ -114,16 +114,16 @@ class FolderBrowserDialog: CommonDialog // docmain
 		// Might need to enum child windows looking for window title
 		// "&New Folder" and hide it, then shift "OK" and "Cancel" over.
 		
-		if(byes)
-			bi.ulFlags &= ~BIF_NONEWFOLDERBUTTON;
+		if (byes)
+			_bi.ulFlags &= ~BIF_NONEWFOLDERBUTTON;
 		else
-			bi.ulFlags |= BIF_NONEWFOLDERBUTTON;
+			_bi.ulFlags |= BIF_NONEWFOLDERBUTTON;
 	}
 	
 	/// ditto
 	final @property bool showNewFolderButton() const // getter
 	{
-		return (bi.ulFlags & BIF_NONEWFOLDERBUTTON) == 0;
+		return (_bi.ulFlags & BIF_NONEWFOLDERBUTTON) == 0;
 	}
 	
 	
@@ -135,16 +135,16 @@ class FolderBrowserDialog: CommonDialog // docmain
 		// Might need to enum child windows looking for window title
 		// "&New Folder" and hide it, then shift "OK" and "Cancel" over.
 		
-		if(byes)
-			bi.ulFlags |= BIF_NEWDIALOGSTYLE;
+		if (byes)
+			_bi.ulFlags |= BIF_NEWDIALOGSTYLE;
 		else
-			bi.ulFlags &= ~BIF_NEWDIALOGSTYLE;
+			_bi.ulFlags &= ~BIF_NEWDIALOGSTYLE;
 	}
 	
 	/// ditto
 	final @property bool showNewStyleDialog() const // getter
 	{
-		return (bi.ulFlags & BIF_NEWDIALOGSTYLE) != 0;
+		return (_bi.ulFlags & BIF_NEWDIALOGSTYLE) != 0;
 	}
 	
 	
@@ -156,16 +156,16 @@ class FolderBrowserDialog: CommonDialog // docmain
 		// Might need to enum child windows looking for window title
 		// "&New Folder" and hide it, then shift "OK" and "Cancel" over.
 		
-		if(byes)
-			bi.ulFlags |= BIF_EDITBOX;
+		if (byes)
+			_bi.ulFlags |= BIF_EDITBOX;
 		else
-			bi.ulFlags &= ~BIF_EDITBOX;
+			_bi.ulFlags &= ~BIF_EDITBOX;
 	}
 	
 	/// ditto
 	final @property bool showTextBox() const // getter
 	{
-		return (bi.ulFlags & BIF_EDITBOX) != 0;
+		return (_bi.ulFlags & BIF_EDITBOX) != 0;
 	}
 	
 	
@@ -204,76 +204,72 @@ class FolderBrowserDialog: CommonDialog // docmain
 	{
 		IMalloc shmalloc;
 		
-		bi.hwndOwner = owner;
+		_bi.hwndOwner = owner;
 		
 		// Using size of wchar so that the buffer works for ansi and unicode.
 		//void* pdescz = dfl.internal.clib.alloca(wchar.sizeof * MAX_PATH);
-		//if(!pdescz)
+		//if (!pdescz)
 		//	throw new DflException("Out of memory"); // Stack overflow ?
 		//wchar[MAX_PATH] pdescz = void;
 		wchar[MAX_PATH] pdescz; // Initialize because SHBrowseForFolder() is modal.
 		
-		static if(dfl.internal.utf.useUnicode)
+		static if (dfl.internal.utf.useUnicode)
 		{
 			enum BROWSE_NAME = "SHBrowseForFolderW";
 			static SHBrowseForFolderWProc browseproc = null;
 			
-			if(!browseproc)
+			if (!browseproc)
 			{
-				HMODULE hmod;
-				hmod = GetModuleHandleA("shell32.dll");
+				HMODULE hmod = GetModuleHandleA("shell32.dll");
 				
 				browseproc = cast(SHBrowseForFolderWProc)GetProcAddress(hmod, BROWSE_NAME.ptr);
-				if(!browseproc)
+				if (!browseproc)
 					throw new Exception("Unable to load procedure " ~ BROWSE_NAME);
 			}
 			
-			biw.lpszTitle = dfl.internal.utf.toUnicodez(_desc);
+			_bi.lpszTitle = dfl.internal.utf.toUnicodez(_description);
 			
 			{
 				LPITEMIDLIST idlist;
 				if (SHGetSpecialFolderLocation(owner, cast(int)_root, &idlist) == S_OK)
-					biw.pidlRoot = idlist;
+					_bi.pidlRoot = idlist;
 				else
-					biw.pidlRoot = null;
+					_bi.pidlRoot = null;
 			}
 			scope(exit)
 			{
-				if (biw.pidlRoot)
-					CoTaskMemFree(biw.pidlRoot);
+				if (_bi.pidlRoot)
+					CoTaskMemFree(_bi.pidlRoot);
 			}
 			
-			biw.pszDisplayName = cast(wchar*)pdescz;
-			if(_desc.length)
+			_bi.pszDisplayName = cast(wchar*)pdescz;
+			if (_description.length)
 			{
-				Dwstring tmp;
-				tmp = dfl.internal.utf.toUnicode(_desc);
-				if(tmp.length >= MAX_PATH)
+				Dwstring tmp = dfl.internal.utf.toUnicode(_description);
+				if (tmp.length >= MAX_PATH)
 					_errPathTooLong();
-				biw.pszDisplayName[0 .. tmp.length] = tmp[];
-				biw.pszDisplayName[tmp.length] = 0;
+				_bi.pszDisplayName[0 .. tmp.length] = tmp[];
+				_bi.pszDisplayName[tmp.length] = 0;
 			}
 			else
 			{
-				biw.pszDisplayName[0] = 0;
+				_bi.pszDisplayName[0] = 0;
 			}
 			
 			// Show the dialog!
-			LPITEMIDLIST result;
-			result = browseproc(&biw);
+			LPITEMIDLIST result = browseproc(&_bi);
 			
-			if(!result)
+			if (!result)
 			{
-				biw.lpszTitle = null;
+				_bi.lpszTitle = null;
 				return false;
 			}
 			
-			if(NOERROR != SHGetMalloc(&shmalloc))
+			if (NOERROR != SHGetMalloc(&shmalloc))
 				_errNoShMalloc();
 			
-			Dstring wbuf;
-			wbuf = shGetPathFromIDList(result);
-			if(!wbuf)
+			Dstring wbuf = shGetPathFromIDList(result);
+			if (!wbuf)
 			{
 				shmalloc.Free(result);
 				shmalloc.Release();
@@ -281,61 +277,58 @@ class FolderBrowserDialog: CommonDialog // docmain
 				assert(0);
 			}
 			
-			_selpath = wbuf;
+			_selectedPath = wbuf;
 			
 			shmalloc.Free(result);
 			shmalloc.Release();
 			
-			biw.lpszTitle = null;
+			_bi.lpszTitle = null;
 		}
 		else
 		{
-			bia.lpszTitle = dfl.internal.utf.toAnsiz(_desc);
+			_bi.lpszTitle = dfl.internal.utf.toAnsiz(_description);
 			
 			{
 				LPITEMIDLIST idlist;
 				if (SHGetSpecialFolderLocation(owner, cast(int)_root, &idlist) == S_OK)
-					bia.pidlRoot = idlist;
+					_bi.pidlRoot = idlist;
 				else
-					bia.pidlRoot = null;
+					_bi.pidlRoot = null;
 			}
 			scope(exit)
 			{
-				if (bia.pidlRoot)
-					CoTaskMemFree(bia.pidlRoot);
+				if (_bi.pidlRoot)
+					CoTaskMemFree(_bi.pidlRoot);
 			}
 
-			bia.pszDisplayName = cast(char*)pdescz;
-			if(_desc.length)
+			_bi.pszDisplayName = cast(char*)pdescz;
+			if (_description.length)
 			{
-				Dstring tmp; // ansi.
-				tmp = dfl.internal.utf.toAnsi(_desc);
-				if(tmp.length >= MAX_PATH)
+				Dstring tmp = dfl.internal.utf.toAnsi(_description); // ansi.
+				if (tmp.length >= MAX_PATH)
 					_errPathTooLong();
-				bia.pszDisplayName[0 .. tmp.length] = tmp[];
-				bia.pszDisplayName[tmp.length] = 0;
+				_bi.pszDisplayName[0 .. tmp.length] = tmp[];
+				_bi.pszDisplayName[tmp.length] = 0;
 			}
 			else
 			{
-				bia.pszDisplayName[0] = 0;
+				_bi.pszDisplayName[0] = 0;
 			}
 			
 			// Show the dialog!
-			LPITEMIDLIST result;
-			result = SHBrowseForFolderA(&bia);
+			LPITEMIDLIST result = SHBrowseForFolderA(&_bi);
 			
-			if(!result)
+			if (!result)
 			{
-				bia.lpszTitle = null;
+				_bi.lpszTitle = null;
 				return false;
 			}
 			
-			if(NOERROR != SHGetMalloc(&shmalloc))
+			if (NOERROR != SHGetMalloc(&shmalloc))
 				_errNoShMalloc();
 			
-			Dstring abuf;
-			abuf = shGetPathFromIDList(result);
-			if(!abuf)
+			Dstring abuf = shGetPathFromIDList(result);
+			if (!abuf)
 			{
 				shmalloc.Free(result);
 				shmalloc.Release();
@@ -343,19 +336,19 @@ class FolderBrowserDialog: CommonDialog // docmain
 				assert(0);
 			}
 			
-			_selpath = abuf;
+			_selectedPath = abuf;
 			
 			shmalloc.Free(result);
 			shmalloc.Release();
 			
-			bia.lpszTitle = null;
+			_bi.lpszTitle = null;
 		}
 		
 		return true;
 	}
 	
 	
-	protected:
+protected:
 	
 	override UINT_PTR hookProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
@@ -363,23 +356,21 @@ class FolderBrowserDialog: CommonDialog // docmain
 	}
 	
 	
-	private:
+private:
 	
 	static if (dfl.internal.utf.useUnicode)
 	{
-		BROWSEINFOW biw;
-		alias bi = biw;
+		BROWSEINFOW _bi;
 	}
 	else
 	{
-		BROWSEINFOA bia;
-		alias bi = bia;
+		BROWSEINFOA _bi;
 	}
 	static assert(BROWSEINFOW.sizeof == BROWSEINFOA.sizeof);
 	static assert(BROWSEINFOW.ulFlags.offsetof == BROWSEINFOA.ulFlags.offsetof);
 	
-	Dstring _desc;
-	Dstring _selpath;
+	Dstring _description;
+	Dstring _selectedPath;
 	Environment.SpecialFolder _root = Environment.SpecialFolder.DESKTOP;
 	
 	
@@ -388,40 +379,39 @@ class FolderBrowserDialog: CommonDialog // docmain
 
 
 // Return type is int.
-// Se  https://learn.microsoft.com/en-us/previous-versions/windows/desktop/legacy/bb762598(v=vs.85)
-private extern(Windows) int fbdHookProc(HWND hwnd, UINT msg, LPARAM lparam, LPARAM lpData) nothrow
+// See https://learn.microsoft.com/en-us/previous-versions/windows/desktop/legacy/bb762598(v=vs.85)
+private extern(Windows) int _fbdHookProc(HWND hwnd, UINT msg, LPARAM lparam, LPARAM lpData) nothrow
 {
-	FolderBrowserDialog fd;
-	int result = 0;
 	
+	int result = 0;
 	try
 	{
-		fd = cast(FolderBrowserDialog)cast(void*)lpData;
-		if(fd)
+		FolderBrowserDialog fd = cast(FolderBrowserDialog)cast(void*)lpData;
+		if (fd)
 		{
-			Dstring s;
-			switch(msg)
+			switch (msg)
 			{
 				case BFFM_INITIALIZED:
-					s = fd.selectedPath;
-					if(s.length)
+				{
+					Dstring s = fd.selectedPath;
+					if (s.length)
 					{
-						static if(dfl.internal.utf.useUnicode)
+						static if (dfl.internal.utf.useUnicode)
 							SendMessageW(hwnd, BFFM_SETSELECTIONW, TRUE, cast(LPARAM)dfl.internal.utf.toUnicodez(s));
 						else
 							SendMessageA(hwnd, BFFM_SETSELECTIONA, TRUE, cast(LPARAM)dfl.internal.utf.toAnsiz(s));
 					}
 					break;
+				}
 				
 				default:
 			}
 		}
 	}
-	catch(DThrowable e)
+	catch (DThrowable e)
 	{
 		Application.onThreadException(e);
 	}
 	
 	return result;
 }
-
