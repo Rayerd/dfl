@@ -102,10 +102,13 @@ class MainForm : Form
 	private void doFolderDialog(Control sender, EventArgs e)
 	{
 		_folderDialog.description = "Select folder";
-		_folderDialog.showNewStyleDialog = true;
-		_folderDialog.showNewFolderButton = true;
-		_folderDialog.showTextBox = true;
-		_folderDialog.rootFolder = Environment.SpecialFolder.MY_COMPUTER;
+
+		// For legacy folder dialog.
+		_folderDialog.showNewStyleDialog = true; // This property is valid for old-style dialogs.
+		_folderDialog.showNewFolderButton = true; // This property is valid for old-style dialogs.
+		_folderDialog.showTextBox = true; // This property is valid for old-style dialogs.
+		_folderDialog.rootFolder = Environment.SpecialFolder.MY_COMPUTER; // This property is valid for old-style dialogs.
+
 		_folderDialog.selectedPath = Environment.getFolderPath(Environment.SpecialFolder.MY_DOCUMENTS);
 
 		DialogResult r = _folderDialog.showDialog();
@@ -224,7 +227,7 @@ class MainForm : Form
 		_saveFileDialog.fileOk ~= &doFileOk;
 		_saveFileDialog.helpRequest ~= &doHelpRequest;
 		
-		_folderDialog = new FolderBrowserDialog();
+		_folderDialog = new FolderBrowserDialog(false);
 		_fontDialog = new FontDialog();
 		_colorDialog = new ColorDialog();
 

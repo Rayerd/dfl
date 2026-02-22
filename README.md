@@ -28,7 +28,12 @@ void main()
 ![screen shot](./image/welcomtodfl.png "screen shot")
 
 ## Recent major features
-- **Supports dpi-aware (per monitor v2).**
+- **dfl.folderdialog has changed from a legacy dialog based on SHBrowseForFolder (left image) 
+to a modern dialog based on IFileDialog (right image).**
+
+![screen shot](./examples/commondialog/image/screenshot3.png "screen shot")
+
+- Supports dpi-aware (per monitor v2).
 	- Add Application.setHighDpiMode method.
 		- ```DPI_UNAWARE```
 		- ```SYSTEM_AWARE```
