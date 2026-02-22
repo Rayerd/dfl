@@ -44,7 +44,7 @@ abstract class FileDialog: CommonDialog // docmain
 		bool resultOK = runDialog(GetActiveWindow());
 		if (resultOK)
 		{
-			populateFiles();
+			_populateFiles();
 			return DialogResult.OK;
 		}
 		else
@@ -59,7 +59,7 @@ abstract class FileDialog: CommonDialog // docmain
 		bool resultOK = runDialog(owner ? owner.handle : GetActiveWindow());
 		if (resultOK)
 		{
-			populateFiles();
+			_populateFiles();
 			return DialogResult.OK;
 		}
 		else
@@ -239,7 +239,7 @@ abstract class FileDialog: CommonDialog // docmain
 	final @property Dstring[] fileNames() // getter
 	{
 		if (_needRebuildFileNames)
-			populateFiles();
+			_populateFiles();
 		
 		return _fileNames;
 	}
@@ -510,10 +510,7 @@ protected:
 		{
 			case WM_NOTIFY:
 			{
-				static if (dfl.internal.utf.useUnicode)
-					OFNOTIFYW* notify = cast(OFNOTIFYW*)lparam;
-				else
-					OFNOTIFYA* notify = cast(OFNOTIFYA*)lparam;
+				OFNOTIFY* notify = cast(OFNOTIFY*)lparam;
 
 				switch (notify.hdr.code)
 				{
@@ -535,7 +532,7 @@ protected:
 								fileName = fromUnicodez(notify.lpOFN.lpstrFile);
 							else
 								fileName = fromAnsiz(notify.lpOFN.lpstrFile);
-							populateFiles();
+							_populateFiles();
 							return 0;
 						}
 					}
@@ -578,7 +575,7 @@ private:
 	enum FILE_BUF_LEN = 4096; // ? 12288 ? 12800 ?
 	
 	
-	void beginOfn(HWND owner)
+	void _beginOfn(HWND owner)
 	{
 		static if (dfl.internal.utf.useUnicode)
 		{
@@ -616,7 +613,7 @@ private:
 	
 	
 	// Populate -_fileNames- from -ofn.lpstrFile-.
-	void populateFiles()
+	void _populateFiles()
 	in
 	{
 		assert(_ofn.lpstrFile !is null);
@@ -756,20 +753,20 @@ private:
 	
 	
 	// Call only if the dialog succeeded.
-	void finishOfn()
+	void _finishOfn()
 	{
 		if (_needRebuildFileNames)
-			populateFiles();
+			_populateFiles();
 		
-		// NOTE: When don't use hook proc, Need to get file names from ofn.lpstrFile.
-		// Don't let ofn.lpstrFile be null.
+		// NOTE: When don't use hook proc, Need to get file names from _ofn.lpstrFile.
+		// Don't let _ofn.lpstrFile be null.
 		//
 		// _ofn.lpstrFile = null;
 	}
 	
 	
 	// Call only if dialog fail or cancel.
-	void cancelOfn()
+	void _cancelOfn()
 	{
 		_needRebuildFileNames = false;
 		
@@ -878,7 +875,7 @@ protected:
 	{
 		BOOL result = 0;
 		
-		beginOfn(owner);
+		_beginOfn(owner);
 		
 		//synchronized(typeid(dfl.internal.utf.CurDirLockType))
 		{
@@ -904,11 +901,11 @@ protected:
 		
 		if (result)
 		{
-			finishOfn();
+			_finishOfn();
 			return result;
 		}
 		
-		cancelOfn();
+		_cancelOfn();
 		return result;
 	}
 }
@@ -977,7 +974,7 @@ protected:
 	
 	override bool runDialog(HWND owner)
 	{
-		beginOfn(owner);
+		_beginOfn(owner);
 		
 		//synchronized(typeid(dfl.internal.utf.CurDirLockType))
 		{
@@ -995,7 +992,7 @@ protected:
 				
 				if (proc(&_ofn))
 				{
-					finishOfn();
+					_finishOfn();
 					return true;
 				}
 			}
@@ -1003,13 +1000,13 @@ protected:
 			{
 				if (GetSaveFileNameA(&_ofn))
 				{
-					finishOfn();
+					_finishOfn();
 					return true;
 				}
 			}
 		}
 		
-		cancelOfn();
+		_cancelOfn();
 		return false;
 	}
 }
@@ -1025,14 +1022,13 @@ private extern(Windows) UINT_PTR _ofnHookProc(HWND hwnd, UINT msg, WPARAM wparam
 	{
 		if (msg == WM_INITDIALOG)
 		{
+			OPENFILENAME* ofn = cast(OPENFILENAME*)lparam;
 			static if (dfl.internal.utf.useUnicode)
 			{
-				OPENFILENAMEW* ofn = cast(OPENFILENAMEW*)lparam;
 				SetPropW(hwnd, toUnicodez(PROP_STR), cast(HANDLE)ofn.lCustData);
 			}
 			else
 			{
-				OPENFILENAMEA* ofn = cast(OPENFILENAMEA*)lparam;
 				SetPropA(hwnd, toAnsiz(PROP_STR), cast(HANDLE)ofn.lCustData);
 			}
 			fd = cast(FileDialog)cast(void*)ofn.lCustData;
@@ -1056,7 +1052,7 @@ private extern(Windows) UINT_PTR _ofnHookProc(HWND hwnd, UINT msg, WPARAM wparam
 			result = fd.hookProc(hwnd, msg, wparam, lparam);
 		}
 	}
-	catch(DThrowable e)
+	catch (DThrowable e)
 	{
 		Application.onThreadException(e);
 	}
