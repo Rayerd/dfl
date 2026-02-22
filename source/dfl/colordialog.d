@@ -27,11 +27,11 @@ class ColorDialog: CommonDialog // docmain
 	{
 		Application.ppin(cast(void*)this);
 		
-		cc.lStructSize = cc.sizeof;
-		cc.Flags = INIT_FLAGS;
-		cc.rgbResult = Color.empty.toArgb();
-		cc.lCustData = cast(typeof(cc.lCustData))cast(void*)this;
-		cc.lpfnHook = &ccHookProc;
+		_chooseColor.lStructSize = _chooseColor.sizeof;
+		_chooseColor.Flags = INIT_FLAGS;
+		_chooseColor.rgbResult = Color.empty.toArgb();
+		_chooseColor.lCustData = cast(typeof(_chooseColor.lCustData))cast(void*)this;
+		_chooseColor.lpfnHook = &ccHookProc;
 		_initcust();
 	}
 	
@@ -39,75 +39,75 @@ class ColorDialog: CommonDialog // docmain
 	///
 	@property void allowFullOpen(bool byes) // setter
 	{
-		if(byes)
-			cc.Flags &= ~CC_PREVENTFULLOPEN;
+		if (byes)
+			_chooseColor.Flags &= ~CC_PREVENTFULLOPEN;
 		else
-			cc.Flags |= CC_PREVENTFULLOPEN;
+			_chooseColor.Flags |= CC_PREVENTFULLOPEN;
 	}
 	
 	/// ditto
-	@property bool allowFullOpen() // getter
+	@property bool allowFullOpen() const // getter
 	{
-		return (cc.Flags & CC_PREVENTFULLOPEN) != CC_PREVENTFULLOPEN;
+		return (_chooseColor.Flags & CC_PREVENTFULLOPEN) != CC_PREVENTFULLOPEN;
 	}
 	
 	
 	///
 	@property void anyColor(bool byes) // setter
 	{
-		if(byes)
-			cc.Flags |= CC_ANYCOLOR;
+		if (byes)
+			_chooseColor.Flags |= CC_ANYCOLOR;
 		else
-			cc.Flags &= ~CC_ANYCOLOR;
+			_chooseColor.Flags &= ~CC_ANYCOLOR;
 	}
 	
 	/// ditto
-	@property bool anyColor() // getter
+	@property bool anyColor() const // getter
 	{
-		return (cc.Flags & CC_ANYCOLOR) == CC_ANYCOLOR;
+		return (_chooseColor.Flags & CC_ANYCOLOR) == CC_ANYCOLOR;
 	}
 	
 	
 	///
 	@property void solidColorOnly(bool byes) // setter
 	{
-		if(byes)
-			cc.Flags |= CC_SOLIDCOLOR;
+		if (byes)
+			_chooseColor.Flags |= CC_SOLIDCOLOR;
 		else
-			cc.Flags &= ~CC_SOLIDCOLOR;
+			_chooseColor.Flags &= ~CC_SOLIDCOLOR;
 	}
 	
 	/// ditto
-	@property bool solidColorOnly() // getter
+	@property bool solidColorOnly() const // getter
 	{
-		return (cc.Flags & CC_SOLIDCOLOR) == CC_SOLIDCOLOR;
+		return (_chooseColor.Flags & CC_SOLIDCOLOR) == CC_SOLIDCOLOR;
 	}
 	
 	
 	///
 	final @property void color(Color c) // setter
 	{
-		cc.rgbResult = c.toRgb();
+		_chooseColor.rgbResult = c.toRgb();
 	}
 	
 	/// ditto
-	final @property Color color() // getter
+	final @property Color color() const // getter
 	{
-		return Color.fromRgb(cc.rgbResult);
+		return Color.fromRgb(_chooseColor.rgbResult);
 	}
 	
 	
 	///
 	final @property void customColors(COLORREF[] colors) // setter
 	{
-		if(colors.length >= _customColors.length)
+		if (colors.length >= _customColors.length)
 			_customColors[] = colors[0 .. _customColors.length];
 		else
 			_customColors[0 .. colors.length] = colors[];
 	}
 	
 	/// ditto
-	final @property COLORREF[] customColors() // getter
+	final @property inout(COLORREF[]) customColors() inout // getter
 	{
 		return _customColors;
 	}
@@ -116,32 +116,32 @@ class ColorDialog: CommonDialog // docmain
 	///
 	@property void fullOpen(bool byes) // setter
 	{
-		if(byes)
-			cc.Flags |= CC_FULLOPEN;
+		if (byes)
+			_chooseColor.Flags |= CC_FULLOPEN;
 		else
-			cc.Flags &= ~CC_FULLOPEN;
+			_chooseColor.Flags &= ~CC_FULLOPEN;
 	}
 	
 	/// ditto
-	@property bool fullOpen() // getter
+	@property bool fullOpen() const // getter
 	{
-		return (cc.Flags & CC_FULLOPEN) == CC_FULLOPEN;
+		return (_chooseColor.Flags & CC_FULLOPEN) == CC_FULLOPEN;
 	}
 	
 	
 	///
 	@property void showHelp(bool byes) // setter
 	{
-		if(byes)
-			cc.Flags |= CC_SHOWHELP;
+		if (byes)
+			_chooseColor.Flags |= CC_SHOWHELP;
 		else
-			cc.Flags &= ~CC_SHOWHELP;
+			_chooseColor.Flags &= ~CC_SHOWHELP;
 	}
 	
 	/// ditto
-	@property bool showHelp() // getter
+	@property bool showHelp() const // getter
 	{
-		return (cc.Flags & CC_SHOWHELP) == CC_SHOWHELP;
+		return (_chooseColor.Flags & CC_SHOWHELP) == CC_SHOWHELP;
 	}
 	
 	
@@ -163,8 +163,8 @@ class ColorDialog: CommonDialog // docmain
 	///
 	override void reset()
 	{
-		cc.Flags = INIT_FLAGS;
-		cc.rgbResult = Color.empty.toArgb();
+		_chooseColor.Flags = INIT_FLAGS;
+		_chooseColor.rgbResult = Color.empty.toArgb();
 		_initcust();
 	}
 	
@@ -179,9 +179,9 @@ class ColorDialog: CommonDialog // docmain
 	///
 	protected override bool runDialog(HWND owner)
 	{
-		if(!_runDialog(owner))
+		if (!_runDialog(owner))
 		{
-			if(!CommDlgExtendedError())
+			if (!CommDlgExtendedError())
 				return false;
 			_cantRun();
 		}
@@ -191,40 +191,27 @@ class ColorDialog: CommonDialog // docmain
 	
 	private BOOL _runDialog(HWND owner)
 	{
-		if(cc.rgbResult == Color.empty.toArgb())
-			cc.Flags &= ~CC_RGBINIT;
+		if (_chooseColor.rgbResult == Color.empty.toArgb())
+			_chooseColor.Flags &= ~CC_RGBINIT;
 		else
-			cc.Flags |= CC_RGBINIT;
-		cc.hwndOwner = owner;
-		cc.lpCustColors = _customColors.ptr;
-		static if (dfl.internal.utf.useUnicode)
-			return ChooseColorW(&cc);
-		else
-			return ChooseColorA(&cc);
+			_chooseColor.Flags |= CC_RGBINIT;
+		_chooseColor.hwndOwner = owner;
+		_chooseColor.lpCustColors = _customColors.ptr;
+		return ChooseColor(&_chooseColor);
 	}
 	
 	
-	private:
+private:
 	enum DWORD INIT_FLAGS = CC_ENABLEHOOK;
 	
-	static if (dfl.internal.utf.useUnicode)
-	{
-		CHOOSECOLORW ccw;
-		alias cc = ccw;
-	}
-	else
-	{
-		CHOOSECOLORA cca;
-		alias cc = cca;
-	}
+	CHOOSECOLOR _chooseColor;
 	COLORREF[16] _customColors;
 	
 	
 	void _initcust()
 	{
-		COLORREF cdef;
-		cdef = Color(0xFF, 0xFF, 0xFF).toRgb();
-		foreach(ref COLORREF cref; _customColors)
+		COLORREF cdef = Color(0xFF, 0xFF, 0xFF).toRgb();
+		foreach (ref COLORREF cref; _customColors)
 		{
 			cref = cdef;
 		}
@@ -240,41 +227,29 @@ package extern(Windows) UINT_PTR ccHookProc(HWND hwnd, UINT msg, WPARAM wparam, 
 	
 	try
 	{
-		if(msg == WM_INITDIALOG)
+		if (msg == WM_INITDIALOG)
 		{
+			CHOOSECOLOR* cc = cast(CHOOSECOLOR*)lparam;
 			static if (dfl.internal.utf.useUnicode)
-			{
-				CHOOSECOLORW* cc;
-				cc = cast(CHOOSECOLORW*)lparam;
 				SetPropW(hwnd, toUnicodez(PROP_STR), cast(HANDLE)cc.lCustData);
-				cd = cast(ColorDialog)cast(void*)cc.lCustData;
-			}
 			else
-			{
-				CHOOSECOLORA* cc;
-				cc = cast(CHOOSECOLORA*)lparam;
 				SetPropA(hwnd, toAnsiz(PROP_STR), cast(HANDLE)cc.lCustData);
-				cd = cast(ColorDialog)cast(void*)cc.lCustData;
-			}
+			cd = cast(ColorDialog)cast(void*)cc.lCustData;
 		}
 		else
 		{
-			static if(dfl.internal.utf.useUnicode)
-			{
+			static if (dfl.internal.utf.useUnicode)
 				cd = cast(ColorDialog)cast(void*)GetPropW(hwnd, toUnicodez(PROP_STR));
-			}
 			else
-			{
 				cd = cast(ColorDialog)cast(void*)GetPropA(hwnd, toAnsiz(PROP_STR));
-			}
 		}
 		
-		if(cd)
+		if (cd)
 		{
 			result = cd.hookProc(hwnd, msg, wparam, lparam);
 		}
 	}
-	catch(DThrowable e)
+	catch (DThrowable e)
 	{
 		Application.onThreadException(e);
 	}
