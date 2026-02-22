@@ -33,7 +33,8 @@ class FontDialog: CommonDialog
 	this()
 	{
 		Application.ppin(cast(void*)this);
-		
+
+		_font = Control.defaultFont;
 		_chooseFont.lStructSize = _chooseFont.sizeof;
 		_chooseFont.Flags = INIT_FLAGS;
 		_chooseFont.lpLogFont = &_logFont.lf;
@@ -45,7 +46,7 @@ class FontDialog: CommonDialog
 	
 	override void reset()
 	{
-		_font = null;
+		_font = Control.defaultFont;
 		_chooseFont.Flags = INIT_FLAGS;
 		_chooseFont.rgbColors = 0;
 		_chooseFont.nSizeMin = 0;
@@ -63,7 +64,7 @@ class FontDialog: CommonDialog
 	}
 	
 	/// ditto
-	final @property bool allowSimulations() // getter
+	final @property bool allowSimulations() const // getter
 	{
 		if (_chooseFont.Flags & CF_NOSIMULATIONS)
 			return false;
@@ -81,7 +82,7 @@ class FontDialog: CommonDialog
 	}
 	
 	/// ditto
-	final @property bool allowVectorFonts() // getter
+	final @property bool allowVectorFonts() const // getter
 	{
 		if (_chooseFont.Flags & CF_NOVECTORFONTS)
 			return false;
@@ -99,7 +100,7 @@ class FontDialog: CommonDialog
 	}
 	
 	/// ditto
-	final @property bool allowVerticalFonts() // getter
+	final @property bool allowVerticalFonts() const // getter
 	{
 		if (_chooseFont.Flags & CF_NOVERTFONTS)
 			return false;
@@ -114,7 +115,7 @@ class FontDialog: CommonDialog
 	}
 	
 	/// ditto
-	final @property Color color() // getter
+	final @property Color color() const // getter
 	{
 		return Color.fromRgb(_chooseFont.rgbColors);
 	}
@@ -130,7 +131,7 @@ class FontDialog: CommonDialog
 	}
 	
 	/// ditto
-	final @property bool fixedPitchOnly() // getter
+	final @property bool fixedPitchOnly() const // getter
 	{
 		if (_chooseFont.Flags & CF_FIXEDPITCHONLY)
 			return true;
@@ -145,10 +146,8 @@ class FontDialog: CommonDialog
 	}
 	
 	/// ditto
-	final @property Font font() // getter
+	final @property inout(Font) font() inout // getter
 	{
-		if (!_font)
-			_font = Control.defaultFont; // TODO: ?
 		return _font;
 	}
 	
@@ -163,7 +162,7 @@ class FontDialog: CommonDialog
 	}
 	
 	/// ditto
-	final @property bool fontMustExist() // getter
+	final @property bool fontMustExist() const // getter
 	{
 		if (_chooseFont.Flags & CF_FORCEFONTEXIST)
 			return true;
@@ -189,7 +188,7 @@ class FontDialog: CommonDialog
 	}
 	
 	/// ditto
-	final @property int maxSize() // getter
+	final @property int maxSize() const // getter
 	{
 		if (_chooseFont.Flags & CF_LIMITSIZE)
 			return _chooseFont.nSizeMax;
@@ -207,7 +206,7 @@ class FontDialog: CommonDialog
 	}
 	
 	/// ditto
-	final @property int minSize() // getter
+	final @property int minSize() const // getter
 	{
 		if (_chooseFont.Flags & CF_LIMITSIZE)
 			return _chooseFont.nSizeMin;
@@ -225,7 +224,7 @@ class FontDialog: CommonDialog
 	}
 	
 	/// ditto
-	final @property bool scriptsOnly() // getter
+	final @property bool scriptsOnly() const // getter
 	{
 		if (_chooseFont.Flags & CF_SCRIPTSONLY)
 			return true;
@@ -243,7 +242,7 @@ class FontDialog: CommonDialog
 	}
 	
 	/// ditto
-	final @property bool showApply() // getter
+	final @property bool showApply() const // getter
 	{
 		if (_chooseFont.Flags & CF_APPLY)
 			return true;
@@ -261,7 +260,7 @@ class FontDialog: CommonDialog
 	}
 	
 	/// ditto
-	final @property bool showHelp() // getter
+	final @property bool showHelp() const // getter
 	{
 		if (_chooseFont.Flags & CF_SHOWHELP)
 			return true;
@@ -279,7 +278,7 @@ class FontDialog: CommonDialog
 	}
 	
 	/// ditto
-	final @property bool showEffects() // getter
+	final @property bool showEffects() const // getter
 	{
 		if (_chooseFont.Flags & CF_EFFECTS)
 			return true;
@@ -415,18 +414,12 @@ private extern(Windows) UINT_PTR fontHookProc(HWND hwnd, UINT msg, WPARAM wparam
 	{
 		if (msg == WM_INITDIALOG)
 		{
+			CHOOSEFONT* cf = cast(CHOOSEFONT*)lparam;
 			static if (useUnicode)
-			{
-				CHOOSEFONTW* cf = cast(CHOOSEFONTW*)lparam;
 				SetPropW(hwnd, toUnicodez(PROP_STR), cast(HANDLE)cf.lCustData);
-				fd = cast(FontDialog)cast(void*)cf.lCustData;
-			}
 			else
-			{
-				CHOOSEFONTA* cf = cast(CHOOSEFONTA*)lparam;
 				SetPropA(hwnd, toAnsiz(PROP_STR), cast(HANDLE)cf.lCustData);
-				fd = cast(FontDialog)cast(void*)cf.lCustData;
-			}
+			fd = cast(FontDialog)cast(void*)cf.lCustData;
 		}
 		else
 		{
@@ -437,9 +430,7 @@ private extern(Windows) UINT_PTR fontHookProc(HWND hwnd, UINT msg, WPARAM wparam
 		}
 		
 		if (fd)
-		{
 			result = fd.hookProc(hwnd, msg, wparam, lparam);
-		}
 	}
 	catch (DThrowable e)
 	{
