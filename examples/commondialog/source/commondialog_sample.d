@@ -227,7 +227,7 @@ class MainForm : Form
 		_saveFileDialog.fileOk ~= &doFileOk;
 		_saveFileDialog.helpRequest ~= &doHelpRequest;
 		
-		_folderDialog = new FolderBrowserDialog(false);
+		_folderDialog = new FolderBrowserDialog();
 		_fontDialog = new FontDialog();
 		_colorDialog = new ColorDialog();
 
