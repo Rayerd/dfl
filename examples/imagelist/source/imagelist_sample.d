@@ -14,8 +14,10 @@ class MainForm : Form
 {
 	private ListView _listView;
 	private ComboBox _combobox;
-	private ImageList _imagelist;
-	private Bitmap _icons;
+	private ImageList _smallImagelist;
+	private ImageList _largeImagelist;
+	private Bitmap _icons24;
+	private Bitmap _icons64;
 
 	// Helper
 	private static string stringFromView(View v)
@@ -31,13 +33,24 @@ class MainForm : Form
 		this.formBorderStyle = FormBorderStyle.FIXED_SINGLE;
 
 		// Create Bitmap
-		_icons = new Bitmap(r".\image\rgb.bmp"); // Change by your environment.
+		ubyte[] bmpData24 = cast(ubyte[])import(r".\image\rgb24.bmp");
+		auto pic24 = new Picture(bmpData24);
+		_icons24 = pic24.toBitmap();
+
+		ubyte[] bmpData64 = cast(ubyte[])import(r".\image\rgb64.bmp");
+		auto pic64 = new Picture(bmpData64);
+		_icons64 = pic64.toBitmap();
 
 		// Create ImageList
-		_imagelist = new ImageList();
-		_imagelist.imageSize = Size(24, 24); // Each bitmap size in image list (W24[dots] x H24[dots] x 3[icons]).
-		_imagelist.transparentColor = Color.white;
-		_imagelist.images.addStrip(_icons);
+		_smallImagelist = new ImageList();
+		_smallImagelist.imageSize = Size(24, 24); // Each bitmap size in image list (W24[dots] x H24[dots] x 3[icons]).
+		_smallImagelist.transparentColor = Color.white;
+		_smallImagelist.images.addStrip(_icons24);
+
+		_largeImagelist = new ImageList();
+		_largeImagelist.imageSize = Size(64, 64); // Each bitmap size in image list (W64[dots] x H64[dots] x 3[icons]).
+		_largeImagelist.transparentColor = Color.white;
+		_largeImagelist.images.addStrip(_icons64);
 
 		// Create ComboBox
 		_combobox = new ComboBox();
@@ -84,8 +97,8 @@ class MainForm : Form
 		_listView.location = Point(0, 0);
 		_listView.size = Size(250, 150);
 
-		_listView.largeImageList = _imagelist; // Attach image list to ListView.
-		_listView.smallImageList = _imagelist; // ditto
+		_listView.largeImageList = _largeImagelist; // Attach image list to ListView.
+		_listView.smallImageList = _smallImagelist; // ditto
 
 		// Style
 		_listView.view = initialViewMove;
@@ -94,6 +107,7 @@ class MainForm : Form
 		_listView.hideSelection = false;
 		_listView.fullRowSelect = true;
 		_listView.checkBoxes = false;
+		_listView.scrollable = true; // scrollable=false is not compatible with the list or details(report) styles(views).
 
 		// Header
 		ColumnHeader col1 = new ColumnHeader();

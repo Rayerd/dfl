@@ -48,16 +48,16 @@ private union CallText
 private CallText _getCallText(Dstring text)
 {
 	CallText result;
-	if(text is null)
+	if (text is null)
 	{
-		static if(useUnicode)
+		static if (useUnicode)
 			result.unicode = null;
 		else
 			result.ansi = null;
 	}
 	else
 	{
-		static if(useUnicode)
+		static if (useUnicode)
 			result.unicode = toUnicodez(text);
 		else
 			result.ansi = toAnsiz(text);
@@ -117,7 +117,7 @@ class ListViewSubItem: DObject
 		this();
 		
 		settextin(thisSubItemText);
-		if(owner)
+		if (owner)
 		{
 			this._item = owner;
 			owner.subItems.add(this);
@@ -187,7 +187,7 @@ class ListViewSubItem: DObject
 	{
 		settextin(newText);
 		
-		if(_item && _item._parentListView && _item._parentListView.created)
+		if (_item && _item._parentListView && _item._parentListView.created)
 		{
 			int ii = _item._parentListView.items.indexOf(_item);
 			assert(-1 != ii);
@@ -236,7 +236,7 @@ class ListViewItem: DObject
 		
 		void _adding(size_t idx, ListViewSubItem val)
 		{
-			if(val._item)
+			if (val._item)
 				throw new DflException("ListViewSubItem already belongs to a ListViewItem");
 		}
 		
@@ -269,7 +269,7 @@ class ListViewItem: DObject
 	
 	private void _setcheckstate(int thisindex, bool bchecked)
 	{
-		if(_parentListView && _parentListView.created)
+		if (_parentListView && _parentListView.created)
 		{
 			LV_ITEMA li;
 			li.stateMask = LVIS_STATEIMAGEMASK; // Bits 12 through 15 of the member state
@@ -281,9 +281,9 @@ class ListViewItem: DObject
 	
 	private bool _getcheckstate(int thisindex)
 	{
-		if(_parentListView && _parentListView.created)
+		if (_parentListView && _parentListView.created)
 		{
-			if((_parentListView.prevwproc(LVM_GETITEMSTATE, cast(WPARAM)thisindex, LVIS_STATEIMAGEMASK) >> 12) - 1)
+			if ((_parentListView.prevwproc(LVM_GETITEMSTATE, cast(WPARAM)thisindex, LVIS_STATEIMAGEMASK) >> 12) - 1)
 				return true;
 		}
 		return false;
@@ -356,7 +356,7 @@ class ListViewItem: DObject
 	///
 	final @property Rect bounds() // getter
 	{
-		if(_parentListView)
+		if (_parentListView)
 		{
 			int i = index;
 			assert(-1 != i);
@@ -369,7 +369,7 @@ class ListViewItem: DObject
 	///
 	final @property int index() // getter
 	{
-		if(_parentListView)
+		if (_parentListView)
 			return _parentListView._litems.indexOf(this);
 		return -1;
 	}
@@ -380,7 +380,7 @@ class ListViewItem: DObject
 	{
 		settextin(newText);
 		
-		if(_parentListView && _parentListView.created)
+		if (_parentListView && _parentListView.created)
 			_parentListView.updateItemText(this, newText);
 	}
 	
@@ -394,11 +394,11 @@ class ListViewItem: DObject
 	///
 	final @property void selected(bool byes) // setter
 	{
-		if(_parentListView && _parentListView.created)
+		if (_parentListView && _parentListView.created)
 		{
 			LV_ITEMA li;
 			li.stateMask = LVIS_SELECTED;
-			if(byes)
+			if (byes)
 				li.state = LVIS_SELECTED;
 			_parentListView.prevwproc(LVM_SETITEMSTATE, cast(WPARAM)index, cast(LPARAM)&li);
 		}
@@ -407,9 +407,9 @@ class ListViewItem: DObject
 	/// ditto
 	final @property bool selected() // getter
 	{
-		if(_parentListView && _parentListView.created)
+		if (_parentListView && _parentListView.created)
 		{
-			if(_parentListView.prevwproc(LVM_GETITEMSTATE, cast(WPARAM)index, LVIS_SELECTED))
+			if (_parentListView.prevwproc(LVM_GETITEMSTATE, cast(WPARAM)index, LVIS_SELECTED))
 				return true;
 		}
 		return false;
@@ -438,9 +438,9 @@ class ListViewItem: DObject
 	
 	final void beginEdit()
 	{
-		if(_parentListView && _parentListView.created)
+		if (_parentListView && _parentListView.created)
 		{
-			static if(dfl.internal.utf.useUnicode)
+			static if (dfl.internal.utf.useUnicode)
 			{
 				_parentListView.prevwproc(LVM_EDITLABELW, index, 0);
 			}
@@ -464,7 +464,7 @@ class ListViewItem: DObject
 	{
 		this._imgidx = index;
 		
-		if(_parentListView && _parentListView.created)
+		if (_parentListView && _parentListView.created)
 			_parentListView.updateItem(this);
 	}
 	
@@ -515,7 +515,7 @@ class ColumnHeader: DObject
 	{
 		_txt = newText;
 		
-		if(_parentListView && _parentListView.created)
+		if (_parentListView && _parentListView.created)
 		{
 			_parentListView.updateColumnText(this, newText);
 		}
@@ -574,7 +574,7 @@ class ColumnHeader: DObject
 	///
 	final @property int index() // getter
 	{
-		if(_parentListView)
+		if (_parentListView)
 			_parentListView._cols.indexOf(this);
 		return -1;
 	}
@@ -585,7 +585,7 @@ class ColumnHeader: DObject
 	{
 		_align = halign;
 		
-		if(_parentListView && _parentListView.created)
+		if (_parentListView && _parentListView.created)
 		{
 			_parentListView.updateColumnAlign(this, halign);
 		}
@@ -603,7 +603,7 @@ class ColumnHeader: DObject
 	{
 		_width = w;
 
-		if(_parentListView && _parentListView.created)
+		if (_parentListView && _parentListView.created)
 		{
 			_parentListView.updateColumnWidth(this, w);
 		}
@@ -753,28 +753,28 @@ class ListView: ControlSuperClass // docmain
 		{
 			int ii = -1; // Insert index.
 			
-			switch(_parentListView.sorting)
+			switch (_parentListView.sorting)
 			{
 				case SortOrder.NONE: // Add to end.
 					ii = _items.length.toI32;
 					break;
 				
 				case SortOrder.ASCENDING: // Insertion sort.
-					for(ii = 0; ii != _items.length.toI32; ii++)
+					for (ii = 0; ii != _items.length.toI32; ii++)
 					{
 						assert(_parentListView._sortproc);
-						//if(item < _items[ii])
-						if(_parentListView._sortproc(item, _items[ii]) < 0)
+						//if (item < _items[ii])
+						if (_parentListView._sortproc(item, _items[ii]) < 0)
 							break;
 					}
 					break;
 				
 				case SortOrder.DESCENDING: // Insertion sort.
-					for(ii = 0; ii != _items.length.toI32; ii++)
+					for (ii = 0; ii != _items.length.toI32; ii++)
 					{
 						assert(_parentListView._sortproc);
-						//if(item >= _items[ii])
-						if(_parentListView._sortproc(item, _items[ii]) >= 0)
+						//if (item >= _items[ii])
+						if (_parentListView._sortproc(item, _items[ii]) >= 0)
 							break;
 					}
 					break;
@@ -797,7 +797,7 @@ class ListView: ControlSuperClass // docmain
 		
 		void addRange(ListViewItem[] range)
 		{
-			foreach(ListViewItem item; range)
+			foreach (ListViewItem item; range)
 			{
 				add(item);
 			}
@@ -806,7 +806,7 @@ class ListView: ControlSuperClass // docmain
 		/+
 		void addRange(Object[] range)
 		{
-			foreach(Object o; range)
+			foreach (Object o; range)
 			{
 				add(o);
 			}
@@ -815,7 +815,7 @@ class ListView: ControlSuperClass // docmain
 		
 		void addRange(Dstring[] range)
 		{
-			foreach(Dstring s; range)
+			foreach (Dstring s; range)
 			{
 				add(s);
 			}
@@ -842,9 +842,9 @@ class ListView: ControlSuperClass // docmain
 		do
 		{
 			int ii;
-			foreach(i, ListViewItem item; _items)
+			foreach (i, ListViewItem item; _items)
 			{
-				if(i > int.max)
+				if (i > int.max)
 					throw new DflException("doListItems() failure");
 				ii = _parentListView._ins(cast(int)i, item);
 				//assert(-1 != ii);
@@ -852,7 +852,7 @@ class ListView: ControlSuperClass // docmain
 				
 				/+
 				// Add sub items.
-				foreach(int subi, ListViewSubItem subItem; item.isubs._subs)
+				foreach (int subi, ListViewSubItem subItem; item.isubs._subs)
 				{
 					_listview._ins(i, subItem, subi + 1); // Sub items really start at 1 in the list view.
 				}
@@ -863,7 +863,7 @@ class ListView: ControlSuperClass // docmain
 		
 		void verifyNoParent(ListViewItem item)
 		{
-			if(item._parentListView)
+			if (item._parentListView)
 				throw new DflException("ListViewItem already belongs to a ListView");
 		}
 		
@@ -879,7 +879,7 @@ class ListView: ControlSuperClass // docmain
 			val._parentListView = _parentListView;
 			
 			int i;
-			if(created)
+			if (created)
 			{
 				i = _parentListView._ins(idx.toI32, val);
 				assert(-1 != i);
@@ -889,16 +889,16 @@ class ListView: ControlSuperClass // docmain
 		
 		void _removed(size_t idx, ListViewItem val)
 		{
-			if(size_t.max == idx) // Clear all.
+			if (size_t.max == idx) // Clear all.
 			{
-				if(created)
+				if (created)
 				{
 					_parentListView.prevwproc(LVM_DELETEALLITEMS, 0, 0);
 				}
 			}
 			else
 			{
-				if(created)
+				if (created)
 				{
 					_parentListView.prevwproc(LVM_DELETEITEM, cast(WPARAM)idx, 0);
 				}
@@ -942,7 +942,7 @@ class ListView: ControlSuperClass // docmain
 		
 		void verifyNoParent(ColumnHeader header)
 		{
-			if(header._parentListView)
+			if (header._parentListView)
 				throw new DflException("ColumnHeader already belongs to a ListView");
 		}
 		
@@ -955,9 +955,9 @@ class ListView: ControlSuperClass // docmain
 		do
 		{
 			int ii;
-			foreach(i, ColumnHeader header; _headers)
+			foreach (i, ColumnHeader header; _headers)
 			{
-				if(i > int.max)
+				if (i > int.max)
 					throw new DflException("doListHeaders() failure");
 				ii = _parentListView._ins(cast(int)i, header);
 				assert(-1 != ii);
@@ -977,7 +977,7 @@ class ListView: ControlSuperClass // docmain
 			val._parentListView = _parentListView;
 			
 			int i;
-			if(created)
+			if (created)
 			{
 				i = _parentListView._ins(idx.toI32, val);
 				assert(-1 != i);
@@ -987,12 +987,12 @@ class ListView: ControlSuperClass // docmain
 		
 		void _removed(size_t idx, ColumnHeader val)
 		{
-			if(size_t.max == idx) // Clear all.
+			if (size_t.max == idx) // Clear all.
 			{
 			}
 			else
 			{
-				if(created)
+				if (created)
 				{
 					_parentListView.prevwproc(LVM_DELETECOLUMN, cast(WPARAM)idx, 0);
 				}
@@ -1015,11 +1015,11 @@ class ListView: ControlSuperClass // docmain
 	{
 		@property int length() // getter
 		{
-			if(!_parentListView.created)
+			if (!_parentListView.created)
 				return 0;
 			
 			int result = 0;
-			foreach(int onidx; this)
+			foreach (int onidx; this)
 			{
 				result++;
 			}
@@ -1029,9 +1029,9 @@ class ListView: ControlSuperClass // docmain
 		
 		int opIndex(int idx)
 		{
-			foreach(int onidx; this)
+			foreach (int onidx; this)
 			{
-				if(!idx)
+				if (!idx)
 					return onidx;
 				idx--;
 			}
@@ -1050,9 +1050,9 @@ class ListView: ControlSuperClass // docmain
 		int indexOf(int idx)
 		{
 			int i = 0;
-			foreach(int onidx; this)
+			foreach (int onidx; this)
 			{
-				if(onidx == idx)
+				if (onidx == idx)
 					return i;
 				i++;
 			}
@@ -1062,19 +1062,19 @@ class ListView: ControlSuperClass // docmain
 		
 		int opApply(int delegate(ref int) dg)
 		{
-			if(!_parentListView.created)
+			if (!_parentListView.created)
 				return 0;
 			
 			int result = 0;
 			int idx = -1;
-			for(;;)
+			for (;;)
 			{
 				idx = cast(int)_parentListView.prevwproc(LVM_GETNEXTITEM, cast(WPARAM)idx, MAKELPARAM(cast(UINT)LVNI_SELECTED, 0));
-				if(-1 == idx) // Done.
+				if (-1 == idx) // Done.
 					break;
 				int dgidx = idx; // Prevent ref.
 				result = dg(dgidx);
-				if(result)
+				if (result)
 					break;
 			}
 			return result;
@@ -1099,11 +1099,11 @@ class ListView: ControlSuperClass // docmain
 	{
 		@property int length() // getter
 		{
-			if(!_parentListView.created)
+			if (!_parentListView.created)
 				return 0;
 			
 			int result = 0;
-			foreach(ListViewItem onitem; this)
+			foreach (ListViewItem onitem; this)
 			{
 				result++;
 			}
@@ -1113,9 +1113,9 @@ class ListView: ControlSuperClass // docmain
 		
 		ListViewItem opIndex(int idx)
 		{
-			foreach(ListViewItem onitem; this)
+			foreach (ListViewItem onitem; this)
 			{
-				if(!idx)
+				if (!idx)
 					return onitem;
 				idx--;
 			}
@@ -1134,9 +1134,9 @@ class ListView: ControlSuperClass // docmain
 		int indexOf(ListViewItem item)
 		{
 			int i = 0;
-			foreach(ListViewItem onitem; this)
+			foreach (ListViewItem onitem; this)
 			{
-				if(onitem == item) // Not using is.
+				if (onitem == item) // Not using is.
 					return i;
 				i++;
 			}
@@ -1146,19 +1146,19 @@ class ListView: ControlSuperClass // docmain
 		
 		int opApply(int delegate(ref ListViewItem) dg)
 		{
-			if(!_parentListView.created)
+			if (!_parentListView.created)
 				return 0;
 			
 			int result = 0;
 			int idx = -1;
-			for(;;)
+			for (;;)
 			{
 				idx = cast(int)_parentListView.prevwproc(LVM_GETNEXTITEM, cast(WPARAM)idx, MAKELPARAM(cast(UINT)LVNI_SELECTED, 0));
-				if(-1 == idx) // Done.
+				if (-1 == idx) // Done.
 					break;
 				ListViewItem litem = _parentListView._litems._items[idx]; // Prevent ref.
 				result = dg(litem);
-				if(result)
+				if (result)
 					break;
 			}
 			return result;
@@ -1183,11 +1183,11 @@ class ListView: ControlSuperClass // docmain
 	{
 		@property int length() // getter
 		{
-			if(!_parentListView.created)
+			if (!_parentListView.created)
 				return 0;
 			
 			int result = 0;
-			foreach(int onidx; this)
+			foreach (int onidx; this)
 			{
 				result++;
 			}
@@ -1197,9 +1197,9 @@ class ListView: ControlSuperClass // docmain
 		
 		int opIndex(int idx)
 		{
-			foreach(int onidx; this)
+			foreach (int onidx; this)
 			{
-				if(!idx)
+				if (!idx)
 					return onidx;
 				idx--;
 			}
@@ -1218,9 +1218,9 @@ class ListView: ControlSuperClass // docmain
 		int indexOf(int idx)
 		{
 			int i = 0;
-			foreach(int onidx; this)
+			foreach (int onidx; this)
 			{
-				if(onidx == idx)
+				if (onidx == idx)
 					return i;
 				i++;
 			}
@@ -1230,17 +1230,17 @@ class ListView: ControlSuperClass // docmain
 		
 		int opApply(int delegate(ref int) dg)
 		{
-			if(!_parentListView.created)
+			if (!_parentListView.created)
 				return 0;
 			
 			int result = 0;
-			foreach(ref size_t i, ref ListViewItem lvitem; _parentListView.items)
+			foreach (ref size_t i, ref ListViewItem lvitem; _parentListView.items)
 			{
-				if(lvitem._getcheckstate(i.toI32))
+				if (lvitem._getcheckstate(i.toI32))
 				{
 					int dgidx = i.toI32; // Prevent ref.
 					result = dg(dgidx);
-					if(result)
+					if (result)
 						break;
 				}
 			}
@@ -1271,14 +1271,6 @@ class ListView: ControlSuperClass // docmain
 		_selobjcollection = new SelectedItemCollection(this);
 		_checkedis = new CheckedIndexCollection(this);
 
-		LOGFONT lf;
-		SystemParametersInfo(SPI_GETICONTITLELOGFONT, cast(UINT)lf.sizeof, &lf, 0);
-		HFONT hFont = CreateFontIndirect(&lf);
-		Font sysFont = new Font(hFont, true);
-		uint systemDpi = GetDpiForSystem(); // this.dpi is not valid yet.
-		float emSize = sysFont.size * systemDpi / USER_DEFAULT_SCREEN_DPI * 72.0 / USER_DEFAULT_SCREEN_DPI;
-		_headerFont = new Font(sysFont, emSize, sysFont.style);
-
 		_windowStyle |= WS_TABSTOP | LVS_ALIGNTOP | LVS_AUTOARRANGE | LVS_SHAREIMAGELISTS;
 		_windowStyleEx |= WS_EX_CLIENTEDGE;
 		_controlStyle |= ControlStyles.SELECTABLE;
@@ -1289,7 +1281,7 @@ class ListView: ControlSuperClass // docmain
 	///
 	final @property void activation(ItemActivation ia) // setter
 	{
-		switch(ia)
+		final switch (ia)
 		{
 			case ItemActivation.STANDARD:
 				_lvexstyle(LVS_EX_ONECLICKACTIVATE | LVS_EX_TWOCLICKACTIVATE, 0);
@@ -1302,9 +1294,6 @@ class ListView: ControlSuperClass // docmain
 			case ItemActivation.TWO_CLICK:
 				_lvexstyle(LVS_EX_ONECLICKACTIVATE | LVS_EX_TWOCLICKACTIVATE, LVS_EX_TWOCLICKACTIVATE);
 				break;
-			
-			default:
-				assert(0);
 		}
 	}
 	
@@ -1312,9 +1301,9 @@ class ListView: ControlSuperClass // docmain
 	final @property ItemActivation activation() const // getter
 	{
 		DWORD lvex = _lvexstyle();
-		if(lvex & LVS_EX_ONECLICKACTIVATE)
+		if (lvex & LVS_EX_ONECLICKACTIVATE)
 			return ItemActivation.ONE_CLICK;
-		if(lvex & LVS_EX_TWOCLICKACTIVATE)
+		if (lvex & LVS_EX_TWOCLICKACTIVATE)
 			return ItemActivation.TWO_CLICK;
 		return ItemActivation.STANDARD;
 	}
@@ -1326,7 +1315,7 @@ class ListView: ControlSuperClass // docmain
 	{
 		// TODO
 		
-		switch(lva)
+		switch (lva)
 		{
 			case ListViewAlignment.TOP:
 				_style((_style() & ~(LVS_ALIGNLEFT | foo)) | LVS_ALIGNTOP);
@@ -1361,7 +1350,7 @@ class ListView: ControlSuperClass // docmain
 	///
 	final @property void autoArrange(bool byes) // setter
 	{
-		if(byes)
+		if (byes)
 			_style(_style() | LVS_AUTOARRANGE);
 		else
 			_style(_style() & ~LVS_AUTOARRANGE);
@@ -1378,13 +1367,14 @@ class ListView: ControlSuperClass // docmain
 	
 	override @property void backColor(Color c) // setter
 	{
-		if(created)
+		if (created)
 		{
-			COLORREF cref;
-			if(Color.empty == c)
-				cref = CLR_NONE;
-			else
-				cref = c.toRgb();
+			COLORREF cref = {
+				if (Color.empty == c)
+					return CLR_NONE;
+				else
+					return c.toRgb();
+			}();
 			prevwproc(LVM_SETBKCOLOR, 0, cast(LPARAM)cref);
 			prevwproc(LVM_SETTEXTBKCOLOR, 0, cast(LPARAM)cref);
 		}
@@ -1395,7 +1385,7 @@ class ListView: ControlSuperClass // docmain
 	
 	override @property Color backColor() const // getter
 	{
-		if(Color.empty == _backColor)
+		if (Color.empty == _backColor)
 			return defaultBackColor;
 		return _backColor;
 	}
@@ -1404,7 +1394,7 @@ class ListView: ControlSuperClass // docmain
 	///
 	final @property void borderStyle(BorderStyle bs) // setter
 	{
-		final switch(bs)
+		final switch (bs)
 		{
 			case BorderStyle.FIXED_3D:
 				_style(_style() & ~WS_BORDER);
@@ -1422,7 +1412,7 @@ class ListView: ControlSuperClass // docmain
 				break;
 		}
 		
-		if(created)
+		if (created)
 		{
 			redrawEntire();
 		}
@@ -1431,9 +1421,9 @@ class ListView: ControlSuperClass // docmain
 	/// ditto
 	final @property BorderStyle borderStyle() const // getter
 	{
-		if(_exStyle() & WS_EX_CLIENTEDGE)
+		if (_exStyle() & WS_EX_CLIENTEDGE)
 			return BorderStyle.FIXED_3D;
-		else if(_style() & WS_BORDER)
+		else if (_style() & WS_BORDER)
 			return BorderStyle.FIXED_SINGLE;
 		return BorderStyle.NONE;
 	}
@@ -1481,7 +1471,7 @@ class ListView: ControlSuperClass // docmain
 	// Extra.
 	final @property int focusedIndex() // getter
 	{
-		if(!created)
+		if (!created)
 			return -1;
 		return cast(int)prevwproc(LVM_GETNEXTITEM, cast(WPARAM)-1, MAKELPARAM(cast(UINT)LVNI_FOCUSED, 0));
 	}
@@ -1491,7 +1481,7 @@ class ListView: ControlSuperClass // docmain
 	final @property ListViewItem focusedItem() // getter
 	{
 		int i = focusedIndex;
-		if(-1 == i)
+		if (-1 == i)
 			return null;
 		return _litems._items[i];
 	}
@@ -1499,7 +1489,7 @@ class ListView: ControlSuperClass // docmain
 	
 	override @property void foreColor(Color c) // setter
 	{
-		if(created)
+		if (created)
 			prevwproc(LVM_SETTEXTCOLOR, 0, cast(LPARAM)c.toRgb());
 		
 		super.foreColor = c;
@@ -1508,7 +1498,7 @@ class ListView: ControlSuperClass // docmain
 	
 	override @property Color foreColor() const // getter
 	{
-		if(Color.empty == _foreColor)
+		if (Color.empty == _foreColor)
 			return defaultForeColor;
 		return _foreColor;
 	}
@@ -1558,7 +1548,7 @@ class ListView: ControlSuperClass // docmain
 	///
 	final @property void hideSelection(bool byes) // setter
 	{
-		if(byes)
+		if (byes)
 			_style(_style() & ~LVS_SHOWSELALWAYS);
 		else
 			_style(_style() | LVS_SHOWSELALWAYS);
@@ -1597,10 +1587,10 @@ class ListView: ControlSuperClass // docmain
 	//final void addRow(Dstring[] rowstrings ...)
 	final ListViewItem addRow(Dstring[] rowstrings ...)
 	{
-		if(rowstrings.length)
+		if (rowstrings.length)
 		{
 			ListViewItem item = new ListViewItem(rowstrings[0]);
-			if(rowstrings.length > 1)
+			if (rowstrings.length > 1)
 				item.subItems.addRange(rowstrings[1 .. rowstrings.length]);
 			items.add(item);
 			return item;
@@ -1612,7 +1602,7 @@ class ListView: ControlSuperClass // docmain
 	///
 	final @property void labelEdit(bool byes) // setter
 	{
-		if(byes)
+		if (byes)
 			_style(_style() | LVS_EDITLABELS);
 		else
 			_style(_style() & ~LVS_EDITLABELS);
@@ -1628,7 +1618,7 @@ class ListView: ControlSuperClass // docmain
 	///
 	final @property void labelWrap(bool byes) // setter
 	{
-		if(byes)
+		if (byes)
 			_style(_style() & ~LVS_NOLABELWRAP);
 		else
 			_style(_style() | LVS_NOLABELWRAP);
@@ -1644,7 +1634,7 @@ class ListView: ControlSuperClass // docmain
 	///
 	final @property void multiSelect(bool byes) // setter
 	{
-		if(byes)
+		if (byes)
 		{
 			_style(_style() & ~LVS_SINGLESEL);
 		}
@@ -1652,7 +1642,7 @@ class ListView: ControlSuperClass // docmain
 		{
 			_style(_style() | LVS_SINGLESEL);
 			
-			if(selectedItems.length > 1)
+			if (selectedItems.length > 1)
 				selectedItems[0].selected = true; // Clear all but first selected.
 		}
 	}
@@ -1669,7 +1659,7 @@ class ListView: ControlSuperClass // docmain
 	// See Knowledge Base Article Q137520.
 	final @property void scrollable(bool byes) // setter
 	{
-		if(byes)
+		if (byes)
 			_style(_style() & ~LVS_NOSCROLL);
 		else
 			_style(_style() | LVS_NOSCROLL);
@@ -1701,7 +1691,7 @@ class ListView: ControlSuperClass // docmain
 	///
 	final @property void view(View v) // setter
 	{
-		final switch(v)
+		final switch (v)
 		{
 			case View.LARGE_ICON:
 				_style((_style() & ~LVS_TYPEMASK) | LVS_ICON);
@@ -1719,19 +1709,22 @@ class ListView: ControlSuperClass // docmain
 				_style((_style() & ~LVS_TYPEMASK) | LVS_REPORT);
 		}
 		
-		if(created)
+		if (created)
+		{
+			arrangeIcons();
 			redrawEntire();
+		}
 	}
 	
 	/// ditto
 	final @property View view() const // getter
 	{
 		LONG st = _style();
-		if(st & LVS_SMALLICON)
+		if (st & LVS_SMALLICON)
 			return View.SMALL_ICON;
-		if(st & LVS_LIST)
+		if (st & LVS_LIST)
 			return View.LIST;
-		if(st & LVS_REPORT)
+		if (st & LVS_REPORT)
 			return View.DETAILS;
 		return View.LARGE_ICON;
 	}
@@ -1740,10 +1733,10 @@ class ListView: ControlSuperClass // docmain
 	///
 	final @property void sorting(SortOrder so) // setter
 	{
-		if(so == _sortorder)
+		if (so == _sortorder)
 			return;
 		
-		switch(so)
+		final switch (so)
 		{
 			case SortOrder.NONE:
 				_sortproc = null;
@@ -1751,12 +1744,9 @@ class ListView: ControlSuperClass // docmain
 			
 			case SortOrder.ASCENDING:
 			case SortOrder.DESCENDING:
-				if(!_sortproc)
+				if (!_sortproc)
 					_sortproc = &_defsortproc;
 				break;
-			
-			default:
-				assert(0);
 		}
 		
 		_sortorder = so;
@@ -1774,11 +1764,11 @@ class ListView: ControlSuperClass // docmain
 	///
 	final void sort()
 	{
-		if(SortOrder.NONE != _sortorder)
+		if (SortOrder.NONE != _sortorder)
 		{
 			assert(_sortproc);
 			ListViewItem[] sitems = items._items;
-			if(sitems.length > 1)
+			if (sitems.length > 1)
 			{
 				sitems = sitems.dup; // So exception won't damage anything.
 				// Stupid bubble sort. At least it's a "stable sort".
@@ -1787,10 +1777,10 @@ class ListView: ControlSuperClass // docmain
 				do
 				{
 					swp = false;
-					for(size_t iw = 0; iw != sortmax; iw++)
+					for (size_t iw = 0; iw != sortmax; iw++)
 					{
-						//if(sitems[iw] > sitems[iw + 1])
-						if(_sortproc(sitems[iw], sitems[iw + 1]) > 0)
+						//if (sitems[iw] > sitems[iw + 1])
+						if (_sortproc(sitems[iw], sitems[iw + 1]) > 0)
 						{
 							swp = true;
 							ListViewItem lvis = sitems[iw];
@@ -1799,13 +1789,13 @@ class ListView: ControlSuperClass // docmain
 						}
 					}
 				}
-				while(swp);
+				while (swp);
 				
-				if(created)
+				if (created)
 				{
 					beginUpdate();
 					SendMessageA(handle, LVM_DELETEALLITEMS, 0, 0); // NOTE: this sends LVN_DELETEALLITEMS.
-					foreach(idx, lvi; sitems)
+					foreach (idx, lvi; sitems)
 					{
 						_ins(idx.toI32, lvi);
 					}
@@ -1821,10 +1811,10 @@ class ListView: ControlSuperClass // docmain
 	///
 	final @property void sorter(int delegate(ListViewItem, ListViewItem) sortproc) // setter
 	{
-		if(sortproc == this._sortproc)
+		if (sortproc == this._sortproc)
 			return;
 		
-		if(!sortproc)
+		if (!sortproc)
 		{
 			this._sortproc = null;
 			sorting = SortOrder.NONE;
@@ -1833,7 +1823,7 @@ class ListView: ControlSuperClass // docmain
 		
 		this._sortproc = sortproc;
 		
-		if(SortOrder.NONE == sorting)
+		if (SortOrder.NONE == sorting)
 			sorting = SortOrder.ASCENDING;
 		sort();
 	}
@@ -1850,7 +1840,7 @@ class ListView: ControlSuperClass // docmain
 	// Gets the first visible item.
 	final @property ListViewItem topItem() // getter
 	{
-		if(!created)
+		if (!created)
 			return null;
 		// TODO: LVM_GETTOPINDEX
 	}
@@ -1860,7 +1850,7 @@ class ListView: ControlSuperClass // docmain
 	///
 	final @property void arrangeIcons()
 	{
-		if(created)
+		if (created)
 		//	SendMessageA(hwnd, LVM_ARRANGE, LVA_DEFAULT, 0);
 			prevwproc(LVM_ARRANGE, LVA_DEFAULT, 0);
 	}
@@ -1868,9 +1858,9 @@ class ListView: ControlSuperClass // docmain
 	/// ditto
 	final @property void arrangeIcons(ListViewAlignment a)
 	{
-		if(created)
+		if (created)
 		{
-			switch(a)
+			final switch (a)
 			{
 				case ListViewAlignment.TOP:
 					//SendMessageA(hwnd, LVM_ARRANGE, LVA_ALIGNTOP, 0);
@@ -1891,9 +1881,6 @@ class ListView: ControlSuperClass // docmain
 					//SendMessageA(hwnd, LVM_ARRANGE, LVA_SNAPTOGRID, 0);
 					prevwproc(LVM_ARRANGE, LVA_SNAPTOGRID, 0);
 					break;
-				
-				default:
-					assert(0);
 			}
 		}
 	}
@@ -1926,7 +1913,7 @@ class ListView: ControlSuperClass // docmain
 		// Can only be visible if it's created. Check if correct implementation.
 		createControl();
 		
-		//if(created)
+		//if (created)
 		//	SendMessageA(hwnd, LVM_ENSUREVISIBLE, cast(WPARAM)index, FALSE);
 			prevwproc(LVM_ENSUREVISIBLE, cast(WPARAM)index, FALSE);
 	}
@@ -1946,11 +1933,11 @@ class ListView: ControlSuperClass // docmain
 	///
 	final Rect getItemRect(int index)
 	{
-		if(created)
+		if (created)
 		{
 			RECT rect;
 			rect.left = LVIR_BOUNDS;
-			if(prevwproc(LVM_GETITEMRECT, cast(WPARAM)index, cast(LPARAM)&rect))
+			if (prevwproc(LVM_GETITEMRECT, cast(WPARAM)index, cast(LPARAM)&rect))
 				return Rect(&rect);
 		}
 		return Rect(0, 0, 0, 0);
@@ -1959,10 +1946,10 @@ class ListView: ControlSuperClass // docmain
 	/// ditto
 	final Rect getItemRect(int index, ItemBoundsPortion ibp)
 	{
-		if(created)
+		if (created)
 		{
 			RECT rect;
-			final switch(ibp)
+			final switch (ibp)
 			{
 				case ItemBoundsPortion.ENTIRE:
 					rect.left = LVIR_BOUNDS;
@@ -1973,13 +1960,13 @@ class ListView: ControlSuperClass // docmain
 					break;
 				
 				case ItemBoundsPortion.ITEM_ONLY:
-					rect.left = LVIR_SELECTBOUNDS; // TODO: ?
+					rect.left = LVIR_SELECTBOUNDS;
 					break;
 				
 				case ItemBoundsPortion.LABEL:
 					rect.left = LVIR_LABEL;
 			}
-			if(prevwproc(LVM_GETITEMRECT, cast(WPARAM)index, cast(LPARAM)&rect))
+			if (prevwproc(LVM_GETITEMRECT, cast(WPARAM)index, cast(LPARAM)&rect))
 				return Rect(&rect);
 		}
 		return Rect(0, 0, 0, 0);
@@ -1989,7 +1976,7 @@ class ListView: ControlSuperClass // docmain
 	///
 	final @property void largeImageList(ImageList imglist) // setter
 	{
-		if(isHandleCreated)
+		if (isHandleCreated)
 		{
 			prevwproc(LVM_SETIMAGELIST, LVSIL_NORMAL,
 				cast(LPARAM)(imglist ? imglist.handle : cast(HIMAGELIST)null));
@@ -2008,7 +1995,7 @@ class ListView: ControlSuperClass // docmain
 	///
 	final @property void smallImageList(ImageList imglist) // setter
 	{
-		if(isHandleCreated)
+		if (isHandleCreated)
 		{
 			prevwproc(LVM_SETIMAGELIST, LVSIL_SMALL,
 				cast(LPARAM)(imglist ? imglist.handle : cast(HIMAGELIST)null));
@@ -2028,7 +2015,7 @@ class ListView: ControlSuperClass // docmain
 	///
 	final @property void stateImageList(ImageList imglist) // setter
 	{
-		if(isHandleCreated)
+		if (isHandleCreated)
 		{
 			prevwproc(LVM_SETIMAGELIST, LVSIL_STATE,
 				cast(LPARAM)(imglist ? imglist.handle : cast(HIMAGELIST)null));
@@ -2046,19 +2033,21 @@ class ListView: ControlSuperClass // docmain
 	
 	
 	///
+	deprecated
 	public @property void headerFont(Font newFont) // setter
 	{
-		if (!newFont) return;
-		if (!isHandleCreated) return;
+		if (newFont && isHandleCreated)
+		{
+			HWND hHeader = ListView_GetHeader(handle);
+			if (hHeader)
+				SendMessage(hHeader, WM_SETFONT, cast(WPARAM)newFont.handle, TRUE);
+		}
 
 		_headerFont = newFont;
-
-		HWND hHeader = ListView_GetHeader(handle);
-		if (hHeader)
-			SendMessage(hHeader, WM_SETFONT, cast(WPARAM)_headerFont.handle, TRUE);
 	}
 
 	/// ditto
+	deprecated
 	public @property Font headerFont() // getter
 	{
 		return _headerFont;
@@ -2144,55 +2133,86 @@ class ListView: ControlSuperClass // docmain
 	}
 	
 	
-	protected override void prevWndProc(ref Message msg)
+	protected override void onHandleCreated(EventArgs ea)
 	{
-		switch(msg.msg)
-		{
-			case WM_MOUSEHOVER:
-				if(!hoverSelection)
-					return;
-				break;
-			
-			default:
-		}
-		
-		//msg.result = CallWindowProcA(listviewPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
-		msg.result = dfl.internal.utf.callWindowProc(listviewPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
+		super.onHandleCreated(ea);
+
+		_buildTreeView();
 	}
 	
-	
+
 	protected override void onDpiChanged(uint newDpi)
 	{
-		if (headerFont)
-		{
-			float emSize = headerFont.size * dpi / USER_DEFAULT_SCREEN_DPI * 72.0 / USER_DEFAULT_SCREEN_DPI;
-			this.headerFont = new Font(headerFont, emSize, headerFont.style);
-		}
+		// BUG: ListView control size will be broken by scrollbars appearing.
 
-		int spacingX = MulDiv(BASE_SPACING_X, dpi, USER_DEFAULT_SCREEN_DPI);
-		int spacingY = MulDiv(BASE_SPACING_Y, dpi, USER_DEFAULT_SCREEN_DPI);
+		int spacingX = MulDiv(_lgimglist.imageSize.width + MARGIN_X, newDpi, USER_DEFAULT_SCREEN_DPI);
+		int spacingY = MulDiv(_lgimglist.imageSize.height + MARGIN_Y, newDpi, USER_DEFAULT_SCREEN_DPI);
 		ListView_SetIconSpacing(_hwnd, spacingX, spacingY);
 
-		static if (1)
+		foreach (size_t colIndex, ref ColumnHeader item; this.columns)
 		{
-			foreach (size_t colIndex, ref ColumnHeader item; this.columns)
-			{
-				int w = MulDiv(item.width, dpi, USER_DEFAULT_SCREEN_DPI);
-				ListView_SetColumnWidth(handle, cast(int)colIndex, w);
-			}
+			updateColumnWidth(cast(int)colIndex, item.width);
 		}
-		else
+	}
+
+
+	private void _buildTreeView()
+	{
+		//SendMessageA(hwnd, LVM_SETEXTENDEDLISTVIEWSTYLE, wlvexstyle, wlvexstyle);
+		prevwproc(LVM_SETEXTENDEDLISTVIEWSTYLE, 0, _wlvexstyle); // wparam=0 sets all.
+		
 		{
-			HWND hHeader = ListView_GetHeader(this.handle);
-			foreach (size_t colIndex, ref ColumnHeader item; this.columns)
-			{
-				HDITEM hdi;
-				hdi.mask = HDI_WIDTH;
-				int cx = MulDiv(item.width, dpi, USER_DEFAULT_SCREEN_DPI);
-				hdi.cxy = cx;
-				Header_SetItem(hHeader, cast(int)colIndex, &hdi);
-			}
+			Color color = backColor;
+			COLORREF cref = {
+				if (Color.empty == color)
+					return CLR_NONE;
+				else
+					return color.toRgb();
+			}();
+			prevwproc(LVM_SETBKCOLOR, 0, cast(LPARAM)cref);
+			prevwproc(LVM_SETTEXTBKCOLOR, 0, cast(LPARAM)cref);
 		}
+		
+		{
+			//prevwproc(LVM_SETTEXTCOLOR, 0, foreColor.toRgb()); // DMD 0.125: cast(Control )(this).foreColor() is not an lvalue
+			Color color = foreColor;
+			prevwproc(LVM_SETTEXTCOLOR, 0, cast(LPARAM)color.toRgb());
+		}
+		
+		if (_lgimglist)
+			prevwproc(LVM_SETIMAGELIST, LVSIL_NORMAL, cast(LPARAM)_lgimglist.handle);
+		if (_smimglist)
+			prevwproc(LVM_SETIMAGELIST, LVSIL_SMALL, cast(LPARAM)_smimglist.handle);
+		//if (_stimglist)
+		//	prevwproc(LVM_SETIMAGELIST, LVSIL_STATE, cast(LPARAM)_stimglist.handle);
+		
+		_cols.doListHeaders();
+		_litems.doListItems();
+
+		static if (0)
+		{
+			headerFont = {
+				LOGFONT lf;
+				SystemParametersInfo(SPI_GETICONTITLELOGFONT, cast(UINT)lf.sizeof, &lf, 0);
+				HFONT hFont = CreateFontIndirect(&lf);
+				Font sysFont = new Font(hFont, true);
+				// float emSize = sysFont.size;
+				float emSize = sysFont.size * dpi / USER_DEFAULT_SCREEN_DPI;
+				return new Font(sysFont, emSize, sysFont.style);
+			}();
+		}
+
+		int spacingX = MulDiv(_lgimglist.imageSize.width + MARGIN_X, dpi, USER_DEFAULT_SCREEN_DPI);
+		int spacingY = MulDiv(_lgimglist.imageSize.height + MARGIN_Y, dpi, USER_DEFAULT_SCREEN_DPI);
+		ListView_SetIconSpacing(_hwnd, spacingX, spacingY);
+
+		foreach (size_t colIndex, ref ColumnHeader item; this.columns)
+		{
+			updateColumnWidth(cast(int)colIndex, item.width);
+		}
+
+		arrangeIcons();
+		recalcEntire(); // Fix frame.
 	}
 
 
@@ -2200,7 +2220,7 @@ class ListView: ControlSuperClass // docmain
 	{
 		// TODO: support the listview messages.
 		
-		switch(m.msg)
+		switch (m.msg)
 		{
 			case WM_NOTIFY:
 			{
@@ -2210,14 +2230,15 @@ class ListView: ControlSuperClass // docmain
 				{
 					switch (nmh.code)
 					{
-						case HDN_ITEMCHANGED:
+						case HDN_ENDTRACK:
 						{
 							HD_NOTIFY* hdn = cast(HD_NOTIFY*)nmh;
 							if (hdn.pitem && (hdn.pitem.mask & HDI_WIDTH))
 							{
-								const int colIndex = hdn.iItem;
-								int cx = MulDiv(hdn.pitem.cxy, USER_DEFAULT_SCREEN_DPI, dpi);
-								columns[colIndex]._width = cx;
+								int colIndex = hdn.iItem;
+								int physicalWidth = ListView_GetColumnWidth(this.handle, colIndex);
+								int logical96 = MulDiv(physicalWidth, USER_DEFAULT_SCREEN_DPI, dpi);
+								columns[colIndex]._width = logical96;
 							}
 							break;
 						}
@@ -2317,60 +2338,20 @@ class ListView: ControlSuperClass // docmain
 	}
 	
 	
-	protected override void onHandleCreated(EventArgs ea)
-	{
-		super.onHandleCreated(ea);
-		
-		//SendMessageA(hwnd, LVM_SETEXTENDEDLISTVIEWSTYLE, wlvexstyle, wlvexstyle);
-		prevwproc(LVM_SETEXTENDEDLISTVIEWSTYLE, 0, _wlvexstyle); // wparam=0 sets all.
-		
-		Color color = backColor;
-		COLORREF cref;
-		if(Color.empty == color)
-			cref = CLR_NONE;
-		else
-			cref = color.toRgb();
-		prevwproc(LVM_SETBKCOLOR, 0, cast(LPARAM)cref);
-		prevwproc(LVM_SETTEXTBKCOLOR, 0, cast(LPARAM)cref);
-		
-		//prevwproc(LVM_SETTEXTCOLOR, 0, foreColor.toRgb()); // DMD 0.125: cast(Control )(this).foreColor() is not an lvalue
-		color = foreColor;
-		prevwproc(LVM_SETTEXTCOLOR, 0, cast(LPARAM)color.toRgb());
-		
-		if(_lgimglist)
-			prevwproc(LVM_SETIMAGELIST, LVSIL_NORMAL, cast(LPARAM)_lgimglist.handle);
-		if(_smimglist)
-			prevwproc(LVM_SETIMAGELIST, LVSIL_SMALL, cast(LPARAM)_smimglist.handle);
-		//if(_stimglist)
-		//	prevwproc(LVM_SETIMAGELIST, LVSIL_STATE, cast(LPARAM)_stimglist.handle);
-		
-		_cols.doListHeaders();
-		_litems.doListItems();
-
-		UINT newDpi = dpi;
-		int spacingX = MulDiv(BASE_SPACING_X, newDpi, USER_DEFAULT_SCREEN_DPI);
-		int spacingY = MulDiv(BASE_SPACING_Y, newDpi, USER_DEFAULT_SCREEN_DPI);
-		ListView_SetIconSpacing(_hwnd, spacingX, spacingY);
-		arrangeIcons();
-
-		recalcEntire(); // Fix frame.
-	}
-	
-	
 	protected override void onReflectedMessage(ref Message m)
 	{
 		super.onReflectedMessage(m);
 		
-		switch(m.msg)
+		switch (m.msg)
 		{
 			case WM_NOTIFY:
 			{
 				NMHDR* nmh = cast(NMHDR*)m.lParam;
-				switch(nmh.code)
+				switch (nmh.code)
 				{
 					case LVN_GETDISPINFOA:
 					{
-						static if(dfl.internal.utf.useUnicode)
+						static if (dfl.internal.utf.useUnicode)
 						{
 							break;
 						}
@@ -2382,19 +2363,19 @@ class ListView: ControlSuperClass // docmain
 							
 							ListViewItem item = cast(ListViewItem)cast(void*)lvdi.item.lParam;
 							
-							if(!lvdi.item.iSubItem) // Item.
+							if (!lvdi.item.iSubItem) // Item.
 							{
-								if(lvdi.item.mask & LVIF_IMAGE)
+								if (lvdi.item.mask & LVIF_IMAGE)
 									lvdi.item.iImage = item._imgidx;
 								
-								if(lvdi.item.mask & LVIF_TEXT)
+								if (lvdi.item.mask & LVIF_TEXT)
 									lvdi.item.pszText = cast(typeof(lvdi.item.pszText))item._calltxt.ansi;
 							}
 							else // Sub item.
 							{
-								if(lvdi.item.mask & LVIF_TEXT)
+								if (lvdi.item.mask & LVIF_TEXT)
 								{
-									if(lvdi.item.iSubItem <= item.subItems.length.toI32)
+									if (lvdi.item.iSubItem <= item.subItems.length.toI32)
 										lvdi.item.pszText = cast(typeof(lvdi.item.pszText))item.subItems[lvdi.item.iSubItem - 1]._calltxt.ansi;
 								}
 							}
@@ -2410,19 +2391,19 @@ class ListView: ControlSuperClass // docmain
 						
 						ListViewItem item = cast(ListViewItem)cast(void*)lvdi.item.lParam;
 						
-						if(!lvdi.item.iSubItem) // Item.
+						if (!lvdi.item.iSubItem) // Item.
 						{
-							if(lvdi.item.mask & LVIF_IMAGE)
+							if (lvdi.item.mask & LVIF_IMAGE)
 								lvdi.item.iImage = item._imgidx;
 							
-							if(lvdi.item.mask & LVIF_TEXT)
+							if (lvdi.item.mask & LVIF_TEXT)
 								lvdi.item.pszText = cast(typeof(lvdi.item.pszText))item._calltxt.unicode;
 						}
 						else // Sub item.
 						{
-							if(lvdi.item.mask & LVIF_TEXT)
+							if (lvdi.item.mask & LVIF_TEXT)
 							{
-								if(lvdi.item.iSubItem <= item.subItems.length.toI32)
+								if (lvdi.item.iSubItem <= item.subItems.length.toI32)
 									lvdi.item.pszText = cast(typeof(lvdi.item.pszText))item.subItems[lvdi.item.iSubItem - 1]._calltxt.unicode;
 							}
 						}
@@ -2433,10 +2414,10 @@ class ListView: ControlSuperClass // docmain
 					case LVN_ITEMCHANGING:
 						{
 							auto nmlv = cast(NM_LISTVIEW*)nmh;
-							if(-1 != nmlv.iItem)
+							if (-1 != nmlv.iItem)
 							{
 								UINT stchg = nmlv.uNewState ^ nmlv.uOldState;
-								if(stchg & (3 << 12))
+								if (stchg & (3 << 12))
 								{
 									// NOTE: not tested.
 									scope ItemCheckEventArgs ea = new ItemCheckEventArgs(nmlv.iItem,
@@ -2452,22 +2433,22 @@ class ListView: ControlSuperClass // docmain
 					case LVN_ITEMCHANGED:
 					{
 						auto nmlv = cast(NMLISTVIEW*)nmh;
-						if(-1 != nmlv.iItem)
+						if (-1 != nmlv.iItem)
 						{
-							if(nmlv.uChanged & LVIF_STATE)
+							if (nmlv.uChanged & LVIF_STATE)
 							{
 								UINT stchg = nmlv.uNewState ^ nmlv.uOldState;
 								
-								//if(stchg & LVIS_SELECTED)
+								//if (stchg & LVIS_SELECTED)
 								{
 									// Only fire for the selected one; don't fire twice for old/new.
-									if(nmlv.uNewState & LVIS_SELECTED)
+									if (nmlv.uNewState & LVIS_SELECTED)
 									{
 										onSelectedIndexChanged(EventArgs.empty);
 									}
 								}
 								
-								if(stchg & (3 << 12))
+								if (stchg & (3 << 12))
 								{
 									scope ItemCheckedEventArgs ea = new ItemCheckedEventArgs(items[nmlv.iItem]);
 									onItemChecked(ea);
@@ -2490,12 +2471,12 @@ class ListView: ControlSuperClass // docmain
 					
 					case LVN_BEGINLABELEDITA:
 					{
-						static if(dfl.internal.utf.useUnicode)
+						static if (dfl.internal.utf.useUnicode)
 							break;
 					begin_label_edit:
 						
 						LV_DISPINFOA* nmdi = cast(LV_DISPINFOA*)nmh;
-						if(nmdi.item.iSubItem)
+						if (nmdi.item.iSubItem)
 						{
 							m.result = TRUE;
 							break;
@@ -2510,10 +2491,10 @@ class ListView: ControlSuperClass // docmain
 					case LVN_ENDLABELEDITW:
 					{
 						LV_DISPINFOW* nmdi = cast(LV_DISPINFOW*)nmh;
-						if(nmdi.item.pszText)
+						if (nmdi.item.pszText)
 						{
 							ListViewItem lvitem = cast(ListViewItem)cast(void*)nmdi.item.lParam;
-							if(nmdi.item.iSubItem)
+							if (nmdi.item.iSubItem)
 							{
 								m.result = FALSE;
 								break;
@@ -2521,7 +2502,7 @@ class ListView: ControlSuperClass // docmain
 							Dstring label = fromUnicodez(nmdi.item.pszText);
 							scope LabelEditEventArgs nleea = new LabelEditEventArgs(lvitem, label);
 							onAfterLabelEdit(nleea);
-							if(nleea.cancelEdit)
+							if (nleea.cancelEdit)
 							{
 								m.result = FALSE;
 							}
@@ -2539,17 +2520,17 @@ class ListView: ControlSuperClass // docmain
 					
 					case LVN_ENDLABELEDITA:
 					{
-						static if(dfl.internal.utf.useUnicode)
+						static if (dfl.internal.utf.useUnicode)
 						{
 							break;
 						}
 						else
 						{
 							LV_DISPINFOA* nmdi = cast(LV_DISPINFOA*)nmh;
-							if(nmdi.item.pszText)
+							if (nmdi.item.pszText)
 							{
 								ListViewItem lvitem = cast(ListViewItem)cast(void*)nmdi.item.lParam;
-								if(nmdi.item.iSubItem)
+								if (nmdi.item.iSubItem)
 								{
 									m.result = FALSE;
 									break;
@@ -2557,7 +2538,7 @@ class ListView: ControlSuperClass // docmain
 								Dstring label = fromAnsiz(nmdi.item.pszText);
 								scope LabelEditEventArgs nleea = new LabelEditEventArgs(lvitem, label);
 								onAfterLabelEdit(nleea);
-								if(nleea.cancelEdit)
+								if (nleea.cancelEdit)
 								{
 									m.result = FALSE;
 								}
@@ -2584,9 +2565,26 @@ class ListView: ControlSuperClass // docmain
 	}
 	
 	
+	protected override void prevWndProc(ref Message msg)
+	{
+		switch (msg.msg)
+		{
+			case WM_MOUSEHOVER:
+				if (!hoverSelection)
+					return;
+				break;
+			
+			default:
+		}
+		
+		//msg.result = CallWindowProcA(listviewPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
+		msg.result = dfl.internal.utf.callWindowProc(listviewPrevWndProc, msg.hWnd, msg.msg, msg.wParam, msg.lParam);
+	}
+
+
 private:
-	enum BASE_SPACING_X = 40;
-	enum BASE_SPACING_Y = 40;
+	enum MARGIN_X = 4;
+	enum MARGIN_Y = 4;
 
 	DWORD _wlvexstyle = 0;
 	ListViewItemCollection _litems;
@@ -2609,7 +2607,7 @@ private:
 	
 	DWORD _lvexstyle() const
 	{
-		//if(created)
+		//if (created)
 		//	wlvexstyle = cast(DWORD)SendMessageA(hwnd, LVM_GETEXTENDEDLISTVIEWSTYLE, 0, 0);
 		//	wlvexstyle = cast(DWORD)prevwproc(LVM_GETEXTENDEDLISTVIEWSTYLE, 0, 0);
 		return _wlvexstyle;
@@ -2621,7 +2619,7 @@ private:
 		DWORD _b4 = _wlvexstyle;
 		
 		_wlvexstyle = flags;
-		if(created)
+		if (created)
 		{
 			// hwnd, msg, mask, flags
 			//SendMessageA(hwnd, LVM_SETEXTENDEDLISTVIEWSTYLE, flags ^ _b4, wlvexstyle);
@@ -2639,7 +2637,7 @@ private:
 	do
 	{
 		_wlvexstyle = (_wlvexstyle & ~mask) | (flags & mask);
-		if(created)
+		if (created)
 		{
 			// hwnd, msg, mask, flags
 			//SendMessageA(hwnd, LVM_SETEXTENDEDLISTVIEWSTYLE, mask, flags);
@@ -2665,8 +2663,8 @@ private:
 		
 		LV_ITEMA lvi;
 		lvi.mask = LVIF_TEXT | LVIF_PARAM;
-		//if(-1 != imageIndex)
-		if(!subItemIndex)
+		//if (-1 != imageIndex)
+		if (!subItemIndex)
 			lvi.mask |= LVIF_IMAGE;
 		//lvi.iImage = imageIndex;
 		lvi.iImage = I_IMAGECALLBACK;
@@ -2703,7 +2701,7 @@ private:
 		
 		LVCOLUMN lvc;
 		lvc.mask = LVCF_FMT | LVCF_SUBITEM | LVCF_TEXT | LVCF_WIDTH;
-		final switch(header.textAlign)
+		final switch (header.textAlign)
 		{
 			case HorizontalAlignment.RIGHT:
 				lvc.fmt = LVCFMT_RIGHT | LVCFMT_FIXED_RATIO;
@@ -2718,7 +2716,7 @@ private:
 		}
 		lvc.cx = MulDiv(header.width, dpi, USER_DEFAULT_SCREEN_DPI);
 		lvc.iSubItem = index; // iSubItem is probably only used when retrieving column info.
-		static if(dfl.internal.utf.useUnicode)
+		static if (dfl.internal.utf.useUnicode)
 		{
 			lvc.pszText = cast(typeof(lvc.pszText))dfl.internal.utf.toUnicodez(header.text);
 			return prevwproc(LVM_INSERTCOLUMNW, cast(WPARAM)index, cast(LPARAM)&lvc).toI32;
@@ -2767,7 +2765,7 @@ private:
 		LVCOLUMN lvc;
 		
 		lvc.mask = LVCF_TEXT;
-		static if(dfl.internal.utf.useUnicode)
+		static if (dfl.internal.utf.useUnicode)
 		{
 			lvc.pszText = cast(typeof(lvc.pszText))dfl.internal.utf.toUnicodez(newText);
 			return prevwproc(LVM_SETCOLUMNW, cast(WPARAM)colIndex, cast(LPARAM)&lvc);
@@ -2792,7 +2790,7 @@ private:
 	{
 		LVCOLUMN lvc;
 		lvc.mask = LVCF_FMT;
-		final switch(halign)
+		final switch (halign)
 		{
 			case HorizontalAlignment.RIGHT:
 				lvc.fmt = LVCFMT_RIGHT | LVCFMT_FIXED_RATIO;
