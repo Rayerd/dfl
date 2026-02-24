@@ -2145,9 +2145,12 @@ class ListView: ControlSuperClass // docmain
 	{
 		// BUG: ListView control size will be broken by scrollbars appearing.
 
-		int spacingX = MulDiv(_lgimglist.imageSize.width + MARGIN_X, newDpi, USER_DEFAULT_SCREEN_DPI);
-		int spacingY = MulDiv(_lgimglist.imageSize.height + MARGIN_Y, newDpi, USER_DEFAULT_SCREEN_DPI);
-		ListView_SetIconSpacing(_hwnd, spacingX, spacingY);
+		if (_lgimglist)
+		{
+			int spacingX = MulDiv(_lgimglist.imageSize.width + MARGIN_X, newDpi, USER_DEFAULT_SCREEN_DPI);
+			int spacingY = MulDiv(_lgimglist.imageSize.height + MARGIN_Y, newDpi, USER_DEFAULT_SCREEN_DPI);
+			ListView_SetIconSpacing(handle, spacingX, spacingY);
+		}
 
 		foreach (size_t colIndex, ref ColumnHeader item; this.columns)
 		{
@@ -2202,9 +2205,12 @@ class ListView: ControlSuperClass // docmain
 			}();
 		}
 
-		int spacingX = MulDiv(_lgimglist.imageSize.width + MARGIN_X, dpi, USER_DEFAULT_SCREEN_DPI);
-		int spacingY = MulDiv(_lgimglist.imageSize.height + MARGIN_Y, dpi, USER_DEFAULT_SCREEN_DPI);
-		ListView_SetIconSpacing(_hwnd, spacingX, spacingY);
+		if (_lgimglist)
+		{
+			int spacingX = MulDiv(_lgimglist.imageSize.width + MARGIN_X, dpi, USER_DEFAULT_SCREEN_DPI);
+			int spacingY = MulDiv(_lgimglist.imageSize.height + MARGIN_Y, dpi, USER_DEFAULT_SCREEN_DPI);
+			ListView_SetIconSpacing(handle, spacingX, spacingY);
+		}
 
 		foreach (size_t colIndex, ref ColumnHeader item; this.columns)
 		{
