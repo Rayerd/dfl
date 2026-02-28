@@ -872,72 +872,18 @@ class ToolBar: ControlSuperClass // docmain
 
 		if (_imageList)
 		{
-			const Size iconSize = {
-				int w, h;
-				ImageList_GetIconSize(_imageList.handle, &w, &h);
-				return Size(w, h);
-			}();
-			
-			const Size newIconSize = Size(
-				MulDiv(iconSize.width, dpi, USER_DEFAULT_SCREEN_DPI),
-				MulDiv(iconSize.height, dpi, USER_DEFAULT_SCREEN_DPI)
-			);
-			const iconCount = ImageList_GetImageCount(_imageList.handle);
-			const Size newBitmapSize = Size(newIconSize.width * iconCount, newIconSize.height);
-
-			auto newGraphics = new MemoryGraphics(newBitmapSize.width, newBitmapSize.height);
-
-			for (int index; index < iconCount; index++)
-			{
-				IMAGEINFO ii;
-				ImageList_GetImageInfo(_imageList.handle, index, &ii);
-				int w = ii.rcImage.right - ii.rcImage.left;
-				int h = ii.rcImage.bottom - ii.rcImage.top;
-
-				HDC hdcSrc = CreateCompatibleDC(null);
-				HGDIOBJ objSrc = SelectObject(hdcSrc, ii.hbmImage);
-
-				HDC hdcDst = CreateCompatibleDC(null);
-				HBITMAP bmpDst = CreateCompatibleBitmap(hdcSrc, w, h);
-				HGDIOBJ objDst = SelectObject(hdcDst, bmpDst);
-
-				BitBlt(hdcDst, 0, 0, w, h,
-					hdcSrc, ii.rcImage.left, ii.rcImage.top, SRCCOPY);
-
-				auto tempGraphics = new MemoryGraphics(w, h);
-				tempGraphics.fillRectangle(new SolidBrush(Color.red), Rect(0, 0, w, h));
-
-				ImageList_DrawEx(_imageList.handle, index, tempGraphics.handle, 0, 0, 0, 0, CLR_NONE, CLR_NONE, ILD_NORMAL);
-
-				int lstretch = SetStretchBltMode(tempGraphics.handle, STRETCH_HALFTONE);
-				StretchBlt(newGraphics.handle, newIconSize.width * index, 0, newIconSize.width, newIconSize.height,
-					tempGraphics.handle, 0, 0, tempGraphics.width, tempGraphics.height, SRCCOPY);
-				SetStretchBltMode(tempGraphics.handle, lstretch);
-
-				SelectObject(hdcDst, objDst);
-				SelectObject(hdcSrc, objSrc);
-				DeleteObject(bmpDst);
-				DeleteDC(hdcDst);
-				DeleteDC(hdcSrc);
-			}
-
 			ImageList oldImageList = _imageListForDpi;
-
-			_imageListForDpi = new ImageList;
-			_imageListForDpi.imageSize = Size(newIconSize.width, newIconSize.height);
-			_imageListForDpi.transparentColor = _imageList.transparentColor;
-			_imageListForDpi.colorDepth = _imageList.colorDepth;
-			_imageListForDpi.images.addStrip(newGraphics.toBitmap);
+			_imageListForDpi = createImageListForDpi(_imageList, dpi);
+			if (oldImageList)
+				oldImageList.dispose;
 
 			// NOTE: This is required for the bitmap method, but not for the image list method.
 			// const int cxIcon = GetSystemMetricsForDpi(SM_CXSMICON, dpi);
 			// const int cyIcon = GetSystemMetricsForDpi(SM_CYSMICON, dpi);
 			// SendMessage(handle, TB_SETBITMAPSIZE, 0, MAKELPARAM(cxIcon, cyIcon));
 
-			SendMessage(handle, TB_SETIMAGELIST, cast(WPARAM)0, cast(LPARAM)_imageListForDpi.handle);
-			
-			if (oldImageList)
-				oldImageList.dispose;
+			if (_imageListForDpi)
+				SendMessage(handle, TB_SETIMAGELIST, cast(WPARAM)0, cast(LPARAM)_imageListForDpi.handle);
 		}
 
 		while (1)
