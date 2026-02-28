@@ -2201,84 +2201,29 @@ class ListView: ControlSuperClass // docmain
 
 	private void _buildImageListForDpi(uint newDpi)
 	{
-		if (_largeImageList)
+		void _update(ImageList origin, ref ImageList scaled, int LVSIL_type)
 		{
-			const Size iconSize = {
-				int w, h;
-				ImageList_GetIconSize(_largeImageList.handle, &w, &h);
-				return Size(w, h);
-			}();
-
-			const Size newIconSize = Size(
-				MulDiv(iconSize.width, newDpi, USER_DEFAULT_SCREEN_DPI),
-				MulDiv(iconSize.height, newDpi, USER_DEFAULT_SCREEN_DPI)
-			);
-			const iconCount = ImageList_GetImageCount(_largeImageList.handle);
-			const Size newBitmapSize = Size(newIconSize.width * iconCount, newIconSize.height);
-
-			auto newGraphics = new MemoryGraphics(newBitmapSize.width, newBitmapSize.height);
-
-			for (int index; index < iconCount; index++)
+			if (origin)
 			{
-				IMAGEINFO ii;
-				ImageList_GetImageInfo(_largeImageList.handle, index, &ii);
-				int w = ii.rcImage.right - ii.rcImage.left;
-				int h = ii.rcImage.bottom - ii.rcImage.top;
-
-				HDC hdcSrc = CreateCompatibleDC(null);
-				HBITMAP objSrc = SelectObject(hdcSrc, ii.hbmImage);
-
-				HDC hdcDst = CreateCompatibleDC(null);
-				HBITMAP bmpDst = CreateCompatibleBitmap(hdcSrc, w, h);
-				HBITMAP objDst = SelectObject(hdcDst, bmpDst);
-
-				BitBlt(hdcDst, 0, 0, w, h,
-					hdcSrc, ii.rcImage.left, ii.rcImage.top, SRCCOPY);
-
-				auto tempGraphics = new MemoryGraphics(w, h);
-				tempGraphics.fillRectangle(_largeImageList.transparentColor, Rect(0, 0, w, h));
-
-				ImageList_DrawEx(_largeImageList.handle, index, tempGraphics.handle, 0, 0, 0, 0, CLR_NONE, CLR_NONE, ILD_NORMAL);
-
-				int lstretch = SetStretchBltMode(tempGraphics.handle, STRETCH_HALFTONE);
-				StretchBlt(newGraphics.handle, newIconSize.width * index, 0, newIconSize.width, newIconSize.height,
-					tempGraphics.handle, 0, 0, tempGraphics.width, tempGraphics.height, SRCCOPY);
-				SetStretchBltMode(tempGraphics.handle, lstretch);
-
-				SelectObject(hdcDst, objDst);
-				SelectObject(hdcSrc, objSrc);
-				DeleteObject(bmpDst);
-				DeleteDC(hdcDst);
-				DeleteDC(hdcSrc);
+				ImageList oldImageList = scaled;
+				scaled = createImageListForDpi(origin, newDpi);
+				if (oldImageList)
+					oldImageList.dispose;
 			}
 
-			ImageList oldImageList = _largeImageListForDpi;
-
-			_largeImageListForDpi = new ImageList;
-			_largeImageListForDpi.imageSize = Size(newIconSize.width, newIconSize.height);
-			_largeImageListForDpi.transparentColor = _largeImageList.transparentColor;
-			_largeImageListForDpi.colorDepth = _largeImageList.colorDepth;
-			_largeImageListForDpi.images.addStrip(newGraphics.toBitmap);
-
-			if (oldImageList)
-				oldImageList.dispose;
+			if (scaled)
+				prevwproc(LVM_SETIMAGELIST, LVSIL_type, cast(LPARAM)scaled.handle);
 		}
 
-		if (_largeImageListForDpi)
-			prevwproc(LVM_SETIMAGELIST, LVSIL_NORMAL, cast(LPARAM)_largeImageListForDpi.handle);
-		
+		_update(_largeImageList, _largeImageListForDpi, LVSIL_NORMAL);
+		_update(_smallImageList, _smallImageListForDpi, LVSIL_SMALL);
+
 		if (_largeImageList)
 		{
 			int spacingX = MulDiv(_largeImageList.imageSize.width + MARGIN_X, newDpi, USER_DEFAULT_SCREEN_DPI);
 			int spacingY = MulDiv(_largeImageList.imageSize.height + MARGIN_Y, newDpi, USER_DEFAULT_SCREEN_DPI);
 			ListView_SetIconSpacing(handle, spacingX, spacingY);
 		}
-
-		if (_smallImageList)
-			prevwproc(LVM_SETIMAGELIST, LVSIL_SMALL, cast(LPARAM)_smallImageList.handle);
-
-		//if (_stimglist)
-		//	prevwproc(LVM_SETIMAGELIST, LVSIL_STATE, cast(LPARAM)_stimglist.handle);
 	}
 
 
@@ -2663,6 +2608,7 @@ private:
 	ImageList _largeImageList;
 	ImageList _largeImageListForDpi;
 	ImageList _smallImageList;
+	ImageList _smallImageListForDpi;
 	//ImageList _stimglist;
 	deprecated Font _headerFont;
 	

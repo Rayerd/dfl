@@ -10,6 +10,7 @@ import dfl.collections;
 import dfl.drawing;
 
 import dfl.internal.dlib;
+import dfl.internal.dpiaware;
 
 import core.sys.windows.winbase;
 import core.sys.windows.windef;
@@ -458,6 +459,68 @@ private:
 		}
 		return imageListAddMasked(_hImageList, cast(HBITMAP)hbm, cr);
 	}
+}
+
+
+///
+ImageList createImageListForDpi(ImageList original, int dpi)
+{
+	const Size iconSize = {
+		int w, h;
+		ImageList_GetIconSize(original.handle, &w, &h);
+		return Size(w, h);
+	}();
+
+	const Size newIconSize = Size(
+		MulDiv(iconSize.width, dpi, USER_DEFAULT_SCREEN_DPI),
+		MulDiv(iconSize.height, dpi, USER_DEFAULT_SCREEN_DPI)
+	);
+	const iconCount = ImageList_GetImageCount(original.handle);
+	const Size newBitmapSize = Size(newIconSize.width * iconCount, newIconSize.height);
+
+	auto newGraphics = new MemoryGraphics(newBitmapSize.width, newBitmapSize.height);
+
+	for (int index; index < iconCount; index++)
+	{
+		IMAGEINFO ii;
+		ImageList_GetImageInfo(original.handle, index, &ii);
+		int w = ii.rcImage.right - ii.rcImage.left;
+		int h = ii.rcImage.bottom - ii.rcImage.top;
+
+		HDC hdcSrc = CreateCompatibleDC(null);
+		HBITMAP objSrc = SelectObject(hdcSrc, ii.hbmImage);
+
+		HDC hdcDst = CreateCompatibleDC(null);
+		HBITMAP bmpDst = CreateCompatibleBitmap(hdcSrc, w, h);
+		HBITMAP objDst = SelectObject(hdcDst, bmpDst);
+
+		BitBlt(hdcDst, 0, 0, w, h,
+			hdcSrc, ii.rcImage.left, ii.rcImage.top, SRCCOPY);
+
+		auto tempGraphics = new MemoryGraphics(w, h);
+		tempGraphics.fillRectangle(original.transparentColor, Rect(0, 0, w, h));
+
+		ImageList_DrawEx(original.handle, index, tempGraphics.handle, 0, 0, 0, 0, CLR_NONE, CLR_NONE, ILD_NORMAL);
+
+		int lstretch = SetStretchBltMode(tempGraphics.handle, STRETCH_HALFTONE);
+		StretchBlt(newGraphics.handle, newIconSize.width * index, 0, newIconSize.width, newIconSize.height,
+			tempGraphics.handle, 0, 0, tempGraphics.width, tempGraphics.height, SRCCOPY);
+		SetStretchBltMode(tempGraphics.handle, lstretch);
+
+		SelectObject(hdcDst, objDst);
+		SelectObject(hdcSrc, objSrc);
+		DeleteObject(bmpDst);
+		DeleteDC(hdcDst);
+		DeleteDC(hdcSrc);
+	}
+
+	ImageList newImageList = new ImageList;
+	newImageList.imageSize = Size(newIconSize.width, newIconSize.height);
+	newImageList.transparentColor = original.transparentColor;
+	newImageList.colorDepth = original.colorDepth;
+	newImageList.images.addStrip(newGraphics.toBitmap);
+
+	return newImageList;
 }
 
 
