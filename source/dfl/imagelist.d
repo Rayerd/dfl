@@ -30,7 +30,7 @@ class ImageList // docmain
 		
 		void insert(int index, Image img)
 		{
-			if(index >= _images.length.toI32)
+			if (index >= _images.length.toI32)
 			{
 				add(img);
 			}
@@ -44,7 +44,7 @@ class ImageList // docmain
 		final void addStrip(Image img)
 		{
 			HGDIOBJ hgo;
-			if(1 != img._imgtype(&hgo))
+			if (1 != img._imgtype(&hgo))
 			{
 				debug
 				{
@@ -57,7 +57,7 @@ class ImageList // docmain
 			}
 			
 			auto sz = imageSize;
-			if(img.height != sz.height
+			if (img.height != sz.height
 				|| img.width % sz.width)
 			{
 				debug
@@ -72,7 +72,7 @@ class ImageList // docmain
 			int num = img.width / sz.width;
 			
 			/+
-			if(1 == num)
+			if (1 == num)
 			{
 				add(img);
 				return;
@@ -83,7 +83,7 @@ class ImageList // docmain
 			_addhbitmap(hgo);
 			
 			int x = 0;
-			for(; num; num--)
+			for (; num; num--)
 			{
 				auto sp = new StripPart();
 				sp.origImg = img;
@@ -155,7 +155,7 @@ class ImageList // docmain
 		{
 			assert(val !is null);
 			
-			switch(val._imgtype(null))
+			switch (val._imgtype(null))
 			{
 				case 1:
 				case 2:
@@ -171,7 +171,7 @@ class ImageList // docmain
 					}
 			}
 			
-			if(val.size != imageSize)
+			if (val.size != imageSize)
 			{
 				debug
 				{
@@ -187,9 +187,9 @@ class ImageList // docmain
 		
 		void _added(size_t idx, Image val)
 		{
-			if(isHandleCreated)
+			if (isHandleCreated)
 			{
-				//if(idx >= _images.length) // Can't test for this here because -val- is already added to the array.
+				//if (idx >= _images.length) // Can't test for this here because -val- is already added to the array.
 				_addimg(val);
 			}
 		}
@@ -197,9 +197,9 @@ class ImageList // docmain
 		
 		void _removed(size_t idx, Image val)
 		{
-			if(isHandleCreated)
+			if (isHandleCreated)
 			{
-				if(size_t.max == idx) // Clear all.
+				if (size_t.max == idx) // Clear all.
 				{
 					imageListRemove(handle, -1);
 				}
@@ -316,9 +316,9 @@ class ImageList // docmain
 	{
 		// ImageList_DrawEx operates differently if the width or height is zero
 		// so bail out if zero and pretend the zero size image was drawn.
-		if(!width)
+		if (!width)
 			return;
-		if(!height)
+		if (!height)
 			return;
 		
 		imageListDrawEx(handle, index, g.handle, x, y, width, height,
@@ -337,7 +337,7 @@ class ImageList // docmain
 	///
 	final @property HIMAGELIST handle() // getter
 	{
-		if(!isHandleCreated)
+		if (!isHandleCreated)
 			_createImageList();
 		return _hImageList;
 	}
@@ -352,11 +352,11 @@ class ImageList // docmain
 	/// ditto
 	void dispose(bool disposing)
 	{
-		if(isHandleCreated)
+		if (isHandleCreated)
 			imageListDestroy(_hImageList);
 		_hImageList = HIMAGELIST.init;
 		
-		if(disposing)
+		if (disposing)
 		{
 			//_cimages._images = null; // Not GC-safe in dtor.
 			//_cimages = null; // Could cause bad things.
@@ -423,7 +423,7 @@ private:
 		
 		HGDIOBJ hgo;
 		int result;
-		switch(img._imgtype(&hgo))
+		switch (img._imgtype(&hgo))
 		{
 			case 1:
 				result = _addhbitmap(hgo);
@@ -437,7 +437,7 @@ private:
 				result = -1;
 		}
 		
-		//if(-1 == result)
+		//if (-1 == result)
 		//	_unableimg();
 		return result;
 	}
@@ -447,7 +447,7 @@ private:
 		assert(isHandleCreated);
 		
 		COLORREF cr;
-		if(_transparentColor == Color.empty
+		if (_transparentColor == Color.empty
 			|| _transparentColor == Color.transparent)
 		{
 			cr = CLR_DEFAULT;
@@ -469,7 +469,7 @@ private extern(Windows)
 	{
 		alias TProc = typeof(&ImageList_Create);
 		static TProc proc = null;
-		if(!proc)
+		if (!proc)
 			proc = cast(typeof(proc))GetProcAddress(GetModuleHandleA("comctl32.dll"), "ImageList_Create");
 		return proc(cx, cy, flags, cInitial, cGrow);
 	}
@@ -478,7 +478,7 @@ private extern(Windows)
 	{
 		alias TProc = typeof(&ImageList_AddIcon);
 		static TProc proc = null;
-		if(!proc)
+		if (!proc)
 			proc = cast(typeof(proc))GetProcAddress(GetModuleHandleA("comctl32.dll"), "ImageList_AddIcon");
 		return proc(himl, hicon);
 	}
@@ -487,7 +487,7 @@ private extern(Windows)
 	{
 		alias TProc = typeof(&ImageList_AddMasked);
 		static TProc proc = null;
-		if(!proc)
+		if (!proc)
 			proc = cast(typeof(proc))GetProcAddress(GetModuleHandleA("comctl32.dll"), "ImageList_AddMasked");
 		return proc(himl, hbmImage, crMask);
 	}
@@ -496,7 +496,7 @@ private extern(Windows)
 	{
 		alias TProc = typeof(&ImageList_Remove);
 		static TProc proc = null;
-		if(!proc)
+		if (!proc)
 			proc = cast(typeof(proc))GetProcAddress(GetModuleHandleA("comctl32.dll"), "ImageList_Remove");
 		return proc(himl, i);
 	}
@@ -505,7 +505,7 @@ private extern(Windows)
 	{
 		alias TProc = typeof(&ImageList_Destroy);
 		static TProc proc = null;
-		if(!proc)
+		if (!proc)
 			proc = cast(typeof(proc))GetProcAddress(GetModuleHandleA("comctl32.dll"), "ImageList_Destroy");
 		return proc(himl);
 	}

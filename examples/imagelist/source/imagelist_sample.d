@@ -67,7 +67,7 @@ class MainForm : Form
 			_combobox.items.add(stringFromView(v));
 		}
 
-		immutable View initialViewMove = View.LIST;
+		immutable View initialViewMove = View.LARGE_ICON;
 		_combobox.text = stringFromView(initialViewMove);
 		_combobox.selectedIndex = cast(int)initialViewMove;
 

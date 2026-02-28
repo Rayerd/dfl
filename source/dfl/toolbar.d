@@ -934,7 +934,7 @@ class ToolBar: ControlSuperClass // docmain
 			// const int cyIcon = GetSystemMetricsForDpi(SM_CYSMICON, dpi);
 			// SendMessage(handle, TB_SETBITMAPSIZE, 0, MAKELPARAM(cxIcon, cyIcon));
 
-			SendMessage(handle, TB_SETIMAGELIST, 0, cast(WPARAM)_imageListForDpi.handle);
+			SendMessage(handle, TB_SETIMAGELIST, cast(WPARAM)0, cast(LPARAM)_imageListForDpi.handle);
 			
 			if (oldImageList)
 				oldImageList.dispose;

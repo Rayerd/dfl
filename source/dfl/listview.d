@@ -370,7 +370,7 @@ class ListViewItem: DObject
 	final @property int index() // getter
 	{
 		if (_parentListView)
-			return _parentListView._litems.indexOf(this);
+			return _parentListView._listViewItems.indexOf(this);
 		return -1;
 	}
 	
@@ -575,7 +575,7 @@ class ColumnHeader: DObject
 	final @property int index() // getter
 	{
 		if (_parentListView)
-			_parentListView._cols.indexOf(this);
+			_parentListView._columnHeaders.indexOf(this);
 		return -1;
 	}
 	
@@ -741,7 +741,7 @@ class ListView: ControlSuperClass // docmain
 		protected this(ListView lv)
 		in
 		{
-			assert(lv._litems is null);
+			assert(lv._listViewItems is null);
 		}
 		do
 		{
@@ -762,9 +762,9 @@ class ListView: ControlSuperClass // docmain
 				case SortOrder.ASCENDING: // Insertion sort.
 					for (ii = 0; ii != _items.length.toI32; ii++)
 					{
-						assert(_parentListView._sortproc);
+						assert(_parentListView._sortProc);
 						//if (item < _items[ii])
-						if (_parentListView._sortproc(item, _items[ii]) < 0)
+						if (_parentListView._sortProc(item, _items[ii]) < 0)
 							break;
 					}
 					break;
@@ -772,9 +772,9 @@ class ListView: ControlSuperClass // docmain
 				case SortOrder.DESCENDING: // Insertion sort.
 					for (ii = 0; ii != _items.length.toI32; ii++)
 					{
-						assert(_parentListView._sortproc);
+						assert(_parentListView._sortProc);
 						//if (item >= _items[ii])
-						if (_parentListView._sortproc(item, _items[ii]) >= 0)
+						if (_parentListView._sortProc(item, _items[ii]) >= 0)
 							break;
 					}
 					break;
@@ -921,7 +921,7 @@ class ListView: ControlSuperClass // docmain
 		protected this(ListView owner)
 		in
 		{
-			assert(!owner._cols);
+			assert(!owner._columnHeaders);
 		}
 		do
 		{
@@ -1156,7 +1156,7 @@ class ListView: ControlSuperClass // docmain
 				idx = cast(int)_parentListView.prevwproc(LVM_GETNEXTITEM, cast(WPARAM)idx, MAKELPARAM(cast(UINT)LVNI_SELECTED, 0));
 				if (-1 == idx) // Done.
 					break;
-				ListViewItem litem = _parentListView._litems._items[idx]; // Prevent ref.
+				ListViewItem litem = _parentListView._listViewItems._items[idx]; // Prevent ref.
 				result = dg(litem);
 				if (result)
 					break;
@@ -1265,11 +1265,11 @@ class ListView: ControlSuperClass // docmain
 	{
 		_initListview();
 		
-		_litems = new ListViewItemCollection(this);
-		_cols = new ColumnHeaderCollection(this);
-		_selidxcollection = new SelectedIndexCollection(this);
-		_selobjcollection = new SelectedItemCollection(this);
-		_checkedis = new CheckedIndexCollection(this);
+		_listViewItems = new ListViewItemCollection(this);
+		_columnHeaders = new ColumnHeaderCollection(this);
+		_selectedIndexes = new SelectedIndexCollection(this);
+		_selectedItems = new SelectedItemCollection(this);
+		_checkedIndexes = new CheckedIndexCollection(this);
 
 		_windowStyle |= WS_TABSTOP | LVS_ALIGNTOP | LVS_AUTOARRANGE | LVS_SHAREIMAGELISTS;
 		_windowStyleEx |= WS_EX_CLIENTEDGE;
@@ -1446,7 +1446,7 @@ class ListView: ControlSuperClass // docmain
 	// ListView.CheckedIndexCollection
 	final @property inout(CheckedIndexCollection) checkedIndices() inout // getter
 	{
-		return _checkedis;
+		return _checkedIndexes;
 	}
 	
 	
@@ -1463,7 +1463,7 @@ class ListView: ControlSuperClass // docmain
 	///
 	final @property inout(ColumnHeaderCollection) columns() inout // getter
 	{
-		return _cols;
+		return _columnHeaders;
 	}
 	
 	
@@ -1483,7 +1483,7 @@ class ListView: ControlSuperClass // docmain
 		int i = focusedIndex;
 		if (-1 == i)
 			return null;
-		return _litems._items[i];
+		return _listViewItems._items[i];
 	}
 	
 	
@@ -1577,7 +1577,7 @@ class ListView: ControlSuperClass // docmain
 	///
 	final @property inout(ListViewItemCollection) items() inout // getter
 	{
-		return _litems;
+		return _listViewItems;
 	}
 	
 	
@@ -1677,14 +1677,14 @@ class ListView: ControlSuperClass // docmain
 	///
 	final @property inout(SelectedIndexCollection) selectedIndices() inout // getter
 	{
-		return _selidxcollection;
+		return _selectedIndexes;
 	}
 	
 	
 	///
 	final @property inout(SelectedItemCollection) selectedItems() inout // getter
 	{
-		return _selobjcollection;
+		return _selectedItems;
 	}
 	
 	
@@ -1733,23 +1733,23 @@ class ListView: ControlSuperClass // docmain
 	///
 	final @property void sorting(SortOrder so) // setter
 	{
-		if (so == _sortorder)
+		if (so == _sortOrder)
 			return;
 		
 		final switch (so)
 		{
 			case SortOrder.NONE:
-				_sortproc = null;
+				_sortProc = null;
 				break;
 			
 			case SortOrder.ASCENDING:
 			case SortOrder.DESCENDING:
-				if (!_sortproc)
-					_sortproc = &_defsortproc;
+				if (!_sortProc)
+					_sortProc = &_defsortproc;
 				break;
 		}
 		
-		_sortorder = so;
+		_sortOrder = so;
 		
 		sort();
 	}
@@ -1757,16 +1757,16 @@ class ListView: ControlSuperClass // docmain
 	/// ditto
 	final @property SortOrder sorting() const // getter
 	{
-		return _sortorder;
+		return _sortOrder;
 	}
 	
 	
 	///
 	final void sort()
 	{
-		if (SortOrder.NONE != _sortorder)
+		if (SortOrder.NONE != _sortOrder)
 		{
-			assert(_sortproc);
+			assert(_sortProc);
 			ListViewItem[] sitems = items._items;
 			if (sitems.length > 1)
 			{
@@ -1780,7 +1780,7 @@ class ListView: ControlSuperClass // docmain
 					for (size_t iw = 0; iw != sortmax; iw++)
 					{
 						//if (sitems[iw] > sitems[iw + 1])
-						if (_sortproc(sitems[iw], sitems[iw + 1]) > 0)
+						if (_sortProc(sitems[iw], sitems[iw + 1]) > 0)
 						{
 							swp = true;
 							ListViewItem lvis = sitems[iw];
@@ -1794,7 +1794,7 @@ class ListView: ControlSuperClass // docmain
 				if (created)
 				{
 					beginUpdate();
-					SendMessageA(handle, LVM_DELETEALLITEMS, 0, 0); // NOTE: this sends LVN_DELETEALLITEMS.
+					SendMessageA(handle, LVM_DELETEALLITEMS, 0, 0);
 					foreach (idx, lvi; sitems)
 					{
 						_ins(idx.toI32, lvi);
@@ -1811,17 +1811,17 @@ class ListView: ControlSuperClass // docmain
 	///
 	final @property void sorter(int delegate(ListViewItem, ListViewItem) sortproc) // setter
 	{
-		if (sortproc == this._sortproc)
+		if (sortproc == this._sortProc)
 			return;
 		
 		if (!sortproc)
 		{
-			this._sortproc = null;
+			this._sortProc = null;
 			sorting = SortOrder.NONE;
 			return;
 		}
 		
-		this._sortproc = sortproc;
+		this._sortProc = sortproc;
 		
 		if (SortOrder.NONE == sorting)
 			sorting = SortOrder.ASCENDING;
@@ -1831,7 +1831,7 @@ class ListView: ControlSuperClass // docmain
 	/// ditto
 	final int delegate(ListViewItem, ListViewItem) sorter() const @property // getter
 	{
-		return _sortproc;
+		return _sortProc;
 	}
 	
 	
@@ -1903,7 +1903,7 @@ class ListView: ControlSuperClass // docmain
 	///
 	final void clear()
 	{
-		_litems.clear();
+		_listViewItems.clear();
 	}
 	
 	
@@ -1982,13 +1982,13 @@ class ListView: ControlSuperClass // docmain
 				cast(LPARAM)(imglist ? imglist.handle : cast(HIMAGELIST)null));
 		}
 		
-		_lgimglist = imglist;
+		_largeImageList = imglist;
 	}
 	
 	/// ditto
 	final @property inout(ImageList) largeImageList() inout // getter
 	{
-		return _lgimglist;
+		return _largeImageList;
 	}
 	
 	
@@ -2001,13 +2001,13 @@ class ListView: ControlSuperClass // docmain
 				cast(LPARAM)(imglist ? imglist.handle : cast(HIMAGELIST)null));
 		}
 		
-		_smimglist = imglist;
+		_smallImageList = imglist;
 	}
 	
 	/// ditto
 	final @property inout(ImageList) smallImageList() inout // getter
 	{
-		return _smimglist;
+		return _smallImageList;
 	}
 	
 	
@@ -2137,7 +2137,7 @@ class ListView: ControlSuperClass // docmain
 	{
 		super.onHandleCreated(ea);
 
-		_buildTreeView();
+		_buildListView();
 	}
 	
 
@@ -2145,12 +2145,7 @@ class ListView: ControlSuperClass // docmain
 	{
 		// BUG: ListView control size will be broken by scrollbars appearing.
 
-		if (_lgimglist)
-		{
-			int spacingX = MulDiv(_lgimglist.imageSize.width + MARGIN_X, newDpi, USER_DEFAULT_SCREEN_DPI);
-			int spacingY = MulDiv(_lgimglist.imageSize.height + MARGIN_Y, newDpi, USER_DEFAULT_SCREEN_DPI);
-			ListView_SetIconSpacing(handle, spacingX, spacingY);
-		}
+		_buildImageListForDpi(newDpi);
 
 		foreach (size_t colIndex, ref ColumnHeader item; this.columns)
 		{
@@ -2159,7 +2154,7 @@ class ListView: ControlSuperClass // docmain
 	}
 
 
-	private void _buildTreeView()
+	private void _buildListView()
 	{
 		//SendMessageA(hwnd, LVM_SETEXTENDEDLISTVIEWSTYLE, wlvexstyle, wlvexstyle);
 		prevwproc(LVM_SETEXTENDEDLISTVIEWSTYLE, 0, _wlvexstyle); // wparam=0 sets all.
@@ -2177,21 +2172,15 @@ class ListView: ControlSuperClass // docmain
 		}
 		
 		{
-			//prevwproc(LVM_SETTEXTCOLOR, 0, foreColor.toRgb()); // DMD 0.125: cast(Control )(this).foreColor() is not an lvalue
 			Color color = foreColor;
 			prevwproc(LVM_SETTEXTCOLOR, 0, cast(LPARAM)color.toRgb());
 		}
 		
-		if (_lgimglist)
-			prevwproc(LVM_SETIMAGELIST, LVSIL_NORMAL, cast(LPARAM)_lgimglist.handle);
-		if (_smimglist)
-			prevwproc(LVM_SETIMAGELIST, LVSIL_SMALL, cast(LPARAM)_smimglist.handle);
-		//if (_stimglist)
-		//	prevwproc(LVM_SETIMAGELIST, LVSIL_STATE, cast(LPARAM)_stimglist.handle);
-		
-		_cols.doListHeaders();
-		_litems.doListItems();
+		_columnHeaders.doListHeaders();
+		_listViewItems.doListItems();
 
+		_buildImageListForDpi(dpi);
+		
 		static if (0)
 		{
 			headerFont = {
@@ -2205,20 +2194,91 @@ class ListView: ControlSuperClass // docmain
 			}();
 		}
 
-		if (_lgimglist)
+		arrangeIcons();
+		recalcEntire(); // Fix frame.
+	}
+
+
+	private void _buildImageListForDpi(uint newDpi)
+	{
+		if (_largeImageList)
 		{
-			int spacingX = MulDiv(_lgimglist.imageSize.width + MARGIN_X, dpi, USER_DEFAULT_SCREEN_DPI);
-			int spacingY = MulDiv(_lgimglist.imageSize.height + MARGIN_Y, dpi, USER_DEFAULT_SCREEN_DPI);
+			const Size iconSize = {
+				int w, h;
+				ImageList_GetIconSize(_largeImageList.handle, &w, &h);
+				return Size(w, h);
+			}();
+
+			const Size newIconSize = Size(
+				MulDiv(iconSize.width, newDpi, USER_DEFAULT_SCREEN_DPI),
+				MulDiv(iconSize.height, newDpi, USER_DEFAULT_SCREEN_DPI)
+			);
+			const iconCount = ImageList_GetImageCount(_largeImageList.handle);
+			const Size newBitmapSize = Size(newIconSize.width * iconCount, newIconSize.height);
+
+			auto newGraphics = new MemoryGraphics(newBitmapSize.width, newBitmapSize.height);
+
+			for (int index; index < iconCount; index++)
+			{
+				IMAGEINFO ii;
+				ImageList_GetImageInfo(_largeImageList.handle, index, &ii);
+				int w = ii.rcImage.right - ii.rcImage.left;
+				int h = ii.rcImage.bottom - ii.rcImage.top;
+
+				HDC hdcSrc = CreateCompatibleDC(null);
+				HBITMAP objSrc = SelectObject(hdcSrc, ii.hbmImage);
+
+				HDC hdcDst = CreateCompatibleDC(null);
+				HBITMAP bmpDst = CreateCompatibleBitmap(hdcSrc, w, h);
+				HBITMAP objDst = SelectObject(hdcDst, bmpDst);
+
+				BitBlt(hdcDst, 0, 0, w, h,
+					hdcSrc, ii.rcImage.left, ii.rcImage.top, SRCCOPY);
+
+				auto tempGraphics = new MemoryGraphics(w, h);
+				tempGraphics.fillRectangle(_largeImageList.transparentColor, Rect(0, 0, w, h));
+
+				ImageList_DrawEx(_largeImageList.handle, index, tempGraphics.handle, 0, 0, 0, 0, CLR_NONE, CLR_NONE, ILD_NORMAL);
+
+				int lstretch = SetStretchBltMode(tempGraphics.handle, STRETCH_HALFTONE);
+				StretchBlt(newGraphics.handle, newIconSize.width * index, 0, newIconSize.width, newIconSize.height,
+					tempGraphics.handle, 0, 0, tempGraphics.width, tempGraphics.height, SRCCOPY);
+				SetStretchBltMode(tempGraphics.handle, lstretch);
+
+				SelectObject(hdcDst, objDst);
+				SelectObject(hdcSrc, objSrc);
+				DeleteObject(bmpDst);
+				DeleteDC(hdcDst);
+				DeleteDC(hdcSrc);
+			}
+
+			ImageList oldImageList = _largeImageListForDpi;
+
+			_largeImageListForDpi = new ImageList;
+			_largeImageListForDpi.imageSize = Size(newIconSize.width, newIconSize.height);
+			_largeImageListForDpi.transparentColor = _largeImageList.transparentColor;
+			_largeImageListForDpi.colorDepth = _largeImageList.colorDepth;
+			_largeImageListForDpi.images.addStrip(newGraphics.toBitmap);
+
+			if (oldImageList)
+				oldImageList.dispose;
+		}
+
+		if (_largeImageListForDpi)
+			prevwproc(LVM_SETIMAGELIST, LVSIL_NORMAL, cast(LPARAM)_largeImageListForDpi.handle);
+		
+		if (_largeImageList)
+		{
+			int spacingX = MulDiv(_largeImageList.imageSize.width + MARGIN_X, newDpi, USER_DEFAULT_SCREEN_DPI);
+			int spacingY = MulDiv(_largeImageList.imageSize.height + MARGIN_Y, newDpi, USER_DEFAULT_SCREEN_DPI);
 			ListView_SetIconSpacing(handle, spacingX, spacingY);
 		}
 
-		foreach (size_t colIndex, ref ColumnHeader item; this.columns)
-		{
-			updateColumnWidth(cast(int)colIndex, item.width);
-		}
+		if (_smallImageList)
+			prevwproc(LVM_SETIMAGELIST, LVSIL_SMALL, cast(LPARAM)_smallImageList.handle);
 
-		arrangeIcons();
-		recalcEntire(); // Fix frame.
+		//if (_stimglist)
+		//	prevwproc(LVM_SETIMAGELIST, LVSIL_STATE, cast(LPARAM)_stimglist.handle);
 	}
 
 
@@ -2269,17 +2329,17 @@ class ListView: ControlSuperClass // docmain
 				return;
 			
 			case LVM_DELETEALLITEMS:
-				_litems.clear();
+				_listViewItems.clear();
 				m.result = TRUE;
 				return;
 			
 			case LVM_DELETECOLUMN:
-				_cols.removeAt(cast(int)m.wParam);
+				_columnHeaders.removeAt(cast(int)m.wParam);
 				m.result = TRUE;
 				return;
 			
 			case LVM_DELETEITEM:
-				_litems.removeAt(cast(int)m.wParam);
+				_listViewItems.removeAt(cast(int)m.wParam);
 				m.result = TRUE;
 				return;
 			
@@ -2593,16 +2653,18 @@ private:
 	enum MARGIN_Y = 4;
 
 	DWORD _wlvexstyle = 0;
-	ListViewItemCollection _litems;
-	ColumnHeaderCollection _cols;
-	SelectedIndexCollection _selidxcollection;
-	SelectedItemCollection _selobjcollection;
-	SortOrder _sortorder = SortOrder.NONE;
-	CheckedIndexCollection _checkedis;
-	int delegate(ListViewItem, ListViewItem) _sortproc;
-	ImageList _lgimglist, _smimglist;
+	ListViewItemCollection _listViewItems;
+	ColumnHeaderCollection _columnHeaders;
+	SelectedIndexCollection _selectedIndexes;
+	SelectedItemCollection _selectedItems;
+	SortOrder _sortOrder = SortOrder.NONE;
+	CheckedIndexCollection _checkedIndexes;
+	int delegate(ListViewItem, ListViewItem) _sortProc;
+	ImageList _largeImageList;
+	ImageList _largeImageListForDpi;
+	ImageList _smallImageList;
 	//ImageList _stimglist;
-	Font _headerFont;
+	deprecated Font _headerFont;
 	
 	
 	int _defsortproc(ListViewItem a, ListViewItem b) const
