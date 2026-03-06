@@ -27,6 +27,7 @@ public import dfl.listbox;
 public import dfl.listview;
 public import dfl.menu;
 public import dfl.messagebox;
+public import dfl.monthcalendar;
 public import dfl.notifyicon;
 public import dfl.panel;
 public import dfl.picturebox;

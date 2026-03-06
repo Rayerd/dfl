@@ -28,6 +28,10 @@ void main()
 ![screen shot](./image/welcomtodfl.png "screen shot")
 
 ## Recent major features
+- **dfl.monthcalendar is now coming.**
+
+![screen shot](./examples/monthcalendar/image/screenshot.png "screen shot")
+
 - **dfl.folderdialog has changed from a legacy dialog based on SHBrowseForFolder (left image) 
 to a modern dialog based on IFileDialog (right image).**
 
@@ -50,28 +54,28 @@ to a modern dialog based on IFileDialog (right image).**
 ![screen shot](./examples/locationalignment/image/screenshot.png "screen shot")
 
 - Enabled padding and margin configuration for all Control types.
-- StackPanel class and example code are now comming.
+- StackPanel class and example code are now coming.
 
 ![screen shot](./examples/stackpanel/image/screenshot.png "screen shot")
 
 - Reworked build-scripts (makelib.bat, makecoff.bat and go.bat) to better work with DUB and MSVC 2022.
 	- dfl.lib and dfl_debug.lib are created in \dfl\bin, just like DUB.
-- Module "dfl.toggleswitch" and example code are now comming.
+- Module "dfl.toggleswitch" and example code are now coming.
 
 ![screen shot](./examples/toggleswitch/image/screenshot.png "screen shot")
 
-- Module "dfl.toastnotifier" is now comming (with example).
+- Module "dfl.toastnotifier" is now coming (with example).
 	- ToastNotifier
 	- ToastNotifierLegacy
 
 ![screen shot](./examples/toastnotifier/image/screenshot.png "screen shot")
 
 - Registered DFL to DUB.
-- Module "dfl.chart" is now comming (with example).
+- Module "dfl.chart" is now coming (with example).
 	- TableRenderer
 	- LineGraphRenderer
 	- TimeChartRenderer
-- Module "dfl.printing" is now comming (with example).
+- Module "dfl.printing" is now coming (with example).
 	- PrintDialog
 	- PrintSetupDialog
 	- PrintPreviewDialog

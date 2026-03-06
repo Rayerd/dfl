@@ -2069,6 +2069,8 @@ enum LISTVIEW_CLASSNAME = "DFL_ListView";
 enum STATUSBAR_CLASSNAME = "DFL_StatusBar";
 enum PROGRESSBAR_CLASSNAME = "DFL_ProgressBar";
 enum TRACKBAR_CLASSNAME = "DFL_TrackBar";
+enum MONTHCALENDAR_CLASSNAME = "DFL_MonthCalendar";
+enum DATETIMEPICKER_CLASSNAME = "DFL_DateTimePicker";
 
 WNDPROC textBoxPrevWndProc;
 WNDPROC listboxPrevWndProc;
@@ -2083,6 +2085,8 @@ WNDPROC listviewPrevWndProc;
 WNDPROC statusbarPrevWndProc;
 WNDPROC progressbarPrevWndProc;
 WNDPROC trackbarPrevWndProc;
+WNDPROC monthcalendarPrevWndProc;
+WNDPROC datetimepickerPrevWndProc;
 
 LONG textBoxClassStyle;
 LONG listboxClassStyle;
@@ -2097,6 +2101,8 @@ LONG listviewClassStyle;
 LONG statusbarClassStyle;
 LONG progressbarClassStyle;
 LONG trackbarClassStyle;
+LONG monthcalendarClassStyle;
+LONG datetimepickerClassStyle;
 
 HMODULE hmodRichtextbox;
 
@@ -2472,6 +2478,34 @@ extern(Windows)
 			if (!trackbarPrevWndProc)
 				_unableToInit(TRACKBAR_CLASSNAME);
 			trackbarClassStyle = info.wc.style;
+		}
+	}
+
+	void _initMonthCalendar()
+	{
+		if (!monthcalendarPrevWndProc)
+		{
+			_initCommonControls(ICC_DATE_CLASSES);
+			
+			dfl.internal.utf.WndClass info;
+			monthcalendarPrevWndProc = superClass(HINSTANCE.init, "SysMonthCal32", MONTHCALENDAR_CLASSNAME, info);
+			if (!monthcalendarPrevWndProc)
+				_unableToInit(MONTHCALENDAR_CLASSNAME);
+			monthcalendarClassStyle = info.wc.style;
+		}
+	}
+
+	void _initDateTimePicker()
+	{
+		if (!datetimepickerPrevWndProc)
+		{
+			_initCommonControls(ICC_DATE_CLASSES);
+			
+			dfl.internal.utf.WndClass info;
+			datetimepickerPrevWndProc = superClass(HINSTANCE.init, "SysDateTimePick32", DATETIMEPICKER_CLASSNAME, info);
+			if (!datetimepickerPrevWndProc)
+				_unableToInit(DATETIMEPICKER_CLASSNAME);
+			datetimepickerClassStyle = info.wc.style;
 		}
 	}
 }
