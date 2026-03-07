@@ -30,7 +30,7 @@ class MonthCalendar : ControlSuperClass
 		// setStyle(ControlStyles.USER_PAINT, false);
 		// setStyle(ControlStyles.USE_TEXT_FOR_ACCESSIBILITY, false);
 
-		_windowStyle |= WS_BORDER | WS_CHILD | WS_VISIBLE
+		_windowStyle |= WS_BORDER | WS_CHILD | WS_VISIBLE | WS_TABSTOP
 			| MCS_DAYSTATE
 			| MCS_MULTISELECT
 			// | MCS_WEEKNUMBERS
@@ -41,7 +41,7 @@ class MonthCalendar : ControlSuperClass
 			| MCS_NOSELCHANGEONNAV
 		;
 
-		// _controlStyle |= ControlStyles.SELECTABLE;
+		_controlStyle |= ControlStyles.SELECTABLE;
 		_windowClassStyle = monthcalendarClassStyle;
 	}
 
@@ -342,7 +342,7 @@ class MonthCalendar : ControlSuperClass
 	/// ditto
 	bool showWeekNumbers() const // getter
 	{
-		return (_style & MCS_WEEKNUMBERS) == 1;
+		return (_style & MCS_WEEKNUMBERS) != 0;
 	}
 
 
@@ -521,7 +521,7 @@ class MonthCalendar : ControlSuperClass
 	///
 	void removeAnnuallyBoldedDate(DateTime datetime)
 	{
-		_annuallyBoldedDates = _annuallyBoldedDates.filter!(d => (d.month != datetime.month && d.day != datetime.day)).array;
+		_annuallyBoldedDates = _annuallyBoldedDates.filter!(d => (d.month != datetime.month || d.day != datetime.day)).array;
 	}
 
 
@@ -550,7 +550,7 @@ class MonthCalendar : ControlSuperClass
 	void setDate(DateTime date)
 	{
 		SYSTEMTIME systime = toSYSTEMTIME(date);
-		DateTime_SetSystemtime(handle, GDT_VALID, &systime);
+		MonthCal_SetCurSel(cast(HWND)_hwnd, &systime);
 	}
 
 
