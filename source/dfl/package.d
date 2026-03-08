@@ -16,6 +16,7 @@ public import dfl.combobox;
 public import dfl.commondialog;
 public import dfl.control;
 public import dfl.data;
+public import dfl.datetimepicker;
 public import dfl.drawing;
 public import dfl.environment;
 public import dfl.event;

@@ -28,6 +28,10 @@ void main()
 ![screen shot](./image/welcomtodfl.png "screen shot")
 
 ## Recent major features
+- **dfl.datetimepicker is now coming.**
+
+![screen shot](./examples/datetimepicker/image/screenshot.png "screen shot")
+
 - **dfl.monthcalendar is now coming.**
 
 ![screen shot](./examples/monthcalendar/image/screenshot.png "screen shot")
