@@ -20,6 +20,7 @@ public import dfl.datetimepicker;
 public import dfl.drawing;
 public import dfl.environment;
 public import dfl.event;
+public import dfl.expander;
 public import dfl.form;
 public import dfl.groupbox;
 public import dfl.imagelist;

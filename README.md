@@ -28,13 +28,17 @@ void main()
 ![screen shot](./image/welcomtodfl.png "screen shot")
 
 ## Recent major features
-- **dfl.datetimepicker is now coming.**
 
-![screen shot](./examples/datetimepicker/image/screenshot.png "screen shot")
+- **dfl.expander is now coming.**
 
-- **dfl.monthcalendar is now coming.**
+<img src="./examples/expander/image/screenshot.png" width="50%">
 
-![screen shot](./examples/monthcalendar/image/screenshot.png "screen shot")
+- **dfl.datetimepicker and dfl.monthcalendar is now coming.**
+
+<p>
+	<img src="./examples/datetimepicker/image/screenshot.png" width="45%">
+	<img src="./examples/monthcalendar/image/screenshot.png" width="45%">
+</p>
 
 - **dfl.folderdialog has changed from a legacy dialog based on SHBrowseForFolder (left image) 
 to a modern dialog based on IFileDialog (right image).**
@@ -43,11 +47,11 @@ to a modern dialog based on IFileDialog (right image).**
 
 - Supports dpi-aware (per monitor v2).
 	- Add Application.setHighDpiMode method.
-		- ```DPI_UNAWARE```
-		- ```SYSTEM_AWARE```
-		- ```PER_MONITOR```
-		- ```PER_MONITOR_V2```
-		- ```DPI_UNAWARE_GDI_SCALED```
+		- `DPI_UNAWARE`
+		- `SYSTEM_AWARE`
+		- `PER_MONITOR`
+		- `PER_MONITOR_V2`
+		- `DPI_UNAWARE_GDI_SCALED`
 	- Add Control.onDpiChanged method for recursive dpi-change.
 
 - Add LocationAlignment property to Control class for easily layout customize GUI elements (with example code) .
@@ -55,18 +59,21 @@ to a modern dialog based on IFileDialog (right image).**
 	- LocationAlignment is affected by the dockMargin property.
 	- LocationAlignment and DockStyle cannot be used at the same time.
 
-![screen shot](./examples/locationalignment/image/screenshot.png "screen shot")
+<img src="./examples/locationalignment/image/screenshot.png" width="70%">
+
 
 - Enabled padding and margin configuration for all Control types.
 - StackPanel class and example code are now coming.
 
-![screen shot](./examples/stackpanel/image/screenshot.png "screen shot")
+<img src="./examples/stackpanel/image/screenshot.png" width="50%">
+
 
 - Reworked build-scripts (makelib.bat, makecoff.bat and go.bat) to better work with DUB and MSVC 2022.
 	- dfl.lib and dfl_debug.lib are created in \dfl\bin, just like DUB.
 - Module "dfl.toggleswitch" and example code are now coming.
 
-![screen shot](./examples/toggleswitch/image/screenshot.png "screen shot")
+<img src="./examples/toggleswitch/image/screenshot.png" width="50%">
+
 
 - Module "dfl.toastnotifier" is now coming (with example).
 	- ToastNotifier
