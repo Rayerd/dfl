@@ -18,6 +18,7 @@ class MainForm : Form
 			e.parent = this;
 			
 			e.header.text = "Open Calendar";
+			e.header.font = new Font("Segoe UI", 18.0f * dpi / USER_DEFAULT_SCREEN_DPI);
 
 			Label caption = new Label;
 			caption.autoSize = true;

@@ -83,26 +83,27 @@ class Expander : ContainerControl
 		};
 		_header.paint ~= (Control c, PaintEventArgs e) {
 			Graphics g = e.graphics;
-			Font font = new Font("Segoe UI", 18.0f * dpi / USER_DEFAULT_SCREEN_DPI);
 			{
+				Font f = _header.font;
 				string str = _header.text;
-				Size sz = g.measureText(str, font);
+				Size sz = g.measureText(str, f);
 				Rect rc = Rect(
 					_header.left,
 					(_header.height - sz.height) / 2,
 					min(sz.width, _header.width - 50),
 					sz.height);
-				g.drawText(str, font, Color.black, rc * dpi / USER_DEFAULT_SCREEN_DPI);
+				g.drawText(str, f, Color.black, rc * dpi / USER_DEFAULT_SCREEN_DPI);
 			}
 			{
+				Font f = new Font("Segoe UI", 18.0f * dpi / USER_DEFAULT_SCREEN_DPI);
 				string str = _isExpanded ? "∧" : "∨";
-				Size sz = g.measureText(str, font);
+				Size sz = g.measureText(str, f);
 				Rect rc = Rect(
 					_header.width - sz.width,
 					(_header.height - sz.height) / 2,
 					sz.width,
 					sz.height);
-				g.drawText(str, font, Color.gray, rc * dpi / USER_DEFAULT_SCREEN_DPI);
+				g.drawText(str, f, Color.gray, rc * dpi / USER_DEFAULT_SCREEN_DPI);
 			}
 			{
 				if (_isMouseHover)
