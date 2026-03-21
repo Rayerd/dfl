@@ -31,14 +31,12 @@ void main()
 
 - **dfl.expander is now coming.**
 
-<img src="./examples/expander/image/screenshot.png" width="50%">
+![screen shot](./examples/expander/image/screenshot.png "screen shot")
 
 - **dfl.datetimepicker and dfl.monthcalendar is now coming.**
 
-<p>
-	<img src="./examples/datetimepicker/image/screenshot.png" width="45%">
-	<img src="./examples/monthcalendar/image/screenshot.png" width="45%">
-</p>
+![screen shot](./examples/datetimepicker/image/screenshot.png "screen shot")
+![screen shot](./examples/monthcalendar/image/screenshot.png "screen shot")
 
 - **dfl.folderdialog has changed from a legacy dialog based on SHBrowseForFolder (left image) 
 to a modern dialog based on IFileDialog (right image).**
@@ -59,21 +57,18 @@ to a modern dialog based on IFileDialog (right image).**
 	- LocationAlignment is affected by the dockMargin property.
 	- LocationAlignment and DockStyle cannot be used at the same time.
 
-<img src="./examples/locationalignment/image/screenshot.png" width="70%">
-
+![screen shot](./examples/locationalignment/image/screenshot.png "screen shot")
 
 - Enabled padding and margin configuration for all Control types.
 - StackPanel class and example code are now coming.
 
-<img src="./examples/stackpanel/image/screenshot.png" width="50%">
-
+![screen shot](./examples/stackpanel/image/screenshot.png "screen shot")
 
 - Reworked build-scripts (makelib.bat, makecoff.bat and go.bat) to better work with DUB and MSVC 2022.
 	- dfl.lib and dfl_debug.lib are created in \dfl\bin, just like DUB.
 - Module "dfl.toggleswitch" and example code are now coming.
 
-<img src="./examples/toggleswitch/image/screenshot.png" width="50%">
-
+![screen shot](./examples/toggleswitch/image/screenshot.png "screen shot")
 
 - Module "dfl.toastnotifier" is now coming (with example).
 	- ToastNotifier
