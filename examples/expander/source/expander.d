@@ -18,12 +18,12 @@ class MainForm : Form
 			e.parent = this;
 			
 			e.header.text = "Open Calendar";
-			e.header.font = new Font("Segoe UI", 18.0f * dpi / USER_DEFAULT_SCREEN_DPI);
+			e.header.font = new Font("Segoe UI", 14.0f);
 
 			Label caption = new Label;
 			caption.autoSize = true;
 			caption.text = "Input Task Subject";
-			caption.font = new Font("Segoe UI", 14.0f * dpi / USER_DEFAULT_SCREEN_DPI);
+			caption.font = new Font("Segoe UI", 14.0f);
 			caption.dockMargin.top = 16;
 			caption.dockMargin.bottom = 4;
 			caption.dock = DockStyle.TOP;
@@ -31,7 +31,7 @@ class MainForm : Form
 
 			TextBox textbox = new TextBox;
 			textbox.text = "Place holder text";
-			textbox.font = new Font("Segoe UI", 12.0f * dpi / USER_DEFAULT_SCREEN_DPI);
+			textbox.font = new Font("Segoe UI", 12.0f);
 			textbox.size = Size(300, 30);
 			textbox.dockMargin.bottom = 16;
 			textbox.dock = DockStyle.TOP;
