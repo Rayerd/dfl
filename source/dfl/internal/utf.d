@@ -1719,7 +1719,7 @@ version = STATIC_UNICODE_PEEK_MESSAGE;
 version = STATIC_UNICODE_DISPATCH_MESSAGE;
 
 
-LONG dispatchMessage(MSG* pmsg)
+LRESULT dispatchMessage(MSG* pmsg)
 {
 	if(useUnicode)
 	{
